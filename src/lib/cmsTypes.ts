@@ -38,6 +38,12 @@ export type Settings = {
   siteTitle: string;
   siteSubtitle: string;
   introYear: string;
+  heroEyebrow: string;
+  heroTitle: string;
+  heroDescription: string;
+  primaryButtonText: string;
+  secondaryButtonText: string;
+  contactText: string;
   instagramUrl: string;
   email: string;
   githubUrl: string;

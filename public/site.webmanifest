@@ -1,0 +1,21 @@
+{
+  "name": "DUOMEI 多美小记",
+  "short_name": "DUOMEI",
+  "description": "记录旅途中的风景、生活片段、旅行照片和心情文字。",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#f8f5ef",
+  "theme_color": "#f8f5ef",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "64x64",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "/apple-touch-icon.svg",
+      "sizes": "180x180",
+      "type": "image/svg+xml"
+    }
+  ]
+}

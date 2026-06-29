@@ -3,6 +3,7 @@ import type { CmsState, ContentItem, ContentType, Profile, Settings } from "./cm
 
 const STORAGE_KEY = "tami-cms-state";
 const AUTH_KEY = "tami-admin-auth";
+export const CMS_UPDATED_EVENT = "tami-cms-updated";
 
 function canUseStorage() {
   return typeof window !== "undefined" && typeof window.localStorage !== "undefined";
@@ -38,6 +39,7 @@ export function getCmsState(): CmsState {
 export function saveCmsState(state: CmsState) {
   if (!canUseStorage()) return;
   window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  window.dispatchEvent(new CustomEvent(CMS_UPDATED_EVENT));
 }
 
 export function getAllItems() {
@@ -96,10 +98,16 @@ export function isAdminLoggedIn() {
 
 export function loginAdmin(username: string, password: string) {
   const ok = username === "tami" && password === "tamidesu";
-  if (ok && canUseStorage()) window.localStorage.setItem(AUTH_KEY, "true");
+  if (ok && canUseStorage()) {
+    window.localStorage.setItem(AUTH_KEY, "true");
+    window.dispatchEvent(new CustomEvent(CMS_UPDATED_EVENT));
+  }
   return ok;
 }
 
 export function logoutAdmin() {
-  if (canUseStorage()) window.localStorage.removeItem(AUTH_KEY);
+  if (canUseStorage()) {
+    window.localStorage.removeItem(AUTH_KEY);
+    window.dispatchEvent(new CustomEvent(CMS_UPDATED_EVENT));
+  }
 }

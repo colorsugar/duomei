@@ -1,8 +1,12 @@
 import { FormEvent, useState } from "react";
 import { getHomeItems } from "../lib/cmsStore";
+import { FrontContentActions } from "./FrontContentActions";
+import { useInlineEdit } from "./InlineEditProvider";
 import { SectionHeading } from "./SectionHeading";
 
 export function AICompanionWall() {
+  const { refreshKey } = useInlineEdit();
+  void refreshKey;
   const [messages, setMessages] = useState(() => getHomeItems("ai-wall").map((item) => item.body));
   const [draft, setDraft] = useState("");
   const [thinking, setThinking] = useState(false);
@@ -12,7 +16,6 @@ export function AICompanionWall() {
     const text = draft.trim();
     if (!text || thinking) return;
 
-    // TODO: Replace this mock wrapper with an OpenAI API call when the backend route is ready.
     setThinking(true);
     setDraft("");
     window.setTimeout(() => {
@@ -28,6 +31,9 @@ export function AICompanionWall() {
         title="AI 旅伴留言墙"
         intro="这里的 AI 不是客服，而是像一路陪着我旅行的旅伴。"
       />
+      <div className="section-front-actions">
+        <FrontContentActions type="ai-wall" addLabel="新增留言" />
+      </div>
 
       <div className="ai-layout">
         <div className="ai-copy" data-reveal>
@@ -53,12 +59,21 @@ export function AICompanionWall() {
               <p>AI is thinking...</p>
             </article>
           ) : null}
-          {messages.map((message, index) => (
-            <article className="message-card" key={`${message}-${index}`}>
+          {getHomeItems("ai-wall").map((item, index) => (
+            <article className="message-card" key={item.id}>
+              <FrontContentActions type="ai-wall" item={item} compact />
               <span>AI Note {String(index + 1).padStart(2, "0")}</span>
-              <p>「{message}」</p>
+              <p>「{item.body}」</p>
             </article>
           ))}
+          {messages
+            .filter((message) => !getHomeItems("ai-wall").some((item) => item.body === message))
+            .map((message, index) => (
+              <article className="message-card" key={`${message}-${index}`}>
+                <span>AI Draft</span>
+                <p>「{message}」</p>
+              </article>
+            ))}
         </div>
       </div>
     </section>

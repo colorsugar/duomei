@@ -12,6 +12,14 @@ const paths: Record<ContentType, string> = {
   "ai-wall": "ai-wall",
 };
 
+const typeLabels: Record<ContentType, string> = {
+  journey: "旅程",
+  photo: "摄影",
+  note: "古文",
+  essay: "文章",
+  "ai-wall": "留言",
+};
+
 function blank(type: ContentType): ContentItem {
   const createdAt = new Date().toISOString();
   return {
@@ -71,13 +79,13 @@ export function ContentEditor({ type }: { type: ContentType }) {
   return (
     <div className="admin-panel">
       <Link className="back-link" to={`/admin/${paths[type]}`}>
-        Back
+        返回
       </Link>
-      <p className="eyebrow">{id ? "Edit Content" : "New Content"}</p>
-      <h1>{id ? item.title || "Untitled" : `New ${type}`}</h1>
+      <p className="eyebrow">{id ? "编辑内容" : "新增内容"}</p>
+      <h1>{id ? item.title || "未命名" : `新增${typeLabels[type]}`}</h1>
       <form className="editor-form" onSubmit={submit}>
         <label>
-          title
+          标题
           <input
             value={item.title}
             onChange={(event) => {
@@ -91,7 +99,7 @@ export function ContentEditor({ type }: { type: ContentType }) {
           />
         </label>
         <label>
-          subtitle
+          副标题
           <input value={item.subtitle ?? ""} onChange={(event) => setField("subtitle", event.target.value)} />
         </label>
         <label>
@@ -99,52 +107,52 @@ export function ContentEditor({ type }: { type: ContentType }) {
           <input value={item.slug} onChange={(event) => setField("slug", slugify(event.target.value, item.type))} />
         </label>
         <label>
-          date
+          日期
           <input value={item.date} onChange={(event) => setField("date", event.target.value)} />
         </label>
         <label>
-          location
+          地点
           <input value={item.location ?? ""} onChange={(event) => setField("location", event.target.value)} />
         </label>
         <label>
-          category
+          分类
           <input value={item.category ?? ""} onChange={(event) => setField("category", event.target.value)} />
         </label>
         <label>
-          tags
+          标签
           <input
             value={item.tags.join(", ")}
             onChange={(event) => setField("tags", event.target.value.split(","))}
           />
         </label>
         <label>
-          excerpt
+          摘要
           <textarea value={item.excerpt} onChange={(event) => setField("excerpt", event.target.value)} />
         </label>
         <label className="wide">
-          body
+          正文
           <textarea value={item.body} onChange={(event) => setField("body", event.target.value)} rows={8} />
         </label>
         <label>
-          coverImageUrl
+          封面图地址
           <input value={item.coverImageUrl ?? ""} onChange={(event) => setField("coverImageUrl", event.target.value)} />
         </label>
         <label>
-          galleryImages
+          图集地址
           <textarea
             value={(item.galleryImages ?? []).join(", ")}
             onChange={(event) => setField("galleryImages", event.target.value.split(","))}
           />
         </label>
         <label>
-          status
+          状态
           <select value={item.status} onChange={(event) => setField("status", event.target.value as ContentItem["status"])}>
-            <option value="published">published</option>
-            <option value="draft">draft</option>
+            <option value="published">已发布</option>
+            <option value="draft">草稿</option>
           </select>
         </label>
         <label>
-          order
+          排序
           <input type="number" value={item.order} onChange={(event) => setField("order", Number(event.target.value))} />
         </label>
         <label className="check-label">
@@ -153,7 +161,7 @@ export function ContentEditor({ type }: { type: ContentType }) {
             checked={item.showOnHome}
             onChange={(event) => setField("showOnHome", event.target.checked)}
           />
-          showOnHome
+          首页显示
         </label>
         <label className="check-label">
           <input
@@ -161,13 +169,13 @@ export function ContentEditor({ type }: { type: ContentType }) {
             checked={item.featured}
             onChange={(event) => setField("featured", event.target.checked)}
           />
-          featured
+          重点展示
         </label>
         <div className="editor-actions">
           <button className="button primary" type="submit">
-            Save
+            保存
           </button>
-          {saved ? <span className="saved-pill">Saved</span> : null}
+          {saved ? <span className="saved-pill">已保存</span> : null}
         </div>
       </form>
     </div>

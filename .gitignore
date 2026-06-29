@@ -6,3 +6,14 @@ dist
 .env.local
 
 *.zip
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.vite
+.cache
+coverage
+.idea
+.vscode
+Thumbs.db

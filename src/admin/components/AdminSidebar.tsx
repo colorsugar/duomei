@@ -3,14 +3,14 @@ import { NavLink, useNavigate } from "react-router-dom";
 import { logoutAdmin } from "../../lib/cmsStore";
 
 const links = [
-  ["Dashboard", "/admin"],
-  ["Journeys", "/admin/journeys"],
-  ["Photography", "/admin/photos"],
-  ["Classical Notes", "/admin/notes"],
-  ["Essays", "/admin/essays"],
-  ["AI Wall", "/admin/ai-wall"],
-  ["Profile", "/admin/profile"],
-  ["Settings", "/admin/settings"],
+  ["仪表盘", "/admin"],
+  ["旅程", "/admin/journeys"],
+  ["摄影", "/admin/photos"],
+  ["古文札记", "/admin/notes"],
+  ["文章", "/admin/essays"],
+  ["AI留言墙", "/admin/ai-wall"],
+  ["个人资料", "/admin/profile"],
+  ["网站设置", "/admin/settings"],
 ];
 
 export function AdminSidebar() {
@@ -25,12 +25,12 @@ export function AdminSidebar() {
   return (
     <>
       <button className="admin-drawer-toggle" type="button" onClick={() => setOpen((value) => !value)}>
-        {open ? "Close Admin" : "Admin Menu"}
+        {open ? "关闭菜单" : "后台菜单"}
       </button>
       <aside className={`admin-sidebar ${open ? "is-open" : ""}`}>
         <div>
           <strong>TAMI</strong>
-          <span>Digital Archive CMS</span>
+          <span>数字档案馆管理后台</span>
         </div>
         <nav>
           {links.map(([label, href]) => (
@@ -40,10 +40,10 @@ export function AdminSidebar() {
           ))}
         </nav>
         <a className="admin-view-site" href="/">
-          View Site
+          查看网站
         </a>
         <button type="button" onClick={logout}>
-          Logout
+          退出登录
         </button>
       </aside>
     </>

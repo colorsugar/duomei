@@ -4,11 +4,11 @@ import type { ContentType } from "../../lib/cmsTypes";
 import { deleteItem, getAllItems } from "../../lib/cmsStore";
 
 const config: Record<ContentType, { title: string; path: string; newLabel: string }> = {
-  journey: { title: "Journeys", path: "journeys", newLabel: "New Journey" },
-  photo: { title: "Photography", path: "photos", newLabel: "New Photo" },
-  note: { title: "Classical Notes", path: "notes", newLabel: "New Note" },
-  essay: { title: "Essays", path: "essays", newLabel: "New Essay" },
-  "ai-wall": { title: "AI Wall", path: "ai-wall", newLabel: "New AI Wall Message" },
+  journey: { title: "旅程", path: "journeys", newLabel: "新增旅程" },
+  photo: { title: "摄影", path: "photos", newLabel: "新增摄影" },
+  note: { title: "古文札记", path: "notes", newLabel: "新增古文" },
+  essay: { title: "文章", path: "essays", newLabel: "新增文章" },
+  "ai-wall": { title: "AI留言墙", path: "ai-wall", newLabel: "新增留言" },
 };
 
 export function ContentTable({ type }: { type: ContentType }) {
@@ -26,7 +26,7 @@ export function ContentTable({ type }: { type: ContentType }) {
     <div className="admin-panel">
       <div className="admin-title-row">
         <div>
-          <p className="eyebrow">Content</p>
+          <p className="eyebrow">内容管理</p>
           <h1>{meta.title}</h1>
         </div>
         <Link className="button primary" to={`/admin/${meta.path}/new`}>
@@ -35,12 +35,12 @@ export function ContentTable({ type }: { type: ContentType }) {
       </div>
       {pendingDelete ? (
         <div className="delete-confirm">
-          <span>确认删除这条内容吗？</span>
+          <span>确定删除这条内容吗？</span>
           <button type="button" onClick={() => remove(pendingDelete)}>
-            Confirm delete
+            确认删除
           </button>
           <button type="button" onClick={() => setPendingDelete(null)}>
-            Cancel
+            取消
           </button>
         </div>
       ) : null}
@@ -52,8 +52,8 @@ export function ContentTable({ type }: { type: ContentType }) {
               <th>状态</th>
               <th>日期</th>
               <th>分类</th>
-              <th>首页</th>
-              <th>Featured</th>
+              <th>首页显示</th>
+              <th>重点展示</th>
               <th>更新时间</th>
               <th>操作</th>
             </tr>
@@ -62,11 +62,11 @@ export function ContentTable({ type }: { type: ContentType }) {
             {rows.map((item) => (
               <tr key={item.id}>
                 <td>{item.title}</td>
-                <td>{item.status}</td>
+                <td>{item.status === "published" ? "已发布" : "草稿"}</td>
                 <td>{item.date}</td>
                 <td>{item.category}</td>
-                <td>{item.showOnHome ? "Yes" : "No"}</td>
-                <td>{item.featured ? "Yes" : "No"}</td>
+                <td>{item.showOnHome ? "是" : "否"}</td>
+                <td>{item.featured ? "是" : "否"}</td>
                 <td>{new Date(item.updatedAt).toLocaleString()}</td>
                 <td>
                   <Link to={`/admin/${meta.path}/${item.id}`}>编辑</Link>

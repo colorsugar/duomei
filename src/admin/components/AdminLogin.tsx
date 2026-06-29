@@ -14,20 +14,20 @@ export function AdminLogin() {
       navigate("/admin");
       return;
     }
-    setError("账号或密码不正确。");
+    setError("用户名或密码不正确。");
   };
 
   return (
     <main className="admin-login">
       <form className="admin-login-card" onSubmit={submit}>
         <p className="eyebrow">TAMI CMS</p>
-        <h1>Digital Archive Admin</h1>
+        <h1>多美数字档案馆管理后台</h1>
         <label>
-          Username
+          用户名
           <input value={username} onChange={(event) => setUsername(event.target.value)} autoComplete="username" />
         </label>
         <label>
-          Password
+          密码
           <input
             value={password}
             onChange={(event) => setPassword(event.target.value)}
@@ -37,7 +37,7 @@ export function AdminLogin() {
         </label>
         {error ? <p className="admin-error">{error}</p> : null}
         <button className="button primary" type="submit">
-          Login
+          登录
         </button>
       </form>
     </main>

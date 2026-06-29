@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
+import type { CSSProperties } from "react";
 import { Link } from "react-router-dom";
+import { EditModeToolbar } from "./EditModeToolbar";
 
 const navItems = [
   { label: "Journey", href: "/journey" },
@@ -35,6 +37,7 @@ export function Header() {
           </Link>
         ))}
       </nav>
+      <EditModeToolbar />
 
       <button
         className="menu-toggle"
@@ -49,10 +52,11 @@ export function Header() {
       <div className={`mobile-menu ${isOpen ? "is-open" : ""}`} id="mobile-menu">
         <nav aria-label="Mobile navigation">
           {navItems.map((item, index) => (
-            <Link key={item.href} to={item.href} onClick={close} style={{ "--i": index } as React.CSSProperties}>
+            <Link key={item.href} to={item.href} onClick={close} style={{ "--i": index } as CSSProperties}>
               {item.label}
             </Link>
           ))}
+          <EditModeToolbar />
         </nav>
       </div>
     </header>

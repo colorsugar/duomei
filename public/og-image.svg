@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" role="img" aria-label="DUOMEI 多美小记">
+  <rect width="1200" height="630" fill="#f8f5ef"/>
+  <path d="M0 475c260-95 610-100 1200 12" fill="none" stroke="#20201d" stroke-width="10" stroke-linecap="round"/>
+  <path d="M150 390c70-110 140-110 210 0m-68 0c65-88 135-88 200 0" fill="#aeb79d" stroke="#20201d" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M835 168c78 48 104 139 60 218 85-26 137-114 120-212" fill="none" stroke="#d5ad6c" stroke-width="9" stroke-linecap="round"/>
+  <path d="M645 382h230v64H645z" fill="#aeb79d" stroke="#20201d" stroke-width="7" stroke-linejoin="round"/>
+  <path d="M682 446v28m155-28v28" stroke="#20201d" stroke-width="7" stroke-linecap="round"/>
+  <path d="M475 235c20-20 48-20 68 0m58 0c20-20 48-20 68 0" fill="none" stroke="#20201d" stroke-width="7" stroke-linecap="round"/>
+  <text x="105" y="145" font-family="Georgia, 'Times New Roman', serif" font-size="82" font-weight="700" letter-spacing="10" fill="#20201d">DUOMEI</text>
+  <text x="112" y="212" font-family="'Noto Sans SC', 'Microsoft YaHei', sans-serif" font-size="38" fill="#77736b">多美小记</text>
+  <text x="112" y="285" font-family="'Noto Sans SC', 'Microsoft YaHei', sans-serif" font-size="31" fill="#20201d">记录旅途中的风景、生活片段、旅行照片和心情文字。</text>
+</svg>

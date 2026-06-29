@@ -1,24 +1,31 @@
 import { Link } from "react-router-dom";
 import { getSettings } from "../lib/cmsStore";
+import { useInlineEdit } from "./InlineEditProvider";
 
 export function Hero() {
   const settings = getSettings();
+  const { isLoggedIn, editMode, openSettingsEditor } = useInlineEdit();
 
   return (
-    <section className="hero" id="top" aria-label="TAMI personal archive">
+    <section className={`hero ${isLoggedIn && editMode ? "editable-block" : ""}`} id="top" aria-label="TAMI personal archive">
+      {isLoggedIn && editMode ? (
+        <div className="editable-actions">
+          <button className="front-edit-button" type="button" onClick={() => openSettingsEditor("hero")}>
+          编辑首页信息
+          </button>
+        </div>
+      ) : null}
       <div className="hero-copy" data-reveal>
-        <p className="eyebrow">TAMI PERSONAL ARCHIVE</p>
-        <h1>多美数字档案馆</h1>
-        <p className="hero-text">
-          这里保存多美的旅程、摄影、古文札记、文章、日本生活、介护工作记忆，以及 AI 旅伴留下的留言。
-        </p>
+        <p className="eyebrow">{settings.heroEyebrow}</p>
+        <h1>{settings.heroTitle}</h1>
+        <p className="hero-text">{settings.heroDescription}</p>
         <p className="hero-subtitle">{settings.siteSubtitle}</p>
         <div className="hero-actions">
           <Link className="button primary" to="/journey">
-            查看旅程
+            {settings.primaryButtonText}
           </Link>
           <Link className="button secondary" to="/essays">
-            阅读文章
+            {settings.secondaryButtonText}
           </Link>
         </div>
       </div>

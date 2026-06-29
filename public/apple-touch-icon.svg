@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 180" role="img" aria-label="DUOMEI">
+  <rect width="180" height="180" rx="42" fill="#f8f5ef"/>
+  <path d="M30 118c22-35 42-35 64 0m-20 0c19-27 40-27 58 0" fill="#aeb79d" stroke="#20201d" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M116 38c18 11 25 32 14 50 20-7 32-27 28-49" fill="none" stroke="#d5ad6c" stroke-width="8" stroke-linecap="round"/>
+  <path d="M55 58c6-6 15-6 21 0m12 0c6-6 15-6 21 0" fill="none" stroke="#20201d" stroke-width="6" stroke-linecap="round"/>
+  <path d="M111 118h37v13h-37z" fill="#aeb79d" stroke="#20201d" stroke-width="6" stroke-linejoin="round"/>
+  <path d="M120 131v7m19-7v7" stroke="#20201d" stroke-width="5" stroke-linecap="round"/>
+  <text x="90" y="158" text-anchor="middle" font-family="Georgia, serif" font-size="18" letter-spacing="4" fill="#20201d">DUOMEI</text>
+</svg>
