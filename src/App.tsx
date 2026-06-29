@@ -35,8 +35,10 @@ function AppRoutes() {
 }
 
 export default function App() {
+  const basename = window.location.pathname.startsWith("/duomei") ? "/duomei" : "/";
+
   return (
-    <BrowserRouter>
+    <BrowserRouter basename={basename}>
       <AppRoutes />
     </BrowserRouter>
   );

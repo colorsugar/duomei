@@ -27,6 +27,16 @@ function localStorageBytes() {
   }
 }
 
+function downloadText(filename: string, text: string) {
+  const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = filename;
+  link.click();
+  URL.revokeObjectURL(url);
+}
+
 export function DuomeiAdmin({ mode }: { mode: "login" | "notes" }) {
   const navigate = useNavigate();
   const [username, setUsername] = useState("");
@@ -37,11 +47,12 @@ export function DuomeiAdmin({ mode }: { mode: "login" | "notes" }) {
   const [utilityText, setUtilityText] = useState("");
   const [importText, setImportText] = useState("");
   const [notesOpen, setNotesOpen] = useState(false);
-  const notes = useMemo(() => getAllNotes(), [notice, pendingDelete]);
+  const [version, setVersion] = useState(0);
+  const notes = useMemo(() => getAllNotes(), [version, notice, pendingDelete]);
 
   useEffect(() => {
     if (!notice) return;
-    const timer = window.setTimeout(() => setNotice(""), 4200);
+    const timer = window.setTimeout(() => setNotice(""), 5200);
     return () => window.clearTimeout(timer);
   }, [notice]);
 
@@ -84,6 +95,8 @@ export function DuomeiAdmin({ mode }: { mode: "login" | "notes" }) {
   const storagePercent = Math.min(100, Math.round((bytes / (4.5 * 1024 * 1024)) * 100));
   const healthScore = Math.max(70, Math.min(98, 92 - drafts * 2 + Math.min(6, imageCount)));
 
+  const refresh = () => setVersion((value) => value + 1);
+
   const createAndEdit = () => {
     const draft = createDraftNote();
     upsertNote(draft);
@@ -91,26 +104,47 @@ export function DuomeiAdmin({ mode }: { mode: "login" | "notes" }) {
   };
 
   const backupNotes = () => {
-    setUtilityText(exportNotesJson());
+    const json = exportNotesJson();
+    setUtilityText(json);
     setImportText("");
-    setNotice("已生成备份 JSON。发布前建议先保存一份备份。");
+    downloadText(`duomei-notes-backup-${Date.now()}.json`, json);
+    setNotice("已下载备份 JSON。换电脑或发布前，建议先保留这份备份。");
   };
 
   const preparePublish = () => {
-    setUtilityText(generateDefaultNotesSource());
+    const source = generateDefaultNotesSource();
+    setUtilityText(source);
     setImportText("");
-    setNotice("已生成发布数据。部署前可用它更新 src/lib/defaultNotes.ts。");
+    downloadText("defaultNotes.ts", source);
+    setNotice("已生成 defaultNotes.ts。静态 GitHub Pages 不能直接读取本机 localStorage，需要把这个文件提交到 GitHub 才会更新线上默认内容。");
   };
 
   const importJson = () => {
     try {
       importNotesJson(importText || utilityText);
-      setNotice("已导入备份数据");
+      setNotice("已导入备份数据。");
       setImportText("");
       setUtilityText("");
+      refresh();
     } catch {
-      setNotice("JSON 格式不正确，导入失败");
+      setNotice("JSON 格式不正确，导入失败。");
     }
+  };
+
+  const publishNote = (id: string) => {
+    const note = notes.find((item) => item.id === id);
+    if (!note) return;
+    upsertNote({ ...note, status: "published", updatedAt: new Date().toISOString() });
+    setNotice("已发布到当前浏览器。要同步到 GitHub Pages，请生成 defaultNotes.ts 并提交。");
+    refresh();
+  };
+
+  const draftNote = (id: string) => {
+    const note = notes.find((item) => item.id === id);
+    if (!note) return;
+    upsertNote({ ...note, status: "draft", updatedAt: new Date().toISOString() });
+    setNotice("已转为草稿，首页不会显示这条小记。");
+    refresh();
   };
 
   return (
@@ -139,7 +173,7 @@ export function DuomeiAdmin({ mode }: { mode: "login" | "notes" }) {
             <h1>工作室</h1>
           </div>
           <div className="studio-status-pill"><span />本地已连接</div>
-          <button type="button" onClick={preparePublish}>生成发布数据</button>
+          <button type="button" onClick={preparePublish}>生成发布文件</button>
           <button type="button" onClick={backupNotes}>备份 JSON</button>
         </div>
 
@@ -170,7 +204,7 @@ export function DuomeiAdmin({ mode }: { mode: "login" | "notes" }) {
             <div>
               <p>健康评分</p>
               <h3>{healthScore >= 90 ? "优秀" : "良好"}</h3>
-              <span>本地数据正常。发布前请先备份，再生成发布数据。</span>
+              <span>本地数据正常。图片较多时，发布前请先备份 JSON。</span>
             </div>
           </article>
           <article className="studio-storage-card">
@@ -180,8 +214,23 @@ export function DuomeiAdmin({ mode }: { mode: "login" | "notes" }) {
               <span>约 {storagePercent}%</span>
             </div>
             <i><b style={{ width: `${storagePercent}%` }} /></i>
-            <span>GitHub Pages 只会读取代码里的默认数据，不会自动读取这台电脑里的 localStorage。</span>
+            <span>网页里的新增和编辑会先保存到这台电脑的浏览器。线上 GitHub Pages 需要提交发布文件后才会同步。</span>
           </article>
+        </div>
+
+        <div className="studio-publish-panel">
+          <div>
+            <p>发布同步</p>
+            <h2>把本机内容同步到 GitHub Pages</h2>
+            <span>
+              浏览器不能安全地直接推送 GitHub。正确流程是：先在这里备份，再生成发布文件；之后由 Codex 或本机 Git 提交到仓库。
+            </span>
+          </div>
+          <div className="studio-publish-actions">
+            <button type="button" onClick={backupNotes}>1. 备份 JSON</button>
+            <button type="button" onClick={preparePublish}>2. 生成 defaultNotes.ts</button>
+            <a href="https://github.com/colorsugar/duomei/actions" target="_blank" rel="noreferrer">查看部署状态</a>
+          </div>
         </div>
 
         <details className="studio-notes-panel" open={notesOpen} onToggle={(event) => setNotesOpen(event.currentTarget.open)}>
@@ -200,22 +249,16 @@ export function DuomeiAdmin({ mode }: { mode: "login" | "notes" }) {
                   <span>{note.status === "published" ? "已发布" : "草稿"} / {note.date} / {note.location || "未填写地点"}</span>
                 </div>
                 <button type="button" onClick={() => navigate(`/note/${note.slug}?edit=1`)}>编辑</button>
+                {note.status === "published" ? (
+                  <button type="button" onClick={() => draftNote(note.id)}>转草稿</button>
+                ) : (
+                  <button type="button" onClick={() => publishNote(note.id)}>发布</button>
+                )}
                 <button type="button" onClick={() => setPendingDelete(note.id)}>删除</button>
               </article>
             ))}
           </div>
         </details>
-
-        <div className="studio-check-panel">
-          <p>发布准备</p>
-          <h2>GitHub Pages 发布前检查</h2>
-          <ul>
-            <li>先备份 JSON，避免本地浏览器数据丢失。</li>
-            <li>再生成发布数据，用于更新默认内容文件。</li>
-            <li>控制图片体积，过大 data URL 会让仓库变大。</li>
-            <li>发布失败时先检查构建命令和 Pages 设置。</li>
-          </ul>
-        </div>
 
         <div className="admin-utilities studio-utilities">
           <div>
@@ -245,7 +288,8 @@ export function DuomeiAdmin({ mode }: { mode: "login" | "notes" }) {
               onClick={() => {
                 deleteNote(pendingDelete);
                 setPendingDelete(null);
-                setNotice("已删除");
+                setNotice("已删除。");
+                refresh();
               }}
             >
               确认删除

@@ -1,5 +1,5 @@
-import { useState } from "react";
 import { Link } from "react-router-dom";
+import { useState } from "react";
 import { useDuomeiEdit } from "./DuomeiEditProvider";
 
 export function DuomeiHeader() {
@@ -10,10 +10,9 @@ export function DuomeiHeader() {
 
   const goHomeTop = () => {
     closeMenu();
-    if (window.location.pathname === "/") {
-      window.history.replaceState(null, "", "/");
+    window.setTimeout(() => {
       window.scrollTo({ top: 0, behavior: "smooth" });
-    }
+    }, 0);
   };
 
   const toggleEdit = () => {
@@ -45,7 +44,7 @@ export function DuomeiHeader() {
       </button>
       <nav>
         <Link to="/" onClick={goHomeTop}>首页</Link>
-        <a href="/#notes" onClick={closeMenu}>小记</a>
+        <Link to="/#notes" onClick={closeMenu}>小记</Link>
         <Link to="/about" onClick={closeMenu}>关于</Link>
         {!isLoggedIn ? <Link to="/admin/login" onClick={closeMenu}>管理</Link> : null}
         {isLoggedIn ? (

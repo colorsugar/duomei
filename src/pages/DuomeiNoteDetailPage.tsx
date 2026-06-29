@@ -1,11 +1,12 @@
 import { ChangeEvent, useEffect, useState } from "react";
 import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
-import { NoteCover } from "../components/NoteCover";
+import { ImageUploadPanel } from "../components/ImageUploadPanel";
 import { NoteBlockRenderer } from "../components/NoteBlockRenderer";
+import { NoteCover } from "../components/NoteCover";
 import { useDuomeiEdit } from "../components/DuomeiEditProvider";
 import { bodyToBlocks, createBlockId, deleteNote, getNoteBySlug, upsertNote } from "../lib/noteStore";
-import type { DuomeiNote, NoteContentBlock } from "../lib/noteTypes";
 import { compressImage } from "../lib/imageTools";
+import type { DuomeiNote, NoteContentBlock } from "../lib/noteTypes";
 
 function blocksToBody(blocks: NoteContentBlock[]) {
   return blocks
@@ -25,6 +26,8 @@ export function DuomeiNoteDetailPage() {
   const navigate = useNavigate();
   const { editMode, isLoggedIn, refreshKey } = useDuomeiEdit();
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [imagePanelOpen, setImagePanelOpen] = useState(false);
+  const [message, setMessage] = useState("");
   const note = getNoteBySlug(slug, isLoggedIn);
   const shouldEdit = isLoggedIn && (editMode || searchParams.get("edit") === "1");
   const [draft, setDraft] = useState<DuomeiNote | undefined>(note);
@@ -33,6 +36,12 @@ export function DuomeiNoteDetailPage() {
   useEffect(() => {
     if (note) setDraft(note);
   }, [note?.id]);
+
+  useEffect(() => {
+    if (!message) return;
+    const timer = window.setTimeout(() => setMessage(""), 3600);
+    return () => window.clearTimeout(timer);
+  }, [message]);
 
   if (!note) {
     return (
@@ -62,6 +71,11 @@ export function DuomeiNoteDetailPage() {
     updateDraft({ contentBlocks: [...blocks, block] });
   };
 
+  const insertBlocks = (nextBlocks: NoteContentBlock[], nextMessage?: string) => {
+    updateDraft({ contentBlocks: [...blocks, ...nextBlocks] });
+    if (nextMessage) setMessage(nextMessage);
+  };
+
   const removeBlock = (id: string) => {
     const nextBlocks = blocks.filter((block) => block.id !== id);
     updateDraft({
@@ -71,28 +85,31 @@ export function DuomeiNoteDetailPage() {
     });
   };
 
-  const saveCurrent = () => {
+  const persistNote = (status?: DuomeiNote["status"]) => {
     if (!draft) return;
     const nextBlocks = draft.contentBlocks?.length ? draft.contentBlocks : bodyToBlocks(draft.body, draft.bodyImages);
     const nextNote: DuomeiNote = {
       ...draft,
+      status: status ?? draft.status,
       body: blocksToBody(nextBlocks),
       bodyImages: blocksToImages(nextBlocks),
       updatedAt: new Date().toISOString(),
     };
     upsertNote(nextNote);
     setDraft(nextNote);
+    setMessage(status === "published" ? "已发布。线上同步仍需要后台生成发布数据并提交到 GitHub。" : "已保存修改。");
   };
 
-  const toggleStatus = () => {
+  const setDraftStatus = (status: DuomeiNote["status"]) => {
     const target = draft ?? note;
     const nextNote: DuomeiNote = {
       ...target,
-      status: target.status === "published" ? "draft" : "published",
+      status,
       updatedAt: new Date().toISOString(),
     };
     upsertNote(nextNote);
     setDraft(nextNote);
+    setMessage(status === "published" ? "已发布到当前浏览器。" : "已转为草稿。");
   };
 
   const deleteCurrent = () => {
@@ -106,26 +123,7 @@ export function DuomeiNoteDetailPage() {
     if (!file) return;
     const result = await compressImage(file, "cover");
     updateDraft({ coverImageUrl: result.dataUrl });
-  };
-
-  const uploadImages = async (event: ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(event.target.files ?? []);
-    event.target.value = "";
-    if (!files.length) return;
-    const imageBlocks = await Promise.all(
-      files.map(async (file) => {
-        const result = await compressImage(file, "article");
-        return {
-          id: createBlockId("image"),
-          type: "image",
-          src: result.dataUrl,
-          caption: "",
-          align: "center",
-          zoom: 100,
-        } satisfies NoteContentBlock;
-      }),
-    );
-    updateDraft({ contentBlocks: [...blocks, ...imageBlocks] });
+    setMessage(`封面已更新：${Math.round(result.beforeBytes / 1024)}KB -> ${Math.round(result.afterBytes / 1024)}KB`);
   };
 
   const updateTag = (index: number, value: string) => {
@@ -140,50 +138,82 @@ export function DuomeiNoteDetailPage() {
     updateDraft({ tags: [...activeNote.tags, "新标签"] });
   };
 
+  const isPublished = activeNote.status === "published";
+
   return (
     <main className={`duomei-detail${shouldEdit ? " detail-edit-page inline-detail-editing" : ""}`}>
       <Link className="detail-back" to="/#notes">
         ← 返回小记
       </Link>
+
       {isLoggedIn && editMode && !shouldEdit ? (
         <div className="detail-edit-actions">
           <button type="button" onClick={() => setSearchParams({ edit: "1" })}>
             编辑这篇小记
           </button>
-          <button className="detail-status-button" type="button" onClick={toggleStatus}>
-            {note.status === "published" ? "设为草稿" : "发布"}
-          </button>
+          {note.status === "draft" ? (
+            <button className="detail-publish-button" type="button" onClick={() => setDraftStatus("published")}>
+              发布
+            </button>
+          ) : (
+            <button className="detail-status-button" type="button" onClick={() => setDraftStatus("draft")}>
+              转为草稿
+            </button>
+          )}
           <button className="detail-danger-button" type="button" onClick={() => setConfirmDelete(true)}>
             删除这篇小记
           </button>
         </div>
       ) : null}
+
       {shouldEdit ? (
-        <div className="detail-inline-toolbar" role="toolbar" aria-label="小记编辑工具栏">
-          <button type="button" onClick={saveCurrent}>保存</button>
-          <button type="button" onClick={toggleStatus}>{activeNote.status === "published" ? "设为草稿" : "发布"}</button>
-          <button type="button" onClick={() => setSearchParams({})}>预览</button>
-          <button type="button" onClick={() => insertBlock({ id: createBlockId("paragraph"), type: "paragraph", text: "" })}>
-            插入段落
-          </button>
-          <button type="button" onClick={() => insertBlock({ id: createBlockId("quote"), type: "quote", text: "" })}>
-            插入引用
-          </button>
-          <button type="button" onClick={() => insertBlock({ id: createBlockId("divider"), type: "divider" })}>
-            分割线
-          </button>
-          <label className="detail-toolbar-upload">
-            添加封面
-            <input type="file" accept="image/*" onChange={uploadCover} />
-          </label>
-          <label className="detail-toolbar-upload">
-            添加图片
-            <input type="file" accept="image/*" multiple onChange={uploadImages} />
-          </label>
-          <button className="detail-danger-button" type="button" onClick={() => setConfirmDelete(true)}>删除</button>
-          <button type="button" onClick={() => navigate("/")}>返回首页</button>
+        <>
+          <div className="detail-inline-toolbar" role="toolbar" aria-label="小记编辑工具栏">
+            <button type="button" onClick={() => persistNote()}>保存修改</button>
+            {isPublished ? (
+              <button type="button" className="is-muted" disabled>已发布</button>
+            ) : (
+              <button type="button" className="is-primary" onClick={() => persistNote("published")}>发布</button>
+            )}
+            {isPublished ? <button type="button" onClick={() => persistNote("draft")}>转为草稿</button> : null}
+            <button type="button" onClick={() => setSearchParams({})}>预览</button>
+            <button type="button" onClick={() => insertBlock({ id: createBlockId("paragraph"), type: "paragraph", text: "" })}>
+              插入段落
+            </button>
+            <button type="button" onClick={() => insertBlock({ id: createBlockId("quote"), type: "quote", text: "" })}>
+              插入引用
+            </button>
+            <button type="button" onClick={() => insertBlock({ id: createBlockId("divider"), type: "divider" })}>
+              分割线
+            </button>
+            <label className="detail-toolbar-upload">
+              添加封面
+              <input type="file" accept="image/*" onChange={uploadCover} />
+            </label>
+            <button type="button" onClick={() => setImagePanelOpen((value) => !value)}>添加图片</button>
+            <button className="detail-danger-button" type="button" onClick={() => setConfirmDelete(true)}>删除</button>
+            <button type="button" onClick={() => navigate("/")}>返回首页</button>
+          </div>
+          {imagePanelOpen ? (
+            <div className="detail-image-panel">
+              <ImageUploadPanel
+                compact
+                onInsert={insertBlocks}
+                onSetCover={(coverImageUrl) => updateDraft({ coverImageUrl })}
+                onClose={() => setImagePanelOpen(false)}
+              />
+            </div>
+          ) : null}
+        </>
+      ) : null}
+
+      {message ? (
+        <div className="detail-save-message">
+          <span>{message}</span>
+          <button type="button" onClick={() => setMessage("")}>关闭</button>
         </div>
       ) : null}
+
       {confirmDelete ? (
         <div className="detail-delete-confirm">
           <span>确定删除这条小记吗？</span>
@@ -191,6 +221,7 @@ export function DuomeiNoteDetailPage() {
           <button type="button" onClick={() => setConfirmDelete(false)}>取消</button>
         </div>
       ) : null}
+
       <article>
         <div className="detail-cover-wrap">
           <NoteCover note={activeNote} detail />
@@ -220,7 +251,7 @@ export function DuomeiNoteDetailPage() {
                   <button type="button" onClick={() => removeTag(index)} aria-label="删除标签">×</button>
                 </span>
               ))}
-              <button className="tag-add-button" type="button" onClick={addTag}>＋</button>
+              <button className="tag-add-button" type="button" onClick={addTag}>+</button>
             </div>
             <textarea
               className="detail-excerpt-editor"
@@ -248,7 +279,15 @@ export function DuomeiNoteDetailPage() {
                         onChange={(event) => updateBlock(block.id, { caption: event.target.value })}
                         placeholder="图片说明"
                       />
-                      <button type="button" onClick={() => removeBlock(block.id)}>删除图片</button>
+                      <div className="image-block-tools">
+                        <button type="button" onClick={() => updateDraft({ coverImageUrl: block.src })}>设为封面</button>
+                        <button type="button" onClick={() => updateBlock(block.id, { align: "center" })}>居中</button>
+                        <button type="button" onClick={() => updateBlock(block.id, { align: "full" })}>通栏</button>
+                        <button type="button" onClick={() => updateBlock(block.id, { zoom: 100 })}>100%</button>
+                        <button type="button" onClick={() => updateBlock(block.id, { zoom: 80 })}>80%</button>
+                        <button type="button" onClick={() => updateBlock(block.id, { zoom: 60 })}>60%</button>
+                        <button type="button" onClick={() => removeBlock(block.id)}>删除图片</button>
+                      </div>
                     </figure>
                   );
                 }

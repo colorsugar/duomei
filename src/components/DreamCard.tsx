@@ -1,4 +1,4 @@
-const poem = "奈何他西风肆虐，余唯恋花枝春野";
+const poemLines = ["奈何他西风肆虐，", "余唯恋花枝春野"];
 
 export function DreamCard() {
   const driftingFlowers = Array.from({ length: 9 }, (_, index) => <i key={index} />);
@@ -8,7 +8,11 @@ export function DreamCard() {
       <strong className="dream-name">多美</strong>
       <span className="dream-tami">TAMI</span>
       <div className="dream-poem-box">
-        <span className="dream-poem-text">{poem}</span>
+        <span className="dream-poem-text">
+          {poemLines.map((line) => (
+            <span key={line}>{line}</span>
+          ))}
+        </span>
         <svg className="poem-wind-lines" viewBox="0 0 560 92" preserveAspectRatio="none" aria-hidden="true">
           <path d="M-80 36 C8 4 86 64 174 28 S338 14 438 40 S590 54 654 18" />
           <path d="M-120 62 C-20 34 58 80 146 54 S316 46 418 68 S572 84 646 44" />
