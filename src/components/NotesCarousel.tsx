@@ -15,10 +15,8 @@ export function NotesCarousel({ notes }: { notes: DuomeiNote[] }) {
     canLoop: false,
     editMode: false,
     isEditorOpen: false,
-    isPaused: false,
     isUserInteracting: false,
   });
-  const [isPaused, setIsPaused] = useState(false);
   const [isUserInteracting, setIsUserInteracting] = useState(false);
   const { editMode, isEditorOpen, openNoteEditor, requestDelete } = useDuomeiEdit();
   const canLoop = notes.length > 1;
@@ -30,8 +28,8 @@ export function NotesCarousel({ notes }: { notes: DuomeiNote[] }) {
   }, []);
 
   useEffect(() => {
-    pauseStateRef.current = { canLoop, editMode, isEditorOpen, isPaused, isUserInteracting };
-  }, [canLoop, editMode, isEditorOpen, isPaused, isUserInteracting]);
+    pauseStateRef.current = { canLoop, editMode, isEditorOpen, isUserInteracting };
+  }, [canLoop, editMode, isEditorOpen, isUserInteracting]);
 
   const normalizeLoopPosition = () => {
     const viewport = viewportRef.current;
@@ -57,6 +55,7 @@ export function NotesCarousel({ notes }: { notes: DuomeiNote[] }) {
       const state = pauseStateRef.current;
       const delta = Math.min(32, time - lastTime);
       lastTime = time;
+      const isCardHovering = canHover.current && !!document.querySelector(".duomei-note-card:hover");
 
       if (
         viewport &&
@@ -64,7 +63,7 @@ export function NotesCarousel({ notes }: { notes: DuomeiNote[] }) {
         !reduceMotion.current &&
         !state.editMode &&
         !state.isEditorOpen &&
-        !state.isPaused &&
+        !isCardHovering &&
         !state.isUserInteracting
       ) {
         const pxPerFrame = window.innerWidth <= 760 ? 0.92 : 0.56;
@@ -111,15 +110,7 @@ export function NotesCarousel({ notes }: { notes: DuomeiNote[] }) {
   }
 
   return (
-    <div
-      className="notes-carousel-shell"
-      onMouseEnter={() => {
-        if (canHover.current) setIsPaused(true);
-      }}
-      onMouseLeave={() => {
-        if (canHover.current) setIsPaused(false);
-      }}
-    >
+    <div className="notes-carousel-shell">
       {canLoop ? (
         <button className="carousel-button prev" type="button" aria-label="上一组小记" onClick={() => scrollByAmount(-1)}>
           ←

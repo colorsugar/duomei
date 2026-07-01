@@ -8,6 +8,7 @@ import { DuomeiHeader } from "./components/DuomeiHeader";
 import { DuomeiFooter } from "./components/DuomeiFooter";
 import { BackToTopButton } from "./components/BackToTopButton";
 import { DuomeiEditProvider } from "./components/DuomeiEditProvider";
+import { RouteScrollManager } from "./components/RouteScrollManager";
 import { useSmoothScroll } from "./hooks/useSmoothScroll";
 
 function AppRoutes() {
@@ -18,6 +19,7 @@ function AppRoutes() {
 
   return (
     <DuomeiEditProvider>
+      <RouteScrollManager />
       {!isAdmin ? <DuomeiHeader /> : null}
       <Routes>
         <Route path="/" element={<DuomeiHomePage />} />
