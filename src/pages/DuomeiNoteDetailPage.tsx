@@ -210,13 +210,13 @@ export function DuomeiNoteDetailPage() {
   };
 
   const deleteCurrent = async () => {
-    deleteNote(note.id);
     try {
       await deleteCloudNote(note.id);
+      deleteNote(note.id);
+      navigate("/");
     } catch {
-      // Local fallback deletion still navigates away.
+      setMessage("云端删除失败，请稍后重试。");
     }
-    navigate("/");
   };
 
   const uploadCover = async (event: ChangeEvent<HTMLInputElement>) => {
