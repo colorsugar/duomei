@@ -7,7 +7,8 @@ import { NoteCover } from "./NoteCover";
 
 export function NotesCarousel({ notes }: { notes: DuomeiNote[] }) {
   const viewportRef = useRef<HTMLDivElement | null>(null);
-  const timerRef = useRef<number | null>(null);
+  const frameRef = useRef<number | null>(null);
+  const lastTimeRef = useRef(0);
   const pauseUntilRef = useRef(0);
   const prefersReducedMotionRef = useRef(false);
   const { editMode, isEditorOpen, openNoteEditor, requestDelete } = useDuomeiEdit();
@@ -36,8 +37,10 @@ export function NotesCarousel({ notes }: { notes: DuomeiNote[] }) {
   }, [canLoop, notes.length]);
 
   useEffect(() => {
-    timerRef.current = window.setInterval(() => {
+    const tick = (time: number) => {
       const viewport = viewportRef.current;
+      const elapsed = lastTimeRef.current ? Math.min(32, time - lastTimeRef.current) : 16;
+      lastTimeRef.current = time;
 
       if (
         viewport &&
@@ -47,15 +50,20 @@ export function NotesCarousel({ notes }: { notes: DuomeiNote[] }) {
         !isEditorOpen &&
         performance.now() > pauseUntilRef.current
       ) {
-        const speed = window.innerWidth <= 760 ? 0.92 : 0.72;
-        viewport.scrollLeft += speed;
+        const pixelsPerSecond = window.innerWidth <= 760 ? 74 : 62;
+        viewport.scrollLeft += (pixelsPerSecond * elapsed) / 1000;
         normalizeLoopPosition();
       }
-    }, 16);
+
+      frameRef.current = window.requestAnimationFrame(tick);
+    };
+
+    frameRef.current = window.requestAnimationFrame(tick);
 
     return () => {
-      if (timerRef.current) window.clearInterval(timerRef.current);
-      timerRef.current = null;
+      if (frameRef.current) window.cancelAnimationFrame(frameRef.current);
+      frameRef.current = null;
+      lastTimeRef.current = 0;
     };
   }, [canLoop, editMode, isEditorOpen, notes.length]);
 

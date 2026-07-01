@@ -68,6 +68,10 @@ export function DuomeiNoteDetailPage() {
   }, [slug, isLoggedIn, refreshKey]);
 
   useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "auto" });
+  }, [slug]);
+
+  useEffect(() => {
     if (note) setDraft(note);
   }, [note?.id]);
 
@@ -186,15 +190,18 @@ export function DuomeiNoteDetailPage() {
   };
 
   const updateTag = (index: number, value: string) => {
-    updateDraft({ tags: activeNote.tags.map((tag, itemIndex) => (itemIndex === index ? value : tag)) });
+    const source = draft ?? activeNote;
+    updateDraft({ tags: source.tags.map((tag, itemIndex) => (itemIndex === index ? value : tag)) });
   };
 
   const removeTag = (index: number) => {
-    updateDraft({ tags: activeNote.tags.filter((_, itemIndex) => itemIndex !== index) });
+    const source = draft ?? activeNote;
+    updateDraft({ tags: source.tags.filter((_, itemIndex) => itemIndex !== index) });
   };
 
   const addTag = () => {
-    updateDraft({ tags: [...activeNote.tags, "新标签"] });
+    const source = draft ?? activeNote;
+    updateDraft({ tags: [...source.tags, ""] });
   };
 
   const isPublished = activeNote.status === "published";
@@ -308,7 +315,7 @@ export function DuomeiNoteDetailPage() {
             </div>
             <div className="detail-tags editable-tags">
               {activeNote.tags.map((tag, index) => (
-                <span className="editable-tag" key={`${tag}-${index}`}>
+                <span className="editable-tag" key={`tag-${index}`}>
                   <input value={tag} onChange={(event) => updateTag(index, event.target.value)} aria-label={`标签 ${index + 1}`} />
                   <button type="button" onClick={() => removeTag(index)} aria-label="删除标签">×</button>
                 </span>

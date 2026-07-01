@@ -98,12 +98,9 @@ export function DuomeiAdmin({ mode }: { mode: "login" | "notes" }) {
         navigate("/admin/notes");
         return;
       } catch {
-        if (loginAdmin(username, password)) {
-          navigate("/admin/notes");
-          return;
-        }
+        logoutAdmin();
       }
-      setError("用户名或密码不正确。请使用 Supabase 管理员邮箱登录。");
+      setError("邮箱或密码不正确。请使用 Supabase 管理员账号登录。");
     };
 
     return (

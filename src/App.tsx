@@ -15,7 +15,7 @@ function AppRoutes() {
   const location = useLocation();
   const isAdmin = location.pathname.startsWith("/admin");
   const isHome = location.pathname === "/";
-  useSmoothScroll(isAdmin);
+  useSmoothScroll(true);
 
   return (
     <DuomeiEditProvider>
