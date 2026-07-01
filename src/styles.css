@@ -2639,13 +2639,43 @@ body.front-editing .card-edit-actions {
   display: flex;
   align-items: center;
   gap: 10px;
+  width: min(420px, calc(100vw - 28px));
+  max-width: min(420px, calc(100vw - 28px));
+  border-radius: 28px;
+  padding: 14px;
+  flex-wrap: wrap;
+  justify-content: center;
+  text-align: center;
 }
 
 .duomei-delete-confirm button {
-  border: 0;
-  background: transparent;
+  border: 1px solid rgba(32, 32, 29, 0.12);
+  border-radius: 999px;
+  background: #fffdf7;
   cursor: pointer;
   font-weight: 700;
+  min-width: 96px;
+  padding: 10px 14px;
+}
+
+.duomei-delete-confirm div {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+}
+
+.duomei-delete-confirm em {
+  flex-basis: 100%;
+  color: #7d3b31;
+  font-size: 0.82rem;
+  font-style: normal;
+  line-height: 1.5;
+}
+
+.duomei-delete-confirm button.danger {
+  color: #7d3b31;
+  border-color: rgba(125, 59, 49, 0.22);
 }
 
 .note-drawer-layer {
@@ -7536,6 +7566,64 @@ body.front-editing .notes-bottom-spacer {
 
 .detail-image-panel .image-upload-panel {
   min-height: 100% !important;
+}
+
+.editable-image-block {
+  width: var(--zoom, 100%) !important;
+  max-width: 100% !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+
+.editable-image-block.align-left {
+  margin-left: 0 !important;
+  margin-right: auto !important;
+}
+
+.editable-image-block.align-right {
+  margin-left: auto !important;
+  margin-right: 0 !important;
+}
+
+.editable-image-block.align-full {
+  width: 100% !important;
+}
+
+.editable-image-frame {
+  position: relative;
+  overflow: visible;
+}
+
+.editable-image-frame img {
+  display: block;
+  width: 100%;
+  max-height: 70vh;
+  border-radius: 24px;
+  object-fit: cover;
+  box-shadow: 0 24px 58px rgba(32, 32, 29, 0.12);
+}
+
+.image-resize-handle {
+  position: absolute;
+  right: -13px;
+  bottom: -13px;
+  width: 34px !important;
+  height: 34px !important;
+  border: 1px solid rgba(32, 32, 29, 0.14) !important;
+  border-radius: 999px !important;
+  background:
+    linear-gradient(135deg, transparent 48%, rgba(32, 32, 29, 0.72) 49%, rgba(32, 32, 29, 0.72) 55%, transparent 56%),
+    rgba(255, 253, 247, 0.96) !important;
+  box-shadow: 0 12px 28px rgba(32, 32, 29, 0.12);
+  cursor: nwse-resize;
+  touch-action: none;
+}
+
+.image-block-tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
 }
 
 @media (max-width: 760px) {

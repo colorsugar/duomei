@@ -35,6 +35,7 @@ export function DuomeiEditProvider({ children }: { children: ReactNode }) {
   const [refreshKey, setRefreshKey] = useState(0);
   const [editingNote, setEditingNote] = useState<DuomeiNote | null>(null);
   const [pendingDelete, setPendingDelete] = useState<string | null>(null);
+  const [deleteError, setDeleteError] = useState("");
 
   const refresh = () => {
     setIsLoggedIn(isAdminLoggedIn());
@@ -54,37 +55,6 @@ export function DuomeiEditProvider({ children }: { children: ReactNode }) {
     document.body.classList.toggle("front-editing", editMode);
     return () => document.body.classList.remove("front-editing");
   }, [editMode]);
-
-  const value = useMemo<EditContext>(
-    () => ({
-      isLoggedIn,
-      editMode,
-      isEditorOpen: !!editingNote,
-      refreshKey,
-      toggleEditMode: () => setEditMode((value) => !value),
-      logout: () => {
-        logoutAdmin();
-        setEditMode(false);
-      },
-      openNoteEditor: async (note) => {
-        if (note) {
-          setEditingNote(note);
-          return;
-        }
-        const draft = createDraftNote();
-        upsertNote(draft);
-        try {
-          await saveCloudNote(draft);
-        } catch {
-          // Keep a local draft when the cloud session is unavailable.
-        }
-        refresh();
-        navigate(`/note/${draft.slug}?edit=1`);
-      },
-      requestDelete: (id) => setPendingDelete(id),
-    }),
-    [editMode, editingNote, isLoggedIn, refreshKey, navigate],
-  );
 
   const save = async (note: DuomeiNote) => {
     const isNew = !getAllNotes().some((item) => item.id === note.id);
@@ -107,29 +77,68 @@ export function DuomeiEditProvider({ children }: { children: ReactNode }) {
 
   const confirmDelete = async () => {
     if (!pendingDelete) return;
-    deleteNote(pendingDelete);
+    setDeleteError("");
     try {
       await deleteCloudNote(pendingDelete);
+      deleteNote(pendingDelete);
+      setPendingDelete(null);
+      refresh();
     } catch {
-      // Keep local deletion even if cloud session expired.
+      setDeleteError("云端删除失败，请确认已登录后再试。");
     }
-    setPendingDelete(null);
-    refresh();
   };
+
+  const value = useMemo<EditContext>(
+    () => ({
+      isLoggedIn,
+      editMode,
+      isEditorOpen: !!editingNote,
+      refreshKey,
+      toggleEditMode: () => setEditMode((value) => !value),
+      logout: () => {
+        logoutAdmin();
+        setEditMode(false);
+        refresh();
+      },
+      openNoteEditor: async (note) => {
+        if (note) {
+          setEditingNote(note);
+          return;
+        }
+        const draft = createDraftNote();
+        upsertNote(draft);
+        try {
+          await saveCloudNote(draft);
+        } catch {
+          // Keep a local draft when the cloud session is unavailable.
+        }
+        refresh();
+        navigate(`/note/${draft.slug}?edit=1`);
+      },
+      requestDelete: (id) => {
+        setDeleteError("");
+        setPendingDelete(id);
+      },
+    }),
+    [editMode, editingNote, isLoggedIn, refreshKey, navigate],
+  );
 
   return (
     <Context.Provider value={value}>
       {children}
       <NoteEditDrawer note={editingNote} onClose={() => setEditingNote(null)} onSave={save} />
       {pendingDelete ? (
-        <div className="duomei-delete-confirm">
+        <div className="duomei-delete-confirm" role="dialog" aria-live="polite" aria-label="删除确认">
           <span>确定删除这条小记吗？</span>
-          <button type="button" onClick={confirmDelete}>
-            确认删除
-          </button>
-          <button type="button" onClick={() => setPendingDelete(null)}>
-            取消
-          </button>
+          {deleteError ? <em>{deleteError}</em> : null}
+          <div>
+            <button type="button" className="danger" onClick={confirmDelete}>
+              确认删除
+            </button>
+            <button type="button" onClick={() => setPendingDelete(null)}>
+              取消
+            </button>
+          </div>
         </div>
       ) : null}
     </Context.Provider>

@@ -119,7 +119,12 @@ export async function saveCloudNote(note: DuomeiNote) {
 }
 
 export async function deleteCloudNote(id: string) {
-  const { error } = await supabase.from("notes").update({ status: "hidden", deleted_at: new Date().toISOString() }).eq("id", id);
+  const { error } = await supabase
+    .from("notes")
+    .update({ status: "hidden", deleted_at: new Date().toISOString() })
+    .eq("id", id)
+    .select("id")
+    .single();
   if (error) throw error;
 }
 

@@ -1,18 +1,23 @@
-import { Link } from "react-router-dom";
 import { useState } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useDuomeiEdit } from "./DuomeiEditProvider";
 
 export function DuomeiHeader() {
   const { isLoggedIn, editMode, toggleEditMode, logout } = useDuomeiEdit();
   const [menuOpen, setMenuOpen] = useState(false);
+  const navigate = useNavigate();
+  const location = useLocation();
 
   const closeMenu = () => setMenuOpen(false);
 
   const goHomeTop = () => {
     closeMenu();
-    window.setTimeout(() => {
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    }, 0);
+    if (location.pathname !== "/") {
+      navigate("/");
+      window.setTimeout(() => window.scrollTo({ top: 0, behavior: "smooth" }), 0);
+      return;
+    }
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const toggleEdit = () => {
@@ -27,7 +32,7 @@ export function DuomeiHeader() {
 
   return (
     <header className={`duomei-header${menuOpen ? " is-menu-open" : ""}`}>
-      <Link className="duomei-brand" to="/" onClick={goHomeTop}>
+      <Link className="duomei-brand" to="/" onClick={(event) => { event.preventDefault(); goHomeTop(); }}>
         <strong>DUOMEI</strong>
         <span>多美小记</span>
       </Link>

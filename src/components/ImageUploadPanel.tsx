@@ -1,6 +1,5 @@
 import { PointerEvent, WheelEvent, useRef, useState } from "react";
 import { createBlockId } from "../lib/noteStore";
-import { uploadNoteImage } from "../lib/supabaseNotes";
 import type { NoteContentBlock } from "../lib/noteTypes";
 
 type AspectMode = "original" | "1:1" | "4:3" | "3:2" | "16:9" | "9:16";
@@ -26,6 +25,7 @@ type ImageUploadPanelProps = {
   onInsert: (blocks: NoteContentBlock[], message?: string) => void;
   onSetCover?: (src: string) => void;
   compact?: boolean;
+  coverOnly?: boolean;
   onClose?: () => void;
 };
 
@@ -36,19 +36,6 @@ type DragState = {
   startY: number;
   originX: number;
   originY: number;
-};
-
-type TouchPoint = {
-  x: number;
-  y: number;
-};
-
-type PinchState = {
-  id: string;
-  distance: number;
-  angle: number;
-  scale: number;
-  rotate: number;
 };
 
 const aspectLabels: Record<AspectMode, string> = {
@@ -62,25 +49,6 @@ const aspectLabels: Record<AspectMode, string> = {
 
 function formatKb(bytes: number) {
   return `${Math.max(1, Math.round(bytes / 1024))}KB`;
-}
-
-function delay(ms: number) {
-  return new Promise((resolve) => window.setTimeout(resolve, ms));
-}
-
-async function waitForFileReady(file: File) {
-  for (let index = 0; index < 20; index += 1) {
-    if (file.size > 0) {
-      try {
-        await file.slice(0, 16).arrayBuffer();
-        return file;
-      } catch {
-        // iCloud-backed photos can need a moment before bytes are readable.
-      }
-    }
-    await delay(220);
-  }
-  throw new Error("照片还没有准备好，请确认 iCloud 照片下载完成后重试。");
 }
 
 function readFileAsDataUrl(file: File) {
@@ -111,13 +79,13 @@ function outputSize(item: PendingImage) {
   const ratio = aspectValue(item);
   const maxWidth = 2400;
   const maxHeight = 1800;
-  let width = maxWidth;
-  let height = Math.round(width / ratio);
+  let width = Math.min(item.originalWidth, maxWidth);
+  let height = width / ratio;
   if (height > maxHeight) {
     height = maxHeight;
-    width = Math.round(height * ratio);
+    width = height * ratio;
   }
-  return { width, height };
+  return { width: Math.round(width), height: Math.round(height) };
 }
 
 async function renderEditedImage(item: PendingImage) {
@@ -126,35 +94,33 @@ async function renderEditedImage(item: PendingImage) {
   const canvas = document.createElement("canvas");
   canvas.width = width;
   canvas.height = height;
-  const context = canvas.getContext("2d");
-  if (!context) throw new Error("浏览器无法创建图片画布。");
+  const ctx = canvas.getContext("2d");
+  if (!ctx) throw new Error("浏览器无法处理这张图片。");
 
-  context.fillStyle = "#f8f5ef";
-  context.fillRect(0, 0, width, height);
-  context.save();
-  context.translate(width / 2 + item.offsetX * 3, height / 2 + item.offsetY * 3);
-  context.rotate((item.rotate * Math.PI) / 180);
-  const baseScale = Math.max(width / image.width, height / image.height);
-  const scale = baseScale * item.cropScale;
-  context.drawImage(image, (-image.width * scale) / 2, (-image.height * scale) / 2, image.width * scale, image.height * scale);
-  context.restore();
+  ctx.fillStyle = "#f8f5ef";
+  ctx.fillRect(0, 0, width, height);
+  ctx.save();
+  ctx.translate(width / 2 + item.offsetX * (width / 520), height / 2 + item.offsetY * (height / 360));
+  ctx.rotate((item.rotate * Math.PI) / 180);
 
-  const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/webp", 0.9));
-  if (!blob) throw new Error("图片压缩失败。");
+  const scale = Math.max(width / image.width, height / image.height) * item.cropScale;
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = "high";
+  ctx.drawImage(image, (-image.width * scale) / 2, (-image.height * scale) / 2, image.width * scale, image.height * scale);
+  ctx.restore();
+
   const dataUrl = canvas.toDataURL("image/webp", 0.9);
-  return { blob, dataUrl, width, height };
+  const bytes = Math.round((dataUrl.length * 3) / 4);
+  return { dataUrl, bytes };
 }
 
-export function ImageUploadPanel({ onInsert, onSetCover, compact = false, onClose }: ImageUploadPanelProps) {
-  const inputRef = useRef<HTMLInputElement | null>(null);
-  const dragRef = useRef<DragState | null>(null);
-  const pointersRef = useRef<Map<number, TouchPoint>>(new Map());
-  const pinchRef = useRef<PinchState | null>(null);
-  const [url, setUrl] = useState("");
+export function ImageUploadPanel({ onInsert, onSetCover, compact = false, coverOnly = false, onClose }: ImageUploadPanelProps) {
   const [pending, setPending] = useState<PendingImage[]>([]);
   const [activeIndex, setActiveIndex] = useState(0);
+  const [url, setUrl] = useState("");
   const [message, setMessage] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
+  const dragRef = useRef<DragState | null>(null);
 
   const active = pending[activeIndex];
 
@@ -162,20 +128,20 @@ export function ImageUploadPanel({ onInsert, onSetCover, compact = false, onClos
     setPending((items) => items.map((item) => (item.id === id ? { ...item, ...patch } : item)));
   };
 
-  const upload = async (files: FileList | null) => {
+  const handleFiles = async (files: FileList | null) => {
     if (!files?.length) return;
     setIsProcessing(true);
     setMessage("正在读取照片...");
     try {
-      const nextImages: PendingImage[] = [];
+      const next: PendingImage[] = [];
       for (const file of Array.from(files)) {
-        const readyFile = await waitForFileReady(file);
-        const dataUrl = await readFileAsDataUrl(readyFile);
-        const image = await loadImage(dataUrl);
-        nextImages.push({
+        if (!file.type.startsWith("image/")) continue;
+        const sourceDataUrl = await readFileAsDataUrl(file);
+        const image = await loadImage(sourceDataUrl);
+        next.push({
           id: createBlockId("pending-image"),
-          fileName: readyFile.name,
-          sourceDataUrl: dataUrl,
+          fileName: file.name,
+          sourceDataUrl,
           caption: "",
           align: "center",
           zoom: 100,
@@ -184,64 +150,26 @@ export function ImageUploadPanel({ onInsert, onSetCover, compact = false, onClos
           offsetX: 0,
           offsetY: 0,
           aspect: "original",
-          beforeBytes: readyFile.size,
-          originalWidth: image.width,
-          originalHeight: image.height,
+          beforeBytes: file.size,
+          originalWidth: image.naturalWidth,
+          originalHeight: image.naturalHeight,
         });
       }
       setPending((items) => {
-        const merged = [...items, ...nextImages];
-        setActiveIndex(items.length);
+        const merged = [...items, ...next];
+        if (!items.length) setActiveIndex(0);
         return merged;
       });
-      setMessage("照片已读取，请先调整裁剪和说明，再插入正文。");
+      setMessage(coverOnly ? "照片已读取。先调整画面，再保存为封面。" : "照片已读取。先调整画面、填写说明，再插入正文。");
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "照片读取失败，请重新选择。");
     } finally {
       setIsProcessing(false);
-      if (inputRef.current) inputRef.current.value = "";
     }
   };
 
-  const movePending = (index: number, direction: -1 | 1) => {
-    const target = index + direction;
-    if (target < 0 || target >= pending.length) return;
-    const next = [...pending];
-    [next[index], next[target]] = [next[target], next[index]];
-    setPending(next);
-    setActiveIndex(target);
-  };
-
-  const resetActive = () => {
+  const startDrag = (event: PointerEvent<HTMLDivElement>) => {
     if (!active) return;
-    updatePending(active.id, { cropScale: 1, rotate: 0, offsetX: 0, offsetY: 0, aspect: "original" });
-  };
-
-  const handleWheel = (event: WheelEvent<HTMLDivElement>) => {
-    if (!active) return;
-    event.preventDefault();
-    const delta = event.deltaY > 0 ? -0.05 : 0.05;
-    updatePending(active.id, { cropScale: Math.min(2.5, Math.max(0.55, active.cropScale + delta)) });
-  };
-
-  const handlePointerDown = (event: PointerEvent<HTMLDivElement>) => {
-    if (!active) return;
-    event.currentTarget.setPointerCapture(event.pointerId);
-    pointersRef.current.set(event.pointerId, { x: event.clientX, y: event.clientY });
-    if (pointersRef.current.size >= 2) {
-      const points = [...pointersRef.current.values()].slice(0, 2);
-      const dx = points[1].x - points[0].x;
-      const dy = points[1].y - points[0].y;
-      pinchRef.current = {
-        id: active.id,
-        distance: Math.max(1, Math.hypot(dx, dy)),
-        angle: Math.atan2(dy, dx),
-        scale: active.cropScale,
-        rotate: active.rotate,
-      };
-      dragRef.current = null;
-      return;
-    }
     dragRef.current = {
       id: active.id,
       pointerId: event.pointerId,
@@ -250,71 +178,75 @@ export function ImageUploadPanel({ onInsert, onSetCover, compact = false, onClos
       originX: active.offsetX,
       originY: active.offsetY,
     };
+    event.currentTarget.setPointerCapture(event.pointerId);
   };
 
-  const handlePointerMove = (event: PointerEvent<HTMLDivElement>) => {
-    pointersRef.current.set(event.pointerId, { x: event.clientX, y: event.clientY });
-    const pinch = pinchRef.current;
-    if (pinch && active && pinch.id === active.id && pointersRef.current.size >= 2) {
-      const points = [...pointersRef.current.values()].slice(0, 2);
-      const dx = points[1].x - points[0].x;
-      const dy = points[1].y - points[0].y;
-      const distance = Math.max(1, Math.hypot(dx, dy));
-      const angle = Math.atan2(dy, dx);
-      updatePending(active.id, {
-        cropScale: Math.min(2.5, Math.max(0.55, pinch.scale * (distance / pinch.distance))),
-        rotate: pinch.rotate + ((angle - pinch.angle) * 180) / Math.PI,
-      });
-      return;
-    }
+  const moveDrag = (event: PointerEvent<HTMLDivElement>) => {
     const drag = dragRef.current;
-    if (!drag || !active || drag.id !== active.id) return;
-    updatePending(active.id, {
+    if (!drag || drag.pointerId !== event.pointerId) return;
+    event.preventDefault();
+    updatePending(drag.id, {
       offsetX: drag.originX + event.clientX - drag.startX,
       offsetY: drag.originY + event.clientY - drag.startY,
     });
   };
 
-  const handlePointerUp = (event: PointerEvent<HTMLDivElement>) => {
-    pointersRef.current.delete(event.pointerId);
-    if (pointersRef.current.size < 2) pinchRef.current = null;
-    if (dragRef.current?.pointerId === event.pointerId) dragRef.current = null;
+  const stopDrag = () => {
+    dragRef.current = null;
+  };
+
+  const handleCropWheel = (event: WheelEvent<HTMLDivElement>) => {
+    if (!active) return;
+    event.preventDefault();
+    const nextScale = active.cropScale + (event.deltaY > 0 ? -0.04 : 0.04);
+    updatePending(active.id, { cropScale: Math.max(0.45, Math.min(3, nextScale)) });
+  };
+
+  const movePending = (from: number, delta: number) => {
+    const to = from + delta;
+    if (to < 0 || to >= pending.length) return;
+    setPending((items) => {
+      const next = [...items];
+      const [item] = next.splice(from, 1);
+      next.splice(to, 0, item);
+      return next;
+    });
+    setActiveIndex(to);
   };
 
   const insertAll = async (setFirstAsCover = false) => {
     if (!pending.length) return;
     setIsProcessing(true);
-    setMessage("正在处理并上传图片...");
+    setMessage("正在处理图片...");
     try {
+      const sourceItems = coverOnly && active ? [active] : pending;
       const blocks: NoteContentBlock[] = [];
       let coverSrc = "";
       let before = 0;
       let after = 0;
 
-      for (const item of pending) {
+      for (const item of sourceItems) {
         const result = await renderEditedImage(item);
         before += item.beforeBytes;
-        after += result.blob.size;
-        let src = result.dataUrl;
-        try {
-          const file = new File([result.blob], `${item.id}.webp`, { type: "image/webp" });
-          src = await uploadNoteImage(file, "article");
-        } catch {
-          // Keep a local preview if cloud upload is temporarily unavailable.
-        }
-        if (!coverSrc) coverSrc = src;
+        after += result.bytes;
+        if (!coverSrc) coverSrc = result.dataUrl;
         blocks.push({
           id: createBlockId("image"),
           type: "image",
-          src,
+          src: result.dataUrl,
           caption: item.caption,
           align: item.align,
           zoom: item.zoom,
         });
       }
 
-      if (setFirstAsCover && coverSrc) onSetCover?.(coverSrc);
-      onInsert(blocks, `已插入 ${pending.length} 张图片：${formatKb(before)} -> ${formatKb(after)}`);
+      if (coverOnly) {
+        if (coverSrc) onSetCover?.(coverSrc);
+        setMessage("封面已设置。保存或发布时再上传云端。");
+      } else {
+        if (setFirstAsCover && coverSrc) onSetCover?.(coverSrc);
+        onInsert(blocks, `已插入 ${sourceItems.length} 张图片：${formatKb(before)} -> ${formatKb(after)}。保存或发布时再上传云端。`);
+      }
       setPending([]);
       setActiveIndex(0);
       onClose?.();
@@ -328,25 +260,41 @@ export function ImageUploadPanel({ onInsert, onSetCover, compact = false, onClos
   const insertUrl = () => {
     const src = url.trim();
     if (!src) return;
-    onInsert([{ id: createBlockId("image"), type: "image", src, caption: "", align: "center", zoom: 100 }], "已插入图片 URL");
+    if (coverOnly) {
+      onSetCover?.(src);
+      setMessage("封面地址已设置。");
+      setUrl("");
+      onClose?.();
+      return;
+    }
+    onInsert(
+      [{
+        id: createBlockId("image"),
+        type: "image",
+        src,
+        caption: "",
+        align: "center",
+        zoom: 100,
+      }],
+      "图片地址已插入正文。",
+    );
     setUrl("");
-    onClose?.();
   };
 
   return (
-    <div className={`image-upload-panel${compact ? " image-upload-panel-compact" : ""}`}>
-      <div className="image-upload-head">
+    <section className={`image-upload-panel${compact ? " compact" : ""}`}>
+      <div className="image-upload-heading">
         <div>
-          <strong>添加正文图片</strong>
-          <span>选择照片后先裁剪、缩放、旋转和填写说明，再插入正文。</span>
+          <strong>{coverOnly ? "添加封面" : "添加正文图片"}</strong>
+          <span>{coverOnly ? "选择照片后先裁剪、缩放和旋转，再保存为封面。" : "选择照片后先裁剪、缩放、旋转和填写说明，再插入正文。"}</span>
         </div>
         {onClose ? <button type="button" onClick={onClose}>关闭</button> : null}
       </div>
 
-      <div className="image-upload-actions">
+      <div className="image-upload-row">
         <label>
           <span>选择图片</span>
-          <input ref={inputRef} type="file" accept="image/*" multiple onChange={(event) => upload(event.target.files)} />
+          <input type="file" accept="image/*" multiple={!coverOnly} onChange={(event) => handleFiles(event.target.files)} />
         </label>
         <label>
           <span>图片 URL</span>
@@ -358,25 +306,22 @@ export function ImageUploadPanel({ onInsert, onSetCover, compact = false, onClos
       {message ? <p className="image-upload-message">{message}</p> : null}
 
       {active ? (
-        <div className="image-crop-panel">
+        <div className="image-crop-card">
           <div className="image-crop-top">
             <div>
               <strong>裁剪照片</strong>
-              <span>
-                {active.fileName} / 原始 {formatKb(active.beforeBytes)} / {active.originalWidth}x{active.originalHeight}
-              </span>
+              <span>{active.fileName} / 原始 {formatKb(active.beforeBytes)} / {active.originalWidth}x{active.originalHeight}</span>
             </div>
             <span>{activeIndex + 1} / {pending.length}</span>
           </div>
 
           <div
-            className={`image-crop-stage aspect-${active.aspect.replace(":", "-")}`}
-            onWheel={handleWheel}
-            onPointerDown={handlePointerDown}
-            onPointerMove={handlePointerMove}
-            onPointerUp={handlePointerUp}
-            onPointerCancel={handlePointerUp}
-            onDoubleClick={resetActive}
+            className="image-crop-stage"
+            onPointerDown={startDrag}
+            onPointerMove={moveDrag}
+            onPointerUp={stopDrag}
+            onPointerCancel={stopDrag}
+            onWheel={handleCropWheel}
           >
             <img
               src={active.sourceDataUrl}
@@ -384,7 +329,6 @@ export function ImageUploadPanel({ onInsert, onSetCover, compact = false, onClos
               style={{
                 transform: `translate3d(${active.offsetX}px, ${active.offsetY}px, 0) rotate(${active.rotate}deg) scale(${active.cropScale})`,
               }}
-              draggable={false}
             />
           </div>
 
@@ -401,53 +345,52 @@ export function ImageUploadPanel({ onInsert, onSetCover, compact = false, onClos
               <span>缩放</span>
               <input
                 type="range"
-                min="0.55"
-                max="2.5"
-                step="0.01"
-                value={active.cropScale}
-                onChange={(event) => updatePending(active.id, { cropScale: Number(event.target.value) })}
+                min="45"
+                max="300"
+                value={Math.round(active.cropScale * 100)}
+                onChange={(event) => updatePending(active.id, { cropScale: Number(event.target.value) / 100 })}
               />
             </label>
             <button type="button" onClick={() => updatePending(active.id, { rotate: active.rotate - 90 })}>左转</button>
             <button type="button" onClick={() => updatePending(active.id, { rotate: active.rotate + 90 })}>右转</button>
-            <button type="button" onClick={resetActive}>重置</button>
-          </div>
-
-          <div className="image-crop-meta">
-            <input value={active.caption} onChange={(event) => updatePending(active.id, { caption: event.target.value })} placeholder="图片说明 caption" />
-            <div>
-              <button type="button" className={active.align === "center" ? "is-active" : ""} onClick={() => updatePending(active.id, { align: "center" })}>居中</button>
-              <button type="button" className={active.align === "full" ? "is-active" : ""} onClick={() => updatePending(active.id, { align: "full" })}>通栏</button>
-              <button type="button" className={active.zoom === 100 ? "is-active" : ""} onClick={() => updatePending(active.id, { zoom: 100 })}>100%</button>
-              <button type="button" className={active.zoom === 80 ? "is-active" : ""} onClick={() => updatePending(active.id, { zoom: 80 })}>80%</button>
-              <button type="button" className={active.zoom === 60 ? "is-active" : ""} onClick={() => updatePending(active.id, { zoom: 60 })}>60%</button>
-            </div>
-          </div>
-
-          <div className="image-crop-strip">
-            {pending.map((item, index) => (
-              <button
-                type="button"
-                className={index === activeIndex ? "is-active" : ""}
-                key={item.id}
-                onClick={() => setActiveIndex(index)}
-              >
-                <img src={item.sourceDataUrl} alt={`待处理图片 ${index + 1}`} />
-              </button>
-            ))}
-          </div>
-
-          <div className="image-confirm-actions">
-            <button type="button" disabled={activeIndex === 0} onClick={() => setActiveIndex((index) => Math.max(0, index - 1))}>上一张</button>
-            <button type="button" disabled={activeIndex >= pending.length - 1} onClick={() => setActiveIndex((index) => Math.min(pending.length - 1, index + 1))}>下一张</button>
+            <button type="button" onClick={() => updatePending(active.id, { cropScale: 1, rotate: 0, offsetX: 0, offsetY: 0 })}>重置</button>
+            {!coverOnly ? (
+              <>
+                <input
+                  value={active.caption}
+                  onChange={(event) => updatePending(active.id, { caption: event.target.value })}
+                  placeholder="图片说明 caption"
+                />
+                <button type="button" className={active.align === "center" ? "is-active" : ""} onClick={() => updatePending(active.id, { align: "center" })}>居中</button>
+                <button type="button" className={active.align === "full" ? "is-active" : ""} onClick={() => updatePending(active.id, { align: "full" })}>通栏</button>
+                {[100, 80, 60].map((zoom) => (
+                  <button
+                    key={zoom}
+                    type="button"
+                    className={active.zoom === zoom ? "is-active" : ""}
+                    onClick={() => updatePending(active.id, { zoom: zoom as 60 | 80 | 100 })}
+                  >
+                    {zoom}%
+                  </button>
+                ))}
+              </>
+            ) : null}
+            <button type="button" onClick={() => movePending(activeIndex, -1)}>上一张</button>
+            <button type="button" onClick={() => movePending(activeIndex, 1)}>下一张</button>
             <button type="button" onClick={() => movePending(activeIndex, -1)}>上移</button>
             <button type="button" onClick={() => movePending(activeIndex, 1)}>下移</button>
             <button type="button" onClick={() => setPending((items) => items.filter((image) => image.id !== active.id))}>移除</button>
-            <button type="button" onClick={() => insertAll(false)} disabled={isProcessing}>全部插入正文</button>
-            <button type="button" onClick={() => insertAll(true)} disabled={isProcessing}>设为封面并插入</button>
+            {coverOnly ? (
+              <button type="button" onClick={() => insertAll(false)} disabled={isProcessing}>保存为封面</button>
+            ) : (
+              <>
+                <button type="button" onClick={() => insertAll(false)} disabled={isProcessing}>全部插入正文</button>
+                <button type="button" onClick={() => insertAll(true)} disabled={isProcessing}>设为封面并插入</button>
+              </>
+            )}
           </div>
         </div>
       ) : null}
-    </div>
+    </section>
   );
 }
