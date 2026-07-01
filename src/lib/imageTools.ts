@@ -43,42 +43,6 @@ export async function compressImageFileWithMeta(
   return { dataUrl: compressed, beforeBytes: file.size, afterBytes: estimateDataUrlBytes(compressed) };
 }
 
-export async function transformImageDataUrl(
-  dataUrl: string,
-  options: { zoom?: number; rotation?: number; aspect?: "original" | "16:10" | "4:3" | "1:1"; quality?: number } = {},
-): Promise<CompressedImage> {
-  const image = await loadImage(dataUrl);
-  const sourceBytes = estimateDataUrlBytes(dataUrl);
-  const aspectMap = {
-    original: image.width / image.height,
-    "16:10": 16 / 10,
-    "4:3": 4 / 3,
-    "1:1": 1,
-  };
-  const aspect = aspectMap[options.aspect ?? "original"];
-  const maxWidth = Math.min(2200, image.width);
-  const width = maxWidth;
-  const height = Math.round(width / aspect);
-  const canvas = document.createElement("canvas");
-  canvas.width = width;
-  canvas.height = height;
-  const context = canvas.getContext("2d");
-  if (!context) return { dataUrl, beforeBytes: sourceBytes, afterBytes: sourceBytes };
-
-  context.fillStyle = "#faf7f0";
-  context.fillRect(0, 0, width, height);
-  context.save();
-  context.translate(width / 2, height / 2);
-  context.rotate(((options.rotation ?? 0) * Math.PI) / 180);
-  const zoom = Math.max(0.6, Math.min(3, (options.zoom ?? 100) / 100));
-  const coverScale = Math.max(width / image.width, height / image.height) * zoom;
-  context.drawImage(image, (-image.width * coverScale) / 2, (-image.height * coverScale) / 2, image.width * coverScale, image.height * coverScale);
-  context.restore();
-
-  const next = canvas.toDataURL("image/webp", options.quality ?? 0.9);
-  return { dataUrl: next, beforeBytes: sourceBytes, afterBytes: estimateDataUrlBytes(next) };
-}
-
 export function estimateDataUrlBytes(dataUrl: string) {
   const base64 = dataUrl.split(",")[1] ?? "";
   return Math.round((base64.length * 3) / 4);

@@ -11,7 +11,7 @@ import {
   logoutAdmin,
   upsertNote,
 } from "../lib/noteStore";
-import { deleteCloudNote, getCloudSession, logoutCloudAdmin, saveCloudNote } from "../lib/supabaseNotes";
+import { deleteCloudNote, saveCloudNote } from "../lib/supabaseNotes";
 import { slugify } from "../lib/slugify";
 import { NoteEditDrawer } from "./NoteEditDrawer";
 
@@ -51,26 +51,6 @@ export function DuomeiEditProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
-    let active = true;
-    const verifyCloudSession = async () => {
-      if (!isAdminLoggedIn()) return;
-      const session = await getCloudSession();
-      if (!active) return;
-      if (!session) {
-        logoutAdmin();
-        setIsLoggedIn(false);
-        setEditMode(false);
-      } else {
-        setIsLoggedIn(true);
-      }
-    };
-    verifyCloudSession();
-    return () => {
-      active = false;
-    };
-  }, [refreshKey]);
-
-  useEffect(() => {
     document.body.classList.toggle("front-editing", editMode);
     return () => document.body.classList.remove("front-editing");
   }, [editMode]);
@@ -85,7 +65,6 @@ export function DuomeiEditProvider({ children }: { children: ReactNode }) {
       logout: () => {
         logoutAdmin();
         setEditMode(false);
-        void logoutCloudAdmin();
       },
       openNoteEditor: async (note) => {
         if (note) {
