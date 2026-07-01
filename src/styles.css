@@ -6590,16 +6590,12 @@ body.front-editing .notes-bottom-spacer {
   }
 }
 
-/* Stable notes-to-footer cover choreography.
-   This block intentionally lives last so older experiment rules cannot move the pinned notes layer. */
-:root {
-  --duomei-header-offset: clamp(136px, 16vh, 190px);
-}
-
+/* Notes to footer cover choreography.
+   Restored to the earlier stable sticky version; keep this block last. */
 .notes-to-dream-stage {
   position: relative !important;
   isolation: isolate;
-  min-height: calc(100svh + 190svh + 100svh) !important;
+  min-height: auto !important;
   background: var(--paper) !important;
   overflow: visible !important;
 }
@@ -6613,26 +6609,26 @@ body.front-editing .notes-bottom-spacer {
 
 .notes-cover-stage {
   position: relative !important;
-  top: auto !important;
+  top: 0 !important;
   z-index: 2 !important;
   display: block !important;
-  height: 260svh !important;
-  min-height: 1900px !important;
+  height: 240svh !important;
+  min-height: 1500px !important;
   padding: 0 !important;
   overflow: visible !important;
   background: var(--paper) !important;
 }
 
 .notes-cover-inner {
-  position: relative;
-  top: 0;
+  position: sticky !important;
+  top: 0 !important;
   z-index: 3 !important;
   display: grid !important;
-  align-content: start !important;
+  align-content: center !important;
   width: 100% !important;
-  height: calc(100svh - var(--duomei-header-offset)) !important;
-  min-height: 520px !important;
-  padding: clamp(16px, 3vh, 30px) 0 clamp(42px, 8vh, 90px) !important;
+  height: 100svh !important;
+  min-height: 680px !important;
+  padding: clamp(10px, 2vh, 24px) 0 clamp(86px, 12vh, 150px) !important;
   overflow: hidden !important;
   background: var(--paper) !important;
   transform: none !important;
@@ -6719,8 +6715,9 @@ body.front-editing .notes-bottom-spacer {
 
 .notes-bottom-spacer {
   position: relative !important;
-  z-index: 1 !important;
-  height: 30svh !important;
+  z-index: 0 !important;
+  display: block !important;
+  height: 0 !important;
   background: var(--paper) !important;
   pointer-events: none !important;
 }
@@ -6729,7 +6726,7 @@ body.front-editing .notes-bottom-spacer {
   position: relative !important;
   z-index: 8 !important;
   min-height: 100svh !important;
-  margin-top: -94svh !important;
+  margin-top: -104svh !important;
   pointer-events: none !important;
 }
 
@@ -6752,18 +6749,19 @@ body.front-editing .notes-bottom-spacer {
 }
 
 body.front-editing .notes-cover-stage {
-  height: 275svh !important;
-  min-height: 2040px !important;
+  height: 250svh !important;
+  min-height: 1620px !important;
   padding: 0 !important;
 }
 
 body.front-editing .notes-cover-inner {
-  min-height: 620px !important;
-  padding-bottom: clamp(72px, 11vh, 130px) !important;
+  min-height: 740px !important;
+  padding-bottom: clamp(110px, 16vh, 190px) !important;
+  transform: none !important;
 }
 
 body.front-editing .notes-bottom-spacer {
-  height: 44svh !important;
+  height: 0 !important;
 }
 
 @media (max-width: 760px) {
@@ -6772,18 +6770,21 @@ body.front-editing .notes-bottom-spacer {
   }
 
   .notes-to-dream-stage {
-    min-height: calc(100svh + 210svh + 100svh) !important;
+    min-height: auto !important;
   }
 
   .notes-cover-stage {
-    height: 238svh !important;
-    min-height: 1680px !important;
+    height: 230svh !important;
+    min-height: 1320px !important;
     padding: 0 !important;
   }
 
   .notes-cover-inner {
-    min-height: 610px !important;
-    padding: 18px 0 54px !important;
+    height: 100svh !important;
+    min-height: 640px !important;
+    align-content: center !important;
+    padding: 8px 0 clamp(96px, 16svh, 150px) !important;
+    transform: none !important;
   }
 
   .notes-intro {
@@ -6809,12 +6810,12 @@ body.front-editing .notes-bottom-spacer {
   }
 
   .notes-bottom-spacer {
-    height: 34svh !important;
+    height: 0 !important;
   }
 
   .dream-cover-stage {
     min-height: 100svh !important;
-    margin-top: -88svh !important;
+    margin-top: -96svh !important;
   }
 
   .footer-dream-section {
@@ -6823,11 +6824,106 @@ body.front-editing .notes-bottom-spacer {
   }
 
   body.front-editing .notes-cover-stage {
-    height: 256svh !important;
-    min-height: 1840px !important;
+    height: 242svh !important;
+    min-height: 1460px !important;
+    padding: 0 !important;
   }
 
   body.front-editing .notes-cover-inner {
-    min-height: 680px !important;
+    min-height: 760px !important;
+    padding-bottom: clamp(118px, 18svh, 170px) !important;
+    transform: none !important;
+  }
+
+  body.front-editing .notes-bottom-spacer {
+    height: 0 !important;
+  }
+}
+
+/* Stable homepage section flow.
+   Notes and dream are now normal stacked sections. Decorative curves are kept
+   inside their own boundaries so they cannot push, cover, or cut the cards. */
+.paper-layer {
+  background: var(--paper) !important;
+}
+
+.paper-curve {
+  position: absolute !important;
+  top: -156px !important;
+  left: 0 !important;
+  right: 0 !important;
+  z-index: 1 !important;
+  height: 180px !important;
+  background: transparent !important;
+  pointer-events: none !important;
+}
+
+.paper-body {
+  position: relative !important;
+  z-index: 2 !important;
+  min-height: 0 !important;
+  padding-top: clamp(62px, 8vh, 96px) !important;
+  padding-bottom: 0 !important;
+  background: var(--paper) !important;
+}
+
+.notes-dream-transition .notes-intro {
+  margin-top: 0 !important;
+  margin-bottom: clamp(28px, 4vh, 48px) !important;
+}
+
+.notes-dream-transition .notes-intro p,
+.notes-dream-transition .notes-intro-eyebrow {
+  display: none !important;
+}
+
+.notes-dream-transition .notes-intro h2,
+.notes-dream-transition .notes-intro-title {
+  padding: 0.08em 0 0.18em !important;
+  font-size: clamp(46px, 5vw, 76px) !important;
+  line-height: 1.18 !important;
+}
+
+.notes-dream-transition .notes-intro span,
+.notes-dream-transition .notes-intro-subtitle {
+  margin-top: 0 !important;
+}
+
+.notes-dream-transition .notes-carousel-shell {
+  position: relative !important;
+  z-index: 3 !important;
+}
+
+.notes-dream-transition .notes-carousel-shell .carousel-button {
+  top: 50% !important;
+}
+
+.notes-dream-footer-panel .footer-dream-section {
+  position: relative !important;
+  min-height: 100svh !important;
+  height: 100svh !important;
+  margin: 0 !important;
+}
+
+@media (max-width: 760px) {
+  .paper-curve {
+    top: -104px !important;
+    height: 128px !important;
+  }
+
+  .paper-body {
+    padding-top: 48px !important;
+  }
+
+  .notes-dream-transition .notes-intro h2,
+  .notes-dream-transition .notes-intro-title {
+    font-size: clamp(38px, 12vw, 54px) !important;
+    line-height: 1.24 !important;
+  }
+
+  .notes-dream-transition .notes-intro span,
+  .notes-dream-transition .notes-intro-subtitle {
+    font-size: 16px !important;
+    line-height: 1.5 !important;
   }
 }
