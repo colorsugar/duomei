@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import type { PointerEvent, WheelEvent } from "react";
 import { Link } from "react-router-dom";
 import type { DuomeiNote } from "../lib/noteTypes";
@@ -7,29 +7,16 @@ import { NoteCover } from "./NoteCover";
 
 export function NotesCarousel({ notes }: { notes: DuomeiNote[] }) {
   const viewportRef = useRef<HTMLDivElement | null>(null);
-  const frameRef = useRef<number | null>(null);
-  const resumeTimerRef = useRef<number | null>(null);
-  const reduceMotion = useRef(false);
-  const canHover = useRef(false);
-  const pauseStateRef = useRef({
-    canLoop: false,
-    editMode: false,
-    isEditorOpen: false,
-    isUserInteracting: false,
-  });
-  const [isUserInteracting, setIsUserInteracting] = useState(false);
+  const timerRef = useRef<number | null>(null);
+  const pauseUntilRef = useRef(0);
+  const prefersReducedMotionRef = useRef(false);
   const { editMode, isEditorOpen, openNoteEditor, requestDelete } = useDuomeiEdit();
   const canLoop = notes.length > 1;
   const displayNotes = useMemo(() => (canLoop ? [...notes, ...notes, ...notes] : notes), [canLoop, notes]);
 
   useEffect(() => {
-    reduceMotion.current = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    canHover.current = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+    prefersReducedMotionRef.current = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   }, []);
-
-  useEffect(() => {
-    pauseStateRef.current = { canLoop, editMode, isEditorOpen, isUserInteracting };
-  }, [canLoop, editMode, isEditorOpen, isUserInteracting]);
 
   const normalizeLoopPosition = () => {
     const viewport = viewportRef.current;
@@ -37,7 +24,7 @@ export function NotesCarousel({ notes }: { notes: DuomeiNote[] }) {
     const groupWidth = viewport.scrollWidth / 3;
     if (groupWidth <= 0) return;
     if (viewport.scrollLeft >= groupWidth * 2) viewport.scrollLeft -= groupWidth;
-    if (viewport.scrollLeft < groupWidth * 0.35) viewport.scrollLeft += groupWidth;
+    if (viewport.scrollLeft < groupWidth * 0.5) viewport.scrollLeft += groupWidth;
   };
 
   useEffect(() => {
@@ -49,59 +36,48 @@ export function NotesCarousel({ notes }: { notes: DuomeiNote[] }) {
   }, [canLoop, notes.length]);
 
   useEffect(() => {
-    let lastTime = performance.now();
-    const tick = (time: number) => {
+    timerRef.current = window.setInterval(() => {
       const viewport = viewportRef.current;
-      const state = pauseStateRef.current;
-      const delta = Math.min(32, time - lastTime);
-      lastTime = time;
-      const isCardHovering = canHover.current && !!document.querySelector(".duomei-note-card:hover");
 
       if (
         viewport &&
-        state.canLoop &&
-        !reduceMotion.current &&
-        !state.editMode &&
-        !state.isEditorOpen &&
-        !isCardHovering &&
-        !state.isUserInteracting
+        canLoop &&
+        !prefersReducedMotionRef.current &&
+        !editMode &&
+        !isEditorOpen &&
+        performance.now() > pauseUntilRef.current
       ) {
-        const pxPerFrame = window.innerWidth <= 760 ? 0.92 : 0.56;
-        viewport.scrollLeft += pxPerFrame * (delta / 16.67);
+        const speed = window.innerWidth <= 760 ? 0.92 : 0.72;
+        viewport.scrollLeft += speed;
         normalizeLoopPosition();
       }
+    }, 16);
 
-      frameRef.current = window.requestAnimationFrame(tick);
-    };
-
-    frameRef.current = window.requestAnimationFrame(tick);
     return () => {
-      if (frameRef.current) window.cancelAnimationFrame(frameRef.current);
-      frameRef.current = null;
+      if (timerRef.current) window.clearInterval(timerRef.current);
+      timerRef.current = null;
     };
-  }, [notes.length]);
+  }, [canLoop, editMode, isEditorOpen, notes.length]);
 
-  const pauseForUser = (duration = 1200) => {
-    setIsUserInteracting(true);
-    if (resumeTimerRef.current) window.clearTimeout(resumeTimerRef.current);
-    resumeTimerRef.current = window.setTimeout(() => setIsUserInteracting(false), duration);
+  const pauseForUser = (duration = 900) => {
+    pauseUntilRef.current = performance.now() + duration;
   };
 
   const handlePointerDown = (event: PointerEvent<HTMLDivElement>) => {
-    if (event.pointerType === "mouse") return;
-    pauseForUser(1500);
+    if (event.pointerType !== "mouse") pauseForUser(1200);
   };
 
   const scrollByAmount = (direction: 1 | -1) => {
     const viewport = viewportRef.current;
     if (!viewport) return;
-    pauseForUser(1200);
-    viewport.scrollBy({ left: direction * Math.min(420, viewport.clientWidth * 0.74), behavior: "smooth" });
+    pauseForUser(900);
+    viewport.scrollBy({ left: direction * Math.min(520, viewport.clientWidth * 0.72), behavior: "smooth" });
+    window.requestAnimationFrame(normalizeLoopPosition);
   };
 
   const handleWheel = (event: WheelEvent<HTMLDivElement>) => {
     if (Math.abs(event.deltaX) <= Math.abs(event.deltaY)) return;
-    pauseForUser(900);
+    pauseForUser(700);
     window.requestAnimationFrame(normalizeLoopPosition);
   };
 
@@ -122,10 +98,10 @@ export function NotesCarousel({ notes }: { notes: DuomeiNote[] }) {
         onWheel={handleWheel}
         onScroll={normalizeLoopPosition}
         onPointerDown={handlePointerDown}
-        onPointerUp={() => pauseForUser(700)}
-        onTouchStart={() => pauseForUser(1500)}
-        onTouchMove={() => pauseForUser(900)}
-        onTouchEnd={() => pauseForUser(700)}
+        onPointerUp={() => pauseForUser(500)}
+        onTouchStart={() => pauseForUser(900)}
+        onTouchMove={() => pauseForUser(500)}
+        onTouchEnd={() => pauseForUser(500)}
       >
         <div className="notes-carousel-track">
           {displayNotes.map((note, index) => (

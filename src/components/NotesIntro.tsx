@@ -29,12 +29,6 @@ export function NotesIntro({ onCreate, canCreate }: { onCreate: () => void; canC
       {canCreate ? (
         <>
           <input
-            className="notes-intro-eyebrow"
-            value={settings.notesEyebrow}
-            onChange={(event) => update("notesEyebrow", event.target.value)}
-            aria-label="小记英文小标题"
-          />
-          <input
             className="notes-intro-title"
             value={settings.notesTitle}
             onChange={(event) => update("notesTitle", event.target.value)}
@@ -49,7 +43,6 @@ export function NotesIntro({ onCreate, canCreate }: { onCreate: () => void; canC
         </>
       ) : (
         <>
-          <p>{settings.notesEyebrow}</p>
           <h2>{settings.notesTitle}</h2>
           <span>{settings.notesSubtitle}</span>
         </>
