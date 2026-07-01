@@ -79,6 +79,128 @@ main {
   }
 }
 
+/* Cover layer hard lock.
+   The outer notes stage is the scroll track; the inner notes panel is what pins.
+   The footer cover starts one viewport early so it rises over the pinned notes. */
+.notes-to-dream-stage {
+  position: relative !important;
+  isolation: isolate !important;
+  min-height: auto !important;
+  overflow: visible !important;
+  background: var(--paper) !important;
+}
+
+.notes-cover-stage {
+  position: relative !important;
+  top: auto !important;
+  z-index: 2 !important;
+  height: 190svh !important;
+  min-height: 1480px !important;
+  display: block !important;
+  padding: 0 !important;
+  overflow: visible !important;
+  background: var(--paper) !important;
+}
+
+.notes-cover-inner {
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 3 !important;
+  width: 100% !important;
+  height: 100svh !important;
+  min-height: 720px !important;
+  display: grid !important;
+  align-content: center !important;
+  gap: clamp(16px, 2vh, 28px) !important;
+  padding: clamp(72px, 10vh, 120px) 0 clamp(72px, 10vh, 120px) !important;
+  overflow: hidden !important;
+  background: var(--paper) !important;
+  transform: translateZ(0) !important;
+}
+
+.notes-bottom-spacer {
+  height: 0 !important;
+  min-height: 0 !important;
+  background: transparent !important;
+}
+
+.dream-cover-stage {
+  position: relative !important;
+  z-index: 9 !important;
+  min-height: 100svh !important;
+  margin-top: -100svh !important;
+  pointer-events: none !important;
+  transform: translateZ(0) !important;
+}
+
+.dream-cover-curve {
+  position: absolute !important;
+  left: 0 !important;
+  right: 0 !important;
+  top: -179px !important;
+  z-index: 10 !important;
+  height: 180px !important;
+  pointer-events: none !important;
+}
+
+.dream-cover-fill {
+  fill: var(--paper) !important;
+}
+
+.dream-cover-stroke {
+  fill: none !important;
+  stroke: #1f1f1b !important;
+  stroke-width: 4px !important;
+  stroke-linecap: round !important;
+  vector-effect: non-scaling-stroke !important;
+}
+
+.footer-dream-section {
+  position: relative !important;
+  z-index: 9 !important;
+  height: 100svh !important;
+  min-height: 760px !important;
+  overflow: hidden !important;
+  pointer-events: auto !important;
+}
+
+@media (max-width: 760px) {
+  .notes-cover-stage {
+    height: 198svh !important;
+    min-height: 1540px !important;
+  }
+
+  .notes-cover-inner {
+    min-height: 100svh !important;
+    padding: 96px 0 78px !important;
+    align-content: center !important;
+  }
+
+  .notes-intro {
+    margin-bottom: 12px !important;
+  }
+
+  .notes-intro h2,
+  .notes-intro-title {
+    font-size: clamp(36px, 11.5vw, 50px) !important;
+    line-height: 1.28 !important;
+    padding: 0.18em 0 0.22em !important;
+  }
+
+  .notes-carousel {
+    padding-top: 6px !important;
+    padding-bottom: 14px !important;
+  }
+
+  .duomei-note-card {
+    flex-basis: min(286px, 78vw) !important;
+  }
+
+  .dream-cover-stage {
+    margin-top: -100svh !important;
+  }
+}
+
 .intro-overlay {
   position: fixed;
   inset: 0;
