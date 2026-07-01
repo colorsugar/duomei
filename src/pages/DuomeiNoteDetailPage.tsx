@@ -1,4 +1,4 @@
-import { ChangeEvent, useEffect, useState } from "react";
+﻿import { ChangeEvent, useEffect, useState } from "react";
 import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { ImageUploadPanel } from "../components/ImageUploadPanel";
 import { NoteBlockRenderer } from "../components/NoteBlockRenderer";
@@ -35,6 +35,7 @@ export function DuomeiNoteDetailPage() {
   const { editMode, isLoggedIn, refreshKey } = useDuomeiEdit();
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [imagePanelOpen, setImagePanelOpen] = useState(false);
+  const [toolbarOpen, setToolbarOpen] = useState(false);
   const [message, setMessage] = useState("");
   const [cloudNote, setCloudNote] = useState<DuomeiNote | undefined>();
   const [navigationNotes, setNavigationNotes] = useState<DuomeiNote[]>(() => (isLoggedIn ? getAllNotes() : getPublishedNotes()));
@@ -230,7 +231,18 @@ export function DuomeiNoteDetailPage() {
 
       {shouldEdit ? (
         <>
-          <div className="detail-inline-toolbar" role="toolbar" aria-label="小记编辑工具栏">
+          <button
+            className={`detail-toolbar-toggle${toolbarOpen ? " is-open" : ""}`}
+            type="button"
+            onClick={() => setToolbarOpen((value) => !value)}
+            aria-label="切换小记编辑工具"
+            aria-expanded={toolbarOpen}
+          >
+            <span />
+            <span />
+            <span />
+          </button>
+          <div className={`detail-inline-toolbar${toolbarOpen ? " is-open" : ""}`} role="toolbar" aria-label="小记编辑工具栏">
             <button type="button" onClick={() => persistNote()}>保存修改</button>
             {isPublished ? (
               <button type="button" className="is-muted" disabled>已发布</button>
@@ -252,7 +264,10 @@ export function DuomeiNoteDetailPage() {
               添加封面
               <input type="file" accept="image/*" onChange={uploadCover} />
             </label>
-            <button type="button" onClick={() => setImagePanelOpen((value) => !value)}>添加图片</button>
+            <button type="button" onClick={() => {
+              setImagePanelOpen((value) => !value);
+              setToolbarOpen(false);
+            }}>添加图片</button>
             <button className="detail-danger-button" type="button" onClick={() => setConfirmDelete(true)}>删除</button>
             <button type="button" onClick={() => navigate("/")}>返回首页</button>
           </div>
@@ -308,7 +323,7 @@ export function DuomeiNoteDetailPage() {
             </div>
             <div className="detail-tags editable-tags">
               {activeNote.tags.map((tag, index) => (
-                <span className="editable-tag" key={`${tag}-${index}`}>
+                <span className="editable-tag" key={`tag-${index}`}>
                   <input value={tag} onChange={(event) => updateTag(index, event.target.value)} aria-label={`标签 ${index + 1}`} />
                   <button type="button" onClick={() => removeTag(index)} aria-label="删除标签">×</button>
                 </span>
@@ -413,3 +428,4 @@ export function DuomeiNoteDetailPage() {
     </main>
   );
 }
+

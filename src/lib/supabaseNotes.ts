@@ -128,6 +128,7 @@ export async function uploadNoteImage(file: File, folder = "notes") {
   const path = `${folder}/${Date.now()}-${Math.random().toString(16).slice(2)}.${ext}`;
   const { error } = await supabase.storage.from("note-images").upload(path, file, {
     cacheControl: "31536000",
+    contentType: file.type || "image/webp",
     upsert: false,
   });
   if (error) throw error;
