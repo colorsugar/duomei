@@ -56,7 +56,7 @@ export function createDraftNote(): DuomeiNote {
   const now = new Date().toISOString();
   const slug = `note-${Date.now()}`;
   return {
-    id: slug,
+    id: crypto.randomUUID(),
     slug,
     title: "未命名小记",
     date: "2026.06.29",
