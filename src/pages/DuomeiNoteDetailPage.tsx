@@ -4,7 +4,7 @@ import { ImageUploadPanel } from "../components/ImageUploadPanel";
 import { NoteBlockRenderer } from "../components/NoteBlockRenderer";
 import { NoteCover } from "../components/NoteCover";
 import { useDuomeiEdit } from "../components/DuomeiEditProvider";
-import { bodyToBlocks, createBlockId, deleteNote, getNoteBySlug, upsertNote } from "../lib/noteStore";
+import { bodyToBlocks, createBlockId, deleteNote, getAllNotes, getNoteBySlug, getPublishedNotes, upsertNote } from "../lib/noteStore";
 import { compressImage } from "../lib/imageTools";
 import type { DuomeiNote, NoteContentBlock } from "../lib/noteTypes";
 
@@ -139,6 +139,10 @@ export function DuomeiNoteDetailPage() {
   };
 
   const isPublished = activeNote.status === "published";
+  const navigationNotes = isLoggedIn ? getAllNotes() : getPublishedNotes();
+  const currentIndex = navigationNotes.findIndex((item) => item.id === note.id);
+  const previousNote = currentIndex > 0 ? navigationNotes[currentIndex - 1] : null;
+  const nextNote = currentIndex >= 0 && currentIndex < navigationNotes.length - 1 ? navigationNotes[currentIndex + 1] : null;
 
   return (
     <main className={`duomei-detail${shouldEdit ? " detail-edit-page inline-detail-editing" : ""}`}>
@@ -321,6 +325,33 @@ export function DuomeiNoteDetailPage() {
           </>
         )}
       </article>
+      <nav className="detail-note-nav" aria-label="小记翻页">
+        {previousNote ? (
+          <Link className="detail-note-nav-card" to={`/note/${previousNote.slug}`}>
+            <span>上一篇</span>
+            <strong>{previousNote.title}</strong>
+          </Link>
+        ) : (
+          <span className="detail-note-nav-card is-disabled">
+            <span>上一篇</span>
+            <strong>已经是第一篇</strong>
+          </span>
+        )}
+        <Link className="detail-note-nav-home" to="/">
+          返回主页
+        </Link>
+        {nextNote ? (
+          <Link className="detail-note-nav-card align-right" to={`/note/${nextNote.slug}`}>
+            <span>下一篇</span>
+            <strong>{nextNote.title}</strong>
+          </Link>
+        ) : (
+          <span className="detail-note-nav-card align-right is-disabled">
+            <span>下一篇</span>
+            <strong>已经是最后一篇</strong>
+          </span>
+        )}
+      </nav>
     </main>
   );
 }
