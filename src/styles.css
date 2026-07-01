@@ -7527,6 +7527,17 @@ body.front-editing .notes-bottom-spacer {
   display: flex !important;
 }
 
+.detail-image-panel {
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  overscroll-behavior: contain !important;
+  -webkit-overflow-scrolling: touch !important;
+}
+
+.detail-image-panel .image-upload-panel {
+  min-height: 100% !important;
+}
+
 @media (max-width: 760px) {
   .detail-edit-page {
     padding-top: 112px !important;

@@ -84,6 +84,19 @@ export function DuomeiNoteDetailPage() {
     return () => window.clearTimeout(timer);
   }, [message]);
 
+  useEffect(() => {
+    if (!imagePanelOpen) return;
+    const originalOverflow = document.body.style.overflow;
+    const originalPaddingRight = document.body.style.paddingRight;
+    const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+    document.body.style.overflow = "hidden";
+    if (scrollbarWidth > 0) document.body.style.paddingRight = `${scrollbarWidth}px`;
+    return () => {
+      document.body.style.overflow = originalOverflow;
+      document.body.style.paddingRight = originalPaddingRight;
+    };
+  }, [imagePanelOpen]);
+
   if (!note) {
     return (
       <main className="duomei-detail">
@@ -308,7 +321,11 @@ export function DuomeiNoteDetailPage() {
             <button type="button" onClick={() => navigate("/")}>返回首页</button>
           </div>
           {imagePanelOpen ? (
-            <div className="detail-image-panel">
+            <div
+              className="detail-image-panel"
+              onWheelCapture={(event) => event.stopPropagation()}
+              onTouchMoveCapture={(event) => event.stopPropagation()}
+            >
               <ImageUploadPanel
                 compact
                 onInsert={insertBlocks}
