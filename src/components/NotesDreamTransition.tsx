@@ -21,9 +21,9 @@ export function NotesDreamTransition({ canCreate, notes, onCreate }: NotesDreamT
       </section>
 
       <div className="notes-dream-divider" aria-hidden="true">
-        <svg viewBox="0 0 1440 170" preserveAspectRatio="none">
-          <path className="notes-dream-divider-fill" d="M0,82 C360,14 1080,14 1440,82 L1440,170 L0,170 Z" />
-          <path className="notes-dream-divider-line" d="M0,82 C360,14 1080,14 1440,82" />
+        <svg viewBox="0 0 1440 120" preserveAspectRatio="none">
+          <path className="notes-dream-divider-fill" d="M0,52 C360,8 1080,8 1440,52 L1440,120 L0,120 Z" />
+          <path className="notes-dream-divider-line" d="M0,52 C360,8 1080,8 1440,52" />
         </svg>
       </div>
 

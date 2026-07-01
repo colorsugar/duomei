@@ -5,6 +5,7 @@ import {
   getFooterSettings,
   saveFooterSettings,
 } from "../lib/footerSettings";
+import { AnimatedParagraph, AnimatedTitle, RevealSection } from "../motion";
 
 export function DuomeiFooter() {
   const { editMode, isLoggedIn } = useDuomeiEdit();
@@ -49,26 +50,30 @@ export function DuomeiFooter() {
   }, []);
 
   return (
-    <footer
+    <RevealSection
+      as="footer"
       className="duomei-footer"
-      ref={footerRef}
+      motionRef={footerRef}
       style={{ "--footer-line-progress": lineProgress } as CSSProperties}
     >
-      <strong>DUOMEI</strong>
-      <p
-        className={editable ? "footer-editable-text" : ""}
-        contentEditable={editable}
-        suppressContentEditableWarning
-        onBlur={(event) => {
-          if (!editable) return;
-          const copyrightText = event.currentTarget.textContent?.trim() || settings.copyrightText;
-          const next = { ...settings, copyrightText };
-          saveFooterSettings(next);
-          setSettings(next);
-        }}
-      >
-        {settings.copyrightText}
-      </p>
-    </footer>
+      <AnimatedTitle as="strong">DUOMEI</AnimatedTitle>
+      {editable ? (
+        <p
+          className="footer-editable-text"
+          contentEditable
+          suppressContentEditableWarning
+          onBlur={(event) => {
+            const copyrightText = event.currentTarget.textContent?.trim() || settings.copyrightText;
+            const next = { ...settings, copyrightText };
+            saveFooterSettings(next);
+            setSettings(next);
+          }}
+        >
+          {settings.copyrightText}
+        </p>
+      ) : (
+        <AnimatedParagraph>{settings.copyrightText}</AnimatedParagraph>
+      )}
+    </RevealSection>
   );
 }

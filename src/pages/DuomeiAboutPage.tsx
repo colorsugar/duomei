@@ -5,6 +5,7 @@ import {
   getAboutSettings,
   saveAboutSettings,
 } from "../lib/aboutSettings";
+import { AnimatedParagraph, AnimatedTitle, RevealSection } from "../motion";
 
 export function DuomeiAboutPage() {
   const { editMode, isLoggedIn } = useDuomeiEdit();
@@ -42,10 +43,9 @@ export function DuomeiAboutPage() {
     update({ ...settings, paragraphs: paragraphs.length ? paragraphs : [""] });
   };
 
-  return (
-    <main className={`duomei-about${editable ? " about-editing" : ""}`}>
-      {editable ? (
-        <>
+  if (editable) {
+    return (
+      <main className="duomei-about about-editing">
           <input
             className="about-eyebrow-editor"
             value={settings.eyebrow}
@@ -75,18 +75,19 @@ export function DuomeiAboutPage() {
               新增段落
             </button>
           </div>
-        </>
-      ) : (
-        <>
-          <p>{settings.eyebrow}</p>
-          <h1>{settings.title}</h1>
+      </main>
+    );
+  }
+
+  return (
+    <RevealSection as="main" className="duomei-about">
+          <AnimatedParagraph>{settings.eyebrow}</AnimatedParagraph>
+          <AnimatedTitle as="h1">{settings.title}</AnimatedTitle>
           <div>
             {settings.paragraphs.map((paragraph, index) => (
-              <p key={index}>{paragraph}</p>
+              <AnimatedParagraph key={index}>{paragraph}</AnimatedParagraph>
             ))}
           </div>
-        </>
-      )}
-    </main>
+    </RevealSection>
   );
 }

@@ -1,5 +1,6 @@
 ﻿import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
+import type { CSSProperties, MouseEvent } from "react";
 import { EditableImageBlock } from "../components/EditableImageBlock";
 import { ImageUploadPanel } from "../components/ImageUploadPanel";
 import { NoteBlockRenderer } from "../components/NoteBlockRenderer";
@@ -15,8 +16,10 @@ import {
   uploadNoteDataUrl,
 } from "../lib/supabaseNotes";
 import type { DuomeiNote, NoteContentBlock } from "../lib/noteTypes";
+import { runSharedJourneyTransition, sharedJourneyNames } from "../motion";
 
 type ImageBlock = Extract<NoteContentBlock, { type: "image" }>;
+type SharedJourneyStyle = CSSProperties & { viewTransitionName?: string };
 
 function blocksToBody(blocks: NoteContentBlock[]) {
   return blocks
@@ -41,7 +44,7 @@ export function DuomeiNoteDetailPage() {
   const { editMode, isLoggedIn, refreshKey } = useDuomeiEdit();
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [imagePanelMode, setImagePanelMode] = useState<"article" | "cover" | null>(null);
-  const [toolbarOpen, setToolbarOpen] = useState(false);
+  const [toolbarOpen, setToolbarOpen] = useState(true);
   const [message, setMessage] = useState("");
   const [cloudNote, setCloudNote] = useState<DuomeiNote | undefined>();
   const [navigationNotes, setNavigationNotes] = useState<DuomeiNote[]>(() => (isLoggedIn ? getAllNotes() : getPublishedNotes()));
@@ -117,7 +120,23 @@ export function DuomeiNoteDetailPage() {
     document.body.style.right = "0";
     document.body.style.width = "100%";
     if (scrollbarWidth > 0) document.body.style.paddingRight = `${scrollbarWidth}px`;
+
+    const keepScrollInsidePanel = (event: WheelEvent | TouchEvent) => {
+      const panel = document.querySelector(".detail-image-panel");
+      if (!panel) return;
+      if (panel.contains(event.target as Node)) {
+        event.stopPropagation();
+        return;
+      }
+      event.preventDefault();
+    };
+
+    window.addEventListener("wheel", keepScrollInsidePanel, { passive: false, capture: true });
+    window.addEventListener("touchmove", keepScrollInsidePanel, { passive: false, capture: true });
+
     return () => {
+      window.removeEventListener("wheel", keepScrollInsidePanel, { capture: true });
+      window.removeEventListener("touchmove", keepScrollInsidePanel, { capture: true });
       root.classList.remove("duomei-modal-open");
       document.body.classList.remove("duomei-modal-open");
       root.style.overflow = originalRootOverflow;
@@ -238,7 +257,6 @@ export function DuomeiNoteDetailPage() {
       const saved = await saveCloudNote(nextNote);
       setCloudNote(saved);
       setDraft(saved);
-      setToolbarOpen(false);
       setMessage((status ?? draft.status) === "published" ? "已发布到云端，线上网站会立即显示。" : "已保存到云端。");
     } catch (error) {
       const localNote: DuomeiNote = {
@@ -298,10 +316,18 @@ export function DuomeiNoteDetailPage() {
   const currentIndex = navigationNotes.findIndex((item) => item.id === note.id);
   const previousNote = currentIndex > 0 ? navigationNotes[currentIndex - 1] : null;
   const nextNote = currentIndex >= 0 && currentIndex < navigationNotes.length - 1 ? navigationNotes[currentIndex + 1] : null;
+  const sharedImageStyle = shouldEdit ? undefined : ({ viewTransitionName: sharedJourneyNames.image } as SharedJourneyStyle);
+  const sharedTitleStyle = shouldEdit ? undefined : ({ viewTransitionName: sharedJourneyNames.title } as SharedJourneyStyle);
+
+  const navigateWithJourney = (event: MouseEvent<HTMLAnchorElement>, target: string) => {
+    if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return;
+    event.preventDefault();
+    runSharedJourneyTransition(() => navigate(target));
+  };
 
   return (
-    <main className={`duomei-detail${shouldEdit ? " detail-edit-page inline-detail-editing" : ""}`}>
-      <Link className="detail-back" to="/#notes">← 返回小记</Link>
+    <main className={`duomei-detail${shouldEdit ? " detail-edit-page inline-detail-editing" : ""}${shouldEdit && toolbarOpen ? " toolbar-open" : ""}`}>
+      <Link className="detail-back" to="/#notes" onClick={(event) => navigateWithJourney(event, "/#notes")}>← 返回小记</Link>
 
       {isLoggedIn && editMode && !shouldEdit ? (
         <div className="detail-edit-actions">
@@ -376,7 +402,9 @@ export function DuomeiNoteDetailPage() {
       ) : null}
 
       <article>
-        <div className="detail-cover-wrap"><NoteCover note={activeNote} detail /></div>
+        <div className="detail-cover-wrap" data-shared-journey-image style={sharedImageStyle}>
+          <NoteCover note={activeNote} detail />
+        </div>
         {shouldEdit ? (
           <>
             <input className="detail-category detail-inline-input category-input" value={activeNote.category} onChange={(event) => updateDraft({ category: event.target.value })} aria-label="分类" />
@@ -388,7 +416,14 @@ export function DuomeiNoteDetailPage() {
             <div className="detail-tags editable-tags">
               {activeNote.tags.map((tag, index) => (
                 <span className="editable-tag" key={`tag-${index}`}>
-                  <input value={tag} onChange={(event) => updateTag(index, event.target.value)} aria-label={`标签 ${index + 1}`} />
+                  <input
+                    defaultValue={tag}
+                    onBlur={(event) => updateTag(index, event.currentTarget.value)}
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter") event.currentTarget.blur();
+                    }}
+                    aria-label={`标签 ${index + 1}`}
+                  />
                   <button type="button" onClick={() => removeTag(index)} aria-label="删除标签">×</button>
                 </span>
               ))}
@@ -424,7 +459,7 @@ export function DuomeiNoteDetailPage() {
         ) : (
           <>
             <p className="detail-category">{note.category}</p>
-            <h1>{note.title}</h1>
+            <h1 data-shared-journey-title style={sharedTitleStyle}>{note.title}</h1>
             <div className="detail-meta"><span>{note.date}</span><span>{note.location}</span></div>
             <div className="detail-tags">{note.tags.map((tag) => <span key={tag}>{tag}</span>)}</div>
             <NoteBlockRenderer blocks={blocks} />
@@ -433,13 +468,13 @@ export function DuomeiNoteDetailPage() {
       </article>
       <nav className="detail-note-nav" aria-label="小记翻页">
         {previousNote ? (
-          <Link className="detail-note-nav-card" to={`/note/${previousNote.slug}`}><span>上一篇</span><strong>{previousNote.title}</strong></Link>
+          <Link className="detail-note-nav-card" to={`/note/${previousNote.slug}`} onClick={(event) => navigateWithJourney(event, `/note/${previousNote.slug}`)}><span>上一篇</span><strong>{previousNote.title}</strong></Link>
         ) : (
           <span className="detail-note-nav-card is-disabled"><span>上一篇</span><strong>已经是第一篇</strong></span>
         )}
-        <Link className="detail-note-nav-home" to="/">返回主页</Link>
+        <Link className="detail-note-nav-home" to="/#notes" onClick={(event) => navigateWithJourney(event, "/#notes")}>返回主页</Link>
         {nextNote ? (
-          <Link className="detail-note-nav-card align-right" to={`/note/${nextNote.slug}`}><span>下一篇</span><strong>{nextNote.title}</strong></Link>
+          <Link className="detail-note-nav-card align-right" to={`/note/${nextNote.slug}`} onClick={(event) => navigateWithJourney(event, `/note/${nextNote.slug}`)}><span>下一篇</span><strong>{nextNote.title}</strong></Link>
         ) : (
           <span className="detail-note-nav-card align-right is-disabled"><span>下一篇</span><strong>已经是最后一篇</strong></span>
         )}

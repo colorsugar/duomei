@@ -1,15 +1,31 @@
 import { useEffect, useMemo, useRef } from "react";
-import type { PointerEvent, WheelEvent } from "react";
-import { Link } from "react-router-dom";
+import type { MouseEvent, PointerEvent, WheelEvent } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import type { DuomeiNote } from "../lib/noteTypes";
+import {
+  AnimatedCard,
+  AnimatedImage,
+  AnimatedParagraph,
+  AnimatedTag,
+  AnimatedTitle,
+  clearJourneyListState,
+  markSharedJourneySource,
+  preloadJourneyImage,
+  readJourneyListState,
+  restoreJourneyWindowScroll,
+  runSharedJourneyTransition,
+  saveJourneyListState,
+} from "../motion";
 import { useDuomeiEdit } from "./DuomeiEditProvider";
 import { NoteCover } from "./NoteCover";
 
 export function NotesCarousel({ notes }: { notes: DuomeiNote[] }) {
   const viewportRef = useRef<HTMLDivElement | null>(null);
-  const timerRef = useRef<number | null>(null);
+  const frameRef = useRef<number | null>(null);
+  const hoverPausedRef = useRef(false);
   const pauseUntilRef = useRef(0);
   const prefersReducedMotionRef = useRef(false);
+  const navigate = useNavigate();
   const { editMode, isEditorOpen, openNoteEditor, requestDelete } = useDuomeiEdit();
   const canLoop = notes.length > 1;
   const displayNotes = useMemo(() => (canLoop ? [...notes, ...notes, ...notes] : notes), [canLoop, notes]);
@@ -29,15 +45,28 @@ export function NotesCarousel({ notes }: { notes: DuomeiNote[] }) {
 
   useEffect(() => {
     const viewport = viewportRef.current;
-    if (!viewport || !canLoop) return;
+    if (!viewport) return;
+
     window.requestAnimationFrame(() => {
-      viewport.scrollLeft = viewport.scrollWidth / 3;
+      const journeyState = readJourneyListState();
+      if (journeyState) {
+        viewport.scrollLeft = journeyState.carouselLeft;
+        restoreJourneyWindowScroll(journeyState);
+        clearJourneyListState();
+        return;
+      }
+
+      if (canLoop) viewport.scrollLeft = viewport.scrollWidth / 3;
     });
   }, [canLoop, notes.length]);
 
   useEffect(() => {
-    timerRef.current = window.setInterval(() => {
+    let previousTime = performance.now();
+
+    const tick = (time: number) => {
       const viewport = viewportRef.current;
+      const delta = Math.min(32, time - previousTime);
+      previousTime = time;
 
       if (
         viewport &&
@@ -45,17 +74,21 @@ export function NotesCarousel({ notes }: { notes: DuomeiNote[] }) {
         !prefersReducedMotionRef.current &&
         !editMode &&
         !isEditorOpen &&
-        performance.now() > pauseUntilRef.current
+        !hoverPausedRef.current &&
+        time > pauseUntilRef.current
       ) {
-        const speed = window.innerWidth <= 760 ? 0.92 : 0.72;
-        viewport.scrollLeft += speed;
+        const speed = window.innerWidth <= 760 ? 0.09 : 0.065;
+        viewport.scrollLeft += delta * speed;
         normalizeLoopPosition();
       }
-    }, 16);
 
+      frameRef.current = window.requestAnimationFrame(tick);
+    };
+
+    frameRef.current = window.requestAnimationFrame(tick);
     return () => {
-      if (timerRef.current) window.clearInterval(timerRef.current);
-      timerRef.current = null;
+      if (frameRef.current) window.cancelAnimationFrame(frameRef.current);
+      frameRef.current = null;
     };
   }, [canLoop, editMode, isEditorOpen, notes.length]);
 
@@ -81,9 +114,29 @@ export function NotesCarousel({ notes }: { notes: DuomeiNote[] }) {
     window.requestAnimationFrame(normalizeLoopPosition);
   };
 
-  if (!notes.length) {
-    return <p className="notes-empty">还没有小记</p>;
-  }
+  const openJourney = (event: MouseEvent<HTMLAnchorElement>, note: DuomeiNote) => {
+    if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return;
+    event.preventDefault();
+
+    const viewport = viewportRef.current;
+    const sourceCard = event.currentTarget.closest<HTMLElement>(".duomei-note-card");
+    const cleanupSharedName = sourceCard ? markSharedJourneySource(sourceCard) : undefined;
+
+    pauseForUser(1600);
+    saveJourneyListState({
+      carouselLeft: viewport?.scrollLeft ?? 0,
+      noteId: note.id,
+    });
+    preloadJourneyImage(note.coverImageUrl);
+
+    runSharedJourneyTransition(() => {
+      navigate(`/note/${note.slug}`);
+    });
+
+    window.setTimeout(() => cleanupSharedName?.(), 900);
+  };
+
+  if (!notes.length) return <p className="notes-empty">还没有小记</p>;
 
   return (
     <div className="notes-carousel-shell">
@@ -92,9 +145,16 @@ export function NotesCarousel({ notes }: { notes: DuomeiNote[] }) {
           ←
         </button>
       ) : null}
+
       <div
         className="notes-carousel"
         ref={viewportRef}
+        onMouseEnter={() => {
+          hoverPausedRef.current = true;
+        }}
+        onMouseLeave={() => {
+          hoverPausedRef.current = false;
+        }}
         onWheel={handleWheel}
         onScroll={normalizeLoopPosition}
         onPointerDown={handlePointerDown}
@@ -105,7 +165,7 @@ export function NotesCarousel({ notes }: { notes: DuomeiNote[] }) {
       >
         <div className="notes-carousel-track">
           {displayNotes.map((note, index) => (
-            <article className="duomei-note-card" key={`${note.id}-${index}`}>
+            <AnimatedCard className="duomei-note-card" data-motion-key={`note-card-${note.id}`} key={`${note.id}-${index}`}>
               {editMode ? (
                 <div className="duomei-card-actions">
                   <button type="button" onClick={() => openNoteEditor(note)}>
@@ -116,27 +176,30 @@ export function NotesCarousel({ notes }: { notes: DuomeiNote[] }) {
                   </button>
                 </div>
               ) : null}
-              <Link to={`/note/${note.slug}`}>
-                <div className="note-card-cover">
+              <Link to={`/note/${note.slug}`} onClick={(event) => openJourney(event, note)}>
+                <AnimatedImage className="note-card-cover" data-motion-key={`note-image-${note.id}`} data-shared-journey-image>
                   <NoteCover note={note} />
-                </div>
+                </AnimatedImage>
                 <div className="note-card-body">
                   <div className="note-card-meta">
-                    <span>{note.location}</span>
+                    <AnimatedTag>{note.location}</AnimatedTag>
                     <time>{note.date}</time>
                   </div>
-                  <h3>{note.title}</h3>
-                  <p>{note.excerpt}</p>
+                  <AnimatedTitle as="h3" className="duomei-motion-card-title" data-shared-journey-title>
+                    {note.title}
+                  </AnimatedTitle>
+                  <AnimatedParagraph>{note.excerpt}</AnimatedParagraph>
                   <div className="note-card-foot">
                     <span>{note.tags.length} 个标签 / 文字</span>
-                    <strong>→</strong>
+                    <strong className="duomei-motion-card-arrow">→</strong>
                   </div>
                 </div>
               </Link>
-            </article>
+            </AnimatedCard>
           ))}
         </div>
       </div>
+
       {canLoop ? (
         <button className="carousel-button next" type="button" aria-label="下一组小记" onClick={() => scrollByAmount(1)}>
           →

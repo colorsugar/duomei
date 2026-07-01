@@ -4,6 +4,7 @@ import {
   getHomeSettings,
   saveHomeSettings,
 } from "../lib/homeSettings";
+import { AnimatedButton, AnimatedParagraph, AnimatedTitle, RevealSection } from "../motion";
 
 export function NotesIntro({ onCreate, canCreate }: { onCreate: () => void; canCreate: boolean }) {
   const [settings, setSettings] = useState(() => getHomeSettings());
@@ -25,7 +26,7 @@ export function NotesIntro({ onCreate, canCreate }: { onCreate: () => void; canC
   };
 
   return (
-    <div className={`notes-intro${canCreate ? " is-editable" : ""}`}>
+    <RevealSection className={`notes-intro${canCreate ? " is-editable" : ""}`}>
       {canCreate ? (
         <>
           <input
@@ -43,15 +44,15 @@ export function NotesIntro({ onCreate, canCreate }: { onCreate: () => void; canC
         </>
       ) : (
         <>
-          <h2>{settings.notesTitle}</h2>
-          <span>{settings.notesSubtitle}</span>
+          <AnimatedTitle as="h2">{settings.notesTitle}</AnimatedTitle>
+          <AnimatedParagraph as="span">{settings.notesSubtitle}</AnimatedParagraph>
         </>
       )}
       {canCreate ? (
-        <button type="button" onClick={onCreate}>
+        <AnimatedButton type="button" onClick={onCreate}>
           新增小记
-        </button>
+        </AnimatedButton>
       ) : null}
-    </div>
+    </RevealSection>
   );
 }

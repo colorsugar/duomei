@@ -10,6 +10,7 @@ import { BackToTopButton } from "./components/BackToTopButton";
 import { DuomeiEditProvider } from "./components/DuomeiEditProvider";
 import { RouteScrollManager } from "./components/RouteScrollManager";
 import { useSmoothScroll } from "./hooks/useSmoothScroll";
+import { MotionProvider } from "./motion";
 
 function AppRoutes() {
   const location = useLocation();
@@ -41,7 +42,9 @@ export default function App() {
 
   return (
     <BrowserRouter basename={basename}>
-      <AppRoutes />
+      <MotionProvider>
+        <AppRoutes />
+      </MotionProvider>
     </BrowserRouter>
   );
 }

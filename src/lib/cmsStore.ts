@@ -97,12 +97,9 @@ export function isAdminLoggedIn() {
 }
 
 export function loginAdmin(username: string, password: string) {
-  const ok = username === "tami" && password === "tamidesu";
-  if (ok && canUseStorage()) {
-    window.localStorage.setItem(AUTH_KEY, "true");
-    window.dispatchEvent(new CustomEvent(CMS_UPDATED_EVENT));
-  }
-  return ok;
+  void username;
+  void password;
+  return false;
 }
 
 export function logoutAdmin() {

@@ -32,7 +32,14 @@ export function DuomeiHeader() {
 
   return (
     <header className={`duomei-header${menuOpen ? " is-menu-open" : ""}`}>
-      <Link className="duomei-brand" to="/" onClick={(event) => { event.preventDefault(); goHomeTop(); }}>
+      <Link
+        className="duomei-brand duomei-motion-ambient-logo"
+        to="/"
+        onClick={(event) => {
+          event.preventDefault();
+          goHomeTop();
+        }}
+      >
         <strong>DUOMEI</strong>
         <span>多美小记</span>
       </Link>
@@ -48,17 +55,31 @@ export function DuomeiHeader() {
         <span />
       </button>
       <nav>
-        <Link to="/" onClick={goHomeTop}>首页</Link>
-        <Link to="/#notes" onClick={closeMenu}>小记</Link>
-        <Link to="/about" onClick={closeMenu}>关于</Link>
-        {!isLoggedIn ? <Link to="/admin/login" onClick={closeMenu}>管理</Link> : null}
+        <Link to="/" onClick={goHomeTop}>
+          首页
+        </Link>
+        <Link to="/#notes" onClick={closeMenu}>
+          小记
+        </Link>
+        <Link to="/about" onClick={closeMenu}>
+          关于
+        </Link>
+        {!isLoggedIn ? (
+          <Link to="/admin/login" onClick={closeMenu}>
+            管理
+          </Link>
+        ) : null}
         {isLoggedIn ? (
           <>
             <button type="button" onClick={toggleEdit}>
               编辑：{editMode ? "开" : "关"}
             </button>
-            <Link to="/admin/notes" onClick={closeMenu}>管理</Link>
-            <button type="button" onClick={logoutAndClose}>退出</button>
+            <Link to="/admin/notes" onClick={closeMenu}>
+              管理
+            </Link>
+            <button type="button" onClick={logoutAndClose}>
+              退出
+            </button>
           </>
         ) : null}
       </nav>

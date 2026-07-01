@@ -13,12 +13,18 @@ function canUseStorage() {
   return typeof window !== "undefined" && typeof window.localStorage !== "undefined";
 }
 
+function repairMojibake(settings: FooterSettings): FooterSettings {
+  return /[�锛绋璁澶氱]/.test(settings.copyrightText) || settings.copyrightText.includes("?")
+    ? defaultFooterSettings
+    : settings;
+}
+
 export function getFooterSettings(): FooterSettings {
   if (!canUseStorage()) return defaultFooterSettings;
   const raw = window.localStorage.getItem(FOOTER_SETTINGS_KEY);
   if (!raw) return defaultFooterSettings;
   try {
-    return { ...defaultFooterSettings, ...JSON.parse(raw) };
+    return repairMojibake({ ...defaultFooterSettings, ...(JSON.parse(raw) as Partial<FooterSettings>) });
   } catch {
     return defaultFooterSettings;
   }

@@ -17,12 +17,17 @@ function canUseStorage() {
   return typeof window !== "undefined" && typeof window.localStorage !== "undefined";
 }
 
+function repairMojibake(settings: HomeSettings): HomeSettings {
+  const looksBroken = Object.values(settings).some((value) => /[�锛绋璁澶氱]/.test(value) || value.includes("?"));
+  return looksBroken ? defaultHomeSettings : settings;
+}
+
 export function getHomeSettings(): HomeSettings {
   if (!canUseStorage()) return defaultHomeSettings;
   const raw = window.localStorage.getItem(HOME_SETTINGS_KEY);
   if (!raw) return defaultHomeSettings;
   try {
-    return { ...defaultHomeSettings, ...(JSON.parse(raw) as Partial<HomeSettings>) };
+    return repairMojibake({ ...defaultHomeSettings, ...(JSON.parse(raw) as Partial<HomeSettings>) });
   } catch {
     return defaultHomeSettings;
   }

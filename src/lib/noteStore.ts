@@ -131,13 +131,15 @@ export function isAdminLoggedIn() {
   return canUseStorage() && window.localStorage.getItem(AUTH_KEY) === "true";
 }
 
-export function loginAdmin(username: string, password: string) {
-  const ok = username === "tami" && password === "tamidesu";
-  if (ok && canUseStorage()) {
+export function markAdminLoggedIn() {
+  if (canUseStorage()) {
     window.localStorage.setItem(AUTH_KEY, "true");
     emitUpdate();
   }
-  return ok;
+}
+
+export function loginAdmin(_username: string, _password: string) {
+  return false;
 }
 
 export function logoutAdmin() {

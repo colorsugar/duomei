@@ -8,7 +8,7 @@ import {
   getAllNotes,
   importNotesJson,
   isAdminLoggedIn,
-  loginAdmin,
+  markAdminLoggedIn,
   logoutAdmin,
   upsertNote,
 } from "../lib/noteStore";
@@ -20,6 +20,7 @@ import {
   logoutCloudAdmin,
   saveCloudNote,
 } from "../lib/supabaseNotes";
+import { AnimatedButton, AnimatedCard, AnimatedParagraph, AnimatedTitle, RevealSection } from "../motion";
 
 function formatBytes(bytes: number) {
   if (bytes < 1024) return `${bytes} B`;
@@ -94,35 +95,30 @@ export function DuomeiAdmin({ mode }: { mode: "login" | "notes" }) {
       setError("");
       try {
         await loginCloudAdmin(username, password);
-        loginAdmin("tami", "tamidesu");
+        markAdminLoggedIn();
         navigate("/admin/notes");
-        return;
       } catch {
-        if (loginAdmin(username, password)) {
-          navigate("/admin/notes");
-          return;
-        }
+        setError("邮箱或密码不正确。请使用 Supabase 管理员账号登录。");
       }
-      setError("用户名或密码不正确。请使用 Supabase 管理员邮箱登录。");
     };
 
     return (
-      <main className="duomei-admin-login">
+      <RevealSection as="main" className="duomei-admin-login">
         <form onSubmit={submit}>
-          <p>DUOMEI NOTES</p>
-          <h1>多美小记管理后台</h1>
+          <AnimatedParagraph>DUOMEI NOTES</AnimatedParagraph>
+          <AnimatedTitle as="h1">多美小记管理后台</AnimatedTitle>
           <label>
-            邮箱 / 用户名
-            <input value={username} onChange={(event) => setUsername(event.target.value)} />
+            邮箱
+            <input value={username} onChange={(event) => setUsername(event.target.value)} autoComplete="username" />
           </label>
           <label>
             密码
-            <input type="password" value={password} onChange={(event) => setPassword(event.target.value)} />
+            <input type="password" value={password} onChange={(event) => setPassword(event.target.value)} autoComplete="current-password" />
           </label>
           {error ? <p className="admin-notice is-danger">{error}</p> : null}
-          <button type="submit">登录</button>
+          <AnimatedButton type="submit">登录</AnimatedButton>
         </form>
-      </main>
+      </RevealSection>
     );
   }
 
@@ -160,7 +156,7 @@ export function DuomeiAdmin({ mode }: { mode: "login" | "notes" }) {
       setUtilityText(JSON.stringify({ notes: cloudNotes }, null, 2));
       setImportText("");
       setCloudReady(true);
-      setNotice("云端已连接：发布内容会直接写入 Supabase，不再需要 Git Push。");
+      setNotice("云端已连接：内容会写入 Supabase，不需要 Git Push。");
     } catch {
       setNotice("云端连接失败，请检查 Supabase 登录状态或网络。");
     }
@@ -210,10 +206,10 @@ export function DuomeiAdmin({ mode }: { mode: "login" | "notes" }) {
         <span>多美小记工作室</span>
         <a href="/">查看网站</a>
         <a href="/#notes">小记列表</a>
-        <button type="button" onClick={createAndEdit}>
+        <AnimatedButton type="button" onClick={createAndEdit}>
           新增小记
-        </button>
-        <button
+        </AnimatedButton>
+        <AnimatedButton
           type="button"
           onClick={() => {
             logoutAdmin();
@@ -222,61 +218,61 @@ export function DuomeiAdmin({ mode }: { mode: "login" | "notes" }) {
           }}
         >
           退出登录
-        </button>
+        </AnimatedButton>
       </aside>
 
-      <section>
+      <RevealSection>
         <div className="studio-admin-topbar">
           <div>
-            <p>DUOMEI STUDIO</p>
-            <h1>工作室</h1>
+            <AnimatedParagraph>DUOMEI STUDIO</AnimatedParagraph>
+            <AnimatedTitle as="h1">工作室</AnimatedTitle>
           </div>
           <div className="studio-status-pill">
             <span />
             {cloudReady ? "云端已连接" : "本地备用模式"}
           </div>
-          <button type="button" onClick={checkCloudPublish}>
-            检查云端发布
-          </button>
-          <button type="button" onClick={backupNotes}>
+          <AnimatedButton type="button" onClick={checkCloudPublish}>
+            检查云端
+          </AnimatedButton>
+          <AnimatedButton type="button" onClick={backupNotes}>
             备份 JSON
-          </button>
+          </AnimatedButton>
         </div>
 
         {notice ? (
           <div className="admin-notice">
             <span>{notice}</span>
-            <button type="button" onClick={() => setNotice("")}>
+            <AnimatedButton type="button" onClick={() => setNotice("")}>
               关闭
-            </button>
+            </AnimatedButton>
           </div>
         ) : null}
 
-        <div className="studio-hero-panel">
-          <p>多美，慢慢记录也没关系。</p>
-          <h2>你的小记档案状态良好。</h2>
+        <AnimatedCard as="div" className="studio-hero-panel">
+          <AnimatedParagraph>多美，慢慢记录也没关系。</AnimatedParagraph>
+          <AnimatedTitle>你的小记档案状态良好。</AnimatedTitle>
           <div>
             <span>{notes.length} 条小记</span>
             <span>{published} 已发布</span>
             <span>{drafts} 草稿</span>
             <span>{imageCount} 张图片</span>
           </div>
-        </div>
+        </AnimatedCard>
 
         <div className="studio-status-grid">
-          <article className="studio-health-card">
+          <AnimatedCard className="studio-health-card">
             <div className="studio-ring" style={{ "--score": healthScore } as CSSProperties}>
               <strong>{healthScore}</strong>
               <span>/100</span>
             </div>
             <div>
-              <p>健康评分</p>
-              <h3>{healthScore >= 90 ? "优秀" : "良好"}</h3>
+              <AnimatedParagraph>健康评分</AnimatedParagraph>
+              <AnimatedTitle as="h3">{healthScore >= 90 ? "优秀" : "良好"}</AnimatedTitle>
               <span>正式数据来自 Supabase。本地只作为草稿和离线兜底。</span>
             </div>
-          </article>
-          <article className="studio-storage-card">
-            <p>Local Draft Cache</p>
+          </AnimatedCard>
+          <AnimatedCard className="studio-storage-card">
+            <AnimatedParagraph>Local Draft Cache</AnimatedParagraph>
             <div>
               <strong>{formatBytes(bytes)}</strong>
               <span>约 {storagePercent}%</span>
@@ -285,27 +281,27 @@ export function DuomeiAdmin({ mode }: { mode: "login" | "notes" }) {
               <b style={{ width: `${storagePercent}%` }} />
             </i>
             <span>LocalStorage 以后只用于草稿缓存，不再承担正式发布。</span>
-          </article>
+          </AnimatedCard>
         </div>
 
-        <div className="studio-publish-panel">
+        <AnimatedCard as="div" className="studio-publish-panel">
           <div>
-            <p>发布同步</p>
-            <h2>手机后台直接发布到 Supabase</h2>
+            <AnimatedParagraph>发布同步</AnimatedParagraph>
+            <AnimatedTitle>手机后台直接发布到 Supabase</AnimatedTitle>
             <span>上传图片、写小记、点击发布后，线上 Vercel 网站会读取同一份云端数据。</span>
           </div>
           <div className="studio-publish-actions">
-            <button type="button" onClick={backupNotes}>
+            <AnimatedButton type="button" onClick={backupNotes}>
               备份 JSON
-            </button>
-            <button type="button" onClick={checkCloudPublish}>
-              检查云端发布
-            </button>
-            <a href="https://github.com/colorsugar/duomei/actions" target="_blank" rel="noreferrer">
+            </AnimatedButton>
+            <AnimatedButton type="button" onClick={checkCloudPublish}>
+              检查云端
+            </AnimatedButton>
+            <AnimatedButton as="a" href="https://github.com/colorsugar/duomei/actions" target="_blank" rel="noreferrer">
               GitHub Actions
-            </a>
+            </AnimatedButton>
           </div>
-        </div>
+        </AnimatedCard>
 
         <details className="studio-notes-panel" open={notesOpen} onToggle={(event) => setNotesOpen(event.currentTarget.open)}>
           <summary>
@@ -317,48 +313,48 @@ export function DuomeiAdmin({ mode }: { mode: "login" | "notes" }) {
           </summary>
           <div className="admin-note-table studio-note-table">
             {notes.map((note) => (
-              <article key={note.id}>
+              <AnimatedCard key={note.id}>
                 <div>
                   <strong>{note.title}</strong>
                   <span>
                     {note.status === "published" ? "已发布" : "草稿"} / {note.date} / {note.location || "未填写地点"}
                   </span>
                 </div>
-                <button type="button" onClick={() => navigate(`/note/${note.slug}?edit=1`)}>
+                <AnimatedButton type="button" onClick={() => navigate(`/note/${note.slug}?edit=1`)}>
                   编辑
-                </button>
+                </AnimatedButton>
                 {note.status === "published" ? (
-                  <button type="button" onClick={() => setNoteStatus(note, "draft")}>
+                  <AnimatedButton type="button" onClick={() => setNoteStatus(note, "draft")}>
                     设为草稿
-                  </button>
+                  </AnimatedButton>
                 ) : (
-                  <button type="button" onClick={() => setNoteStatus(note, "published")}>
+                  <AnimatedButton type="button" onClick={() => setNoteStatus(note, "published")}>
                     发布
-                  </button>
+                  </AnimatedButton>
                 )}
-                <button type="button" onClick={() => setPendingDelete(note.id)}>
+                <AnimatedButton type="button" onClick={() => setPendingDelete(note.id)}>
                   删除
-                </button>
-              </article>
+                </AnimatedButton>
+              </AnimatedCard>
             ))}
           </div>
         </details>
 
-        <div className="admin-utilities studio-utilities">
+        <AnimatedCard as="div" className="admin-utilities studio-utilities">
           <div>
             <strong>数据工具</strong>
-            <p>云端发布不再需要生成 defaultNotes.ts。这里保留 JSON 备份和恢复，用来防止误删。</p>
+            <AnimatedParagraph>云端发布不再需要生成 defaultNotes.ts。这里保留 JSON 备份和恢复，用来防止误删。</AnimatedParagraph>
           </div>
           <div className="admin-utility-actions">
-            <button type="button" onClick={backupNotes}>
+            <AnimatedButton type="button" onClick={backupNotes}>
               备份小记到 JSON
-            </button>
-            <button type="button" onClick={importJson}>
+            </AnimatedButton>
+            <AnimatedButton type="button" onClick={importJson}>
               从 JSON 恢复到本机草稿
-            </button>
-            <button type="button" onClick={checkCloudPublish}>
+            </AnimatedButton>
+            <AnimatedButton type="button" onClick={checkCloudPublish}>
               检查云端
-            </button>
+            </AnimatedButton>
           </div>
           <textarea
             placeholder="这里会显示备份数据；也可以粘贴备份 JSON 后点击恢复。"
@@ -368,20 +364,20 @@ export function DuomeiAdmin({ mode }: { mode: "login" | "notes" }) {
               setImportText(event.target.value);
             }}
           />
-        </div>
+        </AnimatedCard>
 
         {pendingDelete ? (
           <div className="admin-delete-inline">
             <span>确定删除这条小记吗？</span>
-            <button type="button" onClick={confirmDelete}>
+            <AnimatedButton type="button" onClick={confirmDelete}>
               确认删除
-            </button>
-            <button type="button" onClick={() => setPendingDelete(null)}>
+            </AnimatedButton>
+            <AnimatedButton type="button" onClick={() => setPendingDelete(null)}>
               取消
-            </button>
+            </AnimatedButton>
           </div>
         ) : null}
-      </section>
+      </RevealSection>
     </main>
   );
 }

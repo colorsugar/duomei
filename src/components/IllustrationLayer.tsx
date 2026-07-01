@@ -8,6 +8,7 @@ import {
   saveHeroTextSettings,
   type HeroTextSettings,
 } from "../lib/heroSettings";
+import { AnimatedParagraph, RevealSection } from "../motion";
 
 type HeroEditableTextProps = {
   field: keyof HeroTextSettings;
@@ -18,15 +19,22 @@ type HeroEditableTextProps = {
 };
 
 function HeroEditableText({ field, settings, className, editable, onChange }: HeroEditableTextProps) {
-  const Tag = field === "subname" ? "p" : field === "line" ? "p" : "span";
+  const Tag = field === "subname" || field === "line" ? "p" : "span";
+
+  if (!editable) {
+    return (
+      <AnimatedParagraph as={Tag} className={className}>
+        {settings[field]}
+      </AnimatedParagraph>
+    );
+  }
 
   return (
     <Tag
-      className={`${className}${editable ? " hero-inline-editable" : ""}`}
-      contentEditable={editable}
+      className={`${className} hero-inline-editable`}
+      contentEditable
       suppressContentEditableWarning
       onBlur={(event) => {
-        if (!editable) return;
         const next = { ...settings, [field]: event.currentTarget.textContent?.trim() || settings[field] };
         saveHeroTextSettings(next);
         onChange(next);
@@ -53,7 +61,7 @@ export function IllustrationLayer() {
   }, []);
 
   return (
-    <section className={`illustration-layer${editable ? " hero-editing" : ""}`} aria-label="多美小记封面">
+    <RevealSection as="section" className={`illustration-layer duomei-motion-ambient-background${editable ? " hero-editing" : ""}`} aria-label="DUOMEI hero">
       <div className="illustration-layer-inner">
         <HeroIllustration />
         <BounceName />
@@ -61,6 +69,6 @@ export function IllustrationLayer() {
         <HeroEditableText field="line" settings={settings} className="duomei-hero-line" editable={editable} onChange={setSettings} />
         <HeroEditableText field="scrollHint" settings={settings} className="duomei-scroll-hint" editable={editable} onChange={setSettings} />
       </div>
-    </section>
+    </RevealSection>
   );
 }

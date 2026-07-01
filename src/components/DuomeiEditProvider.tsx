@@ -84,7 +84,7 @@ export function DuomeiEditProvider({ children }: { children: ReactNode }) {
       setPendingDelete(null);
       refresh();
     } catch {
-      setDeleteError("云端删除失败，请确认已登录后再试。");
+      setDeleteError("云端删除失败，请确认已经登录后再试。");
     }
   };
 

@@ -1,5 +1,6 @@
 import { useLayoutEffect } from "react";
 import { useLocation } from "react-router-dom";
+import { readJourneyListState, restoreJourneyWindowScroll } from "../motion";
 
 export function RouteScrollManager() {
   const location = useLocation();
@@ -11,6 +12,12 @@ export function RouteScrollManager() {
   }, []);
 
   useLayoutEffect(() => {
+    const journeyState = location.pathname === "/" ? readJourneyListState() : null;
+    if (journeyState) {
+      requestAnimationFrame(() => restoreJourneyWindowScroll(journeyState));
+      return;
+    }
+
     const scrollToTop = () => {
       window.scrollTo({ top: 0, left: 0, behavior: "instant" });
       document.documentElement.scrollTop = 0;
