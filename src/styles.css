@@ -7671,3 +7671,301 @@ body.front-editing .notes-bottom-spacer {
     gap: 8px !important;
   }
 }
+
+/* Stable Word-like image editing layer */
+.detail-image-panel {
+  position: fixed !important;
+  top: 104px !important;
+  left: 50% !important;
+  right: auto !important;
+  bottom: 22px !important;
+  width: min(1160px, calc(100vw - 44px)) !important;
+  max-height: calc(100dvh - 126px) !important;
+  transform: translateX(-50%) !important;
+  z-index: 1600 !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  overscroll-behavior: contain !important;
+  -webkit-overflow-scrolling: touch !important;
+  padding: clamp(18px, 2vw, 28px) !important;
+  border: 1px solid rgba(32, 32, 29, 0.1) !important;
+  border-radius: 28px !important;
+  background: rgba(255, 253, 247, 0.96) !important;
+  box-shadow: 0 34px 90px rgba(32, 32, 29, 0.18) !important;
+}
+
+.image-upload-panel {
+  min-height: 100% !important;
+  color: #22201d !important;
+}
+
+.image-upload-heading,
+.image-crop-top,
+.image-upload-row,
+.image-crop-controls {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  align-items: center !important;
+  gap: 12px !important;
+}
+
+.image-upload-heading {
+  justify-content: space-between !important;
+  margin-bottom: 18px !important;
+}
+
+.image-upload-heading strong,
+.image-crop-top strong {
+  display: block !important;
+  font-size: clamp(1.3rem, 3vw, 2rem) !important;
+  line-height: 1.08 !important;
+}
+
+.image-upload-heading span,
+.image-crop-top span,
+.image-upload-message {
+  color: #77736b !important;
+}
+
+.image-upload-row label {
+  flex: 1 1 280px !important;
+  display: grid !important;
+  gap: 8px !important;
+  color: #77736b !important;
+}
+
+.image-upload-row input,
+.image-crop-controls input,
+.image-crop-controls select,
+.editable-image-block figcaption input {
+  width: 100% !important;
+  min-height: 46px !important;
+  border: 1px solid rgba(32, 32, 29, 0.12) !important;
+  border-radius: 999px !important;
+  background: rgba(255, 253, 247, 0.88) !important;
+  padding: 0 16px !important;
+  color: #22201d !important;
+}
+
+.image-crop-card {
+  margin-top: 18px !important;
+  padding: clamp(14px, 2vw, 24px) !important;
+  border: 1px solid rgba(32, 32, 29, 0.1) !important;
+  border-radius: 24px !important;
+  background: rgba(248, 245, 239, 0.72) !important;
+}
+
+.image-crop-top {
+  justify-content: space-between !important;
+  margin-bottom: 16px !important;
+}
+
+.image-crop-stage {
+  position: relative !important;
+  width: 100% !important;
+  min-height: min(58vh, 560px) !important;
+  border: 12px solid #20201d !important;
+  border-radius: 22px !important;
+  background: #10100e !important;
+  overflow: hidden !important;
+  touch-action: none !important;
+  cursor: grab !important;
+}
+
+.image-crop-stage:active {
+  cursor: grabbing !important;
+}
+
+.image-crop-stage.aspect-1-1 { aspect-ratio: 1 / 1 !important; min-height: 0 !important; }
+.image-crop-stage.aspect-4-3 { aspect-ratio: 4 / 3 !important; min-height: 0 !important; }
+.image-crop-stage.aspect-3-2 { aspect-ratio: 3 / 2 !important; min-height: 0 !important; }
+.image-crop-stage.aspect-16-9 { aspect-ratio: 16 / 9 !important; min-height: 0 !important; }
+.image-crop-stage.aspect-9-16 { aspect-ratio: 9 / 16 !important; min-height: 0 !important; max-height: 70vh !important; }
+
+.image-crop-stage img {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain !important;
+  transition: none !important;
+  will-change: transform !important;
+  user-select: none !important;
+  -webkit-user-drag: none !important;
+}
+
+.image-crop-controls {
+  margin-top: 16px !important;
+}
+
+.image-crop-controls label {
+  min-width: min(280px, 100%) !important;
+  display: grid !important;
+  gap: 8px !important;
+  color: #77736b !important;
+}
+
+.image-crop-controls > input {
+  flex: 1 1 320px !important;
+}
+
+.image-upload-panel button,
+.editable-image-floating-tools button,
+.editable-image-floating-tools select,
+.image-crop-controls button {
+  min-height: 44px !important;
+  border: 1px solid rgba(32, 32, 29, 0.1) !important;
+  border-radius: 999px !important;
+  background: rgba(255, 253, 247, 0.92) !important;
+  color: #22201d !important;
+  padding: 0 16px !important;
+  box-shadow: 0 10px 24px rgba(32, 32, 29, 0.06) !important;
+}
+
+.image-upload-panel button.is-active,
+.editable-image-floating-tools .is-active {
+  background: rgba(170, 184, 155, 0.22) !important;
+}
+
+.editable-image-block {
+  position: relative !important;
+  width: var(--zoom, 100%) !important;
+  max-width: 100% !important;
+  margin: 42px auto !important;
+}
+
+.editable-image-block.align-left { margin-left: 0 !important; margin-right: auto !important; }
+.editable-image-block.align-right { margin-left: auto !important; margin-right: 0 !important; }
+.editable-image-block.align-full { width: 100% !important; }
+
+.editable-image-block.is-selected .editable-image-frame {
+  outline: 2px solid rgba(142, 163, 132, 0.75) !important;
+  outline-offset: 8px !important;
+}
+
+.editable-image-floating-tools {
+  position: relative !important;
+  z-index: 20 !important;
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 8px !important;
+  justify-content: flex-end !important;
+  margin: 0 0 16px !important;
+  padding: 10px !important;
+  border: 1px solid rgba(32, 32, 29, 0.08) !important;
+  border-radius: 22px !important;
+  background: rgba(255, 253, 247, 0.88) !important;
+  box-shadow: 0 18px 42px rgba(32, 32, 29, 0.1) !important;
+}
+
+.editable-image-frame {
+  position: relative !important;
+  overflow: visible !important;
+}
+
+.editable-image-frame img,
+.article-image img {
+  display: block !important;
+  width: 100% !important;
+  border-radius: 24px !important;
+  object-fit: cover !important;
+  box-shadow: 0 24px 58px rgba(32, 32, 29, 0.12) !important;
+}
+
+.editable-image-frame.aspect-original img,
+.article-image.aspect-original img {
+  height: auto !important;
+  object-fit: contain !important;
+}
+
+.editable-image-frame.aspect-1-1,
+.article-image.aspect-1-1 { aspect-ratio: 1 / 1 !important; overflow: hidden !important; border-radius: 24px !important; }
+.editable-image-frame.aspect-4-3,
+.article-image.aspect-4-3 { aspect-ratio: 4 / 3 !important; overflow: hidden !important; border-radius: 24px !important; }
+.editable-image-frame.aspect-3-2,
+.article-image.aspect-3-2 { aspect-ratio: 3 / 2 !important; overflow: hidden !important; border-radius: 24px !important; }
+.editable-image-frame.aspect-16-9,
+.article-image.aspect-16-9 { aspect-ratio: 16 / 9 !important; overflow: hidden !important; border-radius: 24px !important; }
+.editable-image-frame.aspect-9-16,
+.article-image.aspect-9-16 { aspect-ratio: 9 / 16 !important; overflow: hidden !important; border-radius: 24px !important; }
+
+.editable-image-frame[class*="aspect-"]:not(.aspect-original) img,
+.article-image[class*="aspect-"]:not(.aspect-original) img {
+  height: 100% !important;
+}
+
+.image-resize-handle {
+  position: absolute !important;
+  width: 34px !important;
+  height: 34px !important;
+  border: 1px solid rgba(32, 32, 29, 0.14) !important;
+  border-radius: 999px !important;
+  background: rgba(255, 253, 247, 0.98) !important;
+  box-shadow: 0 12px 28px rgba(32, 32, 29, 0.14) !important;
+  touch-action: none !important;
+  z-index: 25 !important;
+}
+
+.handle-nw { left: -17px !important; top: -17px !important; cursor: nwse-resize !important; }
+.handle-ne { right: -17px !important; top: -17px !important; cursor: nesw-resize !important; }
+.handle-sw { left: -17px !important; bottom: -17px !important; cursor: nesw-resize !important; }
+.handle-se { right: -17px !important; bottom: -17px !important; cursor: nwse-resize !important; }
+
+.article-image {
+  width: var(--zoom, 100%) !important;
+  max-width: 100% !important;
+  margin: 42px auto !important;
+}
+.article-image.align-left { margin-left: 0 !important; margin-right: auto !important; }
+.article-image.align-right { margin-left: auto !important; margin-right: 0 !important; }
+.article-image.align-full { width: 100% !important; }
+
+@media (max-width: 760px) {
+  .detail-image-panel {
+    top: 88px !important;
+    left: 12px !important;
+    right: 12px !important;
+    bottom: 12px !important;
+    width: auto !important;
+    transform: none !important;
+    padding: 14px !important;
+    border-radius: 24px !important;
+  }
+
+  .image-crop-stage {
+    min-height: 320px !important;
+    border-width: 8px !important;
+  }
+
+  .editable-image-floating-tools {
+    justify-content: flex-start !important;
+    max-height: 190px !important;
+    overflow-y: auto !important;
+  }
+
+  .editable-image-block {
+    width: min(var(--zoom, 100%), 100%) !important;
+  }
+}
+
+/* Final modal scroll lock: image editing must scroll inside the panel only. */
+html.duomei-modal-open,
+body.duomei-modal-open {
+  overflow: hidden !important;
+  overscroll-behavior: none !important;
+}
+
+.duomei-modal-open .detail-image-panel {
+  position: fixed !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  overscroll-behavior: contain !important;
+  -webkit-overflow-scrolling: touch !important;
+  touch-action: pan-y pinch-zoom !important;
+  z-index: 1800 !important;
+}
+
+.detail-image-panel,
+.detail-image-panel * {
+  overscroll-behavior: contain;
+}

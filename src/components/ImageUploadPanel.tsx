@@ -1,21 +1,22 @@
-import { PointerEvent, WheelEvent, useRef, useState } from "react";
+﻿import { PointerEvent, WheelEvent, useRef, useState } from "react";
 import { createBlockId } from "../lib/noteStore";
 import type { NoteContentBlock } from "../lib/noteTypes";
 
 type AspectMode = "original" | "1:1" | "4:3" | "3:2" | "16:9" | "9:16";
+type AlignMode = "left" | "center" | "right" | "full";
 
 type PendingImage = {
   id: string;
   fileName: string;
   sourceDataUrl: string;
   caption: string;
-  align: "center" | "full";
-  zoom: 60 | 80 | 100;
+  align: AlignMode;
+  zoom: number;
   cropScale: number;
   rotate: number;
   offsetX: number;
   offsetY: number;
-  aspect: AspectMode;
+  aspectRatio: AspectMode;
   beforeBytes: number;
   originalWidth: number;
   originalHeight: number;
@@ -70,8 +71,8 @@ function loadImage(src: string) {
 }
 
 function aspectValue(item: PendingImage) {
-  if (item.aspect === "original") return item.originalWidth / item.originalHeight;
-  const [width, height] = item.aspect.split(":").map(Number);
+  if (item.aspectRatio === "original") return item.originalWidth / item.originalHeight;
+  const [width, height] = item.aspectRatio.split(":").map(Number);
   return width / height;
 }
 
@@ -102,7 +103,6 @@ async function renderEditedImage(item: PendingImage) {
   ctx.save();
   ctx.translate(width / 2 + item.offsetX * (width / 520), height / 2 + item.offsetY * (height / 360));
   ctx.rotate((item.rotate * Math.PI) / 180);
-
   const scale = Math.max(width / image.width, height / image.height) * item.cropScale;
   ctx.imageSmoothingEnabled = true;
   ctx.imageSmoothingQuality = "high";
@@ -121,7 +121,6 @@ export function ImageUploadPanel({ onInsert, onSetCover, compact = false, coverO
   const [message, setMessage] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
   const dragRef = useRef<DragState | null>(null);
-
   const active = pending[activeIndex];
 
   const updatePending = (id: string, patch: Partial<PendingImage>) => {
@@ -149,7 +148,7 @@ export function ImageUploadPanel({ onInsert, onSetCover, compact = false, coverO
           rotate: 0,
           offsetX: 0,
           offsetY: 0,
-          aspect: "original",
+          aspectRatio: "original",
           beforeBytes: file.size,
           originalWidth: image.naturalWidth,
           originalHeight: image.naturalHeight,
@@ -160,7 +159,7 @@ export function ImageUploadPanel({ onInsert, onSetCover, compact = false, coverO
         if (!items.length) setActiveIndex(0);
         return merged;
       });
-      setMessage(coverOnly ? "照片已读取。先调整画面，再保存为封面。" : "照片已读取。先调整画面、填写说明，再插入正文。");
+      setMessage(coverOnly ? "照片已读取。先调整画面，再保存为封面。" : "照片已读取。先裁剪、缩放、排序和填写说明，再插入正文。");
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "照片读取失败，请重新选择。");
     } finally {
@@ -170,14 +169,7 @@ export function ImageUploadPanel({ onInsert, onSetCover, compact = false, coverO
 
   const startDrag = (event: PointerEvent<HTMLDivElement>) => {
     if (!active) return;
-    dragRef.current = {
-      id: active.id,
-      pointerId: event.pointerId,
-      startX: event.clientX,
-      startY: event.clientY,
-      originX: active.offsetX,
-      originY: active.offsetY,
-    };
+    dragRef.current = { id: active.id, pointerId: event.pointerId, startX: event.clientX, startY: event.clientY, originX: active.offsetX, originY: active.offsetY };
     event.currentTarget.setPointerCapture(event.pointerId);
   };
 
@@ -185,10 +177,7 @@ export function ImageUploadPanel({ onInsert, onSetCover, compact = false, coverO
     const drag = dragRef.current;
     if (!drag || drag.pointerId !== event.pointerId) return;
     event.preventDefault();
-    updatePending(drag.id, {
-      offsetX: drag.originX + event.clientX - drag.startX,
-      offsetY: drag.originY + event.clientY - drag.startY,
-    });
+    updatePending(drag.id, { offsetX: drag.originX + event.clientX - drag.startX, offsetY: drag.originY + event.clientY - drag.startY });
   };
 
   const stopDrag = () => {
@@ -198,6 +187,7 @@ export function ImageUploadPanel({ onInsert, onSetCover, compact = false, coverO
   const handleCropWheel = (event: WheelEvent<HTMLDivElement>) => {
     if (!active) return;
     event.preventDefault();
+    event.stopPropagation();
     const nextScale = active.cropScale + (event.deltaY > 0 ? -0.04 : 0.04);
     updatePending(active.id, { cropScale: Math.max(0.45, Math.min(3, nextScale)) });
   };
@@ -214,6 +204,14 @@ export function ImageUploadPanel({ onInsert, onSetCover, compact = false, coverO
     setActiveIndex(to);
   };
 
+  const removePending = (id: string) => {
+    setPending((items) => {
+      const next = items.filter((item) => item.id !== id);
+      setActiveIndex((index) => Math.max(0, Math.min(index, next.length - 1)));
+      return next;
+    });
+  };
+
   const insertAll = async (setFirstAsCover = false) => {
     if (!pending.length) return;
     setIsProcessing(true);
@@ -224,7 +222,6 @@ export function ImageUploadPanel({ onInsert, onSetCover, compact = false, coverO
       let coverSrc = "";
       let before = 0;
       let after = 0;
-
       for (const item of sourceItems) {
         const result = await renderEditedImage(item);
         before += item.beforeBytes;
@@ -234,18 +231,21 @@ export function ImageUploadPanel({ onInsert, onSetCover, compact = false, coverO
           id: createBlockId("image"),
           type: "image",
           src: result.dataUrl,
+          alt: item.caption,
           caption: item.caption,
           align: item.align,
           zoom: item.zoom,
+          aspectRatio: item.aspectRatio,
+          objectFit: item.aspectRatio === "original" ? "contain" : "cover",
+          crop: { x: item.offsetX, y: item.offsetY, scale: item.cropScale, rotate: item.rotate },
         });
       }
-
       if (coverOnly) {
         if (coverSrc) onSetCover?.(coverSrc);
-        setMessage("封面已设置。保存或发布时再上传云端。");
+        setMessage("封面已设置。保存或发布时会上传云端。");
       } else {
         if (setFirstAsCover && coverSrc) onSetCover?.(coverSrc);
-        onInsert(blocks, `已插入 ${sourceItems.length} 张图片：${formatKb(before)} -> ${formatKb(after)}。保存或发布时再上传云端。`);
+        onInsert(blocks, `已插入 ${sourceItems.length} 张图片：${formatKb(before)} -> ${formatKb(after)}。保存或发布时会上传云端。`);
       }
       setPending([]);
       setActiveIndex(0);
@@ -267,39 +267,24 @@ export function ImageUploadPanel({ onInsert, onSetCover, compact = false, coverO
       onClose?.();
       return;
     }
-    onInsert(
-      [{
-        id: createBlockId("image"),
-        type: "image",
-        src,
-        caption: "",
-        align: "center",
-        zoom: 100,
-      }],
-      "图片地址已插入正文。",
-    );
+    onInsert([{ id: createBlockId("image"), type: "image", src, caption: "", align: "center", zoom: 100, aspectRatio: "original", objectFit: "contain" }], "图片地址已插入正文。");
     setUrl("");
+    onClose?.();
   };
 
   return (
-    <section className={`image-upload-panel${compact ? " compact" : ""}`}>
+    <section className={`image-upload-panel${compact ? " compact" : ""}`} onWheelCapture={(event) => event.stopPropagation()} onTouchMoveCapture={(event) => event.stopPropagation()}>
       <div className="image-upload-heading">
         <div>
           <strong>{coverOnly ? "添加封面" : "添加正文图片"}</strong>
-          <span>{coverOnly ? "选择照片后先裁剪、缩放和旋转，再保存为封面。" : "选择照片后先裁剪、缩放、旋转和填写说明，再插入正文。"}</span>
+          <span>{coverOnly ? "选择照片后先裁剪、缩放和旋转，再保存为封面。" : "选择照片后先裁剪、缩放、排序和填写说明，再插入正文。"}</span>
         </div>
         {onClose ? <button type="button" onClick={onClose}>关闭</button> : null}
       </div>
 
       <div className="image-upload-row">
-        <label>
-          <span>选择图片</span>
-          <input type="file" accept="image/*" multiple={!coverOnly} onChange={(event) => handleFiles(event.target.files)} />
-        </label>
-        <label>
-          <span>图片 URL</span>
-          <input value={url} onChange={(event) => setUrl(event.target.value)} placeholder="https://..." />
-        </label>
+        <label><span>选择图片</span><input type="file" accept="image/*" multiple={!coverOnly} onChange={(event) => handleFiles(event.target.files)} /></label>
+        <label><span>图片 URL</span><input value={url} onChange={(event) => setUrl(event.target.value)} placeholder="https://..." /></label>
         <button type="button" onClick={insertUrl}>插入 URL</button>
       </div>
 
@@ -308,86 +293,31 @@ export function ImageUploadPanel({ onInsert, onSetCover, compact = false, coverO
       {active ? (
         <div className="image-crop-card">
           <div className="image-crop-top">
-            <div>
-              <strong>裁剪照片</strong>
-              <span>{active.fileName} / 原始 {formatKb(active.beforeBytes)} / {active.originalWidth}x{active.originalHeight}</span>
-            </div>
+            <div><strong>裁剪照片</strong><span>{active.fileName} / 原始 {formatKb(active.beforeBytes)} / {active.originalWidth}x{active.originalHeight}</span></div>
             <span>{activeIndex + 1} / {pending.length}</span>
           </div>
-
-          <div
-            className="image-crop-stage"
-            onPointerDown={startDrag}
-            onPointerMove={moveDrag}
-            onPointerUp={stopDrag}
-            onPointerCancel={stopDrag}
-            onWheel={handleCropWheel}
-          >
-            <img
-              src={active.sourceDataUrl}
-              alt="裁剪预览"
-              style={{
-                transform: `translate3d(${active.offsetX}px, ${active.offsetY}px, 0) rotate(${active.rotate}deg) scale(${active.cropScale})`,
-              }}
-            />
+          <div className={`image-crop-stage aspect-${active.aspectRatio.replace(":", "-")}`} onPointerDown={startDrag} onPointerMove={moveDrag} onPointerUp={stopDrag} onPointerCancel={stopDrag} onWheel={handleCropWheel}>
+            <img src={active.sourceDataUrl} alt="裁剪预览" style={{ transform: `translate3d(${active.offsetX}px, ${active.offsetY}px, 0) rotate(${active.rotate}deg) scale(${active.cropScale})` }} />
           </div>
-
           <div className="image-crop-controls">
-            <label>
-              <span>裁剪比例</span>
-              <select value={active.aspect} onChange={(event) => updatePending(active.id, { aspect: event.target.value as AspectMode })}>
-                {Object.entries(aspectLabels).map(([value, label]) => (
-                  <option key={value} value={value}>{label}</option>
-                ))}
-              </select>
-            </label>
-            <label>
-              <span>缩放</span>
-              <input
-                type="range"
-                min="45"
-                max="300"
-                value={Math.round(active.cropScale * 100)}
-                onChange={(event) => updatePending(active.id, { cropScale: Number(event.target.value) / 100 })}
-              />
-            </label>
+            <label><span>裁剪比例</span><select value={active.aspectRatio} onChange={(event) => updatePending(active.id, { aspectRatio: event.target.value as AspectMode })}>{Object.entries(aspectLabels).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label>
+            <label><span>缩放</span><input type="range" min="45" max="300" value={Math.round(active.cropScale * 100)} onChange={(event) => updatePending(active.id, { cropScale: Number(event.target.value) / 100 })} /></label>
             <button type="button" onClick={() => updatePending(active.id, { rotate: active.rotate - 90 })}>左转</button>
             <button type="button" onClick={() => updatePending(active.id, { rotate: active.rotate + 90 })}>右转</button>
             <button type="button" onClick={() => updatePending(active.id, { cropScale: 1, rotate: 0, offsetX: 0, offsetY: 0 })}>重置</button>
             {!coverOnly ? (
               <>
-                <input
-                  value={active.caption}
-                  onChange={(event) => updatePending(active.id, { caption: event.target.value })}
-                  placeholder="图片说明 caption"
-                />
-                <button type="button" className={active.align === "center" ? "is-active" : ""} onClick={() => updatePending(active.id, { align: "center" })}>居中</button>
-                <button type="button" className={active.align === "full" ? "is-active" : ""} onClick={() => updatePending(active.id, { align: "full" })}>通栏</button>
-                {[100, 80, 60].map((zoom) => (
-                  <button
-                    key={zoom}
-                    type="button"
-                    className={active.zoom === zoom ? "is-active" : ""}
-                    onClick={() => updatePending(active.id, { zoom: zoom as 60 | 80 | 100 })}
-                  >
-                    {zoom}%
-                  </button>
-                ))}
+                <input value={active.caption} onChange={(event) => updatePending(active.id, { caption: event.target.value })} placeholder="图片说明 caption" />
+                {(["left", "center", "right", "full"] as const).map((align) => <button key={align} type="button" className={active.align === align ? "is-active" : ""} onClick={() => updatePending(active.id, { align })}>{align === "left" ? "居左" : align === "center" ? "居中" : align === "right" ? "居右" : "通栏"}</button>)}
+                {[25, 50, 75, 100].map((zoom) => <button key={zoom} type="button" className={active.zoom === zoom ? "is-active" : ""} onClick={() => updatePending(active.id, { zoom })}>{zoom}%</button>)}
               </>
             ) : null}
-            <button type="button" onClick={() => movePending(activeIndex, -1)}>上一张</button>
-            <button type="button" onClick={() => movePending(activeIndex, 1)}>下一张</button>
+            <button type="button" onClick={() => setActiveIndex(Math.max(0, activeIndex - 1))}>上一张</button>
+            <button type="button" onClick={() => setActiveIndex(Math.min(pending.length - 1, activeIndex + 1))}>下一张</button>
             <button type="button" onClick={() => movePending(activeIndex, -1)}>上移</button>
             <button type="button" onClick={() => movePending(activeIndex, 1)}>下移</button>
-            <button type="button" onClick={() => setPending((items) => items.filter((image) => image.id !== active.id))}>移除</button>
-            {coverOnly ? (
-              <button type="button" onClick={() => insertAll(false)} disabled={isProcessing}>保存为封面</button>
-            ) : (
-              <>
-                <button type="button" onClick={() => insertAll(false)} disabled={isProcessing}>全部插入正文</button>
-                <button type="button" onClick={() => insertAll(true)} disabled={isProcessing}>设为封面并插入</button>
-              </>
-            )}
+            <button type="button" onClick={() => removePending(active.id)}>移除</button>
+            {coverOnly ? <button type="button" onClick={() => insertAll(false)} disabled={isProcessing}>保存为封面</button> : <><button type="button" onClick={() => insertAll(false)} disabled={isProcessing}>全部插入正文</button><button type="button" onClick={() => insertAll(true)} disabled={isProcessing}>设为封面并插入</button></>}
           </div>
         </div>
       ) : null}

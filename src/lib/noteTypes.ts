@@ -11,6 +11,15 @@ export type NoteContentBlock =
       width?: number;
       align?: "left" | "center" | "right" | "full";
       zoom?: number;
+      maxWidth?: number;
+      aspectRatio?: "original" | "1:1" | "4:3" | "3:2" | "16:9" | "9:16";
+      objectFit?: "contain" | "cover";
+      crop?: {
+        x: number;
+        y: number;
+        scale: number;
+        rotate?: number;
+      };
     }
   | { id: string; type: "quote"; text: string }
   | { id: string; type: "divider" };

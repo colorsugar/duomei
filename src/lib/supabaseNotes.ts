@@ -140,3 +140,25 @@ export async function uploadNoteImage(file: File, folder = "notes") {
   const { data } = supabase.storage.from("note-images").getPublicUrl(path);
   return data.publicUrl;
 }
+
+export async function uploadNoteDataUrl(dataUrl: string, folder = "article") {
+  const match = dataUrl.match(/^data:(image\/[a-zA-Z0-9.+-]+);base64,(.+)$/);
+  if (!match) return dataUrl;
+  const mime = match[1];
+  const base64 = match[2];
+  const binary = atob(base64);
+  const bytes = new Uint8Array(binary.length);
+  for (let index = 0; index < binary.length; index += 1) {
+    bytes[index] = binary.charCodeAt(index);
+  }
+  const ext = mime.includes("webp") ? "webp" : mime.includes("png") ? "png" : "jpg";
+  const path = `${folder}/${Date.now()}-${Math.random().toString(16).slice(2)}.${ext}`;
+  const { error } = await supabase.storage.from("note-images").upload(path, new Blob([bytes], { type: mime }), {
+    cacheControl: "31536000",
+    contentType: mime,
+    upsert: false,
+  });
+  if (error) throw error;
+  const { data } = supabase.storage.from("note-images").getPublicUrl(path);
+  return data.publicUrl;
+}
