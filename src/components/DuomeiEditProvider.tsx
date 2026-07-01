@@ -11,6 +11,7 @@ import {
   logoutAdmin,
   upsertNote,
 } from "../lib/noteStore";
+import { deleteCloudNote, saveCloudNote } from "../lib/supabaseNotes";
 import { slugify } from "../lib/slugify";
 import { NoteEditDrawer } from "./NoteEditDrawer";
 
@@ -65,13 +66,18 @@ export function DuomeiEditProvider({ children }: { children: ReactNode }) {
         logoutAdmin();
         setEditMode(false);
       },
-      openNoteEditor: (note) => {
+      openNoteEditor: async (note) => {
         if (note) {
           setEditingNote(note);
           return;
         }
         const draft = createDraftNote();
         upsertNote(draft);
+        try {
+          await saveCloudNote(draft);
+        } catch {
+          // Keep a local draft when the cloud session is unavailable.
+        }
         refresh();
         navigate(`/note/${draft.slug}?edit=1`);
       },
@@ -80,7 +86,7 @@ export function DuomeiEditProvider({ children }: { children: ReactNode }) {
     [editMode, editingNote, isLoggedIn, refreshKey, navigate],
   );
 
-  const save = (note: DuomeiNote) => {
+  const save = async (note: DuomeiNote) => {
     const isNew = !getAllNotes().some((item) => item.id === note.id);
     const next = {
       ...note,
@@ -89,14 +95,24 @@ export function DuomeiEditProvider({ children }: { children: ReactNode }) {
       updatedAt: new Date().toISOString(),
     };
     upsertNote(next);
+    try {
+      await saveCloudNote(next);
+    } catch {
+      // Local fallback remains available for offline drafts.
+    }
     setEditingNote(null);
     refresh();
     if (isNew) navigate(`/note/${next.slug}`);
   };
 
-  const confirmDelete = () => {
+  const confirmDelete = async () => {
     if (!pendingDelete) return;
     deleteNote(pendingDelete);
+    try {
+      await deleteCloudNote(pendingDelete);
+    } catch {
+      // Keep local deletion even if cloud session expired.
+    }
     setPendingDelete(null);
     refresh();
   };

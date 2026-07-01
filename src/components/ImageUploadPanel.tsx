@@ -2,6 +2,7 @@ import { useRef, useState } from "react";
 import { compressImage } from "../lib/imageTools";
 import type { CompressedImage } from "../lib/imageTools";
 import { createBlockId } from "../lib/noteStore";
+import { uploadNoteImage } from "../lib/supabaseNotes";
 import type { NoteContentBlock } from "../lib/noteTypes";
 
 type PendingImage = CompressedImage & {
@@ -33,14 +34,24 @@ export function ImageUploadPanel({ onInsert, onSetCover, compact = false, onClos
   const warnStorageOnce = () => {
     if (hasWarnedStorage) return;
     setHasWarnedStorage(true);
-    setMessage("当前版本使用浏览器本地存储，图片过多可能导致保存失败。建议发布前先在后台备份 JSON。");
+    setMessage("图片会优先上传到 Supabase Storage；云端不可用时才会临时保存到本机草稿。");
   };
 
   const upload = async (files: FileList | null) => {
     if (!files?.length) return;
     setIsProcessing(true);
     try {
-      const results = await Promise.all(Array.from(files).map((file) => compressImage(file, "article")));
+      const results = await Promise.all(
+        Array.from(files).map(async (file) => {
+          const compressed = await compressImage(file, "article");
+          try {
+            const publicUrl = await uploadNoteImage(file, "article");
+            return { ...compressed, dataUrl: publicUrl, afterBytes: file.size };
+          } catch {
+            return compressed;
+          }
+        }),
+      );
       const images = results.map<PendingImage>((result) => ({
         ...result,
         id: createBlockId("pending-image"),

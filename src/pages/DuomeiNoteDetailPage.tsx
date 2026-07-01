@@ -6,6 +6,14 @@ import { NoteCover } from "../components/NoteCover";
 import { useDuomeiEdit } from "../components/DuomeiEditProvider";
 import { bodyToBlocks, createBlockId, deleteNote, getAllNotes, getNoteBySlug, getPublishedNotes, upsertNote } from "../lib/noteStore";
 import { compressImage } from "../lib/imageTools";
+import {
+  deleteCloudNote,
+  fetchAllCloudNotes,
+  fetchCloudNoteBySlug,
+  fetchPublishedNotes,
+  saveCloudNote,
+  uploadNoteImage,
+} from "../lib/supabaseNotes";
 import type { DuomeiNote, NoteContentBlock } from "../lib/noteTypes";
 
 function blocksToBody(blocks: NoteContentBlock[]) {
@@ -28,10 +36,36 @@ export function DuomeiNoteDetailPage() {
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [imagePanelOpen, setImagePanelOpen] = useState(false);
   const [message, setMessage] = useState("");
-  const note = getNoteBySlug(slug, isLoggedIn);
+  const [cloudNote, setCloudNote] = useState<DuomeiNote | undefined>();
+  const [navigationNotes, setNavigationNotes] = useState<DuomeiNote[]>(() => (isLoggedIn ? getAllNotes() : getPublishedNotes()));
+  const note = cloudNote ?? getNoteBySlug(slug, isLoggedIn);
   const shouldEdit = isLoggedIn && (editMode || searchParams.get("edit") === "1");
   const [draft, setDraft] = useState<DuomeiNote | undefined>(note);
   void refreshKey;
+
+  useEffect(() => {
+    let active = true;
+    const load = async () => {
+      if (!slug) return;
+      try {
+        const [nextNote, nextNavigation] = await Promise.all([
+          fetchCloudNoteBySlug(slug, isLoggedIn),
+          isLoggedIn ? fetchAllCloudNotes() : fetchPublishedNotes(),
+        ]);
+        if (!active) return;
+        setCloudNote(nextNote);
+        setNavigationNotes(nextNavigation);
+      } catch {
+        if (!active) return;
+        setCloudNote(undefined);
+        setNavigationNotes(isLoggedIn ? getAllNotes() : getPublishedNotes());
+      }
+    };
+    load();
+    return () => {
+      active = false;
+    };
+  }, [slug, isLoggedIn, refreshKey]);
 
   useEffect(() => {
     if (note) setDraft(note);
@@ -85,7 +119,7 @@ export function DuomeiNoteDetailPage() {
     });
   };
 
-  const persistNote = (status?: DuomeiNote["status"]) => {
+  const persistNote = async (status?: DuomeiNote["status"]) => {
     if (!draft) return;
     const nextBlocks = draft.contentBlocks?.length ? draft.contentBlocks : bodyToBlocks(draft.body, draft.bodyImages);
     const nextNote: DuomeiNote = {
@@ -96,11 +130,18 @@ export function DuomeiNoteDetailPage() {
       updatedAt: new Date().toISOString(),
     };
     upsertNote(nextNote);
-    setDraft(nextNote);
-    setMessage(status === "published" ? "已发布。线上同步仍需要后台生成发布数据并提交到 GitHub。" : "已保存修改。");
+    try {
+      const saved = await saveCloudNote(nextNote);
+      setCloudNote(saved);
+      setDraft(saved);
+      setMessage(status === "published" ? "已发布到云端，线上网站会立即显示。" : "已保存到云端。");
+    } catch {
+      setDraft(nextNote);
+      setMessage("云端保存失败，已先保存为本机草稿。");
+    }
   };
 
-  const setDraftStatus = (status: DuomeiNote["status"]) => {
+  const setDraftStatus = async (status: DuomeiNote["status"]) => {
     const target = draft ?? note;
     const nextNote: DuomeiNote = {
       ...target,
@@ -108,12 +149,24 @@ export function DuomeiNoteDetailPage() {
       updatedAt: new Date().toISOString(),
     };
     upsertNote(nextNote);
-    setDraft(nextNote);
-    setMessage(status === "published" ? "已发布到当前浏览器。" : "已转为草稿。");
+    try {
+      const saved = await saveCloudNote(nextNote);
+      setCloudNote(saved);
+      setDraft(saved);
+      setMessage(status === "published" ? "已发布到云端。" : "已设为草稿。");
+    } catch {
+      setDraft(nextNote);
+      setMessage("云端更新失败，已先保存为本机状态。");
+    }
   };
 
-  const deleteCurrent = () => {
+  const deleteCurrent = async () => {
     deleteNote(note.id);
+    try {
+      await deleteCloudNote(note.id);
+    } catch {
+      // Local fallback deletion still navigates away.
+    }
     navigate("/");
   };
 
@@ -121,9 +174,15 @@ export function DuomeiNoteDetailPage() {
     const file = event.target.files?.[0];
     event.target.value = "";
     if (!file) return;
-    const result = await compressImage(file, "cover");
-    updateDraft({ coverImageUrl: result.dataUrl });
-    setMessage(`封面已更新：${Math.round(result.beforeBytes / 1024)}KB -> ${Math.round(result.afterBytes / 1024)}KB`);
+    try {
+      const url = await uploadNoteImage(file, "covers");
+      updateDraft({ coverImageUrl: url });
+      setMessage("封面已上传到云端。");
+    } catch {
+      const result = await compressImage(file, "cover");
+      updateDraft({ coverImageUrl: result.dataUrl });
+      setMessage(`封面已临时保存：${Math.round(result.beforeBytes / 1024)}KB -> ${Math.round(result.afterBytes / 1024)}KB`);
+    }
   };
 
   const updateTag = (index: number, value: string) => {
@@ -139,7 +198,6 @@ export function DuomeiNoteDetailPage() {
   };
 
   const isPublished = activeNote.status === "published";
-  const navigationNotes = isLoggedIn ? getAllNotes() : getPublishedNotes();
   const currentIndex = navigationNotes.findIndex((item) => item.id === note.id);
   const previousNote = currentIndex > 0 ? navigationNotes[currentIndex - 1] : null;
   const nextNote = currentIndex >= 0 && currentIndex < navigationNotes.length - 1 ? navigationNotes[currentIndex + 1] : null;

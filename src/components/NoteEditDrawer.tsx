@@ -1,6 +1,7 @@
 import { FormEvent, WheelEvent, useEffect, useState } from "react";
 import type { DuomeiNote } from "../lib/noteTypes";
 import { compressImageFile } from "../lib/imageTools";
+import { uploadNoteImage } from "../lib/supabaseNotes";
 
 export function NoteEditDrawer({
   note,
@@ -50,15 +51,28 @@ export function NoteEditDrawer({
     const file = files?.[0];
     if (!file || !draft) return;
     setUploading(true);
-    const dataUrl = await compressImageFile(file, 1600, 0.84);
-    setDraft({ ...draft, coverImageUrl: dataUrl });
+    try {
+      const url = await uploadNoteImage(file, "covers");
+      setDraft({ ...draft, coverImageUrl: url });
+    } catch {
+      const dataUrl = await compressImageFile(file, 1600, 0.84);
+      setDraft({ ...draft, coverImageUrl: dataUrl });
+    }
     setUploading(false);
   };
 
   const uploadBodyImages = async (files: FileList | null) => {
     if (!files || !draft) return;
     setUploading(true);
-    const images = await Promise.all(Array.from(files).map((file) => compressImageFile(file, 1800, 0.88)));
+    const images = await Promise.all(
+      Array.from(files).map(async (file) => {
+        try {
+          return await uploadNoteImage(file, "article");
+        } catch {
+          return compressImageFile(file, 1800, 0.88);
+        }
+      }),
+    );
     setDraft({ ...draft, bodyImages: [...(draft.bodyImages ?? []), ...images] });
     setUploading(false);
   };

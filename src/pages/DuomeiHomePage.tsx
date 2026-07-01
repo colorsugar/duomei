@@ -1,15 +1,35 @@
+import { useEffect, useState } from "react";
 import { IllustrationLayer } from "../components/IllustrationLayer";
 import { FooterDreamSection } from "../components/FooterDreamSection";
 import { NotesIntro } from "../components/NotesIntro";
 import { NotesCarousel } from "../components/NotesCarousel";
 import { PaperLayer } from "../components/PaperLayer";
-import { getPublishedNotes } from "../lib/noteStore";
+import { NOTE_UPDATED_EVENT, getPublishedNotes } from "../lib/noteStore";
+import { fetchPublishedNotes } from "../lib/supabaseNotes";
 import { useDuomeiEdit } from "../components/DuomeiEditProvider";
+import type { DuomeiNote } from "../lib/noteTypes";
 
 export function DuomeiHomePage() {
   const { editMode, openNoteEditor, refreshKey } = useDuomeiEdit();
-  const notes = getPublishedNotes();
-  void refreshKey;
+  const [notes, setNotes] = useState<DuomeiNote[]>(() => getPublishedNotes());
+
+  useEffect(() => {
+    let active = true;
+    const load = async () => {
+      try {
+        const cloudNotes = await fetchPublishedNotes();
+        if (active) setNotes(cloudNotes);
+      } catch {
+        if (active) setNotes(getPublishedNotes());
+      }
+    };
+    load();
+    window.addEventListener(NOTE_UPDATED_EVENT, load);
+    return () => {
+      active = false;
+      window.removeEventListener(NOTE_UPDATED_EVENT, load);
+    };
+  }, [refreshKey]);
 
   return (
     <main className="duomei-stage">

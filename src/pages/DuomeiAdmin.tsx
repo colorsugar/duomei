@@ -1,10 +1,10 @@
-import { CSSProperties, FormEvent, useEffect, useMemo, useState } from "react";
+import { CSSProperties, FormEvent, useEffect, useState } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
+import type { DuomeiNote } from "../lib/noteTypes";
 import {
   createDraftNote,
   deleteNote,
   exportNotesJson,
-  generateDefaultNotesSource,
   getAllNotes,
   importNotesJson,
   isAdminLoggedIn,
@@ -12,6 +12,14 @@ import {
   logoutAdmin,
   upsertNote,
 } from "../lib/noteStore";
+import {
+  deleteCloudNote,
+  fetchAllCloudNotes,
+  getCloudSession,
+  loginCloudAdmin,
+  logoutCloudAdmin,
+  saveCloudNote,
+} from "../lib/supabaseNotes";
 
 function formatBytes(bytes: number) {
   if (bytes < 1024) return `${bytes} B`;
@@ -48,7 +56,10 @@ export function DuomeiAdmin({ mode }: { mode: "login" | "notes" }) {
   const [importText, setImportText] = useState("");
   const [notesOpen, setNotesOpen] = useState(false);
   const [version, setVersion] = useState(0);
-  const notes = useMemo(() => getAllNotes(), [version, notice, pendingDelete]);
+  const [cloudReady, setCloudReady] = useState(false);
+  const [notes, setNotes] = useState<DuomeiNote[]>(() => getAllNotes());
+
+  const refresh = () => setVersion((value) => value + 1);
 
   useEffect(() => {
     if (!notice) return;
@@ -56,14 +67,43 @@ export function DuomeiAdmin({ mode }: { mode: "login" | "notes" }) {
     return () => window.clearTimeout(timer);
   }, [notice]);
 
+  useEffect(() => {
+    let active = true;
+    const load = async () => {
+      try {
+        const session = await getCloudSession();
+        const cloudNotes = await fetchAllCloudNotes();
+        if (!active) return;
+        setCloudReady(Boolean(session));
+        setNotes(cloudNotes);
+      } catch {
+        if (!active) return;
+        setCloudReady(false);
+        setNotes(getAllNotes());
+      }
+    };
+    load();
+    return () => {
+      active = false;
+    };
+  }, [version]);
+
   if (mode === "login") {
-    const submit = (event: FormEvent) => {
+    const submit = async (event: FormEvent) => {
       event.preventDefault();
-      if (loginAdmin(username, password)) {
+      setError("");
+      try {
+        await loginCloudAdmin(username, password);
+        loginAdmin("tami", "tamidesu");
         navigate("/admin/notes");
         return;
+      } catch {
+        if (loginAdmin(username, password)) {
+          navigate("/admin/notes");
+          return;
+        }
       }
-      setError("用户名或密码不正确");
+      setError("用户名或密码不正确。请使用 Supabase 管理员邮箱登录。");
     };
 
     return (
@@ -72,7 +112,7 @@ export function DuomeiAdmin({ mode }: { mode: "login" | "notes" }) {
           <p>DUOMEI NOTES</p>
           <h1>多美小记管理后台</h1>
           <label>
-            用户名
+            邮箱 / 用户名
             <input value={username} onChange={(event) => setUsername(event.target.value)} />
           </label>
           <label>
@@ -93,36 +133,43 @@ export function DuomeiAdmin({ mode }: { mode: "login" | "notes" }) {
   const imageCount = notes.reduce((sum, note) => sum + (note.bodyImages?.length ?? 0) + (note.coverImageUrl ? 1 : 0), 0);
   const bytes = localStorageBytes();
   const storagePercent = Math.min(100, Math.round((bytes / (4.5 * 1024 * 1024)) * 100));
-  const healthScore = Math.max(70, Math.min(98, 92 - drafts * 2 + Math.min(6, imageCount)));
+  const healthScore = Math.max(70, Math.min(98, 94 - drafts * 2 + Math.min(4, imageCount)));
 
-  const refresh = () => setVersion((value) => value + 1);
-
-  const createAndEdit = () => {
+  const createAndEdit = async () => {
     const draft = createDraftNote();
     upsertNote(draft);
+    try {
+      await saveCloudNote(draft);
+    } catch {
+      setNotice("云端暂时不可用，已先保存为本机草稿。");
+    }
     navigate(`/note/${draft.slug}?edit=1`);
   };
 
   const backupNotes = () => {
-    const json = exportNotesJson();
+    const json = JSON.stringify({ notes }, null, 2) || exportNotesJson();
     setUtilityText(json);
     setImportText("");
     downloadText(`duomei-notes-backup-${Date.now()}.json`, json);
-    setNotice("已下载备份 JSON。换电脑或发布前，建议先保留这份备份。");
+    setNotice("已下载备份 JSON。");
   };
 
-  const preparePublish = () => {
-    const source = generateDefaultNotesSource();
-    setUtilityText(source);
-    setImportText("");
-    downloadText("defaultNotes.ts", source);
-    setNotice("已生成 defaultNotes.ts。静态 GitHub Pages 不能直接读取本机 localStorage，需要把这个文件提交到 GitHub 才会更新线上默认内容。");
+  const checkCloudPublish = async () => {
+    try {
+      const cloudNotes = await fetchAllCloudNotes();
+      setUtilityText(JSON.stringify({ notes: cloudNotes }, null, 2));
+      setImportText("");
+      setCloudReady(true);
+      setNotice("云端已连接：发布内容会直接写入 Supabase，不再需要 Git Push。");
+    } catch {
+      setNotice("云端连接失败，请检查 Supabase 登录状态或网络。");
+    }
   };
 
   const importJson = () => {
     try {
       importNotesJson(importText || utilityText);
-      setNotice("已导入备份数据。");
+      setNotice("已导入备份数据到本机草稿。");
       setImportText("");
       setUtilityText("");
       refresh();
@@ -131,19 +178,28 @@ export function DuomeiAdmin({ mode }: { mode: "login" | "notes" }) {
     }
   };
 
-  const publishNote = (id: string) => {
-    const note = notes.find((item) => item.id === id);
-    if (!note) return;
-    upsertNote({ ...note, status: "published", updatedAt: new Date().toISOString() });
-    setNotice("已发布到当前浏览器。要同步到 GitHub Pages，请生成 defaultNotes.ts 并提交。");
+  const setNoteStatus = async (note: DuomeiNote, status: DuomeiNote["status"]) => {
+    const next = { ...note, status, updatedAt: new Date().toISOString() };
+    upsertNote(next);
+    try {
+      await saveCloudNote(next);
+      setNotice(status === "published" ? "已发布到云端，线上网站会立即显示。" : "已设为草稿，首页不会显示。");
+    } catch {
+      setNotice("云端更新失败，已先保存在本机。");
+    }
     refresh();
   };
 
-  const draftNote = (id: string) => {
-    const note = notes.find((item) => item.id === id);
-    if (!note) return;
-    upsertNote({ ...note, status: "draft", updatedAt: new Date().toISOString() });
-    setNotice("已转为草稿，首页不会显示这条小记。");
+  const confirmDelete = async () => {
+    if (!pendingDelete) return;
+    deleteNote(pendingDelete);
+    try {
+      await deleteCloudNote(pendingDelete);
+      setNotice("已从云端隐藏这条小记。");
+    } catch {
+      setNotice("云端删除失败，已先从本机移除。");
+    }
+    setPendingDelete(null);
     refresh();
   };
 
@@ -154,11 +210,14 @@ export function DuomeiAdmin({ mode }: { mode: "login" | "notes" }) {
         <span>多美小记工作室</span>
         <a href="/">查看网站</a>
         <a href="/#notes">小记列表</a>
-        <button type="button" onClick={createAndEdit}>新增小记</button>
+        <button type="button" onClick={createAndEdit}>
+          新增小记
+        </button>
         <button
           type="button"
           onClick={() => {
             logoutAdmin();
+            logoutCloudAdmin();
             navigate("/admin/login");
           }}
         >
@@ -172,15 +231,24 @@ export function DuomeiAdmin({ mode }: { mode: "login" | "notes" }) {
             <p>DUOMEI STUDIO</p>
             <h1>工作室</h1>
           </div>
-          <div className="studio-status-pill"><span />本地已连接</div>
-          <button type="button" onClick={preparePublish}>生成发布文件</button>
-          <button type="button" onClick={backupNotes}>备份 JSON</button>
+          <div className="studio-status-pill">
+            <span />
+            {cloudReady ? "云端已连接" : "本地备用模式"}
+          </div>
+          <button type="button" onClick={checkCloudPublish}>
+            检查云端发布
+          </button>
+          <button type="button" onClick={backupNotes}>
+            备份 JSON
+          </button>
         </div>
 
         {notice ? (
           <div className="admin-notice">
             <span>{notice}</span>
-            <button type="button" onClick={() => setNotice("")}>关闭</button>
+            <button type="button" onClick={() => setNotice("")}>
+              关闭
+            </button>
           </div>
         ) : null}
 
@@ -204,32 +272,38 @@ export function DuomeiAdmin({ mode }: { mode: "login" | "notes" }) {
             <div>
               <p>健康评分</p>
               <h3>{healthScore >= 90 ? "优秀" : "良好"}</h3>
-              <span>本地数据正常。图片较多时，发布前请先备份 JSON。</span>
+              <span>正式数据来自 Supabase。本地只作为草稿和离线兜底。</span>
             </div>
           </article>
           <article className="studio-storage-card">
-            <p>LocalStorage</p>
+            <p>Local Draft Cache</p>
             <div>
               <strong>{formatBytes(bytes)}</strong>
               <span>约 {storagePercent}%</span>
             </div>
-            <i><b style={{ width: `${storagePercent}%` }} /></i>
-            <span>网页里的新增和编辑会先保存到这台电脑的浏览器。线上 GitHub Pages 需要提交发布文件后才会同步。</span>
+            <i>
+              <b style={{ width: `${storagePercent}%` }} />
+            </i>
+            <span>LocalStorage 以后只用于草稿缓存，不再承担正式发布。</span>
           </article>
         </div>
 
         <div className="studio-publish-panel">
           <div>
             <p>发布同步</p>
-            <h2>把本机内容同步到 GitHub Pages</h2>
-            <span>
-              浏览器不能安全地直接推送 GitHub。正确流程是：先在这里备份，再生成发布文件；之后由 Codex 或本机 Git 提交到仓库。
-            </span>
+            <h2>手机后台直接发布到 Supabase</h2>
+            <span>上传图片、写小记、点击发布后，线上 Vercel 网站会读取同一份云端数据。</span>
           </div>
           <div className="studio-publish-actions">
-            <button type="button" onClick={backupNotes}>1. 备份 JSON</button>
-            <button type="button" onClick={preparePublish}>2. 生成 defaultNotes.ts</button>
-            <a href="https://github.com/colorsugar/duomei/actions" target="_blank" rel="noreferrer">查看部署状态</a>
+            <button type="button" onClick={backupNotes}>
+              备份 JSON
+            </button>
+            <button type="button" onClick={checkCloudPublish}>
+              检查云端发布
+            </button>
+            <a href="https://github.com/colorsugar/duomei/actions" target="_blank" rel="noreferrer">
+              GitHub Actions
+            </a>
           </div>
         </div>
 
@@ -246,15 +320,25 @@ export function DuomeiAdmin({ mode }: { mode: "login" | "notes" }) {
               <article key={note.id}>
                 <div>
                   <strong>{note.title}</strong>
-                  <span>{note.status === "published" ? "已发布" : "草稿"} / {note.date} / {note.location || "未填写地点"}</span>
+                  <span>
+                    {note.status === "published" ? "已发布" : "草稿"} / {note.date} / {note.location || "未填写地点"}
+                  </span>
                 </div>
-                <button type="button" onClick={() => navigate(`/note/${note.slug}?edit=1`)}>编辑</button>
+                <button type="button" onClick={() => navigate(`/note/${note.slug}?edit=1`)}>
+                  编辑
+                </button>
                 {note.status === "published" ? (
-                  <button type="button" onClick={() => draftNote(note.id)}>转草稿</button>
+                  <button type="button" onClick={() => setNoteStatus(note, "draft")}>
+                    设为草稿
+                  </button>
                 ) : (
-                  <button type="button" onClick={() => publishNote(note.id)}>发布</button>
+                  <button type="button" onClick={() => setNoteStatus(note, "published")}>
+                    发布
+                  </button>
                 )}
-                <button type="button" onClick={() => setPendingDelete(note.id)}>删除</button>
+                <button type="button" onClick={() => setPendingDelete(note.id)}>
+                  删除
+                </button>
               </article>
             ))}
           </div>
@@ -263,15 +347,21 @@ export function DuomeiAdmin({ mode }: { mode: "login" | "notes" }) {
         <div className="admin-utilities studio-utilities">
           <div>
             <strong>数据工具</strong>
-            <p>导出备份、导入备份，或生成 GitHub Pages 发布用的默认数据。</p>
+            <p>云端发布不再需要生成 defaultNotes.ts。这里保留 JSON 备份和恢复，用来防止误删。</p>
           </div>
           <div className="admin-utility-actions">
-            <button type="button" onClick={backupNotes}>备份小记到 JSON</button>
-            <button type="button" onClick={importJson}>从 JSON 恢复</button>
-            <button type="button" onClick={preparePublish}>生成 defaultNotes.ts</button>
+            <button type="button" onClick={backupNotes}>
+              备份小记到 JSON
+            </button>
+            <button type="button" onClick={importJson}>
+              从 JSON 恢复到本机草稿
+            </button>
+            <button type="button" onClick={checkCloudPublish}>
+              检查云端
+            </button>
           </div>
           <textarea
-            placeholder="这里会显示备份或发布数据；也可以粘贴备份 JSON 后点击恢复"
+            placeholder="这里会显示备份数据；也可以粘贴备份 JSON 后点击恢复。"
             value={utilityText || importText}
             onChange={(event) => {
               setUtilityText("");
@@ -283,18 +373,12 @@ export function DuomeiAdmin({ mode }: { mode: "login" | "notes" }) {
         {pendingDelete ? (
           <div className="admin-delete-inline">
             <span>确定删除这条小记吗？</span>
-            <button
-              type="button"
-              onClick={() => {
-                deleteNote(pendingDelete);
-                setPendingDelete(null);
-                setNotice("已删除。");
-                refresh();
-              }}
-            >
+            <button type="button" onClick={confirmDelete}>
               确认删除
             </button>
-            <button type="button" onClick={() => setPendingDelete(null)}>取消</button>
+            <button type="button" onClick={() => setPendingDelete(null)}>
+              取消
+            </button>
           </div>
         ) : null}
       </section>
