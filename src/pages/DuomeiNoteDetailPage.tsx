@@ -1,4 +1,4 @@
-﻿import { ChangeEvent, useEffect, useState } from "react";
+﻿import { ChangeEvent, useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { ImageUploadPanel } from "../components/ImageUploadPanel";
 import { NoteBlockRenderer } from "../components/NoteBlockRenderer";
@@ -39,6 +39,8 @@ export function DuomeiNoteDetailPage() {
   const [message, setMessage] = useState("");
   const [cloudNote, setCloudNote] = useState<DuomeiNote | undefined>();
   const [navigationNotes, setNavigationNotes] = useState<DuomeiNote[]>(() => (isLoggedIn ? getAllNotes() : getPublishedNotes()));
+  const undoStackRef = useRef<DuomeiNote[]>([]);
+  const [undoCount, setUndoCount] = useState(0);
   const note = cloudNote ?? getNoteBySlug(slug, isLoggedIn);
   const shouldEdit = isLoggedIn && (editMode || searchParams.get("edit") === "1");
   const [draft, setDraft] = useState<DuomeiNote | undefined>(note);
@@ -69,7 +71,11 @@ export function DuomeiNoteDetailPage() {
   }, [slug, isLoggedIn, refreshKey]);
 
   useEffect(() => {
-    if (note) setDraft(note);
+    if (note) {
+      setDraft(note);
+      undoStackRef.current = [];
+      setUndoCount(0);
+    }
   }, [note?.id]);
 
   useEffect(() => {
@@ -93,8 +99,37 @@ export function DuomeiNoteDetailPage() {
     : bodyToBlocks(activeNote.body, activeNote.bodyImages);
 
   const updateDraft = (patch: Partial<DuomeiNote>) => {
-    setDraft((current) => (current ? { ...current, ...patch } : current));
+    setDraft((current) => {
+      if (!current) return current;
+      undoStackRef.current = [...undoStackRef.current.slice(-39), current];
+      setUndoCount(undoStackRef.current.length);
+      return { ...current, ...patch };
+    });
   };
+
+  const undoDraft = () => {
+    const previous = undoStackRef.current.pop();
+    if (!previous) return;
+    setDraft(previous);
+    setUndoCount(undoStackRef.current.length);
+  };
+
+  useEffect(() => {
+    if (!shouldEdit) return;
+    const onKeyDown = (event: KeyboardEvent) => {
+      const target = event.target as HTMLElement | null;
+      const isTextField =
+        target?.tagName === "INPUT" ||
+        target?.tagName === "TEXTAREA" ||
+        target?.isContentEditable;
+      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "z" && !event.shiftKey && !isTextField) {
+        event.preventDefault();
+        undoDraft();
+      }
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [shouldEdit]);
 
   const updateBlock = (id: string, patch: Partial<NoteContentBlock>) => {
     updateDraft({
@@ -251,6 +286,7 @@ export function DuomeiNoteDetailPage() {
             )}
             {isPublished ? <button type="button" onClick={() => persistNote("draft")}>转为草稿</button> : null}
             <button type="button" onClick={() => setSearchParams({})}>预览</button>
+            <button type="button" onClick={undoDraft} disabled={undoCount === 0}>撤销</button>
             <button type="button" onClick={() => insertBlock({ id: createBlockId("paragraph"), type: "paragraph", text: "" })}>
               插入段落
             </button>
