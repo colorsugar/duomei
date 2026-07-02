@@ -6,11 +6,12 @@ export type HeroTextSettings = {
 
 const HERO_TEXT_KEY = "duomei-hero-text-settings";
 export const HERO_TEXT_UPDATED_EVENT = "duomei-hero-text-updated";
+const legacyScrollHints = new Set(["\u5411\u4e0b\u6ed1\u52a8"]);
 
 export const defaultHeroTextSettings: HeroTextSettings = {
   subname: "多美小记",
   line: "记录旅途，遇见生活，也遇见自己。",
-  scrollHint: "向下滑动",
+  scrollHint: "",
 };
 
 function canUseStorage() {
@@ -18,10 +19,12 @@ function canUseStorage() {
 }
 
 function cleanSettings(settings: Partial<HeroTextSettings>): HeroTextSettings {
+  const hasScrollHint = Object.prototype.hasOwnProperty.call(settings, "scrollHint");
+  const scrollHint = settings.scrollHint?.trim() ?? "";
   return {
     subname: settings.subname?.trim() || defaultHeroTextSettings.subname,
     line: settings.line?.trim() || defaultHeroTextSettings.line,
-    scrollHint: settings.scrollHint?.trim() || defaultHeroTextSettings.scrollHint,
+    scrollHint: hasScrollHint ? (legacyScrollHints.has(scrollHint) ? "" : scrollHint) : defaultHeroTextSettings.scrollHint,
   };
 }
 

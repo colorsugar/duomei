@@ -35,7 +35,8 @@ function HeroEditableText({ field, settings, className, editable, onChange }: He
       contentEditable
       suppressContentEditableWarning
       onBlur={(event) => {
-        const next = { ...settings, [field]: event.currentTarget.textContent?.trim() || settings[field] };
+        const value = event.currentTarget.textContent?.trim() ?? "";
+        const next = { ...settings, [field]: field === "scrollHint" ? value : value || settings[field] };
         saveHeroTextSettings(next);
         onChange(next);
       }}
