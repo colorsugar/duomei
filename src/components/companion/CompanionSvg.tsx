@@ -17,6 +17,9 @@ export function CompanionSvg({ state = "sit", className = "", title = "DUOMEI Co
   const isYawn = state === "yawn";
   const isDrag = state === "drag";
   const isRest = state === "rest";
+  const isHop = state === "hop";
+  const isSpin = state === "spin";
+  const isBag = state === "bag";
   const showFlag = state === "flag";
   const showLost = state === "lost";
   const isSleepy = isSleep || isYawn || isRest;
@@ -29,6 +32,9 @@ export function CompanionSvg({ state = "sit", className = "", title = "DUOMEI Co
     isRest ? "is-resting" : "",
     isStretch ? "is-stretching" : "",
     isYawn ? "is-yawning" : "",
+    isHop ? "is-hopping" : "",
+    isSpin ? "is-spinning" : "",
+    isBag ? "is-bagging" : "",
   ]
     .filter(Boolean)
     .join(" ");
@@ -37,6 +43,7 @@ export function CompanionSvg({ state = "sit", className = "", title = "DUOMEI Co
     isWave ? "companion-arm--wave" : "",
     showFlag ? "companion-arm--flag" : "",
     isStretch ? "companion-arm--stretch" : "",
+    isBag ? "companion-arm--bag" : "",
   ]
     .filter(Boolean)
     .join(" ");

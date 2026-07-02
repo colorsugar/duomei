@@ -39,11 +39,15 @@ const POSITION_KEY = "duomei-companion-position";
 const REST_ZONE_HEIGHT = 132;
 const REST_MESSAGES = ["今天先休息一下。", "休息一会儿。"];
 const AMBIENT_ACTIONS: AmbientAction[] = [
-  { state: "idle", duration: 0, weight: 80 },
-  { state: "look", duration: 3000, weight: 10 },
-  { state: "stretch", duration: 2200, weight: 5 },
-  { state: "yawn", duration: 3600, weight: 3 },
-  { state: "happy", duration: 1900, weight: 2 },
+  { state: "idle", duration: 0, weight: 42 },
+  { state: "look", duration: 3200, weight: 14 },
+  { state: "stretch", duration: 2800, weight: 10 },
+  { state: "yawn", duration: 5200, weight: 9 },
+  { state: "sleep", duration: 7200, weight: 5 },
+  { state: "hop", duration: 1700, weight: 7 },
+  { state: "bag", duration: 2600, weight: 6 },
+  { state: "spin", duration: 2200, weight: 4 },
+  { state: "happy", duration: 1800, weight: 3 },
 ];
 const UNSAFE_OVERLAY_SELECTOR = [
   ".detail-image-panel",
@@ -58,8 +62,6 @@ const UNSAFE_OVERLAY_SELECTOR = [
   "dialog[open]",
   "[role='dialog'][aria-modal='true']",
 ].join(", ");
-const NOTES_SAFE_SELECTOR = "#notes, .duomei-notes-section, .notes-section";
-
 function clearTimer(timerRef: { current: number | null }) {
   if (timerRef.current === null) return;
   window.clearTimeout(timerRef.current);
@@ -82,21 +84,12 @@ function pickAmbientAction(): AmbientAction {
 
 function isUnsafeDomState() {
   if (typeof document === "undefined") return true;
-  const modalOpen =
+  return (
     document.body.classList.contains("duomei-modal-open") ||
     document.documentElement.classList.contains("duomei-modal-open") ||
     document.body.classList.contains("front-editing") ||
-    Boolean(document.querySelector(UNSAFE_OVERLAY_SELECTOR));
-  const notesArea = document.querySelector(NOTES_SAFE_SELECTOR);
-  const notesVisible =
-    notesArea instanceof HTMLElement &&
-    (() => {
-      const rect = notesArea.getBoundingClientRect();
-      return rect.top < window.innerHeight * 0.92 && rect.bottom > window.innerHeight * 0.12;
-    })();
-  const mobileCramped = window.innerWidth <= 430 && (notesVisible || window.innerHeight < 720);
-
-  return modalOpen || Boolean(notesVisible) || mobileCramped;
+    Boolean(document.querySelector(UNSAFE_OVERLAY_SELECTOR))
+  );
 }
 
 function routeContext(pathname: string): CompanionMessageContext | null {
@@ -141,7 +134,7 @@ export function DuomeiCompanion({ placement = "global" }: DuomeiCompanionProps) 
   const clickResetTimerRef = useRef<number | null>(null);
   const longPressTimerRef = useRef<number | null>(null);
   const lastInteractionRef = useRef(Date.now());
-  const [visible, setVisible] = useState(placement !== "global");
+  const [visible, setVisible] = useState(true);
   const [state, setState] = useState<CompanionState>(placement === "not-found" ? "lost" : "sit");
   const [noteVisible, setNoteVisible] = useState(false);
   const [clickStep, setClickStep] = useState(0);
@@ -225,8 +218,8 @@ export function DuomeiCompanion({ placement = "global" }: DuomeiCompanionProps) 
       setState(placement === "not-found" ? "lost" : "sit");
       return;
     }
-    setVisible(false);
-    setState("walk");
+    setVisible(true);
+    setState("sit");
   }, [location.pathname, placement]);
 
   useEffect(() => {
@@ -314,7 +307,7 @@ export function DuomeiCompanion({ placement = "global" }: DuomeiCompanionProps) 
   const showContextMessage = () => {
     lastInteractionRef.current = Date.now();
     clearTimer(clickResetTimerRef);
-    const next = clickStep >= 5 ? 1 : clickStep + 1;
+    const next = clickStep >= 7 ? 1 : clickStep + 1;
     setClickStep(next);
     clickResetTimerRef.current = window.setTimeout(() => {
       setClickStep(0);
@@ -337,13 +330,31 @@ export function DuomeiCompanion({ placement = "global" }: DuomeiCompanionProps) 
     if (next === 3) {
       setNoteVisible(false);
       setState("happy");
-      returnToSit(1900);
+      returnToSit(1800);
       return;
     }
     if (next === 4) {
       setNoteVisible(false);
-      setState("blink");
-      returnToSit(900);
+      setState("hop");
+      returnToSit(1700);
+      return;
+    }
+    if (next === 5) {
+      setNoteVisible(false);
+      setState("spin");
+      returnToSit(2200);
+      return;
+    }
+    if (next === 6) {
+      setNoteVisible(false);
+      setState("bag");
+      returnToSit(2600);
+      return;
+    }
+    if (next === 7) {
+      setNoteVisible(false);
+      setState("yawn");
+      returnToSit(3600);
       return;
     }
     setNoteVisible(false);

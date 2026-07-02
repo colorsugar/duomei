@@ -12,6 +12,9 @@ export type CompanionState =
   | "drag"
   | "rest"
   | "stretch"
-  | "yawn";
+  | "yawn"
+  | "hop"
+  | "spin"
+  | "bag";
 
 export type CompanionPlacement = "global" | "footer" | "not-found";

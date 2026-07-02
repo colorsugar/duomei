@@ -9862,7 +9862,7 @@ body.duomei-modal-open {
 }
 
 .companion-body.is-happy {
-  animation: duomeiCompanionHappy 800ms var(--motion-ease-reveal, cubic-bezier(0.16, 1, 0.3, 1)) 1;
+  animation: duomeiCompanionHappy 1s var(--motion-ease-reveal, cubic-bezier(0.16, 1, 0.3, 1)) 1;
 }
 
 .companion-body.is-dragging {
@@ -9887,6 +9887,18 @@ body.duomei-modal-open {
   animation: duomeiCompanionYawn 3.6s var(--motion-ease-ambient, ease-in-out) 1;
 }
 
+.companion-body.is-hopping {
+  animation: duomeiCompanionHop 1.35s var(--motion-ease-reveal, cubic-bezier(0.16, 1, 0.3, 1)) 1;
+}
+
+.companion-body.is-spinning {
+  animation: duomeiCompanionSpin 1.9s var(--motion-ease-reveal, cubic-bezier(0.16, 1, 0.3, 1)) 1;
+}
+
+.companion-body.is-bagging {
+  animation: duomeiCompanionBag 2.4s var(--motion-ease-ambient, ease-in-out) 1;
+}
+
 .companion-backpack {
   display: none !important;
 }
@@ -9905,6 +9917,11 @@ body.duomei-modal-open {
 
 .companion-arm--stretch {
   animation: duomeiCompanionStretchArm 2.2s var(--motion-ease-ambient, ease-in-out) 1;
+}
+
+.companion-arm--bag {
+  transform-origin: 112px 106px;
+  animation: duomeiCompanionBagArm 2.4s var(--motion-ease-ambient, ease-in-out) 1;
 }
 
 .companion-sprout {
@@ -9937,6 +9954,16 @@ body.duomei-modal-open {
 
 .companion-body.is-walking .companion-feet {
   animation: duomeiCompanionFeet 420ms steps(2, end) infinite alternate;
+}
+
+.companion-body.is-hopping .companion-feet,
+.companion-body.is-spinning .companion-feet {
+  animation: duomeiCompanionFeet 260ms steps(2, end) 5 alternate;
+}
+
+.companion-body.is-hopping .companion-sprout,
+.companion-body.is-spinning .companion-sprout {
+  animation: duomeiCompanionSproutParty 1.45s var(--motion-ease-reveal, cubic-bezier(0.16, 1, 0.3, 1)) 1;
 }
 
 body.front-editing .duomei-companion,
@@ -10008,10 +10035,10 @@ html.duomei-modal-open .duomei-companion {
 
 @keyframes duomeiCompanionWave {
   from {
-    transform: rotate(-5deg);
+    transform: rotate(-10deg);
   }
   to {
-    transform: rotate(17deg);
+    transform: rotate(27deg);
   }
 }
 
@@ -10020,10 +10047,86 @@ html.duomei-modal-open .duomei-companion {
     transform: translate3d(0, 0, 0) rotate(-0.2deg);
   }
   48% {
-    transform: translate3d(0, -5px, 0) rotate(0.35deg);
+    transform: translate3d(0, -9px, 0) rotate(0.8deg);
   }
   100% {
     transform: translate3d(0, 0, 0) rotate(0deg);
+  }
+}
+
+@keyframes duomeiCompanionHop {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) rotate(0deg);
+  }
+  22% {
+    transform: translate3d(0, -9px, 0) rotate(-1.5deg);
+  }
+  48% {
+    transform: translate3d(0, 2px, 0) rotate(1deg);
+  }
+  68% {
+    transform: translate3d(0, -6px, 0) rotate(1.2deg);
+  }
+}
+
+@keyframes duomeiCompanionSpin {
+  0% {
+    transform: translate3d(0, 0, 0) rotate(0deg);
+  }
+  18% {
+    transform: translate3d(0, -4px, 0) rotate(-10deg);
+  }
+  54% {
+    transform: translate3d(0, -8px, 0) rotate(188deg);
+  }
+  82% {
+    transform: translate3d(0, -3px, 0) rotate(354deg);
+  }
+  100% {
+    transform: translate3d(0, 0, 0) rotate(360deg);
+  }
+}
+
+@keyframes duomeiCompanionBag {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) rotate(0deg);
+  }
+  24% {
+    transform: translate3d(-2px, 1px, 0) rotate(-1deg);
+  }
+  50% {
+    transform: translate3d(2px, -2px, 0) rotate(0.8deg);
+  }
+  74% {
+    transform: translate3d(-1px, 0, 0) rotate(-0.4deg);
+  }
+}
+
+@keyframes duomeiCompanionBagArm {
+  0%,
+  100% {
+    transform: rotate(0deg) translate3d(0, 0, 0);
+  }
+  35% {
+    transform: rotate(16deg) translate3d(-2px, 2px, 0);
+  }
+  70% {
+    transform: rotate(-7deg) translate3d(1px, -1px, 0);
+  }
+}
+
+@keyframes duomeiCompanionSproutParty {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  30% {
+    transform: rotate(-6deg);
+  }
+  62% {
+    transform: rotate(7deg);
   }
 }
 
