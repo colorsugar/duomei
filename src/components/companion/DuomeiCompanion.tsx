@@ -24,10 +24,27 @@ type DragState = {
   dragging: boolean;
 };
 
-const HOME_DELAY_MS = 24000;
+type AmbientAction = {
+  state: CompanionState;
+  duration: number;
+  weight: number;
+};
+
+const HOME_DELAY_MS = 0;
 const MESSAGE_DURATION_MS = 3000;
+const CLICK_RESET_MS = 8000;
+const LONG_PRESS_RESET_MS = 2000;
+const INACTIVITY_SLEEP_MS = 90000;
 const POSITION_KEY = "duomei-companion-position";
-const REMOVE_ZONE_HEIGHT = 132;
+const REST_ZONE_HEIGHT = 132;
+const REST_MESSAGES = ["今天先休息一下。", "休息一会儿。"];
+const AMBIENT_ACTIONS: AmbientAction[] = [
+  { state: "idle", duration: 0, weight: 80 },
+  { state: "look", duration: 3000, weight: 10 },
+  { state: "stretch", duration: 2200, weight: 5 },
+  { state: "yawn", duration: 3600, weight: 3 },
+  { state: "happy", duration: 1900, weight: 2 },
+];
 const UNSAFE_OVERLAY_SELECTOR = [
   ".detail-image-panel",
   ".image-upload-panel",
@@ -42,6 +59,26 @@ const UNSAFE_OVERLAY_SELECTOR = [
   "[role='dialog'][aria-modal='true']",
 ].join(", ");
 const NOTES_SAFE_SELECTOR = "#notes, .duomei-notes-section, .notes-section";
+
+function clearTimer(timerRef: { current: number | null }) {
+  if (timerRef.current === null) return;
+  window.clearTimeout(timerRef.current);
+  timerRef.current = null;
+}
+
+function randomBetween(min: number, max: number) {
+  return min + Math.round(Math.random() * (max - min));
+}
+
+function pickAmbientAction(): AmbientAction {
+  const total = AMBIENT_ACTIONS.reduce((sum, action) => sum + action.weight, 0);
+  let point = Math.random() * total;
+  for (const action of AMBIENT_ACTIONS) {
+    point -= action.weight;
+    if (point <= 0) return action;
+  }
+  return AMBIENT_ACTIONS[0];
+}
 
 function isUnsafeDomState() {
   if (typeof document === "undefined") return true;
@@ -98,6 +135,12 @@ export function DuomeiCompanion({ placement = "global" }: DuomeiCompanionProps) 
   const companionRef = useRef<HTMLDivElement | null>(null);
   const dragRef = useRef<DragState | null>(null);
   const suppressNextClickRef = useRef(false);
+  const stateTimerRef = useRef<number | null>(null);
+  const ambientTimerRef = useRef<number | null>(null);
+  const messageTimerRef = useRef<number | null>(null);
+  const clickResetTimerRef = useRef<number | null>(null);
+  const longPressTimerRef = useRef<number | null>(null);
+  const lastInteractionRef = useRef(Date.now());
   const [visible, setVisible] = useState(placement !== "global");
   const [state, setState] = useState<CompanionState>(placement === "not-found" ? "lost" : "sit");
   const [noteVisible, setNoteVisible] = useState(false);
@@ -107,8 +150,8 @@ export function DuomeiCompanion({ placement = "global" }: DuomeiCompanionProps) 
   const [activeMessage, setActiveMessage] = useState<string | null>(null);
   const [position, setPosition] = useState<CompanionPosition | null>(null);
   const [dragging, setDragging] = useState(false);
-  const [removeArmed, setRemoveArmed] = useState(false);
-  const [dismissed, setDismissed] = useState(false);
+  const [restArmed, setRestArmed] = useState(false);
+  const [resting, setResting] = useState(false);
 
   const isAdmin = location.pathname.startsWith("/admin");
   const isEditRoute = new URLSearchParams(location.search).get("edit") === "1";
@@ -117,15 +160,35 @@ export function DuomeiCompanion({ placement = "global" }: DuomeiCompanionProps) 
   const messageContext = placement === "not-found" ? "not-found" : (context ?? "home");
   const message = activeMessage ?? getCompanionMessage(messageContext, messageCursor);
 
+  const returnToSit = (delay: number) => {
+    clearTimer(stateTimerRef);
+    stateTimerRef.current = window.setTimeout(() => {
+      setState(placement === "not-found" ? "lost" : "sit");
+      stateTimerRef.current = null;
+    }, delay);
+  };
+
+  const showNote = (note: string) => {
+    clearTimer(messageTimerRef);
+    setActiveMessage(note);
+    setNoteVisible(true);
+    messageTimerRef.current = window.setTimeout(() => {
+      setNoteVisible(false);
+      setActiveMessage(null);
+      messageTimerRef.current = null;
+    }, MESSAGE_DURATION_MS);
+  };
+
   const resetCompanionPosition = () => {
     window.localStorage.removeItem(POSITION_KEY);
     setPosition(null);
     setDragging(false);
-    setRemoveArmed(false);
-    setDismissed(false);
+    setRestArmed(false);
+    setResting(false);
+    setVisible(true);
     setNoteVisible(false);
     setState("happy");
-    window.setTimeout(() => setState("sit"), 900);
+    returnToSit(900);
   };
 
   useEffect(() => {
@@ -147,11 +210,16 @@ export function DuomeiCompanion({ placement = "global" }: DuomeiCompanionProps) 
   }, []);
 
   useEffect(() => {
+    clearTimer(stateTimerRef);
+    clearTimer(messageTimerRef);
+    clearTimer(clickResetTimerRef);
+    clearTimer(longPressTimerRef);
+    clearTimer(ambientTimerRef);
     setNoteVisible(false);
     setActiveMessage(null);
     setClickStep(0);
-    setRemoveArmed(false);
-    setDismissed(false);
+    setRestArmed(false);
+    setResting(false);
     if (placement !== "global") {
       setVisible(true);
       setState(placement === "not-found" ? "lost" : "sit");
@@ -162,14 +230,14 @@ export function DuomeiCompanion({ placement = "global" }: DuomeiCompanionProps) 
   }, [location.pathname, placement]);
 
   useEffect(() => {
-    if (placement !== "global" || suppressed || !context) return;
+    if (placement !== "global" || suppressed || !context || resting) return;
     let entered = false;
     const show = () => {
       if (entered) return;
       entered = true;
       setVisible(true);
       setState("walk");
-      window.setTimeout(() => setState("sit"), 950);
+      returnToSit(2000);
     };
     const delay = window.setTimeout(show, HOME_DELAY_MS);
     const onScroll = () => {
@@ -181,46 +249,50 @@ export function DuomeiCompanion({ placement = "global" }: DuomeiCompanionProps) 
       window.clearTimeout(delay);
       window.removeEventListener("scroll", onScroll);
     };
-  }, [context, placement, suppressed, location.pathname]);
+  }, [context, placement, resting, suppressed, location.pathname]);
 
   useEffect(() => {
-    if (placement !== "global" || suppressed || !visible) return;
+    if (placement !== "global" || suppressed || !visible || dragging || resting || !context) return;
     let cancelled = false;
-    const scheduleLook = () => {
-      const delay = 15000 + Math.round(Math.random() * 15000);
-      window.setTimeout(() => {
-        if (cancelled || suppressed || !visible || dragging) return;
-        const ambientStates: CompanionState[] = ["look", "sleep", "walk"];
-        const nextState = ambientStates[Math.floor(Math.random() * ambientStates.length)];
-        setState(nextState);
-        window.setTimeout(() => {
+    const schedule = () => {
+      clearTimer(ambientTimerRef);
+      ambientTimerRef.current = window.setTimeout(() => {
+        if (cancelled || suppressed || !visible || dragging || resting) return;
+        const inactive = Date.now() - lastInteractionRef.current;
+        const action =
+          inactive > INACTIVITY_SLEEP_MS && Math.random() < 0.35
+            ? { state: "sleep" as CompanionState, duration: 8000, weight: 1 }
+            : pickAmbientAction();
+        if (action.state === "idle") {
+          schedule();
+          return;
+        }
+        setState(action.state);
+        clearTimer(stateTimerRef);
+        stateTimerRef.current = window.setTimeout(() => {
           if (!cancelled) setState("sit");
-          scheduleLook();
-        }, nextState === "sleep" ? 2200 : nextState === "walk" ? 1500 : 1400);
-      }, delay);
+          stateTimerRef.current = null;
+          schedule();
+        }, action.duration);
+      }, randomBetween(15000, 40000));
     };
-    scheduleLook();
+    schedule();
     return () => {
       cancelled = true;
+      clearTimer(ambientTimerRef);
     };
-  }, [placement, suppressed, visible, dragging]);
+  }, [context, dragging, placement, resting, suppressed, visible]);
 
   useEffect(() => {
     if (placement !== "global") return;
     const onPublished = () => {
       if (isUnsafeDomState()) return;
-      setDismissed(false);
-      setRemoveArmed(false);
+      setResting(false);
+      setRestArmed(false);
       setVisible(true);
       setState("flag");
-      setActiveMessage(getCompanionMessage("published", 0));
-      setNoteVisible(true);
-      window.setTimeout(() => {
-        setNoteVisible(false);
-        setActiveMessage(null);
-        setState("sit");
-        setVisible(false);
-      }, MESSAGE_DURATION_MS);
+      showNote(getCompanionMessage("published", 0));
+      returnToSit(3500);
     };
     window.addEventListener("duomei:publish-success", onPublished);
     return () => window.removeEventListener("duomei:publish-success", onPublished);
@@ -239,38 +311,67 @@ export function DuomeiCompanion({ placement = "global" }: DuomeiCompanionProps) 
     return () => window.removeEventListener("resize", onResize);
   }, [placement, position]);
 
-  if (suppressed || (placement === "global" && (dismissed || !context || !visible))) return null;
-
   const showContextMessage = () => {
-    const next = (clickStep + 1) % 3;
+    lastInteractionRef.current = Date.now();
+    clearTimer(clickResetTimerRef);
+    const next = clickStep >= 5 ? 1 : clickStep + 1;
     setClickStep(next);
+    clickResetTimerRef.current = window.setTimeout(() => {
+      setClickStep(0);
+      clickResetTimerRef.current = null;
+    }, CLICK_RESET_MS);
+
     if (next === 1) {
       setState("look");
-      window.setTimeout(() => setState("sit"), 1300);
       setNoteVisible(false);
+      returnToSit(3000);
       return;
     }
     if (next === 2) {
       setState("wave");
-      window.setTimeout(() => setState("sit"), 1300);
-      setActiveMessage(getCompanionMessage(messageContext, messageCursor));
+      showNote(getCompanionMessage(messageContext, messageCursor));
       setMessageCursor((current) => current + 1);
-      setNoteVisible(true);
-      window.setTimeout(() => {
-        setNoteVisible(false);
-        setActiveMessage(null);
-      }, MESSAGE_DURATION_MS);
+      returnToSit(2000);
+      return;
+    }
+    if (next === 3) {
+      setNoteVisible(false);
+      setState("happy");
+      returnToSit(1900);
+      return;
+    }
+    if (next === 4) {
+      setNoteVisible(false);
+      setState("blink");
+      returnToSit(900);
       return;
     }
     setNoteVisible(false);
-    setState("happy");
-    window.setTimeout(() => setState("sit"), 900);
+    setState("sit");
+  };
+
+  const restCompanion = () => {
+    window.localStorage.removeItem(POSITION_KEY);
+    setPosition(null);
+    setRestArmed(false);
+    setState("rest");
+    showNote(REST_MESSAGES[Math.floor(Math.random() * REST_MESSAGES.length)]);
+    clearTimer(stateTimerRef);
+    stateTimerRef.current = window.setTimeout(() => {
+      setVisible(false);
+      setResting(true);
+      setState("sit");
+      setNoteVisible(false);
+      setActiveMessage(null);
+      stateTimerRef.current = null;
+    }, 1500);
   };
 
   const beginDrag = (event: PointerEvent<HTMLButtonElement>) => {
     if (placement !== "global") return;
     const rect = companionRef.current?.getBoundingClientRect();
     if (!rect) return;
+    lastInteractionRef.current = Date.now();
     dragRef.current = {
       pointerId: event.pointerId,
       startX: event.clientX,
@@ -279,6 +380,14 @@ export function DuomeiCompanion({ placement = "global" }: DuomeiCompanionProps) 
       offsetY: event.clientY - rect.top,
       dragging: false,
     };
+    clearTimer(longPressTimerRef);
+    longPressTimerRef.current = window.setTimeout(() => {
+      const drag = dragRef.current;
+      if (drag && !drag.dragging) {
+        resetCompanionPosition();
+        suppressNextClickRef.current = true;
+      }
+    }, LONG_PRESS_RESET_MS);
     event.currentTarget.setPointerCapture(event.pointerId);
   };
 
@@ -288,20 +397,22 @@ export function DuomeiCompanion({ placement = "global" }: DuomeiCompanionProps) 
     if (!drag || !rect || drag.pointerId !== event.pointerId) return;
     const distance = Math.hypot(event.clientX - drag.startX, event.clientY - drag.startY);
     if (!drag.dragging && distance > 10) {
+      clearTimer(longPressTimerRef);
       drag.dragging = true;
       setDragging(true);
       setNoteVisible(false);
-      setState("walk");
+      setState("drag");
     }
     if (!drag.dragging) return;
     event.preventDefault();
     const next = clampPosition(event.clientX - drag.offsetX, event.clientY - drag.offsetY, rect.width, rect.height);
     setPosition(next);
-    setRemoveArmed(event.clientY > window.innerHeight - REMOVE_ZONE_HEIGHT);
+    setRestArmed(event.clientY > window.innerHeight - REST_ZONE_HEIGHT);
     window.localStorage.setItem(POSITION_KEY, JSON.stringify(next));
   };
 
   const endDrag = (event: PointerEvent<HTMLButtonElement>) => {
+    clearTimer(longPressTimerRef);
     const drag = dragRef.current;
     if (!drag || drag.pointerId !== event.pointerId) return;
     try {
@@ -313,26 +424,19 @@ export function DuomeiCompanion({ placement = "global" }: DuomeiCompanionProps) 
     if (drag.dragging) {
       suppressNextClickRef.current = true;
       setDragging(false);
-      if (removeArmed || event.clientY > window.innerHeight - REMOVE_ZONE_HEIGHT) {
-        setDismissed(true);
-        setVisible(false);
-        setRemoveArmed(false);
-        setState("sit");
+      if (restArmed || event.clientY > window.innerHeight - REST_ZONE_HEIGHT) {
+        restCompanion();
         return;
       }
-      setRemoveArmed(false);
+      setRestArmed(false);
       setState("sit");
       return;
     }
     suppressNextClickRef.current = true;
     if (placement === "not-found") {
-      setActiveMessage(getCompanionMessage("not-found", messageCursor));
+      setState("lost");
+      showNote(getCompanionMessage("not-found", messageCursor));
       setMessageCursor((current) => current + 1);
-      setNoteVisible(true);
-      window.setTimeout(() => {
-        setNoteVisible(false);
-        setActiveMessage(null);
-      }, MESSAGE_DURATION_MS);
       return;
     }
     showContextMessage();
@@ -344,17 +448,15 @@ export function DuomeiCompanion({ placement = "global" }: DuomeiCompanionProps) 
       return;
     }
     if (placement === "not-found") {
-      setActiveMessage(getCompanionMessage("not-found", messageCursor));
+      setState("lost");
+      showNote(getCompanionMessage("not-found", messageCursor));
       setMessageCursor((current) => current + 1);
-      setNoteVisible(true);
-      window.setTimeout(() => {
-        setNoteVisible(false);
-        setActiveMessage(null);
-      }, MESSAGE_DURATION_MS);
       return;
     }
     showContextMessage();
   };
+
+  if (suppressed || (placement === "global" && (resting || !context || !visible))) return null;
 
   const companionStyle: CSSProperties =
     placement === "global" && position
@@ -371,17 +473,19 @@ export function DuomeiCompanion({ placement = "global" }: DuomeiCompanionProps) 
       ref={companionRef}
       className={`duomei-companion duomei-companion--${placement} duomei-companion--${context ?? "page"}${
         dragging ? " is-dragging" : ""
-      }${removeArmed ? " is-remove-armed" : ""}`}
+      }${restArmed ? " is-rest-armed" : ""}`}
       style={companionStyle}
     >
       {placement === "global" && dragging ? (
-        <div className={`duomei-companion-remove-zone${removeArmed ? " is-active" : ""}`}>可以删除</div>
+        <div className={`duomei-companion-rest-zone${restArmed ? " is-active" : ""}`}>
+          {restArmed ? "今天先休息一下" : "拖到这里休息"}
+        </div>
       ) : null}
       <CompanionBubble message={message} visible={noteVisible} />
       <button
         className="duomei-companion-button"
         type="button"
-        aria-label="DUOMEI 小旅伴，拖动可移动，双击或长按两秒可复位"
+        aria-label="DUOMEI 小旅伴，拖动可移动，双击或长按两秒可复位，拖到底部可休息"
         onClick={handleCompanionClick}
         onDoubleClick={resetCompanionPosition}
         onPointerDown={beginDrag}
@@ -389,7 +493,7 @@ export function DuomeiCompanion({ placement = "global" }: DuomeiCompanionProps) 
         onPointerUp={endDrag}
         onPointerCancel={endDrag}
       >
-        <CompanionSvg state={state} />
+        <CompanionSvg state={dragging ? "drag" : state} />
       </button>
     </div>
   );

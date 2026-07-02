@@ -8,12 +8,45 @@ type CompanionSvgProps = {
 
 export function CompanionSvg({ state = "sit", className = "", title = "DUOMEI Companion" }: CompanionSvgProps) {
   const isLook = state === "look";
+  const isBlink = state === "blink";
   const isWave = state === "wave";
   const isWalk = state === "walk";
   const isHappy = state === "happy";
   const isSleep = state === "sleep";
+  const isStretch = state === "stretch";
+  const isYawn = state === "yawn";
+  const isDrag = state === "drag";
+  const isRest = state === "rest";
   const showFlag = state === "flag";
   const showLost = state === "lost";
+  const isSleepy = isSleep || isYawn || isRest;
+  const bodyClassName = [
+    "companion-body",
+    isWalk ? "is-walking" : "",
+    isHappy ? "is-happy" : "",
+    isDrag ? "is-dragging" : "",
+    isSleepy ? "is-sleeping" : "",
+    isRest ? "is-resting" : "",
+    isStretch ? "is-stretching" : "",
+    isYawn ? "is-yawning" : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
+  const armClassName = [
+    "companion-arm",
+    isWave ? "companion-arm--wave" : "",
+    showFlag ? "companion-arm--flag" : "",
+    isStretch ? "companion-arm--stretch" : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
+  const eyesClassName = [
+    "companion-eyes",
+    isLook ? "is-looking" : "",
+    isBlink || isSleepy ? "is-blinking" : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
 
   return (
     <svg
@@ -57,7 +90,7 @@ export function CompanionSvg({ state = "sit", className = "", title = "DUOMEI Co
         </g>
       ) : null}
 
-      {isSleep ? (
+      {isSleepy ? (
         <g className="companion-sleep-z" fill="#6f5d45" fontWeight="900">
           <text x="126" y="45" fontSize="15">
             z
@@ -68,7 +101,7 @@ export function CompanionSvg({ state = "sit", className = "", title = "DUOMEI Co
         </g>
       ) : null}
 
-      <g className={isWalk ? "companion-body is-walking" : isHappy ? "companion-body is-happy" : "companion-body"}>
+      <g className={bodyClassName}>
         <g className="companion-feet" fill="#efe0bf" stroke="#332d25" strokeWidth="3.2" strokeLinejoin="round">
           <path d="M56 140c-12 0-20 6-19 14 16 3 28 1 36-5-2-6-8-9-17-9Z" />
           <path d="M94 142c-5 9 2 14 17 12 5-6 2-13-8-16-4 1-7 2-9 4Z" />
@@ -86,7 +119,7 @@ export function CompanionSvg({ state = "sit", className = "", title = "DUOMEI Co
           <path d="M82 117c5 3 12 3 17 0" fill="none" stroke="#d8b455" strokeWidth="5" strokeLinecap="round" opacity="0.8" />
         </g>
 
-        <g className={isWave ? "companion-arm companion-arm--wave" : "companion-arm"}>
+        <g className={armClassName}>
           <path
             d="M112 105c18-11 30-5 31 8 1 11-9 19-25 18"
             fill="#f7edda"
@@ -126,13 +159,17 @@ export function CompanionSvg({ state = "sit", className = "", title = "DUOMEI Co
             <path d="M34 53c19-12 69-13 91-1 2 7-1 12-10 15-24-7-51-7-75 1-9-3-11-8-6-15Z" fill="#dfcfad" stroke="#332d25" strokeWidth="3" />
           </g>
 
-          <g className={isLook ? "companion-eyes is-looking" : "companion-eyes"}>
+          <g className={eyesClassName}>
             <rect x="58" y="77" width="7" height="15" rx="2.5" fill="#2d2924" />
             <rect x="94" y="77" width="7" height="15" rx="2.5" fill="#2d2924" />
           </g>
           <circle cx="50" cy="100" r="5" fill="#e9a679" opacity="0.58" />
           <circle cx="110" cy="100" r="5" fill="#e9a679" opacity="0.58" />
-          <path d={isHappy ? "M71 98c5 7 16 7 21 0" : "M73 98c4 3 11 3 15 0"} fill="none" stroke="#2d2924" strokeWidth="3" strokeLinecap="round" />
+          {isYawn ? (
+            <ellipse cx="81" cy="101" rx="5" ry="6" fill="#2d2924" opacity="0.82" />
+          ) : (
+            <path d={isHappy ? "M71 98c5 7 16 7 21 0" : "M73 98c4 3 11 3 15 0"} fill="none" stroke="#2d2924" strokeWidth="3" strokeLinecap="round" />
+          )}
         </g>
       </g>
     </svg>
