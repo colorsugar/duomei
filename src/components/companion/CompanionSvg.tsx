@@ -79,7 +79,6 @@ export function CompanionSvg({ state = "sit", className = "", title = "DUOMEI Co
           />
           <path d="M-11 21c9 4 22 4 31 0" fill="none" stroke="#7b674f" strokeWidth="2.5" strokeLinecap="round" />
           <path d="M-14 45c9 5 24 5 34 0" fill="none" stroke="#7b674f" strokeWidth="2.5" strokeLinecap="round" />
-          <circle cx="7" cy="13" r="5" fill="#d8b455" stroke="#7b674f" strokeWidth="1.8" />
         </g>
 
         <g className="companion-feet" fill="#efe0bf" stroke="#332d25" strokeWidth="3.2" strokeLinejoin="round">

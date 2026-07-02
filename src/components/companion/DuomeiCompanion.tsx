@@ -21,13 +21,13 @@ type DragState = {
   startY: number;
   offsetX: number;
   offsetY: number;
-  longPressTimer: number;
   dragging: boolean;
 };
 
 const HOME_DELAY_MS = 24000;
 const MESSAGE_DURATION_MS = 3000;
 const POSITION_KEY = "duomei-companion-position";
+const REMOVE_ZONE_HEIGHT = 132;
 const UNSAFE_OVERLAY_SELECTOR = [
   ".detail-image-panel",
   ".image-upload-panel",
@@ -107,6 +107,8 @@ export function DuomeiCompanion({ placement = "global" }: DuomeiCompanionProps) 
   const [activeMessage, setActiveMessage] = useState<string | null>(null);
   const [position, setPosition] = useState<CompanionPosition | null>(null);
   const [dragging, setDragging] = useState(false);
+  const [removeArmed, setRemoveArmed] = useState(false);
+  const [dismissed, setDismissed] = useState(false);
 
   const isAdmin = location.pathname.startsWith("/admin");
   const isEditRoute = new URLSearchParams(location.search).get("edit") === "1";
@@ -119,6 +121,8 @@ export function DuomeiCompanion({ placement = "global" }: DuomeiCompanionProps) 
     window.localStorage.removeItem(POSITION_KEY);
     setPosition(null);
     setDragging(false);
+    setRemoveArmed(false);
+    setDismissed(false);
     setNoteVisible(false);
     setState("happy");
     window.setTimeout(() => setState("sit"), 900);
@@ -146,6 +150,8 @@ export function DuomeiCompanion({ placement = "global" }: DuomeiCompanionProps) 
     setNoteVisible(false);
     setActiveMessage(null);
     setClickStep(0);
+    setRemoveArmed(false);
+    setDismissed(false);
     if (placement !== "global") {
       setVisible(true);
       setState(placement === "not-found" ? "lost" : "sit");
@@ -200,25 +206,11 @@ export function DuomeiCompanion({ placement = "global" }: DuomeiCompanionProps) 
   }, [placement, suppressed, visible, dragging]);
 
   useEffect(() => {
-    if (placement !== "global" || suppressed || !visible || dragging) return;
-    const leaveTimer = window.setTimeout(() => {
-      setState("walk");
-      window.setTimeout(() => setVisible(false), 1100);
-      window.setTimeout(() => {
-        if (!isUnsafeDomState()) {
-          setVisible(true);
-          setState("walk");
-          window.setTimeout(() => setState("sit"), 950);
-        }
-      }, 90000);
-    }, 180000);
-    return () => window.clearTimeout(leaveTimer);
-  }, [placement, suppressed, visible, dragging]);
-
-  useEffect(() => {
     if (placement !== "global") return;
     const onPublished = () => {
       if (isUnsafeDomState()) return;
+      setDismissed(false);
+      setRemoveArmed(false);
       setVisible(true);
       setState("flag");
       setActiveMessage(getCompanionMessage("published", 0));
@@ -247,7 +239,7 @@ export function DuomeiCompanion({ placement = "global" }: DuomeiCompanionProps) 
     return () => window.removeEventListener("resize", onResize);
   }, [placement, position]);
 
-  if (suppressed || (placement === "global" && (!context || !visible))) return null;
+  if (suppressed || (placement === "global" && (dismissed || !context || !visible))) return null;
 
   const showContextMessage = () => {
     const next = (clickStep + 1) % 3;
@@ -279,25 +271,12 @@ export function DuomeiCompanion({ placement = "global" }: DuomeiCompanionProps) 
     if (placement !== "global") return;
     const rect = companionRef.current?.getBoundingClientRect();
     if (!rect) return;
-    const target = event.currentTarget;
-    const longPressTimer = window.setTimeout(() => {
-      if (!dragRef.current || dragRef.current.pointerId !== event.pointerId) return;
-      resetCompanionPosition();
-      suppressNextClickRef.current = true;
-      dragRef.current = null;
-      try {
-        target.releasePointerCapture(event.pointerId);
-      } catch {
-        // The browser may release the pointer first.
-      }
-    }, 2000);
     dragRef.current = {
       pointerId: event.pointerId,
       startX: event.clientX,
       startY: event.clientY,
       offsetX: event.clientX - rect.left,
       offsetY: event.clientY - rect.top,
-      longPressTimer,
       dragging: false,
     };
     event.currentTarget.setPointerCapture(event.pointerId);
@@ -310,7 +289,6 @@ export function DuomeiCompanion({ placement = "global" }: DuomeiCompanionProps) 
     const distance = Math.hypot(event.clientX - drag.startX, event.clientY - drag.startY);
     if (!drag.dragging && distance > 10) {
       drag.dragging = true;
-      window.clearTimeout(drag.longPressTimer);
       setDragging(true);
       setNoteVisible(false);
       setState("walk");
@@ -319,13 +297,13 @@ export function DuomeiCompanion({ placement = "global" }: DuomeiCompanionProps) 
     event.preventDefault();
     const next = clampPosition(event.clientX - drag.offsetX, event.clientY - drag.offsetY, rect.width, rect.height);
     setPosition(next);
+    setRemoveArmed(event.clientY > window.innerHeight - REMOVE_ZONE_HEIGHT);
     window.localStorage.setItem(POSITION_KEY, JSON.stringify(next));
   };
 
   const endDrag = (event: PointerEvent<HTMLButtonElement>) => {
     const drag = dragRef.current;
     if (!drag || drag.pointerId !== event.pointerId) return;
-    window.clearTimeout(drag.longPressTimer);
     try {
       event.currentTarget.releasePointerCapture(event.pointerId);
     } catch {
@@ -335,6 +313,14 @@ export function DuomeiCompanion({ placement = "global" }: DuomeiCompanionProps) 
     if (drag.dragging) {
       suppressNextClickRef.current = true;
       setDragging(false);
+      if (removeArmed || event.clientY > window.innerHeight - REMOVE_ZONE_HEIGHT) {
+        setDismissed(true);
+        setVisible(false);
+        setRemoveArmed(false);
+        setState("sit");
+        return;
+      }
+      setRemoveArmed(false);
       setState("sit");
       return;
     }
@@ -385,9 +371,12 @@ export function DuomeiCompanion({ placement = "global" }: DuomeiCompanionProps) 
       ref={companionRef}
       className={`duomei-companion duomei-companion--${placement} duomei-companion--${context ?? "page"}${
         dragging ? " is-dragging" : ""
-      }`}
+      }${removeArmed ? " is-remove-armed" : ""}`}
       style={companionStyle}
     >
+      {placement === "global" && dragging ? (
+        <div className={`duomei-companion-remove-zone${removeArmed ? " is-active" : ""}`}>松开移除</div>
+      ) : null}
       <CompanionBubble message={message} visible={noteVisible} />
       <button
         className="duomei-companion-button"
