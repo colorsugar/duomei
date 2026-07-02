@@ -240,10 +240,14 @@ function PhysicsIconField() {
     const start = performance.now();
     const rect = () => field.getBoundingClientRect();
     let bounds = rect();
+    const isCompact = window.innerWidth <= 700;
+    const fallGravity = isCompact ? 0.0045 : 0.006;
+    const fallMaxSpeed = isCompact ? 0.16 : 0.22;
+    const driftMaxSpeed = isCompact ? 0.028 : 0.04;
     const bodies = items.map((item, index) => ({
       x: Math.random() * (bounds.width + 320) - 160,
       y: -120 - Math.random() * bounds.height * 0.5,
-      vx: (Math.random() - 0.5) * 0.28,
+      vx: (Math.random() - 0.5) * (isCompact ? 0.035 : 0.055),
       vy: 0,
       r: item.size * 0.42,
       rot: (index * 31) % 360,
@@ -270,25 +274,26 @@ function PhysicsIconField() {
         el.style.opacity = "0.92";
 
         if (!body.settled) {
-          body.vy += 0.035 * dt;
+          body.vy += fallGravity * dt;
+          if (body.vy > fallMaxSpeed) body.vy = fallMaxSpeed;
           body.y += body.vy * dt;
           const floor = body.targetY;
           if (body.y > floor) {
             body.y = floor;
-            body.vy *= -0.22;
-            body.vx *= 0.62;
-            if (Math.abs(body.vy) < 0.24) {
+            body.vy *= -0.12;
+            body.vx *= 0.38;
+            if (Math.abs(body.vy) < 0.055) {
               body.settled = true;
-              body.vx = (((i * 7) % 9) - 4) * 0.035 || 0.045;
-              body.vy = (((i * 11) % 7) - 3) * 0.025;
+              body.vx = (((i * 7) % 9) - 4) * (isCompact ? 0.006 : 0.009) || 0.012;
+              body.vy = (((i * 11) % 7) - 3) * (isCompact ? 0.004 : 0.006);
             }
           }
         } else {
-          body.vx += Math.sin((frame + i * 20) / 190) * 0.0008;
-          body.vy += Math.cos((frame + i * 17) / 210) * 0.0008;
-          body.vx *= 0.998;
-          body.vy *= 0.998;
-          const maxSpeed = 0.12;
+          body.vx += Math.sin((frame + i * 20) / 220) * 0.00018;
+          body.vy += Math.cos((frame + i * 17) / 240) * 0.00018;
+          body.vx *= 0.996;
+          body.vy *= 0.996;
+          const maxSpeed = driftMaxSpeed;
           const speed = Math.hypot(body.vx, body.vy);
           if (speed > maxSpeed) {
             body.vx = (body.vx / speed) * maxSpeed;
@@ -311,17 +316,25 @@ function PhysicsIconField() {
           const min = a.r + b.r;
           if (distance < min) {
             const overlap = min - distance;
-            const push = overlap * 0.004;
+            const push = overlap * 0.0007;
             const nx = dx / distance;
             const ny = dy / distance;
-            a.x -= nx * overlap * 0.18;
-            a.y -= ny * overlap * 0.18;
-            b.x += nx * overlap * 0.18;
-            b.y += ny * overlap * 0.18;
+            a.x -= nx * overlap * 0.08;
+            a.y -= ny * overlap * 0.08;
+            b.x += nx * overlap * 0.08;
+            b.y += ny * overlap * 0.08;
             a.vx -= nx * push;
             a.vy -= ny * push;
             b.vx += nx * push;
             b.vy += ny * push;
+            for (const body of [a, b]) {
+              const maxSpeed = body.settled ? driftMaxSpeed : fallMaxSpeed;
+              const speed = Math.hypot(body.vx, body.vy);
+              if (speed > maxSpeed) {
+                body.vx = (body.vx / speed) * maxSpeed;
+                body.vy = (body.vy / speed) * maxSpeed;
+              }
+            }
           }
         }
       }

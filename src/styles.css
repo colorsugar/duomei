@@ -5364,18 +5364,18 @@ body.front-editing .notes-bottom-spacer {
   align-items: center;
   gap: clamp(90px, 12vw, 190px);
   width: max-content;
-  animation: iconLaneRun 28s linear infinite;
+  animation: iconLaneRun 92s linear infinite;
   will-change: transform;
 }
 
 .lane-two .lane-track {
-  animation-duration: 34s;
+  animation-duration: 108s;
   animation-direction: reverse;
 }
 
 .lane-three .lane-track {
-  animation-duration: 31s;
-  animation-delay: -9s;
+  animation-duration: 102s;
+  animation-delay: -26s;
 }
 
 .lane-icon {
