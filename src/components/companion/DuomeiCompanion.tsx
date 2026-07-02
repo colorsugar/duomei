@@ -225,6 +225,8 @@ export function DuomeiCompanion({ placement = "global" }: DuomeiCompanionProps) 
       return;
     }
     if (next === 2) {
+      setState("wave");
+      window.setTimeout(() => setState("sit"), 1300);
       setActiveMessage(getCompanionMessage(messageContext, messageCursor));
       setMessageCursor((current) => current + 1);
       setNoteVisible(true);
