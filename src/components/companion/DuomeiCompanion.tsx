@@ -1,17 +1,33 @@
-import { useEffect, useMemo, useState } from "react";
+import { type CSSProperties, type PointerEvent, useEffect, useMemo, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { useDuomeiEdit } from "../DuomeiEditProvider";
 import { CompanionBubble } from "./CompanionBubble";
 import { CompanionSvg } from "./CompanionSvg";
-import { companionMessages, type CompanionMessageContext } from "./companionMessages";
+import { getCompanionMessage, type CompanionMessageContext } from "./companionMessages";
 import type { CompanionPlacement, CompanionState } from "./companionStates";
 
 type DuomeiCompanionProps = {
   placement?: CompanionPlacement;
 };
 
+type CompanionPosition = {
+  x: number;
+  y: number;
+};
+
+type DragState = {
+  pointerId: number;
+  startX: number;
+  startY: number;
+  offsetX: number;
+  offsetY: number;
+  longPressTimer: number;
+  dragging: boolean;
+};
+
 const HOME_DELAY_MS = 24000;
 const MESSAGE_DURATION_MS = 3000;
+const POSITION_KEY = "duomei-companion-position";
 
 function isUnsafeDomState() {
   if (typeof document === "undefined") return true;
@@ -30,22 +46,55 @@ function routeContext(pathname: string): CompanionMessageContext | null {
   return null;
 }
 
+function clampPosition(x: number, y: number, width: number, height: number): CompanionPosition {
+  const margin = 12;
+  const mobileBottomReserve = window.innerWidth <= 760 ? 112 : 18;
+  const maxX = Math.max(margin, window.innerWidth - width - margin);
+  const maxY = Math.max(margin, window.innerHeight - height - mobileBottomReserve);
+  return {
+    x: Math.min(Math.max(x, margin), maxX),
+    y: Math.min(Math.max(y, margin), maxY),
+  };
+}
+
+function readSavedPosition(): CompanionPosition | null {
+  try {
+    const raw = window.localStorage.getItem(POSITION_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as CompanionPosition;
+    if (!Number.isFinite(parsed.x) || !Number.isFinite(parsed.y)) return null;
+    return parsed;
+  } catch {
+    return null;
+  }
+}
+
 export function DuomeiCompanion({ placement = "global" }: DuomeiCompanionProps) {
   const location = useLocation();
   const { editMode, isEditorOpen } = useDuomeiEdit();
+  const companionRef = useRef<HTMLDivElement | null>(null);
+  const dragRef = useRef<DragState | null>(null);
   const [visible, setVisible] = useState(placement !== "global");
   const [state, setState] = useState<CompanionState>(placement === "not-found" ? "lost" : "sit");
   const [noteVisible, setNoteVisible] = useState(false);
   const [clickStep, setClickStep] = useState(0);
+  const [messageCursor, setMessageCursor] = useState(0);
   const [unsafe, setUnsafe] = useState(true);
   const [activeMessage, setActiveMessage] = useState<string | null>(null);
+  const [position, setPosition] = useState<CompanionPosition | null>(null);
+  const [dragging, setDragging] = useState(false);
 
   const isAdmin = location.pathname.startsWith("/admin");
   const isEditRoute = new URLSearchParams(location.search).get("edit") === "1";
   const context = useMemo(() => routeContext(location.pathname), [location.pathname]);
   const suppressed = isAdmin || isEditRoute || editMode || isEditorOpen || unsafe;
-  const message =
-    activeMessage ?? (placement === "not-found" ? companionMessages["not-found"] : companionMessages[context ?? "home"]);
+  const messageContext = placement === "not-found" ? "not-found" : (context ?? "home");
+  const message = activeMessage ?? getCompanionMessage(messageContext, messageCursor);
+
+  useEffect(() => {
+    const saved = readSavedPosition();
+    if (saved) setPosition(saved);
+  }, []);
 
   useEffect(() => {
     const check = () => setUnsafe(isUnsafeDomState());
@@ -101,7 +150,7 @@ export function DuomeiCompanion({ placement = "global" }: DuomeiCompanionProps) 
     const scheduleLook = () => {
       const delay = 15000 + Math.round(Math.random() * 15000);
       window.setTimeout(() => {
-        if (cancelled || suppressed || !visible) return;
+        if (cancelled || suppressed || !visible || dragging) return;
         setState("look");
         window.setTimeout(() => {
           if (!cancelled) setState("sit");
@@ -113,10 +162,10 @@ export function DuomeiCompanion({ placement = "global" }: DuomeiCompanionProps) 
     return () => {
       cancelled = true;
     };
-  }, [placement, suppressed, visible]);
+  }, [placement, suppressed, visible, dragging]);
 
   useEffect(() => {
-    if (placement !== "global" || suppressed || !visible) return;
+    if (placement !== "global" || suppressed || !visible || dragging) return;
     const leaveTimer = window.setTimeout(() => {
       setState("walk");
       window.setTimeout(() => setVisible(false), 1100);
@@ -129,7 +178,7 @@ export function DuomeiCompanion({ placement = "global" }: DuomeiCompanionProps) 
       }, 90000);
     }, 180000);
     return () => window.clearTimeout(leaveTimer);
-  }, [placement, suppressed, visible]);
+  }, [placement, suppressed, visible, dragging]);
 
   useEffect(() => {
     if (placement !== "global") return;
@@ -137,7 +186,7 @@ export function DuomeiCompanion({ placement = "global" }: DuomeiCompanionProps) 
       if (isUnsafeDomState()) return;
       setVisible(true);
       setState("flag");
-      setActiveMessage(companionMessages.published);
+      setActiveMessage(getCompanionMessage("published", 0));
       setNoteVisible(true);
       window.setTimeout(() => {
         setNoteVisible(false);
@@ -150,34 +199,137 @@ export function DuomeiCompanion({ placement = "global" }: DuomeiCompanionProps) 
     return () => window.removeEventListener("duomei:publish-success", onPublished);
   }, [placement]);
 
+  useEffect(() => {
+    if (placement !== "global" || !position || !companionRef.current) return;
+    const onResize = () => {
+      const rect = companionRef.current?.getBoundingClientRect();
+      if (!rect) return;
+      const next = clampPosition(position.x, position.y, rect.width, rect.height);
+      setPosition(next);
+      window.localStorage.setItem(POSITION_KEY, JSON.stringify(next));
+    };
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, [placement, position]);
+
   if (suppressed || (placement === "global" && (!context || !visible))) return null;
 
-  const handleClick = () => {
-    if (placement === "not-found") {
-      setNoteVisible(true);
-      window.setTimeout(() => setNoteVisible(false), MESSAGE_DURATION_MS);
-      return;
-    }
-
+  const showContextMessage = () => {
     const next = (clickStep + 1) % 3;
     setClickStep(next);
     if (next === 1) {
       setState("look");
       window.setTimeout(() => setState("sit"), 1300);
       setNoteVisible(false);
-    } else if (next === 2) {
-      setNoteVisible(true);
-      window.setTimeout(() => setNoteVisible(false), MESSAGE_DURATION_MS);
-    } else {
-      setNoteVisible(false);
-      setState("sit");
+      return;
     }
+    if (next === 2) {
+      setActiveMessage(getCompanionMessage(messageContext, messageCursor));
+      setMessageCursor((current) => current + 1);
+      setNoteVisible(true);
+      window.setTimeout(() => {
+        setNoteVisible(false);
+        setActiveMessage(null);
+      }, MESSAGE_DURATION_MS);
+      return;
+    }
+    setNoteVisible(false);
+    setState("sit");
   };
 
+  const beginDrag = (event: PointerEvent<HTMLButtonElement>) => {
+    if (placement !== "global") return;
+    const rect = companionRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    const longPressTimer = window.setTimeout(() => {
+      if (!dragRef.current) return;
+      dragRef.current.dragging = true;
+      setDragging(true);
+      setNoteVisible(false);
+      setState("walk");
+    }, 280);
+    dragRef.current = {
+      pointerId: event.pointerId,
+      startX: event.clientX,
+      startY: event.clientY,
+      offsetX: event.clientX - rect.left,
+      offsetY: event.clientY - rect.top,
+      longPressTimer,
+      dragging: false,
+    };
+    event.currentTarget.setPointerCapture(event.pointerId);
+  };
+
+  const moveDrag = (event: PointerEvent<HTMLButtonElement>) => {
+    const drag = dragRef.current;
+    const rect = companionRef.current?.getBoundingClientRect();
+    if (!drag || !rect || drag.pointerId !== event.pointerId) return;
+    const distance = Math.hypot(event.clientX - drag.startX, event.clientY - drag.startY);
+    if (!drag.dragging && distance > 10) {
+      drag.dragging = true;
+      setDragging(true);
+      setNoteVisible(false);
+      setState("walk");
+    }
+    if (!drag.dragging) return;
+    event.preventDefault();
+    const next = clampPosition(event.clientX - drag.offsetX, event.clientY - drag.offsetY, rect.width, rect.height);
+    setPosition(next);
+    window.localStorage.setItem(POSITION_KEY, JSON.stringify(next));
+  };
+
+  const endDrag = (event: PointerEvent<HTMLButtonElement>) => {
+    const drag = dragRef.current;
+    if (!drag || drag.pointerId !== event.pointerId) return;
+    window.clearTimeout(drag.longPressTimer);
+    event.currentTarget.releasePointerCapture(event.pointerId);
+    dragRef.current = null;
+    if (drag.dragging) {
+      setDragging(false);
+      setState("sit");
+      return;
+    }
+    if (placement === "not-found") {
+      setActiveMessage(getCompanionMessage("not-found", messageCursor));
+      setMessageCursor((current) => current + 1);
+      setNoteVisible(true);
+      window.setTimeout(() => {
+        setNoteVisible(false);
+        setActiveMessage(null);
+      }, MESSAGE_DURATION_MS);
+      return;
+    }
+    showContextMessage();
+  };
+
+  const companionStyle: CSSProperties =
+    placement === "global" && position
+      ? {
+          left: `${position.x}px`,
+          top: `${position.y}px`,
+          right: "auto",
+          bottom: "auto",
+        }
+      : {};
+
   return (
-    <div className={`duomei-companion duomei-companion--${placement} duomei-companion--${context ?? "page"}`}>
+    <div
+      ref={companionRef}
+      className={`duomei-companion duomei-companion--${placement} duomei-companion--${context ?? "page"}${
+        dragging ? " is-dragging" : ""
+      }`}
+      style={companionStyle}
+    >
       <CompanionBubble message={message} visible={noteVisible} />
-      <button className="duomei-companion-button" type="button" aria-label="小旅伴" onClick={handleClick}>
+      <button
+        className="duomei-companion-button"
+        type="button"
+        aria-label="小旅伴，长按可以移动"
+        onPointerDown={beginDrag}
+        onPointerMove={moveDrag}
+        onPointerUp={endDrag}
+        onPointerCancel={endDrag}
+      >
         <CompanionSvg state={state} />
       </button>
     </div>

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 
 export function BackToTopButton() {
   const [visible, setVisible] = useState(false);
@@ -10,7 +11,7 @@ export function BackToTopButton() {
     return () => window.removeEventListener("scroll", update);
   }, []);
 
-  return (
+  return createPortal(
     <button
       className={`back-to-top${visible ? " is-visible" : ""}`}
       type="button"
@@ -18,6 +19,7 @@ export function BackToTopButton() {
       onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
     >
       ↑
-    </button>
+    </button>,
+    document.body,
   );
 }
