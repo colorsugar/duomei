@@ -28,15 +28,38 @@ type DragState = {
 const HOME_DELAY_MS = 24000;
 const MESSAGE_DURATION_MS = 3000;
 const POSITION_KEY = "duomei-companion-position";
+const UNSAFE_OVERLAY_SELECTOR = [
+  ".detail-image-panel",
+  ".image-upload-panel",
+  ".image-editor-overlay",
+  ".image-editor-shell",
+  ".image-cropper-shell",
+  ".image-crop-panel",
+  ".duomei-image-panel",
+  "[data-image-editor-open='true']",
+  "[data-upload-panel-open='true']",
+  "dialog[open]",
+  "[role='dialog'][aria-modal='true']",
+].join(", ");
+const NOTES_SAFE_SELECTOR = "#notes, .duomei-notes-section, .notes-section";
 
 function isUnsafeDomState() {
   if (typeof document === "undefined") return true;
-  return (
+  const modalOpen =
     document.body.classList.contains("duomei-modal-open") ||
     document.documentElement.classList.contains("duomei-modal-open") ||
     document.body.classList.contains("front-editing") ||
-    Boolean(document.querySelector(".detail-image-panel, .image-upload-panel, .image-editor-overlay, [data-image-editor-open='true']"))
-  );
+    Boolean(document.querySelector(UNSAFE_OVERLAY_SELECTOR));
+  const notesArea = document.querySelector(NOTES_SAFE_SELECTOR);
+  const notesVisible =
+    notesArea instanceof HTMLElement &&
+    (() => {
+      const rect = notesArea.getBoundingClientRect();
+      return rect.top < window.innerHeight * 0.92 && rect.bottom > window.innerHeight * 0.12;
+    })();
+  const mobileCramped = window.innerWidth <= 430 && (notesVisible || window.innerHeight < 720);
+
+  return modalOpen || Boolean(notesVisible) || mobileCramped;
 }
 
 function routeContext(pathname: string): CompanionMessageContext | null {
@@ -91,6 +114,15 @@ export function DuomeiCompanion({ placement = "global" }: DuomeiCompanionProps) 
   const suppressed = isAdmin || isEditRoute || editMode || isEditorOpen || unsafe;
   const messageContext = placement === "not-found" ? "not-found" : (context ?? "home");
   const message = activeMessage ?? getCompanionMessage(messageContext, messageCursor);
+
+  const resetCompanionPosition = () => {
+    window.localStorage.removeItem(POSITION_KEY);
+    setPosition(null);
+    setDragging(false);
+    setNoteVisible(false);
+    setState("happy");
+    window.setTimeout(() => setState("sit"), 900);
+  };
 
   useEffect(() => {
     const saved = readSavedPosition();
@@ -152,11 +184,13 @@ export function DuomeiCompanion({ placement = "global" }: DuomeiCompanionProps) 
       const delay = 15000 + Math.round(Math.random() * 15000);
       window.setTimeout(() => {
         if (cancelled || suppressed || !visible || dragging) return;
-        setState("look");
+        const ambientStates: CompanionState[] = ["look", "sleep", "walk"];
+        const nextState = ambientStates[Math.floor(Math.random() * ambientStates.length)];
+        setState(nextState);
         window.setTimeout(() => {
           if (!cancelled) setState("sit");
           scheduleLook();
-        }, 1400);
+        }, nextState === "sleep" ? 2200 : nextState === "walk" ? 1500 : 1400);
       }, delay);
     };
     scheduleLook();
@@ -237,20 +271,26 @@ export function DuomeiCompanion({ placement = "global" }: DuomeiCompanionProps) 
       return;
     }
     setNoteVisible(false);
-    setState("sit");
+    setState("happy");
+    window.setTimeout(() => setState("sit"), 900);
   };
 
   const beginDrag = (event: PointerEvent<HTMLButtonElement>) => {
     if (placement !== "global") return;
     const rect = companionRef.current?.getBoundingClientRect();
     if (!rect) return;
+    const target = event.currentTarget;
     const longPressTimer = window.setTimeout(() => {
-      if (!dragRef.current) return;
-      dragRef.current.dragging = true;
-      setDragging(true);
-      setNoteVisible(false);
-      setState("walk");
-    }, 280);
+      if (!dragRef.current || dragRef.current.pointerId !== event.pointerId) return;
+      resetCompanionPosition();
+      suppressNextClickRef.current = true;
+      dragRef.current = null;
+      try {
+        target.releasePointerCapture(event.pointerId);
+      } catch {
+        // The browser may release the pointer first.
+      }
+    }, 2000);
     dragRef.current = {
       pointerId: event.pointerId,
       startX: event.clientX,
@@ -270,6 +310,7 @@ export function DuomeiCompanion({ placement = "global" }: DuomeiCompanionProps) 
     const distance = Math.hypot(event.clientX - drag.startX, event.clientY - drag.startY);
     if (!drag.dragging && distance > 10) {
       drag.dragging = true;
+      window.clearTimeout(drag.longPressTimer);
       setDragging(true);
       setNoteVisible(false);
       setState("walk");
@@ -285,7 +326,11 @@ export function DuomeiCompanion({ placement = "global" }: DuomeiCompanionProps) 
     const drag = dragRef.current;
     if (!drag || drag.pointerId !== event.pointerId) return;
     window.clearTimeout(drag.longPressTimer);
-    event.currentTarget.releasePointerCapture(event.pointerId);
+    try {
+      event.currentTarget.releasePointerCapture(event.pointerId);
+    } catch {
+      // The browser may release the pointer first.
+    }
     dragRef.current = null;
     if (drag.dragging) {
       suppressNextClickRef.current = true;
@@ -347,8 +392,9 @@ export function DuomeiCompanion({ placement = "global" }: DuomeiCompanionProps) 
       <button
         className="duomei-companion-button"
         type="button"
-        aria-label="小旅伴，长按可以移动"
+        aria-label="DUOMEI 小旅伴，拖动可移动，双击或长按两秒可复位"
         onClick={handleCompanionClick}
+        onDoubleClick={resetCompanionPosition}
         onPointerDown={beginDrag}
         onPointerMove={moveDrag}
         onPointerUp={endDrag}

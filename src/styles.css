@@ -9707,10 +9707,10 @@ body.duomei-modal-open {
 /* DUOMEI Companion: atmosphere only, never above core editing controls. */
 .duomei-companion {
   position: fixed;
-  right: 22px;
-  bottom: calc(126px + env(safe-area-inset-bottom));
-  z-index: 70;
-  width: 86px;
+  right: 26px;
+  bottom: calc(118px + env(safe-area-inset-bottom));
+  z-index: 64;
+  width: 126px;
   pointer-events: none;
   opacity: 0.96;
   contain: layout style;
@@ -9726,7 +9726,7 @@ body.duomei-modal-open {
   right: clamp(18px, 8vw, 128px);
   bottom: 16px;
   z-index: 1;
-  width: 96px;
+  width: 136px;
 }
 
 .duomei-companion--not-found {
@@ -9734,7 +9734,7 @@ body.duomei-modal-open {
   right: auto;
   bottom: auto;
   z-index: 1;
-  width: 112px;
+  width: 150px;
   margin: 28px 0 0;
 }
 
@@ -9742,20 +9742,21 @@ body.duomei-modal-open {
   all: unset;
   display: block;
   width: 100%;
-  cursor: pointer;
+  cursor: grab;
   pointer-events: auto;
   touch-action: none;
   transform-origin: 50% 82%;
-  animation: duomeiCompanionAmbient 12s var(--motion-ease-ambient, ease-in-out) infinite alternate;
+  animation: duomeiCompanionAmbient 9.5s var(--motion-ease-ambient, ease-in-out) infinite alternate;
 }
 
 .duomei-companion.is-dragging {
-  z-index: 82;
+  z-index: 72;
 }
 
 .duomei-companion.is-dragging .duomei-companion-button {
   cursor: grabbing;
   animation-play-state: paused;
+  transform: translate3d(0, -2px, 0) rotate(0.25deg);
 }
 
 .duomei-companion-button:focus-visible {
@@ -9769,7 +9770,10 @@ body.duomei-modal-open {
   width: 100%;
   height: auto;
   overflow: visible;
-  filter: drop-shadow(0 16px 24px rgba(58, 48, 36, 0.1));
+  image-rendering: auto;
+  filter:
+    drop-shadow(2px 2px 0 rgba(39, 35, 28, 0.14))
+    drop-shadow(0 18px 28px rgba(58, 48, 36, 0.12));
 }
 
 .duomei-companion-note {
@@ -9777,7 +9781,7 @@ body.duomei-modal-open {
   right: 72%;
   bottom: 78%;
   width: max-content;
-  max-width: 180px;
+  max-width: 210px;
   padding: 10px 14px;
   border: 1px solid rgba(151, 133, 105, 0.24);
   border-radius: 14px 14px 12px 14px;
@@ -9805,7 +9809,11 @@ body.duomei-modal-open {
 }
 
 .companion-body.is-walking {
-  animation: duomeiCompanionWalk 1.2s var(--motion-ease-ambient, ease-in-out) infinite alternate;
+  animation: duomeiCompanionWalk 700ms steps(2, end) infinite alternate;
+}
+
+.companion-body.is-happy {
+  animation: duomeiCompanionHappy 800ms var(--motion-ease-reveal, cubic-bezier(0.16, 1, 0.3, 1)) 1;
 }
 
 .companion-backpack {
@@ -9818,7 +9826,28 @@ body.duomei-modal-open {
 }
 
 .companion-arm--wave {
-  animation: duomeiCompanionWave 900ms var(--motion-ease-ambient, ease-in-out) 2 alternate;
+  animation: duomeiCompanionWave 780ms var(--motion-ease-ambient, ease-in-out) 3 alternate;
+}
+
+.companion-sprout {
+  transform-origin: 82px 34px;
+  animation: duomeiCompanionSprout 11s var(--motion-ease-ambient, ease-in-out) infinite alternate;
+}
+
+.companion-eyes.is-looking {
+  animation: duomeiCompanionLookEyes 1.25s var(--motion-ease-standard, ease-in-out) 1;
+}
+
+.companion-sleep-z {
+  animation: duomeiCompanionSleepZ 1.9s var(--motion-ease-ambient, ease-in-out) infinite;
+}
+
+.companion-feet {
+  transform-origin: 82px 148px;
+}
+
+.companion-body.is-walking .companion-feet {
+  animation: duomeiCompanionFeet 420ms steps(2, end) infinite alternate;
 }
 
 body.front-editing .duomei-companion,
@@ -9840,10 +9869,10 @@ html.duomei-modal-open .duomei-companion {
 
 @keyframes duomeiCompanionAmbient {
   from {
-    transform: translate3d(0, 0, 0) rotate(-0.3deg);
+    transform: translate3d(0, 0, 0) rotate(-0.45deg);
   }
   to {
-    transform: translate3d(0, -2.5px, 0) rotate(0.35deg);
+    transform: translate3d(0, -4px, 0) rotate(0.45deg);
   }
 }
 
@@ -9858,19 +9887,76 @@ html.duomei-modal-open .duomei-companion {
 
 @keyframes duomeiCompanionWalk {
   from {
-    transform: translate3d(-1px, 0, 0) rotate(-0.3deg);
+    transform: translate3d(-3px, 0, 0) rotate(-0.45deg);
   }
   to {
-    transform: translate3d(1px, -1px, 0) rotate(0.3deg);
+    transform: translate3d(3px, -1px, 0) rotate(0.45deg);
   }
 }
 
 @keyframes duomeiCompanionWave {
   from {
-    transform: rotate(-0.4deg);
+    transform: rotate(-5deg);
   }
   to {
-    transform: rotate(8deg);
+    transform: rotate(17deg);
+  }
+}
+
+@keyframes duomeiCompanionHappy {
+  0% {
+    transform: translate3d(0, 0, 0) rotate(-0.2deg);
+  }
+  48% {
+    transform: translate3d(0, -5px, 0) rotate(0.35deg);
+  }
+  100% {
+    transform: translate3d(0, 0, 0) rotate(0deg);
+  }
+}
+
+@keyframes duomeiCompanionSprout {
+  from {
+    transform: rotate(-1.8deg);
+  }
+  to {
+    transform: rotate(1.8deg);
+  }
+}
+
+@keyframes duomeiCompanionLookEyes {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  35% {
+    transform: translateX(3px);
+  }
+  68% {
+    transform: translateX(-2px);
+  }
+}
+
+@keyframes duomeiCompanionSleepZ {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 4px, 0);
+  }
+  45% {
+    opacity: 0.78;
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(5px, -6px, 0);
+  }
+}
+
+@keyframes duomeiCompanionFeet {
+  from {
+    transform: translateY(0) rotate(-0.6deg);
+  }
+  to {
+    transform: translateY(2px) rotate(0.6deg);
   }
 }
 
@@ -9890,8 +9976,8 @@ html.duomei-modal-open .duomei-companion {
 
   .duomei-companion--global {
     right: max(14px, env(safe-area-inset-right));
-    bottom: calc(146px + env(safe-area-inset-bottom));
-    width: 62px;
+    bottom: calc(150px + env(safe-area-inset-bottom));
+    width: 86px;
   }
 
   .duomei-companion--detail {
@@ -9902,18 +9988,18 @@ html.duomei-modal-open .duomei-companion {
     position: relative;
     right: auto;
     bottom: auto;
-    width: 78px;
+    width: 96px;
     margin: 22px auto 0;
   }
 
   .duomei-companion--not-found {
-    width: 88px;
+    width: 108px;
   }
 
   .duomei-companion-note {
-    right: 58%;
-    bottom: 84%;
-    max-width: 140px;
+    right: 52%;
+    bottom: 82%;
+    max-width: 150px;
     font-size: 12px;
   }
 }
