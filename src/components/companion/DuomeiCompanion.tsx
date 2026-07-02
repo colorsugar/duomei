@@ -375,7 +375,7 @@ export function DuomeiCompanion({ placement = "global" }: DuomeiCompanionProps) 
       style={companionStyle}
     >
       {placement === "global" && dragging ? (
-        <div className={`duomei-companion-remove-zone${removeArmed ? " is-active" : ""}`}>松开移除</div>
+        <div className={`duomei-companion-remove-zone${removeArmed ? " is-active" : ""}`}>可以删除</div>
       ) : null}
       <CompanionBubble message={message} visible={noteVisible} />
       <button

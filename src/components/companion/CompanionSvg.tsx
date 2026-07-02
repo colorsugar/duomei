@@ -69,18 +69,6 @@ export function CompanionSvg({ state = "sit", className = "", title = "DUOMEI Co
       ) : null}
 
       <g className={isWalk ? "companion-body is-walking" : isHappy ? "companion-body is-happy" : "companion-body"}>
-        <g className="companion-backpack" transform="translate(113 88)">
-          <path
-            d="M6 0c12 1 22 12 23 30 1 23-10 38-28 39-17 1-29-11-29-33C-28 13-11-2 6 0Z"
-            fill="#c9b07e"
-            stroke="#332d25"
-            strokeWidth="4"
-            strokeLinejoin="round"
-          />
-          <path d="M-11 21c9 4 22 4 31 0" fill="none" stroke="#7b674f" strokeWidth="2.5" strokeLinecap="round" />
-          <path d="M-14 45c9 5 24 5 34 0" fill="none" stroke="#7b674f" strokeWidth="2.5" strokeLinecap="round" />
-        </g>
-
         <g className="companion-feet" fill="#efe0bf" stroke="#332d25" strokeWidth="3.2" strokeLinejoin="round">
           <path d="M56 140c-12 0-20 6-19 14 16 3 28 1 36-5-2-6-8-9-17-9Z" />
           <path d="M94 142c-5 9 2 14 17 12 5-6 2-13-8-16-4 1-7 2-9 4Z" />
