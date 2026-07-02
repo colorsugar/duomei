@@ -9856,8 +9856,7 @@ body.duomei-modal-open {
 }
 
 .companion-backpack {
-  transform-origin: 100px 112px;
-  animation: duomeiCompanionTinyFloat 13s var(--motion-ease-ambient, ease-in-out) infinite alternate;
+  display: none !important;
 }
 
 .companion-arm {
