@@ -74,6 +74,7 @@ export function DuomeiCompanion({ placement = "global" }: DuomeiCompanionProps) 
   const { editMode, isEditorOpen } = useDuomeiEdit();
   const companionRef = useRef<HTMLDivElement | null>(null);
   const dragRef = useRef<DragState | null>(null);
+  const suppressNextClickRef = useRef(false);
   const [visible, setVisible] = useState(placement !== "global");
   const [state, setState] = useState<CompanionState>(placement === "not-found" ? "lost" : "sit");
   const [noteVisible, setNoteVisible] = useState(false);
@@ -285,8 +286,28 @@ export function DuomeiCompanion({ placement = "global" }: DuomeiCompanionProps) 
     event.currentTarget.releasePointerCapture(event.pointerId);
     dragRef.current = null;
     if (drag.dragging) {
+      suppressNextClickRef.current = true;
       setDragging(false);
       setState("sit");
+      return;
+    }
+    suppressNextClickRef.current = true;
+    if (placement === "not-found") {
+      setActiveMessage(getCompanionMessage("not-found", messageCursor));
+      setMessageCursor((current) => current + 1);
+      setNoteVisible(true);
+      window.setTimeout(() => {
+        setNoteVisible(false);
+        setActiveMessage(null);
+      }, MESSAGE_DURATION_MS);
+      return;
+    }
+    showContextMessage();
+  };
+
+  const handleCompanionClick = () => {
+    if (suppressNextClickRef.current) {
+      suppressNextClickRef.current = false;
       return;
     }
     if (placement === "not-found") {
@@ -325,6 +346,7 @@ export function DuomeiCompanion({ placement = "global" }: DuomeiCompanionProps) 
         className="duomei-companion-button"
         type="button"
         aria-label="小旅伴，长按可以移动"
+        onClick={handleCompanionClick}
         onPointerDown={beginDrag}
         onPointerMove={moveDrag}
         onPointerUp={endDrag}
