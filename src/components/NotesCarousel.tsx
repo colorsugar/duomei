@@ -77,7 +77,7 @@ export function NotesCarousel({ notes }: { notes: DuomeiNote[] }) {
         !hoverPausedRef.current &&
         time > pauseUntilRef.current
       ) {
-        const speed = window.innerWidth <= 760 ? 0.09 : 0.065;
+        const speed = window.innerWidth <= 760 ? 0.14 : 0.08;
         viewport.scrollLeft += delta * speed;
         normalizeLoopPosition();
       }
@@ -168,10 +168,24 @@ export function NotesCarousel({ notes }: { notes: DuomeiNote[] }) {
             <AnimatedCard className="duomei-note-card" data-motion-key={`note-card-${note.id}`} key={`${note.id}-${index}`}>
               {editMode ? (
                 <div className="duomei-card-actions">
-                  <button type="button" onClick={() => openNoteEditor(note)}>
+                  <button
+                    type="button"
+                    onClick={(event) => {
+                      event.preventDefault();
+                      event.stopPropagation();
+                      openNoteEditor(note);
+                    }}
+                  >
                     编辑
                   </button>
-                  <button type="button" onClick={() => requestDelete(note.id)}>
+                  <button
+                    type="button"
+                    onClick={(event) => {
+                      event.preventDefault();
+                      event.stopPropagation();
+                      requestDelete(note.id);
+                    }}
+                  >
                     删除
                   </button>
                 </div>

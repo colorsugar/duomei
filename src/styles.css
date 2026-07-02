@@ -9148,6 +9148,58 @@ body.duomei-modal-open {
   }
 }
 
+/* RC interaction safety: keep the global header/menu clickable above editor tools. */
+.duomei-header {
+  z-index: 7000 !important;
+}
+
+.duomei-header .duomei-menu-toggle,
+.duomei-header nav {
+  z-index: 7010 !important;
+}
+
+@media (max-width: 760px) {
+  .duomei-menu-toggle {
+    display: inline-flex !important;
+    position: relative !important;
+    pointer-events: auto !important;
+  }
+
+  .duomei-header nav {
+    position: absolute !important;
+    top: calc(100% + 8px) !important;
+    right: 14px !important;
+    display: grid !important;
+    width: min(148px, calc(100vw - 28px)) !important;
+    max-width: calc(100vw - 28px) !important;
+    grid-template-columns: 1fr !important;
+    gap: 6px !important;
+    padding: 9px !important;
+    border-radius: 24px !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+    transform: translateY(-6px) scale(0.96) !important;
+  }
+
+  .duomei-header.is-menu-open nav {
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+    transform: translateY(0) scale(1) !important;
+  }
+
+  .duomei-header nav a,
+  .duomei-header nav button {
+    display: flex !important;
+    width: 100% !important;
+    min-height: 36px !important;
+    justify-content: center !important;
+    pointer-events: auto !important;
+    white-space: nowrap !important;
+  }
+}
+
 /* RC hardening: final layer for editor chrome, upload panels, and note controls. */
 .duomei-header,
 .duomei-header .duomei-menu-toggle,
@@ -9464,7 +9516,7 @@ body.duomei-modal-open {
   transform: translateX(-50%) !important;
   width: min(1080px, calc(100vw - 190px)) !important;
   max-width: calc(100vw - 190px) !important;
-  max-height: 132px !important;
+  max-height: none !important;
   z-index: 2200 !important;
   overflow: auto !important;
   overscroll-behavior: contain !important;
@@ -9495,7 +9547,7 @@ body.duomei-modal-open {
   }
 
   .duomei-detail.detail-edit-page.toolbar-open {
-    padding-top: 318px !important;
+    padding-top: 382px !important;
   }
 
   .detail-toolbar-toggle {
@@ -9511,8 +9563,9 @@ body.duomei-modal-open {
     transform: none !important;
     width: auto !important;
     max-width: none !important;
-    max-height: 136px !important;
-    padding: 12px !important;
+    max-height: none !important;
+    padding: 14px !important;
+    align-content: start !important;
   }
 
   .detail-image-panel {
@@ -9551,5 +9604,102 @@ body.duomei-modal-open {
 
   .detail-edit-page .detail-cover-wrap {
     scroll-margin-top: 330px !important;
+  }
+}
+
+/* Final RC interaction guardrails */
+.duomei-card-actions {
+  z-index: 80 !important;
+  pointer-events: auto !important;
+}
+
+.duomei-card-actions button {
+  pointer-events: auto !important;
+  cursor: pointer !important;
+}
+
+.duomei-note-card > a {
+  position: relative !important;
+  z-index: 1 !important;
+}
+
+.duomei-header,
+.duomei-header .duomei-menu-toggle,
+.duomei-header nav {
+  z-index: 5200 !important;
+}
+
+.detail-toolbar-toggle {
+  z-index: 3600 !important;
+}
+
+.detail-inline-toolbar {
+  z-index: 3400 !important;
+}
+
+.detail-image-panel {
+  position: fixed !important;
+  inset: 104px 18px 18px !important;
+  z-index: 5000 !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  overscroll-behavior: contain !important;
+  -webkit-overflow-scrolling: touch !important;
+  background: #fffdf7 !important;
+  border-radius: 24px !important;
+  box-shadow: 0 28px 80px rgba(32, 32, 29, 0.18) !important;
+  touch-action: pan-y !important;
+}
+
+.detail-image-panel .image-upload-panel {
+  min-height: 100% !important;
+}
+
+.image-crop-stage {
+  touch-action: none !important;
+  user-select: none !important;
+}
+
+.image-crop-stage img {
+  pointer-events: none !important;
+  transition: none !important;
+  will-change: transform !important;
+  transform-origin: center center !important;
+}
+
+.detail-save-message {
+  z-index: 5300 !important;
+}
+
+.detail-save-message.sync-error {
+  border-color: rgba(134, 60, 48, 0.26) !important;
+  color: #7d3c32 !important;
+}
+
+@media (max-width: 760px) {
+  .detail-image-panel {
+    inset: 76px 8px 8px !important;
+    border-radius: 20px !important;
+  }
+
+  .illustration-layer {
+    overflow: hidden !important;
+  }
+
+  .illustration-layer::before {
+    top: 54% !important;
+    left: 50% !important;
+    width: 118vw !important;
+    max-width: none !important;
+    transform: translate3d(-50%, -50%, 0) rotate(-4deg) !important;
+    overflow: hidden !important;
+    white-space: nowrap !important;
+  }
+
+  .illustration-layer-inner,
+  .duomei-hero-illustration-wrap,
+  .duomei-hero-illustration,
+  .duomei-hero-image-frame {
+    overflow: hidden !important;
   }
 }

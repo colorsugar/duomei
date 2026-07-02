@@ -39,6 +39,19 @@ type DragState = {
   originY: number;
 };
 
+type TouchPoint = {
+  x: number;
+  y: number;
+};
+
+type GestureState = {
+  id: string;
+  startDistance: number;
+  startAngle: number;
+  originScale: number;
+  originRotate: number;
+};
+
 const aspectLabels: Record<AspectMode, string> = {
   original: "原始比例",
   "1:1": "1:1",
@@ -89,6 +102,18 @@ function outputSize(item: PendingImage) {
   return { width: Math.round(width), height: Math.round(height) };
 }
 
+function clampScale(value: number) {
+  return Math.max(0.45, Math.min(3, value));
+}
+
+function distance(a: TouchPoint, b: TouchPoint) {
+  return Math.hypot(a.x - b.x, a.y - b.y);
+}
+
+function angle(a: TouchPoint, b: TouchPoint) {
+  return (Math.atan2(b.y - a.y, b.x - a.x) * 180) / Math.PI;
+}
+
 async function renderEditedImage(item: PendingImage) {
   const image = await loadImage(item.sourceDataUrl);
   const { width, height } = outputSize(item);
@@ -121,6 +146,8 @@ export function ImageUploadPanel({ onInsert, onSetCover, compact = false, coverO
   const [message, setMessage] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
   const dragRef = useRef<DragState | null>(null);
+  const pointersRef = useRef<Map<number, TouchPoint>>(new Map());
+  const gestureRef = useRef<GestureState | null>(null);
   const active = pending[activeIndex];
 
   const updatePending = (id: string, patch: Partial<PendingImage>) => {
@@ -169,19 +196,52 @@ export function ImageUploadPanel({ onInsert, onSetCover, compact = false, coverO
 
   const startDrag = (event: PointerEvent<HTMLDivElement>) => {
     if (!active) return;
+    event.preventDefault();
+    event.stopPropagation();
+    pointersRef.current.set(event.pointerId, { x: event.clientX, y: event.clientY });
     dragRef.current = { id: active.id, pointerId: event.pointerId, startX: event.clientX, startY: event.clientY, originX: active.offsetX, originY: active.offsetY };
+    if (pointersRef.current.size >= 2) {
+      const [first, second] = Array.from(pointersRef.current.values()).slice(0, 2);
+      gestureRef.current = {
+        id: active.id,
+        startDistance: distance(first, second),
+        startAngle: angle(first, second),
+        originScale: active.cropScale,
+        originRotate: active.rotate,
+      };
+      dragRef.current = null;
+    }
     event.currentTarget.setPointerCapture(event.pointerId);
   };
 
   const moveDrag = (event: PointerEvent<HTMLDivElement>) => {
+    if (pointersRef.current.has(event.pointerId)) {
+      pointersRef.current.set(event.pointerId, { x: event.clientX, y: event.clientY });
+    }
+    event.preventDefault();
+    event.stopPropagation();
+    const gesture = gestureRef.current;
+    if (gesture && pointersRef.current.size >= 2) {
+      const [first, second] = Array.from(pointersRef.current.values()).slice(0, 2);
+      const nextDistance = distance(first, second);
+      const nextAngle = angle(first, second);
+      updatePending(gesture.id, {
+        cropScale: clampScale(gesture.originScale * (nextDistance / Math.max(1, gesture.startDistance))),
+        rotate: gesture.originRotate + nextAngle - gesture.startAngle,
+      });
+      return;
+    }
     const drag = dragRef.current;
     if (!drag || drag.pointerId !== event.pointerId) return;
-    event.preventDefault();
     updatePending(drag.id, { offsetX: drag.originX + event.clientX - drag.startX, offsetY: drag.originY + event.clientY - drag.startY });
   };
 
-  const stopDrag = () => {
-    dragRef.current = null;
+  const stopDrag = (event: PointerEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+    pointersRef.current.delete(event.pointerId);
+    if (pointersRef.current.size < 2) gestureRef.current = null;
+    if (dragRef.current?.pointerId === event.pointerId) dragRef.current = null;
   };
 
   const handleCropWheel = (event: WheelEvent<HTMLDivElement>) => {
@@ -189,7 +249,7 @@ export function ImageUploadPanel({ onInsert, onSetCover, compact = false, coverO
     event.preventDefault();
     event.stopPropagation();
     const nextScale = active.cropScale + (event.deltaY > 0 ? -0.04 : 0.04);
-    updatePending(active.id, { cropScale: Math.max(0.45, Math.min(3, nextScale)) });
+    updatePending(active.id, { cropScale: clampScale(nextScale) });
   };
 
   const movePending = (from: number, delta: number) => {
@@ -273,7 +333,13 @@ export function ImageUploadPanel({ onInsert, onSetCover, compact = false, coverO
   };
 
   return (
-    <section className={`image-upload-panel${compact ? " compact" : ""}`} onWheelCapture={(event) => event.stopPropagation()} onTouchMoveCapture={(event) => event.stopPropagation()}>
+    <section
+      className={`image-upload-panel${compact ? " compact" : ""}`}
+      onWheelCapture={(event) => event.stopPropagation()}
+      onTouchStartCapture={(event) => event.stopPropagation()}
+      onTouchMoveCapture={(event) => event.stopPropagation()}
+      onPointerDown={(event) => event.stopPropagation()}
+    >
       <div className="image-upload-heading">
         <div>
           <strong>{coverOnly ? "添加封面" : "添加正文图片"}</strong>

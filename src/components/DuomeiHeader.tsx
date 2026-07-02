@@ -43,6 +43,7 @@ export function DuomeiHeader() {
         <strong>DUOMEI</strong>
         <span>多美小记</span>
       </Link>
+
       <button
         className="duomei-menu-toggle"
         type="button"
@@ -54,7 +55,8 @@ export function DuomeiHeader() {
         <span />
         <span />
       </button>
-      <nav>
+
+      <nav aria-label="主导航">
         <Link to="/" onClick={goHomeTop}>
           首页
         </Link>

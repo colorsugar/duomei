@@ -11,8 +11,8 @@ import {
   logoutAdmin,
   upsertNote,
 } from "../lib/noteStore";
-import { deleteCloudNote, saveCloudNote } from "../lib/supabaseNotes";
 import { slugify } from "../lib/slugify";
+import { deleteCloudNote, saveCloudNote } from "../lib/supabaseNotes";
 import { NoteEditDrawer } from "./NoteEditDrawer";
 
 type EditContext = {
@@ -68,11 +68,11 @@ export function DuomeiEditProvider({ children }: { children: ReactNode }) {
     try {
       await saveCloudNote(next);
     } catch {
-      // Local fallback remains available for offline drafts.
+      // Detail editor handles full sync errors; front quick edit keeps local draft.
     }
     setEditingNote(null);
     refresh();
-    if (isNew) navigate(`/note/${next.slug}`);
+    if (isNew) navigate(`/note/${next.slug}?edit=1`);
   };
 
   const confirmDelete = async () => {
@@ -94,7 +94,7 @@ export function DuomeiEditProvider({ children }: { children: ReactNode }) {
       editMode,
       isEditorOpen: !!editingNote,
       refreshKey,
-      toggleEditMode: () => setEditMode((value) => !value),
+      toggleEditMode: () => setEditMode((current) => !current),
       logout: () => {
         logoutAdmin();
         setEditMode(false);
@@ -102,7 +102,7 @@ export function DuomeiEditProvider({ children }: { children: ReactNode }) {
       },
       openNoteEditor: async (note) => {
         if (note) {
-          setEditingNote(note);
+          navigate(`/note/${note.slug}?edit=1`);
           return;
         }
         const draft = createDraftNote();
@@ -120,7 +120,7 @@ export function DuomeiEditProvider({ children }: { children: ReactNode }) {
         setPendingDelete(id);
       },
     }),
-    [editMode, editingNote, isLoggedIn, refreshKey, navigate],
+    [editMode, editingNote, isLoggedIn, navigate, refreshKey],
   );
 
   return (

@@ -20,6 +20,7 @@ import { runSharedJourneyTransition, sharedJourneyNames } from "../motion";
 
 type ImageBlock = Extract<NoteContentBlock, { type: "image" }>;
 type SharedJourneyStyle = CSSProperties & { viewTransitionName?: string };
+type SyncStep = "idle" | "draft" | "images" | "upload" | "database" | "done" | "error";
 
 function blocksToBody(blocks: NoteContentBlock[]) {
   return blocks
@@ -37,6 +38,16 @@ function ensureBlocks(note: DuomeiNote) {
   return note.contentBlocks?.length ? note.contentBlocks : bodyToBlocks(note.body, note.bodyImages);
 }
 
+function withTimeout<T>(promise: Promise<T>, ms: number, message: string) {
+  let timeoutId: number | undefined;
+  const timeout = new Promise<never>((_, reject) => {
+    timeoutId = window.setTimeout(() => reject(new Error(message)), ms);
+  });
+  return Promise.race([promise, timeout]).finally(() => {
+    if (timeoutId) window.clearTimeout(timeoutId);
+  });
+}
+
 export function DuomeiNoteDetailPage() {
   const { slug } = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -46,12 +57,17 @@ export function DuomeiNoteDetailPage() {
   const [imagePanelMode, setImagePanelMode] = useState<"article" | "cover" | null>(null);
   const [toolbarOpen, setToolbarOpen] = useState(true);
   const [message, setMessage] = useState("");
+  const [syncStep, setSyncStep] = useState<SyncStep>("idle");
+  const [isSaving, setIsSaving] = useState(false);
+  const [previewNote, setPreviewNote] = useState<DuomeiNote | undefined>();
   const [cloudNote, setCloudNote] = useState<DuomeiNote | undefined>();
   const [navigationNotes, setNavigationNotes] = useState<DuomeiNote[]>(() => (isLoggedIn ? getAllNotes() : getPublishedNotes()));
   const undoStackRef = useRef<DuomeiNote[]>([]);
   const [undoCount, setUndoCount] = useState(0);
-  const note = cloudNote ?? getNoteBySlug(slug, isLoggedIn);
-  const shouldEdit = isLoggedIn && (editMode || searchParams.get("edit") === "1");
+  const storedNote = cloudNote ?? getNoteBySlug(slug, isLoggedIn);
+  const isPreview = searchParams.get("preview") === "1" && !!previewNote;
+  const note = previewNote ?? storedNote;
+  const shouldEdit = isLoggedIn && !isPreview && (editMode || searchParams.get("edit") === "1");
   const [draft, setDraft] = useState<DuomeiNote | undefined>(note);
   void refreshKey;
 
@@ -92,10 +108,10 @@ export function DuomeiNoteDetailPage() {
   }, [note?.id]);
 
   useEffect(() => {
-    if (!message) return;
-    const timer = window.setTimeout(() => setMessage(""), 4200);
+    if (!message || isSaving) return;
+    const timer = window.setTimeout(() => setMessage(""), syncStep === "error" ? 7000 : 4200);
     return () => window.clearTimeout(timer);
-  }, [message]);
+  }, [isSaving, message, syncStep]);
 
   useEffect(() => {
     if (!imagePanelMode) return;
@@ -217,11 +233,20 @@ export function DuomeiNoteDetailPage() {
     });
   };
 
-  const uploadEmbeddedImages = async (nextBlocks: NoteContentBlock[]) => {
+  const setSyncMessage = (step: SyncStep, text: string) => {
+    setSyncStep(step);
+    setMessage(text);
+  };
+
+  const uploadEmbeddedImages = async (nextBlocks: NoteContentBlock[], onProgress?: (done: number, total: number) => void) => {
+    const pendingImages = nextBlocks.filter((block): block is ImageBlock => block.type === "image" && block.src.startsWith("data:image/"));
+    let uploadedCount = 0;
     const uploadedBlocks: NoteContentBlock[] = [];
     for (const block of nextBlocks) {
       if (block.type === "image" && block.src.startsWith("data:image/")) {
-        const src = await uploadNoteDataUrl(block.src, "article");
+        const src = await withTimeout(uploadNoteDataUrl(block.src, "article"), 60000, "图片上传超时，请重新选择较小图片。");
+        uploadedCount += 1;
+        onProgress?.(uploadedCount, pendingImages.length);
         uploadedBlocks.push({ ...block, src });
       } else {
         uploadedBlocks.push(block);
@@ -232,21 +257,35 @@ export function DuomeiNoteDetailPage() {
 
   const uploadCoverIfNeeded = async (coverImageUrl: string) => {
     if (!coverImageUrl?.startsWith("data:image/")) return coverImageUrl;
-    return uploadNoteDataUrl(coverImageUrl, "covers");
+    return withTimeout(uploadNoteDataUrl(coverImageUrl, "covers"), 60000, "封面上传超时，请重新选择较小图片。");
   };
 
   const persistNote = async (status?: DuomeiNote["status"]) => {
-    if (!draft) return;
-    setMessage("正在保存到云端...");
+    if (!draft || isSaving) return;
+    setIsSaving(true);
     const sourceBlocks = draft.contentBlocks?.length ? draft.contentBlocks : bodyToBlocks(draft.body, draft.bodyImages);
+    const targetStatus = status ?? draft.status;
+    const localNote: DuomeiNote = {
+      ...draft,
+      status: targetStatus,
+      contentBlocks: sourceBlocks,
+      body: blocksToBody(sourceBlocks),
+      bodyImages: blocksToImages(sourceBlocks),
+      updatedAt: new Date().toISOString(),
+    };
     try {
-      const [nextBlocks, coverImageUrl] = await Promise.all([
-        uploadEmbeddedImages(sourceBlocks),
-        uploadCoverIfNeeded(draft.coverImageUrl || ""),
-      ]);
+      setSyncMessage("draft", "本地草稿已保存。");
+      upsertNote(localNote);
+      setDraft(localNote);
+
+      setSyncMessage("images", "正在准备图片...");
+      const nextBlocks = await uploadEmbeddedImages(sourceBlocks, (done, total) => {
+        setSyncMessage("upload", `正在上传图片 ${done}/${total}...`);
+      });
+      setSyncMessage("upload", "正在准备封面...");
+      const coverImageUrl = await uploadCoverIfNeeded(localNote.coverImageUrl || "");
       const nextNote: DuomeiNote = {
-        ...draft,
-        status: status ?? draft.status,
+        ...localNote,
         coverImageUrl,
         contentBlocks: nextBlocks,
         body: blocksToBody(nextBlocks),
@@ -254,22 +293,45 @@ export function DuomeiNoteDetailPage() {
         updatedAt: new Date().toISOString(),
       };
       upsertNote(nextNote);
-      const saved = await saveCloudNote(nextNote);
+      setDraft(nextNote);
+      setSyncMessage("database", "正在同步数据库...");
+      const saved = await withTimeout(saveCloudNote(nextNote), 45000, "数据库同步超时，请检查登录状态或网络。");
+      upsertNote(saved);
       setCloudNote(saved);
       setDraft(saved);
-      setMessage((status ?? draft.status) === "published" ? "已发布到云端，线上网站会立即显示。" : "已保存到云端。");
+      setPreviewNote(undefined);
+      setSyncMessage(targetStatus === "published" ? "done" : "done", targetStatus === "published" ? "同步完成：已发布到线上。" : "同步完成：修改已保存到云端。");
     } catch (error) {
       const localNote: DuomeiNote = {
         ...draft,
-        status: status ?? draft.status,
+        status: targetStatus,
         body: blocksToBody(sourceBlocks),
         bodyImages: blocksToImages(sourceBlocks),
         updatedAt: new Date().toISOString(),
       };
       upsertNote(localNote);
       setDraft(localNote);
-      setMessage(error instanceof Error ? `云端保存失败：${error.message}` : "云端保存失败，已先保存为本机草稿。");
+      setSyncMessage("error", error instanceof Error ? `云端保存失败：${error.message}` : "云端保存失败，已先保存为本机草稿。");
+    } finally {
+      setIsSaving(false);
     }
+  };
+
+  const previewCurrentDraft = () => {
+    if (!draft) return;
+    const sourceBlocks = draft.contentBlocks?.length ? draft.contentBlocks : bodyToBlocks(draft.body, draft.bodyImages);
+    const nextPreview: DuomeiNote = {
+      ...draft,
+      contentBlocks: sourceBlocks,
+      body: blocksToBody(sourceBlocks),
+      bodyImages: blocksToImages(sourceBlocks),
+      updatedAt: new Date().toISOString(),
+    };
+    upsertNote(nextPreview);
+    setPreviewNote(nextPreview);
+    setSearchParams({ preview: "1" });
+    setSyncMessage("draft", "正在预览当前编辑内容，尚未同步云端。");
+    window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
   };
 
   const setDraftStatus = async (status: DuomeiNote["status"]) => {
@@ -355,25 +417,31 @@ export function DuomeiNoteDetailPage() {
             <span />
           </button>
           <div className={`detail-inline-toolbar${toolbarOpen ? " is-open" : ""}`} role="toolbar" aria-label="小记编辑工具栏">
-            <button type="button" onClick={() => persistNote()}>保存修改</button>
+            <button type="button" onClick={() => persistNote()} disabled={isSaving}>{isSaving ? "同步中..." : "保存修改"}</button>
             {isPublished ? (
               <button type="button" className="is-muted" disabled>已发布</button>
             ) : (
-              <button type="button" className="is-primary" onClick={() => persistNote("published")}>发布</button>
+              <button type="button" className="is-primary" onClick={() => persistNote("published")} disabled={isSaving}>{isSaving ? "发布中..." : "发布"}</button>
             )}
-            {isPublished ? <button type="button" onClick={() => persistNote("draft")}>转为草稿</button> : null}
-            <button type="button" onClick={() => setSearchParams({})}>预览</button>
+            {isPublished ? <button type="button" onClick={() => persistNote("draft")} disabled={isSaving}>转为草稿</button> : null}
+            <button type="button" onClick={previewCurrentDraft} disabled={isSaving}>预览</button>
             <button type="button" onClick={undoDraft} disabled={undoCount === 0}>撤销</button>
             <button type="button" onClick={() => insertBlock({ id: createBlockId("paragraph"), type: "paragraph", text: "" })}>插入段落</button>
             <button type="button" onClick={() => insertBlock({ id: createBlockId("quote"), type: "quote", text: "" })}>插入引用</button>
             <button type="button" onClick={() => insertBlock({ id: createBlockId("divider"), type: "divider" })}>分割线</button>
-            <button type="button" onClick={() => { setImagePanelMode("cover"); setToolbarOpen(false); }}>添加封面</button>
-            <button type="button" onClick={() => { setImagePanelMode("article"); setToolbarOpen(false); }}>添加图片</button>
+            <button type="button" onClick={() => { setImagePanelMode("cover"); setToolbarOpen(false); }} disabled={isSaving}>添加封面</button>
+            <button type="button" onClick={() => { setImagePanelMode("article"); setToolbarOpen(false); }} disabled={isSaving}>添加图片</button>
             <button className="detail-danger-button" type="button" onClick={() => setConfirmDelete(true)}>删除</button>
             <button type="button" onClick={() => navigate("/")}>返回首页</button>
           </div>
           {imagePanelMode ? (
-            <div className="detail-image-panel" onWheelCapture={(event) => event.stopPropagation()} onTouchMoveCapture={(event) => event.stopPropagation()}>
+            <div
+              className="detail-image-panel"
+              onWheelCapture={(event) => event.stopPropagation()}
+              onTouchStartCapture={(event) => event.stopPropagation()}
+              onTouchMoveCapture={(event) => event.stopPropagation()}
+              onPointerDown={(event) => event.stopPropagation()}
+            >
               <ImageUploadPanel
                 compact
                 coverOnly={imagePanelMode === "cover"}
@@ -387,7 +455,7 @@ export function DuomeiNoteDetailPage() {
       ) : null}
 
       {message ? (
-        <div className="detail-save-message">
+        <div className={`detail-save-message sync-${syncStep}`}>
           <span>{message}</span>
           <button type="button" onClick={() => setMessage("")}>关闭</button>
         </div>
@@ -417,14 +485,26 @@ export function DuomeiNoteDetailPage() {
               {activeNote.tags.map((tag, index) => (
                 <span className="editable-tag" key={`tag-${index}`}>
                   <input
-                    defaultValue={tag}
-                    onBlur={(event) => updateTag(index, event.currentTarget.value)}
+                    value={tag}
+                    onChange={(event) => updateTag(index, event.currentTarget.value)}
+                    onClick={(event) => event.stopPropagation()}
+                    onPointerDown={(event) => event.stopPropagation()}
                     onKeyDown={(event) => {
                       if (event.key === "Enter") event.currentTarget.blur();
                     }}
                     aria-label={`标签 ${index + 1}`}
                   />
-                  <button type="button" onClick={() => removeTag(index)} aria-label="删除标签">×</button>
+                  <button
+                    type="button"
+                    onClick={(event) => {
+                      event.preventDefault();
+                      event.stopPropagation();
+                      removeTag(index);
+                    }}
+                    aria-label="删除标签"
+                  >
+                    ×
+                  </button>
                 </span>
               ))}
               <button className="tag-add-button" type="button" onClick={addTag}>+</button>
