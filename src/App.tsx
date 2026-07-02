@@ -11,6 +11,7 @@ import { DuomeiEditProvider } from "./components/DuomeiEditProvider";
 import { RouteScrollManager } from "./components/RouteScrollManager";
 import { useSmoothScroll } from "./hooks/useSmoothScroll";
 import { MotionProvider } from "./motion";
+import { DuomeiCompanion } from "./components/companion";
 
 function AppRoutes() {
   const location = useLocation();
@@ -32,6 +33,7 @@ function AppRoutes() {
         <Route path="*" element={<DuomeiNotFoundPage />} />
       </Routes>
       {!isAdmin && !isHome ? <DuomeiFooter /> : null}
+      {!isAdmin ? <DuomeiCompanion /> : null}
       {!isAdmin ? <BackToTopButton /> : null}
     </DuomeiEditProvider>
   );

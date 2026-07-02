@@ -8181,21 +8181,21 @@ body.duomei-modal-open {
 }
 
 .illustration-layer::before {
-  content: "DUOMEI / JOURNAL / TRAVEL";
+  content: "";
   position: absolute;
-  inset: 10vh auto auto 50%;
+  inset: 8vh auto auto 50%;
   z-index: -1;
-  width: min(1120px, 96vw);
+  width: min(1120px, 92vw);
+  height: min(520px, 58vh);
   pointer-events: none;
-  color: #2a2925;
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: clamp(56px, 11vw, 180px);
-  font-weight: 900;
-  letter-spacing: 0.08em;
-  line-height: 0.92;
+  background:
+    radial-gradient(circle at 34% 32%, rgba(216, 168, 78, 0.1), transparent 30%),
+    radial-gradient(circle at 68% 42%, rgba(151, 168, 140, 0.08), transparent 34%),
+    linear-gradient(135deg, rgba(255, 253, 247, 0), rgba(255, 253, 247, 0.52));
+  border-radius: 999px;
+  filter: blur(18px);
   opacity: var(--motion-hero-background-opacity, 0.032);
   transform: translateX(-50%) rotate(-1deg);
-  white-space: nowrap;
   animation: duomeiHeroAmbientBackground var(--motion-ambient-background-duration) var(--motion-ease-ambient, ease-in-out) infinite alternate;
 }
 
@@ -8278,8 +8278,7 @@ body.duomei-modal-open {
 
   .illustration-layer::before {
     inset-block-start: 16vh;
-    font-size: clamp(48px, 19vw, 92px);
-    letter-spacing: 0.06em;
+    height: 42vh;
     animation-duration: calc(var(--motion-ambient-background-duration) * 1.2);
   }
 
@@ -9687,13 +9686,13 @@ body.duomei-modal-open {
   }
 
   .illustration-layer::before {
-    top: 54% !important;
+    top: 48% !important;
     left: 50% !important;
-    width: 118vw !important;
+    width: 96vw !important;
+    height: 42vh !important;
     max-width: none !important;
-    transform: translate3d(-50%, -50%, 0) rotate(-4deg) !important;
+    transform: translate3d(-50%, -50%, 0) rotate(-2deg) !important;
     overflow: hidden !important;
-    white-space: nowrap !important;
   }
 
   .illustration-layer-inner,
@@ -9701,5 +9700,211 @@ body.duomei-modal-open {
   .duomei-hero-illustration,
   .duomei-hero-image-frame {
     overflow: hidden !important;
+  }
+}
+
+/* DUOMEI Companion: atmosphere only, never above core editing controls. */
+.duomei-companion {
+  position: fixed;
+  right: 22px;
+  bottom: calc(126px + env(safe-area-inset-bottom));
+  z-index: 70;
+  width: 86px;
+  pointer-events: none;
+  opacity: 0.96;
+  contain: layout style;
+}
+
+.duomei-companion--global {
+  animation: duomeiCompanionWalkIn 950ms var(--motion-ease-reveal, cubic-bezier(0.16, 1, 0.3, 1)) both;
+}
+
+.duomei-companion--footer {
+  position: absolute;
+  right: clamp(18px, 8vw, 128px);
+  bottom: 16px;
+  z-index: 1;
+  width: 96px;
+}
+
+.duomei-companion--not-found {
+  position: relative;
+  right: auto;
+  bottom: auto;
+  z-index: 1;
+  width: 112px;
+  margin: 28px 0 0;
+}
+
+.duomei-companion-button {
+  all: unset;
+  display: block;
+  width: 100%;
+  cursor: pointer;
+  pointer-events: auto;
+  transform-origin: 50% 82%;
+  animation: duomeiCompanionAmbient 12s var(--motion-ease-ambient, ease-in-out) infinite alternate;
+}
+
+.duomei-companion-button:focus-visible {
+  outline: 1px solid rgba(66, 60, 50, 0.5);
+  outline-offset: 4px;
+  border-radius: 999px;
+}
+
+.duomei-companion-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+  filter: drop-shadow(0 16px 24px rgba(58, 48, 36, 0.1));
+}
+
+.duomei-companion-note {
+  position: absolute;
+  right: 72%;
+  bottom: 78%;
+  width: max-content;
+  max-width: 180px;
+  padding: 10px 14px;
+  border: 1px solid rgba(151, 133, 105, 0.24);
+  border-radius: 14px 14px 12px 14px;
+  background: rgba(255, 253, 247, 0.9);
+  color: #3a332b;
+  font-size: 13px;
+  line-height: 1.7;
+  letter-spacing: 0;
+  box-shadow: 0 18px 40px rgba(58, 48, 36, 0.1);
+  opacity: 0;
+  pointer-events: none;
+  transform: translate3d(0, 6px, 0) rotate(-1deg);
+  transition:
+    opacity var(--motion-duration-normal, 420ms) var(--motion-ease-standard, ease),
+    transform var(--motion-duration-normal, 420ms) var(--motion-ease-standard, ease);
+}
+
+.duomei-companion-note.is-visible {
+  opacity: 1;
+  transform: translate3d(0, 0, 0) rotate(-1deg);
+}
+
+.companion-body {
+  transform-origin: 80px 112px;
+}
+
+.companion-body.is-walking {
+  animation: duomeiCompanionWalk 1.2s var(--motion-ease-ambient, ease-in-out) infinite alternate;
+}
+
+.companion-backpack {
+  transform-origin: 100px 112px;
+  animation: duomeiCompanionTinyFloat 13s var(--motion-ease-ambient, ease-in-out) infinite alternate;
+}
+
+.companion-arm {
+  transform-origin: 112px 96px;
+}
+
+.companion-arm--wave {
+  animation: duomeiCompanionWave 900ms var(--motion-ease-ambient, ease-in-out) 2 alternate;
+}
+
+body.front-editing .duomei-companion,
+body.duomei-modal-open .duomei-companion,
+html.duomei-modal-open .duomei-companion {
+  display: none !important;
+}
+
+@keyframes duomeiCompanionWalkIn {
+  from {
+    opacity: 0;
+    transform: translate3d(20px, 8px, 0);
+  }
+  to {
+    opacity: 0.96;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes duomeiCompanionAmbient {
+  from {
+    transform: translate3d(0, 0, 0) rotate(-0.2deg);
+  }
+  to {
+    transform: translate3d(0, -2px, 0) rotate(0.3deg);
+  }
+}
+
+@keyframes duomeiCompanionTinyFloat {
+  from {
+    transform: translate3d(0, 0, 0) rotate(-0.2deg);
+  }
+  to {
+    transform: translate3d(0, -1px, 0) rotate(0.2deg);
+  }
+}
+
+@keyframes duomeiCompanionWalk {
+  from {
+    transform: translate3d(-1px, 0, 0) rotate(-0.3deg);
+  }
+  to {
+    transform: translate3d(1px, -1px, 0) rotate(0.3deg);
+  }
+}
+
+@keyframes duomeiCompanionWave {
+  from {
+    transform: rotate(-0.4deg);
+  }
+  to {
+    transform: rotate(8deg);
+  }
+}
+
+@media (max-width: 760px) {
+  .duomei-companion--global {
+    right: 14px;
+    bottom: calc(112px + env(safe-area-inset-bottom));
+    width: 62px;
+  }
+
+  .duomei-companion--detail {
+    display: none !important;
+  }
+
+  .duomei-companion--footer {
+    position: relative;
+    right: auto;
+    bottom: auto;
+    width: 78px;
+    margin: 22px auto 0;
+  }
+
+  .duomei-companion--not-found {
+    width: 88px;
+  }
+
+  .duomei-companion-note {
+    right: 58%;
+    bottom: 84%;
+    max-width: 140px;
+    font-size: 12px;
+  }
+}
+
+@media (max-height: 680px) {
+  .duomei-companion--global.duomei-companion--detail {
+    display: none !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .duomei-companion,
+  .duomei-companion-button,
+  .duomei-companion-svg *,
+  .duomei-companion-note {
+    animation: none !important;
+    transition: none !important;
   }
 }

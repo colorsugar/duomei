@@ -301,6 +301,9 @@ export function DuomeiNoteDetailPage() {
       setDraft(saved);
       setPreviewNote(undefined);
       setSyncMessage(targetStatus === "published" ? "done" : "done", targetStatus === "published" ? "同步完成：已发布到线上。" : "同步完成：修改已保存到云端。");
+      if (targetStatus === "published") {
+        window.dispatchEvent(new CustomEvent("duomei:publish-success"));
+      }
     } catch (error) {
       const localNote: DuomeiNote = {
         ...draft,
