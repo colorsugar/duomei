@@ -6,9 +6,11 @@ export function HeroIllustration() {
 
   return (
     <AnimatedImage className="duomei-hero-illustration-wrap" aria-label="DUOMEI hero illustration">
-      <figure className="duomei-hero-illustration duomei-hero-image-frame duomei-motion-ambient-hero">
-        <img src={heroImageSrc} alt="" draggable={false} />
-      </figure>
+      <div className="duomei-hero-cover-motion">
+        <figure className="duomei-hero-illustration duomei-hero-image-frame duomei-motion-ambient-hero">
+          <img src={heroImageSrc} alt="" draggable={false} />
+        </figure>
+      </div>
     </AnimatedImage>
   );
 }

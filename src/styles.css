@@ -10327,3 +10327,108 @@ html.duomei-modal-open .duomei-companion {
     transition: none !important;
   }
 }
+
+/* Hero cover motion restoration: keep it independent from reveal/image transforms. */
+.illustration-layer .duomei-hero-cover-motion {
+  display: inline-block;
+  transform-origin: 50% 72%;
+  will-change: transform;
+  backface-visibility: hidden;
+  animation: duomeiHomepageCoverFloat 5.8s cubic-bezier(0.45, 0, 0.55, 1) infinite !important;
+}
+
+.illustration-layer .duomei-hero-cover-motion .duomei-hero-image-frame {
+  animation: none !important;
+}
+
+.illustration-layer .duomei-hero-cover-motion img {
+  backface-visibility: hidden;
+  transform: translateZ(0);
+}
+
+.illustration-layer .bounce-name.duomei-hero-title-motion {
+  transform-origin: center bottom;
+  will-change: transform, opacity, filter;
+  animation: duomeiHomepageNameBreath 7.2s cubic-bezier(0.45, 0, 0.55, 1) infinite !important;
+}
+
+@keyframes duomeiHomepageCoverFloat {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) rotate(-0.55deg);
+  }
+
+  25% {
+    transform: translate3d(4px, -9px, 0) rotate(0.42deg);
+  }
+
+  50% {
+    transform: translate3d(0, -16px, 0) rotate(0.72deg);
+  }
+
+  75% {
+    transform: translate3d(-4px, -7px, 0) rotate(-0.32deg);
+  }
+}
+
+@keyframes duomeiHomepageNameBreath {
+  0%,
+  100% {
+    opacity: 0.96;
+    transform: translate3d(0, 0, 0) scale(1);
+    filter: drop-shadow(0 12px 16px rgba(31, 31, 27, 0.11));
+  }
+
+  50% {
+    opacity: 1;
+    transform: translate3d(0, -5px, 0) scale(1.006);
+    filter: drop-shadow(0 16px 22px rgba(31, 31, 27, 0.16));
+  }
+}
+
+@media (max-width: 640px) {
+  .illustration-layer .duomei-hero-cover-motion {
+    animation-name: duomeiHomepageCoverFloatMobile;
+    animation-duration: 6.4s;
+  }
+}
+
+@keyframes duomeiHomepageCoverFloatMobile {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) rotate(-0.42deg);
+  }
+
+  25% {
+    transform: translate3d(3px, -7px, 0) rotate(0.32deg);
+  }
+
+  50% {
+    transform: translate3d(0, -12px, 0) rotate(0.56deg);
+  }
+
+  75% {
+    transform: translate3d(-3px, -5px, 0) rotate(-0.24deg);
+  }
+}
+
+@keyframes duomeiHomepageCoverFloatReduced {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) rotate(-0.18deg);
+  }
+
+  50% {
+    transform: translate3d(0, -4px, 0) rotate(0.18deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .illustration-layer .duomei-hero-cover-motion {
+    animation: duomeiHomepageCoverFloatReduced 7s ease-in-out infinite !important;
+  }
+
+  .illustration-layer .bounce-name.duomei-hero-title-motion {
+    animation: none !important;
+  }
+}
