@@ -6,7 +6,6 @@ import {
   saveFooterSettings,
 } from "../lib/footerSettings";
 import { AnimatedParagraph, AnimatedTitle, RevealSection } from "../motion";
-import { DuomeiCompanion } from "./companion";
 
 export function DuomeiFooter() {
   const { editMode, isLoggedIn } = useDuomeiEdit();
@@ -75,7 +74,6 @@ export function DuomeiFooter() {
       ) : (
         <AnimatedParagraph>{settings.copyrightText}</AnimatedParagraph>
       )}
-      <DuomeiCompanion placement="footer" />
     </RevealSection>
   );
 }

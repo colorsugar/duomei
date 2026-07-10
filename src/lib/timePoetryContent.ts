@@ -1,10 +1,34 @@
 export type TimePoetryImage = {
+  id?: string;
   label: string;
   src: string;
   position: string;
+  x?: number;
+  y?: number;
+  width?: number;
+  height?: number;
+  zIndex?: number;
   cropX?: number;
   cropY?: number;
   scale?: number;
+  effect?: TimePoetryEffect;
+};
+
+export type TimePoetryEffect = "ink" | "fade" | "rise" | "slide" | "zoom" | "none";
+
+export type TimePoetryTextBlock = {
+  id: string;
+  kind: "title" | "poem" | "caption";
+  content: string;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  fontSize: number;
+  direction: "vertical" | "horizontal";
+  color?: string;
+  zIndex: number;
+  effect?: TimePoetryEffect;
 };
 
 export type TimePoetryLayout = "image-left" | "image-right" | "image-top" | "image-bottom";
@@ -24,11 +48,13 @@ export type TimePoetryWork = {
   imageFrameY?: number;
   imageFrameWidth?: number;
   imageFrameHeight?: number;
+  textDirection?: "vertical" | "horizontal";
   verticalColumns: string[];
   citation?: string;
   body: string[];
   meta: string[];
   images: TimePoetryImage[];
+  textBlocks?: TimePoetryTextBlock[];
 };
 
 export const defaultPoetryFont =

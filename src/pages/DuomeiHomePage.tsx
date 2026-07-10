@@ -9,6 +9,7 @@ import type { DuomeiNote } from "../lib/noteTypes";
 
 export function DuomeiHomePage() {
   const { editMode, openNoteEditor, refreshKey } = useDuomeiEdit();
+  const localPoetryPreview = import.meta.env.DEV && new URLSearchParams(window.location.search).get("poetryEditor") === "1";
   const [notes, setNotes] = useState<DuomeiNote[]>(() => getPublishedNotes());
 
   useEffect(() => {
@@ -33,7 +34,7 @@ export function DuomeiHomePage() {
     <main className="duomei-stage">
       <IllustrationLayer />
       <PaperLayer>
-        <NotesDreamTransition canCreate={editMode} notes={notes} onCreate={() => openNoteEditor()} />
+        <NotesDreamTransition canCreate={editMode || localPoetryPreview} notes={notes} onCreate={() => openNoteEditor()} />
       </PaperLayer>
     </main>
   );

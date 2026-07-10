@@ -2810,7 +2810,7 @@ body.front-editing .card-edit-actions {
 
 .duomei-footer {
   display: flex;
-  width: min(1200px, calc(100% - 40px));
+  width: min(1800px, calc(100% - 128px));
   margin: 0 auto;
   justify-content: space-between;
   gap: 20px;
@@ -6073,11 +6073,11 @@ body.front-editing .notes-bottom-spacer {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
   align-items: start;
-  width: min(1200px, calc(100% - 40px));
+  width: min(1800px, calc(100% - 128px));
   margin: 0 auto;
   gap: 24px;
   border-top: 0;
-  padding: 32px 0 46px;
+  padding: 42px 0 60px;
 }
 
 .duomei-footer::before {
@@ -6105,6 +6105,9 @@ body.front-editing .notes-bottom-spacer {
   color: #20201d;
   text-align: right;
   line-height: 1.8;
+  border: 1px dashed rgba(142, 111, 85, 0.42);
+  border-radius: 999px;
+  padding: 14px 22px;
 }
 
 .footer-editable-text {
@@ -6402,6 +6405,7 @@ body.front-editing .notes-bottom-spacer {
 @media (max-width: 760px) {
   .duomei-footer {
     grid-template-columns: 1fr;
+    width: calc(100% - 40px);
   }
 
   .duomei-footer p {

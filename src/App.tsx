@@ -16,7 +16,6 @@ import { DuomeiCompanion } from "./components/companion";
 function AppRoutes() {
   const location = useLocation();
   const isAdmin = location.pathname.startsWith("/admin");
-  const isHome = location.pathname === "/";
   const isTimePage = location.pathname === "/time";
   useSmoothScroll(isAdmin || isTimePage);
 
@@ -34,7 +33,7 @@ function AppRoutes() {
         <Route path="/admin/notes" element={<DuomeiAdmin mode="notes" />} />
         <Route path="*" element={<DuomeiNotFoundPage />} />
       </Routes>
-      {!isAdmin && !isHome ? <DuomeiFooter /> : null}
+      {!isAdmin ? <DuomeiFooter /> : null}
       {!isAdmin ? <DuomeiCompanion /> : null}
       {!isAdmin ? <BackToTopButton /> : null}
     </DuomeiEditProvider>
