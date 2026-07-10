@@ -74,6 +74,11 @@ export function IllustrationLayer() {
       document.documentElement.style.setProperty("--duomei-hero-progress", String(rounded));
     };
 
+    const setPaperProgress = (value: number) => {
+      const paperProgress = Number(Math.min(1, Math.max(0, value * 1.2)).toFixed(4));
+      document.documentElement.style.setProperty("--duomei-paper-progress", String(paperProgress));
+    };
+
     const readTargetProgress = () => {
       const viewport = Math.max(window.innerHeight, 1);
       targetProgress = Math.min(1, Math.max(0, window.scrollY / (viewport * 0.82)));
@@ -93,6 +98,9 @@ export function IllustrationLayer() {
     const update = () => {
       readFrame = 0;
       readTargetProgress();
+      // The curve is tied directly to scroll so its first and last pixels are exact.
+      // The rest of the hero can keep the softer, interpolated motion below.
+      setPaperProgress(targetProgress);
       if (!drawFrame) draw();
     };
 
@@ -108,6 +116,7 @@ export function IllustrationLayer() {
       if (readFrame) window.cancelAnimationFrame(readFrame);
       if (drawFrame) window.cancelAnimationFrame(drawFrame);
       document.documentElement.style.removeProperty("--duomei-hero-progress");
+      document.documentElement.style.removeProperty("--duomei-paper-progress");
       window.removeEventListener("scroll", requestUpdate);
       window.removeEventListener("resize", requestUpdate);
     };

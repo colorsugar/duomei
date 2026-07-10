@@ -11592,7 +11592,7 @@ html.duomei-modal-open .duomei-companion {
 }
 
 .paper-layer {
-  --paper-turn-progress: min(1, calc(var(--duomei-hero-progress, 0) * 1.2));
+  --paper-turn-progress: var(--duomei-paper-progress, 0);
 }
 
 .paper-curve {
@@ -11612,8 +11612,8 @@ html.duomei-modal-open .duomei-companion {
 
 .paper-stroke {
   stroke: #52685d;
-  stroke-dasharray: 1000;
-  stroke-dashoffset: calc((1 - var(--paper-turn-progress, 0)) * 1000);
+  stroke-dasharray: var(--paper-turn-progress, 0) 1;
+  stroke-dashoffset: 0;
 }
 
 .paper-body {
@@ -12358,5 +12358,17 @@ html.duomei-modal-open .duomei-companion {
     height: auto !important;
     max-width: 88% !important;
     max-height: 72svh !important;
+  }
+}
+
+/* Homepage hero framing: keep the illustration below the fixed desktop header. */
+@media (min-width: 761px) {
+  .illustration-layer {
+    padding-top: clamp(118px, 14vh, 142px);
+    padding-bottom: clamp(24px, 4vh, 48px);
+  }
+
+  .illustration-layer .duomei-hero-image-frame {
+    height: clamp(260px, min(36vw, 46vh), 500px) !important;
   }
 }
