@@ -109,8 +109,8 @@ export function DuomeiHeader() {
         <Link to="/#notes" onClick={closeMenu}>
           小记
         </Link>
-        <Link to="/about" onClick={closeMenu}>
-          关于
+        <Link to="/time" onClick={closeMenu}>
+          微言
         </Link>
         {!isLoggedIn ? (
           <Link to="/admin/login" onClick={closeMenu}>

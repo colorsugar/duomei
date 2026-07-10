@@ -105,8 +105,8 @@ export function DuomeiAdmin({ mode }: { mode: "login" | "notes" }) {
     return (
       <RevealSection as="main" className="duomei-admin-login">
         <form onSubmit={submit}>
-          <AnimatedParagraph>DUOMEI NOTES</AnimatedParagraph>
-          <AnimatedTitle as="h1">多美小记管理后台</AnimatedTitle>
+          <AnimatedParagraph>DUOMEI STUDIO</AnimatedParagraph>
+          <AnimatedTitle as="h1">多美内容管理后台</AnimatedTitle>
           <label>
             邮箱
             <input value={username} onChange={(event) => setUsername(event.target.value)} autoComplete="username" />
@@ -203,9 +203,10 @@ export function DuomeiAdmin({ mode }: { mode: "login" | "notes" }) {
     <main className="duomei-admin studio-admin">
       <aside>
         <strong>DUOMEI</strong>
-        <span>多美小记工作室</span>
-        <a href="/">查看网站</a>
-        <a href="/#notes">小记列表</a>
+        <span>多美内容工作室</span>
+        <a href="/">首页</a>
+        <a href="/time">微言</a>
+        <a href="#note-management">小记管理</a>
         <AnimatedButton type="button" onClick={createAndEdit}>
           新增小记
         </AnimatedButton>
@@ -249,13 +250,33 @@ export function DuomeiAdmin({ mode }: { mode: "login" | "notes" }) {
         ) : null}
 
         <AnimatedCard as="div" className="studio-hero-panel">
-          <AnimatedParagraph>多美，慢慢记录也没关系。</AnimatedParagraph>
-          <AnimatedTitle>你的小记档案状态良好。</AnimatedTitle>
+          <AnimatedParagraph>首页、微言与小记，都在这里保持同步。</AnimatedParagraph>
+          <AnimatedTitle>你的网站内容状态良好。</AnimatedTitle>
           <div>
+            <span>2 个页面</span>
             <span>{notes.length} 条小记</span>
             <span>{published} 已发布</span>
             <span>{drafts} 草稿</span>
             <span>{imageCount} 张图片</span>
+          </div>
+        </AnimatedCard>
+
+        <AnimatedCard as="div" className="studio-publish-panel">
+          <div>
+            <AnimatedParagraph>站点页面</AnimatedParagraph>
+            <AnimatedTitle>按当前网站结构管理内容</AnimatedTitle>
+            <span>首页展示品牌与小记，微言进入快活页面，小记管理继续使用云端发布。</span>
+          </div>
+          <div className="studio-publish-actions">
+            <AnimatedButton as="a" href="/">
+              查看首页
+            </AnimatedButton>
+            <AnimatedButton as="a" href="/time">
+              查看微言
+            </AnimatedButton>
+            <AnimatedButton as="a" href="#note-management">
+              管理小记
+            </AnimatedButton>
           </div>
         </AnimatedCard>
 
@@ -303,7 +324,7 @@ export function DuomeiAdmin({ mode }: { mode: "login" | "notes" }) {
           </div>
         </AnimatedCard>
 
-        <details className="studio-notes-panel" open={notesOpen} onToggle={(event) => setNotesOpen(event.currentTarget.open)}>
+        <details id="note-management" className="studio-notes-panel" open={notesOpen} onToggle={(event) => setNotesOpen(event.currentTarget.open)}>
           <summary>
             <span>
               <strong>小记管理</strong>

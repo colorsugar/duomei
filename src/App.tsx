@@ -1,8 +1,7 @@
-import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom";
+import { BrowserRouter, Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { DuomeiAdmin } from "./pages/DuomeiAdmin";
 import { DuomeiHomePage } from "./pages/DuomeiHomePage";
 import { DuomeiNoteDetailPage } from "./pages/DuomeiNoteDetailPage";
-import { DuomeiAboutPage } from "./pages/DuomeiAboutPage";
 import { DuomeiTimePage } from "./pages/DuomeiTimePage";
 import { DuomeiNotFoundPage } from "./pages/DuomeiNotFoundPage";
 import { DuomeiHeader } from "./components/DuomeiHeader";
@@ -29,7 +28,7 @@ function AppRoutes() {
         <Route path="/" element={<DuomeiHomePage />} />
         <Route path="/time" element={<DuomeiTimePage />} />
         <Route path="/note/:slug" element={<DuomeiNoteDetailPage />} />
-        <Route path="/about" element={<DuomeiAboutPage />} />
+        <Route path="/about" element={<Navigate to="/time" replace />} />
         <Route path="/admin/login" element={<DuomeiAdmin mode="login" />} />
         <Route path="/admin" element={<DuomeiAdmin mode="notes" />} />
         <Route path="/admin/notes" element={<DuomeiAdmin mode="notes" />} />
