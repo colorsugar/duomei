@@ -11612,8 +11612,14 @@ html.duomei-modal-open .duomei-companion {
 
 .paper-stroke {
   stroke: #52685d;
-  stroke-dasharray: var(--paper-turn-progress, 0) 1;
+  stroke-dasharray: none;
   stroke-dashoffset: 0;
+}
+
+.paper-stroke-reveal-rect {
+  transform: scaleX(var(--paper-turn-progress, 0));
+  transform-origin: left center;
+  transform-box: fill-box;
 }
 
 .paper-body {
