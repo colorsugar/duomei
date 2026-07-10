@@ -23,7 +23,7 @@ $requiredMarkers = @(
   @{ File = "src/components/PoetryCanvasEditor.tsx"; Marker = "onUndo" },
   @{ File = "src/components/PoetryCanvasEditor.tsx"; Marker = "onRedo" },
   @{ File = "src/components/DuomeiHeader.tsx"; Marker = 'to="/#kuaihuo"' },
-  @{ File = "src/pages/DuomeiAdmin.tsx"; Marker = "你的网站内容状态良好" },
+  @{ File = "src/pages/DuomeiAdmin.tsx"; Marker = 'id="note-management"' },
   @{ File = "src/components/PaperLayer.tsx"; Marker = "paper-stroke-reveal-rect" },
   @{ File = "src/styles.css"; Marker = ".paper-stroke-reveal-rect" }
 )
