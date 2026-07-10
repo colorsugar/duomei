@@ -1,4 +1,4 @@
-import type { ChangeEvent, CSSProperties, PointerEvent as ReactPointerEvent } from "react";
+import type { ChangeEvent, CSSProperties } from "react";
 import { useEffect, useRef, useState } from "react";
 import { motion, useScroll, useSpring, useTransform } from "framer-motion";
 import type { MotionValue } from "framer-motion";
@@ -170,21 +170,10 @@ function PoetryWorkPanel({
   const copyY = useTransform(scrollYProgress, [0, 0.18], [42, 0]);
   const mediaX = useTransform(scrollYProgress, [0, 0.25], [isReverse ? -58 : 58, 0]);
   const copyX = useTransform(scrollYProgress, [0, 0.2], [isReverse ? 34 : -34, 0]);
-  const hasCustomLayout = work.textX !== undefined || work.imageFrameX !== undefined;
-  const textFrameStyle = hasCustomLayout ? {
-    "--poetry-text-x": `${work.textX ?? 5}%`,
-    "--poetry-text-y": `${work.textY ?? 8}%`,
-    "--poetry-text-width": `${work.textFrameWidth ?? 45}%`,
-    "--poetry-text-height": `${work.textFrameHeight ?? 82}%`,
-    "--poetry-image-x": `${work.imageFrameX ?? 54}%`,
-    "--poetry-image-y": `${work.imageFrameY ?? 3}%`,
-    "--poetry-image-width": `${work.imageFrameWidth ?? 44}%`,
-    "--poetry-image-height": `${work.imageFrameHeight ?? 88}%`,
-  } as CSSProperties : undefined;
 
   return (
     <article ref={panelRef} className="poetry-work-track" aria-labelledby={`poetry-work-${work.id}`}>
-      <div className={`poetry-work-panel${isReverse ? " is-reverse" : ""}${hasCustomLayout ? " has-custom-layout" : ""}`} style={textFrameStyle}>
+      <div className={`poetry-work-panel${isReverse ? " is-reverse" : ""}`}>
       <motion.header className="poetry-work-heading" style={{ opacity: copyOpacity, x: copyX, y: copyY }}>
         <span>诗词作品</span>
         <strong>{String(index + 1).padStart(2, "0")}</strong>
@@ -193,7 +182,7 @@ function PoetryWorkPanel({
 
       <motion.div
         className="poetry-work-vertical"
-        style={{ fontFamily: work.fontFamily || defaultPoetryFont, fontSize: work.fontSize, x: copyX, writingMode: work.textDirection === "horizontal" ? "horizontal-tb" : "vertical-rl" }}
+        style={{ fontFamily: work.fontFamily || defaultPoetryFont, x: copyX }}
         aria-label={work.verticalColumns.join("，")}
       >
         {work.verticalColumns.map((column, columnIndex) => (
@@ -259,72 +248,7 @@ function PoetryEditor({
   onUpdate: (updater: (page: TimePoetryWork) => TimePoetryWork) => void;
 }) {
   const page = pages[activeIndex];
-  const canvasRef = useRef<HTMLDivElement | null>(null);
-  const [interaction, setInteraction] = useState<{
-    target: "text" | "image";
-    mode: "move" | "resize";
-    startX: number;
-    startY: number;
-    x: number;
-    y: number;
-    width: number;
-    height: number;
-  } | null>(null);
-
-  useEffect(() => {
-    if (!interaction) return;
-    const move = (event: PointerEvent) => {
-      const rect = canvasRef.current?.getBoundingClientRect();
-      if (!rect) return;
-      const dx = ((event.clientX - interaction.startX) / rect.width) * 100;
-      const dy = ((event.clientY - interaction.startY) / rect.height) * 100;
-      onUpdate((current) => {
-        if (interaction.mode === "move") {
-          const x = Math.max(0, Math.min(100 - interaction.width, interaction.x + dx));
-          const y = Math.max(0, Math.min(100 - interaction.height, interaction.y + dy));
-          return interaction.target === "text" ? { ...current, textX: x, textY: y } : { ...current, imageFrameX: x, imageFrameY: y };
-        }
-        const width = Math.max(12, Math.min(100 - interaction.x, interaction.width + dx));
-        const height = Math.max(12, Math.min(100 - interaction.y, interaction.height + dy));
-        return interaction.target === "text"
-          ? { ...current, textFrameWidth: width, textFrameHeight: height }
-          : { ...current, imageFrameWidth: width, imageFrameHeight: height };
-      });
-    };
-    const stop = () => setInteraction(null);
-    window.addEventListener("pointermove", move);
-    window.addEventListener("pointerup", stop, { once: true });
-    return () => {
-      window.removeEventListener("pointermove", move);
-      window.removeEventListener("pointerup", stop);
-    };
-  }, [interaction, onUpdate]);
-
   if (!page) return null;
-
-  const textFrame = {
-    x: page.textX ?? 5,
-    y: page.textY ?? 8,
-    width: page.textFrameWidth ?? 45,
-    height: page.textFrameHeight ?? 82,
-  };
-  const imageFrame = {
-    x: page.imageFrameX ?? 54,
-    y: page.imageFrameY ?? 3,
-    width: page.imageFrameWidth ?? 44,
-    height: page.imageFrameHeight ?? 88,
-  };
-
-  const beginInteraction = (
-    event: ReactPointerEvent,
-    target: "text" | "image",
-    mode: "move" | "resize",
-    frame: { x: number; y: number; width: number; height: number },
-  ) => {
-    event.preventDefault();
-    event.stopPropagation();
-    setInteraction({ target, mode, startX: event.clientX, startY: event.clientY, ...frame });
-  };
 
   const updateImage = (imageIndex: number, patch: Partial<TimePoetryImage>) => {
     onUpdate((current) => ({
@@ -367,42 +291,12 @@ function PoetryEditor({
           <button type="button" onClick={onDuplicate}>复制页面</button>
           <button type="button" onClick={onDelete} disabled={pages.length <= 1}>删除页面</button>
         </div>
-        <div className="poetry-direct-toolbar">
-          <span>直接双击画布文字编辑；拖动左上角移动，右下角缩放</span>
-          <button type="button" onClick={() => onUpdate((current) => ({ ...current, textDirection: current.textDirection === "horizontal" ? "vertical" : "horizontal" }))}>
-            {page.textDirection === "horizontal" ? "改为竖排" : "改为横排"}
-          </button>
-          <label>字号<input type="number" min="18" max="120" value={page.fontSize} onChange={(event) => onUpdate((current) => ({ ...current, fontSize: Number(event.target.value) }))} /></label>
-        </div>
-        <div className="poetry-direct-canvas" ref={canvasRef}>
-          <div
-            className="poetry-direct-image-frame"
-            style={{ left: `${imageFrame.x}%`, top: `${imageFrame.y}%`, width: `${imageFrame.width}%`, height: `${imageFrame.height}%` }}
-          >
-            <img src={page.images[0]?.src || fallbackImage.src} alt={page.images[0]?.label || page.title} style={{ objectPosition: page.images[0]?.position || "50% 50%" }} />
-            <button className="poetry-direct-move" type="button" aria-label="移动图片" onPointerDown={(event) => beginInteraction(event, "image", "move", imageFrame)}>✥</button>
-            <button className="poetry-direct-resize" type="button" aria-label="缩放图片" onPointerDown={(event) => beginInteraction(event, "image", "resize", imageFrame)} />
-          </div>
-          <div
-            className={`poetry-direct-text-frame${page.textDirection === "horizontal" ? " is-horizontal" : ""}`}
-            style={{ left: `${textFrame.x}%`, top: `${textFrame.y}%`, width: `${textFrame.width}%`, height: `${textFrame.height}%`, fontFamily: page.fontFamily || defaultPoetryFont }}
-          >
-            <span contentEditable suppressContentEditableWarning onBlur={(event) => onUpdate((current) => ({ ...current, eyebrow: event.currentTarget.innerText }))}>{page.eyebrow}</span>
-            <strong contentEditable suppressContentEditableWarning onBlur={(event) => onUpdate((current) => ({ ...current, title: event.currentTarget.innerText }))}>{page.title}</strong>
-            <div
-              className="poetry-direct-lines"
-              contentEditable
-              suppressContentEditableWarning
-              style={{ fontSize: `${page.fontSize}px` }}
-              onBlur={(event) => onUpdate((current) => ({ ...current, verticalColumns: splitLines(event.currentTarget.innerText) }))}
-            >{page.verticalColumns.join("\n")}</div>
-            <small contentEditable suppressContentEditableWarning onBlur={(event) => onUpdate((current) => ({ ...current, citation: event.currentTarget.innerText }))}>{page.citation}</small>
-            <small contentEditable suppressContentEditableWarning onBlur={(event) => onUpdate((current) => ({ ...current, meta: splitLines(event.currentTarget.innerText) }))}>{page.meta.join(" · ")}</small>
-            <button className="poetry-direct-move" type="button" aria-label="移动文字" onPointerDown={(event) => beginInteraction(event, "text", "move", textFrame)}>✥</button>
-            <button className="poetry-direct-resize" type="button" aria-label="缩放文字" onPointerDown={(event) => beginInteraction(event, "text", "resize", textFrame)} />
-          </div>
-        </div>
-        <div className="poetry-editor-fields poetry-editor-fields-compact">
+        <div className="poetry-editor-fields">
+          <label>标题<input value={page.title} onChange={(event) => onUpdate((current) => ({ ...current, title: event.target.value }))} /></label>
+          <label>引用来源<input value={page.citation ?? ""} onChange={(event) => onUpdate((current) => ({ ...current, citation: event.target.value }))} /></label>
+          <label className="is-wide">竖排诗句<textarea value={page.verticalColumns.join("\n")} onChange={(event) => onUpdate((current) => ({ ...current, verticalColumns: splitLines(event.target.value) }))} /></label>
+          <label className="is-wide">简介<textarea value={page.body.join("\n")} onChange={(event) => onUpdate((current) => ({ ...current, body: splitLines(event.target.value) }))} /></label>
+          <label className="is-wide">页脚信息<textarea value={page.meta.join("\n")} onChange={(event) => onUpdate((current) => ({ ...current, meta: splitLines(event.target.value) }))} /></label>
           <section className="poetry-editor-images">
             <header><strong>页面图片</strong><button type="button" onClick={addImage}>＋ 添加图片</button></header>
             {page.images.map((item, imageIndex) => (
