@@ -7,7 +7,6 @@ import { compressImageFile } from "../lib/imageTools";
 import { defaultPoetryFont, timePoetryWorks } from "../lib/timePoetryContent";
 import type { TimePoetryImage, TimePoetryWork } from "../lib/timePoetryContent";
 import { DreamCard } from "./DreamCard";
-import { PoetryCanvasPage } from "./PoetryCanvasPage";
 import "./HomeIntroSection.css";
 
 type HomeIntroSectionProps = {
@@ -34,7 +33,6 @@ function cloneWork(work: TimePoetryWork): TimePoetryWork {
     body: [...work.body],
     meta: [...work.meta],
     images: work.images.map((image) => ({ ...image })),
-    canvas: work.canvas ? { ...work.canvas, elements: work.canvas.elements.map((element) => ({ ...element })) } : undefined,
   };
 }
 
@@ -149,17 +147,11 @@ function PoetryWorkPanel({
   index,
   canCreate,
   onEdit,
-  editing,
-  onDone,
-  onChange,
 }: {
   work: TimePoetryWork;
   index: number;
   canCreate: boolean;
   onEdit: () => void;
-  editing: boolean;
-  onDone: () => void;
-  onChange: (work: TimePoetryWork) => void;
 }) {
   const panelRef = useRef<HTMLElement | null>(null);
   const images = work.images.length ? work.images : [fallbackImage];
@@ -178,10 +170,6 @@ function PoetryWorkPanel({
   const copyY = useTransform(scrollYProgress, [0, 0.18], [42, 0]);
   const mediaX = useTransform(scrollYProgress, [0, 0.25], [isReverse ? -58 : 58, 0]);
   const copyX = useTransform(scrollYProgress, [0, 0.2], [isReverse ? 34 : -34, 0]);
-
-  if (editing) {
-    return <PoetryCanvasPage work={work} pageIndex={index} editing={editing} canEdit={canCreate} onEdit={onEdit} onDone={onDone} onChange={onChange} />;
-  }
 
   return (
     <article ref={panelRef} className="poetry-work-track" aria-labelledby={`poetry-work-${work.id}`}>
@@ -418,32 +406,24 @@ export function HomeIntroSection({ canCreate }: HomeIntroSectionProps) {
       </section>
 
       <section className="poetry-index" aria-label="诗词作品列表">
-        {canCreate ? (
-          <div className="poetry-page-management">
-            <button type="button" onClick={addPage}>+ 新增作品</button>
-            {editorIndex !== null ? (
-              <>
-                <button type="button" onClick={() => movePage(editorIndex, -1)} disabled={editorIndex === 0}>前移</button>
-                <button type="button" onClick={() => movePage(editorIndex, 1)} disabled={editorIndex === pages.length - 1}>后移</button>
-                <button type="button" onClick={() => duplicatePage(editorIndex)}>复制页面</button>
-                <button type="button" onClick={() => deletePage(editorIndex)} disabled={pages.length <= 1}>删除页面</button>
-              </>
-            ) : null}
-          </div>
-        ) : null}
         {pages.map((work, index) => (
-          <PoetryWorkPanel
-            key={work.id}
-            work={work}
-            index={index}
-            canCreate={canCreate}
-            editing={editorIndex === index}
-            onEdit={() => setEditorIndex(index)}
-            onDone={() => setEditorIndex(null)}
-            onChange={(nextWork) => updatePage(index, () => nextWork)}
-          />
+          <PoetryWorkPanel key={work.id} work={work} index={index} canCreate={canCreate} onEdit={() => setEditorIndex(index)} />
         ))}
       </section>
+
+      {canCreate && editorIndex !== null ? (
+        <PoetryEditor
+          pages={pages}
+          activeIndex={editorIndex}
+          onClose={() => setEditorIndex(null)}
+          onSelect={setEditorIndex}
+          onAdd={addPage}
+          onDuplicate={() => duplicatePage(editorIndex)}
+          onDelete={() => deletePage(editorIndex)}
+          onMove={(direction) => movePage(editorIndex, direction)}
+          onUpdate={(updater) => updatePage(editorIndex, updater)}
+        />
+      ) : null}
     </section>
   );
 }

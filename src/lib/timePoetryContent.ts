@@ -9,35 +9,6 @@ export type TimePoetryImage = {
 
 export type TimePoetryLayout = "image-left" | "image-right" | "image-top" | "image-bottom";
 
-export type TimePoetryCanvasElement = {
-  id: string;
-  kind: "text" | "image";
-  binding: "title" | "eyebrow" | "page" | "citation" | "meta" | "vertical" | "body" | "image" | "custom";
-  index?: number;
-  text?: string;
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-  fontSize?: number;
-  fontFamily?: string;
-  fontWeight?: number;
-  lineHeight?: number;
-  letterSpacing?: number;
-  color?: string;
-  align?: "left" | "center" | "right";
-  vertical?: boolean;
-  objectFit?: "contain" | "cover";
-  zIndex?: number;
-};
-
-export type TimePoetryCanvas = {
-  width: number;
-  height: number;
-  background: string;
-  elements: TimePoetryCanvasElement[];
-};
-
 export type TimePoetryWork = {
   id: string;
   eyebrow: string;
@@ -58,7 +29,6 @@ export type TimePoetryWork = {
   body: string[];
   meta: string[];
   images: TimePoetryImage[];
-  canvas?: TimePoetryCanvas;
 };
 
 export const defaultPoetryFont =
