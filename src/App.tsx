@@ -28,7 +28,7 @@ function AppRoutes() {
         <Route path="/" element={<DuomeiHomePage />} />
         <Route path="/time" element={<DuomeiTimePage />} />
         <Route path="/note/:slug" element={<DuomeiNoteDetailPage />} />
-        <Route path="/about" element={<Navigate to="/time" replace />} />
+        <Route path="/about" element={<Navigate to="/#kuaihuo" replace />} />
         <Route path="/admin/login" element={<DuomeiAdmin mode="login" />} />
         <Route path="/admin" element={<DuomeiAdmin mode="notes" />} />
         <Route path="/admin/notes" element={<DuomeiAdmin mode="notes" />} />

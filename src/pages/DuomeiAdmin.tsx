@@ -205,7 +205,7 @@ export function DuomeiAdmin({ mode }: { mode: "login" | "notes" }) {
         <strong>DUOMEI</strong>
         <span>多美内容工作室</span>
         <a href="/">首页</a>
-        <a href="/time">微言</a>
+        <a href="/#kuaihuo">微言</a>
         <a href="#note-management">小记管理</a>
         <AnimatedButton type="button" onClick={createAndEdit}>
           新增小记
@@ -253,7 +253,7 @@ export function DuomeiAdmin({ mode }: { mode: "login" | "notes" }) {
           <AnimatedParagraph>首页、微言与小记，都在这里保持同步。</AnimatedParagraph>
           <AnimatedTitle>你的网站内容状态良好。</AnimatedTitle>
           <div>
-            <span>2 个页面</span>
+            <span>3 个内容入口</span>
             <span>{notes.length} 条小记</span>
             <span>{published} 已发布</span>
             <span>{drafts} 草稿</span>
@@ -271,7 +271,7 @@ export function DuomeiAdmin({ mode }: { mode: "login" | "notes" }) {
             <AnimatedButton as="a" href="/">
               查看首页
             </AnimatedButton>
-            <AnimatedButton as="a" href="/time">
+            <AnimatedButton as="a" href="/#kuaihuo">
               查看微言
             </AnimatedButton>
             <AnimatedButton as="a" href="#note-management">

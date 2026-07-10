@@ -388,7 +388,7 @@ export function HomeIntroSection({ canCreate }: HomeIntroSectionProps) {
 
   return (
     <section className="poetry-portal" aria-label="多美诗词作品">
-      <section className="poetry-portal-intro" ref={introRef}>
+      <section className="poetry-portal-intro" id="kuaihuo" ref={introRef}>
         <div className="poetry-portal-stage">
           <motion.div className="poetry-portal-paper" style={{ x: paperX }} aria-hidden="true" />
           <motion.div className="poetry-portal-scene" style={{ y: sceneY, opacity: sceneOpacity }}>

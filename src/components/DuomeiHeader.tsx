@@ -62,6 +62,19 @@ export function DuomeiHeader() {
     closeMenu();
   };
 
+  const goKuaihuo = (event: React.MouseEvent<HTMLAnchorElement>) => {
+    event.preventDefault();
+    closeMenu();
+    const scroll = () => document.getElementById("kuaihuo")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    if (location.pathname !== "/") {
+      navigate("/#kuaihuo");
+      window.setTimeout(scroll, 80);
+      return;
+    }
+    window.history.replaceState(null, "", `${window.location.pathname}${window.location.search}#kuaihuo`);
+    scroll();
+  };
+
   return createPortal(
     <>
     <div className="duomei-header-hover-zone" aria-hidden="true" onPointerEnter={() => setHoverRevealed(true)} />
@@ -109,7 +122,7 @@ export function DuomeiHeader() {
         <Link to="/#notes" onClick={closeMenu}>
           小记
         </Link>
-        <Link to="/time" onClick={closeMenu}>
+        <Link to="/#kuaihuo" onClick={goKuaihuo}>
           微言
         </Link>
         {!isLoggedIn ? (
