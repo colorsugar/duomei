@@ -24,6 +24,7 @@ export type TimePoetryWork = {
   imageFrameY?: number;
   imageFrameWidth?: number;
   imageFrameHeight?: number;
+  textDirection?: "vertical" | "horizontal";
   verticalColumns: string[];
   citation?: string;
   body: string[];
