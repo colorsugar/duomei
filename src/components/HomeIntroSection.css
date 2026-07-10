@@ -161,6 +161,7 @@
   position: relative;
   z-index: 4;
   margin-top: -28svh;
+  padding-bottom: clamp(120px, 18svh, 220px);
   background: var(--poetry-paper);
 }
 
@@ -1359,6 +1360,7 @@
 @media (max-width: 760px) {
   .poetry-index {
     margin-top: -105svh;
+    padding-bottom: clamp(88px, 14svh, 140px);
   }
 
   .poetry-work-track {
