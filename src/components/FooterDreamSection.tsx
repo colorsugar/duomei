@@ -3,7 +3,7 @@ import { FooterDreamMotionBackground } from "./FooterDreamMotionBackground";
 
 export function FooterDreamSection() {
   return (
-    <section className="footer-dream-section" aria-label="多美 TAMI">
+    <section className="footer-dream-section" aria-label="DUOMEI TAMI">
       <FooterDreamMotionBackground />
       <DreamCard />
     </section>

@@ -1,5 +1,5 @@
 import type { DuomeiNote } from "../lib/noteTypes";
-import { FooterDreamSection } from "./FooterDreamSection";
+import { HomeIntroSection } from "./HomeIntroSection";
 import { NotesCarousel } from "./NotesCarousel";
 import { NotesIntro } from "./NotesIntro";
 import "./NotesDreamTransition.css";
@@ -27,8 +27,8 @@ export function NotesDreamTransition({ canCreate, notes, onCreate }: NotesDreamT
         </svg>
       </div>
 
-      <section className="notes-dream-footer-panel" aria-label="多美梦境">
-        <FooterDreamSection />
+      <section className="notes-dream-time-panel" aria-label="多美时光">
+        <HomeIntroSection canCreate={canCreate} notes={notes} onCreate={onCreate} />
       </section>
     </div>
   );

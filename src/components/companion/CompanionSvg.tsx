@@ -20,9 +20,14 @@ export function CompanionSvg({ state = "sit", className = "", title = "DUOMEI Co
   const isHop = state === "hop";
   const isSpin = state === "spin";
   const isBag = state === "bag";
+  const isDoze = state === "doze";
+  const isPeek = state === "peek";
+  const isCheer = state === "cheer";
+  const isScribble = state === "scribble";
+  const isShake = state === "shake";
   const showFlag = state === "flag";
   const showLost = state === "lost";
-  const isSleepy = isSleep || isYawn || isRest;
+  const isSleepy = isSleep || isYawn || isRest || isDoze;
   const bodyClassName = [
     "companion-body",
     isWalk ? "is-walking" : "",
@@ -35,6 +40,11 @@ export function CompanionSvg({ state = "sit", className = "", title = "DUOMEI Co
     isHop ? "is-hopping" : "",
     isSpin ? "is-spinning" : "",
     isBag ? "is-bagging" : "",
+    isDoze ? "is-dozing" : "",
+    isPeek ? "is-peeking" : "",
+    isCheer ? "is-cheering" : "",
+    isScribble ? "is-scribbling" : "",
+    isShake ? "is-shaking" : "",
   ]
     .filter(Boolean)
     .join(" ");
@@ -44,12 +54,15 @@ export function CompanionSvg({ state = "sit", className = "", title = "DUOMEI Co
     showFlag ? "companion-arm--flag" : "",
     isStretch ? "companion-arm--stretch" : "",
     isBag ? "companion-arm--bag" : "",
+    isCheer ? "companion-arm--cheer" : "",
+    isScribble ? "companion-arm--scribble" : "",
+    isPeek ? "companion-arm--peek" : "",
   ]
     .filter(Boolean)
     .join(" ");
   const eyesClassName = [
     "companion-eyes",
-    isLook ? "is-looking" : "",
+    isLook || isPeek ? "is-looking" : "",
     isBlink || isSleepy ? "is-blinking" : "",
   ]
     .filter(Boolean)
@@ -108,6 +121,27 @@ export function CompanionSvg({ state = "sit", className = "", title = "DUOMEI Co
         </g>
       ) : null}
 
+      {isDoze ? (
+        <g className="companion-doze-cloud" fill="none" stroke="#b7a98d" strokeWidth="2.4" strokeLinecap="round">
+          <path d="M117 57c8-9 23-4 21 7 8 0 12 10 4 15-9 6-31 4-39-1-7-5-3-14 6-14 0-3 3-6 8-7Z" fill="#fff8e8" opacity="0.9" />
+          <path d="M116 69c6 3 16 3 23-1" opacity="0.48" />
+        </g>
+      ) : null}
+
+      {isCheer ? (
+        <g className="companion-cheer-sparks" fill="none" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M38 47l-5-8M43 39l1-9M121 47l8-7M118 36l4-9" stroke="#d9b451" strokeWidth="3" />
+          <path d="M31 64l-8 1M134 62l10 2" stroke="#8e9f3f" strokeWidth="3" />
+        </g>
+      ) : null}
+
+      {isShake ? (
+        <g className="companion-dizzy-stars" fill="#d9b451" opacity="0.9">
+          <path d="M43 51l3 6 7 1-5 4 1 7-6-3-6 3 1-7-5-4 7-1Z" />
+          <path d="M126 55l2 5 5 1-4 3 1 5-4-2-5 2 1-5-4-3 5-1Z" />
+        </g>
+      ) : null}
+
       <g className={bodyClassName}>
         <g className="companion-feet" fill="#efe0bf" stroke="#332d25" strokeWidth="3.2" strokeLinejoin="round">
           <path d="M56 140c-12 0-20 6-19 14 16 3 28 1 36-5-2-6-8-9-17-9Z" />
@@ -136,6 +170,17 @@ export function CompanionSvg({ state = "sit", className = "", title = "DUOMEI Co
           />
           {isWave ? (
             <path d="M145 91c4-5 9-8 14-10M149 103c6-1 11-1 16 1" stroke="#d9b451" strokeWidth="2.5" strokeLinecap="round" />
+          ) : null}
+          {isCheer ? (
+            <path d="M135 94c8-7 14-12 20-18" stroke="#d9b451" strokeWidth="2.8" strokeLinecap="round" />
+          ) : null}
+          {isScribble ? (
+            <g transform="translate(130 113) rotate(-18)">
+              <g className="companion-pencil">
+                <path d="M0 0h25" stroke="#c08b4d" strokeWidth="5" strokeLinecap="round" />
+                <path d="M21 0l7-4v8Z" fill="#332d25" />
+              </g>
+            </g>
           ) : null}
         </g>
 
@@ -167,17 +212,39 @@ export function CompanionSvg({ state = "sit", className = "", title = "DUOMEI Co
           </g>
 
           <g className={eyesClassName}>
-            <rect x="58" y="77" width="7" height="15" rx="2.5" fill="#2d2924" />
-            <rect x="94" y="77" width="7" height="15" rx="2.5" fill="#2d2924" />
+            {isCheer ? (
+              <>
+                <path d="M56 84c3-6 9-6 12 0" fill="none" stroke="#2d2924" strokeWidth="3" strokeLinecap="round" />
+                <path d="M92 84c3-6 9-6 12 0" fill="none" stroke="#2d2924" strokeWidth="3" strokeLinecap="round" />
+              </>
+            ) : (
+              <>
+                <rect x={isPeek ? 61 : 58} y="77" width="7" height="15" rx="2.5" fill="#2d2924" />
+                <rect x={isPeek ? 97 : 94} y="77" width="7" height="15" rx="2.5" fill="#2d2924" />
+              </>
+            )}
           </g>
           <circle cx="50" cy="100" r="5" fill="#e9a679" opacity="0.58" />
           <circle cx="110" cy="100" r="5" fill="#e9a679" opacity="0.58" />
-          {isYawn ? (
+          {isYawn || isDoze ? (
             <ellipse cx="81" cy="101" rx="5" ry="6" fill="#2d2924" opacity="0.82" />
           ) : (
-            <path d={isHappy ? "M71 98c5 7 16 7 21 0" : "M73 98c4 3 11 3 15 0"} fill="none" stroke="#2d2924" strokeWidth="3" strokeLinecap="round" />
+            <path
+              d={isHappy || isCheer ? "M71 98c5 7 16 7 21 0" : isPeek ? "M75 99c3 2 9 2 12 0" : "M73 98c4 3 11 3 15 0"}
+              fill="none"
+              stroke="#2d2924"
+              strokeWidth="3"
+              strokeLinecap="round"
+            />
           )}
         </g>
+
+        {isScribble ? (
+          <g className="companion-scribble-lines" fill="none" stroke="#d9b451" strokeWidth="2.4" strokeLinecap="round">
+            <path d="M114 137c7-3 16-3 23 0" />
+            <path d="M118 143c5-2 12-2 18 0" />
+          </g>
+        ) : null}
       </g>
     </svg>
   );

@@ -3,6 +3,7 @@ import { DuomeiAdmin } from "./pages/DuomeiAdmin";
 import { DuomeiHomePage } from "./pages/DuomeiHomePage";
 import { DuomeiNoteDetailPage } from "./pages/DuomeiNoteDetailPage";
 import { DuomeiAboutPage } from "./pages/DuomeiAboutPage";
+import { DuomeiTimePage } from "./pages/DuomeiTimePage";
 import { DuomeiNotFoundPage } from "./pages/DuomeiNotFoundPage";
 import { DuomeiHeader } from "./components/DuomeiHeader";
 import { DuomeiFooter } from "./components/DuomeiFooter";
@@ -17,7 +18,8 @@ function AppRoutes() {
   const location = useLocation();
   const isAdmin = location.pathname.startsWith("/admin");
   const isHome = location.pathname === "/";
-  useSmoothScroll(isAdmin);
+  const isTimePage = location.pathname === "/time";
+  useSmoothScroll(isAdmin || isTimePage);
 
   return (
     <DuomeiEditProvider>
@@ -25,6 +27,7 @@ function AppRoutes() {
       {!isAdmin ? <DuomeiHeader /> : null}
       <Routes>
         <Route path="/" element={<DuomeiHomePage />} />
+        <Route path="/time" element={<DuomeiTimePage />} />
         <Route path="/note/:slug" element={<DuomeiNoteDetailPage />} />
         <Route path="/about" element={<DuomeiAboutPage />} />
         <Route path="/admin/login" element={<DuomeiAdmin mode="login" />} />

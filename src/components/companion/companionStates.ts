@@ -15,6 +15,11 @@ export type CompanionState =
   | "yawn"
   | "hop"
   | "spin"
-  | "bag";
+  | "bag"
+  | "doze"
+  | "peek"
+  | "cheer"
+  | "scribble"
+  | "shake";
 
 export type CompanionPlacement = "global" | "footer" | "not-found";

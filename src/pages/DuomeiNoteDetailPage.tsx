@@ -48,6 +48,40 @@ function withTimeout<T>(promise: Promise<T>, ms: number, message: string) {
   });
 }
 
+function scrollDetailToTop(smooth = false) {
+  const lenis = window.__duomeiLenis;
+  if (lenis) {
+    lenis.scrollTo(0, smooth ? { duration: 0.68, easing: (value: number) => 1 - Math.pow(1 - value, 3) } : { immediate: true });
+  } else {
+    window.scrollTo({ top: 0, left: 0, behavior: smooth ? "smooth" : "auto" });
+  }
+
+  if (!smooth) {
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+  }
+}
+
+function keepDetailAtTop() {
+  scrollDetailToTop();
+  let secondFrame = 0;
+  const firstFrame = window.requestAnimationFrame(() => {
+    scrollDetailToTop();
+    secondFrame = window.requestAnimationFrame(() => scrollDetailToTop());
+  });
+  const timers = [
+    window.setTimeout(scrollDetailToTop, 80),
+    window.setTimeout(scrollDetailToTop, 220),
+    window.setTimeout(scrollDetailToTop, 520),
+  ];
+
+  return () => {
+    window.cancelAnimationFrame(firstFrame);
+    if (secondFrame) window.cancelAnimationFrame(secondFrame);
+    timers.forEach((timer) => window.clearTimeout(timer));
+  };
+}
+
 export function DuomeiNoteDetailPage() {
   const { slug } = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -61,10 +95,11 @@ export function DuomeiNoteDetailPage() {
   const [isSaving, setIsSaving] = useState(false);
   const [previewNote, setPreviewNote] = useState<DuomeiNote | undefined>();
   const [cloudNote, setCloudNote] = useState<DuomeiNote | undefined>();
+  const [hasLoadedNote, setHasLoadedNote] = useState(false);
   const [navigationNotes, setNavigationNotes] = useState<DuomeiNote[]>(() => (isLoggedIn ? getAllNotes() : getPublishedNotes()));
   const undoStackRef = useRef<DuomeiNote[]>([]);
   const [undoCount, setUndoCount] = useState(0);
-  const storedNote = cloudNote ?? getNoteBySlug(slug, isLoggedIn);
+  const storedNote = cloudNote?.slug === slug ? cloudNote : getNoteBySlug(slug, isLoggedIn);
   const isPreview = searchParams.get("preview") === "1" && !!previewNote;
   const note = previewNote ?? storedNote;
   const shouldEdit = isLoggedIn && !isPreview && (editMode || searchParams.get("edit") === "1");
@@ -72,13 +107,18 @@ export function DuomeiNoteDetailPage() {
   void refreshKey;
 
   useEffect(() => {
-    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+    return keepDetailAtTop();
   }, [slug]);
 
   useEffect(() => {
     let active = true;
+    setHasLoadedNote(false);
+    setCloudNote((current) => (current?.slug === slug ? current : undefined));
     const load = async () => {
-      if (!slug) return;
+      if (!slug) {
+        setHasLoadedNote(true);
+        return;
+      }
       try {
         const [nextNote, nextNavigation] = await Promise.all([
           fetchCloudNoteBySlug(slug, isLoggedIn),
@@ -87,10 +127,12 @@ export function DuomeiNoteDetailPage() {
         if (!active) return;
         setCloudNote(nextNote);
         setNavigationNotes(nextNavigation);
+        setHasLoadedNote(true);
       } catch {
         if (!active) return;
         setCloudNote(undefined);
         setNavigationNotes(isLoggedIn ? getAllNotes() : getPublishedNotes());
+        setHasLoadedNote(true);
       }
     };
     load();
@@ -106,6 +148,59 @@ export function DuomeiNoteDetailPage() {
       setUndoCount(0);
     }
   }, [note?.id]);
+
+  useEffect(() => {
+    if (shouldEdit || !note) return;
+    const article = document.querySelector(".detail-reading-reveal");
+    if (!article) return;
+    const items = Array.from(article.querySelectorAll<HTMLElement>(".note-block-renderer > *"));
+    items.forEach((item, index) => {
+      item.classList.remove("is-detail-scroll-revealed");
+      item.style.setProperty("--detail-scroll-index", String(Math.min(index, 6)));
+    });
+
+    if (!("IntersectionObserver" in window)) {
+      items.forEach((item) => item.classList.add("is-detail-scroll-revealed"));
+      return;
+    }
+
+    let frame = 0;
+    const revealVisibleItems = () => {
+      frame = 0;
+      const revealLine = window.innerHeight * 0.86;
+      items.forEach((item) => {
+        if (item.classList.contains("is-detail-scroll-revealed")) return;
+        const rect = item.getBoundingClientRect();
+        if (rect.top < revealLine && rect.bottom > 0) item.classList.add("is-detail-scroll-revealed");
+      });
+    };
+    const scheduleRevealCheck = () => {
+      if (frame) return;
+      frame = window.requestAnimationFrame(revealVisibleItems);
+    };
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+          entry.target.classList.add("is-detail-scroll-revealed");
+          observer.unobserve(entry.target);
+        });
+      },
+      { rootMargin: "0px 0px -12% 0px", threshold: 0.18 },
+    );
+
+    items.forEach((item) => observer.observe(item));
+    window.addEventListener("scroll", scheduleRevealCheck, { passive: true });
+    window.addEventListener("resize", scheduleRevealCheck);
+    window.setTimeout(scheduleRevealCheck, 80);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("scroll", scheduleRevealCheck);
+      window.removeEventListener("resize", scheduleRevealCheck);
+      if (frame) window.cancelAnimationFrame(frame);
+    };
+  }, [note?.id, shouldEdit]);
 
   useEffect(() => {
     if (!message || isSaving) return;
@@ -367,6 +462,15 @@ export function DuomeiNoteDetailPage() {
     updateDraft({ tags: [...activeNote.tags, "新标签"] });
   };
 
+  if (!note && !hasLoadedNote) {
+    return (
+      <main className="duomei-detail detail-loading">
+        <p className="detail-category">LOADING</p>
+        <h1>小记正在路上...</h1>
+      </main>
+    );
+  }
+
   if (!note || !activeNote) {
     return (
       <main className="duomei-detail">
@@ -387,6 +491,19 @@ export function DuomeiNoteDetailPage() {
   const navigateWithJourney = (event: MouseEvent<HTMLAnchorElement>, target: string) => {
     if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return;
     event.preventDefault();
+
+    if (target.startsWith("/note/")) {
+      const targetSlug = target.slice("/note/".length).split(/[?#]/, 1)[0];
+      const cachedTarget = navigationNotes.find((item) => item.slug === targetSlug);
+      if (cachedTarget) {
+        setCloudNote(cachedTarget);
+        setHasLoadedNote(true);
+      }
+      navigate(target);
+      window.requestAnimationFrame(() => scrollDetailToTop());
+      return;
+    }
+
     runSharedJourneyTransition(() => navigate(target));
   };
 
@@ -472,7 +589,7 @@ export function DuomeiNoteDetailPage() {
         </div>
       ) : null}
 
-      <article>
+      <article className={shouldEdit ? undefined : "detail-reading-reveal"} key={shouldEdit ? "detail-edit" : note.slug}>
         <div className="detail-cover-wrap" data-shared-journey-image style={sharedImageStyle}>
           <NoteCover note={activeNote} detail />
         </div>
@@ -515,27 +632,9 @@ export function DuomeiNoteDetailPage() {
             <textarea className="detail-excerpt-editor" value={activeNote.excerpt} onChange={(event) => updateDraft({ excerpt: event.target.value })} placeholder="摘要" aria-label="摘要" />
             <div className="inline-block-editor">
               {blocks.map((block) => {
-                if (block.type === "divider") {
-                  return <div className="editable-block-row" key={block.id}><hr /><button type="button" onClick={() => removeBlock(block.id)}>删除</button></div>;
-                }
-                if (block.type === "image") {
-                  return (
-                    <EditableImageBlock
-                      key={block.id}
-                      block={block}
-                      onChange={(nextBlock) => replaceBlock(nextBlock)}
-                      onDelete={() => removeBlock(block.id)}
-                      onMove={(direction) => moveBlock(block.id, direction)}
-                      onSetCover={() => updateDraft({ coverImageUrl: block.src })}
-                    />
-                  );
-                }
-                return (
-                  <div className={`editable-text-block ${block.type === "quote" ? "is-quote" : ""}`} key={block.id}>
-                    <textarea value={block.text} onChange={(event) => updateBlock(block.id, { text: event.target.value })} placeholder={block.type === "quote" ? "引用文字" : "正文"} />
-                    <button type="button" onClick={() => removeBlock(block.id)}>删除</button>
-                  </div>
-                );
+                if (block.type === "divider") return <div className="editable-block-row" key={block.id}><hr /><button type="button" onClick={() => removeBlock(block.id)}>删除</button></div>;
+                if (block.type === "image") return <EditableImageBlock key={block.id} block={block} onChange={replaceBlock} onDelete={() => removeBlock(block.id)} onMove={(direction) => moveBlock(block.id, direction)} onSetCover={() => updateDraft({ coverImageUrl: block.src })} />;
+                return <div className={`editable-text-block ${block.type === "quote" ? "is-quote" : ""}`} key={block.id}><textarea value={block.text} onChange={(event) => updateBlock(block.id, { text: event.target.value })} placeholder={block.type === "quote" ? "引用文字" : "正文"} /><button type="button" onClick={() => removeBlock(block.id)}>删除</button></div>;
               })}
             </div>
           </>
@@ -555,7 +654,7 @@ export function DuomeiNoteDetailPage() {
         ) : (
           <span className="detail-note-nav-card is-disabled"><span>上一篇</span><strong>已经是第一篇</strong></span>
         )}
-        <Link className="detail-note-nav-home" to="/#notes" onClick={(event) => navigateWithJourney(event, "/#notes")}>返回主页</Link>
+        <Link className="detail-note-nav-home" to="/#notes" onClick={(event) => navigateWithJourney(event, "/#notes")}>返回小记</Link>
         {nextNote ? (
           <Link className="detail-note-nav-card align-right" to={`/note/${nextNote.slug}`} onClick={(event) => navigateWithJourney(event, `/note/${nextNote.slug}`)}><span>下一篇</span><strong>{nextNote.title}</strong></Link>
         ) : (

@@ -18,7 +18,10 @@ export function BackToTopButton() {
       aria-label="返回顶部"
       onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
     >
-      ↑
+      <svg viewBox="0 0 32 32" aria-hidden="true">
+        <path d="M8.5 15.5 16 8l7.5 7.5" />
+        <path d="M16 8v16" />
+      </svg>
     </button>,
     document.body,
   );

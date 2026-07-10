@@ -1,23 +1,55 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import { clearJourneyListState } from "../motion";
 import { useDuomeiEdit } from "./DuomeiEditProvider";
 
 export function DuomeiHeader() {
   const { isLoggedIn, editMode, toggleEditMode, logout } = useDuomeiEdit();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const [hoverRevealed, setHoverRevealed] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
 
+  useEffect(() => {
+    const update = () => {
+      const nextScrolled = window.scrollY > 36;
+      setScrolled(nextScrolled);
+      if (!nextScrolled) setHoverRevealed(false);
+    };
+    update();
+    window.addEventListener("scroll", update, { passive: true });
+    return () => window.removeEventListener("scroll", update);
+  }, []);
+
   const closeMenu = () => setMenuOpen(false);
+
+  const scrollHomeTop = (behavior: ScrollBehavior = "smooth") => {
+    const scroll = () => {
+      window.scrollTo({ top: 0, left: 0, behavior });
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+    };
+
+    scroll();
+    requestAnimationFrame(scroll);
+  };
 
   const goHomeTop = () => {
     closeMenu();
-    if (location.pathname !== "/") {
-      navigate("/");
-      window.setTimeout(() => window.scrollTo({ top: 0, behavior: "smooth" }), 0);
+    clearJourneyListState();
+
+    if (location.pathname !== "/" || location.search || location.hash) {
+      navigate("/", { replace: true });
+      window.setTimeout(() => scrollHomeTop(), 0);
       return;
     }
-    window.scrollTo({ top: 0, behavior: "smooth" });
+
+    if (window.location.hash) {
+      window.history.replaceState(null, "", window.location.pathname + window.location.search);
+    }
+    scrollHomeTop();
   };
 
   const toggleEdit = () => {
@@ -30,8 +62,16 @@ export function DuomeiHeader() {
     closeMenu();
   };
 
-  return (
-    <header className={`duomei-header${menuOpen ? " is-menu-open" : ""}`}>
+  return createPortal(
+    <>
+    <div className="duomei-header-hover-zone" aria-hidden="true" onPointerEnter={() => setHoverRevealed(true)} />
+    <header
+      className={`duomei-header${menuOpen ? " is-menu-open" : ""}${scrolled ? " is-scrolled" : ""}${hoverRevealed ? " is-hover-revealed" : ""}`}
+      onPointerEnter={() => setHoverRevealed(true)}
+      onPointerLeave={() => {
+        if (scrolled && !menuOpen) setHoverRevealed(false);
+      }}
+    >
       <Link
         className="duomei-brand duomei-motion-ambient-logo"
         to="/"
@@ -57,7 +97,13 @@ export function DuomeiHeader() {
       </button>
 
       <nav aria-label="主导航">
-        <Link to="/" onClick={goHomeTop}>
+        <Link
+          to="/"
+          onClick={(event) => {
+            event.preventDefault();
+            goHomeTop();
+          }}
+        >
           首页
         </Link>
         <Link to="/#notes" onClick={closeMenu}>
@@ -86,5 +132,7 @@ export function DuomeiHeader() {
         ) : null}
       </nav>
     </header>
+    </>,
+    document.body,
   );
 }

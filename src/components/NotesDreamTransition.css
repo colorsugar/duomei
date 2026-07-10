@@ -1,7 +1,7 @@
 .notes-dream-transition {
   position: relative;
   isolation: isolate;
-  overflow: hidden;
+  overflow: visible;
   background: var(--paper);
 }
 
@@ -62,17 +62,13 @@
   vector-effect: non-scaling-stroke;
 }
 
-.notes-dream-footer-panel {
+.notes-dream-time-panel {
   position: relative;
   z-index: 2;
-  min-height: 100svh;
+  min-height: 0;
   margin: 0;
-  overflow: hidden;
+  overflow: visible;
   background: #faf7f0;
-}
-
-.notes-dream-footer-panel .footer-dream-section {
-  min-height: 100svh !important;
 }
 
 @media (max-width: 760px) {

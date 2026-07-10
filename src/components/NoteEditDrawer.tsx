@@ -1,5 +1,6 @@
 import { FormEvent, WheelEvent, useEffect, useState } from "react";
 import type { DuomeiNote } from "../lib/noteTypes";
+import { defaultCovers } from "../lib/defaultCovers";
 import { compressImageFile } from "../lib/imageTools";
 import { uploadNoteImage } from "../lib/supabaseNotes";
 
@@ -142,6 +143,31 @@ export function NoteEditDrawer({
             封面图地址
             <input value={draft.coverImageUrl} onChange={(event) => setDraft({ ...draft, coverImageUrl: event.target.value })} />
           </label>
+          <div className="system-cover-picker" aria-label="系统默认封面">
+            <div>
+              <strong>系统默认封面</strong>
+              <span>选择一张，或留空让小记自动随机显示。</span>
+            </div>
+            <div className="system-cover-grid">
+              {defaultCovers.map((cover) => (
+                <button
+                  className={draft.coverImageUrl === cover.src ? "is-selected" : ""}
+                  type="button"
+                  key={cover.id}
+                  onClick={() => setDraft({ ...draft, coverImageUrl: cover.src })}
+                  aria-label={`选择${cover.label}`}
+                >
+                  <img src={cover.src} alt="" loading="lazy" />
+                  <span>{cover.label}</span>
+                </button>
+              ))}
+            </div>
+            {draft.coverImageUrl ? (
+              <button className="system-cover-clear" type="button" onClick={() => setDraft({ ...draft, coverImageUrl: "" })}>
+                使用随机默认封面
+              </button>
+            ) : null}
+          </div>
           <label>
             上传封面图
             <input type="file" accept="image/*" onChange={(event) => uploadCover(event.target.files)} />

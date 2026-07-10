@@ -1,4 +1,5 @@
 ﻿import { PointerEvent, WheelEvent, useRef, useState } from "react";
+import { defaultCovers } from "../lib/defaultCovers";
 import { createBlockId } from "../lib/noteStore";
 import type { NoteContentBlock } from "../lib/noteTypes";
 
@@ -332,6 +333,18 @@ export function ImageUploadPanel({ onInsert, onSetCover, compact = false, coverO
     onClose?.();
   };
 
+  const chooseSystemCover = (src: string, label: string) => {
+    onSetCover?.(src);
+    setMessage(`已选择系统默认封面：${label}`);
+    onClose?.();
+  };
+
+  const useRandomDefaultCover = () => {
+    onSetCover?.("");
+    setMessage("已清空封面，将使用随机默认封面。");
+    onClose?.();
+  };
+
   return (
     <section
       className={`image-upload-panel${compact ? " compact" : ""}`}
@@ -353,6 +366,26 @@ export function ImageUploadPanel({ onInsert, onSetCover, compact = false, coverO
         <label><span>图片 URL</span><input value={url} onChange={(event) => setUrl(event.target.value)} placeholder="https://..." /></label>
         <button type="button" onClick={insertUrl}>插入 URL</button>
       </div>
+
+      {coverOnly ? (
+        <div className="system-cover-picker" aria-label="系统默认封面">
+          <div>
+            <strong>系统默认封面</strong>
+            <span>直接选择一张系统图，或留空让小记自动随机显示。</span>
+          </div>
+          <div className="system-cover-grid">
+            {defaultCovers.map((cover) => (
+              <button type="button" key={cover.id} onClick={() => chooseSystemCover(cover.src, cover.label)} aria-label={`选择${cover.label}`}>
+                <img src={cover.src} alt="" loading="lazy" />
+                <span>{cover.label}</span>
+              </button>
+            ))}
+          </div>
+          <button className="system-cover-clear" type="button" onClick={useRandomDefaultCover}>
+            使用随机默认封面
+          </button>
+        </div>
+      ) : null}
 
       {message ? <p className="image-upload-message">{message}</p> : null}
 

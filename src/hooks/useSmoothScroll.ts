@@ -1,6 +1,12 @@
 import { useEffect } from "react";
 import Lenis from "lenis";
 
+declare global {
+  interface Window {
+    __duomeiLenis?: Lenis;
+  }
+}
+
 export function useSmoothScroll(disabled = false) {
   useEffect(() => {
     if (disabled) return;
@@ -9,6 +15,7 @@ export function useSmoothScroll(disabled = false) {
       lerp: 0.08,
       wheelMultiplier: 0.9,
     });
+    window.__duomeiLenis = lenis;
 
     let frame = 0;
     const raf = (time: number) => {
@@ -20,6 +27,7 @@ export function useSmoothScroll(disabled = false) {
 
     return () => {
       cancelAnimationFrame(frame);
+      if (window.__duomeiLenis === lenis) window.__duomeiLenis = undefined;
       lenis.destroy();
     };
   }, [disabled]);
