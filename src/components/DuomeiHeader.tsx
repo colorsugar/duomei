@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Menu, X } from "lucide-react";
 import { clearJourneyListState } from "../motion";
 import { useDuomeiEdit } from "./DuomeiEditProvider";
 
@@ -128,9 +129,8 @@ export function DuomeiHeader() {
         aria-label={menuOpen ? "关闭导航" : "打开导航"}
         onClick={() => setMenuOpen((value) => !value)}
       >
-        <span />
-        <span />
-        <span />
+        <Menu className="duomei-menu-icon is-menu" aria-hidden="true" />
+        <X className="duomei-menu-icon is-close" aria-hidden="true" />
       </button>
 
       <nav id="duomei-primary-navigation" aria-label="主导航">

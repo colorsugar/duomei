@@ -1,4 +1,10 @@
-# DUOMEI 多美小记 · UI System v3
+# DUOMEI 多美小记 · UI System v4
+
+## v4 direction override
+
+首页改为夜潮电影场：四段全屏视频以 1000ms 交叉淡化，透明前景层制造车窗般的空间深度，液态玻璃只用于导航、状态和行动入口。Instrument Serif 负责英文品牌与大型情绪标题，Geist 继续承担正文和所有控件。第三段深林画面会把正文切换为冷蓝深色，导航和底部状态始终保持白色。首页下半段使用 Feature Stack 的电影叙事节奏，再进入原有小记、诗词和编辑功能。所有旧业务边界不变。
+
+v4 mobile contract：320 / 375 / 414 / 768 CSS px 不得横向溢出；首屏标题允许平衡换行；四个场景按钮使用短标签；CTA 改为纵向胶囊；视频叙事取消 sticky 并单列排列；所有点击目标至少 44px。
 
 ## Direction
 

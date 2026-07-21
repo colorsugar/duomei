@@ -2,6 +2,13 @@
 /* Hallmark · genre: atmospheric · macrostructure-family: Photographic / Cinematic Long Document / Index-first Workbench · theme: custom · design-system: design.md · designed-as-app · contrast: pass (40–41) · nav: N5 · footer: Ft5 · slop: pass (42–49) · mobile: pass (34, 49, 50–57) */
 
 :root {
+  --color-night-tide: oklch(0.09 0.018 255);
+  --color-night-tide-soft: oklch(0.14 0.022 255);
+  --color-glass-ink: oklch(0.97 0.012 96);
+  --color-glass-ink-soft: oklch(0.84 0.016 96);
+  --color-glass-blue-ink: oklch(0.28 0.055 245);
+  --color-glass-blue: oklch(0.78 0.12 245);
+  --font-editorial: "Instrument Serif", "Songti SC", "STSong", serif;
   --color-paper: oklch(0.13 0.018 270);
   --color-paper-2: oklch(0.17 0.022 270);
   --color-paper-3: oklch(0.22 0.026 270);

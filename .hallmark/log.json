@@ -1,6 +1,15 @@
 [
   {
     "date": "2026-07-22",
+    "macrostructure": "Feature Stack",
+    "theme": "custom",
+    "theme_axes": "dark / italic-serif / cool-blue",
+    "vibe": "night tide, liquid glass, quiet cinema",
+    "enrichment": "user-supplied cinematic video set",
+    "brief": "DUOMEI v4 liquid-glass fullscreen video narrative"
+  },
+  {
+    "date": "2026-07-22",
     "macrostructure": "Photographic",
     "theme": "custom",
     "theme_axes": "dark-tinted / geometric-display / warm-amber",

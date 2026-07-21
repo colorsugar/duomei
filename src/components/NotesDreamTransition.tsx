@@ -13,7 +13,7 @@ type NotesDreamTransitionProps = {
 export function NotesDreamTransition({ canCreate, notes, onCreate }: NotesDreamTransitionProps) {
   return (
     <div className="notes-dream-transition">
-      <section className="notes-dream-notes-panel" aria-label="多美的小记">
+      <section className="notes-dream-notes-panel" id="notes" aria-label="多美的小记">
         <div className="notes-dream-notes-content">
           <NotesIntro canCreate={canCreate} onCreate={onCreate} />
           <NotesCarousel notes={notes} />

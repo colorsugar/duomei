@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { CinematicHero } from "../components/CinematicHero";
+import { DuomeiLiquidHero } from "../components/DuomeiLiquidHero";
+import { DuomeiVideoStory } from "../components/DuomeiVideoStory";
 import { NotesDreamTransition } from "../components/NotesDreamTransition";
 import { PaperLayer } from "../components/PaperLayer";
 import { NOTE_UPDATED_EVENT, getPublishedNotes } from "../lib/noteStore";
@@ -32,7 +33,8 @@ export function DuomeiHomePage() {
 
   return (
     <main className="duomei-stage">
-      <CinematicHero note={notes[0]} />
+      <DuomeiLiquidHero note={notes[0]} noteCount={notes.length} />
+      <DuomeiVideoStory notes={notes} />
       <PaperLayer>
         <NotesDreamTransition canCreate={editMode || localPoetryPreview} notes={notes} onCreate={() => openNoteEditor()} />
       </PaperLayer>
