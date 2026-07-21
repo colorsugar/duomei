@@ -1,18 +1,18 @@
-{
-  "skill": "hallmark",
-  "task": "DUOMEI UI refresh preview",
-  "genre": "editorial",
-  "structures": ["marquee-hero", "long-document", "workbench"],
-  "navigation": "single-DOM floating-on-scroll paper rail",
-  "footer": "mast-headed",
-  "status": "verified",
-  "critique": { "philosophy": 5, "hierarchy": 4, "execution": 4, "specificity": 5, "restraint": 5, "variety": 4 },
-  "verification": {
-    "viewports": [320, 375, 414, 768, 1280],
-    "routes": ["/", "/time", "/note/tea-town-sunset", "/admin/login", "/admin/notes"],
-    "horizontalOverflow": false,
-    "wrappedAffordances": false,
-    "pageErrors": 0
+[
+  {
+    "date": "2026-07-22",
+    "macrostructure": "Photographic",
+    "theme": "custom",
+    "theme_axes": "dark-tinted / geometric-display / warm-amber",
+    "vibe": "深夜 影像 放映 琥珀",
+    "enrichment": "real note photography",
+    "brief": "DUOMEI v3 dark cinematic journal redesign with complete image and text display"
   },
-  "notes": "Existing visual identity and business logic are preserved; production deployment is forbidden for this pass."
-}
+  {
+    "date": "2026-07-21",
+    "macrostructure": "Marquee Hero / Long Document / Workbench",
+    "theme": "DUOMEI paper",
+    "enrichment": "existing hand-drawn illustration",
+    "brief": "DUOMEI v2 quiet editorial paper preview"
+  }
+]

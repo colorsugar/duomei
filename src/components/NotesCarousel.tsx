@@ -411,6 +411,12 @@ export function NotesCarousel({ notes }: { notes: DuomeiNote[] }) {
           hoverPausedRef.current = false;
           resetActiveCardTilt();
         }}
+        onFocusCapture={() => {
+          hoverPausedRef.current = true;
+        }}
+        onBlurCapture={(event) => {
+          if (!event.currentTarget.contains(event.relatedTarget as Node)) hoverPausedRef.current = false;
+        }}
         onWheel={handleWheel}
         onDragStart={handleNativeDragStart}
         onPointerDown={handlePointerDown}

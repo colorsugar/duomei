@@ -1,0 +1,1613 @@
+/* Hallmark · macrostructure: Photographic · tone: atmospheric · anchor hue: 78 · theme: custom (deep-indigo projection room) · paper: oklch(0.13 0.018 270) · accent: oklch(0.79 0.16 78) · display: Syne Variable · body: Geist Variable · axes: dark-tinted / geometric-display / warm-amber */
+/* Hallmark · pre-emit critique: P5 H5 E5 S5 R4 V5 · contrast: pass (40–41) · nav: N5 · footer: Ft5 · honest: pass (46) · chrome: pass (47) · tokens: pass (48) · responsive: pass (34, 49–57) */
+
+/* DUOMEI v3 is an additive visual layer. The v2 branch remains the rollback point. */
+:root {
+  color: var(--color-ink);
+  background: var(--color-paper);
+  font-family: var(--font-body);
+  color-scheme: dark;
+  --bg: var(--color-paper);
+  --ink: var(--color-ink);
+  --muted: var(--color-muted);
+  --line: var(--color-rule);
+  --paper: var(--color-paper-2);
+  --accent: var(--color-accent);
+  --accent-dark: var(--color-accent);
+  --caramel: var(--color-accent);
+  --radius: var(--radius-card);
+  --shadow: var(--shadow-card);
+}
+
+html,
+body {
+  min-width: 0;
+  overflow-x: clip;
+  color: var(--color-ink);
+  background: var(--color-paper);
+}
+
+body {
+  font-family: var(--font-body);
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  color: var(--color-accent-ink);
+  background: var(--color-accent);
+}
+
+:where(h1, h2, h3, h4, p, blockquote, li, figcaption, strong, span) {
+  min-width: 0;
+}
+
+:where(h1, h2, h3, h4) {
+  overflow-wrap: anywhere;
+  text-wrap: balance;
+}
+
+:where(img, video, canvas, svg) {
+  max-width: 100%;
+}
+
+:where(a, button, input, textarea, select, summary, [contenteditable="true"]):focus-visible {
+  outline: var(--rule-fine) solid var(--color-focus) !important;
+  outline-offset: var(--space-3xs) !important;
+}
+
+:where(a, button, summary) {
+  white-space: nowrap;
+  -webkit-tap-highlight-color: transparent;
+}
+
+:where(button, input, textarea, select) {
+  min-height: var(--control-height);
+  border-width: var(--rule-hair);
+  border-style: solid;
+  border-color: var(--color-rule-2);
+  border-radius: var(--radius-input);
+  color: var(--color-ink);
+  background: var(--color-paper-2);
+  font: inherit;
+}
+
+:where(button, input, textarea, select):disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+:where(button):active,
+:where(a[class]):active {
+  transform: translateY(var(--rule-hair));
+}
+
+.duomei-page-shell {
+  min-width: 0;
+  animation: none;
+}
+
+.duomei-skip-link {
+  min-height: var(--control-height);
+  display: inline-flex;
+  align-items: center;
+  color: var(--color-accent-ink);
+  background: var(--color-accent);
+  border-radius: var(--radius-pill);
+}
+
+/* N5 Floating Pill: one compact navigation object over the photographic field. */
+.duomei-header {
+  position: fixed !important;
+  inset-block-start: var(--space-xs) !important;
+  inset-inline-start: 50% !important;
+  inset-inline-end: auto !important;
+  z-index: var(--z-nav) !important;
+  width: calc(100% - var(--space-md) - var(--space-md)) !important;
+  max-width: var(--content-max) !important;
+  min-height: 3.75rem !important;
+  padding: var(--space-2xs) var(--space-2xs) var(--space-2xs) var(--space-sm) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: var(--space-xs) !important;
+  border: var(--rule-hair) solid color-mix(in oklch, var(--color-rule-2) 72%, transparent) !important;
+  border-radius: var(--radius-pill) !important;
+  color: var(--color-ink) !important;
+  background: color-mix(in oklch, var(--color-paper-2) 88%, transparent) !important;
+  box-shadow: var(--shadow-card) !important;
+  backdrop-filter: blur(1rem) saturate(1.08) !important;
+  transform: translateX(-50%) !important;
+  transition:
+    background-color var(--dur-short) var(--ease-out),
+    border-color var(--dur-short) var(--ease-out),
+    opacity var(--dur-short) var(--ease-out) !important;
+}
+
+.duomei-header.is-scrolled,
+.duomei-header.is-scrolled:not(.is-hover-revealed):not(.is-menu-open):not(:focus-within) {
+  inset-block-start: var(--space-2xs) !important;
+  min-height: 3.5rem !important;
+  border-radius: var(--radius-pill) !important;
+  background: color-mix(in oklch, var(--color-paper) 92%, transparent) !important;
+  transform: translateX(-50%) !important;
+}
+
+.duomei-header-hover-zone {
+  display: none !important;
+}
+
+.duomei-brand {
+  min-height: 2.75rem;
+  display: inline-flex !important;
+  align-items: center;
+  gap: var(--space-2xs);
+  color: var(--color-ink) !important;
+  text-decoration: none;
+}
+
+.duomei-brand strong {
+  color: var(--color-ink) !important;
+  font-family: var(--font-display) !important;
+  font-size: var(--text-md) !important;
+  font-weight: 720;
+  letter-spacing: -0.04em !important;
+}
+
+.duomei-brand span {
+  color: var(--color-muted) !important;
+  font-size: var(--text-xs) !important;
+  letter-spacing: 0.08em !important;
+}
+
+.duomei-header .duomei-menu-toggle {
+  position: relative !important;
+  inset: auto !important;
+  width: 2.75rem !important;
+  height: 2.75rem !important;
+  min-height: 2.75rem !important;
+  display: grid !important;
+  place-items: center !important;
+  padding: 0 !important;
+  border-color: var(--color-rule-2) !important;
+  border-radius: var(--radius-pill) !important;
+  color: var(--color-ink) !important;
+  background: var(--color-paper-3) !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
+}
+
+.duomei-header .duomei-menu-toggle::after {
+  content: "•••";
+  font-size: var(--text-xs);
+  letter-spacing: 0.1em;
+  line-height: 1;
+}
+
+.duomei-header.is-menu-open .duomei-menu-toggle::after {
+  content: "×";
+  font-size: var(--text-xl);
+  letter-spacing: 0;
+}
+
+.duomei-header .duomei-menu-toggle > span {
+  display: none !important;
+}
+
+.duomei-header nav {
+  position: absolute !important;
+  inset-block-start: calc(100% + var(--space-2xs)) !important;
+  inset-inline: 0 !important;
+  width: 100% !important;
+  padding: var(--space-2xs) !important;
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) !important;
+  gap: var(--space-3xs) !important;
+  border: var(--rule-hair) solid var(--color-rule-2) !important;
+  border-radius: var(--radius-card) !important;
+  color: var(--color-ink) !important;
+  background: var(--color-paper-2) !important;
+  box-shadow: var(--shadow-card) !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  transform: translateY(calc(var(--space-2xs) * -1)) !important;
+  transition:
+    opacity var(--dur-short) var(--ease-out),
+    transform var(--dur-short) var(--ease-out) !important;
+}
+
+.duomei-header.is-menu-open nav {
+  opacity: 1 !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
+  transform: none !important;
+}
+
+.duomei-header nav a,
+.duomei-header nav button {
+  width: 100%;
+  min-height: 3rem !important;
+  padding-inline: var(--space-sm) !important;
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: flex-start;
+  border: 0 !important;
+  border-radius: var(--radius-input) !important;
+  color: var(--color-ink) !important;
+  background: transparent !important;
+  font-size: var(--text-sm) !important;
+  text-decoration: none;
+}
+
+.duomei-header nav a::after,
+.duomei-header nav button::after {
+  display: none !important;
+}
+
+/* H6 Photographic Fold: a real note image is shown as ambience and as a complete foreground print. */
+.dm3-hero {
+  --dm3-rotate-x: 0deg;
+  --dm3-rotate-y: 0deg;
+  --dm3-light-x: 50%;
+  --dm3-light-y: 50%;
+  position: relative;
+  isolation: isolate;
+  min-height: 48rem;
+  padding: 6.5rem var(--space-sm) var(--space-xl);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-areas:
+    "photo"
+    "copy"
+    "actions";
+  align-content: start;
+  gap: var(--space-md);
+  overflow: clip;
+  color: var(--color-ink);
+  background: var(--color-paper);
+}
+
+.dm3-hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(to bottom, var(--color-scrim-soft), var(--color-photo-wash));
+  pointer-events: none;
+}
+
+.dm3-hero::before {
+  content: "IMAGE / NOTE / TIME";
+  position: absolute;
+  inset-block-start: 50%;
+  inset-inline-end: calc(var(--space-2xs) * -1);
+  z-index: 3;
+  color: var(--color-accent);
+  font-family: var(--font-display);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-label);
+  writing-mode: vertical-rl;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.dm3-hero-backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  overflow: hidden;
+  background: var(--color-paper-2);
+}
+
+.dm3-hero-backdrop img,
+.dm3-hero-backdrop .note-cover-placeholder {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  filter: saturate(0.74) contrast(1.04);
+  transform: scale(1.04);
+}
+
+.dm3-hero-photo {
+  grid-area: photo;
+  position: relative;
+  min-width: 0;
+  height: min(54svh, 31rem);
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border: var(--rule-hair) solid color-mix(in oklch, var(--color-ink) 24%, transparent);
+  background: color-mix(in oklch, var(--color-paper) 64%, transparent);
+  box-shadow: var(--shadow-card);
+  transform:
+    perspective(90rem)
+    rotateX(var(--dm3-rotate-x))
+    rotateY(var(--dm3-rotate-y));
+  transform-style: preserve-3d;
+  transition: transform var(--dur-long) var(--ease-out);
+  animation: dm3-photo-settle var(--dur-long) var(--ease-out) both;
+}
+
+.dm3-hero.is-depth-active .dm3-hero-photo {
+  transition: none;
+}
+
+.dm3-hero-photo::before {
+  content: "";
+  position: absolute;
+  inset: -24%;
+  z-index: 2;
+  background:
+    radial-gradient(
+      circle at var(--dm3-light-x) var(--dm3-light-y),
+      color-mix(in oklch, var(--color-accent) 36%, transparent),
+      transparent 28%
+    ),
+    linear-gradient(
+      112deg,
+      transparent 35%,
+      color-mix(in oklch, var(--color-ink) 20%, transparent) 48%,
+      transparent 61%
+    );
+  mix-blend-mode: screen;
+  opacity: 0.74;
+  transform: translateX(-48%);
+  animation: dm3-light-sweep 1.2s var(--ease-out) 180ms both;
+  pointer-events: none;
+}
+
+.dm3-hero-photo::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border: var(--space-2xs) solid color-mix(in oklch, var(--color-paper) 58%, transparent);
+  z-index: 3;
+  pointer-events: none;
+}
+
+.dm3-hero-photo img {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  max-width: none !important;
+  height: 100% !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  object-fit: contain !important;
+  background: var(--color-paper);
+}
+
+.dm3-hero-photo .note-cover-placeholder {
+  width: 100% !important;
+  height: 100% !important;
+  background: var(--color-paper);
+}
+
+.dm3-hero-focus-trigger {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  width: 100%;
+  height: 100%;
+  padding: var(--space-sm);
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+  border: 0;
+  border-radius: 0;
+  color: var(--color-ink);
+  background: transparent;
+  cursor: zoom-in;
+}
+
+.dm3-hero-focus-trigger span {
+  min-height: 2.75rem;
+  padding-inline: var(--space-sm);
+  display: inline-flex;
+  align-items: center;
+  border: var(--rule-hair) solid var(--color-rule-2);
+  border-radius: var(--radius-pill);
+  color: var(--color-ink);
+  background: color-mix(in oklch, var(--color-paper) 84%, transparent);
+  backdrop-filter: blur(var(--space-sm));
+}
+
+.dm3-hero-copy {
+  grid-area: copy;
+  min-width: 0;
+  display: grid;
+  gap: var(--space-2xs);
+  animation: dm3-copy-reveal var(--dur-long) var(--ease-out) both;
+}
+
+.dm3-hero-copy h1 {
+  margin: 0;
+  color: var(--color-ink);
+  font-family: var(--font-display);
+  font-size: clamp(2.8rem, 14.5vw, 6rem);
+  font-weight: 720;
+  line-height: 1;
+  letter-spacing: var(--tracking-display);
+  white-space: nowrap;
+}
+
+.dm3-hero-cn {
+  margin: 0;
+  color: var(--color-accent);
+  font-size: var(--text-sm);
+  letter-spacing: var(--tracking-label);
+}
+
+.dm3-hero-note {
+  margin: var(--space-xs) 0 0;
+  display: grid;
+  gap: var(--space-3xs);
+  color: var(--color-ink-2);
+}
+
+.dm3-hero-note strong {
+  max-width: 24ch;
+  color: var(--color-ink);
+  font-family: var(--font-body);
+  font-size: var(--text-lg);
+  font-weight: 500;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.dm3-hero-note span {
+  color: var(--color-muted);
+  font-size: var(--text-sm);
+  font-variant-numeric: tabular-nums;
+}
+
+.dm3-hero-actions {
+  grid-area: actions;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2xs);
+}
+
+.dm3-hero-actions a {
+  min-height: 3rem;
+  padding-inline: var(--space-md);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: var(--rule-hair) solid var(--color-rule-2);
+  border-radius: var(--radius-pill);
+  color: var(--color-ink);
+  background: var(--color-paper-2);
+  font-size: var(--text-sm);
+  text-decoration: none;
+  transition:
+    background-color var(--dur-short) var(--ease-out),
+    color var(--dur-short) var(--ease-out),
+    transform var(--dur-micro) var(--ease-out);
+}
+
+.dm3-hero-actions a:first-child {
+  border-color: var(--color-accent);
+  color: var(--color-accent-ink);
+  background: var(--color-accent);
+}
+
+.dm3-hero-empty {
+  grid-area: photo;
+  min-height: 24rem;
+  border: var(--rule-hair) solid var(--color-rule);
+  background: var(--color-paper-2);
+}
+
+@keyframes dm3-photo-settle {
+  from { opacity: 0; transform: scale(0.985); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes dm3-copy-reveal {
+  from { opacity: 0; clip-path: inset(0 100% 0 0); }
+  to { opacity: 1; clip-path: inset(0); }
+}
+
+@keyframes dm3-light-sweep {
+  from { opacity: 0; transform: translateX(-48%); }
+  42% { opacity: 0.9; }
+  to { opacity: 0.52; transform: translateX(48%); }
+}
+
+.dm3-hero-dialog {
+  position: fixed;
+  inset: 0;
+  width: min(calc(100% - var(--space-lg)), 80rem);
+  max-width: none;
+  height: min(calc(100dvh - var(--space-lg)), 56rem);
+  max-height: none;
+  margin: auto;
+  padding: 0;
+  overflow: hidden;
+  border: var(--rule-hair) solid var(--color-rule-2);
+  border-radius: var(--radius-card);
+  color: var(--color-ink);
+  background: var(--color-paper);
+  box-shadow: var(--shadow-card);
+}
+
+.dm3-hero-dialog::backdrop {
+  background: var(--color-scrim);
+  backdrop-filter: blur(var(--space-2xs));
+}
+
+.dm3-hero-dialog-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  padding: var(--space-sm);
+  display: grid;
+  place-items: center;
+}
+
+.dm3-hero-dialog img,
+.dm3-hero-dialog .note-cover-placeholder {
+  width: auto !important;
+  max-width: 100% !important;
+  height: auto !important;
+  max-height: calc(100dvh - var(--space-2xl)) !important;
+  object-fit: contain !important;
+}
+
+.dm3-hero-dialog button {
+  position: absolute;
+  inset-block-start: var(--space-sm);
+  inset-inline-end: var(--space-sm);
+  min-height: 3rem;
+  padding-inline: var(--space-md);
+  border-color: var(--color-rule-2);
+  border-radius: var(--radius-pill);
+  color: var(--color-ink);
+  background: var(--color-paper-3);
+}
+
+/* Notes archive. */
+.paper-layer,
+.paper-body,
+.notes-dream-transition,
+.notes-dream-notes-panel {
+  min-width: 0;
+  color: var(--color-ink) !important;
+  background: var(--color-paper-2) !important;
+}
+
+.paper-layer {
+  position: relative;
+  min-height: 0 !important;
+  margin-block-start: 0 !important;
+}
+
+.paper-curve {
+  position: absolute !important;
+  inset-block-start: calc(clamp(3rem, 7vw, 6.5rem) * -1) !important;
+  inset-inline: 0 !important;
+  height: clamp(3rem, 7vw, 6.5rem) !important;
+  margin: 0 !important;
+  transform: none !important;
+  filter: none !important;
+}
+
+.paper-curve svg {
+  height: 100% !important;
+}
+
+.paper-body {
+  min-height: 0 !important;
+  margin-block-start: 0 !important;
+  padding-block-start: 0 !important;
+}
+
+.paper-body::before {
+  display: none !important;
+}
+
+.paper-fill {
+  fill: var(--color-paper-2) !important;
+}
+
+.paper-stroke-base,
+.paper-stroke {
+  stroke: var(--color-accent) !important;
+  stroke-width: var(--rule-hair) !important;
+}
+
+.notes-dream-notes-panel {
+  padding-block: var(--space-2xl) var(--space-3xl) !important;
+}
+
+.notes-dream-notes-panel::before {
+  display: none !important;
+}
+
+.notes-dream-notes-content {
+  width: min(100%, var(--content-max)) !important;
+  margin-inline: auto !important;
+}
+
+.notes-intro,
+.notes-dream-transition .notes-intro {
+  width: calc(100% - var(--space-lg)) !important;
+  margin-inline: auto !important;
+  padding: 0 0 var(--space-lg) !important;
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) !important;
+  gap: var(--space-xs) !important;
+  border-block-end: var(--rule-hair) solid var(--color-rule) !important;
+  color: var(--color-ink) !important;
+  text-align: start !important;
+}
+
+.notes-intro h2,
+.notes-intro-title,
+.notes-dream-transition .notes-intro h2,
+.notes-dream-transition .notes-intro-title {
+  margin: 0 !important;
+  color: var(--color-ink) !important;
+  font-family: var(--font-display) !important;
+  font-size: clamp(2.4rem, 12vw, 5.6rem) !important;
+  font-style: normal !important;
+  font-weight: 660 !important;
+  line-height: 0.94 !important;
+  letter-spacing: var(--tracking-display) !important;
+}
+
+.notes-intro span,
+.notes-intro-subtitle {
+  max-width: 46ch;
+  color: var(--color-muted) !important;
+  font-size: var(--text-md) !important;
+  line-height: 1.7 !important;
+}
+
+.notes-browser {
+  padding-block-start: var(--space-lg);
+  display: grid;
+  gap: var(--space-lg);
+}
+
+.notes-collection-tools {
+  width: calc(100% - var(--space-lg)) !important;
+  margin-inline: auto !important;
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) !important;
+  align-items: end;
+  gap: var(--space-xs) !important;
+}
+
+.notes-collection-tools label {
+  min-width: 0;
+  display: grid;
+  gap: var(--space-2xs);
+  color: var(--color-muted) !important;
+  font-size: var(--text-xs) !important;
+  letter-spacing: 0.08em !important;
+}
+
+.notes-collection-tools input,
+.notes-collection-tools select,
+.notes-intro input {
+  width: 100%;
+  min-height: var(--control-height) !important;
+  padding-inline: var(--space-sm) !important;
+  border: var(--rule-hair) solid var(--color-rule-2) !important;
+  color: var(--color-ink) !important;
+  background: var(--color-paper-3) !important;
+}
+
+.notes-result-count {
+  min-height: var(--control-height) !important;
+  display: inline-flex !important;
+  align-items: center;
+  color: var(--color-muted) !important;
+  font-variant-numeric: tabular-nums;
+}
+
+.notes-carousel-shell {
+  min-width: 0;
+  padding-block: var(--space-2xs) var(--space-lg) !important;
+}
+
+.notes-carousel {
+  min-width: 0;
+  padding-block: var(--space-sm) var(--space-xl) !important;
+  scrollbar-color: var(--color-accent) var(--color-paper-3);
+}
+
+.notes-carousel-track {
+  min-width: max-content;
+  gap: var(--space-sm) !important;
+  padding-inline: var(--space-sm) !important;
+}
+
+.duomei-note-card {
+  width: min(78vw, 21rem) !important;
+  min-width: min(78vw, 21rem) !important;
+  overflow: visible !important;
+  border: var(--rule-hair) solid var(--color-rule) !important;
+  border-radius: var(--radius-card) !important;
+  color: var(--color-ink) !important;
+  background: var(--color-paper-3) !important;
+  box-shadow: none !important;
+}
+
+.note-card-cover {
+  aspect-ratio: 4 / 3 !important;
+  min-height: 0 !important;
+  overflow: hidden;
+  border-radius: calc(var(--radius-card) - var(--rule-hair)) calc(var(--radius-card) - var(--rule-hair)) 0 0 !important;
+  background: var(--color-paper) !important;
+}
+
+.note-card-cover img,
+.note-card-cover .note-real-image,
+.note-card-cover .note-cover-placeholder {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain !important;
+  background: var(--color-paper) !important;
+}
+
+.note-card-body {
+  min-width: 0;
+  padding: var(--space-md) !important;
+  display: grid;
+  gap: var(--space-sm);
+}
+
+.note-card-body h3 {
+  margin: 0 !important;
+  color: var(--color-ink) !important;
+  font-family: var(--font-outlier) !important;
+  font-size: clamp(1.35rem, 5vw, 1.75rem) !important;
+  font-style: normal !important;
+  font-weight: 500 !important;
+  line-height: 1.38 !important;
+  overflow-wrap: anywhere;
+}
+
+.note-card-meta,
+.note-card-foot {
+  color: var(--color-muted) !important;
+  font-size: var(--text-sm) !important;
+}
+
+.note-card-foot strong {
+  color: var(--color-accent) !important;
+}
+
+.notes-carousel-shell .carousel-button {
+  width: 3rem !important;
+  height: 3rem !important;
+  min-height: 3rem !important;
+  border: var(--rule-hair) solid var(--color-rule-2) !important;
+  border-radius: var(--radius-pill) !important;
+  color: var(--color-ink) !important;
+  background: var(--color-paper-3) !important;
+  box-shadow: none !important;
+}
+
+.notes-empty {
+  width: calc(100% - var(--space-lg));
+  margin-inline: auto;
+  padding: var(--space-xl);
+  border: var(--rule-hair) solid var(--color-rule);
+  color: var(--color-ink-2);
+  background: var(--color-paper-3);
+}
+
+/* Time / poetry canvas keeps its feature logic; v3 supplies the projection-room shell. */
+.notes-dream-divider,
+.notes-dream-time-panel,
+.duomei-time-page,
+.poetry-portal,
+.poetry-portal-intro,
+.poetry-index {
+  color: var(--color-ink) !important;
+  background: var(--color-paper) !important;
+}
+
+.poetry-portal {
+  --poetry-paper: var(--color-paper);
+  --poetry-paper-deep: var(--color-paper-2);
+  --poetry-ink: var(--color-ink);
+  --poetry-muted: var(--color-muted);
+  --poetry-line: var(--color-rule);
+  --poetry-accent: var(--color-accent);
+}
+
+.poetry-portal-stage {
+  color: var(--color-ink) !important;
+  background:
+    radial-gradient(circle at 18% 18%, color-mix(in oklch, var(--color-accent) 14%, transparent), transparent 34rem),
+    var(--color-paper) !important;
+}
+
+.poetry-portal-paper {
+  background:
+    linear-gradient(90deg, transparent, color-mix(in oklch, var(--color-paper-3) 82%, transparent)),
+    repeating-linear-gradient(0deg, transparent 0 0.45rem, color-mix(in oklch, var(--color-rule) 28%, transparent) 0.5rem) !important;
+}
+
+.poetry-legacy-frame {
+  border-color: var(--color-rule-2) !important;
+  color: var(--color-ink) !important;
+  background: color-mix(in oklch, var(--color-paper-2) 94%, transparent) !important;
+  box-shadow: var(--shadow-card) !important;
+}
+
+.poetry-legacy-frame .dream-card,
+.poetry-legacy-frame .dream-poem-box {
+  color: var(--color-ink) !important;
+  background: var(--color-paper-2) !important;
+  border-color: var(--color-rule) !important;
+  box-shadow: none !important;
+}
+
+.poetry-legacy-frame .dream-name,
+.poetry-legacy-frame .dream-tami {
+  color: var(--color-accent) !important;
+  font-family: var(--font-display) !important;
+}
+
+.poetry-legacy-frame .dream-poem-text,
+.poetry-portal-title,
+.poetry-work-heading h3,
+.poetry-work-vertical,
+.poetry-free-text {
+  color: var(--color-ink) !important;
+  font-family: var(--font-outlier) !important;
+}
+
+.poetry-scroll-progress,
+.poetry-work-heading span,
+.poetry-work-heading strong,
+.poetry-free-index,
+.poetry-work-excerpt small {
+  font-family: var(--font-body) !important;
+}
+
+.poem-wind-lines path {
+  stroke: var(--color-accent) !important;
+}
+
+.poem-flower-field {
+  color: var(--color-accent) !important;
+}
+
+.notes-dream-divider-fill {
+  fill: var(--color-paper) !important;
+}
+
+.notes-dream-divider-line {
+  stroke: var(--color-rule-2) !important;
+}
+
+.poetry-portal-title,
+.poetry-free-text,
+.poetry-work-panel h2,
+.poetry-editor h2 {
+  overflow-wrap: anywhere;
+  text-shadow: none !important;
+}
+
+.poetry-portal-title {
+  inset-block-start: 6.75rem !important;
+  inset-inline: var(--space-sm) !important;
+  width: auto !important;
+  height: auto !important;
+  display: flex !important;
+  flex-direction: row !important;
+  justify-content: flex-end;
+  gap: var(--space-2xs) !important;
+  font-size: var(--text-sm) !important;
+  letter-spacing: 0.08em !important;
+}
+
+.poetry-portal-title > span:not(.poetry-sr-only) {
+  margin: 0 !important;
+  writing-mode: horizontal-tb !important;
+  text-orientation: mixed !important;
+  white-space: nowrap !important;
+}
+
+.poetry-index {
+  min-width: 0;
+  overflow: clip;
+}
+
+.poetry-index::before {
+  background: linear-gradient(180deg, transparent, var(--color-paper)) !important;
+}
+
+.poetry-work-track,
+.poetry-work-panel,
+.poetry-free-panel {
+  min-width: 0;
+  color: var(--color-ink) !important;
+  background: var(--color-paper) !important;
+  border-color: var(--color-rule) !important;
+}
+
+.poetry-work-panel::after {
+  border-color: var(--color-accent) !important;
+  color: var(--color-accent) !important;
+}
+
+.poetry-work-media,
+.poetry-free-image {
+  background: var(--color-paper-2) !important;
+}
+
+.poetry-work-media-mask {
+  background: var(--color-paper) !important;
+}
+
+.poetry-work-media figcaption,
+.poetry-free-image figcaption {
+  color: var(--color-ink) !important;
+  background: color-mix(in oklch, var(--color-paper-2) 88%, transparent) !important;
+}
+
+.poetry-free-image {
+  max-width: 100%;
+  object-fit: contain !important;
+}
+
+.poetry-free-image > img,
+.poetry-work-media img {
+  inset-block-start: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain !important;
+  background: var(--color-paper-2) !important;
+}
+
+.poetry-free-edit,
+.poetry-editor button,
+.poetry-editor input,
+.poetry-editor textarea,
+.poetry-editor select {
+  min-height: var(--control-height) !important;
+  color: var(--color-ink) !important;
+  background: var(--color-paper-2) !important;
+  border-color: var(--color-rule-2) !important;
+}
+
+.poetry-editor-backdrop {
+  color: var(--color-ink) !important;
+  background: var(--color-scrim) !important;
+}
+
+.poetry-editor,
+.poetry-direct-canvas,
+.poetry-editor-fields,
+.poetry-editor-images {
+  color: var(--color-ink) !important;
+  background: var(--color-paper-2) !important;
+  border-color: var(--color-rule-2) !important;
+}
+
+/* Cinematic long-document detail. */
+.duomei-detail {
+  width: min(100%, calc(var(--content-max) + var(--space-2xl))) !important;
+  min-width: 0;
+  margin-inline: auto !important;
+  padding: 7rem var(--space-sm) var(--space-3xl) !important;
+  color: var(--color-ink) !important;
+  background: var(--color-paper) !important;
+}
+
+.duomei-detail article {
+  width: min(100%, var(--reading-max)) !important;
+  min-width: 0;
+  margin-inline: auto !important;
+}
+
+.detail-back {
+  min-height: var(--control-height);
+  display: inline-flex;
+  align-items: center;
+  color: var(--color-ink-2) !important;
+  text-decoration: none;
+}
+
+.detail-cover-wrap {
+  width: min(100%, 68rem) !important;
+  min-height: min(62svh, 38rem) !important;
+  margin-inline: auto !important;
+  display: grid !important;
+  place-items: center !important;
+  overflow: hidden !important;
+  border: var(--rule-hair) solid var(--color-rule) !important;
+  border-radius: var(--radius-card) !important;
+  background: var(--color-paper-2) !important;
+  animation: none !important;
+  clip-path: none !important;
+}
+
+.detail-cover-wrap img,
+.detail-cover-wrap .note-real-image,
+.detail-cover-wrap .note-cover-placeholder {
+  width: 100% !important;
+  height: 100% !important;
+  max-height: 72svh !important;
+  object-fit: contain !important;
+  background: var(--color-paper-2) !important;
+  animation: none !important;
+  clip-path: none !important;
+}
+
+.detail-category {
+  color: var(--color-accent) !important;
+  font-size: var(--text-xs) !important;
+  letter-spacing: var(--tracking-label) !important;
+}
+
+.duomei-detail article > h1,
+.detail-title-editor {
+  width: 100% !important;
+  margin-block: var(--space-lg) var(--space-md) !important;
+  color: var(--color-ink) !important;
+  font-family: var(--font-display) !important;
+  font-size: clamp(2.35rem, 11vw, 5.4rem) !important;
+  font-style: normal !important;
+  font-weight: 660 !important;
+  line-height: 0.98 !important;
+  letter-spacing: var(--tracking-display) !important;
+  overflow-wrap: anywhere;
+  text-wrap: balance;
+}
+
+.detail-meta,
+.detail-tags {
+  color: var(--color-muted) !important;
+  font-variant-numeric: tabular-nums;
+}
+
+.detail-tags span {
+  border-color: var(--color-rule-2) !important;
+  color: var(--color-ink-2) !important;
+  background: var(--color-paper-2) !important;
+}
+
+.note-block-renderer {
+  color: var(--color-ink-2) !important;
+  font-family: var(--font-outlier) !important;
+  font-size: clamp(1.02rem, 0.4vw + 0.96rem, 1.2rem) !important;
+  line-height: 2 !important;
+}
+
+.note-block-renderer > p,
+.note-block-renderer > blockquote {
+  max-width: 66ch;
+  overflow-wrap: anywhere;
+}
+
+.note-block-renderer blockquote {
+  border-color: var(--color-accent) !important;
+  color: var(--color-ink) !important;
+}
+
+.article-image-media {
+  color: var(--color-ink) !important;
+  background: var(--color-paper-2) !important;
+  border-color: var(--color-rule) !important;
+}
+
+.article-image-media > img,
+.article-image-open img {
+  width: 100% !important;
+  height: auto !important;
+  max-height: 82svh !important;
+  object-fit: contain !important;
+}
+
+.detail-note-nav {
+  width: min(100%, var(--content-max)) !important;
+  margin-inline: auto !important;
+  padding-block-start: var(--space-xl) !important;
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) !important;
+  gap: var(--space-xs) !important;
+  border-block-start: var(--rule-hair) solid var(--color-rule) !important;
+}
+
+.detail-note-nav-card,
+.detail-note-nav-home {
+  min-width: 0;
+  min-height: 3rem !important;
+  padding: var(--space-sm) !important;
+  border: var(--rule-hair) solid var(--color-rule) !important;
+  border-radius: var(--radius-card) !important;
+  color: var(--color-ink) !important;
+  background: var(--color-paper-2) !important;
+  text-decoration: none;
+}
+
+.detail-note-nav-card strong {
+  display: block;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.duomei-lightbox {
+  color: var(--color-ink) !important;
+  background: var(--color-paper-2) !important;
+  border-color: var(--color-rule-2) !important;
+}
+
+.duomei-lightbox::backdrop {
+  background: var(--color-scrim) !important;
+}
+
+.duomei-lightbox img {
+  object-fit: contain !important;
+}
+
+.duomei-lightbox-close,
+.duomei-lightbox-nav {
+  min-height: 3rem !important;
+  border-color: var(--color-rule-2) !important;
+  color: var(--color-ink) !important;
+  background: var(--color-paper-3) !important;
+}
+
+.duomei-companion--detail {
+  display: none !important;
+}
+
+/* Index-first workbench admin: one flat information plane. */
+.duomei-admin,
+.studio-admin,
+.duomei-admin-login {
+  min-width: 0;
+  color: var(--color-ink) !important;
+  background: var(--color-paper) !important;
+}
+
+.studio-admin {
+  grid-template-columns: minmax(14rem, 18rem) minmax(0, 1fr) !important;
+}
+
+.studio-admin > section {
+  width: min(100%, 68rem) !important;
+  min-width: 0;
+}
+
+.studio-admin aside,
+.studio-hero-panel,
+.studio-health-card,
+.studio-storage-card,
+.studio-publish-panel,
+.studio-utilities,
+.studio-note-table article,
+.duomei-admin-login form,
+.studio-notes-panel {
+  color: var(--color-ink) !important;
+  background: var(--color-paper-2) !important;
+  border-color: var(--color-rule) !important;
+  border-radius: var(--radius-card) !important;
+  box-shadow: none !important;
+}
+
+.studio-admin aside {
+  background: var(--color-paper-2) !important;
+}
+
+.studio-admin aside > strong {
+  color: var(--color-ink) !important;
+  font-family: var(--font-display) !important;
+  font-size: clamp(2rem, 8vw, 3rem) !important;
+  font-weight: 720 !important;
+  letter-spacing: var(--tracking-display) !important;
+}
+
+.studio-admin aside a,
+.studio-admin aside button,
+.studio-admin-topbar button,
+.studio-publish-actions button,
+.studio-publish-actions a,
+.admin-utility-actions button,
+.admin-utility-actions a,
+.duomei-admin-login button {
+  min-height: var(--control-height) !important;
+  border-color: var(--color-rule-2) !important;
+  color: var(--color-ink) !important;
+  background: var(--color-paper-3) !important;
+}
+
+.studio-admin h1,
+.duomei-admin-login h1 {
+  color: var(--color-ink) !important;
+  font-family: var(--font-display) !important;
+  font-style: normal !important;
+  overflow-wrap: anywhere;
+}
+
+.studio-status-pill {
+  color: var(--color-accent-ink) !important;
+  background: var(--color-accent) !important;
+  border-color: var(--color-accent) !important;
+}
+
+.studio-hero-panel > div:last-child {
+  display: flex !important;
+  flex-wrap: wrap;
+  gap: var(--space-2xs) !important;
+}
+
+.studio-hero-panel > div:last-child > span {
+  padding: var(--space-2xs) var(--space-xs) !important;
+  border: var(--rule-hair) solid var(--color-rule-2) !important;
+  border-radius: var(--radius-pill) !important;
+  color: var(--color-ink-2) !important;
+  background: var(--color-paper-3) !important;
+}
+
+.studio-status-grid {
+  grid-template-columns: minmax(0, 1fr) !important;
+}
+
+.studio-ring {
+  color: var(--color-accent) !important;
+}
+
+.admin-notice,
+.detail-save-message,
+.admin-delete-inline,
+.detail-delete-confirm {
+  color: var(--color-ink) !important;
+  background: var(--color-paper-3) !important;
+  border-color: var(--color-rule-2) !important;
+  box-shadow: var(--shadow-card) !important;
+}
+
+.admin-notice.is-danger,
+.detail-danger-button,
+.admin-delete-inline button,
+.detail-delete-confirm button {
+  border-color: var(--color-danger) !important;
+}
+
+.detail-danger-button {
+  color: var(--color-danger-ink) !important;
+  background: var(--color-danger) !important;
+}
+
+.studio-admin input,
+.studio-admin textarea,
+.studio-admin select,
+.duomei-admin-login input,
+.detail-edit-page input,
+.detail-edit-page textarea,
+.detail-edit-page select {
+  width: 100%;
+  color: var(--color-ink) !important;
+  background: var(--color-paper-3) !important;
+  border-color: var(--color-rule-2) !important;
+}
+
+/* Ft5 Statement close. */
+.duomei-footer {
+  width: 100% !important;
+  min-height: auto !important;
+  margin: 0 !important;
+  padding: var(--space-3xl) var(--space-sm) max(var(--space-lg), env(safe-area-inset-bottom)) !important;
+  display: grid !important;
+  gap: var(--space-2xl) !important;
+  border: 0 !important;
+  color: var(--color-ink) !important;
+  background: var(--color-paper-2) !important;
+  text-align: start !important;
+}
+
+.duomei-footer::before {
+  inset-inline: var(--space-sm) !important;
+  background: var(--color-accent) !important;
+}
+
+.duomei-footer-masthead,
+.duomei-footer-meta {
+  width: min(100%, var(--content-max));
+  margin-inline: auto;
+}
+
+.duomei-footer-masthead {
+  display: grid;
+  gap: var(--space-md);
+}
+
+.duomei-footer-masthead strong {
+  color: var(--color-ink) !important;
+  font-family: var(--font-display) !important;
+  font-size: clamp(3.5rem, 18vw, 12rem) !important;
+  font-weight: 720 !important;
+  line-height: 0.78 !important;
+  letter-spacing: var(--tracking-display) !important;
+  overflow-wrap: anywhere;
+}
+
+.duomei-footer-masthead span {
+  max-width: 18ch;
+  color: var(--color-ink) !important;
+  font-family: var(--font-outlier) !important;
+  font-size: clamp(1.75rem, 7vw, 4.25rem) !important;
+  line-height: 1.38 !important;
+  overflow-wrap: anywhere;
+}
+
+.duomei-footer-meta {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) !important;
+  gap: var(--space-md) !important;
+  color: var(--color-muted) !important;
+}
+
+.duomei-footer nav {
+  display: flex !important;
+  flex-wrap: wrap;
+  gap: var(--space-md) !important;
+}
+
+.duomei-footer nav a {
+  min-height: var(--control-height);
+  display: inline-flex;
+  align-items: center;
+  color: var(--color-ink-2) !important;
+  text-decoration: none;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .dm3-hero-actions a:hover,
+  .duomei-header nav a:hover,
+  .duomei-header nav button:hover,
+  .duomei-footer nav a:hover {
+    color: var(--color-accent-ink) !important;
+    background: var(--color-accent) !important;
+    transform: translateY(calc(var(--rule-hair) * -1));
+  }
+
+  .notes-carousel-shell .carousel-button:hover {
+    color: var(--color-accent-ink) !important;
+    background: var(--color-accent) !important;
+  }
+}
+
+@media (min-width: 40rem) {
+  .dm3-hero {
+    padding-inline: var(--space-lg);
+  }
+
+  .dm3-hero-photo {
+    height: min(58svh, 38rem);
+  }
+
+  .notes-intro,
+  .notes-dream-transition .notes-intro,
+  .notes-collection-tools {
+    width: calc(100% - var(--space-2xl)) !important;
+  }
+
+  .notes-collection-tools {
+    grid-template-columns: minmax(0, 1fr) minmax(10rem, 13rem) auto !important;
+  }
+
+  .duomei-note-card {
+    width: 22rem !important;
+    min-width: 22rem !important;
+  }
+
+  .detail-note-nav {
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) !important;
+  }
+
+  .studio-status-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .duomei-footer {
+    padding-inline: var(--space-lg) !important;
+  }
+
+  .duomei-footer-meta {
+    grid-template-columns: minmax(0, 1fr) auto !important;
+    align-items: center;
+  }
+}
+
+@media (min-width: 60rem) {
+  .duomei-header {
+    width: fit-content !important;
+    max-width: calc(100% - var(--space-2xl)) !important;
+    padding-inline: var(--space-md) var(--space-2xs) !important;
+  }
+
+  .duomei-header .duomei-menu-toggle {
+    display: none !important;
+  }
+
+  .duomei-header nav,
+  .duomei-header.is-menu-open nav {
+    position: static !important;
+    inset: auto !important;
+    width: auto !important;
+    padding: 0 !important;
+    display: flex !important;
+    grid-template-columns: none !important;
+    gap: var(--space-3xs) !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+    transform: none !important;
+  }
+
+  .duomei-header nav a,
+  .duomei-header nav button {
+    width: auto;
+    min-height: 2.75rem !important;
+    padding-inline: var(--space-sm) !important;
+    justify-content: center;
+    border-radius: var(--radius-pill) !important;
+  }
+
+  .poetry-portal-title {
+    inset-block-start: clamp(4.75rem, 13svh, 8.875rem) !important;
+    inset-inline-start: auto !important;
+    inset-inline-end: clamp(2.875rem, 7vw, 7.25rem) !important;
+    width: auto !important;
+    height: min(35.625rem, calc(100% - 10rem)) !important;
+    flex-direction: row-reverse !important;
+    justify-content: flex-start;
+    gap: clamp(0.75rem, 1.5vw, 1.625rem) !important;
+    font-size: clamp(2.3rem, 3.4vw, 4.6rem) !important;
+    letter-spacing: 0.05em !important;
+  }
+
+  .poetry-portal-title > span:not(.poetry-sr-only) {
+    writing-mode: vertical-rl !important;
+    text-orientation: upright !important;
+  }
+
+  .poetry-portal-title > span:nth-child(2) {
+    margin-block-start: 0.7em !important;
+  }
+
+  .poetry-portal-title > span:nth-child(3) {
+    margin-block-start: 1.4em !important;
+  }
+
+  .dm3-hero {
+    min-height: min(84dvh, 54rem);
+    padding: 7.5rem clamp(var(--space-lg), 5vw, var(--space-3xl)) var(--space-2xl);
+    display: block;
+  }
+
+  .dm3-hero-photo {
+    position: absolute;
+    inset-block: 7.5rem var(--space-2xl);
+    inset-inline-start: 46%;
+    inset-inline-end: clamp(var(--space-lg), 5vw, var(--space-3xl));
+    height: auto;
+  }
+
+  .dm3-hero-copy {
+    position: absolute;
+    inset-inline-start: clamp(var(--space-lg), 5vw, var(--space-3xl));
+    inset-block-end: var(--space-2xl);
+    z-index: 2;
+    width: min(44%, 34rem);
+    padding: var(--space-md);
+    background: color-mix(in oklch, var(--color-paper) 84%, transparent);
+  }
+
+  .dm3-hero-copy h1 {
+    font-size: clamp(4rem, 7.6vw, 7.2rem);
+    white-space: nowrap;
+  }
+
+  .dm3-hero-actions {
+    position: absolute;
+    inset-inline-end: clamp(var(--space-lg), 5vw, var(--space-3xl));
+    inset-block-end: var(--space-2xl);
+    z-index: 2;
+    justify-content: flex-end;
+  }
+
+  .notes-intro,
+  .notes-dream-transition .notes-intro {
+    grid-template-columns: minmax(0, 1fr) minmax(16rem, 0.55fr) !important;
+    align-items: end;
+  }
+
+  .duomei-detail {
+    padding-inline: var(--space-xl) !important;
+  }
+
+  .detail-cover-wrap {
+    width: min(calc(100% + var(--space-3xl)), 68rem) !important;
+    margin-inline-start: calc(var(--space-3xl) / -2) !important;
+  }
+
+  .studio-admin {
+    grid-template-columns: minmax(14rem, 18rem) minmax(0, 1fr) !important;
+  }
+}
+
+@media (min-width: 90rem) {
+  .dm3-hero-photo {
+    inset-inline-start: 43%;
+  }
+
+  .duomei-note-card {
+    width: 24rem !important;
+    min-width: 24rem !important;
+  }
+}
+
+@media (pointer: coarse) {
+  :where(button, input, select, summary, a[class]) {
+    min-height: 3rem !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .dm3-hero-photo,
+  .dm3-hero-copy {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+    clip-path: none !important;
+  }
+
+  .dm3-hero-photo::before {
+    animation: none !important;
+    opacity: 0.32 !important;
+    transform: none !important;
+  }
+}
+
+/* Final note-card tilt contract: no transform transition while the pointer is driving rotation. */
+.notes-carousel .duomei-note-card.is-tilting {
+  opacity: 1 !important;
+  filter: saturate(1.04) !important;
+  transform:
+    perspective(900px)
+    translateY(calc(var(--space-xs) * -1))
+    rotateX(var(--note-tilt-x, 0deg))
+    rotateY(var(--note-tilt-y, 0deg))
+    scale3d(1.045, 1.045, 1.045) !important;
+  transition:
+    opacity var(--dur-micro) var(--ease-out),
+    border-color var(--dur-micro) var(--ease-out),
+    filter var(--dur-micro) var(--ease-out) !important;
+  border-color: var(--color-accent) !important;
+  box-shadow: var(--shadow-card) !important;
+  z-index: 18 !important;
+}
+
+.notes-carousel .duomei-note-card.is-resetting-tilt {
+  transition:
+    transform var(--dur-short) var(--ease-out),
+    border-color var(--dur-short) var(--ease-out),
+    filter var(--dur-short) var(--ease-out) !important;
+}

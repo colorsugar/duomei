@@ -42,6 +42,7 @@ export function NoteCover({ note, detail = false }: { note: DuomeiNote; detail?:
       src={coverSrc}
       alt={note.title}
       loading={detail ? "eager" : "lazy"}
+      fetchPriority={detail ? "high" : "auto"}
       decoding="async"
       onLoad={(event) => {
         if (event.currentTarget.naturalWidth > 0) setLoaded(true);
