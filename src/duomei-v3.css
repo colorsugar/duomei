@@ -1501,6 +1501,10 @@ body {
     height: auto;
   }
 
+  .dm3-hero-focus-trigger {
+    align-items: flex-start;
+  }
+
   .dm3-hero-copy {
     position: absolute;
     inset-inline-start: clamp(var(--space-lg), 5vw, var(--space-3xl));
