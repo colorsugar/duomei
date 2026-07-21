@@ -1363,6 +1363,15 @@
     padding-bottom: clamp(88px, 14svh, 140px);
   }
 
+  .poetry-portal-title {
+    opacity: 1 !important;
+  }
+
+  .poetry-portal-title > span:not(.poetry-sr-only) {
+    clip-path: none !important;
+    transform: none !important;
+  }
+
   .poetry-work-track {
     height: 175svh;
   }
@@ -1375,7 +1384,7 @@
     gap: 14px;
     height: 100svh;
     min-height: 0;
-    padding: 54px 18px 28px;
+    padding: max(100px, calc(env(safe-area-inset-top) + 82px)) 18px 24px;
     overflow: hidden;
   }
 
@@ -1386,11 +1395,22 @@
     top: auto !important;
     width: 100% !important;
     height: auto !important;
-    transform: none !important;
+    opacity: 1 !important;
+  }
+
+  .poetry-work-panel.poetry-free-panel::after,
+  .poetry-free-index {
+    top: max(104px, calc(env(safe-area-inset-top) + 86px));
   }
 
   .poetry-free-text.is-title { order: 1; min-height: 72px; font-size: clamp(2.5rem, 13vw, 4.3rem) !important; }
   .poetry-free-text.is-poem { order: 2; min-height: clamp(220px, 30svh, 290px); font-size: clamp(1.35rem, 6vw, 2rem) !important; }
+  .poetry-free-text.is-poem > span {
+    opacity: 1 !important;
+    clip-path: none !important;
+    filter: none !important;
+  }
+  .poetry-free-image .poetry-work-media-mask { display: none; }
   .poetry-free-image { order: 3; flex: 1 1 0; min-height: 0; }
   .poetry-free-text.is-caption { order: 4; min-height: 48px; font-size: 0.78rem !important; }
   .poetry-free-edit { position: absolute; left: 18px; bottom: 18px; z-index: 60; }

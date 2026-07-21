@@ -233,20 +233,21 @@ function PoetryWorkPanel({
   const images = work.images.length ? work.images : [fallbackImage];
   const { scrollYProgress } = useScroll({
     target: panelRef,
-    offset: compact ? ["start 108%", "start 42%"] : ["start 20%", "end end"],
+    offset: compact ? ["start 120%", "end end"] : ["start 20%", "end end"],
   });
-  const mediaY = useTransform(scrollYProgress, [0, 1], ["-7%", "7%"]);
-  const mediaScale = useTransform(scrollYProgress, [0, 0.5, 1], [1.08, 1.02, 1.08]);
-  const maskScaleX = useTransform(scrollYProgress, [0, 0.34], [1, 0]);
-  const copyOpacity = useTransform(scrollYProgress, [0, 0.18], [0, 1]);
-  const copyY = useTransform(scrollYProgress, [0, 0.18], [42, 0]);
-  const mediaX = useTransform(scrollYProgress, [0, 0.25], [isReverse ? -58 : 58, 0]);
-  const mediaRiseY = useTransform(scrollYProgress, [0, 0.25], [64, 0]);
-  const mediaOpacity = useTransform(scrollYProgress, [0, 0.16], [0, 1]);
-  const mediaZoom = useTransform(scrollYProgress, [0, 0.28], [0.9, 1]);
-  const copyX = useTransform(scrollYProgress, [0, 0.2], [isReverse ? 34 : -34, 0]);
-  const copyScale = useTransform(scrollYProgress, [0, 0.2], [0.9, 1]);
-  const copyClip = useTransform(scrollYProgress, [0, 0.24], ["inset(0 0 100% 0)", "inset(0 0 0% 0)"]);
+  const progress = useSpring(scrollYProgress, { stiffness: 150, damping: 32, mass: 0.45 });
+  const mediaY = useTransform(progress, [0, 1], ["-7%", "7%"]);
+  const mediaScale = useTransform(progress, [0, 0.5, 1], [1.08, 1.02, 1.08]);
+  const maskScaleX = useTransform(progress, [0, 0.34], [1, 0]);
+  const copyOpacity = useTransform(progress, [0, 0.18], [0, 1]);
+  const copyY = useTransform(progress, [0, 0.18], [42, 0]);
+  const mediaX = useTransform(progress, [0, 0.25], [isReverse ? -58 : 58, 0]);
+  const mediaRiseY = useTransform(progress, [0, 0.25], [64, 0]);
+  const mediaOpacity = useTransform(progress, [0, 0.16], [0, 1]);
+  const mediaZoom = useTransform(progress, [0, 0.28], [0.9, 1]);
+  const copyX = useTransform(progress, [0, 0.2], [isReverse ? 34 : -34, 0]);
+  const copyScale = useTransform(progress, [0, 0.2], [0.9, 1]);
+  const copyClip = useTransform(progress, [0, 0.24], ["inset(0 0 100% 0)", "inset(0 0 0% 0)"]);
 
   return (
     <article ref={panelRef} className="poetry-work-track" aria-labelledby={`poetry-work-${work.id}`}>
@@ -310,7 +311,7 @@ function PoetryWorkPanel({
                 aria-label={splitLines(block.content).join("，")}
               >
                 {splitLines(block.content).map((line, lineIndex) => effect === "ink" ? (
-                  <PoetryRevealColumn key={`${block.id}-${lineIndex}`} progress={scrollYProgress} index={lineIndex}>{line}</PoetryRevealColumn>
+                  <PoetryRevealColumn key={`${block.id}-${lineIndex}`} progress={progress} index={lineIndex}>{line}</PoetryRevealColumn>
                 ) : <span key={`${block.id}-${lineIndex}`}>{line}</span>)}
               </motion.div>
             );
