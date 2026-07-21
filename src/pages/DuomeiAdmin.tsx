@@ -241,7 +241,7 @@ export function DuomeiAdmin({ mode }: { mode: "login" | "notes" }) {
         </div>
 
         {notice ? (
-          <div className="admin-notice">
+          <div className="admin-notice" role="status" aria-live="polite">
             <span>{notice}</span>
             <AnimatedButton type="button" onClick={() => setNotice("")}>
               关闭
@@ -388,7 +388,7 @@ export function DuomeiAdmin({ mode }: { mode: "login" | "notes" }) {
         </AnimatedCard>
 
         {pendingDelete ? (
-          <div className="admin-delete-inline">
+          <div className="admin-delete-inline" role="dialog" aria-modal="true" aria-label="确认删除小记">
             <span>确定删除这条小记吗？</span>
             <AnimatedButton type="button" onClick={confirmDelete}>
               确认删除

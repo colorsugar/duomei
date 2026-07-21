@@ -1,0 +1,54 @@
+/* Hallmark · pre-emit critique: P5 H4 E4 S5 R5 V4 */
+/* Hallmark · genre: editorial · macrostructure-family: Marquee Hero / Long Document / Workbench · theme: DUOMEI paper · design-system: design.md · designed-as-app · contrast: pass (40–41) · nav: N10 · footer: Ft1 · slop: pass (42–49) · mobile: pass (34, 49–57) */
+
+:root {
+  --dm-paper: oklch(0.972 0.012 82);
+  --dm-paper-elevated: oklch(0.988 0.008 82);
+  --dm-paper-wash: oklch(0.935 0.018 82);
+  --dm-ink: oklch(0.25 0.014 70);
+  --dm-ink-secondary: oklch(0.39 0.018 74);
+  --dm-ink-muted: oklch(0.49 0.02 78);
+  --dm-rule: oklch(0.82 0.018 82);
+  --dm-rule-strong: oklch(0.68 0.025 82);
+  --dm-olive: oklch(0.55 0.06 130);
+  --dm-olive-deep: oklch(0.39 0.05 130);
+  --dm-olive-soft: oklch(0.9 0.035 130);
+  --dm-caramel: oklch(0.64 0.085 65);
+  --dm-brick: oklch(0.5 0.12 32);
+  --dm-focus: oklch(0.42 0.11 145);
+  --dm-on-accent: oklch(0.985 0.006 90);
+  --dm-white: oklch(0.985 0.006 90);
+  --dm-lightbox: oklch(0.18 0.01 70 / 0.96);
+  --dm-lightbox-control: oklch(0.22 0.01 70 / 0.7);
+  --dm-lightbox-rule: oklch(0.985 0.006 90 / 0.24);
+  --dm-lightbox-caption: oklch(0.9 0.01 80);
+  --dm-lightbox-backdrop: oklch(0.12 0.01 70 / 0.78);
+  --dm-lightbox-shadow: 0 34px 100px oklch(0.1 0.01 70 / 0.5);
+
+  --dm-font-display: "Yu Mincho", "Songti SC", STSong, serif;
+  --dm-font-body: "Microsoft YaHei", "PingFang SC", "Noto Sans CJK SC", sans-serif;
+  --dm-font-wordmark: Georgia, "Times New Roman", serif;
+
+  --dm-space-1: 0.25rem;
+  --dm-space-2: 0.5rem;
+  --dm-space-3: 0.75rem;
+  --dm-space-4: 1rem;
+  --dm-space-5: 1.5rem;
+  --dm-space-6: 2rem;
+  --dm-space-7: 3rem;
+  --dm-space-8: 4rem;
+  --dm-space-9: 6rem;
+
+  --dm-radius-control: 0.75rem;
+  --dm-radius-card: 1.25rem;
+  --dm-radius-feature: 1.75rem;
+  --dm-content-max: 73.75rem;
+  --dm-reading-max: 47.5rem;
+
+  --dm-shadow-soft: 0 12px 38px oklch(0.25 0.014 70 / 0.09);
+  --dm-shadow-lift: 0 24px 70px oklch(0.25 0.014 70 / 0.15);
+  --dm-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --dm-duration-fast: 140ms;
+  --dm-duration-ui: 260ms;
+  --dm-duration-scene: 720ms;
+}

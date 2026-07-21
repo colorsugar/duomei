@@ -1,0 +1,10 @@
+{
+  "project": "duomei-notes",
+  "framework": "React 19 + Vite 7 + TypeScript",
+  "styleSource": "src/styles.css plus component CSS",
+  "existingMotion": ["framer-motion", "Lenis", "CSS", "requestAnimationFrame"],
+  "existingCarousel": "custom carousel with protected requestAnimationFrame tilt pipeline",
+  "designDocumentBefore": false,
+  "sourceOfTruth": "working tree after baseline checkpoint 5badd17",
+  "preserve": ["Supabase and local storage logic", "poetry portal atomic bundle", "note card tilt contract", "all routes"]
+}

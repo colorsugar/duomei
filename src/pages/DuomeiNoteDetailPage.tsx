@@ -575,14 +575,14 @@ export function DuomeiNoteDetailPage() {
       ) : null}
 
       {message ? (
-        <div className={`detail-save-message sync-${syncStep}`}>
+        <div className={`detail-save-message sync-${syncStep}`} role={syncStep === "error" ? "alert" : "status"} aria-live="polite">
           <span>{message}</span>
           <button type="button" onClick={() => setMessage("")}>关闭</button>
         </div>
       ) : null}
 
       {confirmDelete ? (
-        <div className="detail-delete-confirm">
+        <div className="detail-delete-confirm" role="dialog" aria-modal="true" aria-label="确认删除小记">
           <span>确定删除这条小记吗？</span>
           <button type="button" onClick={deleteCurrent}>确认删除</button>
           <button type="button" onClick={() => setConfirmDelete(false)}>取消</button>

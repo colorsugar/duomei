@@ -1,0 +1,18 @@
+{
+  "skill": "hallmark",
+  "task": "DUOMEI UI refresh preview",
+  "genre": "editorial",
+  "structures": ["marquee-hero", "long-document", "workbench"],
+  "navigation": "single-DOM floating-on-scroll paper rail",
+  "footer": "mast-headed",
+  "status": "verified",
+  "critique": { "philosophy": 5, "hierarchy": 4, "execution": 4, "specificity": 5, "restraint": 5, "variety": 4 },
+  "verification": {
+    "viewports": [320, 375, 414, 768, 1280],
+    "routes": ["/", "/time", "/note/tea-town-sunset", "/admin/login", "/admin/notes"],
+    "horizontalOverflow": false,
+    "wrappedAffordances": false,
+    "pageErrors": 0
+  },
+  "notes": "Existing visual identity and business logic are preserved; production deployment is forbidden for this pass."
+}

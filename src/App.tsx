@@ -21,8 +21,10 @@ function AppRoutes() {
 
   return (
     <DuomeiEditProvider>
+      <a className="duomei-skip-link" href="#duomei-main-content">跳到正文</a>
       <RouteScrollManager />
       {!isAdmin ? <DuomeiHeader /> : null}
+      <div id="duomei-main-content" className="duomei-page-shell" key={location.pathname}>
       <Routes>
         <Route path="/" element={<DuomeiHomePage />} />
         <Route path="/time" element={<DuomeiTimePage />} />
@@ -33,6 +35,7 @@ function AppRoutes() {
         <Route path="/admin/notes" element={<DuomeiAdmin mode="notes" />} />
         <Route path="*" element={<DuomeiNotFoundPage />} />
       </Routes>
+      </div>
       {!isAdmin ? <DuomeiFooter /> : null}
       {!isAdmin ? <DuomeiCompanion /> : null}
       {!isAdmin ? <BackToTopButton /> : null}

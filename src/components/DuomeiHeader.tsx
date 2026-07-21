@@ -13,15 +13,37 @@ export function DuomeiHeader() {
   const location = useLocation();
 
   useEffect(() => {
+    let frame = 0;
     const update = () => {
+      frame = 0;
       const nextScrolled = window.scrollY > 36;
       setScrolled(nextScrolled);
       if (!nextScrolled) setHoverRevealed(false);
     };
+    const scheduleUpdate = () => {
+      if (frame) return;
+      frame = window.requestAnimationFrame(update);
+    };
     update();
-    window.addEventListener("scroll", update, { passive: true });
-    return () => window.removeEventListener("scroll", update);
+    window.addEventListener("scroll", scheduleUpdate, { passive: true });
+    return () => {
+      if (frame) window.cancelAnimationFrame(frame);
+      window.removeEventListener("scroll", scheduleUpdate);
+    };
   }, []);
+
+  useEffect(() => {
+    setMenuOpen(false);
+  }, [location.pathname, location.hash]);
+
+  useEffect(() => {
+    if (!menuOpen) return;
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setMenuOpen(false);
+    };
+    window.addEventListener("keydown", closeOnEscape);
+    return () => window.removeEventListener("keydown", closeOnEscape);
+  }, [menuOpen]);
 
   const closeMenu = () => setMenuOpen(false);
 
@@ -88,6 +110,7 @@ export function DuomeiHeader() {
       <Link
         className="duomei-brand duomei-motion-ambient-logo"
         to="/"
+        aria-label="多美小记首页"
         onClick={(event) => {
           event.preventDefault();
           goHomeTop();
@@ -101,6 +124,7 @@ export function DuomeiHeader() {
         className="duomei-menu-toggle"
         type="button"
         aria-expanded={menuOpen}
+        aria-controls="duomei-primary-navigation"
         aria-label={menuOpen ? "关闭导航" : "打开导航"}
         onClick={() => setMenuOpen((value) => !value)}
       >
@@ -109,7 +133,7 @@ export function DuomeiHeader() {
         <span />
       </button>
 
-      <nav aria-label="主导航">
+      <nav id="duomei-primary-navigation" aria-label="主导航">
         <Link
           to="/"
           onClick={(event) => {

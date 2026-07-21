@@ -1,4 +1,5 @@
 import { CSSProperties, useEffect, useRef, useState } from "react";
+import { Link } from "react-router-dom";
 import { useDuomeiEdit } from "./DuomeiEditProvider";
 import {
   FOOTER_SETTINGS_UPDATED_EVENT,
@@ -56,24 +57,34 @@ export function DuomeiFooter() {
       motionRef={footerRef}
       style={{ "--footer-line-progress": lineProgress } as CSSProperties}
     >
-      <AnimatedTitle as="strong">DUOMEI</AnimatedTitle>
-      {editable ? (
-        <p
-          className="footer-editable-text"
-          contentEditable
-          suppressContentEditableWarning
-          onBlur={(event) => {
-            const copyrightText = event.currentTarget.textContent?.trim() || settings.copyrightText;
-            const next = { ...settings, copyrightText };
-            saveFooterSettings(next);
-            setSettings(next);
-          }}
-        >
-          {settings.copyrightText}
-        </p>
-      ) : (
-        <AnimatedParagraph>{settings.copyrightText}</AnimatedParagraph>
-      )}
+      <div className="duomei-footer-masthead">
+        <AnimatedTitle as="strong">DUOMEI</AnimatedTitle>
+        <AnimatedParagraph as="span">把旅途、生活和偶然的光，留在纸上。</AnimatedParagraph>
+      </div>
+      <div className="duomei-footer-meta">
+        {editable ? (
+          <p
+            className="footer-editable-text"
+            contentEditable
+            suppressContentEditableWarning
+            onBlur={(event) => {
+              const copyrightText = event.currentTarget.textContent?.trim() || settings.copyrightText;
+              const next = { ...settings, copyrightText };
+              saveFooterSettings(next);
+              setSettings(next);
+            }}
+          >
+            {settings.copyrightText}
+          </p>
+        ) : (
+          <AnimatedParagraph>{settings.copyrightText}</AnimatedParagraph>
+        )}
+        <nav aria-label="页脚导航">
+          <Link to="/">首页</Link>
+          <Link to="/#notes">小记</Link>
+          <Link to="/time">时光</Link>
+        </nav>
+      </div>
     </RevealSection>
   );
 }

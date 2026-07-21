@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { DragEvent, MouseEvent, PointerEvent, WheelEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import type { DuomeiNote } from "../lib/noteTypes";
@@ -41,6 +41,8 @@ function isInteractiveCarouselTarget(target: EventTarget | null) {
 }
 
 export function NotesCarousel({ notes }: { notes: DuomeiNote[] }) {
+  const [query, setQuery] = useState("");
+  const [category, setCategory] = useState("all");
   const viewportRef = useRef<HTMLDivElement | null>(null);
   const frameRef = useRef<number | null>(null);
   const inertiaFrameRef = useRef<number | null>(null);
@@ -57,8 +59,17 @@ export function NotesCarousel({ notes }: { notes: DuomeiNote[] }) {
   const prefersReducedMotionRef = useRef(false);
   const navigate = useNavigate();
   const { editMode, isEditorOpen, openNoteEditor, requestDelete } = useDuomeiEdit();
-  const canLoop = notes.length > 1;
-  const displayNotes = useMemo(() => (canLoop ? [...notes, ...notes, ...notes] : notes), [canLoop, notes]);
+  const categories = useMemo(() => Array.from(new Set(notes.map((note) => note.category).filter(Boolean))), [notes]);
+  const filteredNotes = useMemo(() => {
+    const keyword = query.trim().toLocaleLowerCase();
+    return notes.filter((note) => {
+      const categoryMatches = category === "all" || note.category === category;
+      const keywordMatches = !keyword || [note.title, note.excerpt, note.location, note.category, ...note.tags].join(" ").toLocaleLowerCase().includes(keyword);
+      return categoryMatches && keywordMatches;
+    });
+  }, [category, notes, query]);
+  const canLoop = filteredNotes.length > 1;
+  const displayNotes = useMemo(() => (canLoop ? [...filteredNotes, ...filteredNotes, ...filteredNotes] : filteredNotes), [canLoop, filteredNotes]);
 
   useEffect(() => {
     prefersReducedMotionRef.current = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -367,7 +378,23 @@ export function NotesCarousel({ notes }: { notes: DuomeiNote[] }) {
   if (!notes.length) return <p className="notes-empty">还没有小记</p>;
 
   return (
-    <div className="notes-carousel-shell">
+    <div className="notes-browser">
+      <div className="notes-collection-tools" role="search" aria-label="筛选小记">
+        <label>
+          <span>搜索小记</span>
+          <input type="search" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="标题、地点或标签" />
+        </label>
+        <label>
+          <span>分类</span>
+          <select value={category} onChange={(event) => setCategory(event.target.value)}>
+            <option value="all">全部分类</option>
+            {categories.map((item) => <option value={item} key={item}>{item}</option>)}
+          </select>
+        </label>
+        <span className="notes-result-count" aria-live="polite">{filteredNotes.length} 篇</span>
+      </div>
+
+      {filteredNotes.length ? <div className="notes-carousel-shell">
       {canLoop ? (
         <button className="carousel-button prev" type="button" aria-label="上一组小记" onClick={() => scrollByAmount(-1)}>
           ←
@@ -459,6 +486,7 @@ export function NotesCarousel({ notes }: { notes: DuomeiNote[] }) {
           →
         </button>
       ) : null}
+      </div> : <p className="notes-empty">没有找到符合条件的小记。换个词试试。</p>}
     </div>
   );
 }

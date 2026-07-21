@@ -29,6 +29,7 @@ export function DuomeiTimePage() {
 
   return (
     <main className="duomei-stage duomei-time-page">
+      <h1 className="duomei-visually-hidden">多美时光</h1>
       <HomeIntroSection canCreate={editMode} notes={notes} onCreate={() => openNoteEditor()} />
     </main>
   );
