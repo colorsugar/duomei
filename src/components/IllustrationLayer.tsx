@@ -72,11 +72,35 @@ export function IllustrationLayer() {
       if (rounded === displayedProgress) return;
       displayedProgress = rounded;
       document.documentElement.style.setProperty("--duomei-hero-progress", String(rounded));
+      document.documentElement.style.setProperty("--duomei-kinetic-hero-lift", `${rounded * -176}px`);
+      document.documentElement.style.setProperty("--duomei-kinetic-hero-scale", String(1 + rounded * 0.24));
+      document.documentElement.style.setProperty("--duomei-kinetic-hero-spin", `${rounded * -5.5}deg`);
+      document.documentElement.style.setProperty("--duomei-kinetic-letter-scale", String(1 + rounded * 0.42));
+      document.documentElement.style.setProperty("--duomei-kinetic-left-far", `${rounded * -190}px`);
+      document.documentElement.style.setProperty("--duomei-kinetic-left-near", `${rounded * -112}px`);
+      document.documentElement.style.setProperty("--duomei-kinetic-left-soft", `${rounded * -52}px`);
+      document.documentElement.style.setProperty("--duomei-kinetic-right-soft", `${rounded * 52}px`);
+      document.documentElement.style.setProperty("--duomei-kinetic-right-near", `${rounded * 112}px`);
+      document.documentElement.style.setProperty("--duomei-kinetic-right-far", `${rounded * 190}px`);
+      document.documentElement.style.setProperty("--duomei-kinetic-up-near", `${rounded * -72}px`);
+      document.documentElement.style.setProperty("--duomei-kinetic-up-far", `${rounded * -126}px`);
+      document.documentElement.style.setProperty("--duomei-kinetic-down-near", `${rounded * 52}px`);
+      document.documentElement.style.setProperty("--duomei-kinetic-down-far", `${rounded * 96}px`);
+      document.documentElement.style.setProperty("--duomei-kinetic-spin-left-far", `${rounded * -34}deg`);
+      document.documentElement.style.setProperty("--duomei-kinetic-spin-left", `${rounded * -21}deg`);
+      document.documentElement.style.setProperty("--duomei-kinetic-spin-left-soft", `${rounded * -11}deg`);
+      document.documentElement.style.setProperty("--duomei-kinetic-spin-right-soft", `${rounded * 11}deg`);
+      document.documentElement.style.setProperty("--duomei-kinetic-spin-right", `${rounded * 21}deg`);
+      document.documentElement.style.setProperty("--duomei-kinetic-spin-right-far", `${rounded * 34}deg`);
+      document.documentElement.style.setProperty("--duomei-kinetic-copy-lift", `${rounded * -74}px`);
+      document.documentElement.style.setProperty("--duomei-kinetic-copy-opacity", String(Math.max(0, 1 - rounded * 1.32)));
     };
 
     const setPaperProgress = (value: number) => {
       const paperProgress = Number(Math.min(1, Math.max(0, value * 1.2)).toFixed(4));
       document.documentElement.style.setProperty("--duomei-paper-progress", String(paperProgress));
+      document.documentElement.style.setProperty("--duomei-kinetic-paper-lift", `${paperProgress * -42}px`);
+      document.documentElement.style.setProperty("--duomei-kinetic-paper-scale", String(1 + paperProgress * 0.18));
     };
 
     const readTargetProgress = () => {
@@ -117,6 +141,32 @@ export function IllustrationLayer() {
       if (drawFrame) window.cancelAnimationFrame(drawFrame);
       document.documentElement.style.removeProperty("--duomei-hero-progress");
       document.documentElement.style.removeProperty("--duomei-paper-progress");
+      [
+        "--duomei-kinetic-hero-lift",
+        "--duomei-kinetic-hero-scale",
+        "--duomei-kinetic-hero-spin",
+        "--duomei-kinetic-letter-scale",
+        "--duomei-kinetic-left-far",
+        "--duomei-kinetic-left-near",
+        "--duomei-kinetic-left-soft",
+        "--duomei-kinetic-right-soft",
+        "--duomei-kinetic-right-near",
+        "--duomei-kinetic-right-far",
+        "--duomei-kinetic-up-near",
+        "--duomei-kinetic-up-far",
+        "--duomei-kinetic-down-near",
+        "--duomei-kinetic-down-far",
+        "--duomei-kinetic-spin-left-far",
+        "--duomei-kinetic-spin-left",
+        "--duomei-kinetic-spin-left-soft",
+        "--duomei-kinetic-spin-right-soft",
+        "--duomei-kinetic-spin-right",
+        "--duomei-kinetic-spin-right-far",
+        "--duomei-kinetic-copy-lift",
+        "--duomei-kinetic-copy-opacity",
+        "--duomei-kinetic-paper-lift",
+        "--duomei-kinetic-paper-scale",
+      ].forEach((property) => document.documentElement.style.removeProperty(property));
       window.removeEventListener("scroll", requestUpdate);
       window.removeEventListener("resize", requestUpdate);
     };

@@ -1,5 +1,6 @@
 import type { DuomeiNote } from "../lib/noteTypes";
 import { HomeIntroSection } from "./HomeIntroSection";
+import { KineticNotesStage } from "./HomeKineticStage";
 import { NotesCarousel } from "./NotesCarousel";
 import { NotesIntro } from "./NotesIntro";
 import "./NotesDreamTransition.css";
@@ -13,12 +14,10 @@ type NotesDreamTransitionProps = {
 export function NotesDreamTransition({ canCreate, notes, onCreate }: NotesDreamTransitionProps) {
   return (
     <div className="notes-dream-transition">
-      <section className="notes-dream-notes-panel" aria-label="多美的小记">
-        <div className="notes-dream-notes-content">
-          <NotesIntro canCreate={canCreate} onCreate={onCreate} />
-          <NotesCarousel notes={notes} />
-        </div>
-      </section>
+      <KineticNotesStage noteCount={notes.length}>
+        <NotesIntro canCreate={canCreate} onCreate={onCreate} />
+        <NotesCarousel notes={notes} />
+      </KineticNotesStage>
 
       <div className="notes-dream-divider" aria-hidden="true">
         <svg viewBox="0 0 1440 120" preserveAspectRatio="none">

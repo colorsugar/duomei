@@ -1,0 +1,232 @@
+/* Hallmark · pre-emit critique: P5 H5 E4 S5 R3 V5 */
+/* Hallmark · macrostructure: Marquee Hero · genre: editorial · tone: maximal kinetic
+ * theme: Warm Archive · anchor: caramel-sage · fingerprint: scroll-rupture paper sweep
+ * contrast: pass (40–41) · nav: N9 · footer: existing · slop: pass (42–45)
+ * honest: pass (46) · chrome: pass (47) · tokens: pass (48) · responsive: pass (49)
+ * icons: pass (30) · mobile: pass (34, 49, 50–57)
+ */
+@import "../tokens.css";
+
+html,
+body {
+  overflow-x: clip;
+}
+
+.duomei-kinetic-active {
+  isolation: isolate;
+}
+
+.duomei-kinetic-hero-canvas {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-raised);
+  overflow: clip;
+  pointer-events: none;
+  contain: paint;
+}
+
+.duomei-kinetic-echo {
+  position: absolute;
+  inset-inline-start: 0;
+  inset-block-start: 0;
+  color: var(--color-ink);
+  font-family: var(--font-display);
+  font-size: clamp(7rem, 24vw, 22rem);
+  font-style: normal;
+  font-weight: 700;
+  line-height: 0.72;
+  letter-spacing: -0.07em;
+  white-space: nowrap;
+  transform-origin: center;
+  mix-blend-mode: multiply;
+}
+
+.duomei-kinetic-sash {
+  position: absolute;
+  inset-inline-start: -12%;
+  inset-block-start: 0;
+  width: 124%;
+  min-height: clamp(3.25rem, 8vw, 7rem);
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border-block: var(--rule-hairline) solid color-mix(in oklch, var(--color-ink) 32%, transparent);
+  color: var(--color-ink);
+  background: color-mix(in oklch, var(--color-paper) 91%, transparent);
+  box-shadow: 0 var(--space-lg) var(--space-2xl) color-mix(in oklch, var(--color-ink) 12%, transparent);
+  transform-origin: center;
+}
+
+.duomei-kinetic-sash span {
+  font-family: var(--font-body);
+  font-size: clamp(var(--text-sm), 2vw, var(--text-lg));
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  white-space: nowrap;
+}
+
+.duomei-kinetic-paper-fold {
+  position: absolute;
+  inset-inline-start: -8%;
+  inset-block-start: -24%;
+  width: 54%;
+  height: 148%;
+  border-inline: var(--rule-hairline) solid color-mix(in oklch, var(--color-caramel) 46%, transparent);
+  background: color-mix(in oklch, var(--color-paper-3) 72%, transparent);
+  clip-path: polygon(18% 0, 100% 12%, 78% 100%, 0 82%);
+  transform-origin: center;
+  mix-blend-mode: multiply;
+}
+
+.duomei-kinetic-active .duomei-hero-cover-motion {
+  translate: 0 var(--duomei-kinetic-hero-lift, 0px);
+  rotate: var(--duomei-kinetic-hero-spin, 0deg);
+  scale: var(--duomei-kinetic-hero-scale, 1);
+  transform-origin: 50% 72%;
+}
+
+.duomei-kinetic-active .bounce-name h1 > span {
+  display: inline-block;
+  scale: var(--duomei-kinetic-letter-scale, 1);
+  transform-origin: 50% 80%;
+}
+
+.duomei-kinetic-active .bounce-name h1 > span:nth-child(1) {
+  translate: var(--duomei-kinetic-left-far, 0px) var(--duomei-kinetic-up-near, 0px);
+  rotate: var(--duomei-kinetic-spin-left-far, 0deg);
+}
+
+.duomei-kinetic-active .bounce-name h1 > span:nth-child(2) {
+  translate: var(--duomei-kinetic-left-near, 0px) var(--duomei-kinetic-down-near, 0px);
+  rotate: var(--duomei-kinetic-spin-left, 0deg);
+}
+
+.duomei-kinetic-active .bounce-name h1 > span:nth-child(3) {
+  translate: var(--duomei-kinetic-left-soft, 0px) var(--duomei-kinetic-up-far, 0px);
+  rotate: var(--duomei-kinetic-spin-left-soft, 0deg);
+}
+
+.duomei-kinetic-active .bounce-name h1 > span:nth-child(4) {
+  translate: var(--duomei-kinetic-right-soft, 0px) var(--duomei-kinetic-down-far, 0px);
+  rotate: var(--duomei-kinetic-spin-right-soft, 0deg);
+}
+
+.duomei-kinetic-active .bounce-name h1 > span:nth-child(5) {
+  translate: var(--duomei-kinetic-right-near, 0px) var(--duomei-kinetic-up-near, 0px);
+  rotate: var(--duomei-kinetic-spin-right, 0deg);
+}
+
+.duomei-kinetic-active .bounce-name h1 > span:nth-child(6) {
+  translate: var(--duomei-kinetic-right-far, 0px) var(--duomei-kinetic-down-near, 0px);
+  rotate: var(--duomei-kinetic-spin-right-far, 0deg);
+}
+
+.duomei-kinetic-active .duomei-hero-subname,
+.duomei-kinetic-active .duomei-hero-line,
+.duomei-kinetic-active .duomei-scroll-hint {
+  translate: 0 var(--duomei-kinetic-copy-lift, 0px);
+  opacity: var(--duomei-kinetic-copy-opacity, 1);
+}
+
+.duomei-kinetic-active .paper-curve {
+  translate: 0 var(--duomei-kinetic-paper-lift, 0px);
+  scale: var(--duomei-kinetic-paper-scale, 1) 1;
+  transform-origin: 50% 100%;
+}
+
+.duomei-kinetic-notes-stage {
+  isolation: isolate;
+  overflow: clip;
+}
+
+.duomei-kinetic-notes-canvas {
+  position: absolute;
+  inset: 0;
+  z-index: var(--z-base);
+  overflow: clip;
+  pointer-events: none;
+}
+
+.duomei-kinetic-notes-title {
+  position: absolute;
+  inset-inline-start: 0;
+  inset-block-start: 18%;
+  color: var(--color-ink);
+  font-family: var(--font-body);
+  font-size: clamp(5rem, 18vw, 17rem);
+  font-style: normal;
+  font-weight: 800;
+  line-height: 0.8;
+  letter-spacing: -0.08em;
+  white-space: nowrap;
+  mix-blend-mode: multiply;
+}
+
+.duomei-kinetic-notes-rail {
+  position: absolute;
+  inset-inline-start: -18%;
+  inset-block-start: 55%;
+  width: 136%;
+  height: clamp(2.5rem, 6vw, 5.5rem);
+  border-block: var(--rule-hairline) solid color-mix(in oklch, var(--color-ink) 28%, transparent);
+  background: color-mix(in oklch, var(--color-caramel) 16%, var(--color-paper));
+  transform-origin: center;
+  mix-blend-mode: multiply;
+}
+
+.duomei-kinetic-notes-count {
+  position: absolute;
+  inset-inline-end: var(--space-md);
+  inset-block-start: 48%;
+  color: var(--color-accent);
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  white-space: nowrap;
+  transform-origin: center;
+}
+
+.duomei-kinetic-notes-stage > .notes-dream-notes-content {
+  position: relative;
+  z-index: var(--z-raised);
+  min-width: 0;
+  transform-origin: 52% 58%;
+}
+
+[data-reduced-motion="true"] .duomei-kinetic-hero-canvas,
+[data-reduced-motion="true"] .duomei-kinetic-notes-canvas {
+  display: none;
+}
+
+[data-reduced-motion="true"] .duomei-kinetic-active .duomei-hero-cover-motion,
+[data-reduced-motion="true"] .duomei-kinetic-active .bounce-name h1 > span,
+[data-reduced-motion="true"] .duomei-kinetic-active .duomei-hero-subname,
+[data-reduced-motion="true"] .duomei-kinetic-active .duomei-hero-line,
+[data-reduced-motion="true"] .duomei-kinetic-active .duomei-scroll-hint,
+[data-reduced-motion="true"] .duomei-kinetic-active .paper-curve {
+  translate: none;
+  rotate: none;
+  scale: none;
+  opacity: 1;
+}
+
+@media (min-width: 48rem) {
+  .duomei-kinetic-notes-count {
+    inset-inline-end: var(--space-2xl);
+    font-size: var(--text-md);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .duomei-kinetic-hero-canvas,
+  .duomei-kinetic-notes-canvas {
+    display: none;
+  }
+
+  .duomei-kinetic-notes-stage > .notes-dream-notes-content {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: opacity var(--dur-micro) linear;
+  }
+}

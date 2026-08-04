@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { IllustrationLayer } from "../components/IllustrationLayer";
+import { KineticHeroStage } from "../components/HomeKineticStage";
 import { NotesDreamTransition } from "../components/NotesDreamTransition";
 import { PaperLayer } from "../components/PaperLayer";
 import { NOTE_UPDATED_EVENT, getPublishedNotes } from "../lib/noteStore";
@@ -31,8 +31,8 @@ export function DuomeiHomePage() {
   }, [refreshKey]);
 
   return (
-    <main className="duomei-stage">
-      <IllustrationLayer />
+    <main className="duomei-stage duomei-kinetic-active">
+      <KineticHeroStage />
       <PaperLayer>
         <NotesDreamTransition canCreate={editMode || localPoetryPreview} notes={notes} onCreate={() => openNoteEditor()} />
       </PaperLayer>
