@@ -1,0 +1,23 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "duomei-media-storage",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-08-13",
+  "r2_buckets": [
+    {
+      "binding": "DUOMEI_MEDIA",
+      "bucket_name": "duomei-media"
+    }
+  ],
+  "vars": {
+    "SUPABASE_URL": "https://bokvqndvwqgugkcrizwj.supabase.co",
+    "SUPABASE_PUBLISHABLE_KEY": "sb_publishable_WONhLBnVl1ea_sroDggFAw_FuTZlZFX"
+  },
+  "observability": {
+    "enabled": true,
+    "logs": {
+      "enabled": true,
+      "head_sampling_rate": 1
+    }
+  }
+}

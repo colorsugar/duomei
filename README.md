@@ -35,7 +35,7 @@ README、代码和公开文档中不保存任何可直接使用的登录凭据�
 
 ## 数据发布
 
-正式内容以 Supabase Database 和 Supabase Storage 为准。
+正式内容以 Supabase Database 为准；管理员登录继续使用 Supabase Auth。笔记图片存放在独立的 Cloudflare R2 `duomei-media` 桶，由 Worker 验证 Supabase 管理员会话后上传并公开只读分发。
 
 LocalStorage 只用于草稿缓存、编辑状态和本地备份，不作为正式发布数据源。
 
@@ -43,4 +43,4 @@ LocalStorage 只用于草稿缓存、编辑状态和本地备份，不作为正�
 
 源码托管在 GitHub，正式站点通过 Vercel 部署。
 
-GitHub Pages 可作为备用静态版本保留，但不再作为正式内容发布流程。
+GitHub Actions 已停用；正式站点只通过本地校验后的 Vercel 发布流程部署。

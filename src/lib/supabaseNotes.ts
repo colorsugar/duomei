@@ -128,17 +128,29 @@ export async function deleteCloudNote(id: string) {
   if (error) throw error;
 }
 
+const mediaBaseURL = (import.meta.env.VITE_DUOMEI_MEDIA_URL || "https://duomei-media-storage.colorsugar.workers.dev")
+  .replace(/\/$/, "");
+
+async function uploadMedia(body: Blob, path: string) {
+  const session = await getCloudSession();
+  if (!session) throw new Error("请先登录管理员账号后再上传图片。");
+  const response = await fetch(`${mediaBaseURL}/v1/upload?key=${encodeURIComponent(path)}`, {
+    method: "PUT",
+    headers: {
+      Authorization: `Bearer ${session.access_token}`,
+      "Content-Type": body.type || "image/webp",
+    },
+    body,
+  });
+  const result = await response.json().catch(() => ({ error: "图片上传失败。" })) as { url?: string; error?: string };
+  if (!response.ok || !result.url) throw new Error(result.error || "图片上传失败。");
+  return result.url;
+}
+
 export async function uploadNoteImage(file: File, folder = "notes") {
   const ext = file.name.split(".").pop()?.toLowerCase() || "webp";
   const path = `${folder}/${Date.now()}-${Math.random().toString(16).slice(2)}.${ext}`;
-  const { error } = await supabase.storage.from("note-images").upload(path, file, {
-    cacheControl: "31536000",
-    contentType: file.type || "image/webp",
-    upsert: false,
-  });
-  if (error) throw error;
-  const { data } = supabase.storage.from("note-images").getPublicUrl(path);
-  return data.publicUrl;
+  return uploadMedia(file, path);
 }
 
 export async function uploadNoteDataUrl(dataUrl: string, folder = "article") {
@@ -153,12 +165,5 @@ export async function uploadNoteDataUrl(dataUrl: string, folder = "article") {
   }
   const ext = mime.includes("webp") ? "webp" : mime.includes("png") ? "png" : "jpg";
   const path = `${folder}/${Date.now()}-${Math.random().toString(16).slice(2)}.${ext}`;
-  const { error } = await supabase.storage.from("note-images").upload(path, new Blob([bytes], { type: mime }), {
-    cacheControl: "31536000",
-    contentType: mime,
-    upsert: false,
-  });
-  if (error) throw error;
-  const { data } = supabase.storage.from("note-images").getPublicUrl(path);
-  return data.publicUrl;
+  return uploadMedia(new Blob([bytes], { type: mime }), path);
 }
