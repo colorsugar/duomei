@@ -4,10 +4,13 @@
   --color-paper-3: oklch(93% 0.018 78);
   --color-ink: oklch(25% 0.012 78);
   --color-muted: oklch(55% 0.014 76);
+  --color-muted-strong: oklch(49% 0.014 76);
   --color-rule: oklch(76% 0.018 78);
   --color-accent: oklch(51% 0.045 132);
+  --color-accent-ink: var(--color-paper);
   --color-caramel: oklch(66% 0.09 65);
   --color-focus: oklch(54% 0.11 132);
+  --color-error: oklch(52% 0.15 28);
 
   --font-display: Georgia, "Times New Roman", serif;
   --font-body: Inter, "Noto Sans SC", "Microsoft YaHei", sans-serif;
@@ -21,12 +24,16 @@
   --space-xl: 2.5rem;
   --space-2xl: 4rem;
   --space-3xl: 6rem;
+  --space-4xl: 9rem;
 
   --text-xs: 0.75rem;
   --text-sm: 0.875rem;
+  --text-base: 1rem;
   --text-md: 1rem;
   --text-lg: 1.25rem;
   --text-xl: 1.75rem;
+  --text-2xl: 2.5rem;
+  --text-display-s: clamp(2.75rem, 5vw + 1rem, 5.25rem);
   --text-display: clamp(4rem, 15vw, 13rem);
 
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
@@ -39,6 +46,27 @@
   --radius-card: 1.125rem;
   --radius-pill: 999px;
   --rule-hairline: 1px;
+  --rule-focus: 2px;
+  --size-hit: 2.75rem;
+  --size-guyu-reader-edge: 1.625rem;
+  --size-guyu-book-gutter: 1.875rem;
+  --size-guyu-reader-reserved: 9.375rem;
+  --size-guyu-book-max: 50.625rem;
+  --size-guyu-controls-offset: 1.75rem;
+  --size-guyu-hint-offset: 3.625rem;
+  --size-guyu-perspective: 131.25rem;
+  --size-guyu-mobile-edge: 1.25rem;
+  --size-guyu-controls-max: 24rem;
+  --size-guyu-controls-mobile-max: 21rem;
+  --ratio-guyu-book-spread: 1.306413;
+  --text-guyu-control: 2rem;
+  --layout-wide: 72rem;
+  --layout-reading: 65ch;
+  --shadow-book: 0 1.5rem 3.75rem oklch(25% 0.012 78 / 0.14);
+  --shadow-book-soft: 0 0.75rem 2rem oklch(25% 0.012 78 / 0.1);
   --z-base: 1;
   --z-raised: 10;
+  --z-turn-shadow: 12;
+  --z-turning-page: 20;
+  --z-page-controls: 30;
 }

@@ -28,6 +28,40 @@ The following files form one release unit. If any of them changes for poetry/快
 
 Do not stage or deploy only the navigation, anchor, footer, or CSS portion while editor files remain modified or untracked.
 
+## Atomic Guyu Bundle
+
+The “故语” library and reader are one release unit. Review, commit, and deploy these together:
+
+- `.hallmark/log.json`
+- `.hallmark/preflight.json`
+- `.env.example`, `.gitignore`, and `.vercelignore` (names only; never commit real values)
+- `api/guyu-auth.ts` and `api/guyu-page.ts`
+- `server/guyuSession.ts`, `server/guyuRateLimit.ts`, and their tests
+- `server/guyuBooks.test.ts` for mixed single-page/two-page scan alignment
+- `src/components/GuyuAccessGate.tsx`
+- `src/components/GuyuFlipbook.tsx`
+- `src/content/guyuBooks.ts`
+- `src/pages/DuomeiGuyuPage.tsx`
+- `src/pages/DuomeiGuyuReaderPage.tsx`
+- `src/guyu.css`
+- `src/main.tsx`
+- `tokens.css`
+- `vercel.json`
+- `cloudflare/duomei-media/` source, configuration, lockfile, and tests
+- the shared route and navigation files `src/App.tsx` and `src/components/DuomeiHeader.tsx`
+
+The 53 WebP pages live only in the private `duomei-private` R2 bucket. They must never be committed under `public/` or shipped in the Vercel static output. The original PDF remains a local/iCloud archive and is not a web dependency. Vercel verifies the question and session cookie, then redirects each allowed page request to a short-lived signed Worker URL. Never commit the answer or signing secrets.
+
+The reader pins `react-pageflip@2.0.3` and `page-flip@2.0.7`. Scan numbers 10, 16, 21, 23–27, 30, 34, 39–40, and 42–51 are paired visual spreads; the source file remains one R2 object while the reader crops it across two persistent logical pages. Scan 15 is a wide single page and must not be split.
+
+All logical leaves deliberately use StPageFlip's hard-page density to match the referenced rigid-board album rather than a soft paper curl. The reader's visible back control and browser-history exit force a full document navigation so the pinned upstream render loop cannot accumulate across repeated SPA reader mounts; the component also calls `destroy()` as production cleanup.
+
+If an unpushed local commit ever contained those pages, amend or squash that commit before pushing. A later deletion commit is not enough because the public repository would retain the original blobs in history.
+
+Do not publish the navigation or reader until all 53 R2 objects have been verified and the Vercel and Worker tests pass. `npm.cmd run release:check` rejects public or tracked Guyu originals and verifies the complete protected delivery code bundle.
+
+Before production, the Vercel Firewall must enforce a rate limit on `POST /api/guyu-auth`. The in-function attempt map is defense in depth only and is not shared across serverless instances.
+
 ## Features That Must Remain In The Latest Version
 
 - Poetry canvas editor is present and opened from poetry pages while edit mode is enabled.
@@ -36,6 +70,9 @@ Do not stage or deploy only the navigation, anchor, footer, or CSS portion while
 - Text and images retain selectable entrance effects.
 - Mobile sticky/page-by-page poetry behavior remains intact.
 - “微言” points to `/#kuaihuo` and scrolls to the homepage poetry portal like “小记”.
+- “故语” sits between “小记” and “微言” and opens `/guyu`.
+- `/guyu/meiyou-yujian` keeps all 53 scans, expands detected two-page scans into aligned logical spreads, preserves the front and back covers, uses the pinned StPageFlip engine for full-screen phone/desktop page turns, and keeps keyboard plus compact overlay controls.
+- `/guyu` and every page request remain behind the server-verified class question; direct static and unsigned R2 paths remain blocked.
 - The poetry portal target keeps `id="kuaihuo"`.
 - The admin reflects 首页 / 微言 / 小记管理.
 - The homepage paper curve reaches the full right edge.
@@ -43,7 +80,7 @@ Do not stage or deploy only the navigation, anchor, footer, or CSS portion while
 
 ## Required Release Procedure
 
-1. Run `npm.cmd run build` against the full working tree.
+1. Run the root build and Guyu session tests, then run the Worker typecheck, tests, and dry deploy.
 2. Stage the complete intended feature bundle.
 3. Review `git diff --cached --stat` and `git diff --cached`.
 4. Commit the bundle.

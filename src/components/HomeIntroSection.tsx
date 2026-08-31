@@ -7,6 +7,7 @@ import { compressImageFile } from "../lib/imageTools";
 import { defaultPoetryFont, timePoetryWorks } from "../lib/timePoetryContent";
 import type { TimePoetryImage, TimePoetryTextBlock, TimePoetryWork } from "../lib/timePoetryContent";
 import { DreamCard } from "./DreamCard";
+import { GuyuShelfPreview } from "./GuyuShelfPreview";
 import { PoetryCanvasEditor } from "./PoetryCanvasEditor";
 import "./HomeIntroSection.css";
 
@@ -147,10 +148,10 @@ function splitLines(value: string) {
 }
 
 function useCompactViewport() {
-  const [compact, setCompact] = useState(() => (typeof window === "undefined" ? false : window.innerWidth <= 760));
+  const [compact, setCompact] = useState(() => (typeof window === "undefined" ? false : window.innerWidth <= 768));
 
   useEffect(() => {
-    const update = () => setCompact(window.innerWidth <= 760);
+    const update = () => setCompact(window.innerWidth <= 768);
     update();
     window.addEventListener("resize", update);
     return () => window.removeEventListener("resize", update);
@@ -534,15 +535,19 @@ export function HomeIntroSection({ canCreate }: HomeIntroSectionProps) {
     target: introRef,
     offset: ["start start", "end end"],
   });
-  const progress = useSpring(scrollYProgress, { stiffness: 110, damping: 32, mass: 0.7 });
+  const progress = useSpring(scrollYProgress, {
+    stiffness: compact ? 400 : 110,
+    damping: compact ? 40 : 32,
+    mass: compact ? 0.35 : 0.7,
+  });
 
   const paperX = useTransform(progress, [0.08, 0.42], ["100%", "0%"]);
   const legacyScale = useTransform(progress, [0.08, 0.4], [1, compact ? 0.58 : 0.62]);
   const legacyX = useTransform(progress, [0.08, 0.4], ["0%", compact ? "0%" : "-22%"]);
   const legacyY = useTransform(progress, [0.08, 0.4], ["0%", compact ? "0%" : "3%"]);
-  const sceneY = useTransform(progress, compact ? [0.62, 1] : [0.84, 1], compact ? ["0%", "-54%"] : ["0%", "-106%"]);
-  const sceneOpacity = useTransform(progress, compact ? [0.84, 1] : [0.965, 1], compact ? [1, 0.22] : [1, 0]);
-  const progressOpacity = useTransform(progress, compact ? [0.74, 0.96] : [0.93, 0.995], [1, 0]);
+  const sceneY = useTransform(progress, compact ? [0.76, 1] : [0.84, 1], compact ? ["0%", "-54%"] : ["0%", "-106%"]);
+  const sceneOpacity = useTransform(progress, compact ? [0.9, 1] : [0.965, 1], compact ? [1, 0.22] : [1, 0]);
+  const progressOpacity = useTransform(progress, compact ? [0.86, 0.98] : [0.93, 0.995], [1, 0]);
   const progressScale = useTransform(progress, [0, 1], [0, 1]);
 
   useEffect(() => {
@@ -676,7 +681,9 @@ export function HomeIntroSection({ canCreate }: HomeIntroSectionProps) {
         </div>
       </section>
 
-      <section className="poetry-index" aria-label="诗词作品列表">
+      <GuyuShelfPreview />
+
+      <section className="poetry-index" id="weiyan" aria-label="诗词作品列表">
         {pages.map((work, index) => (
           <PoetryWorkPanel key={work.id} work={work} index={index} canCreate={canCreate} compact={compact} onEdit={() => openEditor(index)} />
         ))}

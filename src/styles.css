@@ -11822,6 +11822,22 @@ html.duomei-modal-open .duomei-companion {
   }
 }
 
+/* On touch screens, sticky hover/focus must never reopen a menu whose state is closed. */
+@media (max-width: 760px) {
+  .duomei-header:not(.is-menu-open) nav {
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+    transform: translateY(-6px) scale(0.96) !important;
+  }
+
+  .duomei-header:not(.is-menu-open) nav a,
+  .duomei-header:not(.is-menu-open) nav button {
+    opacity: 0 !important;
+    transform: translate3d(12px, -4px, 0) scale(0.96) !important;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .illustration-layer,
   .illustration-layer-inner,

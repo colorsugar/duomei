@@ -1,0 +1,15 @@
+{
+  "scannedAt": "2026-09-01",
+  "framework": "React 19 + Vite 7 + TypeScript",
+  "fontStack": "Georgia display + Inter/Noto Sans SC body",
+  "palette": "Warm Archive OKLCH tokens in tokens.css",
+  "motion": "Framer Motion + Lenis + Embla present",
+  "spacing": "4pt semantic scale in tokens.css",
+  "preserve": [
+    "existing typography",
+    "warm paper palette",
+    "current Duomei header and footer",
+    "note-card tilt interaction",
+    "poetry portal and editor behavior"
+  ]
+}

@@ -1,0 +1,7 @@
+.stitch/
+cloudflare/
+docs/
+private/
+prototype/
+tmp/
+verify-*.png

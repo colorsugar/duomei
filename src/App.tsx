@@ -4,6 +4,8 @@ import { DuomeiHomePage } from "./pages/DuomeiHomePage";
 import { DuomeiNoteDetailPage } from "./pages/DuomeiNoteDetailPage";
 import { DuomeiTimePage } from "./pages/DuomeiTimePage";
 import { DuomeiNotFoundPage } from "./pages/DuomeiNotFoundPage";
+import { DuomeiGuyuPage } from "./pages/DuomeiGuyuPage";
+import { DuomeiGuyuReaderPage } from "./pages/DuomeiGuyuReaderPage";
 import { DuomeiHeader } from "./components/DuomeiHeader";
 import { DuomeiFooter } from "./components/DuomeiFooter";
 import { BackToTopButton } from "./components/BackToTopButton";
@@ -17,25 +19,28 @@ function AppRoutes() {
   const location = useLocation();
   const isAdmin = location.pathname.startsWith("/admin");
   const isTimePage = location.pathname === "/time";
-  useSmoothScroll(isAdmin || isTimePage);
+  const isGuyuReader = location.pathname.startsWith("/guyu/");
+  useSmoothScroll(isAdmin || isTimePage || isGuyuReader);
 
   return (
     <DuomeiEditProvider>
       <RouteScrollManager />
-      {!isAdmin ? <DuomeiHeader /> : null}
+      {!isAdmin && !isGuyuReader ? <DuomeiHeader /> : null}
       <Routes>
         <Route path="/" element={<DuomeiHomePage />} />
         <Route path="/time" element={<DuomeiTimePage />} />
         <Route path="/note/:slug" element={<DuomeiNoteDetailPage />} />
+        <Route path="/guyu" element={<DuomeiGuyuPage />} />
+        <Route path="/guyu/:bookId" element={<DuomeiGuyuReaderPage />} />
         <Route path="/about" element={<Navigate to="/#kuaihuo" replace />} />
         <Route path="/admin/login" element={<DuomeiAdmin mode="login" />} />
         <Route path="/admin" element={<DuomeiAdmin mode="notes" />} />
         <Route path="/admin/notes" element={<DuomeiAdmin mode="notes" />} />
         <Route path="*" element={<DuomeiNotFoundPage />} />
       </Routes>
-      {!isAdmin ? <DuomeiFooter /> : null}
-      {!isAdmin ? <DuomeiCompanion /> : null}
-      {!isAdmin ? <BackToTopButton /> : null}
+      {!isAdmin && !isGuyuReader ? <DuomeiFooter /> : null}
+      {!isAdmin && !isGuyuReader ? <DuomeiCompanion /> : null}
+      {!isAdmin && !isGuyuReader ? <BackToTopButton /> : null}
     </DuomeiEditProvider>
   );
 }

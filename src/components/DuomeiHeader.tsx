@@ -23,7 +23,15 @@ export function DuomeiHeader() {
     return () => window.removeEventListener("scroll", update);
   }, []);
 
-  const closeMenu = () => setMenuOpen(false);
+  useEffect(() => {
+    setMenuOpen(false);
+    setHoverRevealed(false);
+  }, [location.hash, location.key, location.pathname, location.search]);
+
+  const closeMenu = () => {
+    setMenuOpen(false);
+    setHoverRevealed(false);
+  };
 
   const scrollHomeTop = (behavior: ScrollBehavior = "smooth") => {
     const scroll = () => {
@@ -121,6 +129,9 @@ export function DuomeiHeader() {
         </Link>
         <Link to="/#notes" onClick={closeMenu}>
           小记
+        </Link>
+        <Link to="/guyu" onClick={closeMenu}>
+          故语
         </Link>
         <Link to="/#kuaihuo" onClick={goKuaihuo}>
           微言

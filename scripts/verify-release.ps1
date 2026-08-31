@@ -1,9 +1,12 @@
 $ErrorActionPreference = "Stop"
+if (Get-Variable -Name PSNativeCommandUseErrorActionPreference -ErrorAction SilentlyContinue) {
+  $PSNativeCommandUseErrorActionPreference = $false
+}
 
 $root = Resolve-Path (Join-Path $PSScriptRoot "..")
 Set-Location $root
 
-$bundle = @(
+$poetryBundle = @(
   "src/components/HomeIntroSection.tsx",
   "src/components/HomeIntroSection.css",
   "src/components/PoetryCanvasEditor.tsx",
@@ -17,12 +20,66 @@ $bundle = @(
   "src/styles.css"
 )
 
+$guyuBundle = @(
+  ".env.example",
+  ".gitignore",
+  ".vercelignore",
+  ".hallmark/log.json",
+  ".hallmark/preflight.json",
+  "api/guyu-auth.ts",
+  "api/guyu-page.ts",
+  "cloudflare/duomei-media/.gitignore",
+  "cloudflare/duomei-media/package-lock.json",
+  "cloudflare/duomei-media/package.json",
+  "cloudflare/duomei-media/src/index.ts",
+  "cloudflare/duomei-media/test/storage.test.ts",
+  "cloudflare/duomei-media/tsconfig.json",
+  "cloudflare/duomei-media/vitest.config.ts",
+  "cloudflare/duomei-media/worker-configuration.d.ts",
+  "cloudflare/duomei-media/wrangler.jsonc",
+  "docs/release-source-of-truth.md",
+  "package-lock.json",
+  "package.json",
+  "server/guyuSession.test.ts",
+  "server/guyuSession.ts",
+  "server/guyuRateLimit.test.ts",
+  "server/guyuRateLimit.ts",
+  "server/guyuBooks.test.ts",
+  "src/components/GuyuAccessGate.tsx",
+  "src/components/GuyuFlipbook.tsx",
+  "src/content/guyuBooks.ts",
+  "src/pages/DuomeiGuyuPage.tsx",
+  "src/pages/DuomeiGuyuReaderPage.tsx",
+  "src/guyu.css",
+  "src/main.tsx",
+  "tokens.css",
+  "tsconfig.server.json",
+  "vercel.json"
+)
+
+$bundle = @($poetryBundle + $guyuBundle | Sort-Object -Unique)
+
 $requiredMarkers = @(
   @{ File = "src/components/HomeIntroSection.tsx"; Marker = "PoetryCanvasEditor" },
   @{ File = "src/components/HomeIntroSection.tsx"; Marker = 'id="kuaihuo"' },
   @{ File = "src/components/PoetryCanvasEditor.tsx"; Marker = "onUndo" },
   @{ File = "src/components/PoetryCanvasEditor.tsx"; Marker = "onRedo" },
   @{ File = "src/components/DuomeiHeader.tsx"; Marker = 'to="/#kuaihuo"' },
+  @{ File = "src/components/DuomeiHeader.tsx"; Marker = 'to="/guyu"' },
+  @{ File = "src/App.tsx"; Marker = 'path="/guyu"' },
+  @{ File = "src/App.tsx"; Marker = 'path="/guyu/:bookId"' },
+  @{ File = "src/content/guyuBooks.ts"; Marker = 'Array.from({ length: 53 }' },
+  @{ File = "src/content/guyuBooks.ts"; Marker = '/api/guyu-page?book=' },
+  @{ File = "package.json"; Marker = '"react-pageflip": "2.0.3"' },
+  @{ File = "package.json"; Marker = '"page-flip": "2.0.7"' },
+  @{ File = "src/components/GuyuFlipbook.tsx"; Marker = 'HTMLFlipBook' },
+  @{ File = "src/content/guyuBooks.ts"; Marker = 'pairedScanNumbers' },
+  @{ File = "src/pages/DuomeiGuyuPage.tsx"; Marker = 'GuyuAccessGate' },
+  @{ File = "src/pages/DuomeiGuyuReaderPage.tsx"; Marker = 'GuyuAccessGate' },
+  @{ File = "api/guyu-page.ts"; Marker = 'requestHasGuyuSession' },
+  @{ File = "server/guyuSession.ts"; Marker = 'createGuyuMediaSignature' },
+  @{ File = "cloudflare/duomei-media/src/index.ts"; Marker = '/private-media/' },
+  @{ File = "vercel.json"; Marker = '/api/guyu-page?book=:book&page=:page' },
   @{ File = "src/pages/DuomeiAdmin.tsx"; Marker = 'id="note-management"' },
   @{ File = "src/components/PaperLayer.tsx"; Marker = "paper-stroke-reveal-rect" },
   @{ File = "src/styles.css"; Marker = ".paper-stroke-reveal-rect" }
@@ -30,14 +87,47 @@ $requiredMarkers = @(
 
 $errors = [System.Collections.Generic.List[string]]::new()
 
+$publicGuyuFiles = @(
+  Get-ChildItem -LiteralPath "public/books/guyu" -Recurse -File -ErrorAction SilentlyContinue
+)
+if ($publicGuyuFiles.Count -gt 0) {
+  $errors.Add("Guyu originals must not exist under public/books/guyu; keep all pages in private R2")
+}
+
+$trackedPublicGuyuFiles = @(git ls-files -- "public/books/guyu")
+if ($trackedPublicGuyuFiles.Count -gt 0) {
+  $errors.Add("Guyu originals must not be tracked from public/books/guyu")
+}
+
+$savedErrorActionPreference = $ErrorActionPreference
+$ErrorActionPreference = "Continue"
+git rev-parse --verify origin/main 2>$null | Out-Null
+$hasOriginMain = $LASTEXITCODE -eq 0
+$ErrorActionPreference = $savedErrorActionPreference
+if ($hasOriginMain) {
+  $unpushedPublicObjects = @(git rev-list --objects "origin/main..HEAD" -- "public/books/guyu")
+  if ($unpushedPublicObjects.Count -gt 0) {
+    $errors.Add("Unpushed Git history still contains public Guyu originals; amend or squash before push")
+  }
+}
+
+$trackedPrivateGuyuFiles = @(git ls-files -- "private/books/guyu")
+if ($trackedPrivateGuyuFiles.Count -gt 0) {
+  $errors.Add("Local private Guyu originals must remain ignored; R2 is the deployment source")
+}
+
 foreach ($file in $bundle) {
   if (-not (Test-Path -LiteralPath $file)) {
     $errors.Add("Missing bundle file: $file")
     continue
   }
 
+  $savedErrorActionPreference = $ErrorActionPreference
+  $ErrorActionPreference = "Continue"
   git cat-file -e "HEAD:$file" 2>$null
-  if ($LASTEXITCODE -ne 0) {
+  $headFileExists = $LASTEXITCODE -eq 0
+  $ErrorActionPreference = $savedErrorActionPreference
+  if (-not $headFileExists) {
     $errors.Add("Bundle file is not committed in HEAD: $file")
   }
 }
@@ -49,8 +139,12 @@ foreach ($requirement in $requiredMarkers) {
     $errors.Add("Working tree is missing required feature marker '$($requirement.Marker)' in $($requirement.File)")
   }
 
-  $headText = git show "HEAD:$($requirement.File)"
-  if ($LASTEXITCODE -ne 0 -or -not ($headText -join "`n").Contains($requirement.Marker)) {
+  $savedErrorActionPreference = $ErrorActionPreference
+  $ErrorActionPreference = "Continue"
+  $headText = git show "HEAD:$($requirement.File)" 2>$null
+  $headTextExists = $LASTEXITCODE -eq 0
+  $ErrorActionPreference = $savedErrorActionPreference
+  if (-not $headTextExists -or -not ($headText -join "`n").Contains($requirement.Marker)) {
     $errors.Add("HEAD is missing required feature marker '$($requirement.Marker)' in $($requirement.File)")
   }
 }
@@ -74,4 +168,4 @@ if ($errors.Count -gt 0) {
   exit 1
 }
 
-Write-Output "Release check passed: committed poetry bundle and latest-version markers are intact."
+Write-Output "Release check passed: committed poetry and protected Guyu bundles plus latest-version markers are intact."

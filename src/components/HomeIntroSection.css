@@ -610,9 +610,9 @@
   }
 }
 
-@media (max-width: 760px) {
+@media (max-width: 768px) {
   .poetry-portal-intro {
-    height: 190svh;
+    height: 230svh;
   }
 
   .poetry-portal-stage {
@@ -629,6 +629,30 @@
     min-height: 300px;
     border-radius: 20px;
     translate: 0 -50%;
+  }
+
+  .poetry-legacy-frame .dream-name {
+    right: var(--space-lg);
+    top: 20%;
+    font-size: clamp(4rem, 22vw, 5.4rem);
+  }
+
+  .poetry-legacy-frame .dream-tami {
+    left: var(--space-lg);
+    top: 44%;
+    bottom: auto;
+    font-size: clamp(1.5rem, 8vw, 2rem);
+  }
+
+  .poetry-legacy-frame .dream-poem-box {
+    left: var(--space-lg);
+    right: var(--space-lg);
+    top: 60%;
+    bottom: auto;
+    width: auto;
+    min-height: 0;
+    font-size: clamp(1rem, 4.6vw, 1.2rem);
+    line-height: 1.65;
   }
 
   .poetry-portal-title {
@@ -916,7 +940,7 @@
   grid-template-columns: 1fr;
 }
 
-@media (max-width: 760px) {
+@media (max-width: 768px) {
   .poetry-direct-canvas {
     width: 1040px;
     min-height: 585px;
@@ -1357,14 +1381,14 @@
   }
 }
 
-@media (max-width: 760px) {
+@media (max-width: 768px) {
   .poetry-index {
-    margin-top: -105svh;
+    margin-top: 0;
     padding-bottom: clamp(88px, 14svh, 140px);
   }
 
   .poetry-work-track {
-    height: 175svh;
+    height: 225svh;
   }
 
   .poetry-work-panel.poetry-free-panel {

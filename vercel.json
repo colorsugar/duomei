@@ -1,7 +1,12 @@
 {
+  "$schema": "https://openapi.vercel.sh/vercel.json",
   "rewrites": [
     {
-      "source": "/(.*)",
+      "source": "/books/guyu/:book/pages/:page.webp",
+      "destination": "/api/guyu-page?book=:book&page=:page"
+    },
+    {
+      "source": "/((?!api(?:/|$)|src(?:/|$)|@vite(?:/|$)|@id(?:/|$)|@fs(?:/|$)|@react-refresh(?:/|$)|node_modules(?:/|$)).*)",
       "destination": "/index.html"
     }
   ]
