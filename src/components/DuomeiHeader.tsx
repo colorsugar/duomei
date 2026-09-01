@@ -136,6 +136,9 @@ export function DuomeiHeader() {
         <Link to="/#kuaihuo" onClick={goKuaihuo}>
           微言
         </Link>
+        <Link to="/skills" onClick={closeMenu}>
+          技能
+        </Link>
         {!isLoggedIn ? (
           <Link to="/admin/login" onClick={closeMenu}>
             管理

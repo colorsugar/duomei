@@ -1,6 +1,13 @@
 [
   {
     "date": "2026-09-01",
+    "macrostructure": "Index-First",
+    "theme": "Warm Archive",
+    "enrichment": "none",
+    "brief": "Menu-only skills directory linking Duomei visitors to portable Agent Skills"
+  },
+  {
+    "date": "2026-09-01",
     "macrostructure": "Catalogue",
     "theme": "Warm Archive",
     "enrichment": "private pages plus typographic closed-book teaser",

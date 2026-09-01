@@ -11328,6 +11328,7 @@ html.duomei-modal-open .duomei-companion {
   .duomei-header.is-menu-open nav > :nth-child(5) { transition-delay: 360ms !important; }
   .duomei-header.is-menu-open nav > :nth-child(6) { transition-delay: 430ms !important; }
   .duomei-header.is-menu-open nav > :nth-child(7) { transition-delay: 500ms !important; }
+  .duomei-header.is-menu-open nav > :nth-child(8) { transition-delay: 570ms !important; }
   .duomei-header .duomei-menu-toggle:hover ~ nav > :nth-child(1),
   .duomei-header .duomei-menu-toggle:focus-visible ~ nav > :nth-child(1),
   .duomei-header nav:hover > :nth-child(1),
@@ -11356,6 +11357,10 @@ html.duomei-modal-open .duomei-companion {
   .duomei-header .duomei-menu-toggle:focus-visible ~ nav > :nth-child(7),
   .duomei-header nav:hover > :nth-child(7),
   .duomei-header nav:focus-within > :nth-child(7) { transition-delay: 500ms !important; }
+  .duomei-header .duomei-menu-toggle:hover ~ nav > :nth-child(8),
+  .duomei-header .duomei-menu-toggle:focus-visible ~ nav > :nth-child(8),
+  .duomei-header nav:hover > :nth-child(8),
+  .duomei-header nav:focus-within > :nth-child(8) { transition-delay: 570ms !important; }
 }
 
 /* Detail page entry: slow paper-restoration reveal inspired by narrative trail pages. */

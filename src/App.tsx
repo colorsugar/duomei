@@ -6,6 +6,7 @@ import { DuomeiTimePage } from "./pages/DuomeiTimePage";
 import { DuomeiNotFoundPage } from "./pages/DuomeiNotFoundPage";
 import { DuomeiGuyuPage } from "./pages/DuomeiGuyuPage";
 import { DuomeiGuyuReaderPage } from "./pages/DuomeiGuyuReaderPage";
+import { DuomeiSkillsPage } from "./pages/DuomeiSkillsPage";
 import { DuomeiHeader } from "./components/DuomeiHeader";
 import { DuomeiFooter } from "./components/DuomeiFooter";
 import { BackToTopButton } from "./components/BackToTopButton";
@@ -32,6 +33,7 @@ function AppRoutes() {
         <Route path="/note/:slug" element={<DuomeiNoteDetailPage />} />
         <Route path="/guyu" element={<DuomeiGuyuPage />} />
         <Route path="/guyu/:bookId" element={<DuomeiGuyuReaderPage />} />
+        <Route path="/skills" element={<DuomeiSkillsPage />} />
         <Route path="/about" element={<Navigate to="/#kuaihuo" replace />} />
         <Route path="/admin/login" element={<DuomeiAdmin mode="login" />} />
         <Route path="/admin" element={<DuomeiAdmin mode="notes" />} />

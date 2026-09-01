@@ -77,6 +77,8 @@ Before production, the Vercel Firewall must enforce a rate limit on `POST /api/g
 - The admin reflects 首页 / 微言 / 小记管理.
 - The homepage paper curve reaches the full right edge.
 - The full-site footer remains at the end of the site without duplicating the companion.
+- `/skills` remains a standalone Skill index linked only from the main menu; the homepage must not gain a Skills module.
+- The Skill index links to the public `colorsugar/agent-skills` repository and preserves the site-wide header, footer, and mobile menu-close behavior.
 
 ## Required Release Procedure
 
