@@ -16,15 +16,21 @@ The following files form one release unit. If any of them changes for poetry/快
 
 - `src/components/HomeIntroSection.tsx`
 - `src/components/HomeIntroSection.css`
+- `src/components/SkillsDirectory.tsx`
+- `src/components/StickerPackSection.tsx`
 - `src/components/PoetryCanvasEditor.tsx`
 - `src/lib/timePoetryContent.ts`
 - `src/pages/DuomeiHomePage.tsx`
 - `src/App.tsx`
 - `src/components/DuomeiFooter.tsx`
 - `src/components/DuomeiHeader.tsx`
+- `src/pages/DuomeiSkillsPage.tsx`
 - `src/pages/DuomeiAdmin.tsx`
 - `src/components/PaperLayer.tsx`
+- `src/skills.css`
 - `src/styles.css`
+- `public/images/stickers/` supplied preview and QR assets
+- `scripts/verify-release.ps1`
 
 Do not stage or deploy only the navigation, anchor, footer, or CSS portion while editor files remain modified or untracked.
 
@@ -40,6 +46,7 @@ The “故语” library and reader are one release unit. Review, commit, and de
 - `server/guyuBooks.test.ts` for mixed single-page/two-page scan alignment
 - `src/components/GuyuAccessGate.tsx`
 - `src/components/GuyuFlipbook.tsx`
+- `src/components/GuyuShelfPreview.tsx`
 - `src/content/guyuBooks.ts`
 - `src/pages/DuomeiGuyuPage.tsx`
 - `src/pages/DuomeiGuyuReaderPage.tsx`
@@ -68,17 +75,20 @@ Before production, the Vercel Firewall must enforce a rate limit on `POST /api/g
 - Save, cancel, undo, redo, add, duplicate, delete, and page ordering remain available.
 - Images support the note image crop workflow, positioning, scaling, and replacement.
 - Text and images retain selectable entrance effects.
-- Mobile sticky/page-by-page poetry behavior remains intact.
-- “微言” points to `/#kuaihuo` and scrolls to the homepage poetry portal like “小记”.
-- “故语” sits between “小记” and “微言” and opens `/guyu`.
+- Mobile poetry editing remains page-by-page; the public 微言 reader uses the manual horizontal overlapping deck instead of the former vertical sticky stack.
+- “微言” points to `/#weiyan` and opens the homepage's manual, non-looping overlapping poetry deck.
+- The homepage order remains 主视觉 / 小记 / 快活 / 故语 / 颜色 / 微言 / 技能 / 版权脚注.
+- “故语” sits between “快活” and “颜色”; its homepage preview opens `/guyu`.
+- “颜色” preserves the supplied 多美 and 多美猪猪 WeChat preview/QR assets and their official short links.
+- Mobile keeps the fixed safe-area shortcut order 首页 / 小记 / 故语 / 颜色 / 微言 / 技能; desktop renders the same shortcuts inside the footer.
 - `/guyu/meiyou-yujian` keeps all 53 scans, expands detected two-page scans into aligned logical spreads, preserves the front and back covers, uses the pinned StPageFlip engine for full-screen phone/desktop page turns, and keeps keyboard plus compact overlay controls.
 - `/guyu` and every page request remain behind the server-verified class question; direct static and unsigned R2 paths remain blocked.
 - The poetry portal target keeps `id="kuaihuo"`.
 - The admin reflects 首页 / 微言 / 小记管理.
 - The homepage paper curve reaches the full right edge.
 - The full-site footer remains at the end of the site without duplicating the companion.
-- `/skills` remains a standalone Skill index linked only from the main menu; the homepage must not gain a Skills module.
-- The Skill index links to the public `colorsugar/agent-skills` repository and preserves the site-wide header, footer, and mobile menu-close behavior.
+- `/skills` remains the standalone full Skill index, while the homepage also renders the shared Skill directory before the copyright footer.
+- Both Skill surfaces link to the public `colorsugar/agent-skills` repository and preserve the site-wide header, footer, and mobile menu-close behavior.
 
 ## Required Release Procedure
 

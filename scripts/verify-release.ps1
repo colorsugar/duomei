@@ -9,15 +9,24 @@ Set-Location $root
 $poetryBundle = @(
   "src/components/HomeIntroSection.tsx",
   "src/components/HomeIntroSection.css",
+  "src/components/SkillsDirectory.tsx",
+  "src/components/StickerPackSection.tsx",
   "src/components/PoetryCanvasEditor.tsx",
   "src/lib/timePoetryContent.ts",
   "src/pages/DuomeiHomePage.tsx",
   "src/App.tsx",
   "src/components/DuomeiFooter.tsx",
   "src/components/DuomeiHeader.tsx",
+  "src/pages/DuomeiSkillsPage.tsx",
   "src/pages/DuomeiAdmin.tsx",
   "src/components/PaperLayer.tsx",
-  "src/styles.css"
+  "src/skills.css",
+  "src/styles.css",
+  "public/images/stickers/duomei-preview.jpg",
+  "public/images/stickers/duomei-qr.jpg",
+  "public/images/stickers/duomei-zhu-zhu-preview.jpg",
+  "public/images/stickers/duomei-zhu-zhu-qr.jpg",
+  "scripts/verify-release.ps1"
 )
 
 $guyuBundle = @(
@@ -47,6 +56,7 @@ $guyuBundle = @(
   "server/guyuBooks.test.ts",
   "src/components/GuyuAccessGate.tsx",
   "src/components/GuyuFlipbook.tsx",
+  "src/components/GuyuShelfPreview.tsx",
   "src/content/guyuBooks.ts",
   "src/pages/DuomeiGuyuPage.tsx",
   "src/pages/DuomeiGuyuReaderPage.tsx",
@@ -62,10 +72,18 @@ $bundle = @($poetryBundle + $guyuBundle | Sort-Object -Unique)
 $requiredMarkers = @(
   @{ File = "src/components/HomeIntroSection.tsx"; Marker = "PoetryCanvasEditor" },
   @{ File = "src/components/HomeIntroSection.tsx"; Marker = 'id="kuaihuo"' },
+  @{ File = "src/components/HomeIntroSection.tsx"; Marker = "PoetryStackDeck" },
+  @{ File = "src/components/HomeIntroSection.tsx"; Marker = "StickerPackSection" },
+  @{ File = "src/components/HomeIntroSection.tsx"; Marker = "HomeSkillsSection" },
   @{ File = "src/components/PoetryCanvasEditor.tsx"; Marker = "onUndo" },
   @{ File = "src/components/PoetryCanvasEditor.tsx"; Marker = "onRedo" },
-  @{ File = "src/components/DuomeiHeader.tsx"; Marker = 'to="/#kuaihuo"' },
+  @{ File = "src/components/DuomeiHeader.tsx"; Marker = 'to="/#color"' },
+  @{ File = "src/components/DuomeiHeader.tsx"; Marker = 'to="/#weiyan"' },
   @{ File = "src/components/DuomeiHeader.tsx"; Marker = 'to="/guyu"' },
+  @{ File = "src/components/DuomeiFooter.tsx"; Marker = 'to: "/#skills"' },
+  @{ File = "src/components/StickerPackSection.tsx"; Marker = "https://w.url.cn/s/ANJIS6e#wechat_redirect" },
+  @{ File = "src/components/StickerPackSection.tsx"; Marker = "https://w.url.cn/s/A5vPMKw#wechat_redirect" },
+  @{ File = "src/components/SkillsDirectory.tsx"; Marker = "pdf-to-immersive-flipbook" },
   @{ File = "src/App.tsx"; Marker = 'path="/guyu"' },
   @{ File = "src/App.tsx"; Marker = 'path="/guyu/:bookId"' },
   @{ File = "src/content/guyuBooks.ts"; Marker = 'Array.from({ length: 53 }' },

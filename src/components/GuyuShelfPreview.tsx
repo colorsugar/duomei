@@ -5,7 +5,7 @@ export function GuyuShelfPreview() {
   const book = guyuBooks[0];
 
   return (
-    <section className="guyu-home-shelf" aria-labelledby="guyu-home-shelf-title">
+    <section id="guyu" className="guyu-home-shelf" aria-labelledby="guyu-home-shelf-title">
       <header className="guyu-home-shelf-heading">
         <h2 id="guyu-home-shelf-title">故语</h2>
         <p>把旧日收好，等后来的人翻阅。</p>
@@ -25,7 +25,9 @@ export function GuyuShelfPreview() {
 
         <span className="guyu-home-work-copy">
           <span className="guyu-home-work-kind">同学录 · 旧册</span>
-          <strong>{book.title}</strong>
+          <strong className="guyu-title-phrases" aria-label={book.title}>
+            {book.title.split(/\s+/u).map((part) => <span key={part}>{part}</span>)}
+          </strong>
           <span>{book.description}</span>
           <span className="guyu-home-work-open">翻开这一本</span>
         </span>

@@ -39,7 +39,9 @@ export function DuomeiGuyuPage() {
                 </span>
                 <span className="guyu-book-meta">
                   <span className="guyu-book-kind">{book.kind} · 旧册</span>
-                  <strong>{book.title}</strong>
+                  <strong className="guyu-title-phrases" aria-label={book.title}>
+                    {book.title.split(/\s+/u).map((part) => <span key={part}>{part}</span>)}
+                  </strong>
                   <span>{book.description}</span>
                   <span className="guyu-book-open">翻阅</span>
                 </span>

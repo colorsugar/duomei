@@ -1,3 +1,4 @@
+/* Hallmark · pre-emit critique: P5 H4 E4 S5 R5 V4 · genre: editorial · macrostructure: Marquee Hero (preserved) · theme: inherited Warm Archive · enrichment: supplied sticker assets · nav: retained · footer: Ft2 · scoped slop: pass · contrast: pass (40–41) · mobile: pass (34, 49–57) */
 @font-face {
   font-family: "Duomei Handwriting";
   src: local("LXGW WenKai"), local("霞鹜文楷"), local("STKaiti"), local("KaiTi");
@@ -1418,4 +1419,508 @@
   .poetry-free-image { order: 3; flex: 1 1 0; min-height: 0; }
   .poetry-free-text.is-caption { order: 4; min-height: 48px; font-size: 0.78rem !important; }
   .poetry-free-edit { position: absolute; left: 18px; bottom: 18px; z-index: 60; }
+}
+
+/* Homepage additions keep the existing Warm Archive system and page rhythm. */
+.sticker-pack-section,
+.poetry-index,
+.duomei-home-skills {
+  position: relative;
+  z-index: var(--z-base);
+  inline-size: 100%;
+  min-inline-size: 0;
+}
+
+.sticker-pack-section {
+  display: grid;
+  gap: var(--space-2xl);
+  padding: var(--space-3xl) clamp(var(--space-md), 6vw, var(--space-3xl));
+  color: var(--color-ink);
+  background: var(--color-paper-2);
+}
+
+.sticker-pack-heading,
+.sticker-pack-list,
+.poetry-deck-heading,
+.poetry-deck-stage,
+.poetry-deck-controls {
+  inline-size: min(100%, var(--layout-wide));
+  margin-inline: auto;
+}
+
+.sticker-pack-heading,
+.poetry-deck-heading {
+  position: relative;
+  z-index: var(--z-sticky);
+  display: grid;
+  gap: var(--space-md);
+  min-inline-size: 0;
+}
+
+.sticker-pack-heading h2,
+.poetry-deck-heading h2,
+.duomei-home-skills-heading h2 {
+  min-inline-size: 0;
+  margin: 0;
+  color: var(--color-ink);
+  font-family: var(--font-display);
+  font-size: var(--text-display-s);
+  font-style: normal;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.035em;
+  text-wrap: balance;
+  overflow-wrap: anywhere;
+}
+
+.sticker-pack-heading p,
+.poetry-deck-heading p {
+  max-inline-size: var(--layout-reading);
+  margin: 0;
+  color: var(--color-muted-strong);
+  font-size: var(--text-base);
+  line-height: 1.65;
+}
+
+.sticker-pack-list {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: min(82vw, 42rem);
+  gap: var(--space-lg);
+  padding: 0 0 var(--space-md);
+  margin-block: 0;
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+  scroll-snap-type: inline mandatory;
+  scrollbar-width: thin;
+  list-style: none;
+}
+
+.sticker-pack-list > li {
+  min-inline-size: 0;
+  scroll-snap-align: start;
+}
+
+.sticker-pack-card {
+  position: relative;
+  display: grid;
+  gap: var(--space-lg);
+  min-block-size: 100%;
+  min-inline-size: 0;
+  padding: var(--space-lg);
+  overflow: hidden;
+  color: var(--color-ink);
+  background: var(--color-paper);
+  border: var(--rule-hairline) solid var(--color-rule);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-book-soft);
+}
+
+.sticker-pack-number {
+  position: absolute;
+  inset-block-start: var(--space-lg);
+  inset-inline-end: var(--space-lg);
+  z-index: var(--z-raised);
+  padding: var(--space-xs) var(--space-sm);
+  color: var(--color-muted-strong);
+  background: color-mix(in oklch, var(--color-paper) 88%, transparent);
+  border: var(--rule-hairline) solid var(--color-rule);
+  border-radius: var(--radius-pill);
+  font-size: var(--text-sm);
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.sticker-pack-preview {
+  min-inline-size: 0;
+  aspect-ratio: 837 / 1280;
+  margin: 0;
+  overflow: hidden;
+  background: var(--color-paper-3);
+  border-radius: calc(var(--radius-card) * 0.72);
+}
+
+.sticker-pack-preview img {
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: cover;
+}
+
+.sticker-pack-copy {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-content: end;
+  gap: var(--space-lg);
+  min-inline-size: 0;
+}
+
+.sticker-pack-copy > div:first-child {
+  align-self: end;
+  min-inline-size: 0;
+}
+
+.sticker-pack-copy > div:first-child > span {
+  color: var(--color-muted-strong);
+  font-size: var(--text-sm);
+}
+
+.sticker-pack-copy h3 {
+  min-inline-size: 0;
+  margin: var(--space-xs) 0 0;
+  font-family: var(--font-display);
+  font-size: clamp(var(--text-xl), 7vw, var(--text-2xl));
+  font-style: normal;
+  line-height: 1.05;
+  letter-spacing: -0.025em;
+  text-wrap: balance;
+  overflow-wrap: anywhere;
+}
+
+.sticker-pack-qr {
+  display: grid;
+  align-self: end;
+  justify-items: center;
+  gap: var(--space-xs);
+  inline-size: 5.5rem;
+  margin: 0;
+}
+
+.sticker-pack-qr img {
+  display: block;
+  inline-size: 100%;
+  block-size: auto;
+  border: var(--rule-hairline) solid var(--color-rule);
+}
+
+.sticker-pack-qr figcaption {
+  color: var(--color-muted-strong);
+  font-size: var(--text-xs);
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.sticker-pack-actions {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm) var(--space-lg);
+}
+
+.sticker-pack-actions a {
+  display: inline-flex;
+  min-block-size: var(--size-hit);
+  align-items: center;
+  color: var(--color-accent);
+  border-block-end: var(--rule-hairline) solid currentColor;
+  font-size: var(--text-sm);
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.sticker-pack-actions a:focus-visible,
+.poetry-deck-stage:focus-visible,
+.poetry-deck-controls button:focus-visible {
+  outline: var(--rule-focus) solid var(--color-focus);
+  outline-offset: var(--space-2xs);
+}
+
+.sticker-pack-actions a:active {
+  color: var(--color-ink);
+}
+
+.poetry-index {
+  display: grid;
+  gap: var(--space-xl);
+  margin-block-start: 0;
+  padding: var(--space-4xl) clamp(var(--space-md), 6vw, var(--space-3xl)) var(--space-3xl);
+  color: var(--poetry-ink);
+  background: var(--poetry-paper);
+}
+
+.poetry-index::before {
+  display: none;
+}
+
+.poetry-deck-stage {
+  position: relative;
+  block-size: clamp(38rem, 76svh, 47rem);
+  min-inline-size: 0;
+  overflow: clip;
+  background: var(--color-paper-3);
+  border: var(--rule-hairline) solid var(--color-rule);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-book);
+  isolation: isolate;
+}
+
+.poetry-deck-card {
+  position: absolute;
+  inset: 0;
+  min-inline-size: 0;
+  overflow: hidden;
+  background: var(--poetry-paper);
+  border-radius: inherit;
+  box-shadow: calc(var(--space-md) * -1) 0 var(--space-xl) color-mix(in oklch, var(--color-ink) 12%, transparent);
+  transform-origin: center left;
+}
+
+.poetry-deck-card.is-next {
+  border-inline-start: var(--rule-hairline) solid var(--color-rule);
+}
+
+.poetry-deck-media-layer {
+  display: contents;
+}
+
+.poetry-deck-card .poetry-work-panel.poetry-free-panel {
+  position: relative;
+  inset: auto;
+  block-size: 100%;
+  min-block-size: 0;
+  border: 0;
+  border-radius: inherit;
+}
+
+.poetry-deck-drag-surface {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  cursor: grab;
+  touch-action: pan-y;
+  user-select: none;
+}
+
+.poetry-deck-drag-surface:active {
+  cursor: grabbing;
+}
+
+.poetry-deck-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-sm) var(--space-lg);
+}
+
+.poetry-deck-controls button {
+  min-block-size: var(--size-hit);
+  padding: var(--space-sm) var(--space-md);
+  color: var(--color-ink);
+  background: transparent;
+  border: var(--rule-hairline) solid var(--color-rule);
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  font: inherit;
+  line-height: 1;
+  white-space: nowrap;
+  transition:
+    color var(--dur-short) var(--ease-out),
+    background-color var(--dur-short) var(--ease-out),
+    transform var(--dur-micro) var(--ease-out);
+}
+
+.poetry-deck-controls button:active:not(:disabled) {
+  transform: translateY(var(--rule-hairline));
+}
+
+.poetry-deck-controls button:disabled {
+  cursor: not-allowed;
+  opacity: 0.46;
+}
+
+.poetry-deck-controls > span {
+  color: var(--color-muted-strong);
+  font-size: var(--text-sm);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.poetry-deck-controls > span b {
+  color: var(--color-ink);
+  font-size: var(--text-base);
+  font-weight: 600;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .sticker-pack-actions a:hover,
+  .poetry-deck-controls button:hover:not(:disabled) {
+    color: var(--color-ink);
+  }
+
+  .poetry-deck-controls button:hover:not(:disabled) {
+    background: var(--color-paper-2);
+  }
+}
+
+@media (min-width: 48rem) {
+  .sticker-pack-section {
+    gap: var(--space-3xl);
+    padding-block: var(--space-4xl);
+  }
+
+  .sticker-pack-heading,
+  .poetry-deck-heading {
+    grid-template-columns: minmax(0, 0.72fr) minmax(0, 1.28fr);
+    align-items: end;
+    gap: var(--space-2xl);
+  }
+
+  .sticker-pack-heading p,
+  .poetry-deck-heading p {
+    font-size: var(--text-lg);
+  }
+
+  .sticker-pack-card {
+    grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr);
+    align-items: stretch;
+    gap: var(--space-xl);
+    padding: var(--space-xl);
+  }
+
+  .sticker-pack-copy {
+    grid-template-rows: minmax(0, 1fr) auto;
+  }
+
+  .sticker-pack-actions {
+    align-self: end;
+  }
+}
+
+@media (min-width: 64rem) {
+  .sticker-pack-list {
+    grid-auto-flow: row;
+    grid-auto-columns: auto;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-xl);
+    padding-block-end: 0;
+    overflow: visible;
+  }
+}
+
+@media (max-width: 48rem) {
+  .sticker-pack-section,
+  .poetry-index {
+    gap: var(--space-xl);
+    padding-block: var(--space-3xl);
+  }
+
+  .sticker-pack-heading,
+  .poetry-deck-heading {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .sticker-pack-list {
+    gap: var(--space-sm);
+    margin-inline-start: 0;
+    margin-inline-end: calc(var(--space-md) * -1);
+    padding-inline-end: var(--space-md);
+  }
+
+  .sticker-pack-card {
+    padding: var(--space-md);
+  }
+
+  .sticker-pack-number {
+    inset-block-start: var(--space-md);
+    inset-inline-end: var(--space-md);
+  }
+
+  .poetry-deck-stage {
+    block-size: clamp(34rem, calc(100svh - 7rem), 44rem);
+  }
+
+  .poetry-deck-card .poetry-work-panel.poetry-free-panel {
+    position: relative;
+    inset: auto;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+    block-size: 100%;
+    min-block-size: 0;
+    padding: var(--space-2xl) var(--space-md) var(--space-lg);
+    overflow: hidden;
+  }
+
+  .poetry-deck-card .poetry-free-index {
+    inset-block-start: var(--space-lg);
+    inset-inline-end: var(--space-lg);
+  }
+
+  .poetry-deck-card .poetry-free-text.is-title {
+    min-block-size: 3.5rem;
+    font-size: clamp(2rem, 11vw, 3.5rem) !important;
+  }
+
+  .poetry-deck-card .poetry-free-text.is-poem {
+    min-block-size: clamp(8.75rem, 23svh, 12.5rem);
+    padding-inline-end: calc(var(--size-hit) + var(--space-sm));
+    font-size: clamp(1.15rem, 5.4vw, 1.75rem) !important;
+  }
+
+  .poetry-deck-card .poetry-deck-media-layer {
+    order: 3;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-rows: repeat(2, minmax(0, 1fr));
+    gap: var(--space-2xs);
+    flex: 1 1 9rem;
+    min-block-size: 8rem;
+    overflow: hidden;
+  }
+
+  .poetry-deck-card .poetry-deck-media-layer.is-count-1 {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr);
+  }
+
+  .poetry-deck-card .poetry-deck-media-layer.is-count-2 {
+    grid-template-rows: minmax(0, 1fr);
+  }
+
+  .poetry-deck-card .poetry-deck-media-layer.is-count-3 .poetry-free-image:first-child {
+    grid-row: 1 / -1;
+  }
+
+  .poetry-deck-card .poetry-deck-media-layer .poetry-free-image {
+    position: relative !important;
+    inset: auto !important;
+    inline-size: auto !important;
+    block-size: auto !important;
+    min-inline-size: 0;
+    min-block-size: 0;
+  }
+
+  .poetry-deck-card .poetry-free-text.is-caption {
+    min-block-size: 2.5rem;
+    font-size: var(--text-xs) !important;
+  }
+
+  .poetry-deck-controls {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    gap: var(--space-sm);
+  }
+
+  .poetry-deck-controls button {
+    justify-self: stretch;
+    padding-inline: var(--space-sm);
+  }
+
+  .poetry-deck-controls button:nth-of-type(2):not(:last-child) {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+
+  .poetry-deck-controls > span {
+    justify-self: center;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .poetry-deck-controls button,
+  .sticker-pack-actions a {
+    transition-duration: var(--dur-micro);
+  }
 }

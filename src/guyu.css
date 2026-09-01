@@ -194,7 +194,7 @@ body {
 
 .guyu-library-page {
   min-block-size: 100svh;
-  padding: var(--space-4xl) clamp(var(--space-md), 5vw, var(--space-2xl)) var(--space-3xl);
+  padding: var(--space-4xl) clamp(var(--space-md), 5vw, var(--space-2xl)) var(--space-xl);
 }
 
 .guyu-library-intro,
@@ -343,6 +343,19 @@ body {
   font-style: normal;
   line-height: 1.2;
   overflow-wrap: anywhere;
+}
+
+.guyu-title-phrases {
+  display: grid;
+  row-gap: 0.06em;
+  min-inline-size: 0;
+  overflow-wrap: normal !important;
+  word-break: keep-all;
+}
+
+.guyu-title-phrases > span {
+  min-inline-size: 0;
+  white-space: nowrap;
 }
 
 .guyu-book-meta > span:not(.guyu-book-kind):not(.guyu-book-open) {

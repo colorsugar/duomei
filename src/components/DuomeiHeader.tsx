@@ -10,6 +10,7 @@ export function DuomeiHeader() {
   const [scrolled, setScrolled] = useState(false);
   const [hoverRevealed, setHoverRevealed] = useState(false);
   const menuTouchStartRef = useRef<{ x: number; y: number } | null>(null);
+  const pendingTouchActivationRef = useRef<number | null>(null);
   const lastTouchActivationRef = useRef(0);
   const navigate = useNavigate();
   const location = useLocation();
@@ -29,6 +30,12 @@ export function DuomeiHeader() {
     setMenuOpen(false);
     setHoverRevealed(false);
   }, [location.hash, location.key, location.pathname, location.search]);
+
+  useEffect(() => () => {
+    if (pendingTouchActivationRef.current !== null) {
+      window.cancelAnimationFrame(pendingTouchActivationRef.current);
+    }
+  }, []);
 
   const closeMenu = () => {
     setMenuOpen(false);
@@ -94,28 +101,42 @@ export function DuomeiHeader() {
     if (!target || !event.currentTarget.contains(target)) return;
 
     // iOS Safari can leave :hover active and suppress the compatibility click.
-    // Activate the settled target directly after a genuine, non-drag touch.
+    // Activate after touchend returns so the synthetic click has its own event cycle.
     event.preventDefault();
-    lastTouchActivationRef.current = window.performance.now();
-    target.click();
+    if (pendingTouchActivationRef.current !== null) {
+      window.cancelAnimationFrame(pendingTouchActivationRef.current);
+    }
+    pendingTouchActivationRef.current = window.requestAnimationFrame(() => {
+      pendingTouchActivationRef.current = null;
+      if (!target.isConnected) return;
+      target.click();
+      lastTouchActivationRef.current = window.performance.now();
+    });
   };
 
   const blockDuplicateTouchClick = (event: React.MouseEvent<HTMLElement>) => {
-    if (!event.nativeEvent.isTrusted || window.performance.now() - lastTouchActivationRef.current > 700) return;
+    if (!event.nativeEvent.isTrusted) return;
+    if (pendingTouchActivationRef.current !== null) {
+      window.cancelAnimationFrame(pendingTouchActivationRef.current);
+      pendingTouchActivationRef.current = null;
+      return;
+    }
+    if (window.performance.now() - lastTouchActivationRef.current > 700) return;
     event.preventDefault();
     event.stopPropagation();
   };
 
-  const goKuaihuo = (event: React.MouseEvent<HTMLAnchorElement>) => {
+  const goHomeSection = (event: React.MouseEvent<HTMLAnchorElement>, sectionId: string) => {
     event.preventDefault();
     closeMenu();
-    const scroll = () => document.getElementById("kuaihuo")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    clearJourneyListState();
+    const scroll = () => document.getElementById(sectionId)?.scrollIntoView({ behavior: "smooth", block: "start" });
     if (location.pathname !== "/") {
-      navigate("/#kuaihuo");
+      navigate(`/#${sectionId}`);
       window.setTimeout(scroll, 80);
       return;
     }
-    window.history.replaceState(null, "", `${window.location.pathname}${window.location.search}#kuaihuo`);
+    window.history.replaceState(null, "", `${window.location.pathname}${window.location.search}#${sectionId}`);
     scroll();
   };
 
@@ -175,7 +196,10 @@ export function DuomeiHeader() {
         <Link to="/guyu" onClick={closeMenu}>
           故语
         </Link>
-        <Link to="/#kuaihuo" onClick={goKuaihuo}>
+        <Link to="/#color" onClick={(event) => goHomeSection(event, "color")}>
+          颜色
+        </Link>
+        <Link to="/#weiyan" onClick={(event) => goHomeSection(event, "weiyan")}>
           微言
         </Link>
         <Link to="/skills" onClick={closeMenu}>
