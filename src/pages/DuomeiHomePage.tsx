@@ -26,7 +26,7 @@ function HomeSectionProgress() {
     let frame = 0;
     const update = () => {
       frame = 0;
-      const anchor = window.scrollY + window.innerHeight * 0.46;
+      const viewportTop = window.scrollY;
       const boundaries = homeProgressSections.map((section) => ({
         ...section,
         top: section.id === "home"
@@ -34,13 +34,15 @@ function HomeSectionProgress() {
           : (document.getElementById(section.id)?.getBoundingClientRect().top ?? Number.POSITIVE_INFINITY) + window.scrollY,
       }));
       const footerTop = (document.querySelector<HTMLElement>(".duomei-footer")?.getBoundingClientRect().top ?? Number.POSITIVE_INFINITY) + window.scrollY;
+      const activationLine = viewportTop + Math.min(72, window.innerHeight * 0.1);
       let activeIndex = 0;
       for (let index = 1; index < boundaries.length; index += 1) {
-        if (boundaries[index].top <= anchor) activeIndex = index;
+        if (boundaries[index].top <= activationLine) activeIndex = index;
       }
       const current = boundaries[activeIndex];
       const nextTop = boundaries[activeIndex + 1]?.top ?? footerTop;
-      const sectionProgress = Math.min(1, Math.max(0, (anchor - current.top) / Math.max(1, nextTop - current.top)));
+      const holdDistance = Math.max(1, nextTop - current.top - window.innerHeight);
+      const sectionProgress = Math.min(1, Math.max(0, (viewportTop - current.top) / holdDistance));
       progressRef.current?.style.setProperty("--home-section-progress", String(sectionProgress));
       setActiveLabel(current.label);
       setVisible(window.scrollY > 48 && window.scrollY + window.innerHeight < footerTop);

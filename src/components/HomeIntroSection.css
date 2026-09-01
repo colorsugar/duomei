@@ -1395,6 +1395,7 @@
 .sticker-pack-section {
   display: grid;
   gap: var(--space-2xl);
+  min-block-size: 130svh;
   padding: var(--space-3xl) clamp(var(--space-md), 6vw, var(--space-3xl));
   color: var(--color-ink);
   background: var(--color-paper-2);
