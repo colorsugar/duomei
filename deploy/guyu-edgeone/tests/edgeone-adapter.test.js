@@ -48,6 +48,7 @@ test("EdgeOne adapter reads Makers environment variables from process.env", asyn
   Object.assign(process.env, env);
   try {
     const response = await handleEdgeOneRequest({
+      env: {},
       request: new Request("https://duomei.site/api/guyu-auth"),
     }, {
       downloadFile: async () => assert.fail("storage must not be touched"),

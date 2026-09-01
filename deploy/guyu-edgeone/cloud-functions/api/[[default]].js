@@ -30,7 +30,7 @@ function toResponse(result) {
 }
 
 export async function handleEdgeOneRequest(context, overrides = {}) {
-  const env = context.env || process.env;
+  const env = { ...process.env, ...(context.env || {}) };
   let downloadFile = overrides.downloadFile;
   let createUploadUrl = overrides.createUploadUrl;
 
