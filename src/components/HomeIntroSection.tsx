@@ -190,6 +190,8 @@ function PortalTitle({ progress }: { progress: ReturnType<typeof useSpring> }) {
 }
 
 const poetryEase = [0.16, 1, 0.3, 1] as const;
+const poetryDeckCompactPeek = 16;
+const poetryDeckWidePeek = 52;
 
 function poetryEffectState(effect: TimePoetryEffect, visible: boolean, reverse: boolean, reducedMotion: boolean) {
   if (visible || reducedMotion || effect === "none") {
@@ -360,7 +362,7 @@ function PoetryStackDeck({
   const activeIndex = resolvedActiveIndex >= 0
     ? resolvedActiveIndex
     : Math.min(activeIndexRef.current, Math.max(0, pages.length - 1));
-  const peekSize = stageWidth <= 760 ? 44 : 76;
+  const peekSize = stageWidth <= 760 ? poetryDeckCompactPeek : poetryDeckWidePeek;
   const nextRestX = Math.max(0, stageWidth - peekSize);
   const hasPrevious = activeIndex > 0;
   const hasNext = activeIndex < pages.length - 1;
@@ -372,7 +374,7 @@ function PoetryStackDeck({
       const width = stage.getBoundingClientRect().width;
       setStageWidth(width);
       currentX.set(0);
-      nextX.set(Math.max(0, width - (width <= 760 ? 44 : 76)));
+      nextX.set(Math.max(0, width - (width <= 760 ? poetryDeckCompactPeek : poetryDeckWidePeek)));
     };
     update();
     const observer = new ResizeObserver(update);

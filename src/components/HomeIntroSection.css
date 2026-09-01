@@ -1667,7 +1667,12 @@
 }
 
 .poetry-deck-card.is-next {
+  background: var(--poetry-paper-deep);
   border-inline-start: var(--rule-hairline) solid var(--color-rule);
+}
+
+.poetry-deck-card.is-next .poetry-work-panel.poetry-free-panel {
+  background: var(--poetry-paper-deep);
 }
 
 .poetry-deck-media-layer {
@@ -1855,7 +1860,7 @@
 
   .poetry-deck-card .poetry-free-text.is-poem {
     min-block-size: clamp(8.75rem, 23svh, 12.5rem);
-    padding-inline-end: calc(var(--size-hit) + var(--space-sm));
+    padding-inline-end: var(--space-xl);
     font-size: clamp(1.15rem, 5.4vw, 1.75rem) !important;
   }
 
