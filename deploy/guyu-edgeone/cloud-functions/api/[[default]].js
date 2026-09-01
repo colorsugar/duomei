@@ -1,13 +1,7 @@
-import COS from "cos-nodejs-sdk-v5";
+import { getStore } from "@edgeone/pages-blob";
 import core from "../../server/guyu-core.cjs";
 
-const { createHandler } = core;
-
-function required(env, name) {
-  const value = env?.[name];
-  if (typeof value !== "string" || !value) throw new Error(`${name} is not configured`);
-  return value;
-}
+const { createHandler, STORAGE_NAMESPACE } = core;
 
 async function toEvent(request) {
   const url = new URL(request.url);
@@ -36,33 +30,32 @@ function toResponse(result) {
 }
 
 export async function handleEdgeOneRequest(context, overrides = {}) {
-  const env = context.env || {};
+  const env = context.env || process.env;
   let downloadFile = overrides.downloadFile;
+  let createUploadUrl = overrides.createUploadUrl;
 
-  if (!downloadFile) {
+  if (!downloadFile || !createUploadUrl) {
     try {
-      const cos = new COS({
-        SecretId: required(env, "TENCENTCLOUD_SECRETID"),
-        SecretKey: required(env, "TENCENTCLOUD_SECRETKEY"),
-      });
-      downloadFile = async (objectKey) => new Promise((resolve, reject) => {
-        cos.getObject({
-          Bucket: required(env, "GUYU_COS_BUCKET"),
-          Region: required(env, "GUYU_COS_REGION"),
-          Key: objectKey,
-        }, (error, data) => {
-          if (error) reject(error);
-          else resolve(data?.Body);
+      const store = getStore(STORAGE_NAMESPACE);
+      if (!downloadFile) {
+        downloadFile = async (objectKey) => {
+          const content = await store.get(objectKey, { type: "arrayBuffer" });
+          return content == null ? null : Buffer.from(content);
+        };
+      }
+      if (!createUploadUrl) {
+        createUploadUrl = async (objectKey) => store.createUploadUrl(objectKey, {
+          expireSeconds: 300,
+          contentType: "image/webp",
         });
-      });
+      }
     } catch {
-      downloadFile = async () => {
-        throw new Error("private storage is not configured");
-      };
+      if (!downloadFile) downloadFile = async () => { throw new Error("private storage is not configured"); };
+      if (!createUploadUrl) createUploadUrl = async () => { throw new Error("private storage is not configured"); };
     }
   }
 
-  const handler = createHandler({ downloadFile, env });
+  const handler = createHandler({ downloadFile, createUploadUrl, env });
   return toResponse(await handler(await toEvent(context.request)));
 }
 

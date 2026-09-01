@@ -26,8 +26,8 @@
 - `cloud-functions/api/[[default]].js` 在 Makers Node.js Cloud Functions 中运行，`edgeone.json` 将海外函数地域固定为 `ap-singapore`。
 - 页面和 `/api/guyu-auth`、`/api/guyu-page` 保持同源；密码答案只发送给云函数。
 - 答案使用 PBKDF2-SHA256（210,000 次）摘要，成功后仅下发 `HttpOnly; Secure; SameSite=Strict` 会话 Cookie。
-- 云函数鉴权后只读取新加坡私有 COS 固定路径 `private-media/guyu/meiyou-yujian/pages/001.webp`—`053.webp`，不向前端暴露 COS URL 或签名 URL。
-- 原稿、答案、Cookie、COS 密钥和会话密钥均不进入 Git、静态目录或 `edgeone.json`。
+- 云函数鉴权后只读取 EdgeOne Pages Blob 的 `guyu-private` 命名空间固定路径 `private-media/guyu/meiyou-yujian/pages/001.webp`—`053.webp`，不向前端暴露 Blob URL。
+- 原稿、答案、Cookie、上传密钥和会话密钥均不进入 Git、静态目录或 `edgeone.json`。
 - Supabase 项目标识不是站点源站；任何现有业务调用继续使用原有 Supabase 配置，本独立画册页面不引入 `service_role` 或改写 Auth。
 
 ## 获得腾讯云授权后的步骤
@@ -45,20 +45,17 @@ edgeone whoami
 
 若使用短期 API Token，只在 Makers 控制台的 API Token 页面创建并设置过期时间，通过本机 `EDGEONE_API_TOKEN` 或 CLI `-t` 参数传入；不得写入仓库、聊天或命令历史。
 
-1. 登录 EdgeOne Makers，新建项目 `guyu-duomei-site-candidate`，项目根目录选择本目录。也可在本目录执行 `edgeone makers link` 关联这个全新项目。构建配置由 `edgeone.json` 提供：`npm ci`、`npm run build`、输出 `dist`、Node 22.11.0。
+1. 登录 EdgeOne Makers，新建项目 `guyu-duomei-site-candidate`，项目根目录选择本目录。也可在本目录执行 `edgeone makers link` 关联这个全新项目。构建配置由 `edgeone.json` 提供：`npm ci`、`npm run build`、输出 `dist`、Node 22.17.1。
 2. 加速区域只选“全球可用区（不含中国大陆）”。不得选择“中国大陆可用区”或包含中国大陆的全球区。
-3. 在新加坡准备一个全新私有 COS Bucket。仅在另行确认允许复制原稿后，把 53 页上传到固定私有前缀；不迁移、不删除任何现有原稿。
-4. 新建专用 CAM 子账号或密钥，只授予该 Bucket 固定前缀的 `cos:GetObject`，并把下列值配置到 Makers 项目环境变量/Secret：
+3. 在 EdgeOne Makers 项目中触发一次 Blob 请求，确认 `guyu-private` 命名空间已创建。仅在另行确认允许复制原稿后，把 53 页上传到固定私有前缀；不迁移、不删除任何现有原稿。
+4. 把下列值配置到 Makers 项目环境变量/Secret；Blob 不需要 COS/CAM 密钥：
 
    ```text
    GUYU_ANSWER_SALT
    GUYU_ANSWER_HASH
    GUYU_SESSION_SECRET
    GUYU_STORAGE_PREFIX=private-media/guyu/meiyou-yujian/pages
-   GUYU_COS_BUCKET=新候选Bucket完整名称
-   GUYU_COS_REGION=ap-singapore
-   TENCENTCLOUD_SECRETID
-   TENCENTCLOUD_SECRETKEY
+   GUYU_UPLOAD_SECRET=临时迁移密钥（仅用于上传接口）
    ```
 
    前三个值由 `node scripts/generate-secrets.mjs` 在本地生成。不要把输出粘贴到聊天、Git、构建日志或普通环境变量；密钥必须使用平台 Secret。

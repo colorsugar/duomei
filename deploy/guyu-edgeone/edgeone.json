@@ -3,7 +3,7 @@
   "installCommand": "npm ci",
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
-  "nodeVersion": "22.11.0",
+  "nodeVersion": "22.17.1",
   "rewrites": [
     {
       "source": "/*",
@@ -27,9 +27,9 @@
     }
   ],
   "cloudFunctions": {
-    "overseasRegions": ["ap-singapore"],
-    "nodejs": {
-      "maxDuration": 30
-    }
+    "regions": {
+      "overseas": ["ap-singapore"]
+    },
+    "maxDuration": 30
   }
 }
