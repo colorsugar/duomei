@@ -11829,6 +11829,12 @@ html.duomei-modal-open .duomei-companion {
 
 /* On touch screens, sticky hover/focus must never reopen a menu whose state is closed. */
 @media (max-width: 760px) {
+  .duomei-header nav a,
+  .duomei-header nav button {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+
   .duomei-header:not(.is-menu-open) nav {
     opacity: 0 !important;
     visibility: hidden !important;
@@ -11839,7 +11845,27 @@ html.duomei-modal-open .duomei-companion {
   .duomei-header:not(.is-menu-open) nav a,
   .duomei-header:not(.is-menu-open) nav button {
     opacity: 0 !important;
+    pointer-events: none !important;
     transform: translate3d(12px, -4px, 0) scale(0.96) !important;
+  }
+
+  .duomei-header.is-menu-open nav a,
+  .duomei-header.is-menu-open nav button {
+    pointer-events: auto !important;
+  }
+}
+
+@media (max-width: 760px) and (hover: none), (max-width: 760px) and (pointer: coarse) {
+  .duomei-header nav a,
+  .duomei-header nav button {
+    transition:
+      background 180ms ease,
+      border-color 180ms ease,
+      box-shadow 180ms ease !important;
+  }
+
+  .duomei-header.is-menu-open nav > * {
+    transition-delay: 0ms !important;
   }
 }
 
