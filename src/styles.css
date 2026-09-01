@@ -12532,23 +12532,15 @@ html.duomei-modal-open .duomei-companion {
 }
 
 @media (max-width: 760px) {
-  html {
-    scroll-padding-bottom: calc(4.75rem + env(safe-area-inset-bottom));
-  }
-
   .duomei-footer {
     grid-template-columns: minmax(0, 1fr);
     grid-template-areas:
       "brand"
-      "copy"
-      "nav";
+      "nav"
+      "copy";
     width: calc(100% - (var(--space-md) * 2));
     gap: var(--space-lg);
-    padding-block: var(--space-xl) calc(6.5rem + env(safe-area-inset-bottom));
-  }
-
-  .back-to-top {
-    display: none !important;
+    padding-block: var(--space-xl) var(--space-2xl);
   }
 
   .duomei-footer .duomei-footer-copy {
@@ -12558,24 +12550,22 @@ html.duomei-modal-open .duomei-companion {
   }
 
   .duomei-quick-nav {
-    position: fixed;
-    inset: auto 0 0;
-    z-index: var(--z-sticky);
-    padding:
-      var(--space-xs)
-      max(var(--space-xs), env(safe-area-inset-right))
-      calc(var(--space-xs) + env(safe-area-inset-bottom))
-      max(var(--space-xs), env(safe-area-inset-left));
-    background: color-mix(in oklch, var(--color-paper) 94%, transparent);
+    position: static;
+    justify-self: stretch;
+    inline-size: 100%;
+    max-inline-size: none;
+    margin: 0;
+    padding-block: var(--space-lg) 0;
+    background: transparent;
     border-block-start: var(--rule-hairline) solid var(--color-rule);
-    box-shadow: 0 calc(var(--space-sm) * -1) var(--space-xl) color-mix(in oklch, var(--color-ink) 8%, transparent);
-    backdrop-filter: blur(14px);
+    box-shadow: none;
+    backdrop-filter: none;
   }
 
   .duomei-quick-nav ul {
     display: grid;
-    grid-template-columns: repeat(6, minmax(0, 1fr));
-    gap: var(--space-2xs);
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--space-sm) var(--space-md);
   }
 
   .duomei-quick-nav a {
@@ -12586,11 +12576,5 @@ html.duomei-modal-open .duomei-companion {
     color: var(--color-ink);
     font-size: var(--text-xs);
     text-align: center;
-  }
-
-  body.front-editing .duomei-quick-nav,
-  body.duomei-modal-open .duomei-quick-nav,
-  html.duomei-modal-open .duomei-quick-nav {
-    display: none;
   }
 }
