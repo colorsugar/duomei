@@ -799,8 +799,6 @@ export function HomeIntroSection({ canCreate }: HomeIntroSectionProps) {
   const legacyY = useTransform(progress, [0.08, 0.4], ["0%", compact ? "0%" : "3%"]);
   const sceneY = useTransform(progress, compact ? [0.76, 1] : [0.84, 1], compact ? ["0%", "-54%"] : ["0%", "-106%"]);
   const sceneOpacity = useTransform(progress, compact ? [0.9, 1] : [0.965, 1], compact ? [1, 0.22] : [1, 0]);
-  const progressOpacity = useTransform(progress, compact ? [0.86, 0.98] : [0.93, 0.995], [1, 0]);
-  const progressScale = useTransform(progress, [0, 1], [0, 1]);
 
   useEffect(() => {
     if (editorIndex === null) savePoetryPages(pages);
@@ -924,11 +922,6 @@ export function HomeIntroSection({ canCreate }: HomeIntroSectionProps) {
               <DreamCard />
             </motion.div>
             <PortalTitle progress={progress} />
-          </motion.div>
-          <motion.div className="poetry-scroll-progress" style={{ opacity: progressOpacity }} aria-hidden="true">
-            <span>进入</span>
-            <i><motion.b style={{ scaleX: progressScale }} /></i>
-            <span>诗词</span>
           </motion.div>
         </div>
       </section>

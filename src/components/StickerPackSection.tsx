@@ -1,3 +1,5 @@
+import { useState } from "react";
+
 const stickerPacks = [
   {
     index: "01",
@@ -19,7 +21,49 @@ const stickerPacks = [
   },
 ] as const;
 
+async function copyText(value: string) {
+  if (navigator.clipboard && window.isSecureContext) {
+    try {
+      await navigator.clipboard.writeText(value);
+      return;
+    } catch {
+      // Fall through for browsers that expose Clipboard but block the write.
+    }
+  }
+
+  const textarea = document.createElement("textarea");
+  textarea.value = value;
+  textarea.readOnly = true;
+  textarea.style.position = "fixed";
+  textarea.style.opacity = "0";
+  textarea.style.pointerEvents = "none";
+  document.body.append(textarea);
+
+  let copied = false;
+  try {
+    textarea.focus();
+    textarea.select();
+    textarea.setSelectionRange(0, value.length);
+    copied = document.execCommand("copy");
+  } finally {
+    textarea.remove();
+  }
+
+  if (!copied) throw new Error("copy failed");
+}
+
 export function StickerPackSection() {
+  const [copyStatus, setCopyStatus] = useState<{ name: string; copied: boolean } | null>(null);
+
+  const handleCopy = async (name: string, installUrl: string) => {
+    try {
+      await copyText(installUrl);
+      setCopyStatus({ name, copied: true });
+    } catch {
+      setCopyStatus({ name, copied: false });
+    }
+  };
+
   return (
     <section className="sticker-pack-section" id="color" aria-labelledby="sticker-pack-title">
       <header className="sticker-pack-heading">
@@ -62,8 +106,15 @@ export function StickerPackSection() {
                 </figure>
 
                 <div className="sticker-pack-actions">
-                  <a href={pack.installUrl} target="_blank" rel="noreferrer">打开微信表情</a>
+                  <button type="button" onClick={() => void handleCopy(pack.name, pack.installUrl)}>
+                    {copyStatus?.name === pack.name && copyStatus.copied ? "链接已复制" : "复制微信链接"}
+                  </button>
                   <a href={pack.qrSrc} download={pack.downloadName}>保存二维码</a>
+                  <p className="sticker-pack-copy-help" role="status" aria-live="polite">
+                    {copyStatus?.name === pack.name && !copyStatus.copied
+                      ? "复制失败，请再试一次。"
+                      : "复制后，请到微信内粘贴并打开。"}
+                  </p>
                 </div>
               </div>
             </article>

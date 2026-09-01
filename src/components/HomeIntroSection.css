@@ -127,37 +127,6 @@
   margin-top: 1.4em;
 }
 
-.poetry-scroll-progress {
-  position: absolute;
-  z-index: 8;
-  left: 4vw;
-  right: 4vw;
-  bottom: clamp(20px, 3svh, 34px);
-  display: grid;
-  grid-template-columns: auto minmax(80px, 1fr) auto;
-  align-items: center;
-  gap: 16px;
-  color: var(--poetry-muted);
-  font: 600 0.64rem/1 Arial, sans-serif;
-  letter-spacing: 0.16em;
-}
-
-.poetry-scroll-progress i {
-  position: relative;
-  display: block;
-  height: 1px;
-  overflow: hidden;
-  background: rgba(31, 31, 27, 0.16);
-}
-
-.poetry-scroll-progress b {
-  position: absolute;
-  inset: 0;
-  display: block;
-  background: var(--poetry-ink);
-  transform-origin: left center;
-}
-
 .poetry-index {
   position: relative;
   z-index: 4;
@@ -665,13 +634,6 @@
     font-size: clamp(1.15rem, 4.9vw, 1.8rem);
   }
 
-  .poetry-scroll-progress {
-    left: 5vw;
-    right: 5vw;
-    bottom: 18px;
-    gap: 10px;
-  }
-
   .poetry-work-panel,
   .poetry-work-panel.is-reverse {
     display: grid;
@@ -761,8 +723,7 @@
 
   .poetry-portal-paper,
   .poetry-legacy-frame,
-  .poetry-portal-title,
-  .poetry-scroll-progress b {
+  .poetry-portal-title {
     transform: none !important;
     opacity: 1 !important;
     clip-path: none !important;
@@ -1608,26 +1569,43 @@
   gap: var(--space-sm) var(--space-lg);
 }
 
-.sticker-pack-actions a {
+.sticker-pack-actions a,
+.sticker-pack-actions button {
   display: inline-flex;
   min-block-size: var(--size-hit);
   align-items: center;
+  padding: 0;
   color: var(--color-accent);
+  appearance: none;
+  background: none;
+  border: 0;
   border-block-end: var(--rule-hairline) solid currentColor;
+  cursor: pointer;
+  font-family: inherit;
   font-size: var(--text-sm);
   line-height: 1;
   white-space: nowrap;
 }
 
 .sticker-pack-actions a:focus-visible,
+.sticker-pack-actions button:focus-visible,
 .poetry-deck-stage:focus-visible,
 .poetry-deck-controls button:focus-visible {
   outline: var(--rule-focus) solid var(--color-focus);
   outline-offset: var(--space-2xs);
 }
 
-.sticker-pack-actions a:active {
+.sticker-pack-actions a:active,
+.sticker-pack-actions button:active {
   color: var(--color-ink);
+}
+
+.sticker-pack-copy-help {
+  flex: 0 0 100%;
+  margin: calc(var(--space-xs) * -1) 0 0;
+  color: var(--color-muted-strong);
+  font-size: var(--text-xs);
+  line-height: 1.6;
 }
 
 .poetry-index {
@@ -1750,6 +1728,7 @@
 
 @media (hover: hover) and (pointer: fine) {
   .sticker-pack-actions a:hover,
+  .sticker-pack-actions button:hover,
   .poetry-deck-controls button:hover:not(:disabled) {
     color: var(--color-ink);
   }

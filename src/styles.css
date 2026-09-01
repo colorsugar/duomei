@@ -12305,7 +12305,7 @@ html.duomei-modal-open .duomei-companion {
     backdrop-filter 360ms ease !important;
 }
 
-.duomei-header.is-scrolled:not(.is-hover-revealed):not(.is-menu-open):not(:focus-within) {
+.duomei-header.is-scrolled.is-scroll-hidden:not(.is-hover-revealed):not(.is-menu-open):not(:focus-within) {
   transform: translate3d(0, calc(-100% + 12px), 0) !important;
   background: transparent !important;
   box-shadow: none !important;
@@ -12576,5 +12576,81 @@ html.duomei-modal-open .duomei-companion {
     color: var(--color-ink);
     font-size: var(--text-xs);
     text-align: center;
+  }
+}
+
+.duomei-header.is-scroll-visible,
+.duomei-header.is-menu-open,
+.duomei-header:focus-within {
+  transform: translate3d(0, 0, 0) !important;
+}
+
+.home-section-progress {
+  --home-section-progress: 0;
+  position: fixed;
+  inset: auto clamp(var(--space-lg), 4vw, var(--space-2xl)) var(--space-lg);
+  z-index: 62;
+  display: grid;
+  grid-template-columns: auto minmax(5rem, 1fr) auto;
+  align-items: center;
+  gap: var(--space-md);
+  color: var(--color-muted-strong);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: 0.12em;
+  opacity: 0;
+  pointer-events: none;
+  transform: translate3d(0, var(--space-sm), 0);
+  transition:
+    opacity var(--dur-short) var(--ease-out),
+    transform var(--dur-short) var(--ease-out);
+}
+
+.home-section-progress.is-visible {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+}
+
+.home-section-progress i {
+  position: relative;
+  display: block;
+  block-size: var(--rule-hairline);
+  overflow: hidden;
+  background: var(--color-rule);
+}
+
+.home-section-progress b {
+  position: absolute;
+  inset: 0;
+  display: block;
+  background: var(--color-ink);
+  transform: scaleX(var(--home-section-progress));
+  transform-origin: left center;
+}
+
+.home-section-progress strong {
+  color: var(--color-muted-strong);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+body.front-editing .home-section-progress,
+body.duomei-modal-open .home-section-progress,
+html.duomei-modal-open .home-section-progress {
+  display: none;
+}
+
+@media (max-width: 760px) {
+  .home-section-progress {
+    inset-inline: var(--space-lg);
+    inset-block-end: var(--space-md);
+    gap: var(--space-sm);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home-section-progress {
+    transition: none;
   }
 }

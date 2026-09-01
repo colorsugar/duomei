@@ -9,33 +9,45 @@ export function DuomeiHeader() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [hoverRevealed, setHoverRevealed] = useState(false);
-  const menuTouchStartRef = useRef<{ x: number; y: number } | null>(null);
-  const pendingTouchActivationRef = useRef<number | null>(null);
-  const lastTouchActivationRef = useRef(0);
+  const [scrollRevealed, setScrollRevealed] = useState(true);
+  const lastScrollYRef = useRef(typeof window === "undefined" ? 0 : window.scrollY);
+  const scrollFrameRef = useRef(0);
   const navigate = useNavigate();
   const location = useLocation();
 
   useEffect(() => {
     const update = () => {
+      scrollFrameRef.current = 0;
+      const currentScrollY = window.scrollY;
       const nextScrolled = window.scrollY > 36;
       setScrolled(nextScrolled);
-      if (!nextScrolled) setHoverRevealed(false);
+      if (!nextScrolled) {
+        setHoverRevealed(false);
+        setScrollRevealed(true);
+      } else if (currentScrollY - lastScrollYRef.current > 6) {
+        setScrollRevealed(false);
+      } else if (lastScrollYRef.current - currentScrollY > 6) {
+        setScrollRevealed(true);
+      }
+      lastScrollYRef.current = currentScrollY;
+    };
+    const onScroll = () => {
+      if (scrollFrameRef.current) return;
+      scrollFrameRef.current = window.requestAnimationFrame(update);
     };
     update();
-    window.addEventListener("scroll", update, { passive: true });
-    return () => window.removeEventListener("scroll", update);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      if (scrollFrameRef.current) window.cancelAnimationFrame(scrollFrameRef.current);
+      window.removeEventListener("scroll", onScroll);
+    };
   }, []);
 
   useEffect(() => {
     setMenuOpen(false);
     setHoverRevealed(false);
+    setScrollRevealed(true);
   }, [location.hash, location.key, location.pathname, location.search]);
-
-  useEffect(() => () => {
-    if (pendingTouchActivationRef.current !== null) {
-      window.cancelAnimationFrame(pendingTouchActivationRef.current);
-    }
-  }, []);
 
   const closeMenu = () => {
     setMenuOpen(false);
@@ -79,72 +91,11 @@ export function DuomeiHeader() {
     closeMenu();
   };
 
-  const beginMenuTouch = (event: React.TouchEvent<HTMLElement>) => {
-    if (event.touches.length !== 1) {
-      menuTouchStartRef.current = null;
-      return;
-    }
-
-    const touch = event.touches[0];
-    menuTouchStartRef.current = { x: touch.clientX, y: touch.clientY };
-  };
-
-  const finishMenuTouch = (event: React.TouchEvent<HTMLElement>) => {
-    const start = menuTouchStartRef.current;
-    menuTouchStartRef.current = null;
-    const touch = event.changedTouches[0];
-    if (!start || !touch || Math.hypot(touch.clientX - start.x, touch.clientY - start.y) > 10) return;
-
-    const target = event.target instanceof Element
-      ? event.target.closest<HTMLAnchorElement | HTMLButtonElement>("a, button")
-      : null;
-    if (!target || !event.currentTarget.contains(target)) return;
-
-    // iOS Safari can leave :hover active and suppress the compatibility click.
-    // Activate after touchend returns so the synthetic click has its own event cycle.
-    event.preventDefault();
-    if (pendingTouchActivationRef.current !== null) {
-      window.cancelAnimationFrame(pendingTouchActivationRef.current);
-    }
-    pendingTouchActivationRef.current = window.requestAnimationFrame(() => {
-      pendingTouchActivationRef.current = null;
-      if (!target.isConnected) return;
-      target.click();
-      lastTouchActivationRef.current = window.performance.now();
-    });
-  };
-
-  const blockDuplicateTouchClick = (event: React.MouseEvent<HTMLElement>) => {
-    if (!event.nativeEvent.isTrusted) return;
-    if (pendingTouchActivationRef.current !== null) {
-      window.cancelAnimationFrame(pendingTouchActivationRef.current);
-      pendingTouchActivationRef.current = null;
-      return;
-    }
-    if (window.performance.now() - lastTouchActivationRef.current > 700) return;
-    event.preventDefault();
-    event.stopPropagation();
-  };
-
-  const goHomeSection = (event: React.MouseEvent<HTMLAnchorElement>, sectionId: string) => {
-    event.preventDefault();
-    closeMenu();
-    clearJourneyListState();
-    const scroll = () => document.getElementById(sectionId)?.scrollIntoView({ behavior: "smooth", block: "start" });
-    if (location.pathname !== "/") {
-      navigate(`/#${sectionId}`);
-      window.setTimeout(scroll, 80);
-      return;
-    }
-    window.history.replaceState(null, "", `${window.location.pathname}${window.location.search}#${sectionId}`);
-    scroll();
-  };
-
   return createPortal(
     <>
     <div className="duomei-header-hover-zone" aria-hidden="true" onPointerEnter={() => setHoverRevealed(true)} />
     <header
-      className={`duomei-header${menuOpen ? " is-menu-open" : ""}${scrolled ? " is-scrolled" : ""}${hoverRevealed ? " is-hover-revealed" : ""}`}
+      className={`duomei-header${menuOpen ? " is-menu-open" : ""}${scrolled ? " is-scrolled" : ""}${scrollRevealed ? " is-scroll-visible" : " is-scroll-hidden"}${hoverRevealed ? " is-hover-revealed" : ""}`}
       onPointerEnter={() => setHoverRevealed(true)}
       onPointerLeave={() => {
         if (scrolled && !menuOpen) setHoverRevealed(false);
@@ -174,50 +125,38 @@ export function DuomeiHeader() {
         <span />
       </button>
 
-      <nav
-        aria-label="主导航"
-        onClickCapture={blockDuplicateTouchClick}
-        onTouchStart={beginMenuTouch}
-        onTouchEnd={finishMenuTouch}
-        onTouchCancel={() => { menuTouchStartRef.current = null; }}
-      >
-        <Link
-          to="/"
-          onClick={(event) => {
-            event.preventDefault();
-            goHomeTop();
-          }}
-        >
+      <nav aria-label="主导航">
+        <a href="/" onClick={closeMenu}>
           首页
-        </Link>
-        <Link to="/#notes" onClick={closeMenu}>
+        </a>
+        <a href="/#notes" onClick={closeMenu}>
           小记
-        </Link>
-        <Link to="/guyu" onClick={closeMenu}>
+        </a>
+        <a href="/guyu" onClick={closeMenu}>
           故语
-        </Link>
-        <Link to="/#color" onClick={(event) => goHomeSection(event, "color")}>
+        </a>
+        <a href="/#color" onClick={closeMenu}>
           颜色
-        </Link>
-        <Link to="/#weiyan" onClick={(event) => goHomeSection(event, "weiyan")}>
+        </a>
+        <a href="/#weiyan" onClick={closeMenu}>
           微言
-        </Link>
-        <Link to="/skills" onClick={closeMenu}>
+        </a>
+        <a href="/skills" onClick={closeMenu}>
           技能
-        </Link>
+        </a>
         {!isLoggedIn ? (
-          <Link to="/admin/login" onClick={closeMenu}>
+          <a href="/admin/login" onClick={closeMenu}>
             管理
-          </Link>
+          </a>
         ) : null}
         {isLoggedIn ? (
           <>
             <button type="button" onClick={toggleEdit}>
               编辑：{editMode ? "开" : "关"}
             </button>
-            <Link to="/admin/notes" onClick={closeMenu}>
+            <a href="/admin/notes" onClick={closeMenu}>
               管理
-            </Link>
+            </a>
             <button type="button" onClick={logoutAndClose}>
               退出
             </button>
