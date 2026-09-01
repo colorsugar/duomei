@@ -43,7 +43,7 @@ function readConfig(env) {
     throw new Error("GUYU_STORAGE_PREFIX is missing or outside the fixed private page path");
   }
 
-  return { answerSalt, answerHash, sessionSecret, storagePrefix, uploadSecret: env.GUYU_UPLOAD_SECRET };
+  return { answerSalt, answerHash, sessionSecret, storagePrefix };
 }
 
 function decodeBase64(value, name, minimumLength) {
@@ -137,26 +137,7 @@ function pageNumber(event) {
   return numeric >= 1 && numeric <= PAGE_COUNT ? String(page) : null;
 }
 
-function uploadSecretMatches(event, config) {
-  if (typeof config.uploadSecret !== "string" || config.uploadSecret.length < 24) return false;
-  const authorization = String(requestHeader(event, "authorization") || "");
-  const custom = String(requestHeader(event, "x-guyu-upload-secret") || "");
-  const presented = authorization.startsWith("Bearer ") ? authorization.slice(7) : custom;
-  const expected = Buffer.from(config.uploadSecret, "utf8");
-  const actual = Buffer.from(presented, "utf8");
-  return actual.length === expected.length && timingSafeEqual(actual, expected);
-}
-
-function uploadRequest(event) {
-  let body;
-  try { body = JSON.parse(requestBody(event).toString("utf8")); } catch { return null; }
-  const page = typeof body?.page === "string" ? body.page : "";
-  const contentType = typeof body?.contentType === "string" ? body.contentType : "";
-  if (!/^\d{3}$/.test(page) || Number(page) < 1 || Number(page) > PAGE_COUNT || contentType !== "image/webp") return null;
-  return { page, contentType };
-}
-
-function createHandler({ downloadFile, createUploadUrl, env = process.env, now = () => Date.now(), nonce } = {}) {
+function createHandler({ downloadFile, env = process.env, now = () => Date.now(), nonce } = {}) {
   if (typeof downloadFile !== "function") throw new TypeError("downloadFile is required");
 
   return async function handler(event = {}) {
@@ -188,18 +169,6 @@ function createHandler({ downloadFile, createUploadUrl, env = process.env, now =
       return json(200, { authorized: true }, {
         "Set-Cookie": `${COOKIE_NAME}=${token}; Max-Age=${SESSION_SECONDS}; Path=/; HttpOnly; Secure; SameSite=Strict`,
       });
-    }
-
-    if (path === "/api/guyu-upload-url" && method === "POST") {
-      if (!uploadSecretMatches(event, config)) return json(401, { error: "上传接口未授权。" });
-      const request = uploadRequest(event);
-      if (!request || typeof createUploadUrl !== "function") return json(400, { error: "上传参数不正确。" });
-      try {
-        const result = await createUploadUrl(`${config.storagePrefix}/${request.page}.webp`);
-        return json(200, { url: result.url, key: result.key, expiresAt: result.expiresAt });
-      } catch {
-        return json(503, { error: "上传服务暂不可用。" });
-      }
     }
 
     if (path === "/api/guyu-page" && method === "GET") {

@@ -32,30 +32,20 @@ function toResponse(result) {
 export async function handleEdgeOneRequest(context, overrides = {}) {
   const env = { ...process.env, ...(context.env || {}) };
   let downloadFile = overrides.downloadFile;
-  let createUploadUrl = overrides.createUploadUrl;
 
-  if (!downloadFile || !createUploadUrl) {
+  if (!downloadFile) {
     try {
       const store = getStore(STORAGE_NAMESPACE);
-      if (!downloadFile) {
-        downloadFile = async (objectKey) => {
-          const content = await store.get(objectKey, { type: "arrayBuffer" });
-          return content == null ? null : Buffer.from(content);
-        };
-      }
-      if (!createUploadUrl) {
-        createUploadUrl = async (objectKey) => store.createUploadUrl(objectKey, {
-          expireSeconds: 300,
-          contentType: "image/webp",
-        });
-      }
+      downloadFile = async (objectKey) => {
+        const content = await store.get(objectKey, { type: "arrayBuffer" });
+        return content == null ? null : Buffer.from(content);
+      };
     } catch {
-      if (!downloadFile) downloadFile = async () => { throw new Error("private storage is not configured"); };
-      if (!createUploadUrl) createUploadUrl = async () => { throw new Error("private storage is not configured"); };
+      downloadFile = async () => { throw new Error("private storage is not configured"); };
     }
   }
 
-  const handler = createHandler({ downloadFile, createUploadUrl, env });
+  const handler = createHandler({ downloadFile, env });
   return toResponse(await handler(await toEvent(context.request)));
 }
 

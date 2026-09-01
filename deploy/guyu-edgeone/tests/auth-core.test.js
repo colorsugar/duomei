@@ -13,7 +13,6 @@ const env = {
   GUYU_ANSWER_HASH: pbkdf2Sync(answer, salt, PBKDF2_ITERATIONS, 32, "sha256").toString("base64"),
   GUYU_SESSION_SECRET: Buffer.alloc(32, 9).toString("base64"),
   GUYU_STORAGE_PREFIX: "private-media/guyu/meiyou-yujian/pages",
-  GUYU_UPLOAD_SECRET: "test-upload-secret-0123456789012345",
 };
 const now = () => 1_800_000_000_000;
 
@@ -103,27 +102,4 @@ test("page traversal and out-of-range pages never reach storage", async () => {
     assert.equal(response.statusCode, 400);
   }
   assert.equal(calls, 0);
-});
-
-test("upload URL requires the migration secret and fixed page content type", async () => {
-  let requestedKey;
-  const handler = createHandler({
-    downloadFile: async () => Buffer.alloc(1),
-    createUploadUrl: async (key) => { requestedKey = key; return { url: "https://upload.invalid/one-shot", key, expiresAt: 123 }; },
-    env,
-  });
-  const denied = await handler(event("/api/guyu-upload-url", "POST", { body: JSON.stringify({ page: "001", contentType: "image/webp" }) }));
-  assert.equal(denied.statusCode, 401);
-  const allowed = await handler(event("/api/guyu-upload-url", "POST", {
-    headers: { authorization: `Bearer ${env.GUYU_UPLOAD_SECRET}` },
-    body: JSON.stringify({ page: "053", contentType: "image/webp" }),
-  }));
-  assert.equal(allowed.statusCode, 200);
-  assert.deepEqual(JSON.parse(allowed.body), { url: "https://upload.invalid/one-shot", key: "private-media/guyu/meiyou-yujian/pages/053.webp", expiresAt: 123 });
-  assert.equal(requestedKey, "private-media/guyu/meiyou-yujian/pages/053.webp");
-  const invalid = await handler(event("/api/guyu-upload-url", "POST", {
-    headers: { "x-guyu-upload-secret": env.GUYU_UPLOAD_SECRET },
-    body: JSON.stringify({ page: "054", contentType: "image/png" }),
-  }));
-  assert.equal(invalid.statusCode, 400);
 });

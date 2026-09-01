@@ -7,7 +7,6 @@ const env = {
   GUYU_ANSWER_HASH: Buffer.alloc(32, 2).toString("base64"),
   GUYU_SESSION_SECRET: Buffer.alloc(32, 3).toString("base64"),
   GUYU_STORAGE_PREFIX: "private-media/guyu/meiyou-yujian/pages",
-  GUYU_UPLOAD_SECRET: "test-upload-secret-0123456789012345",
 };
 
 test("EdgeOne adapter exposes the same-origin anonymous auth state", async () => {
@@ -52,7 +51,6 @@ test("EdgeOne adapter reads Makers environment variables from process.env", asyn
       request: new Request("https://duomei.site/api/guyu-auth"),
     }, {
       downloadFile: async () => assert.fail("storage must not be touched"),
-      createUploadUrl: async () => assert.fail("upload storage must not be touched"),
     });
     assert.equal(response.status, 200);
     assert.deepEqual(await response.json(), { authorized: false });
