@@ -1,0 +1,45 @@
+:root {
+  color: #2f2b22;
+  background: #efe8d8;
+  font-family: "Noto Serif SC", "Songti SC", "STSong", serif;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+}
+
+* { box-sizing: border-box; }
+html, body, #root { min-height: 100%; margin: 0; }
+body { min-width: 320px; }
+button, input { font: inherit; }
+
+.guyu-standalone-header {
+  position: fixed;
+  inset: max(0.75rem, env(safe-area-inset-top)) 1rem auto;
+  z-index: 40;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  pointer-events: none;
+}
+
+.guyu-standalone-header div { opacity: 0.76; }
+.guyu-standalone-header p,
+.guyu-standalone-header h1 { margin: 0; }
+.guyu-standalone-header p { font-size: 0.72rem; letter-spacing: 0.16em; }
+.guyu-standalone-header h1 { margin-top: 0.2rem; font-size: clamp(0.9rem, 2vw, 1.12rem); font-weight: 500; }
+.guyu-standalone-header button {
+  pointer-events: auto;
+  border: 1px solid rgb(47 43 34 / 24%);
+  border-radius: 999px;
+  padding: 0.48rem 0.8rem;
+  color: inherit;
+  background: rgb(255 252 242 / 82%);
+  cursor: pointer;
+}
+
+.guyu-reader-page.is-book-open .guyu-standalone-header div { opacity: 0; }
+
+@media (max-width: 560px) {
+  .guyu-standalone-header { inset-inline: 0.7rem; }
+  .guyu-standalone-header button { padding: 0.42rem 0.66rem; font-size: 0.75rem; }
+}

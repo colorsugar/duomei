@@ -1,0 +1,24 @@
+{
+  "provider": "tance.cc",
+  "taskId": 0,
+  "targetUrl": "https://duomei.site/",
+  "completedAt": "REPLACE_WITH_ISO_8601_COMPLETION_TIME",
+  "resultsUrl": "https://www.tance.cc/api-proxy/v1/tasks/REPLACE/results",
+  "pageUrl": "https://www.tance.cc/http/REPLACE",
+  "nodes": {
+    "total": { "tested": 0, "http200": 0, "timeouts": 0, "averageMs": 0 },
+    "mainland": { "tested": 0, "http200": 0, "timeouts": 0, "averageMs": 0 },
+    "telecom": { "tested": 0, "http200": 0, "timeouts": 0, "averageMs": 0 },
+    "unicom": { "tested": 0, "http200": 0, "timeouts": 0, "averageMs": 0 },
+    "mobile": { "tested": 0, "http200": 0, "timeouts": 0, "averageMs": 0 }
+  },
+  "manual": {
+    "mainlandRealDevice": false,
+    "passwordGate": false,
+    "firstPrivatePage": false,
+    "touchFlip": false,
+    "verticalScroll": false,
+    "preloadBeforeTurn": false,
+    "failureRetry": false
+  }
+}
