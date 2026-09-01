@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { HomeSectionHold } from "./HomeSectionHold";
 import "../skills.css";
 
 export const skills = [
@@ -59,7 +60,7 @@ export function SkillsDirectory({ headingId }: { headingId: string }) {
 
 export function HomeSkillsSection() {
   return (
-    <section className="duomei-home-skills" id="skills" aria-labelledby="duomei-home-skills-title">
+    <HomeSectionHold id="skills" className="duomei-home-skills" ariaLabelledBy="duomei-home-skills-title">
       <header className="duomei-home-skills-heading">
         <h2 id="duomei-home-skills-title">技能</h2>
         <div>
@@ -68,6 +69,6 @@ export function HomeSkillsSection() {
         </div>
       </header>
       <SkillsDirectory headingId="duomei-home-skills-directory-title" />
-    </section>
+    </HomeSectionHold>
   );
 }

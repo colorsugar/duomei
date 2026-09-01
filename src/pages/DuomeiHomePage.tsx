@@ -41,7 +41,11 @@ function HomeSectionProgress() {
       }
       const current = boundaries[activeIndex];
       const nextTop = boundaries[activeIndex + 1]?.top ?? footerTop;
-      const holdDistance = Math.max(1, nextTop - current.top - window.innerHeight);
+      const currentElement = current.id === "home" ? null : document.getElementById(current.id);
+      const stageHeight = currentElement
+        ?.querySelector<HTMLElement>(".home-section-hold-stage, .poetry-portal-stage")
+        ?.getBoundingClientRect().height ?? window.innerHeight;
+      const holdDistance = Math.max(1, nextTop - current.top - stageHeight);
       const sectionProgress = Math.min(1, Math.max(0, (viewportTop - current.top) / holdDistance));
       progressRef.current?.style.setProperty("--home-section-progress", String(sectionProgress));
       setActiveLabel(current.label);

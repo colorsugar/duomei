@@ -9,6 +9,7 @@ import type { TimePoetryEffect, TimePoetryImage, TimePoetryTextBlock, TimePoetry
 import { DreamCard } from "./DreamCard";
 import { GuyuShelfPreview } from "./GuyuShelfPreview";
 import { HomeSkillsSection } from "./SkillsDirectory";
+import { HomeSectionHold } from "./HomeSectionHold";
 import { StickerPackSection } from "./StickerPackSection";
 import { PoetryCanvasEditor } from "./PoetryCanvasEditor";
 import "./HomeIntroSection.css";
@@ -523,7 +524,7 @@ function PoetryStackDeck({
   if (!pages.length) return null;
 
   return (
-    <section className="poetry-index" id="weiyan" aria-labelledby="poetry-deck-title">
+    <HomeSectionHold id="weiyan" className="poetry-index" ariaLabelledBy="poetry-deck-title">
       <header className="poetry-deck-heading">
         <h2 id="poetry-deck-title">微言</h2>
         <p>向左翻到下一页，向右揭开上一页。</p>
@@ -584,7 +585,7 @@ function PoetryStackDeck({
         {canCreate ? <button type="button" onClick={() => onEdit(activeIndex)}>编辑当前页</button> : null}
         <button type="button" onClick={showNext} disabled={!hasNext || transitioning} aria-label="下一页微言">下一页</button>
       </div>
-    </section>
+    </HomeSectionHold>
   );
 }
 

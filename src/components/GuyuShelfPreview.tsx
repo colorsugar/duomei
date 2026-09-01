@@ -1,11 +1,12 @@
 import { Link } from "react-router-dom";
 import { guyuBooks } from "../content/guyuBooks";
+import { HomeSectionHold } from "./HomeSectionHold";
 
 export function GuyuShelfPreview() {
   const book = guyuBooks[0];
 
   return (
-    <section id="guyu" className="guyu-home-shelf" aria-labelledby="guyu-home-shelf-title">
+    <HomeSectionHold id="guyu" className="guyu-home-shelf" ariaLabelledBy="guyu-home-shelf-title">
       <header className="guyu-home-shelf-heading">
         <h2 id="guyu-home-shelf-title">故语</h2>
         <p>把旧日收好，等后来的人翻阅。</p>
@@ -34,6 +35,6 @@ export function GuyuShelfPreview() {
       </Link>
 
       <p className="guyu-home-shelf-note">有些话，只适合留在纸页之间。</p>
-    </section>
+    </HomeSectionHold>
   );
 }

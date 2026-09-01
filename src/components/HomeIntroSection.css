@@ -1,4 +1,4 @@
-/* Hallmark · pre-emit critique: P5 H4 E4 S5 R5 V4 · genre: editorial · macrostructure: Marquee Hero (preserved) · theme: inherited Warm Archive · enrichment: supplied sticker assets · nav: retained · footer: Ft2 · scoped slop: pass · contrast: pass (40–41) · mobile: pass (34, 49–57) */
+/* Hallmark · pre-emit critique: P5 H4 E5 S5 R5 V4 · genre: editorial · macrostructure: Marquee Hero (preserved) · theme: inherited Warm Archive · enrichment: supplied sticker assets · nav: retained · footer: Ft2 · scoped slop: pass · contrast: pass (40–41) · mobile: pass (34, 49–57) */
 @font-face {
   font-family: "Duomei Handwriting";
   src: local("LXGW WenKai"), local("霞鹜文楷"), local("STKaiti"), local("KaiTi");
@@ -1382,6 +1382,46 @@
   .poetry-free-edit { position: absolute; left: 18px; bottom: 18px; z-index: 60; }
 }
 
+/* Hallmark · component: sticky section hold · genre: editorial · theme: Warm Archive
+ * states: entering · pinned · progressing · released · reduced-motion
+ * contrast: inherited pass
+ */
+.home-section-hold {
+  position: relative;
+  inline-size: 100%;
+  min-inline-size: 0;
+}
+
+.home-section-hold-stage {
+  position: sticky;
+  inset-block-start: 0;
+  block-size: 100svh;
+  min-block-size: 100svh;
+  overflow: clip;
+}
+
+.home-section-hold-content {
+  min-block-size: 100svh;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home-section-hold {
+    block-size: auto !important;
+  }
+
+  .home-section-hold-stage {
+    position: relative;
+    inset-block-start: auto;
+    block-size: auto;
+    overflow: visible;
+  }
+
+  .home-section-hold-content {
+    min-block-size: 0;
+    transform: none !important;
+  }
+}
+
 /* Homepage additions keep the existing Warm Archive system and page rhythm. */
 .sticker-pack-section,
 .poetry-index,
@@ -1395,7 +1435,6 @@
 .sticker-pack-section {
   display: grid;
   gap: var(--space-2xl);
-  min-block-size: 130svh;
   padding: var(--space-3xl) clamp(var(--space-md), 6vw, var(--space-3xl));
   color: var(--color-ink);
   background: var(--color-paper-2);
