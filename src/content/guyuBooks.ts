@@ -162,7 +162,7 @@ export const guyuBooks: readonly GuyuBook[] = [
     accessibilityNote: "本册主要由手写原稿组成；每一页都有画面说明，暂未收录完整文字。",
     pageCount: meiyouYujianPages.length,
     coverSrc: meiyouYujianPages[0],
-    previewCoverSrc: "https://duomei-media-storage.colorsugar.workers.dev/media/covers/guyu-meiyou-yujian.webp",
+    previewCoverSrc: "/images/guyu-meiyou-yujian-cover.webp",
     pages: meiyouYujianPages,
     pageDescriptions: meiyouYujianPageDescriptions,
     logicalPages: meiyouYujianLogicalPages,

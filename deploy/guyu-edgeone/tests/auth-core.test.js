@@ -103,3 +103,31 @@ test("page traversal and out-of-range pages never reach storage", async () => {
   }
   assert.equal(calls, 0);
 });
+
+test("normalized class-answer variants are accepted", async () => {
+  const classEnv = {
+    ...env,
+    GUYU_ANSWER_HASH: pbkdf2Sync("142", salt, PBKDF2_ITERATIONS, 32, "sha256").toString("base64"),
+  };
+  for (const [index, variant] of ["142班", " １４２ 班 "].entries()) {
+    const handler = createHandler({ downloadFile: async () => Buffer.alloc(1), env: classEnv, now, nonce: () => `nonce-variant-${index}` });
+    const result = await handler(event("/api/guyu-auth", "POST", {
+      headers: { "x-forwarded-for": `198.51.100.${index + 10}` },
+      body: JSON.stringify({ answer: variant }),
+    }));
+    assert.equal(result.statusCode, 200);
+  }
+});
+
+test("the fifth failed answer blocks that client for ten minutes", async () => {
+  const handler = createHandler({ downloadFile: async () => Buffer.alloc(1), env, now });
+  let result;
+  for (let attempt = 1; attempt <= 5; attempt += 1) {
+    result = await handler(event("/api/guyu-auth", "POST", {
+      headers: { "x-forwarded-for": "203.0.113.77" },
+      body: JSON.stringify({ answer: "wrong" }),
+    }));
+  }
+  assert.equal(result.statusCode, 429);
+  assert.equal(result.headers["Retry-After"], "600");
+});

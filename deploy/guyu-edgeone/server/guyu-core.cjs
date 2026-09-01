@@ -16,6 +16,11 @@ const MAX_IMAGE_BYTES = 5_500_000;
 const PBKDF2_ITERATIONS = 210_000;
 const STORAGE_NAMESPACE = "guyu-private";
 const FIXED_STORAGE_PREFIX = "private-media/guyu/meiyou-yujian/pages";
+const RATE_LIMIT_MAX_FAILURES = 5;
+const RATE_LIMIT_WINDOW_MS = 10 * 60 * 1000;
+const RATE_LIMIT_BLOCK_MS = 10 * 60 * 1000;
+const MAX_TRACKED_CLIENTS = 2048;
+const attempts = new Map();
 
 function json(statusCode, value, extraHeaders = {}) {
   return {
@@ -115,12 +120,60 @@ function verifySession(token, config, nowMs) {
   return actual.length === expected.length && timingSafeEqual(actual, expected);
 }
 
+function normalizeAnswer(value) {
+  if (typeof value !== "string" || value.length > 64) return "";
+  return value
+    .normalize("NFKC")
+    .trim()
+    .replace(/\s+/gu, "")
+    .replace(/班$/u, "");
+}
+
 function verifyAnswer(answer, config) {
-  if (typeof answer !== "string" || answer.length > 64) return false;
-  const normalized = answer.normalize("NFKC").trim();
+  const normalized = normalizeAnswer(answer);
   if (!normalized) return false;
   const derived = pbkdf2Sync(normalized, config.answerSalt, PBKDF2_ITERATIONS, 32, "sha256");
   return timingSafeEqual(derived, config.answerHash);
+}
+
+function rateLimitKey(event) {
+  const forwarded = requestHeader(event, "x-forwarded-for")
+    || requestHeader(event, "x-real-ip")
+    || "unknown-client";
+  return String(forwarded).split(",", 1)[0].trim().slice(0, 96) || "unknown-client";
+}
+
+function pruneAttempts(nowMs) {
+  for (const [key, record] of attempts) {
+    const windowExpired = record.windowStartedAt + RATE_LIMIT_WINDOW_MS <= nowMs;
+    if (record.blockedUntil <= nowMs && windowExpired) attempts.delete(key);
+  }
+  while (attempts.size >= MAX_TRACKED_CLIENTS) {
+    const oldestKey = attempts.keys().next().value;
+    if (!oldestKey) break;
+    attempts.delete(oldestKey);
+  }
+}
+
+function inspectRateLimit(key, nowMs) {
+  const record = attempts.get(key);
+  if (!record || record.blockedUntil <= nowMs) return { allowed: true, retryAfterSeconds: 0 };
+  return {
+    allowed: false,
+    retryAfterSeconds: Math.max(1, Math.ceil((record.blockedUntil - nowMs) / 1000)),
+  };
+}
+
+function registerFailure(key, nowMs) {
+  pruneAttempts(nowMs);
+  const current = attempts.get(key);
+  const record = !current || current.windowStartedAt + RATE_LIMIT_WINDOW_MS <= nowMs
+    ? { failures: 0, windowStartedAt: nowMs, blockedUntil: 0 }
+    : current;
+  record.failures += 1;
+  if (record.failures >= RATE_LIMIT_MAX_FAILURES) record.blockedUntil = nowMs + RATE_LIMIT_BLOCK_MS;
+  attempts.set(key, record);
+  return inspectRateLimit(key, nowMs);
 }
 
 function authorized(event, config, nowMs) {
@@ -157,14 +210,31 @@ function createHandler({ downloadFile, env = process.env, now = () => Date.now()
     }
 
     if (path === "/api/guyu-auth" && method === "POST") {
+      const clientKey = rateLimitKey(event);
+      const currentLimit = inspectRateLimit(clientKey, nowMs);
+      if (!currentLimit.allowed) {
+        return json(429, { error: "尝试次数较多，请稍后再试。" }, {
+          "Retry-After": String(currentLimit.retryAfterSeconds),
+        });
+      }
+
       let answer;
       try {
         answer = JSON.parse(requestBody(event).toString("utf8")).answer;
       } catch {
         return json(400, { error: "请求格式不正确。" });
       }
-      if (!verifyAnswer(answer, config)) return json(401, { error: "答案不正确。" });
+      if (!verifyAnswer(answer, config)) {
+        const nextLimit = registerFailure(clientKey, nowMs);
+        if (!nextLimit.allowed) {
+          return json(429, { error: "尝试次数较多，请稍后再试。" }, {
+            "Retry-After": String(nextLimit.retryAfterSeconds),
+          });
+        }
+        return json(401, { error: "答案不正确。" });
+      }
 
+      attempts.delete(clientKey);
       const token = signSession(config, nowMs, nonce?.());
       return json(200, { authorized: true }, {
         "Set-Cookie": `${COOKIE_NAME}=${token}; Max-Age=${SESSION_SECONDS}; Path=/; HttpOnly; Secure; SameSite=Strict`,

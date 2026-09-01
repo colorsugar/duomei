@@ -10,12 +10,13 @@
     "build": "npm run typecheck:server && tsc -b && vite build",
     "typecheck": "tsc -b",
     "typecheck:server": "tsc -p tsconfig.server.json",
-    "test:guyu": "node --experimental-strip-types --test server/guyuSession.test.ts server/guyuRateLimit.test.ts server/guyuBooks.test.ts",
+    "test:guyu": "node --experimental-strip-types --test server/guyuSession.test.ts server/guyuRateLimit.test.ts server/guyuBooks.test.ts server/guyuEdgeOneAdapter.test.mjs",
     "lint": "tsc -b",
     "preview": "vite preview",
     "release:check": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/verify-release.ps1"
   },
   "dependencies": {
+    "@edgeone/pages-blob": "0.0.16",
     "@supabase/supabase-js": "^2.110.0",
     "@vitejs/plugin-react": "^5.0.0",
     "embla-carousel-autoplay": "^8.6.0",
