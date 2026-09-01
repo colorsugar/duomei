@@ -9,6 +9,8 @@ test("maps mixed single and two-page scans into aligned logical pages", () => {
   assert.equal(book.logicalPages[0].sourcePage, 1);
   assert.equal(book.logicalPages.at(-1)?.sourcePage, 53);
   assert.equal(book.logicalPages.filter((page) => page.placement === "blank").length, 5);
+  assert.match(book.previewCoverSrc, /^https:\/\/[^/]+\/media\/covers\/[A-Za-z0-9._-]+\.webp$/u);
+  assert.doesNotMatch(book.previewCoverSrc, /private-media|api\/guyu-page/u);
 
   for (const sourcePage of [10, 16, 21, 23, 24, 25, 26, 27, 30, 34, 39, 40, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51]) {
     const indices = book.logicalPages

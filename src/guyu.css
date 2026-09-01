@@ -449,59 +449,11 @@ body {
   transition: transform var(--dur-long) var(--ease-out);
 }
 
-.guyu-home-book-spine {
-  position: absolute;
-  inset-block: 0;
-  inset-inline-start: 0;
-  inline-size: var(--space-lg);
-  background: color-mix(in oklch, var(--color-ink) 78%, var(--color-paper-3));
-  border-inline-end: var(--rule-hairline) solid color-mix(in oklch, var(--color-paper) 24%, transparent);
-}
-
-.guyu-home-book-kind {
-  position: absolute;
-  inset-block-start: var(--space-xl);
-  inset-inline-start: var(--space-2xl);
-  color: var(--color-rule);
-  font-size: var(--text-sm);
-  letter-spacing: 0.14em;
-}
-
-.guyu-home-book > strong {
-  position: absolute;
-  inset-block-start: var(--space-2xl);
-  inset-inline-end: var(--space-xl);
+.guyu-home-book img {
   display: block;
-  max-block-size: calc(100% - var(--space-4xl));
-  color: var(--color-paper-2);
-  font-family: var(--font-display);
-  font-size: clamp(var(--text-xl), 3vw, var(--text-2xl));
-  font-style: normal;
-  font-weight: 700;
-  line-height: 1.15;
-  letter-spacing: 0.08em;
-  writing-mode: vertical-rl;
-}
-
-.guyu-home-cover-marks {
-  position: absolute;
-  inset-inline-start: var(--space-2xl);
-  inset-block-end: var(--space-xl);
-  display: grid;
-  grid-template-columns: repeat(2, var(--space-xl));
-  gap: var(--space-sm);
-}
-
-.guyu-home-cover-marks i {
-  display: block;
-  aspect-ratio: 0.72;
-  border: var(--rule-hairline) solid var(--color-caramel);
-  border-radius: var(--space-xs) var(--space-xs) var(--space-sm) var(--space-sm);
-}
-
-.guyu-home-cover-marks i:nth-child(2),
-.guyu-home-cover-marks i:nth-child(3) {
-  border-color: var(--color-accent);
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: cover;
 }
 
 .guyu-home-work-copy {
@@ -584,18 +536,6 @@ body {
 
   .guyu-home-book {
     inline-size: min(62vw, 13rem);
-  }
-
-  .guyu-home-book > strong {
-    inset-block-start: var(--space-xl);
-    inset-inline-end: var(--space-lg);
-    max-block-size: calc(100% - var(--space-3xl));
-    font-size: var(--text-xl);
-  }
-
-  .guyu-home-book-kind,
-  .guyu-home-cover-marks {
-    inset-inline-start: var(--space-xl);
   }
 
   .guyu-home-work-copy > strong {

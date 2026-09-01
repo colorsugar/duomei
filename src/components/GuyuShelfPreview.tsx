@@ -13,12 +13,14 @@ export function GuyuShelfPreview() {
 
       <Link className="guyu-home-work" to="/guyu" aria-label={`前往故语，翻阅《${book.title}》`}>
         <span className="guyu-home-book" aria-hidden="true">
-          <span className="guyu-home-book-spine" />
-          <span className="guyu-home-book-kind">同学录</span>
-          <strong>{book.title}</strong>
-          <span className="guyu-home-cover-marks">
-            <i /><i /><i /><i />
-          </span>
+          <img
+            src={book.previewCoverSrc}
+            width="1100"
+            height="1684"
+            alt=""
+            loading="lazy"
+            decoding="async"
+          />
         </span>
 
         <span className="guyu-home-work-copy">
