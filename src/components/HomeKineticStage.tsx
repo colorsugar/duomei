@@ -82,9 +82,10 @@ export function KineticHeroStage() {
 type KineticNotesStageProps = {
   children: ReactNode;
   noteCount: number;
+  staticContent?: boolean;
 };
 
-export function KineticNotesStage({ children, noteCount }: KineticNotesStageProps) {
+export function KineticNotesStage({ children, noteCount, staticContent = false }: KineticNotesStageProps) {
   const sectionRef = useRef<HTMLElement | null>(null);
   const compact = useCompactMotion();
   const reduceMotion = useReducedMotion();
@@ -110,7 +111,9 @@ export function KineticNotesStage({ children, noteCount }: KineticNotesStageProp
   const countY = useTransform(progress, [0, 1], ["44svh", "-38svh"]);
   const countRotate = useTransform(progress, [0, 1], [-90, -76]);
 
-  const contentStyle = reduceMotion ? undefined : { x: contentX, scale: contentScale, rotate: contentRotate, opacity: contentOpacity };
+  const contentStyle = reduceMotion || staticContent
+    ? undefined
+    : { x: contentX, scale: contentScale, rotate: contentRotate, opacity: contentOpacity };
 
   return (
     <section ref={sectionRef} className="notes-dream-notes-panel duomei-kinetic-notes-stage" aria-label="多美的小记">

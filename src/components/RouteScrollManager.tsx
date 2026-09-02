@@ -1,6 +1,5 @@
 import { useLayoutEffect } from "react";
 import { useLocation } from "react-router-dom";
-import { HOME_SECTION_HOLD_LAYOUT_EVENT } from "../lib/homeSectionHold";
 import { readJourneyListState, restoreJourneyWindowScroll } from "../motion";
 
 function scrollWindowTop() {
@@ -43,45 +42,10 @@ export function RouteScrollManager() {
       };
     }
 
-    let readyTimerId = 0;
-    let userInterrupted = false;
-    const stopReadySync = () => {
-      userInterrupted = true;
-      if (readyTimerId) window.clearTimeout(readyTimerId);
-    };
-    const stopReadySyncOnKey = (event: KeyboardEvent) => {
-      if (["ArrowDown", "ArrowUp", "End", "Home", "PageDown", "PageUp", " "].includes(event.key)) {
-        stopReadySync();
-      }
-    };
-    const syncReadyLayout = () => {
-      if (userInterrupted) return;
-      const holds = Array.from(document.querySelectorAll<HTMLElement>("[data-home-section-hold]"));
-      if (!holds.length || holds.some((hold) => hold.dataset.homeSectionReady !== "true")) return;
-      if (readyTimerId) window.clearTimeout(readyTimerId);
-      readyTimerId = window.setTimeout(() => {
-        if (!userInterrupted) scrollHashTarget(location.hash);
-      }, 50);
-    };
-    window.addEventListener(HOME_SECTION_HOLD_LAYOUT_EVENT, syncReadyLayout);
-    window.addEventListener("wheel", stopReadySync, { passive: true });
-    window.addEventListener("touchstart", stopReadySync, { passive: true });
-    window.addEventListener("pointerdown", stopReadySync, { passive: true });
-    window.addEventListener("keydown", stopReadySyncOnKey);
-
-    const frameId = requestAnimationFrame(() => {
-      scrollHashTarget(location.hash);
-      syncReadyLayout();
-    });
+    const frameId = requestAnimationFrame(() => scrollHashTarget(location.hash));
 
     return () => {
       cancelAnimationFrame(frameId);
-      if (readyTimerId) window.clearTimeout(readyTimerId);
-      window.removeEventListener(HOME_SECTION_HOLD_LAYOUT_EVENT, syncReadyLayout);
-      window.removeEventListener("wheel", stopReadySync);
-      window.removeEventListener("touchstart", stopReadySync);
-      window.removeEventListener("pointerdown", stopReadySync);
-      window.removeEventListener("keydown", stopReadySyncOnKey);
     };
   }, [location.pathname, location.search, location.hash]);
 

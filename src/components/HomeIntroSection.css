@@ -1388,6 +1388,7 @@
  */
 .home-section-hold {
   position: relative;
+  block-size: 230svh;
   inline-size: 100%;
   min-inline-size: 0;
 }
@@ -1402,6 +1403,10 @@
 
 .home-section-hold-content {
   min-block-size: 100svh;
+}
+
+.home-section-hold[data-home-section-static="true"] .home-section-hold-stage {
+  overflow: visible;
 }
 
 @media (prefers-reduced-motion: reduce) {

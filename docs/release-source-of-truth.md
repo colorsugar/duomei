@@ -16,6 +16,7 @@ The following files form one release unit. If any of them changes for poetry/快
 
 - `src/components/HomeIntroSection.tsx`
 - `src/components/HomeIntroSection.css`
+- `src/components/HomeKineticStage.tsx`
 - `src/components/HomeSectionHold.tsx`
 - `src/components/NotesDreamTransition.tsx`
 - `src/components/SkillsDirectory.tsx`
@@ -83,7 +84,7 @@ Before production, the Vercel Firewall must enforce a rate limit on `POST /api/g
 - Mobile poetry editing remains page-by-page; the public 微言 reader uses the manual horizontal overlapping deck instead of the former vertical sticky stack.
 - “微言” points to `/#weiyan` and opens the homepage's manual, non-looping overlapping poetry deck.
 - The homepage order remains 主视觉 / 小记 / 快活 / 故语 / 颜色 / 微言 / 技能 / 版权脚注.
-- 小记、故语、颜色、微言、技能与既有快活板块保持同一 sticky 停留节奏；底部进度到 100% 后才释放到下一板块，减少动态效果模式恢复普通文档流。
+- 小记、故语、颜色、微言、技能与既有快活板块统一使用 `230svh / 100svh` sticky 停留节奏；底部进度到 100% 后才释放到下一板块，小记不平移轮播层，减少动态效果模式恢复普通文档流。
 - “故语” sits between “快活” and “颜色”; its homepage preview opens `/guyu`.
 - “颜色” preserves the supplied 多美 and 多美猪猪 WeChat preview/QR assets and their official short links.
 - Mobile keeps the fixed safe-area shortcut order 首页 / 小记 / 故语 / 颜色 / 微言 / 技能; desktop renders the same shortcuts inside the footer.

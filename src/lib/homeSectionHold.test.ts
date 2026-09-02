@@ -14,14 +14,14 @@ test("keeps short content in place and adds the dwell runway", () => {
   });
 });
 
-test("uses the stable sticky-stage height when the dynamic viewport differs", () => {
+test("keeps the same 230svh rhythm when long content needs more travel", () => {
   assert.deepEqual(getHomeSectionHoldLayout({ viewportHeight: 800, contentHeight: 2200, innerHeight: 760 }), {
     viewportHeight: 800,
     contentHeight: 2200,
     innerHeight: 760,
     dwell: 988,
     travel: 1440,
-    trackHeight: 3188,
+    trackHeight: 1748,
   });
 });
 

@@ -1,5 +1,4 @@
 export const HOME_SECTION_DWELL_VIEWPORTS = 1.3;
-export const HOME_SECTION_HOLD_LAYOUT_EVENT = "duomei:home-section-hold-layout";
 
 export type HomeSectionHoldMeasure = {
   viewportHeight: number;
@@ -32,6 +31,6 @@ export function getHomeSectionHoldLayout(measure: HomeSectionHoldMeasure): HomeS
     innerHeight,
     dwell,
     travel,
-    trackHeight: stageHeight + travel + dwell,
+    trackHeight: stageHeight + dwell,
   };
 }

@@ -15,8 +15,8 @@ type NotesDreamTransitionProps = {
 export function NotesDreamTransition({ canCreate, notes, onCreate }: NotesDreamTransitionProps) {
   return (
     <div className="notes-dream-transition">
-      <HomeSectionHold id="notes">
-        <KineticNotesStage noteCount={notes.length}>
+      <HomeSectionHold id="notes" translateContent={false}>
+        <KineticNotesStage noteCount={notes.length} staticContent>
           <NotesIntro canCreate={canCreate} onCreate={onCreate} />
           <NotesCarousel notes={notes} />
         </KineticNotesStage>

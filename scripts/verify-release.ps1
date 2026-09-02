@@ -9,6 +9,7 @@ Set-Location $root
 $poetryBundle = @(
   "src/components/HomeIntroSection.tsx",
   "src/components/HomeIntroSection.css",
+  "src/components/HomeKineticStage.tsx",
   "src/components/HomeSectionHold.tsx",
   "src/components/NotesDreamTransition.tsx",
   "src/components/SkillsDirectory.tsx",
@@ -81,7 +82,8 @@ $requiredMarkers = @(
   @{ File = "src/components/HomeIntroSection.tsx"; Marker = "StickerPackSection" },
   @{ File = "src/components/HomeIntroSection.tsx"; Marker = "HomeSkillsSection" },
   @{ File = "src/components/HomeSectionHold.tsx"; Marker = "data-home-section-hold" },
-  @{ File = "src/components/RouteScrollManager.tsx"; Marker = "HOME_SECTION_HOLD_LAYOUT_EVENT" },
+  @{ File = "src/components/HomeKineticStage.tsx"; Marker = "staticContent" },
+  @{ File = "src/components/RouteScrollManager.tsx"; Marker = 'behavior: "instant"' },
   @{ File = "src/lib/homeSectionHold.ts"; Marker = "HOME_SECTION_DWELL_VIEWPORTS" },
   @{ File = "package.json"; Marker = '"test:home-hold"' },
   @{ File = "src/components/PoetryCanvasEditor.tsx"; Marker = "onUndo" },
