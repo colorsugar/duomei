@@ -17,6 +17,7 @@ test("maps mixed single and two-page scans into aligned logical pages", () => {
   assert.equal(book.logicalPages.filter((page) => page.placement === "blank").length, 5);
   assert.equal(book.access, "class-gated");
   assert.equal(book.previewCoverSrc, "/images/guyu-meiyou-yujian-cover.webp");
+  assert.match(book.previewAccent, /^var\(--color-guyu-cover-/u);
   assert.doesNotMatch(book.previewCoverSrc, /private-media|api\/guyu-page/u);
 
   for (const sourcePage of [10, 16, 21, 23, 24, 25, 26, 27, 30, 34, 39, 40, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51]) {
@@ -51,6 +52,7 @@ test("maps zhi-shang-feiyan as a full-page new-book", () => {
   assert.equal(book.pageDescriptions.length, 30);
   assert.equal(book.coverSrc, "/images/guyu/zhi-shang-feiyan/pages/001.webp");
   assert.equal(book.previewCoverSrc, "/images/guyu-zhi-shang-feiyan-cover.webp");
+  assert.match(book.previewAccent, /^var\(--color-guyu-cover-/u);
   assert.ok(book.logicalPages.every((page) => page.placement === "full"));
   assert.deepEqual(
     book.logicalPages.map((page) => page.src),
@@ -75,6 +77,7 @@ test("maps the existing xinshuo-01 artwork as a public full-page book", () => {
   assert.ok(book.logicalPages.every((page) => page.placement === "full"));
   assert.equal(book.logicalPages[0].description, "纸上初醒");
   assert.equal(book.logicalPages.at(-1)?.description, "未完的蓝圈与新芽");
+  assert.match(book.previewAccent, /^var\(--color-guyu-cover-/u);
 });
 
 test("keeps every public new-book page present, ordered, and byte-stable", () => {

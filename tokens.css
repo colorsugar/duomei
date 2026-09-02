@@ -11,6 +11,9 @@
   --color-caramel: oklch(66% 0.09 65);
   --color-focus: oklch(54% 0.11 132);
   --color-error: oklch(52% 0.15 28);
+  --color-guyu-cover-old: oklch(38% 0.035 62);
+  --color-guyu-cover-feiyan: oklch(50% 0.09 62);
+  --color-guyu-cover-imagination: oklch(47% 0.08 128);
 
   --font-display: Georgia, "Times New Roman", serif;
   --font-body: Inter, "Noto Sans SC", "Microsoft YaHei", sans-serif;

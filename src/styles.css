@@ -12559,8 +12559,8 @@ html.duomei-modal-open .duomei-companion {
       "nav"
       "copy";
     width: calc(100% - (var(--space-md) * 2));
-    gap: var(--space-lg);
-    padding-block: var(--space-xl) var(--space-2xl);
+    gap: var(--space-sm);
+    padding-block: var(--space-md) var(--space-lg);
   }
 
   .duomei-footer .duomei-footer-copy {
@@ -12575,7 +12575,7 @@ html.duomei-modal-open .duomei-companion {
     inline-size: 100%;
     max-inline-size: none;
     margin: 0;
-    padding-block: var(--space-lg) 0;
+    padding-block: var(--space-sm) 0;
     background: transparent;
     border-block-start: var(--rule-hairline) solid var(--color-rule);
     box-shadow: none;
@@ -12583,12 +12583,18 @@ html.duomei-modal-open .duomei-companion {
   }
 
   .duomei-quick-nav ul {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: var(--space-sm) var(--space-md);
+    display: flex;
+    flex-wrap: nowrap;
+    gap: var(--space-2xs);
+  }
+
+  .duomei-quick-nav li {
+    min-inline-size: 0;
+    flex: 1 1 0;
   }
 
   .duomei-quick-nav a {
+    inline-size: 100%;
     justify-content: center;
     min-inline-size: 0;
     min-block-size: var(--size-hit);
@@ -12596,6 +12602,12 @@ html.duomei-modal-open .duomei-companion {
     color: var(--color-ink);
     font-size: var(--text-xs);
     text-align: center;
+  }
+}
+
+@media (max-width: 360px) {
+  .duomei-quick-nav ul {
+    gap: 0;
   }
 }
 

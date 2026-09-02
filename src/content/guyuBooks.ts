@@ -25,6 +25,7 @@ export type GuyuBook = {
   pageCount: number;
   coverSrc: string;
   previewCoverSrc: string;
+  previewAccent: string;
   pages: readonly string[];
   pageDescriptions: readonly string[];
   logicalPages: readonly GuyuLogicalPage[];
@@ -261,6 +262,7 @@ export const guyuBooks: readonly GuyuBook[] = [
     pageCount: meiyouYujianPages.length,
     coverSrc: meiyouYujianPages[0],
     previewCoverSrc: "/images/guyu-meiyou-yujian-cover.webp",
+    previewAccent: "var(--color-guyu-cover-old)",
     pages: meiyouYujianPages,
     pageDescriptions: meiyouYujianPageDescriptions,
     logicalPages: meiyouYujianLogicalPages,
@@ -276,6 +278,7 @@ export const guyuBooks: readonly GuyuBook[] = [
     pageCount: 30,
     coverSrc: zhiShangFeiyanPages[0],
     previewCoverSrc: "/images/guyu-zhi-shang-feiyan-cover.webp",
+    previewAccent: "var(--color-guyu-cover-feiyan)",
     pages: zhiShangFeiyanPages,
     pageDescriptions: zhiShangFeiyanPageDescriptions,
     logicalPages: zhiShangFeiyanLogicalPages,
@@ -291,6 +294,7 @@ export const guyuBooks: readonly GuyuBook[] = [
     pageCount: 30,
     coverSrc: xinshuoOnePages[0],
     previewCoverSrc: "/images/guyu-xinshuo-01-cover.webp",
+    previewAccent: "var(--color-guyu-cover-imagination)",
     pages: xinshuoOnePages,
     pageDescriptions: xinshuoOnePageDescriptions,
     logicalPages: xinshuoOneLogicalPages,
