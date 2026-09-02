@@ -168,6 +168,7 @@ $requiredMarkers = @(
   @{ File = "src/pages/DuomeiAdmin.tsx"; Marker = 'id="note-management"' },
   @{ File = "src/components/PaperLayer.tsx"; Marker = "paper-stroke-reveal-rect" },
   @{ File = "src/styles.css"; Marker = ".paper-stroke-reveal-rect" }
+  @{ File = "src/components/HomeIntroSection.css"; Marker = "Static notes keep the shared 230svh track" }
 )
 
 $errors = [System.Collections.Generic.List[string]]::new()

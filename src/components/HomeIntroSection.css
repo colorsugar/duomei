@@ -1405,7 +1405,14 @@
   min-block-size: 100svh;
 }
 
+/* Static notes keep the shared 230svh track but let their full content define the stage. */
 .home-section-hold[data-home-section-static="true"] .home-section-hold-stage {
+  block-size: auto;
+  min-block-size: 100svh;
+  overflow: visible;
+}
+
+.home-section-hold[data-home-section-static="true"] .duomei-kinetic-notes-stage {
   overflow: visible;
 }
 
