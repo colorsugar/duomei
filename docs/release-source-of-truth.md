@@ -117,5 +117,5 @@ If any bundle file is still modified, staged, or untracked after the commit, the
 - Pushes to `candidate/guyu-edgeone-global-20260901` deploy the repository root to the existing direct-upload Makers project `duomei-guyu` (`makers-brifmhu31vjf`).
 - The workflow must keep `edgeone.json`, `cloud-functions/`, and the full source tree together; never replace the deploy command with a `dist`-only upload.
 - `EDGEONE_API_TOKEN` exists only as a GitHub Actions Secret. Runtime `GUYU_*` values remain in the EdgeOne console and must never be copied into GitHub.
-- The media Worker keeps the exact Linux x64 TypeScript companion package as an optional dependency so `npm ci` works on GitHub's Ubuntu runner without changing Windows development.
+- The media Worker keeps its exact Linux x64 native companion packages as optional dependencies so `npm ci` works on GitHub's Ubuntu runner without changing Windows development.
 - Production is accepted only when the generated `/.well-known/duomei-build.json` matches the pushed commit and the homepage/auth/private-page checks return `200/200/401`.
