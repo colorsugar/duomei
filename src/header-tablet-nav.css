@@ -19,14 +19,7 @@
     visibility: visible !important;
   }
 
-  .duomei-header nav,
-  .duomei-header:hover nav,
-  .duomei-header:focus-within nav,
-  .duomei-header.is-hover-revealed nav,
-  .duomei-header .duomei-menu-toggle:hover ~ nav,
-  .duomei-header .duomei-menu-toggle:focus-visible ~ nav,
-  .duomei-header nav:hover,
-  .duomei-header nav:focus-within {
+  .duomei-header nav {
     position: absolute !important;
     top: calc(100% + 8px) !important;
     right: 14px !important;
@@ -34,6 +27,9 @@
     width: min(148px, calc(100vw - 28px)) !important;
     max-width: calc(100vw - 28px) !important;
     grid-template-columns: 1fr !important;
+  }
+
+  .duomei-header:not(.is-menu-open) nav {
     opacity: 0 !important;
     visibility: hidden !important;
     pointer-events: none !important;

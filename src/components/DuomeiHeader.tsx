@@ -14,7 +14,6 @@ export function DuomeiHeader() {
   const lastScrollYRef = useRef(typeof window === "undefined" ? 0 : window.scrollY);
   const scrollFrameRef = useRef(0);
   const menuTouchStartRef = useRef<{ x: number; y: number } | null>(null);
-  const pendingTouchActivationRef = useRef<number | null>(null);
   const lastTouchActivationRef = useRef(0);
   const navigate = useNavigate();
   const location = useLocation();
@@ -93,15 +92,12 @@ export function DuomeiHeader() {
       // short tap inside React's delegated compatibility-click chain.
       header.dataset.menuLastActivation = "touch";
       event.preventDefault();
-      if (pendingTouchActivationRef.current !== null) {
-        window.cancelAnimationFrame(pendingTouchActivationRef.current);
+      lastTouchActivationRef.current = window.performance.now();
+      if (target.tagName === "A") {
+        window.location.assign((target as HTMLAnchorElement).href);
+        return;
       }
-      pendingTouchActivationRef.current = window.requestAnimationFrame(() => {
-        pendingTouchActivationRef.current = null;
-        if (!target.isConnected) return;
-        target.click();
-        lastTouchActivationRef.current = window.performance.now();
-      });
+      target.click();
     };
 
     const cancelMenuTouch = () => {
@@ -117,9 +113,6 @@ export function DuomeiHeader() {
       header.removeEventListener("touchcancel", cancelMenuTouch, true);
       delete header.dataset.menuTouchListener;
       delete header.dataset.menuLastActivation;
-      if (pendingTouchActivationRef.current !== null) {
-        window.cancelAnimationFrame(pendingTouchActivationRef.current);
-      }
     };
   }, []);
 
@@ -167,11 +160,6 @@ export function DuomeiHeader() {
 
   const blockDuplicateTouchClick = (event: MouseEvent<HTMLElement>) => {
     if (!event.nativeEvent.isTrusted) return;
-    if (pendingTouchActivationRef.current !== null) {
-      window.cancelAnimationFrame(pendingTouchActivationRef.current);
-      pendingTouchActivationRef.current = null;
-      return;
-    }
     if (window.performance.now() - lastTouchActivationRef.current > 700) return;
     event.preventDefault();
     event.stopPropagation();

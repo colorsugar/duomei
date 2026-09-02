@@ -88,11 +88,18 @@ External runtime hosts intentionally referenced by the site are `duomei.site`, `
 - 小记、快活、故语、颜色、微言、技能 share the `230svh` track and `100svh` sticky-stage rhythm. A section releases only after its bottom progress reaches 100%.
 - 小记 keeps its horizontal carousel but does not vertically transform the carousel content; this avoids mobile scroll jank.
 - The fixed header hides while scrolling down and returns while scrolling up. Mobile navigation must work from the homepage and from secondary pages, especially `/guyu`.
-- The header portal binds native short-touch listeners directly to its DOM for iOS compatibility. Preserve drag rejection, duplicate-click suppression, mouse/keyboard navigation, and the delayed close after a real route/hash navigation.
+- The header portal binds native short-touch listeners directly to its DOM for iOS compatibility. Touch activation is synchronous: buttons dispatch their click immediately, while anchors call `window.location.assign()` during the touch event. Preserve drag rejection, duplicate-click suppression, mouse/keyboard navigation, and the delayed close after a real route/hash navigation.
 - The Guyu gate uses the original class-question wording and a numeric class-number field. Do not display a generated password length. Never place the real answer in source, tests, documentation, or public history, and never change the answer without explicit authorization.
 - The Guyu reader keeps 53 physical scans, reviewed spread mapping, cover pages, touch/keyboard page turning, private same-origin delivery, and no public originals.
 - WeChat sticker actions copy the official short link and explain that it must be pasted into WeChat. Do not navigate the browser directly to the WeChat short link.
 - Mobile and desktop text must not clip, overlap, or create horizontal overflow. Recheck all affected supported widths after UI work.
+
+### Frozen Mobile Header Contract
+
+- Do not change the header event chain, navigation hrefs, portal mount, `header-tablet-nav.css`, or hide/reveal behavior unless the user explicitly requests header work.
+- At `<=768px` or on a coarse/hoverless primary pointer, the hamburger is always reachable. A closed menu is hidden and non-hit-testable; `.is-menu-open` must make the nav and every item visible and hit-testable even when WebKit leaves `:hover` or `:focus` stuck.
+- Never defer the native touch activation with `requestAnimationFrame`: iOS WebViews can drop the synthetic default navigation after user activation expires. Anchors navigate synchronously; the following compatibility click is suppressed once.
+- `npm.cmd run test:home-hold` is a release gate. After every authorized header change, test the toggle and every destination on `/` and `/guyu` at a phone viewport; a desktop click alone is not acceptance.
 
 Before changing note-card hover or tilt behavior, also read `docs/note-card-tilt.md`.
 

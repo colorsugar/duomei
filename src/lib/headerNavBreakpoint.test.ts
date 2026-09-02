@@ -5,6 +5,7 @@ import test from "node:test";
 import { fileURLToPath } from "node:url";
 
 const css = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../header-tablet-nav.css"), "utf8");
+const headerSource = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../components/DuomeiHeader.tsx"), "utf8");
 const query = "@media (max-width: 768px), (hover: none) and (pointer: coarse)";
 
 test("keeps a reachable hamburger on 768px and coarse/hover-none viewports", () => {
@@ -12,6 +13,14 @@ test("keeps a reachable hamburger on 768px and coarse/hover-none viewports", () 
   assert.notEqual(start, -1, "missing tablet/coarse header media query");
   const block = css.slice(start);
   assert.match(block, /\.duomei-menu-toggle[\s\S]*display:\s*inline-flex\s*!important/);
+  assert.match(block, /\.duomei-header:not\(\.is-menu-open\) nav[\s\S]*pointer-events:\s*none\s*!important/);
   assert.match(block, /\.duomei-header\.is-menu-open nav[\s\S]*pointer-events:\s*auto\s*!important/);
   assert.match(block, /\.duomei-header-hover-zone[\s\S]*display:\s*none\s*!important/);
+  assert.doesNotMatch(block, /\.duomei-menu-toggle:hover\s*~\s*nav/);
+});
+
+test("keeps iOS header touch activation synchronous and deterministic", () => {
+  assert.match(headerSource, /lastTouchActivationRef\.current = window\.performance\.now\(\)/);
+  assert.match(headerSource, /window\.location\.assign\(\(target as HTMLAnchorElement\)\.href\)/);
+  assert.doesNotMatch(headerSource, /pendingTouchActivationRef/);
 });

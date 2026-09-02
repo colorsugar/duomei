@@ -33,3 +33,5 @@ This is mandatory for every AI coding agent working in this repository.
 The homepage note-card 3D tilt interaction is performance-sensitive. Do not add duplicate mouse/pointer listeners, do not add `transform` transitions while `.is-tilting`, and do not override the final note-card tilt CSS block without following the repair notes in `docs/note-card-tilt.md`.
 
 If a future task touches unrelated files, leave this interaction alone.
+
+The mobile header contract is frozen. Do not change `DuomeiHeader.tsx`, `header-tablet-nav.css`, their touch activation order, navigation targets, visibility/pointer-event rules, or hide-on-scroll behavior unless the user explicitly asks for header work. An open menu must remain visible and hit-testable even after sticky `:hover`/`:focus` states in iOS WebViews. Header changes must pass `npm.cmd run test:home-hold` and production checks of the toggle plus every menu destination at a phone viewport before release.
