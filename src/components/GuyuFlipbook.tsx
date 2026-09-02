@@ -501,7 +501,7 @@ export function GuyuFlipbook({
             autoSize
             maxShadowOpacity={0.48}
             showCover
-            mobileScrollSupport={false}
+            mobileScrollSupport={true}
             clickEventForward={false}
             useMouseEvents
             swipeDistance={30}

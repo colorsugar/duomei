@@ -1452,7 +1452,7 @@ body {
   display: grid;
   place-items: center;
   margin: 0;
-  touch-action: manipulation;
+  touch-action: pan-y pinch-zoom;
   isolation: isolate;
 }
 
@@ -1477,6 +1477,8 @@ body {
   min-block-size: 0 !important;
   margin: 0 !important;
   overflow: visible !important;
+  /* StPageFlip ships pan-y here; keep native pinch zoom on its actual touch surface. */
+  touch-action: pan-y pinch-zoom;
   transition: transform 580ms cubic-bezier(0.22, 0.8, 0.24, 1);
 }
 

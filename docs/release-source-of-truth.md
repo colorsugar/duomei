@@ -110,6 +110,7 @@ EdgeOne production has a precise client-IP rate-limit rule for `/api/guyu-auth` 
 - Mobile keeps the fixed safe-area shortcut order 首页 / 小记 / 故语 / 颜色 / 微言 / 技能; desktop renders the same shortcuts inside the footer.
 - The mobile menu toggle and anchors use a guarded native short-tap listener on the portal header for iOS in-app WebViews, with drag rejection and duplicate-click suppression; anchors still complete navigation before the route/hash change closes the menu.
 - `/guyu/meiyou-yujian` keeps all 53 scans, expands detected two-page scans into aligned logical spreads, preserves the front and back covers, uses the pinned StPageFlip engine for full-screen phone/desktop page turns, and keeps keyboard plus compact overlay controls.
+- The Guyu book surface keeps browser-native pan and pinch zoom enabled; StPageFlip must not cancel the browser gesture before a page turn begins.
 - `/guyu` and every page request remain behind the original server-verified class question; direct static and unsigned R2 paths remain blocked.
 - The poetry portal target keeps `id="kuaihuo"`.
 - The admin reflects 首页 / 微言 / 小记管理.
