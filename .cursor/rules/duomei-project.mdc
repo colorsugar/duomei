@@ -1,0 +1,8 @@
+---
+description: Mandatory DUOMEI project context and release rules
+globs:
+  - "**/*"
+alwaysApply: true
+---
+
+Before analysis or edits, read `AGENTS.md`, `PROJECT_CONTEXT.md`, and `docs/release-source-of-truth.md` completely. They are canonical. Preserve dirty work, keep production credentials and Guyu originals out of Git, and verify UI work on the actual production webpage before claiming completion.

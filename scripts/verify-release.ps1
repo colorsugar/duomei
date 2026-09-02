@@ -6,6 +6,21 @@ if (Get-Variable -Name PSNativeCommandUseErrorActionPreference -ErrorAction Sile
 $root = Resolve-Path (Join-Path $PSScriptRoot "..")
 Set-Location $root
 
+$maintenanceBundle = @(
+  ".cursor/rules/duomei-project.mdc",
+  ".github/copilot-instructions.md",
+  "AGENTS.md",
+  "CLAUDE.md",
+  "deploy/guyu-edgeone/README.md",
+  "deploy/guyu-edgeone/docs/architecture.md",
+  "deploy/guyu-edgeone/docs/duomei-site-dns-plan.md",
+  "deploy/guyu-edgeone/docs/duomei-site-release-gate.md",
+  "deploy/guyu-edgeone/docs/supabase-boundary.md",
+  "GEMINI.md",
+  "PROJECT_CONTEXT.md",
+  "README.md"
+)
+
 $poetryBundle = @(
   ".github/workflows/deploy-edgeone.yml",
   "src/components/HomeIntroSection.tsx",
@@ -45,6 +60,7 @@ $guyuBundle = @(
   ".hallmark/preflight.json",
   "api/guyu-auth.ts",
   "api/guyu-page.ts",
+  "cloud-functions/api/[[default]].js",
   "cloudflare/duomei-media/.gitignore",
   "cloudflare/duomei-media/package-lock.json",
   "cloudflare/duomei-media/package.json",
@@ -55,6 +71,7 @@ $guyuBundle = @(
   "cloudflare/duomei-media/worker-configuration.d.ts",
   "cloudflare/duomei-media/wrangler.jsonc",
   "docs/release-source-of-truth.md",
+  "edgeone.json",
   "package-lock.json",
   "package.json",
   "server/guyuSession.test.ts",
@@ -62,6 +79,11 @@ $guyuBundle = @(
   "server/guyuRateLimit.test.ts",
   "server/guyuRateLimit.ts",
   "server/guyuBooks.test.ts",
+  "server/guyuEdgeOneAdapter.test.mjs",
+  "deploy/guyu-edgeone/edgeone.json",
+  "deploy/guyu-edgeone/package-lock.json",
+  "deploy/guyu-edgeone/package.json",
+  "deploy/guyu-edgeone/server/guyu-core.cjs",
   "src/components/GuyuAccessGate.tsx",
   "deploy/guyu-edgeone/src/components/GuyuAccessGate.tsx",
   "src/components/GuyuFlipbook.tsx",
@@ -76,9 +98,14 @@ $guyuBundle = @(
   "vercel.json"
 )
 
-$bundle = @($poetryBundle + $guyuBundle | Sort-Object -Unique)
+$bundle = @($maintenanceBundle + $poetryBundle + $guyuBundle | Sort-Object -Unique)
 
 $requiredMarkers = @(
+  @{ File = "AGENTS.md"; Marker = "PROJECT_CONTEXT.md" },
+  @{ File = "PROJECT_CONTEXT.md"; Marker = "makers-brifmhu31vjf" },
+  @{ File = "PROJECT_CONTEXT.md"; Marker = "candidate/guyu-edgeone-global-20260901" },
+  @{ File = "PROJECT_CONTEXT.md"; Marker = "Never read, print, commit, rotate, or replace" },
+  @{ File = "README.md"; Marker = "EdgeOne Makers" },
   @{ File = ".github/workflows/deploy-edgeone.yml"; Marker = "EDGEONE_PROJECT_ID: makers-brifmhu31vjf" },
   @{ File = ".github/workflows/deploy-edgeone.yml"; Marker = 'EDGEONE_API_TOKEN: ${{ secrets.EDGEONE_API_TOKEN }}' },
   @{ File = ".github/workflows/deploy-edgeone.yml"; Marker = "public/.well-known/duomei-build.json" },
@@ -140,7 +167,7 @@ $publicGuyuFiles = @(
   Get-ChildItem -LiteralPath "public/books/guyu" -Recurse -File -ErrorAction SilentlyContinue
 )
 if ($publicGuyuFiles.Count -gt 0) {
-  $errors.Add("Guyu originals must not exist under public/books/guyu; keep all pages in private R2")
+  $errors.Add("Guyu originals must not exist under public/books/guyu; keep all pages in private storage")
 }
 
 $trackedPublicGuyuFiles = @(git ls-files -- "public/books/guyu")
@@ -162,7 +189,7 @@ if ($hasOriginMain) {
 
 $trackedPrivateGuyuFiles = @(git ls-files -- "private/books/guyu")
 if ($trackedPrivateGuyuFiles.Count -gt 0) {
-  $errors.Add("Local private Guyu originals must remain ignored; R2 is the deployment source")
+  $errors.Add("Local private Guyu originals must remain ignored; private storage is the deployment source")
 }
 
 foreach ($file in $bundle) {

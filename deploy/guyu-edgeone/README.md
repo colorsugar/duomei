@@ -1,13 +1,15 @@
-# “没有遇见 何来艳遇”EdgeOne 独立候选
+# “没有遇见 何来艳遇”EdgeOne 隔离包（历史候选）
+
+> 状态更新（2026-09-02）：本目录不再是正式部署根目录。当前完整站从仓库根目录部署到 EdgeOne Makers `duomei-guyu`（`makers-brifmhu31vjf`），正式域名为 `duomei.site`。根 `cloud-functions/api/[[default]].js` 仍复用本目录的 `server/guyu-core.cjs`，因此这里保留为隔离验证包。下方“尚未授权/新建候选/DNS 待执行”等内容是历史记录，不得作为当前操作步骤。开始维护前先读 `../../PROJECT_CONTEXT.md`。
 
 本目录是与现有正式站完全隔离的 EdgeOne Makers 可部署制品。长期入口固定为 `duomei.site`，加速区域必须选择**全球可用区（不含中国大陆）**，因此按 EdgeOne 当前官方规则不要求 ICP 备案。
 
-## 当前结论
+## 2026-09-01 历史候选结论（禁止作为当前操作）
 
 - 禁止把 `duomei.site` 直接绑定 CloudBase：CloudBase 当前官方文档把 ICP 备案列为自定义域名前提，开启 EdgeOne 加速也没有免备案例外。
 - EdgeOne Makers 项目域名在中国大陆只能通过 3 小时预览链接访问，不能当长期入口；`duomei.site` 自定义域名才是长期 Prototype 入口。
 - 用户已确认域名正常并授权 DNS 修改，但目前没有 EdgeOne/腾讯云登录授权，无法创建项目、获取真实 TXT/CNAME、配置证书或部署。
-- 现有 Supabase 项目继续承担 DUOMEI 数据库/Auth；本候选不迁移、不修改该项目，也不把 `duomei.site` 解析到 Supabase。画册密码门与私有原稿仍由同源 Makers Cloud Function/COS 独立保护。
+- 现有 Supabase 项目继续承担 DUOMEI 数据库/Auth；本候选不迁移、不修改该项目，也不把 `duomei.site` 解析到 Supabase。当前画册密码门与私有原稿由同源 Makers Cloud Function/EdgeOne Pages Blob 独立保护；保留的 Vercel 回退链才使用 Cloudflare Worker/R2。
 - DNS 尚未修改；不存在项目 ID、部署 ID 或可点击候选 URL。
 - `color-duomei.vercel.app`、`color-rho-ten.vercel.app` 和其他既有正式资源不在操作范围内。
 
@@ -30,9 +32,9 @@
 - 原稿、答案、Cookie 和会话密钥均不进入 Git、静态目录或 `edgeone.json`。
 - Supabase 项目标识不是站点源站；任何现有业务调用继续使用原有 Supabase 配置，本独立画册页面不引入 `service_role` 或改写 Auth。
 
-## 获得腾讯云授权后的步骤
+## 历史建站步骤（已经完成，禁止重复执行）
 
-必须新建项目和存储资源，不能选择或覆盖任何现有项目。
+以下内容只记录首次候选阶段当时的计划。当前维护不得新建替代项目、覆盖现有项目或重复修改 DNS。
 
 登录入口：[EdgeOne Makers 控制台](https://console.cloud.tencent.com/edgeone/pages)。CLI 使用官方当前命令族：
 

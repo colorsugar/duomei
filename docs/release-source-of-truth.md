@@ -10,6 +10,21 @@ This document is mandatory for every AI agent and every new conversation working
 4. Never deploy a partial subset of a coupled feature. First identify all related modified and untracked files.
 5. Preserve unrelated local changes. Do not reset, checkout, delete, or rewrite them.
 
+## Cross-AI Maintenance Bundle
+
+The repository-level AI entry files are one documentation unit and must stay aligned with the actual architecture and release target:
+
+- `AGENTS.md`
+- `PROJECT_CONTEXT.md`
+- `README.md`
+- `CLAUDE.md`
+- `GEMINI.md`
+- `.github/copilot-instructions.md`
+- `.cursor/rules/duomei-project.mdc`
+- `docs/release-source-of-truth.md`
+
+Agent-specific files are pointers only. `PROJECT_CONTEXT.md` contains the shared facts; do not duplicate changing architecture or deployment state into every pointer.
+
 ## Atomic Poetry Portal Bundle
 
 The following files form one release unit. If any of them changes for poetry/快活/微言 work, inspect the entire group and publish the complete intended version together:
@@ -48,6 +63,8 @@ The “故语” library and reader are one release unit. Review, commit, and de
 - `.hallmark/log.json`
 - `.hallmark/preflight.json`
 - `.env.example`, `.gitignore`, and `.vercelignore` (names only; never commit real values)
+- root `edgeone.json` and `cloud-functions/api/[[default]].js`
+- `deploy/guyu-edgeone/server/guyu-core.cjs`, its EdgeOne config/package lock, and adapter/core tests
 - `api/guyu-auth.ts` and `api/guyu-page.ts`
 - `server/guyuSession.ts`, `server/guyuRateLimit.ts`, and their tests
 - `server/guyuBooks.test.ts` for mixed single-page/two-page scan alignment
@@ -65,17 +82,17 @@ The “故语” library and reader are one release unit. Review, commit, and de
 - `cloudflare/duomei-media/` source, configuration, lockfile, and tests
 - the shared route and navigation files `src/App.tsx` and `src/components/DuomeiHeader.tsx`
 
-The 53 WebP pages live only in the private `duomei-private` R2 bucket. They must never be committed under `public/` or shipped in the Vercel static output. The original PDF remains a local/iCloud archive and is not a web dependency. Vercel verifies the question and session cookie, then redirects each allowed page request to a short-lived signed Worker URL. Never commit the answer or signing secrets.
+Current EdgeOne production stores the 53 WebP pages in the private `guyu-private` Pages Blob namespace and returns them through the same-origin Cloud Function. The retained Vercel fallback uses the private `duomei-private` R2 bucket and short-lived signed Worker URLs. Neither copy may be committed under `public/` or shipped in static output. The original PDF remains a local/iCloud archive. Never commit the answer or signing secrets.
 
-The reader pins `react-pageflip@2.0.3` and `page-flip@2.0.7`. Scan numbers 10, 16, 21, 23–27, 30, 34, 39–40, and 42–51 are paired visual spreads; the source file remains one R2 object while the reader crops it across two persistent logical pages. Scan 15 is a wide single page and must not be split.
+The reader pins `react-pageflip@2.0.3` and `page-flip@2.0.7`. Scan numbers 10, 16, 21, 23–27, 30, 34, 39–40, and 42–51 are paired visual spreads; the source remains one private object while the reader crops it across two persistent logical pages. Scan 15 is a wide single page and must not be split.
 
 All logical leaves deliberately use StPageFlip's hard-page density to match the referenced rigid-board album rather than a soft paper curl. The reader's visible back control and browser-history exit force a full document navigation so the pinned upstream render loop cannot accumulate across repeated SPA reader mounts; the component also calls `destroy()` as production cleanup.
 
 If an unpushed local commit ever contained those pages, amend or squash that commit before pushing. A later deletion commit is not enough because the public repository would retain the original blobs in history.
 
-Do not publish the navigation or reader until all 53 R2 objects have been verified and the Vercel and Worker tests pass. `npm.cmd run release:check` rejects public or tracked Guyu originals and verifies the complete protected delivery code bundle.
+Do not publish the navigation or reader until all 53 EdgeOne Blob objects and the root Guyu tests are verified. When changing the retained Vercel/Cloudflare path, verify its R2 objects and Worker tests too. `npm.cmd run release:check` rejects public or tracked Guyu originals and verifies the protected delivery bundle.
 
-Before production, the Vercel Firewall must enforce a rate limit on `POST /api/guyu-auth`. The in-function attempt map is defense in depth only and is not shared across serverless instances.
+EdgeOne production must enforce a shared security/WAF rate limit on `POST /api/guyu-auth`; this rule was not verified during the 2026-09-02 audit. The in-function attempt map is defense in depth only and is not shared across instances. Vercel Firewall applies only if the retained fallback becomes the requested deployment target.
 
 ## Features That Must Remain In The Latest Version
 

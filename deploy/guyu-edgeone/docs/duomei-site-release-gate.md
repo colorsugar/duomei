@@ -1,8 +1,10 @@
-# duomei.site 发布门禁
+# duomei.site 历史发布门禁（已完成，禁止重复执行）
+
+> 历史状态说明（2026-09-02）：本文件记录首次候选上线前的域名授权门禁。`duomei.site` 现已绑定并由仓库根目录自动部署到 EdgeOne Makers `duomei-guyu`（`makers-brifmhu31vjf`）。不要重复执行“新建候选项目”或猜写 DNS；当前维护以 `../../../PROJECT_CONTEXT.md` 为准。
 
 记录日期：2026-09-01。以下域名状态由用户提供，仅用于部署编排，不包含或要求任何个人身份信息。
 
-## 已知状态
+## 2026-09-01 历史状态
 
 - 域名：`duomei.site`
 - 注册商：Alibaba Cloud / HiChina
@@ -14,7 +16,7 @@
 - 注册局/解析状态：阿里云当前显示“正常”，用户确认 `clientHold` 等待阶段已结束
 - DNS 授权：用户已明确允许为本 EdgeOne Makers 全球不含大陆候选配置 `duomei.site`
 
-## 禁止操作
+## 历史门禁条件（已完成）
 
 下面四项现已满足，域名发布门禁可以通过：
 
@@ -27,7 +29,7 @@
 
 本记录不保存短信账号标识、短信链接、姓名、证件、邮箱、手机号或其他个人信息。
 
-## 通过后的最小操作范围
+## 历史候选操作范围（禁止重复执行）
 
 - 仅在 `duomei.site` 添加 EdgeOne Makers 实际要求的所有权验证记录、CNAME 和 HTTPS 验证记录。
 - 仅把域名绑定到新建的 `guyu-duomei-site-candidate` Makers 候选项目。
