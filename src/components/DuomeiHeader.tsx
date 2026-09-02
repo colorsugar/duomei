@@ -170,6 +170,10 @@ export function DuomeiHeader() {
     <div className="duomei-header-hover-zone" aria-hidden="true" onPointerEnter={() => setHoverRevealed(true)} />
     <header
       className={`duomei-header${menuOpen ? " is-menu-open" : ""}${scrolled ? " is-scrolled" : ""}${scrollRevealed ? " is-scroll-visible" : " is-scroll-hidden"}${hoverRevealed ? " is-hover-revealed" : ""}`}
+      onClickCapture={blockDuplicateTouchClick}
+      onTouchStart={beginMenuTouch}
+      onTouchEnd={finishMenuTouch}
+      onTouchCancel={() => { menuTouchStartRef.current = null; }}
       onPointerEnter={() => setHoverRevealed(true)}
       onPointerLeave={() => {
         if (scrolled && !menuOpen) setHoverRevealed(false);
@@ -202,10 +206,6 @@ export function DuomeiHeader() {
       <nav
         aria-label="主导航"
         data-native-navigation
-        onClickCapture={blockDuplicateTouchClick}
-        onTouchStart={beginMenuTouch}
-        onTouchEnd={finishMenuTouch}
-        onTouchCancel={() => { menuTouchStartRef.current = null; }}
       >
         <a href="/" onClick={closeAfterNativeNavigation}>
           首页

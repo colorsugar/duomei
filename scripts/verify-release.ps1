@@ -107,6 +107,7 @@ $requiredMarkers = @(
   @{ File = "src/components/DuomeiHeader.tsx"; Marker = "data-native-navigation" },
   @{ File = "src/components/DuomeiHeader.tsx"; Marker = "closeAfterNativeNavigation" },
   @{ File = "src/components/DuomeiHeader.tsx"; Marker = "pendingTouchActivationRef" },
+  @{ File = "src/components/DuomeiHeader.tsx"; Marker = "onClickCapture={blockDuplicateTouchClick}" },
   @{ File = "src/components/DuomeiHeader.tsx"; Marker = "onTouchEnd={finishMenuTouch}" },
   @{ File = "src/components/DuomeiHeader.tsx"; Marker = 'window.addEventListener("hashchange"' },
   @{ File = "src/components/DuomeiFooter.tsx"; Marker = 'to: "/#skills"' },
