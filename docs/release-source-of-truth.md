@@ -77,12 +77,16 @@ The “故语” library and reader are one release unit. Review, commit, and de
 - `src/pages/DuomeiGuyuReaderPage.tsx`
 - `src/guyu.css`
 - `src/main.tsx`
+- `scripts/sync-guyu-private-books.mjs` and its `--check` gate
+- `public/images/guyu-zhi-shang-feiyan-cover.webp` (approved low-sensitivity preview only)
 - `tokens.css`
 - `vercel.json`
 - `cloudflare/duomei-media/` source, configuration, lockfile, and tests
 - the shared route and navigation files `src/App.tsx` and `src/components/DuomeiHeader.tsx`
 
-Current EdgeOne production stores the 53 WebP pages in the private `guyu-private` Pages Blob namespace and returns them through the same-origin Cloud Function. The retained Vercel fallback uses the private `duomei-private` R2 bucket and short-lived signed Worker URLs. Neither copy may be committed under `public/` or shipped in static output. The original PDF remains a local/iCloud archive. Never commit the answer or signing secrets.
+Current EdgeOne production stores 83 WebP pages in the private `guyu-private` Pages Blob namespace: 53 pages under `meiyou-yujian` and 30 under `zhi-shang-feiyan`. The same-origin Cloud Function exposes only allowlisted books after authorization. The retained Vercel fallback still contains only the 53-page old-book copy in private `duomei-private` R2. Private pages may not be committed under `public/` or shipped in static output; approved low-sensitivity cover previews are separate public derivatives. Never commit the answer or signing secrets.
+
+`纸上飞檐` is pinned to audited source commit `249736f5dd4914f1797a6eb5b4e8d9226edb6be9`. Its fixed Vercel deployment is only a bootstrap source for missing Blob objects: the sync script verifies 30 expected hashes, refuses to overwrite mismatches, and the production reader never fetches pages from Vercel.
 
 The reader pins `react-pageflip@2.0.3` and `page-flip@2.0.7`. Scan numbers 10, 16, 21, 23–27, 30, 34, 39–40, and 42–51 are paired visual spreads; the source remains one private object while the reader crops it across two persistent logical pages. Scan 15 is a wide single page and must not be split.
 
@@ -90,7 +94,7 @@ All logical leaves deliberately use StPageFlip's hard-page density to match the 
 
 If an unpushed local commit ever contained those pages, amend or squash that commit before pushing. A later deletion commit is not enough because the public repository would retain the original blobs in history.
 
-Do not publish the navigation or reader until all 53 EdgeOne Blob objects and the root Guyu tests are verified. When changing the retained Vercel/Cloudflare path, verify its R2 objects and Worker tests too. `npm.cmd run release:check` rejects public or tracked Guyu originals and verifies the protected delivery bundle.
+Do not publish the navigation or reader until all 83 EdgeOne Blob objects and the root Guyu tests are verified. The production workflow must finish the immutable-source sync before deploying the frontend, and a missing/mismatched `纸上飞檐` object must fail closed without overwriting it. When changing the retained Vercel/Cloudflare path, verify its R2 objects and Worker tests too. `npm.cmd run release:check` rejects public or tracked Guyu originals and verifies the protected delivery bundle.
 
 EdgeOne production has a precise client-IP rate-limit rule for `/api/guyu-auth` in addition to the process-local failure map. Reverify the project security rule after any domain or project migration. Vercel Firewall applies only if the retained fallback becomes the requested deployment target.
 
@@ -110,6 +114,7 @@ EdgeOne production has a precise client-IP rate-limit rule for `/api/guyu-auth` 
 - Mobile keeps the fixed safe-area shortcut order 首页 / 小记 / 故语 / 颜色 / 微言 / 技能; desktop renders the same shortcuts inside the footer.
 - The frozen mobile header uses one synchronous native short-tap path on the portal DOM: buttons activate immediately, anchors call `window.location.assign()` before iOS user activation expires, and the compatibility click is suppressed once. Sticky hover/focus must never override `.is-menu-open` visibility or pointer events.
 - `/guyu/meiyou-yujian` keeps all 53 scans, expands detected two-page scans into aligned logical spreads, preserves the front and back covers, uses the pinned StPageFlip engine for full-screen phone/desktop page turns, and keeps keyboard plus compact overlay controls.
+- `/guyu/zhi-shang-feiyan` appears under the `新说` shelf and reuses the same GuyuFlipbook with exactly 30 complete `full` leaves; it never enters the old-book split/stack pipeline.
 - The Guyu book surface keeps browser-native pan and pinch zoom enabled; StPageFlip must not cancel the browser gesture before a page turn begins.
 - `/guyu` and every page request remain behind the original server-verified class question; direct static and unsigned R2 paths remain blocked.
 - The poetry portal target keeps `id="kuaihuo"`.

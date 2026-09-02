@@ -104,6 +104,36 @@ test("page traversal and out-of-range pages never reach storage", async () => {
   assert.equal(calls, 0);
 });
 
+test("authorized new-book pages use the private fixed prefix and enforce its 30-page boundary", async () => {
+  const requested = [];
+  const handler = createHandler({
+    downloadFile: async (fileID) => { requested.push(fileID); return { fileContent: Buffer.from("RIFFxxxxWEBP") }; },
+    env,
+    now,
+    nonce: () => "fixed_nonce_for_new_book",
+  });
+  const login = await handler(event("/api/guyu-auth", "POST", { body: JSON.stringify({ answer }) }));
+  const cookie = login.headers["Set-Cookie"].split(";", 1)[0];
+  const page = await handler(event("/api/guyu-page", "GET", {
+    headers: { cookie },
+    queryStringParameters: { book: "zhi-shang-feiyan", page: "030" },
+  }));
+  assert.equal(page.statusCode, 200);
+  assert.equal(page.headers["Content-Type"], "image/webp");
+  assert.deepEqual(requested, ["private-media/guyu/zhi-shang-feiyan/pages/030.webp"]);
+
+  for (const queryStringParameters of [
+    { book: "zhi-shang-feiyan", page: "031" },
+    { book: "unknown", page: "001" },
+    { book: "__proto__", page: "001" },
+    { book: "constructor", page: "001" },
+  ]) {
+    const rejected = await handler(event("/api/guyu-page", "GET", { headers: { cookie }, queryStringParameters }));
+    assert.equal(rejected.statusCode, 400);
+  }
+  assert.deepEqual(requested, ["private-media/guyu/zhi-shang-feiyan/pages/030.webp"]);
+});
+
 test("normalized class-answer variants are accepted", async () => {
   const classEnv = {
     ...env,

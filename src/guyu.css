@@ -236,6 +236,18 @@ body {
   padding-block: var(--space-2xl) var(--space-xl);
 }
 
+.guyu-shelf-chapter + .guyu-shelf-chapter {
+  margin-block-start: var(--space-2xl);
+}
+
+.guyu-shelf-chapter h3 {
+  margin: 0 0 var(--space-md);
+  color: var(--color-muted-strong);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  letter-spacing: 0.12em;
+}
+
 .guyu-shelf {
   position: relative;
   display: grid;

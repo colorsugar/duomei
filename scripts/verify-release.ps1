@@ -83,6 +83,7 @@ $guyuBundle = @(
   "server/guyuRateLimit.ts",
   "server/guyuBooks.test.ts",
   "server/guyuEdgeOneAdapter.test.mjs",
+  "scripts/sync-guyu-private-books.mjs",
   "deploy/guyu-edgeone/edgeone.json",
   "deploy/guyu-edgeone/package-lock.json",
   "deploy/guyu-edgeone/package.json",
@@ -96,6 +97,7 @@ $guyuBundle = @(
   "src/pages/DuomeiGuyuReaderPage.tsx",
   "src/guyu.css",
   "src/main.tsx",
+  "public/images/guyu-zhi-shang-feiyan-cover.webp",
   "tokens.css",
   "tsconfig.server.json",
   "vercel.json"
@@ -156,6 +158,14 @@ $requiredMarkers = @(
   @{ File = "src/App.tsx"; Marker = 'path="/guyu"' },
   @{ File = "src/App.tsx"; Marker = 'path="/guyu/:bookId"' },
   @{ File = "src/content/guyuBooks.ts"; Marker = 'Array.from({ length: 53 }' },
+  @{ File = "src/content/guyuBooks.ts"; Marker = 'id: "zhi-shang-feiyan"' },
+  @{ File = "server/guyuBooks.test.ts"; Marker = 'maps zhi-shang-feiyan as a full-page new-book' },
+  @{ File = "deploy/guyu-edgeone/server/guyu-core.cjs"; Marker = 'private-media/guyu/zhi-shang-feiyan/pages' },
+  @{ File = "deploy/guyu-edgeone/server/guyu-core.cjs"; Marker = 'Object.hasOwn(BOOKS, book)' },
+  @{ File = "scripts/sync-guyu-private-books.mjs"; Marker = '249736f5dd4914f1797a6eb5b4e8d9226edb6be9' },
+  @{ File = "scripts/sync-guyu-private-books.mjs"; Marker = 'https://zhi-shang-feiyan-52dbdlv5c-duomei.vercel.app/pages' },
+  @{ File = "scripts/sync-guyu-private-books.mjs"; Marker = 'onlyIfNew: true' },
+  @{ File = ".github/workflows/deploy-edgeone.yml"; Marker = "Sync private Guyu books" },
   @{ File = "src/content/guyuBooks.ts"; Marker = '/api/guyu-page?book=' },
   @{ File = "package.json"; Marker = '"react-pageflip": "2.0.3"' },
   @{ File = "package.json"; Marker = '"page-flip": "2.0.7"' },
@@ -178,6 +188,22 @@ $requiredMarkers = @(
 )
 
 $errors = [System.Collections.Generic.List[string]]::new()
+
+$feiyanCover = "public/images/guyu-zhi-shang-feiyan-cover.webp"
+$feiyanCoverHash = "69644B7DFFDBF78FE5D2D624678B0005AF65FA6E9029340176615FAFCE332D6B"
+if (Test-Path -LiteralPath $feiyanCover) {
+  $coverStream = [System.IO.File]::OpenRead((Resolve-Path -LiteralPath $feiyanCover))
+  $sha256 = [System.Security.Cryptography.SHA256]::Create()
+  try {
+    $actualFeiyanCoverHash = [System.BitConverter]::ToString($sha256.ComputeHash($coverStream)).Replace("-", "")
+  } finally {
+    $sha256.Dispose()
+    $coverStream.Dispose()
+  }
+  if ($actualFeiyanCoverHash -ne $feiyanCoverHash) {
+    $errors.Add("The public 纸上飞檐 preview cover does not match the audited source")
+  }
+}
 
 $publicGuyuFiles = @(
   Get-ChildItem -LiteralPath "public/books/guyu" -Recurse -File -ErrorAction SilentlyContinue

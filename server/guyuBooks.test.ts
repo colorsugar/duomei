@@ -32,3 +32,23 @@ test("formats physical book pages without exposing scan numbers", () => {
   assert.equal(formatGuyuPageNumber(77, 80), "77–78 / 78");
   assert.equal(formatGuyuPageNumber(79, 80), "封底");
 });
+
+test("maps zhi-shang-feiyan as a full-page new-book", () => {
+  const book = guyuBooks.find((candidate) => candidate.id === "zhi-shang-feiyan");
+  assert.ok(book);
+  assert.equal(book.chapter, "新说");
+  assert.equal(book.kind, "新说");
+  assert.equal(book.pages.length, 30);
+  assert.equal(book.logicalPages.length, 30);
+  assert.equal(book.pageDescriptions.length, 30);
+  assert.equal(book.coverSrc, "/api/guyu-page?book=zhi-shang-feiyan&page=001");
+  assert.equal(book.previewCoverSrc, "/images/guyu-zhi-shang-feiyan-cover.webp");
+  assert.ok(book.logicalPages.every((page) => page.placement === "full"));
+  assert.deepEqual(
+    book.logicalPages.map((page) => page.src),
+    book.pages,
+  );
+  assert.equal(book.logicalPages[0].description, "单角飞檐、朱红流苏、一朵山茶，下半纸留白给书名");
+  assert.equal(book.logicalPages.at(-1)?.description, "极简飞檐剪影与一小朵山茶，无长文");
+  assert.match(book.logicalPages.at(-1)?.src ?? "", /page=030$/u);
+});

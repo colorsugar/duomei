@@ -40,7 +40,8 @@ Browser at duomei.site
 ├─ EdgeOne Node Cloud Function (`cloud-functions/api/[[default]].js`)
 │  └─ Guyu core (`deploy/guyu-edgeone/server/guyu-core.cjs`)
 │     └─ private EdgeOne Pages Blob namespace `guyu-private`
-│        └─ `private-media/guyu/meiyou-yujian/pages/001.webp` … `053.webp`
+│        ├─ `private-media/guyu/meiyou-yujian/pages/001.webp` … `053.webp`
+│        └─ `private-media/guyu/zhi-shang-feiyan/pages/001.webp` … `030.webp`
 │
 ├─ Supabase project `bokvqndvwqgugkcrizwj`
 │  ├─ Auth
@@ -63,7 +64,7 @@ The current EdgeOne Guyu path returns protected WebP bytes from EdgeOne Blob thr
 | Admin identity and sessions | Supabase Auth + `public.duomei_admins` | Supabase remains required |
 | Note cover/body media | Cloudflare Worker + R2 `duomei-media` | 28 objects, 99.3 MB; current database media URLs use the Worker host |
 | Legacy Supabase `note-images` | Supabase Storage | 0 objects; retained only as a locked rollback boundary after the upload migration |
-| Current Guyu pages | EdgeOne Pages Blob `guyu-private` | 53 protected pages through same-origin `/api/guyu-page` |
+| Current Guyu pages | EdgeOne Pages Blob `guyu-private` | 83 protected pages: 53-page old album plus 30-page `纸上飞檐`, all through same-origin `/api/guyu-page` |
 | Retained Guyu fallback | Cloudflare R2 `duomei-private` | 53 objects, 11.4 MB; not the current EdgeOne read path |
 
 External runtime hosts intentionally referenced by the site are `duomei.site`, `bokvqndvwqgugkcrizwj.supabase.co`, `duomei-media-storage.colorsugar.workers.dev`, `github.com/colorsugar/agent-skills`, and WeChat short links under `w.url.cn`. No third-party analytics script was verified.
@@ -77,6 +78,7 @@ External runtime hosts intentionally referenced by the site are `duomei.site`, `
 | `/note/:slug` | Note detail | Yes |
 | `/guyu` | Protected Guyu shelf | Yes |
 | `/guyu/:bookId` | Full-screen protected reader | No |
+| `/guyu/zhi-shang-feiyan` | `新说 / 纸上飞檐`, 30 complete `full` pages | No |
 | `/skills` | Skill directory | Yes |
 | `/admin/login` | Supabase admin login | No |
 | `/admin`, `/admin/notes` | Note management | No |
@@ -90,7 +92,7 @@ External runtime hosts intentionally referenced by the site are `duomei.site`, `
 - The fixed header hides while scrolling down and returns while scrolling up. Mobile navigation must work from the homepage and from secondary pages, especially `/guyu`.
 - The header portal binds native short-touch listeners directly to its DOM for iOS compatibility. Touch activation is synchronous: buttons dispatch their click immediately, while anchors call `window.location.assign()` during the touch event. Preserve drag rejection, duplicate-click suppression, mouse/keyboard navigation, and the delayed close after a real route/hash navigation.
 - The Guyu gate uses the original class-question wording and a numeric class-number field. Do not display a generated password length. Never place the real answer in source, tests, documentation, or public history, and never change the answer without explicit authorization.
-- The Guyu reader keeps 53 physical scans, reviewed spread mapping, cover pages, touch/keyboard page turning, private same-origin delivery, and no public originals.
+- The Guyu reader keeps the 53 physical old-book scans with their reviewed spread mapping and adds `纸上飞檐` as 30 complete `full` pages. Both use the same touch/keyboard reader and private same-origin delivery; only approved low-sensitivity covers may be public.
 - WeChat sticker actions copy the official short link and explain that it must be pasted into WeChat. Do not navigate the browser directly to the WeChat short link.
 - Mobile and desktop text must not clip, overlap, or create horizontal overflow. Recheck all affected supported widths after UI work.
 
@@ -118,7 +120,9 @@ Never commit or echo values for:
 - Supabase service-role or secret keys
 - session Cookies, private originals, PDFs, or Guyu page images
 
-Production Guyu runtime values belong only in EdgeOne project environment settings. `EDGEONE_API_TOKEN` belongs only in the GitHub Actions Secret with that name. The 53 protected pages belong in private storage, never under `public/`.
+Production Guyu runtime values belong only in EdgeOne project environment settings. `EDGEONE_API_TOKEN` belongs only in the GitHub Actions Secret with that name. All 83 protected pages belong in private storage, never under `public/`.
+
+`纸上飞檐` was audited from private source repository `colorsugar/-` at commit `249736f5dd4914f1797a6eb5b4e8d9226edb6be9`; its user-supplied immutable Vercel preview is the workflow's bootstrap source. `scripts/sync-guyu-private-books.mjs` first verifies any existing Blob object, downloads only missing pages, checks all 30 fixed SHA-256 values, and writes with `onlyIfNew` before the production deployment. The workflow secret is never printed or copied locally, and the live reader never depends on Vercel after import. Do not change the source deployment, commit, hashes, page count, Blob prefix, or `full` placement without a new source audit and explicit book update.
 
 ## Local Verification
 

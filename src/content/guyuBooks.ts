@@ -18,6 +18,7 @@ export type GuyuBook = {
   id: string;
   title: string;
   kind: string;
+  chapter: string;
   description: string;
   accessibilityNote: string;
   pageCount: number;
@@ -153,11 +154,57 @@ function buildLogicalPages(): GuyuLogicalPage[] {
 
 const meiyouYujianLogicalPages = buildLogicalPages();
 
+const zhiShangFeiyanPages = Array.from({ length: 30 }, (_, index) =>
+  `/api/guyu-page?book=zhi-shang-feiyan&page=${String(index + 1).padStart(3, "0")}`,
+);
+
+const zhiShangFeiyanPageDescriptions = [
+  "单角飞檐、朱红流苏、一朵山茶，下半纸留白给书名",
+  "关闭的朱红院门与石门槛，门楣上露出一角飞檐",
+  "空荡庭院，远处月洞门，白墙被晨光斜切",
+  "近看瓦垄与墙缝里长出的山茶",
+  "墙外看花窗，枯枝影子落在粉墙上",
+  "穿过花窗格子看见昏暗木厅，只有家具轮廓",
+  "天色转青，瓦开始发暗，第一场雨的气息",
+  "庭石积水，倒映出飞檐一角",
+  "近看滴水的飞檐与铜雨链",
+  "湿润的月洞门，山茶更红",
+  "月门里漫出薄雾，园景略微失真",
+  "仰视层层斗拱与梁架木几何",
+  "长复廊，柱列重复，透视被拉长",
+  "一口静水缸，倒映倒置的飞檐",
+  "黄昏庭院，檐下第一盏纸灯亮起来",
+  "站在月门圆洞里，一半暖一半冷",
+  "黄昏全庭，灯、瓦、山茶同时最丰",
+  "厅内彩梁与花窗漏进的格子光",
+  "略俯视的重重屋脊与飞檐交错",
+  "夜廊一串纸灯，暖点连成线",
+  "青瓦上落着赭红枯叶，近于霜意",
+  "极近的飞檐尖对着一轮纸色月",
+  "次日清晨，同一庭院，只剩一盏未收的灯",
+  "同一飞檐的三个轻叠角度，仍是单页素描而非拼图",
+  "月门现在只框住空天空",
+  "花窗格子轻轻叠在淡了的庭院上",
+  "一朵山茶落在青石上，午后瓦影很浅",
+  "无人复廊，最后一抹光停在柱身上",
+  "夜里只剩一条瓦垄和一轮淡月",
+  "极简飞檐剪影与一小朵山茶，无长文",
+] as const;
+
+const zhiShangFeiyanLogicalPages: GuyuLogicalPage[] = zhiShangFeiyanPages.map((src, index) => ({
+  id: `zhi-shang-feiyan-${String(index + 1).padStart(3, "0")}`,
+  sourcePage: index + 1,
+  src,
+  placement: "full",
+  description: zhiShangFeiyanPageDescriptions[index],
+}));
+
 export const guyuBooks: readonly GuyuBook[] = [
   {
     id: "meiyou-yujian",
     title: "没有遇见 何来艳遇",
     kind: "同学录",
+    chapter: "旧册",
     description: "一些名字、笔迹与当时的天气，仍停在纸上。",
     accessibilityNote: "本册主要由手写原稿组成；每一页都有画面说明，暂未收录完整文字。",
     pageCount: meiyouYujianPages.length,
@@ -166,6 +213,20 @@ export const guyuBooks: readonly GuyuBook[] = [
     pages: meiyouYujianPages,
     pageDescriptions: meiyouYujianPageDescriptions,
     logicalPages: meiyouYujianLogicalPages,
+  },
+  {
+    id: "zhi-shang-feiyan",
+    title: "纸上飞檐",
+    kind: "新说",
+    chapter: "新说",
+    description: "用彩铅在暖纸上，跟一处无名旧园走完从晨到夜、从雨到月的一日。",
+    accessibilityNote: "本册为无人物彩铅建筑画本；每一页都有画面说明。",
+    pageCount: 30,
+    coverSrc: zhiShangFeiyanPages[0],
+    previewCoverSrc: "/images/guyu-zhi-shang-feiyan-cover.webp",
+    pages: zhiShangFeiyanPages,
+    pageDescriptions: zhiShangFeiyanPageDescriptions,
+    logicalPages: zhiShangFeiyanLogicalPages,
   },
 ];
 

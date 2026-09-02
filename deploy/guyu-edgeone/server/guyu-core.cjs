@@ -9,6 +9,10 @@ const {
 
 const BOOK_ID = "meiyou-yujian";
 const PAGE_COUNT = 53;
+const BOOKS = Object.freeze({
+  "meiyou-yujian": Object.freeze({ pageCount: 53, storagePrefix: "private-media/guyu/meiyou-yujian/pages" }),
+  "zhi-shang-feiyan": Object.freeze({ pageCount: 30, storagePrefix: "private-media/guyu/zhi-shang-feiyan/pages" }),
+});
 const COOKIE_NAME = "guyu_session";
 const SESSION_SECONDS = 12 * 60 * 60;
 const MAX_BODY_BYTES = 4096;
@@ -185,9 +189,12 @@ function pageNumber(event) {
   const query = event.queryStringParameters || {};
   const book = Array.isArray(query.book) ? query.book[0] : query.book;
   const page = Array.isArray(query.page) ? query.page[0] : query.page;
-  if (book !== BOOK_ID || !/^\d{3}$/.test(String(page || ""))) return null;
+  const bookConfig = typeof book === "string" && Object.hasOwn(BOOKS, book) ? BOOKS[book] : null;
+  if (!bookConfig || !/^\d{3}$/.test(String(page || ""))) return null;
   const numeric = Number(page);
-  return numeric >= 1 && numeric <= PAGE_COUNT ? String(page) : null;
+  return numeric >= 1 && numeric <= bookConfig.pageCount
+    ? { book, page: String(page), storagePrefix: bookConfig.storagePrefix }
+    : null;
 }
 
 function createHandler({ downloadFile, env = process.env, now = () => Date.now(), nonce } = {}) {
@@ -246,7 +253,7 @@ function createHandler({ downloadFile, env = process.env, now = () => Date.now()
       const page = pageNumber(event);
       if (!page) return json(400, { error: "页面参数不正确。" });
 
-      const objectKey = `${config.storagePrefix}/${page}.webp`;
+      const objectKey = `${page.storagePrefix}/${page.page}.webp`;
       try {
         const result = await downloadFile(objectKey);
         const content = Buffer.isBuffer(result) ? result : result?.fileContent;
@@ -258,7 +265,7 @@ function createHandler({ downloadFile, env = process.env, now = () => Date.now()
           headers: {
             "Content-Type": "image/webp",
             "Content-Length": String(content.length),
-            "Content-Disposition": `inline; filename=\"page-${page}.webp\"`,
+            "Content-Disposition": `inline; filename=\"page-${page.page}.webp\"`,
             "Cache-Control": "private, no-store",
             "CDN-Cache-Control": "no-store",
             "X-Content-Type-Options": "nosniff",
@@ -280,6 +287,7 @@ function createHandler({ downloadFile, env = process.env, now = () => Date.now()
 module.exports = {
   BOOK_ID,
   PAGE_COUNT,
+  BOOKS,
   PBKDF2_ITERATIONS,
   STORAGE_NAMESPACE,
   FIXED_STORAGE_PREFIX,
