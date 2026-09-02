@@ -11867,6 +11867,26 @@ html.duomei-modal-open .duomei-companion {
   .duomei-header.is-menu-open nav > * {
     transition-delay: 0ms !important;
   }
+
+  .duomei-header nav a:hover,
+  .duomei-header nav button:hover {
+    transform: none !important;
+  }
+
+  .duomei-header nav a:hover::after,
+  .duomei-header nav button:hover::after {
+    transform: scaleX(0) !important;
+  }
+
+  .duomei-header:not(.is-menu-open) .duomei-menu-toggle:hover ~ nav,
+  .duomei-header:not(.is-menu-open) .duomei-menu-toggle:focus-visible ~ nav,
+  .duomei-header:not(.is-menu-open) nav:hover,
+  .duomei-header:not(.is-menu-open) nav:focus-within {
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+    transform: translateY(-6px) scale(0.96) !important;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

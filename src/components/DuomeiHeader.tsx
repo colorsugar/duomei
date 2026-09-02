@@ -49,6 +49,16 @@ export function DuomeiHeader() {
     setScrollRevealed(true);
   }, [location.hash, location.key, location.pathname, location.search]);
 
+  useEffect(() => {
+    const finishHashNavigation = () => {
+      setMenuOpen(false);
+      setHoverRevealed(false);
+      if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
+    };
+    window.addEventListener("hashchange", finishHashNavigation);
+    return () => window.removeEventListener("hashchange", finishHashNavigation);
+  }, []);
+
   const closeMenu = () => {
     setMenuOpen(false);
     setHoverRevealed(false);
@@ -91,6 +101,14 @@ export function DuomeiHeader() {
     closeMenu();
   };
 
+  const closeAfterNativeNavigation = () => {
+    // Let iOS Safari commit the native link before hiding its fixed navigation layer.
+    window.setTimeout(() => {
+      closeMenu();
+      if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
+    }, 0);
+  };
+
   return createPortal(
     <>
     <div className="duomei-header-hover-zone" aria-hidden="true" onPointerEnter={() => setHoverRevealed(true)} />
@@ -125,27 +143,27 @@ export function DuomeiHeader() {
         <span />
       </button>
 
-      <nav aria-label="主导航">
-        <a href="/" onClick={closeMenu}>
+      <nav aria-label="主导航" data-native-navigation>
+        <a href="/" onClick={closeAfterNativeNavigation}>
           首页
         </a>
-        <a href="/#notes" onClick={closeMenu}>
+        <a href="/#notes" onClick={closeAfterNativeNavigation}>
           小记
         </a>
-        <a href="/guyu" onClick={closeMenu}>
+        <a href="/guyu" onClick={closeAfterNativeNavigation}>
           故语
         </a>
-        <a href="/#color" onClick={closeMenu}>
+        <a href="/#color" onClick={closeAfterNativeNavigation}>
           颜色
         </a>
-        <a href="/#weiyan" onClick={closeMenu}>
+        <a href="/#weiyan" onClick={closeAfterNativeNavigation}>
           微言
         </a>
-        <a href="/skills" onClick={closeMenu}>
+        <a href="/skills" onClick={closeAfterNativeNavigation}>
           技能
         </a>
         {!isLoggedIn ? (
-          <a href="/admin/login" onClick={closeMenu}>
+          <a href="/admin/login" onClick={closeAfterNativeNavigation}>
             管理
           </a>
         ) : null}
@@ -154,7 +172,7 @@ export function DuomeiHeader() {
             <button type="button" onClick={toggleEdit}>
               编辑：{editMode ? "开" : "关"}
             </button>
-            <a href="/admin/notes" onClick={closeMenu}>
+            <a href="/admin/notes" onClick={closeAfterNativeNavigation}>
               管理
             </a>
             <button type="button" onClick={logoutAndClose}>
