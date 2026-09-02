@@ -94,6 +94,8 @@ $guyuBundle = @(
   "src/components/GuyuShelfPreview.tsx",
   "src/lib/guyuCarousel.ts",
   "src/lib/guyuCarousel.test.ts",
+  "src/lib/guyuTouchSequence.ts",
+  "src/lib/guyuTouchSequence.test.ts",
   "src/content/guyuBooks.ts",
   "src/pages/DuomeiGuyuPage.tsx",
   "src/pages/DuomeiGuyuReaderPage.tsx",
@@ -101,6 +103,7 @@ $guyuBundle = @(
   "src/main.tsx",
   "public/images/guyu",
   "public/images/guyu-xinshuo-01-cover.webp",
+  "public/images/guyu-xinshuo-02-cover.webp",
   "public/images/guyu-zhi-shang-feiyan-cover.webp",
   "tokens.css",
   "tsconfig.server.json",
@@ -164,12 +167,16 @@ $requiredMarkers = @(
   @{ File = "src/content/guyuBooks.ts"; Marker = 'Array.from({ length: 53 }' },
   @{ File = "src/content/guyuBooks.ts"; Marker = 'id: "zhi-shang-feiyan"' },
   @{ File = "src/content/guyuBooks.ts"; Marker = 'id: "xinshuo-01"' },
+  @{ File = "src/content/guyuBooks.ts"; Marker = 'id: "xinshuo-02"' },
   @{ File = "src/content/guyuBooks.ts"; Marker = 'access: "class-gated"' },
   @{ File = "src/content/guyuBooks.ts"; Marker = 'access: "public"' },
   @{ File = "src/lib/guyuCarousel.ts"; Marker = 'GUYU_CAROUSEL_DWELL_MS = 1_600' },
   @{ File = "src/components/GuyuShelfPreview.tsx"; Marker = 'guyu-home-fragment' },
   @{ File = "src/components/GuyuShelfPreview.tsx"; Marker = 'onPointerMove={handlePointerMove}' },
   @{ File = "src/components/GuyuShelfPreview.tsx"; Marker = 'aria-current={indicatedIndex === index' },
+  @{ File = "src/components/GuyuFlipbook.tsx"; Marker = 'onTouchStartCapture={onBookTouchStart}' },
+  @{ File = "src/components/GuyuFlipbook.tsx"; Marker = 'onClickCapture={blockCompatibilityMouse}' },
+  @{ File = "src/lib/guyuTouchSequence.ts"; Marker = 'activeTouchCount >= 2' },
   @{ File = "src/components/BackToTopButton.tsx"; Marker = 'visible && !footerVisible' },
   @{ File = "src/styles.css"; Marker = 'flex-wrap: nowrap' },
   @{ File = "server/guyuBooks.test.ts"; Marker = 'maps zhi-shang-feiyan as a full-page new-book' },
@@ -177,6 +184,7 @@ $requiredMarkers = @(
   @{ File = "deploy/guyu-edgeone/server/guyu-core.cjs"; Marker = 'private-media/guyu/meiyou-yujian/pages' },
   @{ File = "deploy/guyu-edgeone/server/guyu-core.cjs"; Marker = 'Object.hasOwn(BOOKS, book)' },
   @{ File = ".github/workflows/deploy-edgeone.yml"; Marker = "/images/guyu/xinshuo-01/pages/001.webp" },
+  @{ File = ".github/workflows/deploy-edgeone.yml"; Marker = "/images/guyu/xinshuo-02/pages/001.webp" },
   @{ File = "src/content/guyuBooks.ts"; Marker = '/api/guyu-page?book=' },
   @{ File = "package.json"; Marker = '"react-pageflip": "2.0.3"' },
   @{ File = "package.json"; Marker = '"page-flip": "2.0.7"' },
@@ -203,6 +211,7 @@ $errors = [System.Collections.Generic.List[string]]::new()
 $publicCoverHashes = @{
   "public/images/guyu-zhi-shang-feiyan-cover.webp" = "69644B7DFFDBF78FE5D2D624678B0005AF65FA6E9029340176615FAFCE332D6B"
   "public/images/guyu-xinshuo-01-cover.webp" = "A993DF1567F85CC70D814E27ED7C8F201CDF115495D5B38B4DED47EA5F74EF8D"
+  "public/images/guyu-xinshuo-02-cover.webp" = "C779F4CD56A3162C3C16631A72F3033015A02CEBBBA39C05427F3923382A5369"
 }
 
 foreach ($cover in $publicCoverHashes.GetEnumerator()) {

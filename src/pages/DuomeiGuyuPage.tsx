@@ -35,7 +35,7 @@ export function DuomeiGuyuPage() {
                         <span className="guyu-book-spine" />
                       </span>
                       <span className="guyu-book-meta">
-                        <span className="guyu-book-kind">{book.kind}</span>
+                        <span className="guyu-book-kind">{book.kind}{book.author ? ` · ${book.author}` : ""}</span>
                         <strong className="guyu-title-phrases" aria-label={book.title}>
                           {book.title.split(/\s+/u).map((part) => <span key={part}>{part}</span>)}
                         </strong>

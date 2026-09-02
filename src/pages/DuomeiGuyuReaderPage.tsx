@@ -44,7 +44,7 @@ export function DuomeiGuyuReaderPage() {
         </Link>
         <div className="guyu-visually-hidden">
           <h1>{book.title}</h1>
-          <p>{book.kind}</p>
+          <p>{book.kind}{book.author ? ` · ${book.author}` : ""}</p>
         </div>
       </header>
       <GuyuFlipbook book={book} onOpenChange={setIsBookOpen} />

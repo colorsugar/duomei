@@ -17,6 +17,7 @@ export type GuyuLogicalPage = {
 export type GuyuBook = {
   id: string;
   title: string;
+  author?: string;
   kind: string;
   chapter: string;
   access: "class-gated" | "public";
@@ -250,6 +251,60 @@ const xinshuoOnePageDescriptions = [
 
 const xinshuoOneLogicalPages = fullLogicalPages("xinshuo-01", xinshuoOnePages, xinshuoOnePageDescriptions);
 
+const xinshuoTwoPages = publicBookPages("xinshuo-02", 30);
+const xinshuoTwoPreviewCoverSrc = "/images/guyu-xinshuo-02-cover.webp";
+
+const xinshuoTwoPageDescriptions = [
+  "安静的教室里，黄色书包忽然浮离地面。学生抱着课本，惊讶地看着浮起的黄色书包。",
+  "书包带着星光飘向楼梯，学生追了上去。学生沿校园走廊追赶飘向楼梯的书包。",
+  "课桌和椅子搭成通往夜空的阶梯。学生爬上歪斜的课桌阶梯，伸手追赶书包。",
+  "教室屋顶变成星空，月亮近得像能摸到。教室屋顶敞向星空，学生站在课桌上伸手够书包。",
+  "害怕变成勇气，书包载着学生飞过云层。学生骑着黄色书包飞向巨大月亮，纸飞机相随。",
+  "清晨回到校门，掌心多了一颗浅蓝色石头。学生在校门前向橘猫展示浅蓝色月亮石。",
+  "大云朵像水壶一样，把第一场雨倒下来。两名穿雨衣的学生仰望水壶形状的乌云。",
+  "积水越过雨靴，担心随着纸船一起漂动。两名学生挤在翻折的雨伞下看着被水淹的街道。",
+  "雨伞成了帆船，公交车成了红鲸鱼。两名学生在雨水想象成的河里驾驶雨伞船。",
+  "小纸船接走困在叶子上的蚂蚁。两名学生用纸船帮助叶片上的蚂蚁渡过积水。",
+  "红色公交鲸鱼推着温柔的浪向前游。雨伞船与长出鲸尾的红色公交车并肩航行。",
+  "雨停以后，彩虹藏进了路边水洼。两名学生站在雨后街道上看着水洼里的彩虹。",
+  "忙碌街道上，只有一个人发现高处的猫影。学生在车流旁指向正在攀爬高楼的橘猫。",
+  "一串湿猫爪印沿着楼梯一直向上。学生跟随橘色猫爪印爬上狭长楼梯。",
+  "楼顶的风很大，城市深得让人不敢迈步。学生站在高楼屋顶望向对面受困的橘猫。",
+  "一条红围巾在两座楼之间变成小桥。学生拉紧红围巾，让橘猫从相邻屋顶走来。",
+  "风停下来，小小的身体终于不再发抖。学生坐在安全的屋顶中央紧紧抱住获救橘猫。",
+  "高楼不再孤单，窗户和花盆一起亮起来。学生与橘猫在夕阳屋顶分享食物和水。",
+  "操场很热闹，教室里却只剩一个人。学生独坐在空教室，门外同学正在操场奔跑。",
+  "柜子深处还有几截短短的彩色粉笔。学生在旧柜子里发现装着短粉笔的纸盒。",
+  "一根犹豫的红线，让奔跑的人停下来看。学生跪在操场边画红线，两名同学好奇围观。",
+  "安静的一根线，变成全操场的彩色道路。许多学生在操场共同绘制巨大的彩虹道路。",
+  "短雨把粉笔画冲开，颜色开始自己流动。学生们在太阳雨中用叶片引导流动的彩色水痕。",
+  "被冲淡的画，又被更多双手重新画亮。学生举起最后一截红粉笔，大家共同重画彩虹路。",
+  "月亮石、纸船和红粉笔被放在书桌上。穿条纹睡衣的学生整理书包里的月亮石、纸船和粉笔。",
+  "屋里很安静，月亮石却在床边轻轻发光。学生躺在床上望着床头发光的浅蓝色月亮石。",
+  "枕头下面露出一小块太阳和白云。学生掀开枕头一角，看见温暖的太阳光。",
+  "房间装不下的白天，流进了无边梦境。学生掀开枕头，白昼风景流入布满鲸鱼和云朵的梦境。",
+  "月亮、纸船、小猫和彩虹在同一片天空相遇。学生和橘猫乘飞行书包经过鲸鱼、彩虹路与漂浮校园。",
+  "清晨回到画纸，梦里的故事有了最后一笔。学生在晨光中为画册画橘猫，真猫用爪碰触页面。",
+] as const;
+
+const xinshuoTwoLogicalPages: GuyuLogicalPage[] = [
+  {
+    id: "xinshuo-02-cover",
+    sourcePage: null,
+    src: xinshuoTwoPreviewCoverSrc,
+    placement: "full",
+    description: "水彩封面：月亮、黄色书包、学校、树与橘猫，题字多美故语·新说",
+  },
+  ...fullLogicalPages("xinshuo-02", xinshuoTwoPages, xinshuoTwoPageDescriptions),
+  {
+    id: "xinshuo-02-back-cover",
+    sourcePage: null,
+    src: null,
+    placement: "blank",
+    description: "封底衬页",
+  },
+];
+
 export const guyuBooks: readonly GuyuBook[] = [
   {
     id: "meiyou-yujian",
@@ -298,6 +353,23 @@ export const guyuBooks: readonly GuyuBook[] = [
     pages: xinshuoOnePages,
     pageDescriptions: xinshuoOnePageDescriptions,
     logicalPages: xinshuoOneLogicalPages,
+  },
+  {
+    id: "xinshuo-02",
+    title: "月亮下的童梦",
+    author: "多美",
+    kind: "画册",
+    chapter: "新说",
+    access: "public",
+    description: "五段小学水彩想象，从飞向月亮的书包，到被枕头收好的白天。",
+    accessibilityNote: "本册为小学生水彩画风格的连续想象画册；每一页都有画面说明。",
+    pageCount: 30,
+    coverSrc: xinshuoTwoPreviewCoverSrc,
+    previewCoverSrc: xinshuoTwoPreviewCoverSrc,
+    previewAccent: "var(--color-guyu-cover-watercolor)",
+    pages: xinshuoTwoPages,
+    pageDescriptions: xinshuoTwoPageDescriptions,
+    logicalPages: xinshuoTwoLogicalPages,
   },
 ];
 

@@ -80,10 +80,43 @@ test("maps the existing xinshuo-01 artwork as a public full-page book", () => {
   assert.match(book.previewAccent, /^var\(--color-guyu-cover-/u);
 });
 
+test("maps watercolor xinshuo-02 with an independent cover and 30 full body pages", () => {
+  const book = guyuBooks.find((candidate) => candidate.id === "xinshuo-02");
+  assert.ok(book);
+  assert.equal(book.title, "月亮下的童梦");
+  assert.equal(book.author, "多美");
+  assert.equal(book.chapter, "新说");
+  assert.equal(book.kind, "画册");
+  assert.equal(book.access, "public");
+  assert.equal(book.pages.length, 30);
+  assert.equal(book.pageDescriptions.length, 30);
+  assert.equal(book.logicalPages.length, 32);
+  assert.ok(book.pages.every((page) => page.startsWith("/images/guyu/xinshuo-02/pages/")));
+  assert.equal(book.coverSrc, "/images/guyu-xinshuo-02-cover.webp");
+  assert.equal(book.logicalPages[0].src, book.previewCoverSrc);
+  assert.equal(book.logicalPages[0].sourcePage, null);
+  assert.ok(book.logicalPages.slice(1, -1).every((page) => page.placement === "full"));
+  assert.deepEqual(book.logicalPages.slice(1, -1).map((page) => page.src), book.pages);
+  assert.equal(book.logicalPages.at(-1)?.placement, "blank");
+  assert.equal(formatGuyuPageNumber(1, book.logicalPages.length), "1–2 / 30");
+  assert.equal(formatGuyuPageNumber(29, book.logicalPages.length), "29–30 / 30");
+  assert.equal(formatGuyuPageNumber(31, book.logicalPages.length), "封底");
+  assert.equal(
+    book.logicalPages[1].description,
+    "安静的教室里，黄色书包忽然浮离地面。学生抱着课本，惊讶地看着浮起的黄色书包。",
+  );
+  assert.equal(
+    book.logicalPages.at(-2)?.description,
+    "清晨回到画纸，梦里的故事有了最后一笔。学生在晨光中为画册画橘猫，真猫用爪碰触页面。",
+  );
+  assert.match(book.previewAccent, /^var\(--color-guyu-cover-/u);
+});
+
 test("keeps every public new-book page present, ordered, and byte-stable", () => {
   const expectedHashes = {
     "zhi-shang-feiyan": "3500dbe09effcf7f8cc6d14616caad110a8c8c3d59d1520be8962149bece2c20",
     "xinshuo-01": "39621cb2ce866b65f64fd2d305e73d5e4035c264cf302a8993909576542cfba8",
+    "xinshuo-02": "98f439c37b83abbb52da41334d531c7df9fc30f07a9805535d3bb96be8c6fab2",
   } as const;
   const expectedNames = Array.from({ length: 30 }, (_, index) => `${String(index + 1).padStart(3, "0")}.webp`);
 

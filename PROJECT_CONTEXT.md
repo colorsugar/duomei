@@ -44,7 +44,8 @@ Browser at duomei.site
 │
 ├─ Public static Guyu assets (`public/images/guyu/`)
 │  ├─ `zhi-shang-feiyan/pages/001.webp` … `030.webp`
-│  └─ `xinshuo-01/pages/001.webp` … `030.webp`
+│  ├─ `xinshuo-01/pages/001.webp` … `030.webp`
+│  └─ `xinshuo-02/pages/001.webp` … `030.webp`
 │
 ├─ Supabase project `bokvqndvwqgugkcrizwj`
 │  ├─ Auth
@@ -68,7 +69,7 @@ Only the 53-page class book uses the protected EdgeOne Blob path and the origina
 | Note cover/body media | Cloudflare Worker + R2 `duomei-media` | 28 objects, 99.3 MB; current database media URLs use the Worker host |
 | Legacy Supabase `note-images` | Supabase Storage | 0 objects; retained only as a locked rollback boundary after the upload migration |
 | Protected class-book pages | EdgeOne Pages Blob `guyu-private` | 53-page `meiyou-yujian`; only this book uses `/api/guyu-auth` and `/api/guyu-page` |
-| Public `新说` pages | EdgeOne static deployment | 60 ordered WebP pages: `纸上飞檐` and `xinshuo-01`; hashes and page sequences are release-tested |
+| Public `新说` pages | EdgeOne static deployment | 90 ordered WebP pages: `纸上飞檐`, `xinshuo-01`, and `xinshuo-02`; hashes and page sequences are release-tested |
 | Retained `纸上飞檐` Blob copy | EdgeOne Pages Blob `guyu-private` | 30 objects retained only as an unused rollback copy; not a live read path |
 | Retained Guyu fallback | Cloudflare R2 `duomei-private` | 53 objects, 11.4 MB; not the current EdgeOne read path |
 
@@ -86,6 +87,7 @@ External runtime hosts intentionally referenced by the site are `duomei.site`, `
 | `/guyu/:bookId` | Public full-screen reader for allowlisted `新说` books | No |
 | `/guyu/zhi-shang-feiyan` | `新说 / 纸上飞檐`, 30 complete `full` pages | No |
 | `/guyu/xinshuo-01` | `新说 / 想象画本`, 30 complete `full` pages | No |
+| `/guyu/xinshuo-02` | `新说 / 月亮下的童梦`, 30 complete `full` watercolor pages | No |
 | `/skills` | Skill directory | Yes |
 | `/admin/login` | Supabase admin login | No |
 | `/admin`, `/admin/notes` | Note management | No |
@@ -100,6 +102,7 @@ External runtime hosts intentionally referenced by the site are `duomei.site`, `
 - The header portal binds native short-touch listeners directly to its DOM for iOS compatibility. Touch activation is synchronous: buttons dispatch their click immediately, while anchors call `window.location.assign()` during the touch event. Preserve drag rejection, duplicate-click suppression, mouse/keyboard navigation, and the delayed close after a real route/hash navigation.
 - The Guyu gate uses the original class-question wording and a numeric class-number field. Do not display a generated password length. Never place the real answer in source, tests, documentation, or public history, and never change the answer without explicit authorization.
 - The Guyu reader keeps the 53 physical old-book scans with their reviewed spread mapping. Only that class book is password-gated. The public shelf and all `新说` books reuse the same touch/keyboard reader with public static WebP pages.
+- Guyu reader touch ownership is frozen: the capture layer owns single-finger tap/swipe while leaving native vertical scroll and pinch zoom enabled. Once any touch sequence contains two fingers, that whole sequence is latched as zoom-only until every finger is released; it must never turn a page or emit a compatibility-click turn afterward.
 - The homepage Guyu preview displays each book for 1.6 seconds, then keeps 16 visible cover fragments while they scatter, take on the next cover's accent, swap imagery, and reassemble. It supports left/right swipe, Arrow/Home/End keys, a pause control, clickable IG-style progress dots, and seamless first/last looping; a normal tap still opens the public `/guyu` shelf. Reduced-motion mode disables autoplay and uses immediate state changes.
 - On mobile, the Guyu shelf ending uses compact spacing and the footer keeps all six shortcuts in one 44px-high row. The back-to-top control hides while the footer is visible so it never covers navigation or copyright text.
 - The header menu item `故语` targets `/#guyu`; it must never bypass the homepage preview by navigating directly to `/guyu`.
@@ -131,9 +134,9 @@ Never commit or echo values for:
 - Supabase service-role or secret keys
 - session Cookies, private class-book originals, or private source PDFs
 
-Production Guyu runtime values belong only in EdgeOne project environment settings. `EDGEONE_API_TOKEN` belongs only in the GitHub Actions Secret with that name. The 53 protected `meiyou-yujian` pages remain private and may never be copied under `public/`; the two approved `新说` books are intentionally public static assets.
+Production Guyu runtime values belong only in EdgeOne project environment settings. `EDGEONE_API_TOKEN` belongs only in the GitHub Actions Secret with that name. The 53 protected `meiyou-yujian` pages remain private and may never be copied under `public/`; the three approved `新说` books are intentionally public static assets.
 
-`纸上飞檐` was audited from private source repository `colorsugar/-` at commit `249736f5dd4914f1797a6eb5b4e8d9226edb6be9`. Its 30 pages are now committed public derivatives and the production reader never fetches the source Vercel preview. `xinshuo-01` is the approved first cloud-task album and must not be regenerated or replaced. Both the abstract-geometric and adult photorealistic `xinshuo-02` drafts were rejected on 2026-09-03 and must never be published. The only approved direction is a 30-page elementary-school watercolor album titled `月亮下的童梦`; do not publish it until the complete 1100×1684 WebP set and manifest pass the normal book checks. `server/guyuBooks.test.ts` fixes every currently approved public book's page sequence and aggregate SHA-256.
+`纸上飞檐` was audited from private source repository `colorsugar/-` at commit `249736f5dd4914f1797a6eb5b4e8d9226edb6be9`. Its 30 pages are now committed public derivatives and the production reader never fetches the source Vercel preview. `xinshuo-01` is the approved first cloud-task album and must not be regenerated or replaced. Both the abstract-geometric and adult photorealistic second drafts were rejected on 2026-09-03 and must never be published. The approved `xinshuo-02` is the 30-page elementary-school watercolor album `月亮下的童梦`, imported from audited package SHA-256 `e5489da43ef4dc5c00d9c42290503a1041c3cedce0dc8720123ed17b8817dde7`; all 30 files are 1100×1684, use `full` placement, and have aggregate page SHA-256 `98f439c37b83abbb52da41334d531c7df9fc30f07a9805535d3bb96be8c6fab2`. `server/guyuBooks.test.ts` fixes every approved public book's page sequence and aggregate SHA-256.
 
 ## Local Verification
 
