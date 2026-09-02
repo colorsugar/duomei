@@ -10,7 +10,7 @@
     "build": "npm run typecheck:server && tsc -b && vite build",
     "typecheck": "tsc -b",
     "typecheck:server": "tsc -p tsconfig.server.json",
-    "test:home-hold": "node --experimental-strip-types --test src/lib/homeSectionHold.test.ts",
+    "test:home-hold": "node --experimental-strip-types --test src/lib/homeSectionHold.test.ts src/lib/headerNavBreakpoint.test.ts",
     "test:guyu": "node --experimental-strip-types --test server/guyuSession.test.ts server/guyuRateLimit.test.ts server/guyuBooks.test.ts server/guyuEdgeOneAdapter.test.mjs",
     "lint": "tsc -b",
     "preview": "vite preview",

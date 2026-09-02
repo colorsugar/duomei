@@ -161,7 +161,7 @@ Do not send another AI passwords, tokens, Cookies, private page files, or platfo
 
 These findings are not automatically authorized fixes. Reverify before acting.
 
-- **P1 — 768px coarse-pointer navigation:** at a verified `768×900` coarse/hover-none viewport, the mobile toggle is hidden while the desktop nav is also hidden and non-interactive. Tablet navigation needs a breakpoint/input-mode repair.
+- **P1 — 768px coarse-pointer navigation:** repaired. `@media (max-width: 768px), (hover: none) and (pointer: coarse)` now keeps the hamburger reachable and opens the menu with `.is-menu-open` instead of hover-reveal. Reverify at `768×900` coarse/hover-none on `/` and `/guyu` after deploy.
 - **P1 — Guyu brute-force boundary:** application fallback limiting uses forwarded IP headers and process-local memory. A shared EdgeOne WAF/rate-limit rule for `POST /api/guyu-auth` was not verified in the audit and must not be assumed.
 - **P2 — Legacy Supabase Storage:** the public `note-images` bucket was empty at audit time, but its write/update/delete policies allow any authenticated role rather than checking DUOMEI admin membership. Current note media uses the Cloudflare Worker/R2 path; keep the legacy bucket isolated until policies are tightened or it is retired.
 - **P2 — SVG uploads:** the Cloudflare media Worker accepts `image/svg+xml` without content sanitization. Remove SVG support or sanitize/rasterize it before treating arbitrary authenticated uploaders as safe.

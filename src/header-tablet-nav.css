@@ -1,0 +1,67 @@
+/* Tablet / coarse-pointer header: keep a reachable menu when hover-reveal cannot work.
+   768×900 hover-none/coarse previously hid both the toggle (max-width: 760) and the desktop nav. */
+@media (max-width: 768px), (hover: none) and (pointer: coarse) {
+  .duomei-header-hover-zone {
+    display: none !important;
+  }
+
+  .duomei-menu-toggle,
+  .duomei-header .duomei-menu-toggle {
+    display: inline-flex !important;
+    position: relative !important;
+    pointer-events: auto !important;
+    width: 42px !important;
+    height: 42px !important;
+    min-width: 42px !important;
+    align-items: center !important;
+    justify-content: center !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+
+  .duomei-header nav,
+  .duomei-header:hover nav,
+  .duomei-header:focus-within nav,
+  .duomei-header.is-hover-revealed nav,
+  .duomei-header .duomei-menu-toggle:hover ~ nav,
+  .duomei-header .duomei-menu-toggle:focus-visible ~ nav,
+  .duomei-header nav:hover,
+  .duomei-header nav:focus-within {
+    position: absolute !important;
+    top: calc(100% + 8px) !important;
+    right: 14px !important;
+    display: grid !important;
+    width: min(148px, calc(100vw - 28px)) !important;
+    max-width: calc(100vw - 28px) !important;
+    grid-template-columns: 1fr !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+    transform: translateY(-6px) scale(0.96) !important;
+  }
+
+  .duomei-header.is-menu-open nav {
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+    transform: translateY(0) scale(1) !important;
+  }
+
+  .duomei-header nav a,
+  .duomei-header nav button {
+    display: flex !important;
+    width: 100% !important;
+    min-height: 36px !important;
+    justify-content: center !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    white-space: nowrap !important;
+  }
+
+  .duomei-header.is-menu-open nav a,
+  .duomei-header.is-menu-open nav button {
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    transform: translate3d(0, 0, 0) scale(1) !important;
+  }
+}
