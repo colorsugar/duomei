@@ -106,6 +106,8 @@ $requiredMarkers = @(
   @{ File = "src/components/DuomeiHeader.tsx"; Marker = 'href="/guyu"' },
   @{ File = "src/components/DuomeiHeader.tsx"; Marker = "data-native-navigation" },
   @{ File = "src/components/DuomeiHeader.tsx"; Marker = "closeAfterNativeNavigation" },
+  @{ File = "src/components/DuomeiHeader.tsx"; Marker = "pendingTouchActivationRef" },
+  @{ File = "src/components/DuomeiHeader.tsx"; Marker = "onTouchEnd={finishMenuTouch}" },
   @{ File = "src/components/DuomeiHeader.tsx"; Marker = 'window.addEventListener("hashchange"' },
   @{ File = "src/components/DuomeiFooter.tsx"; Marker = 'to: "/#skills"' },
   @{ File = "src/components/StickerPackSection.tsx"; Marker = "https://w.url.cn/s/ANJIS6e#wechat_redirect" },

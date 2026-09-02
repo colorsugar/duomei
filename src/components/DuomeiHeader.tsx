@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type MouseEvent, type TouchEvent } from "react";
 import { createPortal } from "react-dom";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { clearJourneyListState } from "../motion";
@@ -12,6 +12,9 @@ export function DuomeiHeader() {
   const [scrollRevealed, setScrollRevealed] = useState(true);
   const lastScrollYRef = useRef(typeof window === "undefined" ? 0 : window.scrollY);
   const scrollFrameRef = useRef(0);
+  const menuTouchStartRef = useRef<{ x: number; y: number } | null>(null);
+  const pendingTouchActivationRef = useRef<number | null>(null);
+  const lastTouchActivationRef = useRef(0);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -59,6 +62,12 @@ export function DuomeiHeader() {
     return () => window.removeEventListener("hashchange", finishHashNavigation);
   }, []);
 
+  useEffect(() => () => {
+    if (pendingTouchActivationRef.current !== null) {
+      window.cancelAnimationFrame(pendingTouchActivationRef.current);
+    }
+  }, []);
+
   const closeMenu = () => {
     setMenuOpen(false);
     setHoverRevealed(false);
@@ -99,6 +108,53 @@ export function DuomeiHeader() {
   const logoutAndClose = () => {
     logout();
     closeMenu();
+  };
+
+  const beginMenuTouch = (event: TouchEvent<HTMLElement>) => {
+    if (event.touches.length !== 1) {
+      menuTouchStartRef.current = null;
+      return;
+    }
+
+    const touch = event.touches[0];
+    menuTouchStartRef.current = { x: touch.clientX, y: touch.clientY };
+  };
+
+  const finishMenuTouch = (event: TouchEvent<HTMLElement>) => {
+    const start = menuTouchStartRef.current;
+    menuTouchStartRef.current = null;
+    const touch = event.changedTouches[0];
+    if (!start || !touch || Math.hypot(touch.clientX - start.x, touch.clientY - start.y) > 10) return;
+
+    const target = event.target instanceof Element
+      ? event.target.closest<HTMLAnchorElement | HTMLButtonElement>("a, button")
+      : null;
+    if (!target || !event.currentTarget.contains(target)) return;
+
+    // iOS Safari can suppress the compatibility click inside a fixed, animated menu.
+    // Activate a genuine short tap on the next frame and block any delayed duplicate.
+    event.preventDefault();
+    if (pendingTouchActivationRef.current !== null) {
+      window.cancelAnimationFrame(pendingTouchActivationRef.current);
+    }
+    pendingTouchActivationRef.current = window.requestAnimationFrame(() => {
+      pendingTouchActivationRef.current = null;
+      if (!target.isConnected) return;
+      target.click();
+      lastTouchActivationRef.current = window.performance.now();
+    });
+  };
+
+  const blockDuplicateTouchClick = (event: MouseEvent<HTMLElement>) => {
+    if (!event.nativeEvent.isTrusted) return;
+    if (pendingTouchActivationRef.current !== null) {
+      window.cancelAnimationFrame(pendingTouchActivationRef.current);
+      pendingTouchActivationRef.current = null;
+      return;
+    }
+    if (window.performance.now() - lastTouchActivationRef.current > 700) return;
+    event.preventDefault();
+    event.stopPropagation();
   };
 
   const closeAfterNativeNavigation = () => {
@@ -143,7 +199,14 @@ export function DuomeiHeader() {
         <span />
       </button>
 
-      <nav aria-label="主导航" data-native-navigation>
+      <nav
+        aria-label="主导航"
+        data-native-navigation
+        onClickCapture={blockDuplicateTouchClick}
+        onTouchStart={beginMenuTouch}
+        onTouchEnd={finishMenuTouch}
+        onTouchCancel={() => { menuTouchStartRef.current = null; }}
+      >
         <a href="/" onClick={closeAfterNativeNavigation}>
           首页
         </a>
