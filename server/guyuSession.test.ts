@@ -12,12 +12,12 @@ import {
 const secret = "test-only-secret-that-is-longer-than-thirty-two-characters";
 
 test("normalizes accepted class-answer variants", () => {
-  for (const answer of ["726", "726班", " 7 2 6 ", "７ ２ ６ 班"]) {
-    assert.equal(normalizeGuyuAnswer(answer), "726");
-    assert.equal(guyuAnswerMatches(answer, "726"), true);
+  for (const answer of ["fixture314", "fixture314班", " fixture 314 ", "ｆｉｘｔｕｒｅ ３１４ 班"]) {
+    assert.equal(normalizeGuyuAnswer(answer), "fixture314");
+    assert.equal(guyuAnswerMatches(answer, "fixture314"), true);
   }
-  assert.equal(guyuAnswerMatches("725", "726"), false);
-  assert.equal(guyuAnswerMatches("726班班", "726"), false);
+  assert.equal(guyuAnswerMatches("fixture315", "fixture314"), false);
+  assert.equal(guyuAnswerMatches("fixture314班班", "fixture314"), false);
 });
 
 test("signs, expires, and rejects tampered sessions", () => {

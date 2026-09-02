@@ -5,6 +5,11 @@ export default defineConfig({
   plugins: [
     cloudflareTest({
       wrangler: { configPath: "./wrangler.jsonc" },
+      miniflare: {
+        bindings: {
+          GUYU_MEDIA_SIGNING_SECRET: "test-only-secret-that-is-longer-than-thirty-two-characters",
+        },
+      },
     }),
   ],
 });

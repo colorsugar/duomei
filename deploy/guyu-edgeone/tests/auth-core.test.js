@@ -107,9 +107,9 @@ test("page traversal and out-of-range pages never reach storage", async () => {
 test("normalized class-answer variants are accepted", async () => {
   const classEnv = {
     ...env,
-    GUYU_ANSWER_HASH: pbkdf2Sync("142", salt, PBKDF2_ITERATIONS, 32, "sha256").toString("base64"),
+    GUYU_ANSWER_HASH: pbkdf2Sync("fixture314", salt, PBKDF2_ITERATIONS, 32, "sha256").toString("base64"),
   };
-  for (const [index, variant] of ["142班", " １４２ 班 "].entries()) {
+  for (const [index, variant] of ["fixture314班", " ｆｉｘｔｕｒｅ ３１４ 班 "].entries()) {
     const handler = createHandler({ downloadFile: async () => Buffer.alloc(1), env: classEnv, now, nonce: () => `nonce-variant-${index}` });
     const result = await handler(event("/api/guyu-auth", "POST", {
       headers: { "x-forwarded-for": `198.51.100.${index + 10}` },

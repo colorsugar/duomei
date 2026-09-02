@@ -1,0 +1,162 @@
+name: Deploy DUOMEI to EdgeOne
+
+on:
+  push:
+    branches:
+      - candidate/guyu-edgeone-global-20260901
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: edgeone-production-duomei-guyu
+  cancel-in-progress: false
+
+jobs:
+  verify-and-deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      EDGEONE_CLI_VERSION: 1.6.31-3
+      EDGEONE_PROJECT_NAME: duomei-guyu
+      EDGEONE_PROJECT_ID: makers-brifmhu31vjf
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 22.17.1
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            cloudflare/duomei-media/package-lock.json
+
+      - name: Install site dependencies
+        run: npm ci
+
+      - name: Test homepage section holds
+        run: npm run test:home-hold
+
+      - name: Test protected Guyu delivery
+        run: npm run test:guyu
+
+      - name: Build full site
+        run: npm run build
+
+      - name: Verify release source of truth
+        shell: pwsh
+        run: ./scripts/verify-release.ps1
+
+      - name: Install media worker dependencies
+        run: npm --prefix cloudflare/duomei-media ci
+
+      - name: Check media worker
+        run: npm --prefix cloudflare/duomei-media run check
+
+      - name: Test media worker
+        run: npm --prefix cloudflare/duomei-media test
+
+      - name: Dry-run media worker bundle
+        run: npm --prefix cloudflare/duomei-media run deploy:dry
+
+      - name: Write deployment marker
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p public/.well-known
+          printf '{"commit":"%s","run":"%s"}\n' "$GITHUB_SHA" "$GITHUB_RUN_ID" > public/.well-known/duomei-build.json
+
+      - name: Deploy production to EdgeOne Makers
+        id: edgeone
+        shell: bash
+        env:
+          EDGEONE_API_TOKEN: ${{ secrets.EDGEONE_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          if [[ -z "${EDGEONE_API_TOKEN:-}" ]]; then
+            echo "EDGEONE_API_TOKEN is not configured." >&2
+            exit 1
+          fi
+
+          deploy_log="$(mktemp)"
+          npx --yes "edgeone@${EDGEONE_CLI_VERSION}" makers deploy \
+            -n "$EDGEONE_PROJECT_NAME" \
+            -t "$EDGEONE_API_TOKEN" \
+            -e production \
+            -a global \
+            --json | tee "$deploy_log"
+
+          DEPLOY_RESULT="$(tail -n 1 "$deploy_log")" node <<'NODE'
+          const fs = require("node:fs");
+
+          const expectedProjectId = process.env.EDGEONE_PROJECT_ID;
+          const result = JSON.parse(process.env.DEPLOY_RESULT);
+          const strings = [];
+          const visit = (value) => {
+            if (typeof value === "string") strings.push(value);
+            else if (Array.isArray(value)) value.forEach(visit);
+            else if (value && typeof value === "object") Object.values(value).forEach(visit);
+          };
+          visit(result);
+
+          if (!strings.includes(expectedProjectId)) {
+            throw new Error(`EdgeOne returned an unexpected project: expected ${expectedProjectId}`);
+          }
+
+          const deploymentId = strings.find((value) => /^dp[a-z0-9]+$/i.test(value)) ?? "unknown";
+          fs.appendFileSync(
+            process.env.GITHUB_STEP_SUMMARY,
+            `## EdgeOne production deployment\n\n- Project: ${expectedProjectId}\n- Deployment: ${deploymentId}\n- Commit: ${process.env.GITHUB_SHA}\n`,
+          );
+          NODE
+
+      - name: Verify production commit and protected routes
+        shell: bash
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const expectedCommit = process.env.GITHUB_SHA;
+          const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+          let lastError = "deployment did not propagate";
+
+          for (let attempt = 1; attempt <= 18; attempt += 1) {
+            try {
+              const nonce = `${Date.now()}-${attempt}`;
+              const [marker, home, auth, protectedPage] = await Promise.all([
+                fetch(`https://duomei.site/.well-known/duomei-build.json?ci=${nonce}`, { cache: "no-store" }),
+                fetch(`https://duomei.site/?ci=${nonce}`, { cache: "no-store" }),
+                fetch(`https://duomei.site/api/guyu-auth?ci=${nonce}`, { cache: "no-store" }),
+                fetch(`https://duomei.site/api/guyu-page?book=meiyou-yujian&page=001&ci=${nonce}`, { cache: "no-store" }),
+              ]);
+              const markerBody = marker.ok ? await marker.json() : null;
+              const authBody = auth.ok ? await auth.json() : null;
+
+              if (
+                marker.status === 200 &&
+                markerBody?.commit === expectedCommit &&
+                home.status === 200 &&
+                auth.status === 200 &&
+                authBody?.authorized === false &&
+                protectedPage.status === 401
+              ) {
+                console.log(`Production verified on attempt ${attempt}.`);
+                process.exit(0);
+              }
+
+              lastError = `marker=${marker.status}/${markerBody?.commit ?? "missing"} home=${home.status} auth=${auth.status}/${authBody?.authorized} protected=${protectedPage.status}`;
+            } catch (error) {
+              lastError = error instanceof Error ? error.message : String(error);
+            }
+
+            console.log(`Waiting for production propagation (${attempt}/18): ${lastError}`);
+            await sleep(10_000);
+          }
+
+          throw new Error(`Production verification failed: ${lastError}`);
+          NODE

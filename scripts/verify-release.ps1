@@ -7,6 +7,7 @@ $root = Resolve-Path (Join-Path $PSScriptRoot "..")
 Set-Location $root
 
 $poetryBundle = @(
+  ".github/workflows/deploy-edgeone.yml",
   "src/components/HomeIntroSection.tsx",
   "src/components/HomeIntroSection.css",
   "src/components/HomeKineticStage.tsx",
@@ -19,6 +20,7 @@ $poetryBundle = @(
   "src/lib/timePoetryContent.ts",
   "src/lib/homeSectionHold.ts",
   "src/lib/homeSectionHold.test.ts",
+  "deploy/guyu-edgeone/tests/auth-core.test.js",
   "src/pages/DuomeiHomePage.tsx",
   "src/App.tsx",
   "src/components/DuomeiFooter.tsx",
@@ -61,6 +63,7 @@ $guyuBundle = @(
   "server/guyuRateLimit.ts",
   "server/guyuBooks.test.ts",
   "src/components/GuyuAccessGate.tsx",
+  "deploy/guyu-edgeone/src/components/GuyuAccessGate.tsx",
   "src/components/GuyuFlipbook.tsx",
   "src/components/GuyuShelfPreview.tsx",
   "src/content/guyuBooks.ts",
@@ -76,6 +79,14 @@ $guyuBundle = @(
 $bundle = @($poetryBundle + $guyuBundle | Sort-Object -Unique)
 
 $requiredMarkers = @(
+  @{ File = ".github/workflows/deploy-edgeone.yml"; Marker = "EDGEONE_PROJECT_ID: makers-brifmhu31vjf" },
+  @{ File = ".github/workflows/deploy-edgeone.yml"; Marker = 'EDGEONE_API_TOKEN: ${{ secrets.EDGEONE_API_TOKEN }}' },
+  @{ File = ".github/workflows/deploy-edgeone.yml"; Marker = "public/.well-known/duomei-build.json" },
+  @{ File = "deploy/guyu-edgeone/tests/auth-core.test.js"; Marker = "fixture314" },
+  @{ File = "server/guyuSession.test.ts"; Marker = "fixture314" },
+  @{ File = "cloudflare/duomei-media/vitest.config.ts"; Marker = "test-only-secret-that-is-longer-than-thirty-two-characters" },
+  @{ File = "src/components/GuyuAccessGate.tsx"; Marker = 'data-guyu-access-code="10-digits"' },
+  @{ File = "deploy/guyu-edgeone/src/components/GuyuAccessGate.tsx"; Marker = 'data-guyu-access-code="10-digits"' },
   @{ File = "src/components/HomeIntroSection.tsx"; Marker = "PoetryCanvasEditor" },
   @{ File = "src/components/HomeIntroSection.tsx"; Marker = 'id="kuaihuo"' },
   @{ File = "src/components/HomeIntroSection.tsx"; Marker = "PoetryStackDeck" },

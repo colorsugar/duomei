@@ -14,6 +14,7 @@ This document is mandatory for every AI agent and every new conversation working
 
 The following files form one release unit. If any of them changes for poetry/快活/微言 work, inspect the entire group and publish the complete intended version together:
 
+- `.github/workflows/deploy-edgeone.yml`
 - `src/components/HomeIntroSection.tsx`
 - `src/components/HomeIntroSection.css`
 - `src/components/HomeKineticStage.tsx`
@@ -51,6 +52,7 @@ The “故语” library and reader are one release unit. Review, commit, and de
 - `server/guyuSession.ts`, `server/guyuRateLimit.ts`, and their tests
 - `server/guyuBooks.test.ts` for mixed single-page/two-page scan alignment
 - `src/components/GuyuAccessGate.tsx`
+- `deploy/guyu-edgeone/src/components/GuyuAccessGate.tsx` for the isolated EdgeOne package
 - `src/components/GuyuFlipbook.tsx`
 - `src/components/GuyuShelfPreview.tsx`
 - `src/content/guyuBooks.ts`
@@ -90,7 +92,7 @@ Before production, the Vercel Firewall must enforce a rate limit on `POST /api/g
 - Mobile keeps the fixed safe-area shortcut order 首页 / 小记 / 故语 / 颜色 / 微言 / 技能; desktop renders the same shortcuts inside the footer.
 - Mobile menu anchors complete native navigation before the route/hash change closes the menu; do not synchronously hide the nav inside an anchor click handler.
 - `/guyu/meiyou-yujian` keeps all 53 scans, expands detected two-page scans into aligned logical spreads, preserves the front and back covers, uses the pinned StPageFlip engine for full-screen phone/desktop page turns, and keeps keyboard plus compact overlay controls.
-- `/guyu` and every page request remain behind the server-verified class question; direct static and unsigned R2 paths remain blocked.
+- `/guyu` and every page request remain behind the server-verified access code; direct static and unsigned R2 paths remain blocked.
 - The poetry portal target keeps `id="kuaihuo"`.
 - The admin reflects 首页 / 微言 / 小记管理.
 - The homepage paper curve reaches the full right edge.
@@ -109,3 +111,10 @@ Before production, the Vercel Firewall must enforce a rate limit on `POST /api/g
 7. Verify production and the editor, not only the public visual page.
 
 If any bundle file is still modified, staged, or untracked after the commit, the release is incomplete and must not be deployed.
+
+## EdgeOne Production Automation
+
+- Pushes to `candidate/guyu-edgeone-global-20260901` deploy the repository root to the existing direct-upload Makers project `duomei-guyu` (`makers-brifmhu31vjf`).
+- The workflow must keep `edgeone.json`, `cloud-functions/`, and the full source tree together; never replace the deploy command with a `dist`-only upload.
+- `EDGEONE_API_TOKEN` exists only as a GitHub Actions Secret. Runtime `GUYU_*` values remain in the EdgeOne console and must never be copied into GitHub.
+- Production is accepted only when the generated `/.well-known/duomei-build.json` matches the pushed commit and the homepage/auth/private-page checks return `200/200/401`.
