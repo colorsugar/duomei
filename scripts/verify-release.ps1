@@ -85,6 +85,7 @@ $requiredMarkers = @(
   @{ File = "deploy/guyu-edgeone/tests/auth-core.test.js"; Marker = "fixture314" },
   @{ File = "server/guyuSession.test.ts"; Marker = "fixture314" },
   @{ File = "cloudflare/duomei-media/vitest.config.ts"; Marker = "test-only-secret-that-is-longer-than-thirty-two-characters" },
+  @{ File = "cloudflare/duomei-media/package.json"; Marker = '"@typescript/typescript-linux-x64": "7.0.2"' },
   @{ File = "src/components/GuyuAccessGate.tsx"; Marker = 'data-guyu-access-code="10-digits"' },
   @{ File = "deploy/guyu-edgeone/src/components/GuyuAccessGate.tsx"; Marker = 'data-guyu-access-code="10-digits"' },
   @{ File = "src/components/HomeIntroSection.tsx"; Marker = "PoetryCanvasEditor" },

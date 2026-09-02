@@ -15,5 +15,8 @@
     "typescript": "7.0.2",
     "vitest": "4.1.10",
     "wrangler": "4.122.0"
+  },
+  "optionalDependencies": {
+    "@typescript/typescript-linux-x64": "7.0.2"
   }
 }
