@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type MouseEvent, type TouchEvent } from "react";
+import { useEffect, useRef, useState, type MouseEvent } from "react";
 import { createPortal } from "react-dom";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { clearJourneyListState } from "../motion";
@@ -10,6 +10,7 @@ export function DuomeiHeader() {
   const [scrolled, setScrolled] = useState(false);
   const [hoverRevealed, setHoverRevealed] = useState(false);
   const [scrollRevealed, setScrollRevealed] = useState(true);
+  const headerRef = useRef<HTMLElement>(null);
   const lastScrollYRef = useRef(typeof window === "undefined" ? 0 : window.scrollY);
   const scrollFrameRef = useRef(0);
   const menuTouchStartRef = useRef<{ x: number; y: number } | null>(null);
@@ -62,10 +63,64 @@ export function DuomeiHeader() {
     return () => window.removeEventListener("hashchange", finishHashNavigation);
   }, []);
 
-  useEffect(() => () => {
-    if (pendingTouchActivationRef.current !== null) {
-      window.cancelAnimationFrame(pendingTouchActivationRef.current);
-    }
+  useEffect(() => {
+    const header = headerRef.current;
+    if (!header) return;
+    header.dataset.menuTouchListener = "ready";
+
+    const beginMenuTouch = (event: TouchEvent) => {
+      if (event.touches.length !== 1) {
+        menuTouchStartRef.current = null;
+        return;
+      }
+
+      const touch = event.touches[0];
+      menuTouchStartRef.current = { x: touch.clientX, y: touch.clientY };
+    };
+
+    const finishMenuTouch = (event: TouchEvent) => {
+      const start = menuTouchStartRef.current;
+      menuTouchStartRef.current = null;
+      const touch = event.changedTouches[0];
+      if (!start || !touch || Math.hypot(touch.clientX - start.x, touch.clientY - start.y) > 10) return;
+
+      const target = event.target instanceof Element
+        ? event.target.closest<HTMLAnchorElement | HTMLButtonElement>("a, button")
+        : null;
+      if (!target || !header.contains(target)) return;
+
+      // Bind directly to the portal DOM so iOS in-app WebViews cannot lose the
+      // short tap inside React's delegated compatibility-click chain.
+      header.dataset.menuLastActivation = "touch";
+      event.preventDefault();
+      if (pendingTouchActivationRef.current !== null) {
+        window.cancelAnimationFrame(pendingTouchActivationRef.current);
+      }
+      pendingTouchActivationRef.current = window.requestAnimationFrame(() => {
+        pendingTouchActivationRef.current = null;
+        if (!target.isConnected) return;
+        target.click();
+        lastTouchActivationRef.current = window.performance.now();
+      });
+    };
+
+    const cancelMenuTouch = () => {
+      menuTouchStartRef.current = null;
+    };
+
+    header.addEventListener("touchstart", beginMenuTouch, { capture: true, passive: true });
+    header.addEventListener("touchend", finishMenuTouch, { capture: true, passive: false });
+    header.addEventListener("touchcancel", cancelMenuTouch, { capture: true, passive: true });
+    return () => {
+      header.removeEventListener("touchstart", beginMenuTouch, true);
+      header.removeEventListener("touchend", finishMenuTouch, true);
+      header.removeEventListener("touchcancel", cancelMenuTouch, true);
+      delete header.dataset.menuTouchListener;
+      delete header.dataset.menuLastActivation;
+      if (pendingTouchActivationRef.current !== null) {
+        window.cancelAnimationFrame(pendingTouchActivationRef.current);
+      }
+    };
   }, []);
 
   const closeMenu = () => {
@@ -110,41 +165,6 @@ export function DuomeiHeader() {
     closeMenu();
   };
 
-  const beginMenuTouch = (event: TouchEvent<HTMLElement>) => {
-    if (event.touches.length !== 1) {
-      menuTouchStartRef.current = null;
-      return;
-    }
-
-    const touch = event.touches[0];
-    menuTouchStartRef.current = { x: touch.clientX, y: touch.clientY };
-  };
-
-  const finishMenuTouch = (event: TouchEvent<HTMLElement>) => {
-    const start = menuTouchStartRef.current;
-    menuTouchStartRef.current = null;
-    const touch = event.changedTouches[0];
-    if (!start || !touch || Math.hypot(touch.clientX - start.x, touch.clientY - start.y) > 10) return;
-
-    const target = event.target instanceof Element
-      ? event.target.closest<HTMLAnchorElement | HTMLButtonElement>("a, button")
-      : null;
-    if (!target || !event.currentTarget.contains(target)) return;
-
-    // iOS Safari can suppress the compatibility click inside a fixed, animated menu.
-    // Activate a genuine short tap on the next frame and block any delayed duplicate.
-    event.preventDefault();
-    if (pendingTouchActivationRef.current !== null) {
-      window.cancelAnimationFrame(pendingTouchActivationRef.current);
-    }
-    pendingTouchActivationRef.current = window.requestAnimationFrame(() => {
-      pendingTouchActivationRef.current = null;
-      if (!target.isConnected) return;
-      target.click();
-      lastTouchActivationRef.current = window.performance.now();
-    });
-  };
-
   const blockDuplicateTouchClick = (event: MouseEvent<HTMLElement>) => {
     if (!event.nativeEvent.isTrusted) return;
     if (pendingTouchActivationRef.current !== null) {
@@ -169,11 +189,9 @@ export function DuomeiHeader() {
     <>
     <div className="duomei-header-hover-zone" aria-hidden="true" onPointerEnter={() => setHoverRevealed(true)} />
     <header
+      ref={headerRef}
       className={`duomei-header${menuOpen ? " is-menu-open" : ""}${scrolled ? " is-scrolled" : ""}${scrollRevealed ? " is-scroll-visible" : " is-scroll-hidden"}${hoverRevealed ? " is-hover-revealed" : ""}`}
       onClickCapture={blockDuplicateTouchClick}
-      onTouchStart={beginMenuTouch}
-      onTouchEnd={finishMenuTouch}
-      onTouchCancel={() => { menuTouchStartRef.current = null; }}
       onPointerEnter={() => setHoverRevealed(true)}
       onPointerLeave={() => {
         if (scrolled && !menuOpen) setHoverRevealed(false);
