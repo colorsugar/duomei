@@ -9,6 +9,7 @@ const headerSource = readFileSync(join(dirname(fileURLToPath(import.meta.url)), 
 const backToTopSource = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../components/BackToTopButton.tsx"), "utf8");
 const guyuPreviewSource = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../components/GuyuShelfPreview.tsx"), "utf8");
 const guyuCarouselSource = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "./guyuCarousel.ts"), "utf8");
+const guyuCss = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../guyu.css"), "utf8");
 const homeIntroCss = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../components/HomeIntroSection.css"), "utf8");
 const siteCss = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../styles.css"), "utf8");
 const query = "@media (max-width: 768px), (hover: none) and (pointer: coarse)";
@@ -32,13 +33,28 @@ test("keeps iOS header touch activation synchronous and deterministic", () => {
   assert.doesNotMatch(headerSource, /pendingTouchActivationRef/);
 });
 
-test("keeps the homepage Guyu preview fast, fragmented, manual, and routed through the public shelf", () => {
+test("keeps the homepage Guyu preview deliberate, fragmented, manual, and routed through the public shelf", () => {
+  const beginSettle = guyuPreviewSource.slice(
+    guyuPreviewSource.indexOf("const beginSettle"),
+    guyuPreviewSource.indexOf("const beginAssembly"),
+  );
   assert.match(guyuCarouselSource, /GUYU_CAROUSEL_DWELL_MS = 1_600/);
+  assert.match(guyuCarouselSource, /GUYU_FRAGMENT_SCATTER_MS = 340/);
+  assert.match(guyuCarouselSource, /GUYU_FRAGMENT_ASSEMBLE_MS = 500/);
+  assert.match(guyuCarouselSource, /GUYU_SETTLE_FALLBACK_MS = 1_200/);
   assert.match(guyuPreviewSource, /data-phase=\{transitionPhase\}/);
   assert.match(guyuPreviewSource, /guyu-home-fragment/);
   assert.match(guyuPreviewSource, /onPointerMove=\{handlePointerMove\}/);
   assert.match(guyuPreviewSource, /aria-current=\{indicatedIndex === index/);
-  assert.match(guyuPreviewSource, /TRANSITION_FALLBACK_MS = 900/);
+  assert.match(guyuPreviewSource, /transitionPhaseRef\.current = "settle"/);
+  assert.match(guyuPreviewSource, /cycleTokenRef\.current !== cycleToken/);
+  assert.match(guyuPreviewSource, /performance\.now\(\) - phaseStartedAtRef\.current/);
+  assert.match(guyuPreviewSource, /event\.elapsedTime \* 1_000/);
+  assert.match(guyuPreviewSource, /image\.decode\(\)\.then/);
+  assert.match(guyuPreviewSource, /requestAnimationFrame\(\(\) => \{[\s\S]*requestAnimationFrame\(\(\) => finishSettle/);
+  assert.match(beginSettle, /setBookIndex\(completedIndex\)[\s\S]*setTransitionPhase\("settle"\)/);
+  assert.doesNotMatch(beginSettle, /setIncomingIndex\(null\)|setTransitionPhase\("idle"\)/);
+  assert.match(guyuCss, /data-phase="settle"[\s\S]*\.guyu-home-book-base/);
   assert.match(guyuPreviewSource, /to="\/guyu"/);
   assert.doesNotMatch(guyuPreviewSource, /to=\{`\/guyu\/\$\{book\.id\}`\}/);
 });

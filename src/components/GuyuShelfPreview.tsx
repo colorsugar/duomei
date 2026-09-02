@@ -13,14 +13,20 @@ import { useReducedMotion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { guyuBooks, type GuyuBook } from "../content/guyuBooks";
 import {
+  GUYU_ASSEMBLE_FALLBACK_MS,
   GUYU_CAROUSEL_DWELL_MS,
+  GUYU_FRAGMENT_ASSEMBLE_MS,
+  GUYU_FRAGMENT_HOLD_MS,
+  GUYU_FRAGMENT_SCATTER_MS,
+  GUYU_SCATTER_FALLBACK_MS,
+  GUYU_SETTLE_FALLBACK_MS,
   getGuyuSwipeDirection,
   wrapGuyuCarouselIndex,
   type GuyuCarouselDirection,
 } from "../lib/guyuCarousel";
 import { HomeSectionHold } from "./HomeSectionHold";
 
-type TransitionPhase = "idle" | "scatter" | "assemble";
+type TransitionPhase = "idle" | "scatter" | "assemble" | "settle";
 
 type DragState = {
   pointerId: number;
@@ -46,7 +52,7 @@ type CarouselStyle = CSSProperties & {
 const FRAGMENT_COLUMNS = 4;
 const FRAGMENT_ROWS = 4;
 const TRANSITION_SENTINEL_INDEX = 3;
-const TRANSITION_FALLBACK_MS = 900;
+const TRANSITION_DURATION_TOLERANCE_MS = 24;
 const FRAGMENTS = Array.from({ length: FRAGMENT_COLUMNS * FRAGMENT_ROWS }, (_, index) => {
   const column = index % FRAGMENT_COLUMNS;
   const row = Math.floor(index / FRAGMENT_COLUMNS);
@@ -84,11 +90,16 @@ function BookCopy({ book, incoming = false }: { book: GuyuBook; incoming?: boole
 
 export function GuyuShelfPreview() {
   const reducedMotion = useReducedMotion() ?? false;
+  const baseImageRef = useRef<HTMLImageElement | null>(null);
   const carouselRef = useRef<HTMLDivElement | null>(null);
   const currentIndexRef = useRef(0);
+  const cycleTokenRef = useRef(0);
   const incomingIndexRef = useRef<number | null>(null);
   const dragRef = useRef<DragState | null>(null);
   const phaseFallbackRef = useRef<number | null>(null);
+  const phaseRafRef = useRef<number | null>(null);
+  const phaseStartedAtRef = useRef(0);
+  const scatterQueuedRef = useRef(false);
   const suppressClickRef = useRef(false);
   const transitionPhaseRef = useRef<TransitionPhase>("idle");
   const [bookIndex, setBookIndex] = useState(0);
@@ -110,34 +121,87 @@ export function GuyuShelfPreview() {
     phaseFallbackRef.current = null;
   }, []);
 
-  const commitIncomingBook = useCallback(() => {
-    if (transitionPhaseRef.current !== "assemble" || incomingIndexRef.current === null) return;
+  const clearPhaseRaf = useCallback(() => {
+    if (phaseRafRef.current !== null) window.cancelAnimationFrame(phaseRafRef.current);
+    phaseRafRef.current = null;
+  }, []);
+
+  const finishSettle = useCallback((cycleToken: number, phaseStartedAt: number) => {
+    if (
+      cycleTokenRef.current !== cycleToken ||
+      transitionPhaseRef.current !== "settle" ||
+      phaseStartedAtRef.current !== phaseStartedAt
+    ) return;
     clearPhaseFallback();
-    const completedIndex = incomingIndexRef.current;
-    currentIndexRef.current = completedIndex;
+    clearPhaseRaf();
     incomingIndexRef.current = null;
     transitionPhaseRef.current = "idle";
-    setBookIndex(completedIndex);
+    phaseStartedAtRef.current = performance.now();
     setIncomingIndex(null);
     setTransitionPhase("idle");
-  }, [clearPhaseFallback]);
+  }, [clearPhaseFallback, clearPhaseRaf]);
 
-  const beginAssembly = useCallback(() => {
-    if (transitionPhaseRef.current !== "scatter") return;
+  const beginSettle = useCallback((cycleToken: number) => {
+    if (
+      cycleTokenRef.current !== cycleToken ||
+      transitionPhaseRef.current !== "assemble" ||
+      incomingIndexRef.current === null
+    ) return;
     clearPhaseFallback();
+    const completedIndex = incomingIndexRef.current;
+    const phaseStartedAt = performance.now();
+    currentIndexRef.current = completedIndex;
+    transitionPhaseRef.current = "settle";
+    phaseStartedAtRef.current = phaseStartedAt;
+    setBookIndex(completedIndex);
+    setTransitionPhase("settle");
+    phaseFallbackRef.current = window.setTimeout(
+      () => finishSettle(cycleToken, phaseStartedAt),
+      GUYU_SETTLE_FALLBACK_MS,
+    );
+  }, [clearPhaseFallback, finishSettle]);
+
+  const beginAssembly = useCallback((cycleToken: number) => {
+    if (cycleTokenRef.current !== cycleToken || transitionPhaseRef.current !== "scatter") return;
+    clearPhaseFallback();
+    scatterQueuedRef.current = false;
     transitionPhaseRef.current = "assemble";
+    phaseStartedAtRef.current = performance.now();
     setTransitionPhase("assemble");
-    phaseFallbackRef.current = window.setTimeout(commitIncomingBook, TRANSITION_FALLBACK_MS);
-  }, [clearPhaseFallback, commitIncomingBook]);
+    phaseFallbackRef.current = window.setTimeout(
+      () => beginSettle(cycleToken),
+      GUYU_ASSEMBLE_FALLBACK_MS,
+    );
+  }, [beginSettle, clearPhaseFallback]);
+
+  const queueAssembly = useCallback((cycleToken: number) => {
+    if (
+      cycleTokenRef.current !== cycleToken ||
+      transitionPhaseRef.current !== "scatter" ||
+      scatterQueuedRef.current
+    ) return;
+    clearPhaseFallback();
+    scatterQueuedRef.current = true;
+    phaseFallbackRef.current = window.setTimeout(
+      () => beginAssembly(cycleToken),
+      GUYU_FRAGMENT_HOLD_MS,
+    );
+  }, [beginAssembly, clearPhaseFallback]);
 
   const goToBook = useCallback((requestedIndex: number, direction: GuyuCarouselDirection) => {
     const targetIndex = wrapGuyuCarouselIndex(requestedIndex, bookCount);
     if (bookCount < 2 || targetIndex === currentIndexRef.current || transitionPhaseRef.current !== "idle") return;
 
     clearPhaseFallback();
+    clearPhaseRaf();
+    const cycleToken = cycleTokenRef.current + 1;
+    cycleTokenRef.current = cycleToken;
+    scatterQueuedRef.current = false;
     if (reducedMotion) {
       currentIndexRef.current = targetIndex;
       incomingIndexRef.current = null;
+      transitionPhaseRef.current = "idle";
+      phaseStartedAtRef.current = performance.now();
       setBookIndex(targetIndex);
       setIncomingIndex(null);
       setTransitionPhase("idle");
@@ -145,12 +209,16 @@ export function GuyuShelfPreview() {
     }
 
     transitionPhaseRef.current = "scatter";
+    phaseStartedAtRef.current = performance.now();
     incomingIndexRef.current = targetIndex;
     setTransitionDirection(direction);
     setIncomingIndex(targetIndex);
     setTransitionPhase("scatter");
-    phaseFallbackRef.current = window.setTimeout(beginAssembly, TRANSITION_FALLBACK_MS);
-  }, [beginAssembly, bookCount, clearPhaseFallback, reducedMotion]);
+    phaseFallbackRef.current = window.setTimeout(
+      () => queueAssembly(cycleToken),
+      GUYU_SCATTER_FALLBACK_MS,
+    );
+  }, [bookCount, clearPhaseFallback, clearPhaseRaf, queueAssembly, reducedMotion]);
 
   const moveBy = useCallback((direction: GuyuCarouselDirection) => {
     goToBook(currentIndexRef.current + direction, direction);
@@ -158,19 +226,66 @@ export function GuyuShelfPreview() {
 
   const handleFragmentTransitionEnd = useCallback((event: ReactTransitionEvent<HTMLSpanElement>) => {
     if (event.target !== event.currentTarget || event.propertyName !== "transform") return;
+    const cycleToken = cycleTokenRef.current;
+    const elapsed = performance.now() - phaseStartedAtRef.current;
+    const cssElapsed = event.elapsedTime * 1_000;
     if (transitionPhaseRef.current === "scatter") {
-      beginAssembly();
+      if (
+        elapsed < GUYU_FRAGMENT_SCATTER_MS ||
+        Math.abs(cssElapsed - GUYU_FRAGMENT_SCATTER_MS) > TRANSITION_DURATION_TOLERANCE_MS
+      ) return;
+      queueAssembly(cycleToken);
       return;
     }
-    commitIncomingBook();
-  }, [beginAssembly, commitIncomingBook]);
+    if (
+      transitionPhaseRef.current === "assemble" &&
+      elapsed >= GUYU_FRAGMENT_ASSEMBLE_MS &&
+      Math.abs(cssElapsed - GUYU_FRAGMENT_ASSEMBLE_MS) <= TRANSITION_DURATION_TOLERANCE_MS
+    ) {
+      beginSettle(cycleToken);
+    }
+  }, [beginSettle, queueAssembly]);
 
-  useEffect(() => clearPhaseFallback, [clearPhaseFallback]);
+  useEffect(() => () => {
+    cycleTokenRef.current += 1;
+    clearPhaseFallback();
+    clearPhaseRaf();
+  }, [clearPhaseFallback, clearPhaseRaf]);
+
+  useEffect(() => {
+    if (transitionPhase !== "settle") return;
+    const cycleToken = cycleTokenRef.current;
+    const phaseStartedAt = phaseStartedAtRef.current;
+    const image = baseImageRef.current;
+    if (!image || typeof image.decode !== "function") return;
+
+    void image.decode().then(() => {
+      if (
+        cycleTokenRef.current !== cycleToken ||
+        transitionPhaseRef.current !== "settle" ||
+        phaseStartedAtRef.current !== phaseStartedAt
+      ) return;
+      phaseRafRef.current = window.requestAnimationFrame(() => {
+        if (
+          cycleTokenRef.current !== cycleToken ||
+          transitionPhaseRef.current !== "settle" ||
+          phaseStartedAtRef.current !== phaseStartedAt
+        ) return;
+        phaseRafRef.current = window.requestAnimationFrame(() => finishSettle(cycleToken, phaseStartedAt));
+      });
+    }).catch(() => {
+      // Keep the decoded incoming fragments visible until the guarded settle fallback.
+    });
+
+    return clearPhaseRaf;
+  }, [bookIndex, clearPhaseRaf, finishSettle, transitionPhase]);
 
   useEffect(() => {
     guyuBooks.forEach((candidate) => {
       const image = new Image();
+      image.decoding = "async";
       image.src = candidate.previewCoverSrc;
+      if (typeof image.decode === "function") void image.decode().catch(() => undefined);
     });
   }, []);
 
@@ -390,14 +505,22 @@ export function GuyuShelfPreview() {
           }}
         >
           <span className="guyu-home-book" aria-hidden="true">
-            <img className="guyu-home-book-base" src={book.previewCoverSrc} width="1100" height="1684" alt="" />
+            <img
+              ref={baseImageRef}
+              className="guyu-home-book-base"
+              src={book.previewCoverSrc}
+              width="1100"
+              height="1684"
+              decoding="async"
+              alt=""
+            />
             <span className="guyu-home-fragment-grid">
               {FRAGMENTS.map((fragment) => {
                 const fragmentStyle = {
                   "--guyu-fragment-x": `${fragment.x * transitionDirection}px`,
                   "--guyu-fragment-y": `${fragment.y}px`,
                   "--guyu-fragment-rotation": `${fragment.rotation * transitionDirection}deg`,
-                  "--guyu-fragment-delay": `${((fragment.row + fragment.column) % 4) * 12}ms`,
+                  "--guyu-fragment-delay": `${((fragment.row + fragment.column) % 4) * 24}ms`,
                 } as FragmentStyle;
                 const imageStyle = {
                   backgroundPosition: fragment.position,

@@ -34,13 +34,14 @@ export function DuomeiGuyuReaderPage() {
           to="/guyu"
           reloadDocument
           aria-label="返回故语"
-          aria-hidden={!isBookOpen}
-          tabIndex={isBookOpen ? 0 : -1}
+          aria-hidden={isBookOpen}
+          tabIndex={isBookOpen ? -1 : 0}
           title="返回故语"
         >
           <svg viewBox="0 0 24 24" aria-hidden="true">
             <path d="M15 5 8 12l7 7" />
           </svg>
+          <span>返回故语</span>
         </Link>
         <div className="guyu-visually-hidden">
           <h1>{book.title}</h1>

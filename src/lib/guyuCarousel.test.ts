@@ -1,7 +1,21 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 // @ts-expect-error Node's strip-types test runner needs the explicit source extension.
-import { GUYU_CAROUSEL_DWELL_MS, getGuyuSwipeDirection, wrapGuyuCarouselIndex } from "./guyuCarousel.ts";
+import * as carousel from "./guyuCarousel.ts";
+
+const {
+  GUYU_ASSEMBLE_FALLBACK_MS,
+  GUYU_CAROUSEL_DWELL_MS,
+  GUYU_FRAGMENT_ASSEMBLE_MS,
+  GUYU_FRAGMENT_HOLD_MS,
+  GUYU_FRAGMENT_MAX_DELAY_MS,
+  GUYU_FRAGMENT_SCATTER_MS,
+  GUYU_FRAGMENT_VISUAL_MS,
+  GUYU_SCATTER_FALLBACK_MS,
+  GUYU_SETTLE_FALLBACK_MS,
+  getGuyuSwipeDirection,
+  wrapGuyuCarouselIndex,
+} = carousel;
 
 test("loops the Guyu carousel in both directions", () => {
   assert.equal(wrapGuyuCarouselIndex(3, 3), 0);
@@ -19,4 +33,15 @@ test("switches only for a deliberate horizontal swipe", () => {
 
 test("uses the faster automatic dwell", () => {
   assert.equal(GUYU_CAROUSEL_DWELL_MS, 1_600);
+});
+
+test("keeps the fragment transition deliberate and fallbacks safely after CSS", () => {
+  assert.equal(GUYU_FRAGMENT_SCATTER_MS, 340);
+  assert.equal(GUYU_FRAGMENT_MAX_DELAY_MS, 72);
+  assert.equal(GUYU_FRAGMENT_HOLD_MS, 110);
+  assert.equal(GUYU_FRAGMENT_ASSEMBLE_MS, 500);
+  assert.ok(GUYU_FRAGMENT_VISUAL_MS >= 1_050 && GUYU_FRAGMENT_VISUAL_MS <= 1_150);
+  assert.ok(GUYU_SCATTER_FALLBACK_MS > GUYU_FRAGMENT_SCATTER_MS + GUYU_FRAGMENT_MAX_DELAY_MS);
+  assert.ok(GUYU_ASSEMBLE_FALLBACK_MS > GUYU_FRAGMENT_ASSEMBLE_MS + GUYU_FRAGMENT_MAX_DELAY_MS);
+  assert.equal(GUYU_SETTLE_FALLBACK_MS, 1_200);
 });
