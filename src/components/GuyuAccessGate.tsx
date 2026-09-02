@@ -58,7 +58,7 @@ export function GuyuAccessGate({ children }: PropsWithChildren) {
         return;
       }
       setState("locked");
-      setMessage(response.status === 401 ? "访问码不对，请重新输入。" : result.error || "没能打开，请再试一次。");
+      setMessage(response.status === 401 ? "班号不对，再想想那一年。" : result.error || "没能打开，请再试一次。");
     } catch {
       setState("error");
       setMessage("门暂时没开，请稍后再试。");
@@ -81,11 +81,11 @@ export function GuyuAccessGate({ children }: PropsWithChildren) {
           </div>
         ) : (
           <form className="guyu-gate-form" onSubmit={submitAnswer}>
-            <label htmlFor={answerId}>请输入故语访问码</label>
+            <label htmlFor={answerId}>还记得，我们高中在哪个班吗？</label>
             <input
               id={answerId}
               type="password"
-              data-guyu-access-code="10-digits"
+              data-guyu-answer-format="class-number"
               inputMode="numeric"
               autoComplete="off"
               maxLength={16}
@@ -93,13 +93,13 @@ export function GuyuAccessGate({ children }: PropsWithChildren) {
               aria-describedby={message ? messageId : undefined}
               aria-invalid={Boolean(message)}
               disabled={state === "submitting"}
-              placeholder="10 位访问码"
+              placeholder="那年的班号"
               onChange={(event) => {
                 setAnswer(event.currentTarget.value);
                 if (message) setMessage("");
               }}
             />
-            <p className="guyu-gate-hint">输入正确的访问码，旧册便会打开。</p>
+            <p className="guyu-gate-hint">答对，旧册便会打开。</p>
             <button type="submit" disabled={state === "submitting"}>
               {state === "submitting" ? "正在辨认" : "翻开旧册"}
             </button>
