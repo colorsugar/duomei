@@ -1,13 +1,12 @@
 const MAX_OBJECT_BYTES = 15 * 1024 * 1024;
 const STORAGE_HARD_LIMIT_BYTES = 1_000_000_000;
-const PUBLIC_KEY_PATTERN = /^(?:article|covers|notes|poetry)\/[A-Za-z0-9._-]{1,240}\.(?:gif|jpe?g|png|svg|webp)$/i;
+const PUBLIC_KEY_PATTERN = /^(?:article|covers|notes|poetry)\/[A-Za-z0-9._-]{1,240}\.(?:gif|jpe?g|png|webp)$/i;
 const PRIVATE_KEY_PATTERN = /^guyu\/meiyou-yujian\/pages\/(?:00[1-9]|0[1-4]\d|05[0-3])\.webp$/u;
 const MAX_SIGNED_URL_SECONDS = 120;
 const ALLOWED_MIME_TYPES = new Set([
   "image/gif",
   "image/jpeg",
   "image/png",
-  "image/svg+xml",
   "image/webp",
 ]);
 
@@ -25,6 +24,7 @@ function json(status: number, body: unknown, origin?: string): Response {
 
 function allowedOrigin(origin: string): boolean {
   if ([
+    "https://duomei.site",
     "https://color-duomei.vercel.app",
     "https://color-rho-ten.vercel.app",
   ].includes(origin)) return true;
@@ -194,17 +194,26 @@ async function upload(request: Request, env: Env, origin: string): Promise<Respo
     return json(400, { error: "Invalid image key." }, origin);
   }
   const contentType = (request.headers.get("content-type") ?? "").split(";", 1)[0].trim().toLowerCase();
-  const contentLength = Number(request.headers.get("content-length"));
   if (!ALLOWED_MIME_TYPES.has(contentType)) return json(415, { error: "Unsupported image type." }, origin);
-  if (!Number.isSafeInteger(contentLength) || contentLength <= 0 || contentLength > MAX_OBJECT_BYTES) {
+  const declaredLengthHeader = request.headers.get("content-length");
+  const declaredLength = declaredLengthHeader === null ? null : Number(declaredLengthHeader);
+  if (declaredLength !== null && (!Number.isSafeInteger(declaredLength) || declaredLength <= 0 || declaredLength > MAX_OBJECT_BYTES)) {
     return json(413, { error: "Image exceeds the 15 MiB limit." }, origin);
+  }
+  const body = await request.arrayBuffer();
+  const contentLength = body.byteLength;
+  if (contentLength <= 0 || contentLength > MAX_OBJECT_BYTES) {
+    return json(413, { error: "Image exceeds the 15 MiB limit." }, origin);
+  }
+  if (declaredLength !== null && declaredLength !== contentLength) {
+    return json(422, { error: "Uploaded image size did not match the request." }, origin);
   }
   if (await env.DUOMEI_MEDIA.head(key)) return json(409, { error: "Image key already exists." }, origin);
   if (await storedBytes(env.DUOMEI_MEDIA) + contentLength > STORAGE_HARD_LIMIT_BYTES) {
     return json(507, { error: "Color image storage reached its 1 GB hard limit." }, origin);
   }
 
-  const object = await env.DUOMEI_MEDIA.put(key, request.body, {
+  const object = await env.DUOMEI_MEDIA.put(key, body, {
     httpMetadata: { contentType, cacheControl: "public, max-age=31536000, immutable" },
   });
   if (object.size !== contentLength) {

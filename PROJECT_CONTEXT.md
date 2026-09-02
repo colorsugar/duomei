@@ -54,6 +54,20 @@ Browser at duomei.site
 
 The current EdgeOne Guyu path returns protected WebP bytes from EdgeOne Blob through a same-origin Cloud Function. The retained Vercel path instead signs a short-lived URL for the Cloudflare Worker. Do not combine these two storage paths or assume one platform's secrets exist on the other.
 
+## Current Data Ownership — 2026-09-02
+
+| Data | Current system | Verified state |
+|---|---|---|
+| Site bundle and public assets | EdgeOne static deployment | `duomei.site`; root build output |
+| Note text, metadata and status | Supabase `public.notes` | 41 rows: 8 published, 15 draft, 18 hidden/deleted |
+| Admin identity and sessions | Supabase Auth + `public.duomei_admins` | Supabase remains required |
+| Note cover/body media | Cloudflare Worker + R2 `duomei-media` | 28 objects, 99.3 MB; current database media URLs use the Worker host |
+| Legacy Supabase `note-images` | Supabase Storage | 0 objects; retained only as a locked rollback boundary after the upload migration |
+| Current Guyu pages | EdgeOne Pages Blob `guyu-private` | 53 protected pages through same-origin `/api/guyu-page` |
+| Retained Guyu fallback | Cloudflare R2 `duomei-private` | 53 objects, 11.4 MB; not the current EdgeOne read path |
+
+External runtime hosts intentionally referenced by the site are `duomei.site`, `bokvqndvwqgugkcrizwj.supabase.co`, `duomei-media-storage.colorsugar.workers.dev`, `github.com/colorsugar/agent-skills`, and WeChat short links under `w.url.cn`. No third-party analytics script was verified.
+
 ## Routes
 
 | Route | Purpose | Global header/footer |
@@ -162,9 +176,9 @@ Do not send another AI passwords, tokens, Cookies, private page files, or platfo
 These findings are not automatically authorized fixes. Reverify before acting.
 
 - **P1 — 768px coarse-pointer navigation:** repaired. `@media (max-width: 768px), (hover: none) and (pointer: coarse)` now keeps the hamburger reachable and opens the menu with `.is-menu-open` instead of hover-reveal. Reverify at `768×900` coarse/hover-none on `/` and `/guyu` after deploy.
-- **P1 — Guyu brute-force boundary:** application fallback limiting uses forwarded IP headers and process-local memory. A shared EdgeOne WAF/rate-limit rule for `POST /api/guyu-auth` was not verified in the audit and must not be assumed.
-- **P2 — Legacy Supabase Storage:** the public `note-images` bucket was empty at audit time, but its write/update/delete policies allow any authenticated role rather than checking DUOMEI admin membership. Current note media uses the Cloudflare Worker/R2 path; keep the legacy bucket isolated until policies are tightened or it is retired.
-- **P2 — SVG uploads:** the Cloudflare media Worker accepts `image/svg+xml` without content sanitization. Remove SVG support or sanitize/rasterize it before treating arbitrary authenticated uploaders as safe.
+- **Resolved — Guyu brute-force boundary:** EdgeOne precise rate-limit rule `Guyu登录限流` now matches `/api/guyu-auth`, counts by client IP, blocks after more than 6 requests in 10 seconds, and holds the block for 30 seconds. The process-local 10-minute failure map remains defense in depth.
+- **Resolved — Legacy Supabase Storage migration:** note upload helpers now target the authenticated Cloudflare Worker/R2 path. Keep the empty `note-images` bucket private and admin-only as a rollback boundary; do not restore it as the primary upload path.
+- **Resolved — SVG uploads:** the Cloudflare media Worker now accepts only JPG, PNG, WebP and GIF; SVG paths and MIME types are rejected.
 - **P2 — Dependency advisories:** root `npm audit --omit=dev` reported 12 high and 1 moderate advisory, mainly in the Vite/Babel/PostCSS/Browserslist build chain plus a React Router RSC advisory. The site is a SPA and many findings are build-time or non-RSC, but upgrades need a separate compatibility-tested dependency task.
 - **P2 — Legacy GitHub Pages workflow:** `.github/workflows/deploy.yml` still uses floating action tags. It is not the production workflow; pin or retire it in a separate task.
 - **P3 — Supabase advisors:** leaked-password protection is disabled; `public.debug_auth_claims()` has a mutable search path; five RLS policies have an init-plan performance warning. Public table RLS is enabled, and an anonymous live read returned only eight non-deleted published notes.

@@ -92,7 +92,7 @@ If an unpushed local commit ever contained those pages, amend or squash that com
 
 Do not publish the navigation or reader until all 53 EdgeOne Blob objects and the root Guyu tests are verified. When changing the retained Vercel/Cloudflare path, verify its R2 objects and Worker tests too. `npm.cmd run release:check` rejects public or tracked Guyu originals and verifies the protected delivery bundle.
 
-EdgeOne production must enforce a shared security/WAF rate limit on `POST /api/guyu-auth`; this rule was not verified during the 2026-09-02 audit. The in-function attempt map is defense in depth only and is not shared across instances. Vercel Firewall applies only if the retained fallback becomes the requested deployment target.
+EdgeOne production has a precise client-IP rate-limit rule for `/api/guyu-auth` in addition to the process-local failure map. Reverify the project security rule after any domain or project migration. Vercel Firewall applies only if the retained fallback becomes the requested deployment target.
 
 ## Features That Must Remain In The Latest Version
 
@@ -136,4 +136,5 @@ If any bundle file is still modified, staged, or untracked after the commit, the
 - The workflow must keep `edgeone.json`, `cloud-functions/`, and the full source tree together; never replace the deploy command with a `dist`-only upload.
 - `EDGEONE_API_TOKEN` exists only as a GitHub Actions Secret. Runtime `GUYU_*` values remain in the EdgeOne console and must never be copied into GitHub.
 - The media Worker keeps its exact Linux x64 native companion packages as optional dependencies so `npm ci` works on GitHub's Ubuntu runner without changing Windows development.
+- Note image uploads use the authenticated media Worker at `/v1/upload`; production CORS includes only `duomei.site` plus retained reviewed origins, and SVG uploads remain rejected.
 - Production is accepted only when the generated `/.well-known/duomei-build.json` matches the pushed commit and the homepage/auth/private-page checks return `200/200/401`.
