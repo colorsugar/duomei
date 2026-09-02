@@ -1960,3 +1960,40 @@
     transition-duration: var(--dur-micro);
   }
 }
+
+/* Keep the compact poetry card readable before the fixed section progress rail. */
+@media (max-width: 48rem) and (max-height: 720px) {
+  .poetry-deck-stage {
+    block-size: clamp(30rem, calc(100svh - 10rem), 34rem);
+  }
+
+  .poetry-deck-card .poetry-work-panel.poetry-free-panel {
+    gap: 3px;
+    padding: 34px 14px 10px;
+  }
+
+  .poetry-deck-card .poetry-free-text.is-title {
+    flex: 0 0 auto;
+    min-block-size: 3rem;
+  }
+
+  .poetry-deck-card .poetry-free-text.is-poem {
+    flex: 0 0 auto;
+    min-block-size: 6.75rem;
+    padding-inline-end: var(--space-md);
+    font-size: clamp(1rem, 4.5vw, 1.2rem) !important;
+    line-height: 1.06;
+  }
+
+  .poetry-deck-card .poetry-deck-media-layer {
+    flex: 1 1 7rem;
+    min-block-size: 7rem;
+  }
+
+  .poetry-deck-card .poetry-free-text.is-caption {
+    flex: 0 0 auto;
+    min-block-size: 2.5rem;
+    overflow: visible;
+    line-height: 1.45;
+  }
+}

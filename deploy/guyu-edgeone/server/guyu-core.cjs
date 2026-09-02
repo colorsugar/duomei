@@ -11,7 +11,6 @@ const BOOK_ID = "meiyou-yujian";
 const PAGE_COUNT = 53;
 const BOOKS = Object.freeze({
   "meiyou-yujian": Object.freeze({ pageCount: 53, storagePrefix: "private-media/guyu/meiyou-yujian/pages" }),
-  "zhi-shang-feiyan": Object.freeze({ pageCount: 30, storagePrefix: "private-media/guyu/zhi-shang-feiyan/pages" }),
 });
 const COOKIE_NAME = "guyu_session";
 const SESSION_SECONDS = 12 * 60 * 60;

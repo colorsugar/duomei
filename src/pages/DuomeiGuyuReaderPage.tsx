@@ -26,8 +26,7 @@ export function DuomeiGuyuReaderPage() {
 
   if (!book) return <Navigate to="/guyu" replace />;
 
-  return (
-    <GuyuAccessGate>
+  const reader = (
     <main className={`guyu-reader-page${isBookOpen ? " is-book-open" : ""}`}>
       <header className="guyu-reader-heading">
         <Link
@@ -50,6 +49,7 @@ export function DuomeiGuyuReaderPage() {
       </header>
       <GuyuFlipbook book={book} onOpenChange={setIsBookOpen} />
     </main>
-    </GuyuAccessGate>
   );
+
+  return book.access === "class-gated" ? <GuyuAccessGate>{reader}</GuyuAccessGate> : reader;
 }

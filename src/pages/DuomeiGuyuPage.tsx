@@ -1,6 +1,5 @@
 import { useEffect } from "react";
 import { Link } from "react-router-dom";
-import { GuyuAccessGate } from "../components/GuyuAccessGate";
 import { guyuBooks } from "../content/guyuBooks";
 
 export function DuomeiGuyuPage() {
@@ -13,7 +12,6 @@ export function DuomeiGuyuPage() {
   }, []);
 
   return (
-    <GuyuAccessGate>
     <main className="guyu-library-page">
       <header className="guyu-library-intro">
         <h1>故语</h1>
@@ -54,6 +52,5 @@ export function DuomeiGuyuPage() {
         <p className="guyu-shelf-note">有些话，只适合留在纸页之间。</p>
       </section>
     </main>
-    </GuyuAccessGate>
   );
 }

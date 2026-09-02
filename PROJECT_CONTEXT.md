@@ -1,6 +1,6 @@
 # DUOMEI Project Context — Required AI Reading
 
-Last reviewed: 2026-09-02.
+Last reviewed: 2026-09-03.
 
 This is the canonical cross-AI maintenance entry for DUOMEI. Read it before changing code, configuration, content, credentials, or deployment state. If another document conflicts with this file, stop and verify the live repository and production marker before acting.
 
@@ -35,13 +35,16 @@ Browser at duomei.site
 ├─ React/Vite full site (`src/`)
 │  ├─ public notes → Supabase Data API (`notes`, RLS)
 │  ├─ admin → Supabase Auth + RLS; media upload → Cloudflare Worker/R2
-│  └─ Guyu UI → same-origin `/api/guyu-auth` and `/api/guyu-page`
+│  └─ Guyu UI → public shelf/new-book assets; old class book → same-origin auth/page API
 │
 ├─ EdgeOne Node Cloud Function (`cloud-functions/api/[[default]].js`)
 │  └─ Guyu core (`deploy/guyu-edgeone/server/guyu-core.cjs`)
 │     └─ private EdgeOne Pages Blob namespace `guyu-private`
-│        ├─ `private-media/guyu/meiyou-yujian/pages/001.webp` … `053.webp`
-│        └─ `private-media/guyu/zhi-shang-feiyan/pages/001.webp` … `030.webp`
+│        └─ active: `private-media/guyu/meiyou-yujian/pages/001.webp` … `053.webp`
+│
+├─ Public static Guyu assets (`public/images/guyu/`)
+│  ├─ `zhi-shang-feiyan/pages/001.webp` … `030.webp`
+│  └─ `xinshuo-01/pages/001.webp` … `030.webp`
 │
 ├─ Supabase project `bokvqndvwqgugkcrizwj`
 │  ├─ Auth
@@ -53,9 +56,9 @@ Browser at duomei.site
    └─ retained signed Guyu fallback → private R2 `duomei-private`
 ```
 
-The current EdgeOne Guyu path returns protected WebP bytes from EdgeOne Blob through a same-origin Cloud Function. The retained Vercel path instead signs a short-lived URL for the Cloudflare Worker. Do not combine these two storage paths or assume one platform's secrets exist on the other.
+Only the 53-page class book uses the protected EdgeOne Blob path and the original server-verified class question. The `/guyu` shelf and every `新说` book are public static content. The retained Vercel path instead signs a short-lived URL for the Cloudflare Worker. Do not combine these storage paths or assume one platform's secrets exist on another.
 
-## Current Data Ownership — 2026-09-02
+## Current Data Ownership — 2026-09-03
 
 | Data | Current system | Verified state |
 |---|---|---|
@@ -64,7 +67,9 @@ The current EdgeOne Guyu path returns protected WebP bytes from EdgeOne Blob thr
 | Admin identity and sessions | Supabase Auth + `public.duomei_admins` | Supabase remains required |
 | Note cover/body media | Cloudflare Worker + R2 `duomei-media` | 28 objects, 99.3 MB; current database media URLs use the Worker host |
 | Legacy Supabase `note-images` | Supabase Storage | 0 objects; retained only as a locked rollback boundary after the upload migration |
-| Current Guyu pages | EdgeOne Pages Blob `guyu-private` | 83 protected pages: 53-page old album plus 30-page `纸上飞檐`, all through same-origin `/api/guyu-page` |
+| Protected class-book pages | EdgeOne Pages Blob `guyu-private` | 53-page `meiyou-yujian`; only this book uses `/api/guyu-auth` and `/api/guyu-page` |
+| Public `新说` pages | EdgeOne static deployment | 60 ordered WebP pages: `纸上飞檐` and `xinshuo-01`; hashes and page sequences are release-tested |
+| Retained `纸上飞檐` Blob copy | EdgeOne Pages Blob `guyu-private` | 30 objects retained only as an unused rollback copy; not a live read path |
 | Retained Guyu fallback | Cloudflare R2 `duomei-private` | 53 objects, 11.4 MB; not the current EdgeOne read path |
 
 External runtime hosts intentionally referenced by the site are `duomei.site`, `bokvqndvwqgugkcrizwj.supabase.co`, `duomei-media-storage.colorsugar.workers.dev`, `github.com/colorsugar/agent-skills`, and WeChat short links under `w.url.cn`. No third-party analytics script was verified.
@@ -76,9 +81,11 @@ External runtime hosts intentionally referenced by the site are `duomei.site`, `
 | `/` | Full homepage | Yes |
 | `/time` | Time/poetry page | Header/footer remain, smooth-scroll exception |
 | `/note/:slug` | Note detail | Yes |
-| `/guyu` | Protected Guyu shelf | Yes |
-| `/guyu/:bookId` | Full-screen protected reader | No |
+| `/guyu` | Public Guyu shelf | Yes |
+| `/guyu/meiyou-yujian` | Password-gated class-book reader | No |
+| `/guyu/:bookId` | Public full-screen reader for allowlisted `新说` books | No |
 | `/guyu/zhi-shang-feiyan` | `新说 / 纸上飞檐`, 30 complete `full` pages | No |
+| `/guyu/xinshuo-01` | `新说 / 想象画本`, 30 complete `full` pages | No |
 | `/skills` | Skill directory | Yes |
 | `/admin/login` | Supabase admin login | No |
 | `/admin`, `/admin/notes` | Note management | No |
@@ -92,7 +99,9 @@ External runtime hosts intentionally referenced by the site are `duomei.site`, `
 - The fixed header hides while scrolling down and returns while scrolling up. Mobile navigation must work from the homepage and from secondary pages, especially `/guyu`.
 - The header portal binds native short-touch listeners directly to its DOM for iOS compatibility. Touch activation is synchronous: buttons dispatch their click immediately, while anchors call `window.location.assign()` during the touch event. Preserve drag rejection, duplicate-click suppression, mouse/keyboard navigation, and the delayed close after a real route/hash navigation.
 - The Guyu gate uses the original class-question wording and a numeric class-number field. Do not display a generated password length. Never place the real answer in source, tests, documentation, or public history, and never change the answer without explicit authorization.
-- The Guyu reader keeps the 53 physical old-book scans with their reviewed spread mapping and adds `纸上飞檐` as 30 complete `full` pages. Both use the same touch/keyboard reader and private same-origin delivery; only approved low-sensitivity covers may be public.
+- The Guyu reader keeps the 53 physical old-book scans with their reviewed spread mapping. Only that class book is password-gated. The public shelf and all `新说` books reuse the same touch/keyboard reader with public static WebP pages.
+- The homepage Guyu preview stays on each book for 2.5 seconds, fades between `故语 · 同学录` and the public `新说` books without horizontal autoplay, and always opens the public `/guyu` shelf.
+- The header menu item `故语` targets `/#guyu`; it must never bypass the homepage preview by navigating directly to `/guyu`.
 - WeChat sticker actions copy the official short link and explain that it must be pasted into WeChat. Do not navigate the browser directly to the WeChat short link.
 - Mobile and desktop text must not clip, overlap, or create horizontal overflow. Recheck all affected supported widths after UI work.
 
@@ -102,6 +111,7 @@ External runtime hosts intentionally referenced by the site are `duomei.site`, `
 - At `<=768px` or on a coarse/hoverless primary pointer, the hamburger is always reachable. A closed menu is hidden and non-hit-testable; `.is-menu-open` must make the nav and every item visible and hit-testable even when WebKit leaves `:hover` or `:focus` stuck.
 - Never defer the native touch activation with `requestAnimationFrame`: iOS WebViews can drop the synthetic default navigation after user activation expires. Anchors navigate synchronously; the following compatibility click is suppressed once.
 - `npm.cmd run test:home-hold` is a release gate. After every authorized header change, test the toggle and every destination on `/` and `/guyu` at a phone viewport; a desktop click alone is not acceptance.
+- The frozen `故语` menu destination is `/#guyu`. Do not restore `/guyu` there unless the user explicitly changes this product rule.
 
 Before changing note-card hover or tilt behavior, also read `docs/note-card-tilt.md`.
 
@@ -118,11 +128,11 @@ Never commit or echo values for:
 - `GUYU_UPLOAD_SECRET`
 - `GUYU_MEDIA_SIGNING_SECRET`
 - Supabase service-role or secret keys
-- session Cookies, private originals, PDFs, or Guyu page images
+- session Cookies, private class-book originals, or private source PDFs
 
-Production Guyu runtime values belong only in EdgeOne project environment settings. `EDGEONE_API_TOKEN` belongs only in the GitHub Actions Secret with that name. All 83 protected pages belong in private storage, never under `public/`.
+Production Guyu runtime values belong only in EdgeOne project environment settings. `EDGEONE_API_TOKEN` belongs only in the GitHub Actions Secret with that name. The 53 protected `meiyou-yujian` pages remain private and may never be copied under `public/`; the two approved `新说` books are intentionally public static assets.
 
-`纸上飞檐` was audited from private source repository `colorsugar/-` at commit `249736f5dd4914f1797a6eb5b4e8d9226edb6be9`; its user-supplied immutable Vercel preview is the workflow's bootstrap source. `scripts/sync-guyu-private-books.mjs` first verifies any existing Blob object, downloads only missing pages, checks all 30 fixed SHA-256 values, and writes with `onlyIfNew` before the production deployment. The workflow secret is never printed or copied locally, and the live reader never depends on Vercel after import. Do not change the source deployment, commit, hashes, page count, Blob prefix, or `full` placement without a new source audit and explicit book update.
+`纸上飞檐` was audited from private source repository `colorsugar/-` at commit `249736f5dd4914f1797a6eb5b4e8d9226edb6be9`. Its 30 pages are now committed public derivatives and the production reader never fetches the source Vercel preview. `xinshuo-01` is the approved first cloud-task album and must not be regenerated or replaced. The previous abstract-geometric `xinshuo-02` delivery was rejected on 2026-09-03 and must never be published; wait for a human-centered replacement to pass its sample gate. `server/guyuBooks.test.ts` fixes every currently approved public book's 30-page sequence and aggregate SHA-256.
 
 ## Local Verification
 

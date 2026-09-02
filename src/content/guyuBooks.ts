@@ -19,6 +19,7 @@ export type GuyuBook = {
   title: string;
   kind: string;
   chapter: string;
+  access: "class-gated" | "public";
   description: string;
   accessibilityNote: string;
   pageCount: number;
@@ -154,9 +155,23 @@ function buildLogicalPages(): GuyuLogicalPage[] {
 
 const meiyouYujianLogicalPages = buildLogicalPages();
 
-const zhiShangFeiyanPages = Array.from({ length: 30 }, (_, index) =>
-  `/api/guyu-page?book=zhi-shang-feiyan&page=${String(index + 1).padStart(3, "0")}`,
-);
+function publicBookPages(bookId: string, count: number) {
+  return Array.from({ length: count }, (_, index) =>
+    `/images/guyu/${bookId}/pages/${String(index + 1).padStart(3, "0")}.webp`,
+  );
+}
+
+function fullLogicalPages(bookId: string, pages: readonly string[], descriptions: readonly string[]) {
+  return pages.map((src, index): GuyuLogicalPage => ({
+    id: `${bookId}-${String(index + 1).padStart(3, "0")}`,
+    sourcePage: index + 1,
+    src,
+    placement: "full",
+    description: descriptions[index],
+  }));
+}
+
+const zhiShangFeiyanPages = publicBookPages("zhi-shang-feiyan", 30);
 
 const zhiShangFeiyanPageDescriptions = [
   "单角飞檐、朱红流苏、一朵山茶，下半纸留白给书名",
@@ -191,13 +206,48 @@ const zhiShangFeiyanPageDescriptions = [
   "极简飞檐剪影与一小朵山茶，无长文",
 ] as const;
 
-const zhiShangFeiyanLogicalPages: GuyuLogicalPage[] = zhiShangFeiyanPages.map((src, index) => ({
-  id: `zhi-shang-feiyan-${String(index + 1).padStart(3, "0")}`,
-  sourcePage: index + 1,
-  src,
-  placement: "full",
-  description: zhiShangFeiyanPageDescriptions[index],
-}));
+const zhiShangFeiyanLogicalPages = fullLogicalPages(
+  "zhi-shang-feiyan",
+  zhiShangFeiyanPages,
+  zhiShangFeiyanPageDescriptions,
+);
+
+const xinshuoOnePages = publicBookPages("xinshuo-01", 30);
+
+const xinshuoOnePageDescriptions = [
+  "纸上初醒",
+  "蓝灰纸袋里的微风",
+  "夜里收集到的蓝",
+  "云朵观察页",
+  "叶脉的秘密地图",
+  "雨后石子微光",
+  "追踪枝影",
+  "窗边的第三种绿",
+  "拾得的午后旧票",
+  "会折叠的小径",
+  "无形之声的形状",
+  "给河石造一间小屋",
+  "叶脉写成的无字书信",
+  "桌上漂走的小岛",
+  "借来天空的鱼",
+  "小门后的辽阔风景",
+  "云朵修补铺",
+  "寻得一小片月亮",
+  "会呼吸的山",
+  "六种红的触感对话",
+  "纸上暖黄日光",
+  "绿意从边缘归来",
+  "暖橙落在静页上",
+  "轻轻展开，碎片重连",
+  "一线缝起午后",
+  "旧纸里的第二场天气",
+  "小发现铺成一条路",
+  "正在发生的留白",
+  "一粒种子的远行",
+  "未完的蓝圈与新芽",
+] as const;
+
+const xinshuoOneLogicalPages = fullLogicalPages("xinshuo-01", xinshuoOnePages, xinshuoOnePageDescriptions);
 
 export const guyuBooks: readonly GuyuBook[] = [
   {
@@ -205,6 +255,7 @@ export const guyuBooks: readonly GuyuBook[] = [
     title: "没有遇见 何来艳遇",
     kind: "同学录",
     chapter: "旧册",
+    access: "class-gated",
     description: "一些名字、笔迹与当时的天气，仍停在纸上。",
     accessibilityNote: "本册主要由手写原稿组成；每一页都有画面说明，暂未收录完整文字。",
     pageCount: meiyouYujianPages.length,
@@ -217,8 +268,9 @@ export const guyuBooks: readonly GuyuBook[] = [
   {
     id: "zhi-shang-feiyan",
     title: "纸上飞檐",
-    kind: "新说",
+    kind: "画本",
     chapter: "新说",
+    access: "public",
     description: "用彩铅在暖纸上，跟一处无名旧园走完从晨到夜、从雨到月的一日。",
     accessibilityNote: "本册为无人物彩铅建筑画本；每一页都有画面说明。",
     pageCount: 30,
@@ -227,6 +279,21 @@ export const guyuBooks: readonly GuyuBook[] = [
     pages: zhiShangFeiyanPages,
     pageDescriptions: zhiShangFeiyanPageDescriptions,
     logicalPages: zhiShangFeiyanLogicalPages,
+  },
+  {
+    id: "xinshuo-01",
+    title: "想象画本",
+    kind: "画本",
+    chapter: "新说",
+    access: "public",
+    description: "自由绘画、观察记录、幻想片段、手作、色彩实验与纸上小发现。",
+    accessibilityNote: "本册为无身份文字的想象与创作画本；每一页都有画面说明。",
+    pageCount: 30,
+    coverSrc: xinshuoOnePages[0],
+    previewCoverSrc: "/images/guyu-xinshuo-01-cover.webp",
+    pages: xinshuoOnePages,
+    pageDescriptions: xinshuoOnePageDescriptions,
+    logicalPages: xinshuoOneLogicalPages,
   },
 ];
 

@@ -77,24 +77,23 @@ The “故语” library and reader are one release unit. Review, commit, and de
 - `src/pages/DuomeiGuyuReaderPage.tsx`
 - `src/guyu.css`
 - `src/main.tsx`
-- `scripts/sync-guyu-private-books.mjs` and its `--check` gate
-- `public/images/guyu-zhi-shang-feiyan-cover.webp` (approved low-sensitivity preview only)
+- `public/images/guyu/` public `新说` page assets and their two approved preview covers
 - `tokens.css`
 - `vercel.json`
 - `cloudflare/duomei-media/` source, configuration, lockfile, and tests
 - the shared route and navigation files `src/App.tsx` and `src/components/DuomeiHeader.tsx`
 
-Current EdgeOne production stores 83 WebP pages in the private `guyu-private` Pages Blob namespace: 53 pages under `meiyou-yujian` and 30 under `zhi-shang-feiyan`. The same-origin Cloud Function exposes only allowlisted books after authorization. The retained Vercel fallback still contains only the 53-page old-book copy in private `duomei-private` R2. Private pages may not be committed under `public/` or shipped in static output; approved low-sensitivity cover previews are separate public derivatives. Never commit the answer or signing secrets.
+Current EdgeOne production keeps only the 53-page `meiyou-yujian` class book behind the original server-verified question and private `guyu-private` Pages Blob path. `/guyu` is a public shelf. `纸上飞檐` and `xinshuo-01` are approved public `新说` books with 30 ordered static WebP pages each. The retained Vercel fallback still contains only the 53-page old-book copy in private `duomei-private` R2. Never commit the answer or signing secrets.
 
-`纸上飞檐` is pinned to audited source commit `249736f5dd4914f1797a6eb5b4e8d9226edb6be9`. Its fixed Vercel deployment is only a bootstrap source for missing Blob objects: the sync script verifies 30 expected hashes, refuses to overwrite mismatches, and the production reader never fetches pages from Vercel.
+`纸上飞檐` is pinned to audited source commit `249736f5dd4914f1797a6eb5b4e8d9226edb6be9`; production never fetches its source Vercel preview. `xinshuo-01` is the approved first cloud-task output and must not be regenerated during website maintenance. The abstract-geometric second output was rejected on 2026-09-03 and must not enter the public bundle; only an approved human-centered replacement may become `xinshuo-02`. The root book test verifies every approved public page sequence, WebP signature, and aggregate hash.
 
 The reader pins `react-pageflip@2.0.3` and `page-flip@2.0.7`. Scan numbers 10, 16, 21, 23–27, 30, 34, 39–40, and 42–51 are paired visual spreads; the source remains one private object while the reader crops it across two persistent logical pages. Scan 15 is a wide single page and must not be split.
 
 All logical leaves deliberately use StPageFlip's hard-page density to match the referenced rigid-board album rather than a soft paper curl. The reader's visible back control and browser-history exit force a full document navigation so the pinned upstream render loop cannot accumulate across repeated SPA reader mounts; the component also calls `destroy()` as production cleanup.
 
-If an unpushed local commit ever contained those pages, amend or squash that commit before pushing. A later deletion commit is not enough because the public repository would retain the original blobs in history.
+If an unpushed local commit ever contains the protected `meiyou-yujian` pages, amend or squash that commit before pushing. A later deletion commit is not enough because the public repository would retain the original blobs in history.
 
-Do not publish the navigation or reader until all 83 EdgeOne Blob objects and the root Guyu tests are verified. The production workflow must finish the immutable-source sync before deploying the frontend, and a missing/mismatched `纸上飞檐` object must fail closed without overwriting it. When changing the retained Vercel/Cloudflare path, verify its R2 objects and Worker tests too. `npm.cmd run release:check` rejects public or tracked Guyu originals and verifies the protected delivery bundle.
+Do not publish the navigation or reader until the 53 protected old-book objects and all public `新说` page contracts are verified. When changing the retained Vercel/Cloudflare path, verify its R2 objects and Worker tests too. `npm.cmd run release:check` rejects public or tracked protected originals and verifies the complete mixed-access Guyu bundle.
 
 EdgeOne production has a precise client-IP rate-limit rule for `/api/guyu-auth` in addition to the process-local failure map. Reverify the project security rule after any domain or project migration. Vercel Firewall applies only if the retained fallback becomes the requested deployment target.
 
@@ -109,14 +108,16 @@ EdgeOne production has a precise client-IP rate-limit rule for `/api/guyu-auth` 
 - The homepage order remains 主视觉 / 小记 / 快活 / 故语 / 颜色 / 微言 / 技能 / 版权脚注.
 - 小记、故语、颜色、微言、技能与既有快活板块统一使用 `230svh / 100svh` sticky 停留节奏；底部进度到 100% 后才释放到下一板块，小记不平移轮播层，减少动态效果模式恢复普通文档流。
 - On short mobile viewports, the static notes stage uses its natural content height inside the unchanged `230svh` track so the complete card clears before the next section; never shrink or clip the card text or alter the tilt pipeline.
-- “故语” sits between “快活” and “颜色”; its homepage preview opens `/guyu`.
+- “故语” sits between “快活” and “颜色”; its preview stays on each current book for 2.5 seconds, fades between `故语 · 同学录` and public `新说` books without horizontal autoplay, and opens `/guyu`.
 - “颜色” preserves the supplied 多美 and 多美猪猪 WeChat preview/QR assets and their official short links.
 - Mobile keeps the fixed safe-area shortcut order 首页 / 小记 / 故语 / 颜色 / 微言 / 技能; desktop renders the same shortcuts inside the footer.
 - The frozen mobile header uses one synchronous native short-tap path on the portal DOM: buttons activate immediately, anchors call `window.location.assign()` before iOS user activation expires, and the compatibility click is suppressed once. Sticky hover/focus must never override `.is-menu-open` visibility or pointer events.
 - `/guyu/meiyou-yujian` keeps all 53 scans, expands detected two-page scans into aligned logical spreads, preserves the front and back covers, uses the pinned StPageFlip engine for full-screen phone/desktop page turns, and keeps keyboard plus compact overlay controls.
-- `/guyu/zhi-shang-feiyan` appears under the `新说` shelf and reuses the same GuyuFlipbook with exactly 30 complete `full` leaves; it never enters the old-book split/stack pipeline.
+- `/guyu/zhi-shang-feiyan` and `/guyu/xinshuo-01` appear under the public `新说` shelf and reuse the same GuyuFlipbook. Each has exactly 30 complete `full` pages and never enters the old-book split/stack pipeline. A future `xinshuo-02` requires an approved replacement artifact and the same release checks.
 - The Guyu book surface keeps browser-native pan and pinch zoom enabled; StPageFlip must not cancel the browser gesture before a page turn begins.
-- `/guyu` and every page request remain behind the original server-verified class question; direct static and unsigned R2 paths remain blocked.
+- Only `/guyu/meiyou-yujian` and its `/api/guyu-page` requests remain behind the original server-verified class question. `/guyu` and all `新说` readers are public; no other route may display the class gate.
+- The header menu item `故语` targets the homepage `/#guyu` position, not `/guyu` directly.
+- At supported mobile widths and short viewports, complete poetry cards, captions, controls, and the fixed section progress rail must remain visible without clipping or overlap.
 - The poetry portal target keeps `id="kuaihuo"`.
 - The admin reflects 首页 / 微言 / 小记管理.
 - The homepage paper curve reaches the full right edge.

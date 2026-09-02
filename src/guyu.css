@@ -471,7 +471,9 @@ body {
   border-radius: calc(var(--radius-card) * 0.72);
   box-shadow: var(--shadow-book);
   transform-origin: left center;
-  transition: transform var(--dur-long) var(--ease-out);
+  transition:
+    transform var(--dur-long) var(--ease-out),
+    opacity var(--dur-long) var(--ease-out);
 }
 
 .guyu-home-book img {
@@ -485,6 +487,12 @@ body {
   display: grid;
   gap: var(--space-md);
   min-inline-size: 0;
+  transition: opacity var(--dur-long) var(--ease-out);
+}
+
+.guyu-home-work.is-transitioning .guyu-home-book,
+.guyu-home-work.is-transitioning .guyu-home-work-copy {
+  opacity: 0;
 }
 
 .guyu-home-work-kind {

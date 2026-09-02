@@ -219,7 +219,7 @@ export function DuomeiHeader() {
         <a href="/#notes" onClick={closeAfterNativeNavigation}>
           小记
         </a>
-        <a href="/guyu" onClick={closeAfterNativeNavigation}>
+        <a href="/#guyu" onClick={closeAfterNativeNavigation}>
           故语
         </a>
         <a href="/#color" onClick={closeAfterNativeNavigation}>

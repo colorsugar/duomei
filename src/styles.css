@@ -12664,7 +12664,10 @@ html.duomei-modal-open .home-section-progress {
 @media (max-width: 760px) {
   .home-section-progress {
     inset-inline: var(--space-lg);
-    inset-block-end: var(--space-md);
+    inset-block-end: max(
+      var(--space-md),
+      env(safe-area-inset-bottom, 0px)
+    );
     gap: var(--space-sm);
   }
 }

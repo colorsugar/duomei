@@ -1,9 +1,50 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { guyuBooks } from "../content/guyuBooks";
 import { HomeSectionHold } from "./HomeSectionHold";
 
 export function GuyuShelfPreview() {
-  const book = guyuBooks[0];
+  const [bookIndex, setBookIndex] = useState(0);
+  const [reducedMotion, setReducedMotion] = useState(false);
+  const [isTransitioning, setIsTransitioning] = useState(false);
+  const bookCount = guyuBooks.length;
+  const book = guyuBooks[bookIndex] ?? guyuBooks[0];
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const updateMotionPreference = () => setReducedMotion(mediaQuery.matches);
+    updateMotionPreference();
+    mediaQuery.addEventListener("change", updateMotionPreference);
+    return () => mediaQuery.removeEventListener("change", updateMotionPreference);
+  }, []);
+
+  useEffect(() => {
+    if (reducedMotion || bookCount < 2) return;
+    let dwellTimer = 0;
+    let switchTimer = 0;
+
+    const queueNextBook = () => {
+      dwellTimer = window.setTimeout(() => {
+        setIsTransitioning(true);
+        switchTimer = window.setTimeout(() => {
+          setBookIndex((current) => (current + 1) % bookCount);
+          setIsTransitioning(false);
+          queueNextBook();
+        }, 420);
+      }, 2500);
+    };
+
+    queueNextBook();
+    return () => {
+      window.clearTimeout(dwellTimer);
+      window.clearTimeout(switchTimer);
+    };
+  }, [bookCount, reducedMotion]);
+
+  if (!book) return null;
+  const isNewStory = book.chapter === "新说";
+  const sectionLabel = isNewStory ? "新说" : "故语";
+  const shelfLabel = book.kind;
 
   return (
     <HomeSectionHold id="guyu" className="guyu-home-shelf" ariaLabelledBy="guyu-home-shelf-title">
@@ -12,7 +53,11 @@ export function GuyuShelfPreview() {
         <p>把旧日收好，等后来的人翻阅。</p>
       </header>
 
-      <Link className="guyu-home-work" to="/guyu" aria-label={`前往故语，翻阅《${book.title}》`}>
+      <Link
+        className={`guyu-home-work${isTransitioning ? " is-transitioning" : ""}`}
+        to="/guyu"
+        aria-label={`前往故语书架，查看${sectionLabel}《${book.title}》`}
+      >
         <span className="guyu-home-book" aria-hidden="true">
           <img
             src={book.previewCoverSrc}
@@ -25,7 +70,7 @@ export function GuyuShelfPreview() {
         </span>
 
         <span className="guyu-home-work-copy">
-          <span className="guyu-home-work-kind">同学录 · 旧册</span>
+          <span className="guyu-home-work-kind">{sectionLabel} · {shelfLabel}</span>
           <strong className="guyu-title-phrases" aria-label={book.title}>
             {book.title.split(/\s+/u).map((part) => <span key={part}>{part}</span>)}
           </strong>

@@ -83,7 +83,6 @@ $guyuBundle = @(
   "server/guyuRateLimit.ts",
   "server/guyuBooks.test.ts",
   "server/guyuEdgeOneAdapter.test.mjs",
-  "scripts/sync-guyu-private-books.mjs",
   "deploy/guyu-edgeone/edgeone.json",
   "deploy/guyu-edgeone/package-lock.json",
   "deploy/guyu-edgeone/package.json",
@@ -97,6 +96,8 @@ $guyuBundle = @(
   "src/pages/DuomeiGuyuReaderPage.tsx",
   "src/guyu.css",
   "src/main.tsx",
+  "public/images/guyu",
+  "public/images/guyu-xinshuo-01-cover.webp",
   "public/images/guyu-zhi-shang-feiyan-cover.webp",
   "tokens.css",
   "tsconfig.server.json",
@@ -138,7 +139,7 @@ $requiredMarkers = @(
   @{ File = "src/components/PoetryCanvasEditor.tsx"; Marker = "onRedo" },
   @{ File = "src/components/DuomeiHeader.tsx"; Marker = 'href="/#color"' },
   @{ File = "src/components/DuomeiHeader.tsx"; Marker = 'href="/#weiyan"' },
-  @{ File = "src/components/DuomeiHeader.tsx"; Marker = 'href="/guyu"' },
+  @{ File = "src/components/DuomeiHeader.tsx"; Marker = 'href="/#guyu"' },
   @{ File = "src/components/DuomeiHeader.tsx"; Marker = "data-native-navigation" },
   @{ File = "src/components/DuomeiHeader.tsx"; Marker = "closeAfterNativeNavigation" },
   @{ File = "src/components/DuomeiHeader.tsx"; Marker = 'window.location.assign((target as HTMLAnchorElement).href)' },
@@ -159,21 +160,22 @@ $requiredMarkers = @(
   @{ File = "src/App.tsx"; Marker = 'path="/guyu/:bookId"' },
   @{ File = "src/content/guyuBooks.ts"; Marker = 'Array.from({ length: 53 }' },
   @{ File = "src/content/guyuBooks.ts"; Marker = 'id: "zhi-shang-feiyan"' },
+  @{ File = "src/content/guyuBooks.ts"; Marker = 'id: "xinshuo-01"' },
+  @{ File = "src/content/guyuBooks.ts"; Marker = 'access: "class-gated"' },
+  @{ File = "src/content/guyuBooks.ts"; Marker = 'access: "public"' },
+  @{ File = "src/components/GuyuShelfPreview.tsx"; Marker = '}, 2500)' },
   @{ File = "server/guyuBooks.test.ts"; Marker = 'maps zhi-shang-feiyan as a full-page new-book' },
-  @{ File = "deploy/guyu-edgeone/server/guyu-core.cjs"; Marker = 'private-media/guyu/zhi-shang-feiyan/pages' },
+  @{ File = "server/guyuBooks.test.ts"; Marker = 'keeps every public new-book page present, ordered, and byte-stable' },
+  @{ File = "deploy/guyu-edgeone/server/guyu-core.cjs"; Marker = 'private-media/guyu/meiyou-yujian/pages' },
   @{ File = "deploy/guyu-edgeone/server/guyu-core.cjs"; Marker = 'Object.hasOwn(BOOKS, book)' },
-  @{ File = "scripts/sync-guyu-private-books.mjs"; Marker = '249736f5dd4914f1797a6eb5b4e8d9226edb6be9' },
-  @{ File = "scripts/sync-guyu-private-books.mjs"; Marker = 'https://zhi-shang-feiyan-52dbdlv5c-duomei.vercel.app/pages' },
-  @{ File = "scripts/sync-guyu-private-books.mjs"; Marker = 'onlyIfNew: true' },
-  @{ File = ".github/workflows/deploy-edgeone.yml"; Marker = "Sync private Guyu books" },
+  @{ File = ".github/workflows/deploy-edgeone.yml"; Marker = "/images/guyu/xinshuo-01/pages/001.webp" },
   @{ File = "src/content/guyuBooks.ts"; Marker = '/api/guyu-page?book=' },
   @{ File = "package.json"; Marker = '"react-pageflip": "2.0.3"' },
   @{ File = "package.json"; Marker = '"page-flip": "2.0.7"' },
   @{ File = "src/components/GuyuFlipbook.tsx"; Marker = 'mobileScrollSupport={true}' },
   @{ File = "src/guyu.css"; Marker = 'StPageFlip ships pan-y here; keep native pinch zoom on its actual touch surface.' },
   @{ File = "src/content/guyuBooks.ts"; Marker = 'pairedScanNumbers' },
-  @{ File = "src/pages/DuomeiGuyuPage.tsx"; Marker = 'GuyuAccessGate' },
-  @{ File = "src/pages/DuomeiGuyuReaderPage.tsx"; Marker = 'GuyuAccessGate' },
+  @{ File = "src/pages/DuomeiGuyuReaderPage.tsx"; Marker = 'book.access === "class-gated"' },
   @{ File = "api/guyu-page.ts"; Marker = 'requestHasGuyuSession' },
   @{ File = "server/guyuSession.ts"; Marker = 'createGuyuMediaSignature' },
   @{ File = "cloudflare/duomei-media/src/index.ts"; Marker = '/private-media/' },
@@ -185,23 +187,28 @@ $requiredMarkers = @(
   @{ File = "src/components/PaperLayer.tsx"; Marker = "paper-stroke-reveal-rect" },
   @{ File = "src/styles.css"; Marker = ".paper-stroke-reveal-rect" }
   @{ File = "src/components/HomeIntroSection.css"; Marker = "Static notes keep the shared 230svh track" }
+  @{ File = "src/components/HomeIntroSection.css"; Marker = "(max-height: 720px)" }
 )
 
 $errors = [System.Collections.Generic.List[string]]::new()
 
-$feiyanCover = "public/images/guyu-zhi-shang-feiyan-cover.webp"
-$feiyanCoverHash = "69644B7DFFDBF78FE5D2D624678B0005AF65FA6E9029340176615FAFCE332D6B"
-if (Test-Path -LiteralPath $feiyanCover) {
-  $coverStream = [System.IO.File]::OpenRead((Resolve-Path -LiteralPath $feiyanCover))
+$publicCoverHashes = @{
+  "public/images/guyu-zhi-shang-feiyan-cover.webp" = "69644B7DFFDBF78FE5D2D624678B0005AF65FA6E9029340176615FAFCE332D6B"
+  "public/images/guyu-xinshuo-01-cover.webp" = "A993DF1567F85CC70D814E27ED7C8F201CDF115495D5B38B4DED47EA5F74EF8D"
+}
+
+foreach ($cover in $publicCoverHashes.GetEnumerator()) {
+  if (-not (Test-Path -LiteralPath $cover.Key)) { continue }
+  $coverStream = [System.IO.File]::OpenRead((Resolve-Path -LiteralPath $cover.Key))
   $sha256 = [System.Security.Cryptography.SHA256]::Create()
   try {
-    $actualFeiyanCoverHash = [System.BitConverter]::ToString($sha256.ComputeHash($coverStream)).Replace("-", "")
+    $actualCoverHash = [System.BitConverter]::ToString($sha256.ComputeHash($coverStream)).Replace("-", "")
   } finally {
     $sha256.Dispose()
     $coverStream.Dispose()
   }
-  if ($actualFeiyanCoverHash -ne $feiyanCoverHash) {
-    $errors.Add("The public 纸上飞檐 preview cover does not match the audited source")
+  if ($actualCoverHash -ne $cover.Value) {
+    $errors.Add("The public Guyu preview cover does not match its audited source: $($cover.Key)")
   }
 }
 
@@ -214,7 +221,14 @@ if ($publicGuyuFiles.Count -gt 0) {
 
 $trackedPublicGuyuFiles = @(git ls-files -- "public/books/guyu")
 if ($trackedPublicGuyuFiles.Count -gt 0) {
-  $errors.Add("Guyu originals must not be tracked from public/books/guyu")
+  $errors.Add("Protected Guyu originals must not be tracked from public/books/guyu")
+}
+
+$publicClassBookFiles = @(
+  Get-ChildItem -LiteralPath "public/images/guyu/meiyou-yujian" -Recurse -File -ErrorAction SilentlyContinue
+)
+if ($publicClassBookFiles.Count -gt 0) {
+  $errors.Add("The protected meiyou-yujian pages must never exist under public/images/guyu")
 }
 
 $savedErrorActionPreference = $ErrorActionPreference
@@ -286,4 +300,4 @@ if ($errors.Count -gt 0) {
   exit 1
 }
 
-Write-Output "Release check passed: committed poetry and protected Guyu bundles plus latest-version markers are intact."
+Write-Output "Release check passed: committed poetry and mixed-access Guyu bundles plus latest-version markers are intact."

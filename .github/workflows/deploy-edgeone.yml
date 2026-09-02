@@ -65,11 +65,6 @@ jobs:
       - name: Dry-run media worker bundle
         run: npm --prefix cloudflare/duomei-media run deploy:dry
 
-      - name: Sync private Guyu books
-        env:
-          EDGEONE_API_TOKEN: ${{ secrets.EDGEONE_API_TOKEN }}
-        run: node scripts/sync-guyu-private-books.mjs
-
       - name: Write deployment marker
         shell: bash
         run: |
@@ -133,12 +128,13 @@ jobs:
           for (let attempt = 1; attempt <= 18; attempt += 1) {
             try {
               const nonce = `${Date.now()}-${attempt}`;
-              const [marker, home, auth, protectedOldPage, protectedNewPage] = await Promise.all([
+              const [marker, home, auth, protectedOldPage, publicFeiyanPage, publicXinshuoOnePage] = await Promise.all([
                 fetch(`https://duomei.site/.well-known/duomei-build.json?ci=${nonce}`, { cache: "no-store" }),
                 fetch(`https://duomei.site/?ci=${nonce}`, { cache: "no-store" }),
                 fetch(`https://duomei.site/api/guyu-auth?ci=${nonce}`, { cache: "no-store" }),
                 fetch(`https://duomei.site/api/guyu-page?book=meiyou-yujian&page=001&ci=${nonce}`, { cache: "no-store" }),
-                fetch(`https://duomei.site/api/guyu-page?book=zhi-shang-feiyan&page=001&ci=${nonce}`, { cache: "no-store" }),
+                fetch(`https://duomei.site/images/guyu/zhi-shang-feiyan/pages/001.webp?ci=${nonce}`, { cache: "no-store" }),
+                fetch(`https://duomei.site/images/guyu/xinshuo-01/pages/001.webp?ci=${nonce}`, { cache: "no-store" }),
               ]);
               const markerBody = marker.ok ? await marker.json() : null;
               const authBody = auth.ok ? await auth.json() : null;
@@ -150,13 +146,14 @@ jobs:
                 auth.status === 200 &&
                 authBody?.authorized === false &&
                 protectedOldPage.status === 401 &&
-                protectedNewPage.status === 401
+                publicFeiyanPage.status === 200 &&
+                publicXinshuoOnePage.status === 200
               ) {
                 console.log(`Production verified on attempt ${attempt}.`);
                 process.exit(0);
               }
 
-              lastError = `marker=${marker.status}/${markerBody?.commit ?? "missing"} home=${home.status} auth=${auth.status}/${authBody?.authorized} protected-old=${protectedOldPage.status} protected-new=${protectedNewPage.status}`;
+              lastError = `marker=${marker.status}/${markerBody?.commit ?? "missing"} home=${home.status} auth=${auth.status}/${authBody?.authorized} protected-old=${protectedOldPage.status} public-feiyan=${publicFeiyanPage.status} public-xinshuo-01=${publicXinshuoOnePage.status}`;
             } catch (error) {
               lastError = error instanceof Error ? error.message : String(error);
             }
