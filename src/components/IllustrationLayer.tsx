@@ -63,7 +63,6 @@ export function IllustrationLayer() {
 
   useEffect(() => {
     let readFrame = 0;
-    let drawFrame = 0;
     let targetProgress = 0;
     let displayedProgress = -1;
 
@@ -108,24 +107,14 @@ export function IllustrationLayer() {
       targetProgress = Math.min(1, Math.max(0, window.scrollY / (viewport * 0.82)));
     };
 
-    const draw = () => {
-      const next = displayedProgress < 0 ? targetProgress : displayedProgress + (targetProgress - displayedProgress) * 0.18;
-      setProgress(Math.abs(targetProgress - next) < 0.001 ? targetProgress : next);
-
-      if (Math.abs(targetProgress - displayedProgress) > 0.001) {
-        drawFrame = window.requestAnimationFrame(draw);
-      } else {
-        drawFrame = 0;
-      }
-    };
-
     const update = () => {
       readFrame = 0;
       readTargetProgress();
-      // The curve is tied directly to scroll so its first and last pixels are exact.
-      // The rest of the hero can keep the softer, interpolated motion below.
+      // Lenis already eases the scroll position. A second lerp here made the
+      // hero lag behind the paper curve and the kinetic canvas, so every layer
+      // now reads the same eased scroll value directly.
       setPaperProgress(targetProgress);
-      if (!drawFrame) draw();
+      if (displayedProgress !== targetProgress) setProgress(targetProgress);
     };
 
     const requestUpdate = () => {
@@ -138,7 +127,6 @@ export function IllustrationLayer() {
     window.addEventListener("resize", requestUpdate);
     return () => {
       if (readFrame) window.cancelAnimationFrame(readFrame);
-      if (drawFrame) window.cancelAnimationFrame(drawFrame);
       document.documentElement.style.removeProperty("--duomei-hero-progress");
       document.documentElement.style.removeProperty("--duomei-paper-progress");
       [

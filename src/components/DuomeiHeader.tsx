@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { Link, useLocation, useNavigate } from "react-router-dom";
-import { clearJourneyListState } from "../motion";
+import { useLocation } from "react-router-dom";
+import { Link, clearJourneyListState, useTransitionNavigate } from "../motion";
 import { useDuomeiEdit } from "./DuomeiEditProvider";
+import { scrollWindowTo } from "../hooks/useSmoothScroll";
 
 export function DuomeiHeader() {
   const { isLoggedIn, editMode, toggleEditMode, logout } = useDuomeiEdit();
@@ -11,7 +12,7 @@ export function DuomeiHeader() {
   const [hoverRevealed, setHoverRevealed] = useState(false);
   const menuTouchStartRef = useRef<{ x: number; y: number } | null>(null);
   const lastTouchActivationRef = useRef(0);
-  const navigate = useNavigate();
+  const navigate = useTransitionNavigate();
   const location = useLocation();
 
   useEffect(() => {
@@ -35,16 +36,7 @@ export function DuomeiHeader() {
     setHoverRevealed(false);
   };
 
-  const scrollHomeTop = (behavior: ScrollBehavior = "smooth") => {
-    const scroll = () => {
-      window.scrollTo({ top: 0, left: 0, behavior });
-      document.documentElement.scrollTop = 0;
-      document.body.scrollTop = 0;
-    };
-
-    scroll();
-    requestAnimationFrame(scroll);
-  };
+  const scrollHomeTop = () => scrollWindowTo(0);
 
   const goHomeTop = () => {
     closeMenu();
@@ -109,7 +101,10 @@ export function DuomeiHeader() {
   const goKuaihuo = (event: React.MouseEvent<HTMLAnchorElement>) => {
     event.preventDefault();
     closeMenu();
-    const scroll = () => document.getElementById("kuaihuo")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    const scroll = () => {
+      const target = document.getElementById("kuaihuo");
+      if (target) scrollWindowTo(target);
+    };
     if (location.pathname !== "/") {
       navigate("/#kuaihuo");
       window.setTimeout(scroll, 80);

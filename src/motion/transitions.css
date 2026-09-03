@@ -1,0 +1,72 @@
+/* Site-wide motion layer. Loaded after styles.css and guyu.css so it can settle
+   the few places where systems used to fight each other. Motion tokens are set
+   on <html> by MotionProvider, so everything here (portaled header, view
+   transition pseudo-elements) can read them. */
+
+/* Lenis owns smooth scrolling; native smoothing stacked on top of it stutters. */
+html {
+  scroll-behavior: auto;
+}
+
+/* Route changes breathe: the old page lifts and fades, the new one settles in
+   from a soft blur. The shared card-to-note journey keeps its own variant. */
+@supports (view-transition-name: duomei-page) {
+  ::view-transition {
+    pointer-events: none;
+  }
+
+  /* The fixed header persists between routes and never takes part in the page fade. */
+  .duomei-header {
+    view-transition-name: duomei-header;
+  }
+
+  ::view-transition-group(duomei-header) {
+    animation-duration: var(--motion-duration-s, 220ms);
+  }
+
+  :root[data-view-transition="page"]::view-transition-old(root) {
+    animation: duomeiPageLeave var(--motion-duration-m, 420ms) var(--motion-ease-standard, cubic-bezier(0.16, 1, 0.3, 1)) both;
+    mix-blend-mode: normal;
+  }
+
+  :root[data-view-transition="page"]::view-transition-new(root) {
+    animation: duomeiPageEnter var(--motion-duration-xl, 900ms) var(--motion-ease-standard, cubic-bezier(0.16, 1, 0.3, 1)) both;
+    mix-blend-mode: normal;
+  }
+
+  @keyframes duomeiPageLeave {
+    to {
+      opacity: 0;
+      transform: translate3d(0, -14px, 0) scale(0.992);
+    }
+  }
+
+  @keyframes duomeiPageEnter {
+    from {
+      opacity: 0;
+      transform: translate3d(0, 26px, 0) scale(1.008);
+      filter: blur(10px);
+    }
+
+    45% {
+      opacity: 1;
+    }
+
+    to {
+      opacity: 1;
+      transform: translate3d(0, 0, 0) scale(1);
+      filter: blur(0);
+    }
+  }
+}
+
+/* The header lives in a portal outside .duomei-motion-root, so the reduced-motion
+   rules scoped to that root never reached it. */
+:root[data-reduced-motion="true"] .duomei-header nav a::after,
+:root[data-reduced-motion="true"] .duomei-header nav button::after,
+:root[data-reduced-motion="true"] .duomei-header,
+:root[data-reduced-motion="true"] .duomei-brand,
+:root[data-reduced-motion="true"] .back-to-top {
+  transition: none !important;
+  animation: none !important;
+}

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import { motion, useReducedMotion, useScroll, useSpring, useTransform } from "framer-motion";
+import { motion, useReducedMotion, useScroll, useTransform } from "framer-motion";
 import { IllustrationLayer } from "./IllustrationLayer";
 import "../home-kinetic.css";
 
@@ -27,8 +27,8 @@ function useHeroScrollProgress() {
     return () => window.removeEventListener("resize", update);
   }, []);
 
-  const rawProgress = useTransform(scrollY, [0, viewportHeight * 0.94], [0, 1], { clamp: true });
-  return useSpring(rawProgress, { stiffness: 150, damping: 30, mass: 0.38 });
+  // Lenis eases the scroll itself; a spring on top desynced the canvas from the hero.
+  return useTransform(scrollY, [0, viewportHeight * 0.94], [0, 1], { clamp: true });
 }
 
 export function KineticHeroStage() {
@@ -92,7 +92,7 @@ export function KineticNotesStage({ children, noteCount }: KineticNotesStageProp
     target: sectionRef,
     offset: ["start 94%", "end 6%"],
   });
-  const progress = useSpring(scrollYProgress, { stiffness: 125, damping: 29, mass: 0.42 });
+  const progress = scrollYProgress;
 
   const contentX = useTransform(progress, [0, 0.2, 0.78, 1], compact ? ["12vw", "0vw", "0vw", "-7vw"] : ["30vw", "0vw", "0vw", "-18vw"]);
   const contentScale = useTransform(progress, [0, 0.22, 0.78, 1], compact ? [0.92, 1, 1, 1.015] : [0.76, 1, 1, 1.055]);
