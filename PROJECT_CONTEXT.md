@@ -86,13 +86,14 @@ Only the 53-page class book uses the protected EdgeOne Blob path and the origina
 | Retained `纸上飞檐` Blob copy | EdgeOne Pages Blob `guyu-private` | 30 objects retained only as an unused rollback copy; not a live read path |
 | Retained Guyu fallback | Cloudflare R2 `duomei-private` | 53 objects, 11.4 MB; not the current EdgeOne read path |
 
-External runtime hosts intentionally referenced by the site are `duomei.site`, `bokvqndvwqgugkcrizwj.supabase.co`, `duomei-media-storage.colorsugar.workers.dev`, `github.com/colorsugar/agent-skills`, and WeChat short links under `w.url.cn`. No third-party analytics script was verified.
+External runtime hosts intentionally referenced by the site are `duomei.site`, `bokvqndvwqgugkcrizwj.supabase.co`, `duomei-media-storage.colorsugar.workers.dev`, `github.com/colorsugar/agent-skills`, the embedded daily digest `zaobao-six.vercel.app` (only inside `/zaobao`), and WeChat short links under `w.url.cn`. No third-party analytics script was verified.
 
 ## Routes
 
 | Route | Purpose | Global header/footer |
 |---|---|---|
 | `/` | Full homepage | Yes |
+| `/zaobao` | Full-screen `iframe` of the external daily digest `https://zaobao-six.vercel.app` | No; keeps `← 返回首页` |
 | `/time` | Time/poetry page | Header/footer remain, smooth-scroll exception |
 | `/note/:slug` | Note detail | Yes |
 | `/guyu` | Public Guyu shelf | Yes |
@@ -110,7 +111,8 @@ External runtime hosts intentionally referenced by the site are `duomei.site`, `
 ## Product Behavior That Must Not Regress
 
 - Preserve the quiet warm-paper DUOMEI design, existing content, typography, mascot, and information architecture. Do not replace it with a generic template or redesign a scoped bug fix.
-- Homepage order stays: hero / 小记 / 快活 / 故语 / 云游 / 颜色 / 微言 / 技能 / copyright footer.
+- Homepage order stays: hero / 早报 / 小记 / 快活 / 故语 / 云游 / 颜色 / 微言 / 技能 / copyright footer.
+- 早报 is a single-card section (`id="zaobao"`) whose card opens `/zaobao`, a full-screen same-tab `iframe` of the external daily digest `https://zaobao-six.vercel.app`; the digest HTML is never copied into this repository. The route hides the header/footer and keeps a visible `← 返回首页` link targeting `/#zaobao` plus a same-tab `直接打开` fallback link. Header, footer, and scroll-spy order is 首页 / 早报 / 小记 / 故语 / 云游 / 颜色 / 微言 / 技能.
 - 小记、快活、故语、颜色、微言、技能 share the `230svh` track and `100svh` sticky-stage rhythm. A section releases only after its bottom progress reaches 100%.
 - 小记 keeps its horizontal carousel but does not vertically transform the carousel content; this avoids mobile scroll jank.
 - The fixed header hides while scrolling down and returns while scrolling up. Mobile navigation must work from the homepage and from secondary pages, especially `/guyu`.
@@ -120,7 +122,7 @@ External runtime hosts intentionally referenced by the site are `duomei.site`, `
 - Guyu reader touch ownership is frozen: the capture layer owns single-finger tap/swipe while leaving native vertical scroll and pinch zoom enabled. Once any touch sequence contains two fingers, that whole sequence is latched as zoom-only until every finger is released. While `visualViewport.scale > 1.01`, the page surface enables native horizontal and vertical panning and every page-turn path remains blocked; only a fresh single-finger gesture after returning to 100% may turn pages.
 - The `/guyu` shelf has a visible 44px `← 返回首页` link targeting `/#guyu`; a closed Guyu reader still shows `返回故语`, and an open reader replaces it with `合上`, which returns to the cover without leaving the route or destroying the reader. Shelf titles must wrap fully inside their card without ellipsis or clipping.
 - The homepage Guyu preview displays each book for 1.6 seconds, then keeps 16 visible cover fragments through an approximately 1.1-second scatter/tint/swap/reassembly. After reassembly the incoming base cover is exposed beneath the still-visible fragments with no opacity transition; the fragments stay mounted until that base image decodes and survives two paint frames, so the prior cover cannot flash back. The whole cover, copy, and “翻开这一本” card opens the current book at `/guyu/{book.id}`; a separate 44px “查看所有” link opens `/guyu`. It supports left/right swipe, Arrow/Home/End keys, a pause control, clickable IG-style progress dots, and seamless first/last looping; reduced-motion mode disables autoplay and uses immediate state changes.
-- On mobile, the Guyu shelf ending uses compact spacing and the footer keeps all seven shortcuts in one 44px-high row. The back-to-top control hides while the footer is visible so it never covers navigation or copyright text.
+- On mobile, the Guyu shelf ending uses compact spacing and the footer keeps all eight shortcuts in one 44px-high row. The back-to-top control hides while the footer is visible so it never covers navigation or copyright text.
 - The header menu item `故语` targets `/#guyu`; it must never bypass the homepage preview by navigating directly to `/guyu`.
 - The header and footer item `云游` targets `/#yunyou`; the homepage card then opens the same-origin `/yunyou/` map. Production must never link this card to a Vercel Preview.
 - `/yunyou/` keeps a visible `← 返回多美` target, a loading state, a WebGL/module failure fallback, mobile DPR limits, touch rotation/zoom, a user-controlled auto-rotate toggle, and reduced-motion mode with auto-rotate disabled.
