@@ -6,10 +6,8 @@ import {
   requestHasGuyuSession,
 } from "../server/guyuSession.js";
 
-const BOOK_PAGE_COUNTS = new Map([
-  ["meiyou-yujian", 53],
-  ["gui-xiang-huan-xiang", 30],
-]);
+const BOOK_ID = "meiyou-yujian";
+const PAGE_COUNT = 53;
 
 function jsonError(error: string, status: number) {
   return Response.json(
@@ -48,14 +46,13 @@ export default {
     const bookId = url.searchParams.get("book");
     const page = url.searchParams.get("page") ?? "";
     const pageNumber = Number.parseInt(page, 10);
-    const pageCount = bookId ? BOOK_PAGE_COUNTS.get(bookId) : undefined;
-    if (!pageCount || !/^\d{3}$/u.test(page) || pageNumber < 1 || pageNumber > pageCount) {
+    if (bookId !== BOOK_ID || !/^\d{3}$/u.test(page) || pageNumber < 1 || pageNumber > PAGE_COUNT) {
       return jsonError("没有这一页。", 404);
     }
 
     try {
       const { mediaOrigin, signingSecret } = getGuyuMediaConfig();
-      const key = `guyu/${bookId}/pages/${page}.webp`;
+      const key = `guyu/${BOOK_ID}/pages/${page}.webp`;
       const expiresAt = Math.floor(Date.now() / 1000) + GUYU_MEDIA_URL_TTL_SECONDS;
       const signature = createGuyuMediaSignature(key, expiresAt, signingSecret);
       const mediaURL = new URL(`/private-media/${key}`, mediaOrigin);

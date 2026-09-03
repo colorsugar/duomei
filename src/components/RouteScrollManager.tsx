@@ -11,7 +11,7 @@ function scrollWindowTop() {
 function scrollHashTarget(hash: string) {
   const target = document.querySelector(hash);
   if (!target) return false;
-  target.scrollIntoView({ block: "start", inline: "nearest", behavior: "auto" });
+  target.scrollIntoView({ block: "start", inline: "nearest", behavior: "instant" as ScrollBehavior });
   return true;
 }
 
@@ -43,15 +43,9 @@ export function RouteScrollManager() {
     }
 
     const frameId = requestAnimationFrame(() => scrollHashTarget(location.hash));
-    const timers = [
-      window.setTimeout(() => scrollHashTarget(location.hash), 80),
-      window.setTimeout(() => scrollHashTarget(location.hash), 240),
-      window.setTimeout(() => scrollHashTarget(location.hash), 520),
-    ];
 
     return () => {
       cancelAnimationFrame(frameId);
-      timers.forEach((timer) => window.clearTimeout(timer));
     };
   }, [location.pathname, location.search, location.hash]);
 

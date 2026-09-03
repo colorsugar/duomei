@@ -19,7 +19,7 @@ function PaperCurve() {
 
 export function PaperLayer({ children }: { children: ReactNode }) {
   return (
-    <section className="paper-layer" id="notes">
+    <section className="paper-layer">
       <PaperCurve />
       <div className="paper-body">{children}</div>
     </section>

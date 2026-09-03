@@ -1,13 +1,16 @@
-import type { ChangeEvent, CSSProperties, PointerEvent as ReactPointerEvent } from "react";
+import type { ChangeEvent, CSSProperties, KeyboardEvent, PointerEvent as ReactPointerEvent } from "react";
 import { useEffect, useRef, useState } from "react";
-import { motion, useScroll, useSpring, useTransform } from "framer-motion";
-import type { MotionValue } from "framer-motion";
+import { animate, motion, useMotionValue, useReducedMotion, useScroll, useSpring, useTransform } from "framer-motion";
+import type { MotionValue, PanInfo } from "framer-motion";
 import type { DuomeiNote } from "../lib/noteTypes";
 import { compressImageFile } from "../lib/imageTools";
 import { defaultPoetryFont, timePoetryWorks } from "../lib/timePoetryContent";
-import type { TimePoetryImage, TimePoetryTextBlock, TimePoetryWork } from "../lib/timePoetryContent";
+import type { TimePoetryEffect, TimePoetryImage, TimePoetryTextBlock, TimePoetryWork } from "../lib/timePoetryContent";
 import { DreamCard } from "./DreamCard";
 import { GuyuShelfPreview } from "./GuyuShelfPreview";
+import { HomeSkillsSection } from "./SkillsDirectory";
+import { HomeSectionHold } from "./HomeSectionHold";
+import { StickerPackSection } from "./StickerPackSection";
 import { PoetryCanvasEditor } from "./PoetryCanvasEditor";
 import "./HomeIntroSection.css";
 
@@ -187,28 +190,48 @@ function PortalTitle({ progress }: { progress: ReturnType<typeof useSpring> }) {
   );
 }
 
+const poetryEase = [0.16, 1, 0.3, 1] as const;
+const poetryDeckCompactPeek = 16;
+const poetryDeckWidePeek = 52;
+
+function poetryEffectState(effect: TimePoetryEffect, visible: boolean, reverse: boolean, reducedMotion: boolean) {
+  if (visible || reducedMotion || effect === "none") {
+    return { opacity: 1, x: 0, y: 0, scale: 1, clipPath: "inset(0 0 0% 0)" };
+  }
+
+  if (effect === "slide") {
+    return { opacity: 0, x: reverse ? -42 : 42, y: 0, scale: 1, clipPath: "inset(0 0 0% 0)" };
+  }
+  if (effect === "rise") {
+    return { opacity: 0, x: 0, y: 34, scale: 1, clipPath: "inset(0 0 0% 0)" };
+  }
+  if (effect === "zoom") {
+    return { opacity: 0, x: 0, y: 0, scale: 0.94, clipPath: "inset(0 0 0% 0)" };
+  }
+  if (effect === "ink") {
+    return { opacity: 1, x: 0, y: 18, scale: 1, clipPath: "inset(0 0 100% 0)" };
+  }
+  return { opacity: 0, x: 0, y: 0, scale: 1, clipPath: "inset(0 0 0% 0)" };
+}
+
 function PoetryRevealColumn({
-  progress,
+  visible,
+  reducedMotion,
   index,
   children,
 }: {
-  progress: MotionValue<number>;
+  visible: boolean;
+  reducedMotion: boolean;
   index: number;
   children: string;
 }) {
-  const start = 0.025 + index * 0.07;
-  const end = start + 0.18;
-  const opacity = useTransform(progress, [start, start + 0.055, end], [0, 0.72, 1]);
-  const clipPath = useTransform(
-    progress,
-    [start, end],
-    ["inset(0 0 100% 0 round 45% 45% 0 0)", "inset(0 0 0% 0 round 0% 0% 0 0)"],
-  );
-  const y = useTransform(progress, [start, end], [46 + index * 7, 0]);
-  const filter = useTransform(progress, [start, end], ["blur(2.4px)", "blur(0px)"]);
-
   return (
-    <motion.span aria-hidden="true" style={{ opacity, clipPath, y, filter }}>
+    <motion.span
+      aria-hidden="true"
+      initial={reducedMotion ? false : poetryEffectState("ink", false, false, false)}
+      animate={poetryEffectState("ink", visible, false, reducedMotion)}
+      transition={{ duration: reducedMotion ? 0.01 : 0.42, delay: visible && !reducedMotion ? index * 0.06 : 0, ease: poetryEase }}
+    >
       {children}
     </motion.span>
   );
@@ -217,73 +240,55 @@ function PoetryRevealColumn({
 function PoetryWorkPanel({
   work,
   index,
-  canCreate,
-  compact,
-  onEdit,
+  active,
+  revealed,
+  reducedMotion,
 }: {
   work: TimePoetryWork;
   index: number;
-  canCreate: boolean;
-  compact: boolean;
-  onEdit: () => void;
+  active: boolean;
+  revealed: boolean;
+  reducedMotion: boolean;
 }) {
-  const panelRef = useRef<HTMLElement | null>(null);
   const isReverse = index % 2 === 1;
   const title = work.title || `诗词作品 ${String(index + 1).padStart(2, "0")}`;
   const textBlocks = work.textBlocks?.length ? work.textBlocks : createTextBlocks(work);
   const images = work.images.length ? work.images : [fallbackImage];
-  const { scrollYProgress } = useScroll({
-    target: panelRef,
-    offset: compact ? ["start 108%", "start 42%"] : ["start 20%", "end end"],
-  });
-  const mediaY = useTransform(scrollYProgress, [0, 1], ["-7%", "7%"]);
-  const mediaScale = useTransform(scrollYProgress, [0, 0.5, 1], [1.08, 1.02, 1.08]);
-  const maskScaleX = useTransform(scrollYProgress, [0, 0.34], [1, 0]);
-  const copyOpacity = useTransform(scrollYProgress, [0, 0.18], [0, 1]);
-  const copyY = useTransform(scrollYProgress, [0, 0.18], [42, 0]);
-  const mediaX = useTransform(scrollYProgress, [0, 0.25], [isReverse ? -58 : 58, 0]);
-  const mediaRiseY = useTransform(scrollYProgress, [0, 0.25], [64, 0]);
-  const mediaOpacity = useTransform(scrollYProgress, [0, 0.16], [0, 1]);
-  const mediaZoom = useTransform(scrollYProgress, [0, 0.28], [0.9, 1]);
-  const copyX = useTransform(scrollYProgress, [0, 0.2], [isReverse ? 34 : -34, 0]);
-  const copyScale = useTransform(scrollYProgress, [0, 0.2], [0.9, 1]);
-  const copyClip = useTransform(scrollYProgress, [0, 0.24], ["inset(0 0 100% 0)", "inset(0 0 0% 0)"]);
+  const transition = { duration: reducedMotion ? 0.01 : 0.46, ease: poetryEase };
 
   return (
-    <article ref={panelRef} className="poetry-work-track" aria-labelledby={`poetry-work-${work.id}`}>
-      <div className={`poetry-work-panel poetry-free-panel${isReverse ? " is-reverse" : ""}`}>
+      <div className={`poetry-work-panel poetry-free-panel${isReverse ? " is-reverse" : ""}`} aria-hidden={!active}>
         <span className="poetry-free-index" aria-hidden="true">{String(index + 1).padStart(2, "0")}</span>
-        {images.map((item, imageIndex) => {
-          const effect = item.effect ?? "ink";
-          return <motion.figure
-            className="poetry-free-image"
-            key={item.id ?? `${work.id}-image-${imageIndex}`}
-            style={{
-              left: `${item.x ?? 55}%`,
-              top: `${item.y ?? 9}%`,
-              width: `${item.width ?? 41}%`,
-              height: `${item.height ?? 74}%`,
-              zIndex: item.zIndex ?? 2,
-              x: effect === "slide" || effect === "ink" ? mediaX : 0,
-              y: effect === "rise" ? mediaRiseY : 0,
-              opacity: effect === "none" ? 1 : mediaOpacity,
-              scale: effect === "zoom" ? mediaZoom : 1,
-            }}
-          >
-            <motion.img
-              src={item.src || fallbackImage.src}
-              alt={item.label || title}
-              loading={index === 0 && imageIndex === 0 ? "eager" : "lazy"}
+        <div className={`poetry-deck-media-layer is-count-${Math.min(images.length, 4)}`}>
+          {images.map((item, imageIndex) => {
+            const effect = item.effect ?? "ink";
+            return <motion.figure
+              className="poetry-free-image"
+              key={item.id ?? `${work.id}-image-${imageIndex}`}
+              initial={reducedMotion ? false : poetryEffectState(effect, false, isReverse, false)}
+              animate={poetryEffectState(effect, revealed, isReverse, reducedMotion)}
+              transition={{ ...transition, delay: revealed && !reducedMotion ? imageIndex * 0.05 : 0 }}
               style={{
-                objectPosition: `${50 + (item.cropX ?? 0)}% ${50 + (item.cropY ?? 0)}%`,
-                y: mediaY,
-                scale: item.scale ?? mediaScale,
+                left: `${item.x ?? 55}%`,
+                top: `${item.y ?? 9}%`,
+                width: `${item.width ?? 41}%`,
+                height: `${item.height ?? 74}%`,
+                zIndex: item.zIndex ?? 2,
               }}
-            />
-            {effect === "ink" ? <motion.span className="poetry-work-media-mask" style={{ scaleX: maskScaleX }} aria-hidden="true" /> : null}
-            {item.label ? <figcaption>{item.label}</figcaption> : null}
-          </motion.figure>;
-        })}
+            >
+              <img
+                src={item.src || fallbackImage.src}
+                alt={item.label || title}
+                loading={index === 0 && imageIndex === 0 ? "eager" : "lazy"}
+                style={{
+                  objectPosition: `${50 + (item.cropX ?? 0)}% ${50 + (item.cropY ?? 0)}%`,
+                  scale: item.scale ?? 1,
+                }}
+              />
+              {item.label ? <figcaption>{item.label}</figcaption> : null}
+            </motion.figure>;
+          })}
+        </div>
 
         {textBlocks.map((block) => {
           const blockStyle = {
@@ -295,11 +300,6 @@ function PoetryWorkPanel({
             color: block.color || "var(--poetry-ink)",
             fontFamily: work.fontFamily || defaultPoetryFont,
             fontSize: `${block.fontSize / 14.4}cqw`,
-            opacity: block.effect === "none" ? 1 : copyOpacity,
-            x: block.effect === "slide" ? copyX : 0,
-            y: block.effect === "rise" || !block.effect ? copyY : 0,
-            scale: block.effect === "zoom" ? copyScale : 1,
-            clipPath: block.effect === "ink" ? copyClip : "none",
           };
           if (block.kind === "poem") {
             const effect = block.effect ?? "ink";
@@ -307,11 +307,14 @@ function PoetryWorkPanel({
               <motion.div
                 className={`poetry-free-text is-poem is-${block.direction}`}
                 key={block.id}
-                style={effect === "ink" ? { ...blockStyle, opacity: 1, y: 0, clipPath: "none" } : blockStyle}
+                initial={reducedMotion || effect === "ink" ? false : poetryEffectState(effect, false, isReverse, false)}
+                animate={effect === "ink" ? undefined : poetryEffectState(effect, revealed, isReverse, reducedMotion)}
+                transition={transition}
+                style={blockStyle}
                 aria-label={splitLines(block.content).join("，")}
               >
                 {splitLines(block.content).map((line, lineIndex) => effect === "ink" ? (
-                  <PoetryRevealColumn key={`${block.id}-${lineIndex}`} progress={scrollYProgress} index={lineIndex}>{line}</PoetryRevealColumn>
+                  <PoetryRevealColumn key={`${block.id}-${lineIndex}`} visible={revealed} reducedMotion={reducedMotion} index={lineIndex}>{line}</PoetryRevealColumn>
                 ) : <span key={`${block.id}-${lineIndex}`}>{line}</span>)}
               </motion.div>
             );
@@ -321,18 +324,268 @@ function PoetryWorkPanel({
               className={`poetry-free-text is-${block.kind} is-${block.direction}`}
               id={block.kind === "title" ? `poetry-work-${work.id}` : undefined}
               key={block.id}
+              initial={reducedMotion ? false : poetryEffectState(block.effect ?? "rise", false, isReverse, false)}
+              animate={poetryEffectState(block.effect ?? "rise", revealed, isReverse, reducedMotion)}
+              transition={transition}
               style={blockStyle}
             >
               {block.content}
             </motion.div>
           );
         })}
+      </div>
+  );
+}
 
-        {canCreate ? (
-          <button className="poetry-free-edit" type="button" onClick={onEdit}>直接编辑这一页</button>
+function PoetryStackDeck({
+  pages,
+  canCreate,
+  onEdit,
+}: {
+  pages: TimePoetryWork[];
+  canCreate: boolean;
+  onEdit: (index: number) => void;
+}) {
+  const stageRef = useRef<HTMLDivElement | null>(null);
+  const transitioningRef = useRef(false);
+  const activeIndexRef = useRef(0);
+  const animationSequenceRef = useRef(0);
+  const positionAnimationsRef = useRef<Array<{ stop: () => void }>>([]);
+  const currentX = useMotionValue(0);
+  const nextX = useMotionValue(0);
+  const reducedMotion = Boolean(useReducedMotion());
+  const [activePageId, setActivePageId] = useState(() => pages[0]?.id ?? "");
+  const [stageWidth, setStageWidth] = useState(0);
+  const [previewingNext, setPreviewingNext] = useState(false);
+  const [transitioning, setTransitioning] = useState(false);
+
+  const resolvedActiveIndex = pages.findIndex((page) => page.id === activePageId);
+  const activeIndex = resolvedActiveIndex >= 0
+    ? resolvedActiveIndex
+    : Math.min(activeIndexRef.current, Math.max(0, pages.length - 1));
+  const peekSize = stageWidth <= 760 ? poetryDeckCompactPeek : poetryDeckWidePeek;
+  const nextRestX = Math.max(0, stageWidth - peekSize);
+  const hasPrevious = activeIndex > 0;
+  const hasNext = activeIndex < pages.length - 1;
+
+  useEffect(() => {
+    const stage = stageRef.current;
+    if (!stage) return;
+    const update = () => {
+      const width = stage.getBoundingClientRect().width;
+      setStageWidth(width);
+      currentX.set(0);
+      nextX.set(Math.max(0, width - (width <= 760 ? poetryDeckCompactPeek : poetryDeckWidePeek)));
+    };
+    update();
+    const observer = new ResizeObserver(update);
+    observer.observe(stage);
+    return () => observer.disconnect();
+  }, [currentX, nextX]);
+
+  useEffect(() => {
+    if (!pages.length) return;
+    if (resolvedActiveIndex >= 0) {
+      activeIndexRef.current = resolvedActiveIndex;
+      return;
+    }
+    const fallbackIndex = Math.min(activeIndexRef.current, pages.length - 1);
+    activeIndexRef.current = fallbackIndex;
+    setActivePageId(pages[fallbackIndex].id);
+  }, [activePageId, pages, resolvedActiveIndex]);
+
+  const transition = reducedMotion
+    ? { duration: 0.01 }
+    : { duration: 0.42, ease: poetryEase };
+
+  const stopPositionAnimations = () => {
+    animationSequenceRef.current += 1;
+    positionAnimationsRef.current.forEach((animation) => animation.stop());
+    positionAnimationsRef.current = [];
+  };
+
+  useEffect(() => () => {
+    animationSequenceRef.current += 1;
+    positionAnimationsRef.current.forEach((animation) => animation.stop());
+    positionAnimationsRef.current = [];
+  }, []);
+
+  const resetCards = () => {
+    currentX.set(0);
+    nextX.set(nextRestX);
+    positionAnimationsRef.current = [];
+    transitioningRef.current = false;
+    setPreviewingNext(false);
+    setTransitioning(false);
+  };
+
+  const showNext = () => {
+    if (!hasNext || transitioningRef.current) return;
+    const nextPageId = pages[activeIndex + 1]?.id;
+    if (!nextPageId) return;
+    stopPositionAnimations();
+    const sequence = animationSequenceRef.current;
+    transitioningRef.current = true;
+    setTransitioning(true);
+    setPreviewingNext(true);
+    const animation = animate(nextX, 0, transition);
+    positionAnimationsRef.current = [animation];
+    animation.then(() => {
+      if (sequence !== animationSequenceRef.current) return;
+      activeIndexRef.current = activeIndex + 1;
+      setActivePageId(nextPageId);
+      resetCards();
+    });
+  };
+
+  const showPrevious = () => {
+    if (!hasPrevious || transitioningRef.current) return;
+    const previousPageId = pages[activeIndex - 1]?.id;
+    if (!previousPageId) return;
+    stopPositionAnimations();
+    const sequence = animationSequenceRef.current;
+    transitioningRef.current = true;
+    setTransitioning(true);
+    const animations = [
+      animate(currentX, stageWidth + peekSize, transition),
+      animate(nextX, stageWidth, transition),
+    ];
+    positionAnimationsRef.current = animations;
+    Promise.all(animations).then(() => {
+      if (sequence !== animationSequenceRef.current) return;
+      activeIndexRef.current = activeIndex - 1;
+      setActivePageId(previousPageId);
+      resetCards();
+    });
+  };
+
+  const settleCards = () => {
+    stopPositionAnimations();
+    const sequence = animationSequenceRef.current;
+    const animations = [
+      animate(currentX, 0, transition),
+      animate(nextX, nextRestX, transition),
+    ];
+    positionAnimationsRef.current = animations;
+    Promise.all(animations).then(() => {
+      if (sequence !== animationSequenceRef.current) return;
+      positionAnimationsRef.current = [];
+      setPreviewingNext(false);
+    });
+  };
+
+  const handleDragStart = () => {
+    if (!transitioningRef.current) {
+      stopPositionAnimations();
+      setPreviewingNext(false);
+    }
+  };
+
+  const handleDrag = (_event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
+    if (transitioningRef.current || !stageWidth) return;
+    if (info.offset.x < 0 && hasNext) {
+      const nextPosition = Math.max(0, Math.min(nextRestX, nextRestX + info.offset.x));
+      nextX.set(nextPosition);
+      currentX.set(0);
+      if (info.offset.x < -8 && !previewingNext) setPreviewingNext(true);
+      return;
+    }
+    if (info.offset.x > 0 && hasPrevious) {
+      currentX.set(Math.min(stageWidth + peekSize, info.offset.x));
+      nextX.set(Math.min(stageWidth, nextRestX + info.offset.x));
+      return;
+    }
+    currentX.set(Math.max(0, info.offset.x * 0.12));
+  };
+
+  const handleDragEnd = (_event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
+    const threshold = Math.min(110, stageWidth * 0.18);
+    if (hasNext && (info.offset.x < -threshold || info.velocity.x < -560)) {
+      showNext();
+      return;
+    }
+    if (hasPrevious && (info.offset.x > threshold || info.velocity.x > 560)) {
+      showPrevious();
+      return;
+    }
+    settleCards();
+  };
+
+  const handleKeyDown = (event: KeyboardEvent<HTMLElement>) => {
+    if (event.key === "ArrowRight") {
+      event.preventDefault();
+      showNext();
+    } else if (event.key === "ArrowLeft") {
+      event.preventDefault();
+      showPrevious();
+    }
+  };
+
+  if (!pages.length) return null;
+
+  return (
+    <HomeSectionHold id="weiyan" className="poetry-index" ariaLabelledBy="poetry-deck-title">
+      <header className="poetry-deck-heading">
+        <h2 id="poetry-deck-title">微言</h2>
+        <p>向左翻到下一页，向右揭开上一页。</p>
+      </header>
+
+      <div
+        className="poetry-deck-stage"
+        ref={stageRef}
+        tabIndex={0}
+        onKeyDown={handleKeyDown}
+        aria-label={`微言，第 ${activeIndex + 1} 页，共 ${pages.length} 页`}
+      >
+        {pages.map((work, index) => {
+          const isPrevious = index === activeIndex - 1;
+          const isCurrent = index === activeIndex;
+          const isNext = index === activeIndex + 1;
+          if (!isPrevious && !isCurrent && !isNext) return null;
+          return (
+            <motion.article
+              className={`poetry-deck-card${isPrevious ? " is-previous" : ""}${isCurrent ? " is-current" : ""}${isNext ? " is-next" : ""}`}
+              key={work.id}
+              style={{ x: isCurrent ? currentX : isNext ? nextX : 0, zIndex: isNext ? 3 : isCurrent ? 2 : 1 }}
+              animate={{ scale: isPrevious ? 0.985 : 1, opacity: isPrevious ? 0.82 : 1 }}
+              transition={transition}
+              aria-hidden={!isCurrent}
+            >
+              <PoetryWorkPanel
+                work={work}
+                index={index}
+                active={isCurrent}
+                revealed={index <= activeIndex || (isNext && previewingNext)}
+                reducedMotion={reducedMotion}
+              />
+            </motion.article>
+          );
+        })}
+
+        {stageWidth ? (
+          <motion.div
+            className="poetry-deck-drag-surface"
+            aria-hidden="true"
+            drag="x"
+            dragConstraints={{ left: -stageWidth, right: stageWidth }}
+            dragDirectionLock
+            dragElastic={0.06}
+            dragMomentum={false}
+            dragSnapToOrigin="x"
+            onDragStart={handleDragStart}
+            onDrag={handleDrag}
+            onDragEnd={handleDragEnd}
+          />
         ) : null}
       </div>
-    </article>
+
+      <div className="poetry-deck-controls">
+        <button type="button" onClick={showPrevious} disabled={!hasPrevious || transitioning} aria-label="上一页微言">上一页</button>
+        <span aria-live="polite"><b>{String(activeIndex + 1).padStart(2, "0")}</b> / {String(pages.length).padStart(2, "0")}</span>
+        {canCreate ? <button type="button" onClick={() => onEdit(activeIndex)}>编辑当前页</button> : null}
+        <button type="button" onClick={showNext} disabled={!hasNext || transitioning} aria-label="下一页微言">下一页</button>
+      </div>
+    </HomeSectionHold>
   );
 }
 
@@ -547,8 +800,6 @@ export function HomeIntroSection({ canCreate }: HomeIntroSectionProps) {
   const legacyY = useTransform(progress, [0.08, 0.4], ["0%", compact ? "0%" : "3%"]);
   const sceneY = useTransform(progress, compact ? [0.76, 1] : [0.84, 1], compact ? ["0%", "-54%"] : ["0%", "-106%"]);
   const sceneOpacity = useTransform(progress, compact ? [0.9, 1] : [0.965, 1], compact ? [1, 0.22] : [1, 0]);
-  const progressOpacity = useTransform(progress, compact ? [0.86, 0.98] : [0.93, 0.995], [1, 0]);
-  const progressScale = useTransform(progress, [0, 1], [0, 1]);
 
   useEffect(() => {
     if (editorIndex === null) savePoetryPages(pages);
@@ -673,21 +924,15 @@ export function HomeIntroSection({ canCreate }: HomeIntroSectionProps) {
             </motion.div>
             <PortalTitle progress={progress} />
           </motion.div>
-          <motion.div className="poetry-scroll-progress" style={{ opacity: progressOpacity }} aria-hidden="true">
-            <span>进入</span>
-            <i><motion.b style={{ scaleX: progressScale }} /></i>
-            <span>诗词</span>
-          </motion.div>
         </div>
       </section>
 
       <GuyuShelfPreview />
+      <StickerPackSection />
 
-      <section className="poetry-index" id="weiyan" aria-label="诗词作品列表">
-        {pages.map((work, index) => (
-          <PoetryWorkPanel key={work.id} work={work} index={index} canCreate={canCreate} compact={compact} onEdit={() => openEditor(index)} />
-        ))}
-      </section>
+      <PoetryStackDeck pages={pages} canCreate={canCreate} onEdit={openEditor} />
+
+      <HomeSkillsSection />
 
       {canCreate && editorIndex !== null ? (
         <PoetryCanvasEditor

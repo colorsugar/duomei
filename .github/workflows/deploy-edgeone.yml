@@ -1,0 +1,168 @@
+name: Deploy DUOMEI to EdgeOne
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: edgeone-production-duomei-guyu
+  cancel-in-progress: false
+
+jobs:
+  verify-and-deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      EDGEONE_CLI_VERSION: 1.6.31-3
+      EDGEONE_PROJECT_NAME: duomei-guyu
+      EDGEONE_PROJECT_ID: makers-brifmhu31vjf
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 22.17.1
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            cloudflare/duomei-media/package-lock.json
+
+      - name: Install site dependencies
+        run: npm ci
+
+      - name: Test homepage section holds
+        run: npm run test:home-hold
+
+      - name: Test protected Guyu delivery
+        run: npm run test:guyu
+
+      - name: Build full site
+        run: npm run build
+
+      - name: Verify release source of truth
+        shell: pwsh
+        run: ./scripts/verify-release.ps1
+
+      - name: Install media worker dependencies
+        run: npm --prefix cloudflare/duomei-media ci
+
+      - name: Check media worker
+        run: npm --prefix cloudflare/duomei-media run check
+
+      - name: Test media worker
+        run: npm --prefix cloudflare/duomei-media test
+
+      - name: Dry-run media worker bundle
+        run: npm --prefix cloudflare/duomei-media run deploy:dry
+
+      - name: Write deployment marker
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p public/.well-known
+          printf '{"commit":"%s","run":"%s"}\n' "$GITHUB_SHA" "$GITHUB_RUN_ID" > public/.well-known/duomei-build.json
+
+      - name: Deploy production to EdgeOne Makers
+        id: edgeone
+        shell: bash
+        env:
+          EDGEONE_API_TOKEN: ${{ secrets.EDGEONE_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          if [[ -z "${EDGEONE_API_TOKEN:-}" ]]; then
+            echo "EDGEONE_API_TOKEN is not configured." >&2
+            exit 1
+          fi
+
+          deploy_log="$(mktemp)"
+          npx --yes "edgeone@${EDGEONE_CLI_VERSION}" makers deploy \
+            -n "$EDGEONE_PROJECT_NAME" \
+            -t "$EDGEONE_API_TOKEN" \
+            -e production \
+            -a global \
+            --json | tee "$deploy_log"
+
+          DEPLOY_RESULT="$(tail -n 1 "$deploy_log")" node <<'NODE'
+          const fs = require("node:fs");
+
+          const expectedProjectId = process.env.EDGEONE_PROJECT_ID;
+          const result = JSON.parse(process.env.DEPLOY_RESULT);
+          const strings = [];
+          const visit = (value) => {
+            if (typeof value === "string") strings.push(value);
+            else if (Array.isArray(value)) value.forEach(visit);
+            else if (value && typeof value === "object") Object.values(value).forEach(visit);
+          };
+          visit(result);
+
+          if (!strings.includes(expectedProjectId)) {
+            throw new Error(`EdgeOne returned an unexpected project: expected ${expectedProjectId}`);
+          }
+
+          const deploymentId = strings.find((value) => /^dp[a-z0-9]+$/i.test(value)) ?? "unknown";
+          fs.appendFileSync(
+            process.env.GITHUB_STEP_SUMMARY,
+            `## EdgeOne production deployment\n\n- Project: ${expectedProjectId}\n- Deployment: ${deploymentId}\n- Commit: ${process.env.GITHUB_SHA}\n`,
+          );
+          NODE
+
+      - name: Verify production commit and protected routes
+        shell: bash
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const expectedCommit = process.env.GITHUB_SHA;
+          const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+          let lastError = "deployment did not propagate";
+
+          for (let attempt = 1; attempt <= 18; attempt += 1) {
+            try {
+              const nonce = `${Date.now()}-${attempt}`;
+              const [marker, home, auth, protectedOldPage, publicFeiyanPage, publicXinshuoOnePage, publicXinshuoTwoPage] = await Promise.all([
+                fetch(`https://duomei.site/.well-known/duomei-build.json?ci=${nonce}`, { cache: "no-store" }),
+                fetch(`https://duomei.site/?ci=${nonce}`, { cache: "no-store" }),
+                fetch(`https://duomei.site/api/guyu-auth?ci=${nonce}`, { cache: "no-store" }),
+                fetch(`https://duomei.site/api/guyu-page?book=meiyou-yujian&page=001&ci=${nonce}`, { cache: "no-store" }),
+                fetch(`https://duomei.site/images/guyu/zhi-shang-feiyan/pages/001.webp?ci=${nonce}`, { cache: "no-store" }),
+                fetch(`https://duomei.site/images/guyu/xinshuo-01/pages/001.webp?ci=${nonce}`, { cache: "no-store" }),
+                fetch(`https://duomei.site/images/guyu/xinshuo-02/pages/001.webp?ci=${nonce}`, { cache: "no-store" }),
+              ]);
+              const markerBody = marker.ok ? await marker.json() : null;
+              const authBody = auth.ok ? await auth.json() : null;
+
+              if (
+                marker.status === 200 &&
+                markerBody?.commit === expectedCommit &&
+                home.status === 200 &&
+                auth.status === 200 &&
+                authBody?.authorized === false &&
+                protectedOldPage.status === 401 &&
+                publicFeiyanPage.status === 200 &&
+                publicXinshuoOnePage.status === 200 &&
+                publicXinshuoTwoPage.status === 200
+              ) {
+                console.log(`Production verified on attempt ${attempt}.`);
+                process.exit(0);
+              }
+
+              lastError = `marker=${marker.status}/${markerBody?.commit ?? "missing"} home=${home.status} auth=${auth.status}/${authBody?.authorized} protected-old=${protectedOldPage.status} public-feiyan=${publicFeiyanPage.status} public-xinshuo-01=${publicXinshuoOnePage.status} public-xinshuo-02=${publicXinshuoTwoPage.status}`;
+            } catch (error) {
+              lastError = error instanceof Error ? error.message : String(error);
+            }
+
+            console.log(`Waiting for production propagation (${attempt}/18): ${lastError}`);
+            await sleep(10_000);
+          }
+
+          throw new Error(`Production verification failed: ${lastError}`);
+          NODE

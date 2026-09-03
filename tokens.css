@@ -11,6 +11,10 @@
   --color-caramel: oklch(66% 0.09 65);
   --color-focus: oklch(54% 0.11 132);
   --color-error: oklch(52% 0.15 28);
+  --color-guyu-cover-old: oklch(38% 0.035 62);
+  --color-guyu-cover-feiyan: oklch(50% 0.09 62);
+  --color-guyu-cover-imagination: oklch(47% 0.08 128);
+  --color-guyu-cover-watercolor: oklch(58% 0.105 248);
 
   --font-display: Georgia, "Times New Roman", serif;
   --font-body: Inter, "Noto Sans SC", "Microsoft YaHei", sans-serif;
@@ -69,4 +73,5 @@
   --z-turn-shadow: 12;
   --z-turning-page: 20;
   --z-page-controls: 30;
+  --z-sticky: 70;
 }

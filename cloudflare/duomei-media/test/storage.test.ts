@@ -4,11 +4,13 @@ import { createPrivateSignature } from "../src/index";
 
 describe("DUOMEI media gateway", () => {
   const publicKey = "article/test-image.png";
+  const noLengthKey = "notes/no-content-length.png";
   const privateKey = "guyu/meiyou-yujian/pages/001.webp";
 
   beforeEach(async () => {
     await Promise.all([
       env.DUOMEI_MEDIA.delete(publicKey),
+      env.DUOMEI_MEDIA.delete(noLengthKey),
       env.DUOMEI_PRIVATE.delete(privateKey),
     ]);
   });
@@ -81,13 +83,23 @@ describe("DUOMEI media gateway", () => {
     const response = await exports.default.fetch("https://duomei-media.test/v1/upload?key=article/test-image.png", {
       method: "PUT",
       headers: {
-        origin: "https://color-duomei.vercel.app",
+        origin: "https://duomei.site",
         "content-type": "image/png",
         "content-length": "3",
       },
       body: new Uint8Array([1, 2, 3]),
     });
     expect(response.status).toBe(401);
+    await response.text();
+  });
+
+  it("allows the production site upload preflight", async () => {
+    const response = await exports.default.fetch("https://duomei-media.test/v1/upload", {
+      method: "OPTIONS",
+      headers: { origin: "https://duomei.site" },
+    });
+    expect(response.status).toBe(204);
+    expect(response.headers.get("access-control-allow-origin")).toBe("https://duomei.site");
     await response.text();
   });
 
@@ -110,7 +122,7 @@ describe("DUOMEI media gateway", () => {
       method: "PUT",
       headers: {
         authorization: "Bearer valid-session",
-        origin: "https://color-duomei.vercel.app",
+        origin: "https://duomei.site",
         "content-type": "image/png",
         "content-length": "3",
       },
@@ -119,6 +131,101 @@ describe("DUOMEI media gateway", () => {
     expect(response.status).toBe(201);
     expect(fetchSpy).toHaveBeenCalledTimes(2);
     expect(await env.DUOMEI_MEDIA.get(publicKey)).not.toBeNull();
+    await response.text();
+  });
+
+  it("rejects SVG uploads even for an authenticated administrator", async () => {
+    vi.spyOn(globalThis, "fetch").mockImplementation(async (input) => {
+      const target = typeof input === "string" ? input : input instanceof Request ? input.url : String(input);
+      const url = new URL(target);
+      if (url.pathname === "/auth/v1/user") return Response.json({ email: "admin@example.com" });
+      if (url.pathname === "/rest/v1/duomei_admins") return Response.json([{ email: "admin@example.com" }]);
+      return new Response(null, { status: 404 });
+    });
+
+    const response = await exports.default.fetch("https://duomei-media.test/v1/upload?key=article/test-image.png", {
+      method: "PUT",
+      headers: {
+        authorization: "Bearer valid-session",
+        origin: "https://duomei.site",
+        "content-type": "image/svg+xml",
+        "content-length": "3",
+      },
+      body: new Uint8Array([1, 2, 3]),
+    });
+    expect(response.status).toBe(415);
+    await response.text();
+  });
+
+  it.each([
+    ["article/test-image.svg", "image/png"],
+    ["unapproved/test-image.png", "image/png"],
+  ])("rejects an invalid public media key: %s", async (key, contentType) => {
+    vi.spyOn(globalThis, "fetch").mockImplementation(async (input) => {
+      const target = typeof input === "string" ? input : input instanceof Request ? input.url : String(input);
+      const url = new URL(target);
+      if (url.pathname === "/auth/v1/user") return Response.json({ email: "admin@example.com" });
+      if (url.pathname === "/rest/v1/duomei_admins") return Response.json([{ email: "admin@example.com" }]);
+      return new Response(null, { status: 404 });
+    });
+    const response = await exports.default.fetch(`https://duomei-media.test/v1/upload?key=${encodeURIComponent(key)}`, {
+      method: "PUT",
+      headers: {
+        authorization: "Bearer valid-session",
+        origin: "https://duomei.site",
+        "content-type": contentType,
+        "content-length": "3",
+      },
+      body: new Uint8Array([1, 2, 3]),
+    });
+    expect(response.status).toBe(400);
+    await response.text();
+  });
+
+  it("rejects a forged content length before writing the object", async () => {
+    vi.spyOn(globalThis, "fetch").mockImplementation(async (input) => {
+      const target = typeof input === "string" ? input : input instanceof Request ? input.url : String(input);
+      const url = new URL(target);
+      if (url.pathname === "/auth/v1/user") return Response.json({ email: "admin@example.com" });
+      if (url.pathname === "/rest/v1/duomei_admins") return Response.json([{ email: "admin@example.com" }]);
+      return new Response(null, { status: 404 });
+    });
+    const response = await exports.default.fetch("https://duomei-media.test/v1/upload?key=article/length-mismatch.png", {
+      method: "PUT",
+      headers: {
+        authorization: "Bearer valid-session",
+        origin: "https://duomei.site",
+        "content-type": "image/png",
+        "content-length": "2",
+      },
+      body: new Uint8Array([1, 2, 3]),
+    });
+    expect(response.status).toBe(422);
+    expect(await env.DUOMEI_MEDIA.get("article/length-mismatch.png")).toBeNull();
+    await response.text();
+  });
+
+  it("accepts a valid browser upload without an explicit content-length header", async () => {
+    vi.spyOn(globalThis, "fetch").mockImplementation(async (input) => {
+      const target = typeof input === "string" ? input : input instanceof Request ? input.url : String(input);
+      const url = new URL(target);
+      if (url.pathname === "/auth/v1/user") return Response.json({ email: "admin@example.com" });
+      if (url.pathname === "/rest/v1/duomei_admins") return Response.json([{ email: "admin@example.com" }]);
+      return new Response(null, { status: 404 });
+    });
+    const request = new Request(`https://duomei-media.test/v1/upload?key=${encodeURIComponent(noLengthKey)}`, {
+      method: "PUT",
+      headers: {
+        authorization: "Bearer valid-session",
+        origin: "https://duomei.site",
+        "content-type": "image/png",
+      },
+      body: new Uint8Array([1, 2, 3]),
+    });
+    expect(request.headers.get("content-length")).toBeNull();
+    const response = await exports.default.fetch(request);
+    expect(response.status).toBe(201);
+    expect(await env.DUOMEI_MEDIA.get(noLengthKey)).not.toBeNull();
     await response.text();
   });
 

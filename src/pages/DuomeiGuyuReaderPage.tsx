@@ -26,8 +26,7 @@ export function DuomeiGuyuReaderPage() {
 
   if (!book) return <Navigate to="/guyu" replace />;
 
-  return (
-    <GuyuAccessGate>
+  const reader = (
     <main className={`guyu-reader-page${isBookOpen ? " is-book-open" : ""}`}>
       <header className="guyu-reader-heading">
         <Link
@@ -35,21 +34,23 @@ export function DuomeiGuyuReaderPage() {
           to="/guyu"
           reloadDocument
           aria-label="返回故语"
-          aria-hidden={!isBookOpen}
-          tabIndex={isBookOpen ? 0 : -1}
+          aria-hidden={isBookOpen}
+          tabIndex={isBookOpen ? -1 : 0}
           title="返回故语"
         >
           <svg viewBox="0 0 24 24" aria-hidden="true">
             <path d="M15 5 8 12l7 7" />
           </svg>
+          <span>返回故语</span>
         </Link>
         <div className="guyu-visually-hidden">
           <h1>{book.title}</h1>
-          <p>{book.kind} · 旧册</p>
+          <p>{book.kind}{book.author ? ` · ${book.author}` : ""}</p>
         </div>
       </header>
       <GuyuFlipbook book={book} onOpenChange={setIsBookOpen} />
     </main>
-    </GuyuAccessGate>
   );
+
+  return book.access === "class-gated" ? <GuyuAccessGate>{reader}</GuyuAccessGate> : reader;
 }

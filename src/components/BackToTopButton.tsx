@@ -3,6 +3,7 @@ import { createPortal } from "react-dom";
 
 export function BackToTopButton() {
   const [visible, setVisible] = useState(false);
+  const [footerVisible, setFooterVisible] = useState(false);
 
   useEffect(() => {
     const update = () => setVisible(window.scrollY > 520);
@@ -11,11 +12,23 @@ export function BackToTopButton() {
     return () => window.removeEventListener("scroll", update);
   }, []);
 
+  useEffect(() => {
+    const footer = document.querySelector(".duomei-footer");
+    if (!footer || typeof IntersectionObserver === "undefined") return;
+    const observer = new IntersectionObserver(([entry]) => setFooterVisible(entry.isIntersecting), { threshold: 0.15 });
+    observer.observe(footer);
+    return () => observer.disconnect();
+  }, []);
+
+  const shown = visible && !footerVisible;
+
   return createPortal(
     <button
-      className={`back-to-top${visible ? " is-visible" : ""}`}
+      className={`back-to-top${shown ? " is-visible" : ""}`}
       type="button"
       aria-label="返回顶部"
+      aria-hidden={!shown}
+      tabIndex={shown ? 0 : -1}
       onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
     >
       <svg viewBox="0 0 32 32" aria-hidden="true">

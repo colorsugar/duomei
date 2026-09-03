@@ -1,4 +1,5 @@
-import { CSSProperties, useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { useDuomeiEdit } from "./DuomeiEditProvider";
 import {
   FOOTER_SETTINGS_UPDATED_EVENT,
@@ -7,11 +8,24 @@ import {
 } from "../lib/footerSettings";
 import { AnimatedParagraph, AnimatedTitle, RevealSection } from "../motion";
 
+const quickLinks = [
+  { label: "首页", to: "/" },
+  { label: "小记", to: "/#notes" },
+  { label: "故语", to: "/#guyu" },
+  { label: "颜色", to: "/#color" },
+  { label: "微言", to: "/#weiyan" },
+  { label: "技能", to: "/#skills" },
+] as const;
+
+function splitCopyrightPhrases(value: string) {
+  const parts = value.match(/[^，。！？；,.!?;\s]+[，。！？；,.!?;]?|©/gu) ?? [value];
+  if (parts[0] === "©" && parts[1]) return [`© ${parts[1]}`, ...parts.slice(2)];
+  return parts;
+}
+
 export function DuomeiFooter() {
   const { editMode, isLoggedIn } = useDuomeiEdit();
   const [settings, setSettings] = useState(() => getFooterSettings());
-  const footerRef = useRef<HTMLElement | null>(null);
-  const [lineProgress, setLineProgress] = useState(0);
   const editable = isLoggedIn && editMode;
 
   useEffect(() => {
@@ -24,42 +38,22 @@ export function DuomeiFooter() {
     };
   }, []);
 
-  useEffect(() => {
-    let frame = 0;
-    const updateLine = () => {
-      frame = 0;
-      const footer = footerRef.current;
-      if (!footer) return;
-      const rect = footer.getBoundingClientRect();
-      const visibleFooter = window.innerHeight - rect.top;
-      const progress = Math.min(1, Math.max(0, visibleFooter / Math.max(1, rect.height)));
-      setLineProgress(progress);
-    };
-    const onScroll = () => {
-      if (frame) return;
-      frame = window.requestAnimationFrame(updateLine);
-    };
-    updateLine();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", onScroll);
-    return () => {
-      if (frame) window.cancelAnimationFrame(frame);
-      window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", onScroll);
-    };
-  }, []);
-
   return (
     <RevealSection
       as="footer"
       className="duomei-footer"
-      motionRef={footerRef}
-      style={{ "--footer-line-progress": lineProgress } as CSSProperties}
     >
       <AnimatedTitle as="strong">DUOMEI</AnimatedTitle>
+      <nav className="duomei-quick-nav" aria-label="全站快捷导航">
+        <ul>
+          {quickLinks.map((link) => (
+            <li key={link.label}><Link to={link.to}>{link.label}</Link></li>
+          ))}
+        </ul>
+      </nav>
       {editable ? (
         <p
-          className="footer-editable-text"
+          className="duomei-footer-copy footer-editable-text"
           contentEditable
           suppressContentEditableWarning
           onBlur={(event) => {
@@ -72,7 +66,11 @@ export function DuomeiFooter() {
           {settings.copyrightText}
         </p>
       ) : (
-        <AnimatedParagraph>{settings.copyrightText}</AnimatedParagraph>
+        <AnimatedParagraph className="duomei-footer-copy">
+          {splitCopyrightPhrases(settings.copyrightText).map((phrase, index) => (
+            <span className="duomei-footer-copy-segment" key={`${phrase}-${index}`}>{phrase}</span>
+          ))}
+        </AnimatedParagraph>
       )}
     </RevealSection>
   );

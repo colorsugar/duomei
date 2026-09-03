@@ -2,6 +2,16 @@ import { supabase } from "./supabaseClient";
 import { bodyToBlocks } from "./noteStore";
 import type { DuomeiNote, NoteContentBlock, NoteStatus } from "./noteTypes";
 
+const NOTE_MEDIA_ORIGIN = (import.meta.env.VITE_DUOMEI_MEDIA_ORIGIN
+  || "https://duomei-media-storage.colorsugar.workers.dev").replace(/\/+$/u, "");
+const NOTE_MEDIA_TYPES = new Map([
+  ["image/gif", "gif"],
+  ["image/jpeg", "jpg"],
+  ["image/png", "png"],
+  ["image/webp", "webp"],
+]);
+const NOTE_MEDIA_FOLDERS = new Set(["article", "covers", "notes", "poetry"]);
+
 type NoteRow = {
   id: string;
   slug: string;
@@ -128,17 +138,42 @@ export async function deleteCloudNote(id: string) {
   if (error) throw error;
 }
 
-export async function uploadNoteImage(file: File, folder = "notes") {
-  const ext = file.name.split(".").pop()?.toLowerCase() || "webp";
-  const path = `${folder}/${Date.now()}-${Math.random().toString(16).slice(2)}.${ext}`;
-  const { error } = await supabase.storage.from("note-images").upload(path, file, {
-    cacheControl: "31536000",
-    contentType: file.type || "image/webp",
-    upsert: false,
+function normalizeNoteMediaType(value: string) {
+  const normalized = value.toLowerCase() === "image/jpg" ? "image/jpeg" : value.toLowerCase();
+  if (!NOTE_MEDIA_TYPES.has(normalized)) throw new Error("仅支持 JPG、PNG、WebP 或 GIF 图片。");
+  return normalized;
+}
+
+function createNoteMediaId() {
+  if (typeof crypto.randomUUID === "function") return crypto.randomUUID();
+  return Array.from(crypto.getRandomValues(new Uint32Array(4)), (value) => value.toString(16).padStart(8, "0")).join("");
+}
+
+async function uploadNoteMedia(blob: Blob, folder: string, requestedType: string) {
+  if (!NOTE_MEDIA_FOLDERS.has(folder)) throw new Error("图片目录不受支持。");
+  const contentType = normalizeNoteMediaType(requestedType);
+  const extension = NOTE_MEDIA_TYPES.get(contentType)!;
+  const session = await getCloudSession();
+  if (!session?.access_token) throw new Error("请先登录管理员账号。");
+
+  const key = `${folder}/${Date.now()}-${createNoteMediaId()}.${extension}`;
+  const uploadURL = new URL("/v1/upload", NOTE_MEDIA_ORIGIN);
+  uploadURL.searchParams.set("key", key);
+  const response = await fetch(uploadURL, {
+    method: "PUT",
+    headers: {
+      authorization: `Bearer ${session.access_token}`,
+      "content-type": contentType,
+    },
+    body: blob,
   });
-  if (error) throw error;
-  const { data } = supabase.storage.from("note-images").getPublicUrl(path);
-  return data.publicUrl;
+  const result = await response.json().catch(() => ({})) as { error?: string; url?: string };
+  if (!response.ok || !result.url) throw new Error(result.error || "图片上传失败，请稍后重试。");
+  return result.url;
+}
+
+export async function uploadNoteImage(file: File, folder = "notes") {
+  return uploadNoteMedia(file, folder, file.type || "image/webp");
 }
 
 export async function uploadNoteDataUrl(dataUrl: string, folder = "article") {
@@ -151,14 +186,5 @@ export async function uploadNoteDataUrl(dataUrl: string, folder = "article") {
   for (let index = 0; index < binary.length; index += 1) {
     bytes[index] = binary.charCodeAt(index);
   }
-  const ext = mime.includes("webp") ? "webp" : mime.includes("png") ? "png" : "jpg";
-  const path = `${folder}/${Date.now()}-${Math.random().toString(16).slice(2)}.${ext}`;
-  const { error } = await supabase.storage.from("note-images").upload(path, new Blob([bytes], { type: mime }), {
-    cacheControl: "31536000",
-    contentType: mime,
-    upsert: false,
-  });
-  if (error) throw error;
-  const { data } = supabase.storage.from("note-images").getPublicUrl(path);
-  return data.publicUrl;
+  return uploadNoteMedia(new Blob([bytes], { type: mime }), folder, mime);
 }

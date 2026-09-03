@@ -85,6 +85,7 @@ export function GuyuAccessGate({ children }: PropsWithChildren) {
             <input
               id={answerId}
               type="password"
+              data-guyu-answer-format="class-number"
               inputMode="numeric"
               autoComplete="off"
               maxLength={16}

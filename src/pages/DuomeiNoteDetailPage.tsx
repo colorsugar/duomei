@@ -465,6 +465,7 @@ export function DuomeiNoteDetailPage() {
   if (!note && !hasLoadedNote) {
     return (
       <main className="duomei-detail detail-loading">
+        <Link className="detail-back" to="/#notes">← 返回小记</Link>
         <p className="detail-category">LOADING</p>
         <h1>小记正在路上...</h1>
       </main>
@@ -474,9 +475,9 @@ export function DuomeiNoteDetailPage() {
   if (!note || !activeNote) {
     return (
       <main className="duomei-detail">
+        <Link className="detail-back" to="/#notes">← 返回小记</Link>
         <p className="detail-category">NOT FOUND</p>
         <h1>旅行中……页面不存在</h1>
-        <Link to="/">返回首页</Link>
       </main>
     );
   }
