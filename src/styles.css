@@ -11071,10 +11071,21 @@ html.duomei-modal-open .duomei-companion {
   }
 }
 
-/* Detail read mode spacing: editor toolbar padding should not affect normal browsing. */
-.duomei-detail:not(.detail-edit-page) {
-  padding-top: clamp(36px, 6vh, 72px) !important;
-  padding-bottom: clamp(56px, 8vh, 88px) !important;
+/* Detail read mode keeps the fixed-header safe area and a keyboard-visible back target. */
+.detail-back {
+  display: inline-flex;
+  min-block-size: var(--size-hit);
+  align-items: center;
+  margin-block: 0 var(--space-lg);
+  padding-inline: var(--space-xs);
+  color: var(--accent-dark);
+  font-weight: 700;
+}
+
+.detail-back:focus-visible {
+  outline: var(--rule-focus) solid var(--color-focus);
+  outline-offset: var(--space-2xs);
+  border-radius: var(--space-xs);
 }
 
 .duomei-detail.detail-loading {
@@ -11083,13 +11094,6 @@ html.duomei-modal-open .duomei-companion {
 
 .duomei-detail.detail-loading h1 {
   opacity: 0.78;
-}
-
-@media (max-width: 760px) {
-  .duomei-detail:not(.detail-edit-page) {
-    padding-top: clamp(32px, 6vh, 48px) !important;
-    padding-bottom: 56px !important;
-  }
 }
 
 /* Premium hover reveals for carousel arrows and the mobile navigation trigger. */

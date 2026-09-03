@@ -14,6 +14,7 @@ export function DuomeiGuyuPage() {
   return (
     <main className="guyu-library-page">
       <header className="guyu-library-intro">
+        <Link className="guyu-library-back" to="/#guyu">← 返回首页</Link>
         <h1>故语</h1>
         <p>把旧日收好，等后来的人翻阅。</p>
       </header>

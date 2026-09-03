@@ -8,6 +8,7 @@ const css = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../heade
 const headerSource = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../components/DuomeiHeader.tsx"), "utf8");
 const backToTopSource = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../components/BackToTopButton.tsx"), "utf8");
 const guyuPreviewSource = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../components/GuyuShelfPreview.tsx"), "utf8");
+const noteDetailSource = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../pages/DuomeiNoteDetailPage.tsx"), "utf8");
 const guyuCarouselSource = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "./guyuCarousel.ts"), "utf8");
 const guyuCss = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../guyu.css"), "utf8");
 const homeIntroCss = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../components/HomeIntroSection.css"), "utf8");
@@ -33,7 +34,7 @@ test("keeps iOS header touch activation synchronous and deterministic", () => {
   assert.doesNotMatch(headerSource, /pendingTouchActivationRef/);
 });
 
-test("keeps the homepage Guyu preview deliberate, fragmented, manual, and routed through the public shelf", () => {
+test("keeps the homepage Guyu preview deliberate, fragmented, manual, and linked to the current book", () => {
   const beginSettle = guyuPreviewSource.slice(
     guyuPreviewSource.indexOf("const beginSettle"),
     guyuPreviewSource.indexOf("const beginAssembly"),
@@ -54,9 +55,25 @@ test("keeps the homepage Guyu preview deliberate, fragmented, manual, and routed
   assert.match(guyuPreviewSource, /requestAnimationFrame\(\(\) => \{[\s\S]*requestAnimationFrame\(\(\) => finishSettle/);
   assert.match(beginSettle, /setBookIndex\(completedIndex\)[\s\S]*setTransitionPhase\("settle"\)/);
   assert.doesNotMatch(beginSettle, /setIncomingIndex\(null\)|setTransitionPhase\("idle"\)/);
-  assert.match(guyuCss, /data-phase="settle"[\s\S]*\.guyu-home-book-base/);
-  assert.match(guyuPreviewSource, /to="\/guyu"/);
-  assert.doesNotMatch(guyuPreviewSource, /to=\{`\/guyu\/\$\{book\.id\}`\}/);
+  assert.match(guyuCss, /data-phase="settle"\]\s+\.guyu-home-book-base\s*\{\s*opacity:\s*1;\s*transition:\s*none;/);
+  assert.doesNotMatch(guyuCss, /\.guyu-home-carousel\[data-phase="settle"\][^{}]*\.guyu-home-book-base\s*\{[^}]*opacity:\s*0/);
+  assert.match(guyuPreviewSource, /const linkedBook = transitionPhase === "assemble" \|\| transitionPhase === "settle"/);
+  assert.match(guyuPreviewSource, /to=\{`\/guyu\/\$\{linkedBook\.id\}`\}/);
+  assert.match(guyuPreviewSource, /className="guyu-home-shelf-all"\s+to="\/guyu"/);
+  assert.match(guyuPreviewSource, /翻开\$\{getBookLabels\(linkedBook\)\.section\}《\$\{linkedBook\.title\}》/);
+  assert.match(guyuCss, /\.guyu-library-back,\s*\.guyu-home-shelf-all\s*\{[^}]*min-block-size:\s*var\(--size-hit\)/);
+});
+
+test("keeps the public Guyu shelf reachable with a 44px home link", () => {
+  const pageSource = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../pages/DuomeiGuyuPage.tsx"), "utf8");
+  assert.match(pageSource, /className="guyu-library-back"\s+to="\/#guyu"/);
+  assert.match(guyuCss, /\.guyu-library-back,\s*\.guyu-home-shelf-all\s*\{[^}]*min-block-size:\s*var\(--size-hit\)/);
+});
+
+test("keeps the note-detail back target visible outside the fixed header", () => {
+  assert.equal(noteDetailSource.match(/className="detail-back"/g)?.length, 3);
+  assert.match(siteCss, /\.detail-back\s*\{[^}]*min-block-size:\s*var\(--size-hit\)/);
+  assert.doesNotMatch(siteCss, /\.duomei-detail:not\(\.detail-edit-page\)\s*\{[^}]*padding-top:\s*clamp\((?:32|36)px/);
 });
 
 test("keeps the mobile footer compact with all six shortcuts on one row", () => {

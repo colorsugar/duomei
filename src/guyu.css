@@ -211,6 +211,28 @@ body {
   border-block-end: var(--rule-hairline) solid var(--color-rule);
 }
 
+.guyu-library-back,
+.guyu-home-shelf-all {
+  display: inline-flex;
+  align-items: center;
+  min-block-size: var(--size-hit);
+  color: var(--color-accent);
+  font-size: var(--text-base);
+  line-height: 1.3;
+  text-decoration: none;
+  border-block-end: var(--rule-hairline) solid currentColor;
+}
+
+.guyu-library-back {
+  justify-self: start;
+}
+
+.guyu-library-back:focus-visible,
+.guyu-home-shelf-all:focus-visible {
+  outline: var(--rule-focus) solid var(--color-focus);
+  outline-offset: var(--space-2xs);
+}
+
 .guyu-library-intro h1 {
   min-inline-size: 0;
   margin: 0;
@@ -445,6 +467,11 @@ body {
   gap: var(--space-xl);
 }
 
+.guyu-home-shelf-all {
+  justify-self: start;
+  grid-column: 2;
+}
+
 .guyu-home-shelf-heading h2 {
   min-inline-size: 0;
   margin: 0;
@@ -522,9 +549,13 @@ body {
 }
 
 .guyu-home-carousel[data-phase="scatter"] .guyu-home-book-base,
-.guyu-home-carousel[data-phase="assemble"] .guyu-home-book-base,
-.guyu-home-carousel[data-phase="settle"] .guyu-home-book-base {
+.guyu-home-carousel[data-phase="assemble"] .guyu-home-book-base {
   opacity: 0;
+}
+
+.guyu-home-carousel[data-phase="settle"] .guyu-home-book-base {
+  opacity: 1;
+  transition: none;
 }
 
 .guyu-home-fragment-grid {
@@ -802,6 +833,10 @@ body {
 
   .guyu-home-shelf-heading {
     gap: var(--space-md);
+  }
+
+  .guyu-home-shelf-all {
+    grid-column: auto;
   }
 
   .guyu-home-shelf-heading p,

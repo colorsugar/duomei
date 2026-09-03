@@ -115,6 +115,7 @@ export function GuyuShelfPreview() {
   const book = guyuBooks[bookIndex] ?? guyuBooks[0];
   const incomingBook = incomingIndex === null ? null : guyuBooks[incomingIndex] ?? null;
   const indicatedIndex = incomingIndex ?? bookIndex;
+  const linkedBook = transitionPhase === "assemble" || transitionPhase === "settle" ? incomingBook ?? book : book;
 
   const clearPhaseFallback = useCallback(() => {
     if (phaseFallbackRef.current !== null) window.clearTimeout(phaseFallbackRef.current);
@@ -438,6 +439,7 @@ export function GuyuShelfPreview() {
       <header className="guyu-home-shelf-heading">
         <h2 id="guyu-home-shelf-title">故语</h2>
         <p>把旧日收好，等后来的人翻阅。</p>
+        <Link className="guyu-home-shelf-all" to="/guyu">查看所有</Link>
       </header>
 
       <div
@@ -491,8 +493,8 @@ export function GuyuShelfPreview() {
 
         <Link
           className="guyu-home-work"
-          to="/guyu"
-          aria-label={`前往故语书架，查看${getBookLabels(book).section}《${book.title}》`}
+          to={`/guyu/${linkedBook.id}`}
+          aria-label={`翻开${getBookLabels(linkedBook).section}《${linkedBook.title}》`}
           onPointerDown={handlePointerDown}
           onPointerMove={handlePointerMove}
           onPointerUp={(event) => finishPointer(event)}
