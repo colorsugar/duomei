@@ -222,6 +222,9 @@ export function DuomeiHeader() {
         <a href="/#guyu" onClick={closeAfterNativeNavigation}>
           故语
         </a>
+        <a href="/#yunyou" onClick={closeAfterNativeNavigation}>
+          云游
+        </a>
         <a href="/#color" onClick={closeAfterNativeNavigation}>
           颜色
         </a>

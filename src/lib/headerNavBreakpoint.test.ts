@@ -30,6 +30,7 @@ test("keeps iOS header touch activation synchronous and deterministic", () => {
   assert.match(headerSource, /lastTouchActivationRef\.current = window\.performance\.now\(\)/);
   assert.match(headerSource, /window\.location\.assign\(\(target as HTMLAnchorElement\)\.href\)/);
   assert.match(headerSource, /href="\/#guyu"/);
+  assert.match(headerSource, /href="\/#yunyou"/);
   assert.doesNotMatch(headerSource, /href="\/guyu"/);
   assert.doesNotMatch(headerSource, /pendingTouchActivationRef/);
 });
@@ -58,7 +59,7 @@ test("keeps the homepage Guyu preview deliberate, fragmented, manual, and linked
   assert.match(guyuCss, /data-phase="settle"\]\s+\.guyu-home-book-base\s*\{\s*opacity:\s*1;\s*transition:\s*none;/);
   assert.doesNotMatch(guyuCss, /\.guyu-home-carousel\[data-phase="settle"\][^{}]*\.guyu-home-book-base\s*\{[^}]*opacity:\s*0/);
   assert.match(guyuPreviewSource, /const linkedBook = transitionPhase === "assemble" \|\| transitionPhase === "settle"/);
-  assert.match(guyuPreviewSource, /to=\{`\/guyu\/\$\{linkedBook\.id\}`\}/);
+  assert.match(guyuPreviewSource, /to=\{\`\/guyu\/\$\{linkedBook\.id\}\`\}/);
   assert.match(guyuPreviewSource, /className="guyu-home-shelf-all"\s+to="\/guyu"/);
   assert.match(guyuPreviewSource, /翻开\$\{getBookLabels\(linkedBook\)\.section\}《\$\{linkedBook\.title\}》/);
   assert.match(guyuCss, /\.guyu-library-back,\s*\.guyu-home-shelf-all\s*\{[^}]*min-block-size:\s*var\(--size-hit\)/);
