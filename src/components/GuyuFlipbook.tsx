@@ -213,12 +213,16 @@ export function GuyuFlipbook({
     setViewportZoomed(zoomed);
   }, []);
 
-  const isTurnBlocked = useCallback(() => (
-    multiTouchRef.current ||
-    zoomedTouchRef.current ||
-    viewportZoomedRef.current ||
-    isGuyuViewportZoomed(window.visualViewport?.scale)
-  ), []);
+  // A sequence that ever had two fingers stays zoom-only until every finger lifts.
+  // Being zoomed in on its own no longer blocks a deliberate tap or an explicit
+  // control: while zoomed, a drag is native panning, so only swipes stay blocked.
+  const isTurnBlocked = useCallback((allowZoomed = false) => {
+    if (multiTouchRef.current) return true;
+    if (allowZoomed) return false;
+    return zoomedTouchRef.current ||
+      viewportZoomedRef.current ||
+      isGuyuViewportZoomed(window.visualViewport?.scale);
+  }, []);
 
   const resolveWaiters = useCallback((index: number) => {
     const waiters = waitersRef.current.get(index);
@@ -331,8 +335,8 @@ export function GuyuFlipbook({
     if (event.data === "read") finishInteraction();
   }, [finishInteraction]);
 
-  const requestTurn = useCallback(async (direction: -1 | 1) => {
-    if (busyRef.current || isTurnBlocked()) return;
+  const requestTurn = useCallback(async (direction: -1 | 1, allowZoomed = false) => {
+    if (busyRef.current || isTurnBlocked(allowZoomed)) return;
     const controller = flipbookRef.current?.pageFlip();
     if (!controller) return;
     const current = controller.getCurrentPageIndex();
@@ -354,7 +358,7 @@ export function GuyuFlipbook({
     try {
       await ensurePages(required);
       if (requestIdRef.current !== requestId) return;
-      if (isTurnBlocked()) {
+      if (isTurnBlocked(allowZoomed)) {
         finishInteraction();
         return;
       }
@@ -420,7 +424,7 @@ export function GuyuFlipbook({
   const onBookTouchStart = useCallback((event: ReactTouchEvent<HTMLDivElement>) => {
     stopNativePageFlipTouch(event);
     const update = updateTouchSequence(event.touches.length);
-    if (update.blocksTurn || event.touches.length !== 1) {
+    if (update.multiTouch || event.touches.length !== 1) {
       touchStartRef.current = null;
       return;
     }
@@ -431,7 +435,7 @@ export function GuyuFlipbook({
   const onBookTouchMove = useCallback((event: ReactTouchEvent<HTMLDivElement>) => {
     stopNativePageFlipTouch(event);
     const update = updateTouchSequence(event.touches.length);
-    if (update.blocksTurn) touchStartRef.current = null;
+    if (update.multiTouch) touchStartRef.current = null;
   }, [stopNativePageFlipTouch, updateTouchSequence]);
 
   const onBookTouchEnd = useCallback((event: ReactTouchEvent<HTMLDivElement>) => {
@@ -439,7 +443,7 @@ export function GuyuFlipbook({
     window.requestAnimationFrame(syncViewportZoom);
     const update = updateTouchSequence(event.touches.length);
     const start = touchStartRef.current;
-    if (update.blocksTurn || event.touches.length > 0) {
+    if (update.multiTouch || event.touches.length > 0) {
       touchStartRef.current = null;
       return;
     }
@@ -453,13 +457,14 @@ export function GuyuFlipbook({
     // even when it drifts sideways by more than the swipe distance.
     const horizontalSwipe = Math.abs(dx) >= SWIPE_MIN_DISTANCE && Math.abs(dx) > Math.abs(dy) * 1.2;
     if (horizontalSwipe) {
-      void requestTurn(dx < 0 ? 1 : -1);
+      // Zoomed in, a horizontal drag is the native pan; only a tap may turn.
+      if (!update.blocksTurn) void requestTurn(dx < 0 ? 1 : -1);
       return;
     }
     if (Math.abs(dx) > TAP_MAX_MOVE || Math.abs(dy) > TAP_MAX_MOVE) return;
     if (duration >= TAP_MAX_DURATION) return;
     const bounds = event.currentTarget.getBoundingClientRect();
-    void requestTurn(pageIndex === 0 || touch.clientX >= bounds.left + bounds.width / 2 ? 1 : -1);
+    void requestTurn(pageIndex === 0 || touch.clientX >= bounds.left + bounds.width / 2 ? 1 : -1, true);
   }, [pageIndex, requestTurn, stopNativePageFlipTouch, syncViewportZoom, updateTouchSequence]);
 
   const onBookTouchCancel = useCallback((event: ReactTouchEvent<HTMLDivElement>) => {
@@ -470,13 +475,13 @@ export function GuyuFlipbook({
   }, [stopNativePageFlipTouch, syncViewportZoom, updateTouchSequence]);
 
   const blockCompatibilityMouse = useCallback((event: React.SyntheticEvent<HTMLDivElement>) => {
-    if (performance.now() >= suppressCompatibilityMouseUntilRef.current && !isTurnBlocked()) return;
+    if (performance.now() >= suppressCompatibilityMouseUntilRef.current && !isTurnBlocked(true)) return;
     event.preventDefault();
     event.stopPropagation();
   }, [isTurnBlocked]);
 
   const jumpToPage = useCallback(async (target: number) => {
-    if (busyRef.current || isTurnBlocked()) return;
+    if (busyRef.current || isTurnBlocked(true)) return;
     const controller = flipbookRef.current?.pageFlip();
     if (!controller) return;
     busyRef.current = true;
@@ -490,7 +495,7 @@ export function GuyuFlipbook({
     const visibleCurrent = [current, current + 1].filter((index) => index <= lastIndex);
     try {
       await ensurePages([...new Set([...visibleCurrent, ...required])], true);
-      if (isTurnBlocked()) {
+      if (isTurnBlocked(true)) {
         finishInteraction();
         return;
       }
@@ -526,10 +531,10 @@ export function GuyuFlipbook({
       if (target?.matches("input, textarea, select, button, a, [contenteditable='true']")) return;
       if (event.key === "ArrowLeft") {
         event.preventDefault();
-        void requestTurn(-1);
+        void requestTurn(-1, true);
       } else if (event.key === "ArrowRight") {
         event.preventDefault();
-        void requestTurn(1);
+        void requestTurn(1, true);
       } else if (event.key === "Home") {
         event.preventDefault();
         void jumpToPage(0);
@@ -621,14 +626,14 @@ export function GuyuFlipbook({
             type="button"
             aria-label={pageIndex === 0 ? "翻开画册" : "上一页"}
             disabled={busy || (pageIndex === 0 && !coverReady && !loadError)}
-            onClick={() => void requestTurn(pageIndex === 0 ? 1 : -1)}
+            onClick={() => void requestTurn(pageIndex === 0 ? 1 : -1, true)}
           />
           <button
             className="guyu-page-zone is-next"
             type="button"
             aria-label="下一页"
             disabled={busy || (!coverReady && !loadError) || pageIndex >= lastIndex}
-            onClick={() => void requestTurn(1)}
+            onClick={() => void requestTurn(1, true)}
           />
         </div>
 
@@ -651,7 +656,7 @@ export function GuyuFlipbook({
             type="button"
             disabled={busy || pageIndex === 0}
             aria-label="上一页"
-            onClick={() => void requestTurn(-1)}
+            onClick={() => void requestTurn(-1, true)}
           >
             <span aria-hidden="true">‹</span>
           </button>
@@ -661,7 +666,7 @@ export function GuyuFlipbook({
             type="button"
             disabled={busy || pageIndex >= lastIndex}
             aria-label="下一页"
-            onClick={() => void requestTurn(1)}
+            onClick={() => void requestTurn(1, true)}
           >
             <span aria-hidden="true">›</span>
           </button>

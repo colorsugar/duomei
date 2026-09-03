@@ -302,6 +302,7 @@ body {
   display: grid;
   grid-template-columns: minmax(0, 0.86fr) minmax(0, 1.14fr);
   gap: var(--space-lg);
+  block-size: 100%;
   min-block-size: 20rem;
   padding: var(--space-lg);
   color: var(--color-ink);
@@ -1387,7 +1388,8 @@ body {
   }
 
   .guyu-shelf {
-    grid-auto-columns: minmax(17rem, calc(100% - var(--space-lg)));
+    /* One fixed track: a single-book row and a four-book row get the same card width. */
+    grid-auto-columns: calc(100% - var(--space-lg));
     gap: var(--space-md);
   }
 

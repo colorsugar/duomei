@@ -69,7 +69,7 @@ const FRAGMENTS = Array.from({ length: FRAGMENT_COLUMNS * FRAGMENT_ROWS }, (_, i
 
 function getBookLabels(book: GuyuBook) {
   return {
-    section: book.chapter === "新说" ? "新说" : "故语",
+    section: book.chapter,
     shelf: book.kind,
   };
 }
