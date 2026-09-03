@@ -15,6 +15,7 @@ concurrency:
 
 jobs:
   verify-and-deploy:
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 30
     env:
@@ -128,7 +129,7 @@ jobs:
           for (let attempt = 1; attempt <= 18; attempt += 1) {
             try {
               const nonce = `${Date.now()}-${attempt}`;
-              const [marker, home, auth, protectedOldPage, publicFeiyanPage, publicXinshuoOnePage, publicXinshuoTwoPage, publicGuiXiangPage] = await Promise.all([
+              const [marker, home, auth, protectedOldPage, publicFeiyanPage, publicXinshuoOnePage, publicXinshuoTwoPage, publicGuiXiangPage, yunyouIndex, yunyouMain] = await Promise.all([
                 fetch(`https://duomei.site/.well-known/duomei-build.json?ci=${nonce}`, { cache: "no-store" }),
                 fetch(`https://duomei.site/?ci=${nonce}`, { cache: "no-store" }),
                 fetch(`https://duomei.site/api/guyu-auth?ci=${nonce}`, { cache: "no-store" }),
@@ -137,9 +138,12 @@ jobs:
                 fetch(`https://duomei.site/images/guyu/xinshuo-01/pages/001.webp?ci=${nonce}`, { cache: "no-store" }),
                 fetch(`https://duomei.site/images/guyu/xinshuo-02/pages/001.webp?ci=${nonce}`, { cache: "no-store" }),
                 fetch(`https://duomei.site/images/guyu/gui-xiang-huan-xiang/pages/001.webp?ci=${nonce}`, { cache: "no-store" }),
+                fetch(`https://duomei.site/yunyou/index.html?ci=${nonce}`, { cache: "no-store" }),
+                fetch(`https://duomei.site/yunyou/src/main.js?ci=${nonce}`, { cache: "no-store" }),
               ]);
               const markerBody = marker.ok ? await marker.json() : null;
               const authBody = auth.ok ? await auth.json() : null;
+              const yunyouBody = yunyouIndex.ok ? await yunyouIndex.text() : "";
 
               if (
                 marker.status === 200 &&
@@ -151,13 +155,17 @@ jobs:
                 publicFeiyanPage.status === 200 &&
                 publicXinshuoOnePage.status === 200 &&
                 publicXinshuoTwoPage.status === 200 &&
-                publicGuiXiangPage.status === 200
+                publicGuiXiangPage.status === 200 &&
+                yunyouIndex.status === 200 &&
+                yunyouBody.includes("云游桂林 · 多美小记") &&
+                yunyouBody.includes("./vendor/three/three.module.js") &&
+                yunyouMain.status === 200
               ) {
                 console.log(`Production verified on attempt ${attempt}.`);
                 process.exit(0);
               }
 
-              lastError = `marker=${marker.status}/${markerBody?.commit ?? "missing"} home=${home.status} auth=${auth.status}/${authBody?.authorized} protected-old=${protectedOldPage.status} public-feiyan=${publicFeiyanPage.status} public-xinshuo-01=${publicXinshuoOnePage.status} public-xinshuo-02=${publicXinshuoTwoPage.status} public-gui-xiang=${publicGuiXiangPage.status}`;
+              lastError = `marker=${marker.status}/${markerBody?.commit ?? "missing"} home=${home.status} auth=${auth.status}/${authBody?.authorized} protected-old=${protectedOldPage.status} public-feiyan=${publicFeiyanPage.status} public-xinshuo-01=${publicXinshuoOnePage.status} public-xinshuo-02=${publicXinshuoTwoPage.status} public-gui-xiang=${publicGuiXiangPage.status} yunyou=${yunyouIndex.status}/${yunyouBody.includes("云游桂林 · 多美小记")} yunyou-main=${yunyouMain.status}`;
             } catch (error) {
               lastError = error instanceof Error ? error.message : String(error);
             }

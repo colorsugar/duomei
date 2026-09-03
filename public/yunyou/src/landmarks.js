@@ -1,0 +1,305 @@
+// 逐个地标手工建模。尺寸取自公开资料（见 data/landmarks.js 的 desc），平面位置/朝向取自 OSM 足迹（data/geo.js FOOT）。
+import * as THREE from 'three';
+import { karstHill, sdfHill, sdRoundBox, sdEllipsoid, sdCone, smin, fbm, fbm3, pagoda, bottlePagoda, hall, extrudeRing, ringAngle, TEX } from './lib.js';
+
+const std = (o) => new THREE.MeshStandardMaterial(o);
+const tex = (t, rx, ry) => { const c = t.clone(); c.repeat.set(rx, ry); c.needsUpdate = true; return c; };
+
+export function makeMaterials() {
+  const M = {
+    stone: (() => { const t = tex(TEX.stone, 1 / 4, 1 / 4); return std({ map: t, bumpMap: t, bumpScale: 0.6, roughness: 0.95 }); })(),        // 拉伸体：UV 为米；一张料石图 ≈ 4 m（6 层石）
+    stoneBox: (() => { const t = tex(TEX.stone, 8, 1); return std({ map: t, bumpMap: t, bumpScale: 0.6, roughness: 0.95 }); })(),             // 盒体：UV 0..1
+    tile: std({ map: TEX.tile, bumpMap: TEX.tile, bumpScale: 0.4, roughness: 0.85 }),
+    wall: std({ color: 0xf1ebdf, roughness: 0.9 }),
+    column: std({ color: 0x9c3a2b, roughness: 0.7 }),
+    wood: std({ color: 0x6f4632, roughness: 0.8 }),
+    lattice: std({ color: 0x4a2c1e, roughness: 0.85 }),
+    rail: std({ color: 0x8b5a3c, roughness: 0.8 }),
+    ridge: std({ color: 0x2c2f33, roughness: 0.8 }),
+    marble: std({ color: 0xf1eee6, roughness: 0.55 }),
+    pale: std({ color: 0xd8d0c1, roughness: 0.9 }),
+    concrete: std({ color: 0xdad7cf, roughness: 0.85 }),
+    dark: std({ color: 0x2b2724, roughness: 0.9 }),
+    copper: std({ map: tex(TEX.copper, 4, 1), metalness: 0.7, roughness: 0.35 }),
+    copperRoof: std({ map: tex(TEX.copper, 6, 1), color: 0xf6d38a, metalness: 0.8, roughness: 0.3 }),
+    glaze: std({ map: tex(TEX.glaze, 4, 1), roughness: 0.3 }),
+    glazeRoof: std({ color: 0x4b7f92, roughness: 0.25, metalness: 0.2 }),
+    silver: std({ color: 0xcfd6dc, metalness: 0.6, roughness: 0.4 }),
+    brick: (() => { const t = tex(TEX.brick, 6, 2); return std({ map: t, bumpMap: t, bumpScale: 0.3, roughness: 0.9 }); })(),
+    leaf: std({ color: 0x3f6b33, roughness: 0.95 }),
+    trunk: std({ color: 0x5a4636, roughness: 0.95 }),
+  };
+  M.hallGray = { stone: M.stoneBox, marble: M.marble, wall: M.wall, column: M.column, wood: M.wood, lattice: M.lattice, rail: M.rail, roof: M.tile, ridge: M.ridge };
+  return M;
+}
+
+const ellipse = (cx, cz, rx, rz, n = 36) => Array.from({ length: n }, (_, i) => { const a = i / n * Math.PI * 2; return [cx + Math.cos(a) * rx, cz + Math.sin(a) * rz]; });
+const at = (obj, x, y, z, ry = 0) => { obj.position.set(x, y, z); obj.rotation.y = ry; return obj; };
+
+// 象鼻山：隐式体（SDF + Marching Cubes）。象身 108×100 m、顶 55 m 平缓；象臀在南，象头在北端桃花江口、略低成鞍部；
+// 象鼻为粗石柱在东北角（两江汇流处）自象头东侧垂下直插漓江——从桃花江北岸爱情岛望去象鼻在左；
+// 鼻与前腿之间自然形成南北贯通的水月洞（≈13 m 宽、14 m 高）；三层噪声叠出溶沟与竖向石纹；象背普贤塔 13.6 m。
+export const XBS = { cx: -198, cz: 1450, box: { x0: -198 - 66, x1: -198 + 86, y0: -4, y1: 66, z0: 1450 - 100, z1: 1450 + 80 } };
+XBS.sdf = (x, y, z) => {
+  const cx = XBS.cx, cz = XBS.cz;
+  {
+    const px = x - cx, py = y, pz = z - cz;
+    // 象身：近直立崖壁的长方体（100×92 m），顶部圆肩，背部缓隆；东崖直落漓江岸（x≈+50）
+    let d = sdRoundBox(px - 2, py - 22, pz - 4, 50, 26, 46, 20);
+    d += 5 * fbm3(x * 0.02 + 7, y * 0.008, z * 0.02, 1);                                  // 大尺度轮廓起伏：平面不成规则矩形
+    d = smin(d, sdEllipsoid(px - 12, py - 30, pz + 18, 26, 24, 30), 9);                 // 象背隆起（普贤塔处，最高 ≈54 m）
+    d = smin(d, sdEllipsoid(px + 10, py - 26, pz - 30, 30, 22, 28), 9);                 // 象臀（南端，足迹偏西）
+    // 象头（北端）：略低于背成鞍部（颈），顶仍较平
+    d = smin(d, sdRoundBox(px - 30, py - 27, pz + 54, 22, 20, 14, 9), 10);
+    // 额/鼻根：从象头向东跨在洞顶之上，连接头与鼻
+    d = smin(d, sdRoundBox(px - 58, py - 31, pz + 58, 16, 14, 10, 6), 6);
+    // 象鼻：粗石柱自鼻根近直下插江中（东北角，鼻端抵两江汇流处岸线 x≈+78）
+    d = smin(d, sdCone(px, py, pz, [66, 34, -58], [70, -6, -62], 11, 9), 5);
+    // 水月洞：鼻与前腿之间南北贯通（≈13 m 宽、14 m 高，圆拱）
+    d = Math.max(d, -sdRoundBox(px - 50, py - 6.5, pz + 58, 6.5, 7, 34, 3));
+    if (Math.abs(d) < 9) d += 2.2 * fbm3(x * 0.045, y * 0.045, z * 0.045, 3) + 1.1 * fbm3(x * 0.15, y * 0.15, z * 0.15, 6) + 0.7 * fbm(px * 0.22 + py * 0.02, pz * 0.22, 9);
+    return d;
+  }
+};
+export function xiangbishan(F, M) {
+  const g = new THREE.Group();
+  const { cx, cz, sdf, box } = XBS;
+  const hill = sdfHill({ sdf, box, res: 108, seed: 3, cx, cz });
+  g.add(hill);
+  const px = -184, pz = 1432; // 普贤塔在象背
+  g.add(at(bottlePagoda(13.6, M.pale), px, hill.userData.heightAt(px, pz) - 0.6, pz));
+  g.userData.top = 55 + 13.6;
+  return g;
+}
+
+// 日塔：九层八角铜塔 41 m；月塔：七层八角琉璃塔 35 m。均立于杉湖小岛石台上。
+export function twinPagodas(F, M) {
+  const ri = pagoda({ h: 41, tiers: 9, r0: 9.2, taper: 0.5, mats: { body: M.copper, roof: M.copperRoof, trim: M.copperRoof, dark: M.dark } });
+  const yu = pagoda({ h: 35, tiers: 7, r0: 7.8, taper: 0.55, mats: { body: M.glaze, roof: M.glazeRoof, trim: M.silver, dark: M.dark, rail: M.silver } });
+  const base = (r) => { const b = new THREE.Mesh(new THREE.CylinderGeometry(r, r + 0.6, 1.4, 8), M.marble); b.position.y = 0.7; return b; };
+  const gr = new THREE.Group(), gy = new THREE.Group();
+  gr.add(base(13), at(ri, 0, 1.4, 0));
+  gy.add(base(11), at(yu, 0, 1.4, 0));
+  at(gr, F.rita.c[0], 0, F.rita.c[1]);
+  at(gy, F.yueta.c[0], 0, F.yueta.c[1]);
+  gr.userData.top = 42; gy.userData.top = 36;
+  return { rita: gr, yueta: gy };
+}
+
+// 逍遥楼：二层三檐楼阁，高 24 m，面阔进深 22 m，1.5 m 台基。仿唐：青瓦、朱柱、白壁。
+export function xiaoyaolou(F, M) {
+  const g = hall([
+    { w: 20, d: 20, h: 6.5, cw: 24, cd: 24, roof: { h: 2.8, ridge: 7, over: 2.4 } },
+    { w: 17, d: 17, h: 6, cw: 19, cd: 19, balcony: true, roof: { h: 2.6, ridge: 6, over: 2.4 } },
+    { w: 14, d: 14, h: 3.6, cw: 15, cd: 15, balcony: true, roof: { h: 5, ridge: 8, over: 2.6, rise: 5 } },
+  ], M.hallGray, { baseH: 1.5, baseW: 34, baseD: 34 });
+  at(g, F.xiaoyaolou.c[0], 0, F.xiaoyaolou.c[1], ringAngle(F.xiaoyaolou.o));
+  g.userData.top = 24;
+  return g;
+}
+
+// 正阳门落位：OSM 门楼足迹比城墙线深（南缘即城墙线），门楼中心投影到最近的城墙段上，和墙体对齐
+export function zhengyangAnchor(F) {
+  const ring = F.wangcheng.o, [gx, gz] = F.zhengyangmen.c;
+  let best = { d: Infinity };
+  for (let i = 0; i < ring.length; i++) {
+    const a = ring[i], b = ring[(i + 1) % ring.length], dx = b[0] - a[0], dz = b[1] - a[1], L2 = dx * dx + dz * dz;
+    const t = Math.max(0, Math.min(1, ((gx - a[0]) * dx + (gz - a[1]) * dz) / L2)), x = a[0] + dx * t, z = a[1] + dz * t, d = Math.hypot(gx - x, gz - z);
+    if (d < best.d) best = { d, seg: i, x, z, angle: Math.atan2(-dz, dx) };
+  }
+  return best;
+}
+// 靖江王城：料石城墙（高 7.9 m、厚 5.5 m）沿 OSM 轮廓，四门城楼，承运门/承运殿，独秀峰 66 m
+export function wangchengWalls(F, M) {
+  const g = new THREE.Group();
+  const ring = F.wangcheng.o, H = 7.9, T = 5.5;
+  const geos = [];
+  const m4 = new THREE.Matrix4();
+  const merlons = [];
+  // 正阳门是落地门楼（拱门在地面贯通），城墙在它两侧断开 30 m
+  const { x: px, z: pz } = zhengyangAnchor(F), R = 15, segs = [];
+  for (let i = 0; i < ring.length; i++) {
+    const a = ring[i], b = ring[(i + 1) % ring.length], dx = b[0] - a[0], dz = b[1] - a[1];
+    // 线段与半径 R 的圆求交，保留圆外部分
+    const fx = a[0] - px, fz = a[1] - pz, A = dx * dx + dz * dz, B = 2 * (fx * dx + fz * dz), C = fx * fx + fz * fz - R * R, D = B * B - 4 * A * C;
+    if (D <= 0) { segs.push([a, b]); continue; }
+    const t1 = Math.max(0, (-B - Math.sqrt(D)) / (2 * A)), t2 = Math.min(1, (-B + Math.sqrt(D)) / (2 * A));
+    if (t2 <= 0 || t1 >= 1) { segs.push([a, b]); continue; }
+    if (t1 > 0) segs.push([a, [a[0] + dx * t1, a[1] + dz * t1]]);
+    if (t2 < 1) segs.push([[a[0] + dx * t2, a[1] + dz * t2], b]);
+  }
+  for (const [[ax, az], [bx, bz]] of segs) {
+    const dx = bx - ax, dz = bz - az, L = Math.hypot(dx, dz);
+    if (L < 1) continue;
+    const nx = -dz / L * T / 2, nz = dx / L * T / 2;
+    geos.push(extrudeRing([[ax + nx, az + nz], [bx + nx, bz + nz], [bx - nx, bz - nz], [ax - nx, az - nz]], H));
+    for (let s = 1.2; s < L; s += 2.6) for (const side of [-1, 1]) {
+      const x = ax + dx / L * s + side * nx * 0.85, z = az + dz / L * s + side * nz * 0.85;
+      m4.makeRotationY(Math.atan2(-dz, dx)); m4.setPosition(x, H + 0.45, z);
+      merlons.push(m4.clone());
+    }
+  }
+  for (const ge of geos) g.add(new THREE.Mesh(ge, M.stone));
+  const mer = new THREE.InstancedMesh(new THREE.BoxGeometry(1.4, 0.9, 0.8), M.stone, merlons.length);
+  merlons.forEach((m, i) => mer.setMatrixAt(i, m));
+  g.add(mer);
+  return g;
+}
+export function duxiufengPeak(F) {
+  return karstHill({ ring: F.duxiufeng.o, peaks: [{ x: 138, z: -343, h: 66, r: 48, k: 0.6 }], margin: 13, floor: 0.2, seed: 11, rough: 0.07 });
+}
+export function wangcheng(F, M) {
+  const g = new THREE.Group();
+  const H = 7.9;
+  g.add(wangchengWalls(F, M));
+  // 城门：正阳门(端礼门) 城台 11 m + 二层城楼；承运门 城台 + 单层门楼；东华/西华/广智门 单层门楼
+  const gate = (foot, towerFloors, platH) => {
+    const grp = new THREE.Group();
+    grp.add(new THREE.Mesh(extrudeRing(foot.o, platH), M.stone));
+    const t = hall(towerFloors, M.hallGray);
+    at(t, foot.c[0], platH, foot.c[1], ringAngle(foot.o));
+    grp.add(t);
+    return grp;
+  };
+  g.add(gate(F.zhengyangmen, [
+    { w: 26, d: 11, h: 5.5, cw: 28, cd: 13, roof: { h: 2.6, ridge: 16, over: 2 } },
+    { w: 22, d: 9, h: 4.5, cw: 23, cd: 10, balcony: true, roof: { h: 4.2, ridge: 14, over: 2.2, rise: 4.2 } },
+  ], 11));
+  g.add(gate(F.chengyunmen, [{ w: 20, d: 8, h: 6, cw: 22, cd: 10, roof: { h: 4.2, ridge: 12, over: 2.2, rise: 4.2 } }], 5));
+  const side = (x, z, ry) => { const t = hall([{ w: 16, d: 7, h: 5, cw: 17, cd: 8, roof: { h: 3.6, ridge: 9, over: 1.8, rise: 3.6 } }], M.hallGray); at(t, x, H, z, ry); g.add(t); };
+  side(244.3, 8.0, Math.PI / 2 - 0.14);      // 东华门(体仁)
+  side(-77.7, -32.7, Math.PI / 2 - 0.14);    // 西华门(遵义)
+  side(147.7, -436.3, -0.14);                // 广智门(后贡)
+  // 承运殿：2.2 m 须弥座台基 + 单层大殿
+  const dian = new THREE.Group();
+  dian.add(new THREE.Mesh(extrudeRing(F.chengyundian.o, 2.2), M.marble));
+  const hallM = hall([{ w: 42, d: 20, h: 9, cw: 44, cd: 22, roof: { h: 6.5, ridge: 26, over: 2.6, rise: 6.5 } }], M.hallGray);
+  at(hallM, F.chengyundian.c[0], 2.2, F.chengyundian.c[1], ringAngle(F.chengyundian.o));
+  dian.add(hallM);
+  g.add(dian);
+  // 独秀峰 66 m，峰顶独秀亭（六角小亭，非塔——独秀峰历来无塔）
+  const peak = duxiufengPeak(F);
+  g.add(peak);
+  const ting = hall([{ w: 4.5, d: 4.5, h: 3.2, cw: 5, cd: 5, roof: { h: 2.6, ridge: 0, over: 1.2, rise: 2.6 } }], M.hallGray, { colPitch: 2.5 });
+  g.add(at(ting, 138, peak.userData.heightAt(138, -343) - 0.3, -343));
+  g.userData.top = 66 + 6;
+  return g;
+}
+
+// 伏波山：长 120 m、宽 60 m、高 63 m，东临漓江为陡壁
+export function fuboshan(F, M) {
+  const g = karstHill({ ring: ellipse(596, -392, 33, 62), peaks: [{ x: 598, z: -398, h: 63, r: 58, k: 0.7 }], margin: 11, floor: 0.3, seed: 5, rough: 0.07 });
+  g.userData.top = 63;
+  return g;
+}
+
+// 叠彩山：明月峰 73 m、仙鹤峰、四望山、于越山四峰，足迹取公园范围
+export function diecaishan(F, M) {
+  const g = karstHill({ ring: F.diecaishan.o, res: 4, margin: 30, floor: 0.18, seed: 7, rough: 0.09,
+    peaks: [{ x: 543, z: -1132, h: 73, r: 72, k: 0.75 }, { x: 218, z: -1176, h: 62, r: 62, k: 0.8 }, { x: 222, z: -1060, h: 48, r: 56, k: 0.9 }, { x: 450, z: -1012, h: 56, r: 60, k: 0.85 }] });
+  g.userData.top = 73;
+  return g;
+}
+
+// 古南门：方石城台 39.4×19.4×5.3 m，券洞宽 2.9 高 3.5 m，上为单檐歇山榕树楼；门前千年古榕（高 18.6 m、冠幅 32 m）
+export function gunanmen(F, M) {
+  const g = new THREE.Group();
+  const s = new THREE.Shape();
+  s.moveTo(-19.7, 0); s.lineTo(19.7, 0); s.lineTo(19.7, 5.3); s.lineTo(-19.7, 5.3); s.closePath();
+  const arch = new THREE.Path();
+  arch.moveTo(-1.45, 0); arch.lineTo(-1.45, 2.05); arch.absarc(0, 2.05, 1.45, Math.PI, 0, true); arch.lineTo(1.45, 0); arch.closePath();
+  s.holes.push(arch);
+  const plat = new THREE.ExtrudeGeometry(s, { depth: 19.4, bevelEnabled: false });
+  plat.translate(0, 0, -9.7);
+  const ry = ringAngle(F.rongshulou.o);
+  g.add(at(new THREE.Mesh(plat, M.stone), 0, 0, 0, ry));
+  const lou = hall([{ w: 12, d: 8, h: 4.2, cw: 13, cd: 9, roof: { h: 3.2, ridge: 7, over: 1.8, rise: 3.2 } }], M.hallGray);
+  g.add(at(lou, 0, 5.3, 0, ry));
+  // 古榕：位于门西侧湖岸
+  const tree = new THREE.Group();
+  const tr = new THREE.Mesh(new THREE.CylinderGeometry(1.6, 2.6, 9, 10), M.trunk); tr.position.y = 4.5;
+  tree.add(tr);
+  // 冠幅 32 m 的榕树冠：多球叠成，顶 18.6 m
+  for (let i = 0; i < 9; i++) {
+    const a = i * 2.4, rr = i === 0 ? 0 : 7 + (i % 3) * 2.2, r = i === 0 ? 9 : 5.5 + (i % 4) * 0.9;
+    const cr = new THREE.Mesh(new THREE.SphereGeometry(r, 12, 9), std({ color: [0x3f6b33, 0x4a7a3a, 0x37602c][i % 3], roughness: 0.95 }));
+    cr.scale.y = 0.7;
+    cr.position.set(Math.cos(a) * rr, 12.5 - (i % 3) * 1.2 + (i === 0 ? 1.2 : 0), Math.sin(a) * rr);
+    tree.add(cr);
+    if (i > 0 && i % 2) { const br = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.7, 12, 6), M.trunk); br.position.set(Math.cos(a) * rr * 0.6, 8, Math.sin(a) * rr * 0.6); br.rotation.set(Math.sin(a) * 0.6, 0, -Math.cos(a) * 0.6); tree.add(br); }
+  }
+  g.add(at(tree, -30, 0, 6));
+  at(g, F.rongshulou.c[0], 0, F.rongshulou.c[1]);
+  g.userData.top = 13;
+  return g;
+}
+
+// 木龙塔：仿宋（上海龙华塔）七层楼阁式砖塔，约 40 m
+export function mulongta(F, M) {
+  const g = pagoda({ h: 40, tiers: 7, r0: 5.6, taper: 0.62, spire: 0.16, mats: { body: M.brick, roof: M.tile, trim: M.wood, dark: M.dark, rail: M.rail } });
+  at(g, F.mulongta.c[0], 0, F.mulongta.c[1]);
+  g.userData.top = 40;
+  return g;
+}
+
+// 解放桥：284×45 m，五跨空腹式连拱 41.5+61+72+61+41.5，两墩在江中
+export function jiefangqiao(F, M) {
+  const g = new THREE.Group();
+  const ring = F.jiefangqiao.o, ry = ringAngle(ring), [cx, cz] = F.jiefangqiao.c;
+  const deckY = 8.2;
+  g.add(new THREE.Mesh(extrudeRing(ring, 2.0, deckY), M.concrete));
+  const inner = new THREE.Group();
+  const spans = [41.5, 61, 72, 61, 41.5];
+  let x = -spans.reduce((a, b) => a + b) / 2;
+  for (const L of spans) {
+    const f = Math.min(6.5, L * 0.1), s = new THREE.Shape();
+    s.moveTo(-L / 2, deckY); s.lineTo(L / 2, deckY); s.lineTo(L / 2, 1.2);
+    s.quadraticCurveTo(0, 1.2 + 2 * f, -L / 2, 1.2); s.closePath();
+    const rib = new THREE.Mesh(new THREE.ExtrudeGeometry(s, { depth: 40, bevelEnabled: false }), M.concrete);
+    rib.position.set(x + L / 2, 0, -20);
+    inner.add(rib);
+    x += L;
+    if (x < 130) { const pier = new THREE.Mesh(new THREE.BoxGeometry(5, deckY + 1, 42), M.concrete); pier.position.set(x, deckY / 2 - 0.5, 0); inner.add(pier); }
+  }
+  for (const side of [-1, 1]) { const rail = new THREE.Mesh(new THREE.BoxGeometry(284, 1.1, 0.35), M.marble); rail.position.set(0, deckY + 2.5, side * 22.2); inner.add(rail); }
+  at(inner, cx, 0, cz, ry);
+  g.add(inner);
+  g.userData.top = 10;
+  return g;
+}
+
+// 其它桥：OSM 桥面拉伸；北斗桥为汉白玉曲桥（折线带）
+export function bridges(BR, F, M) {
+  const g = new THREE.Group();
+  for (const b of BR) if (b.n !== '解放桥') g.add(new THREE.Mesh(extrudeRing(b.o, 1.1, 2.4), M.pale));
+  const pts = F.beidouqiao.o, w = 3.6;
+  const pos = [], idx = [];
+  for (let i = 0; i < pts.length; i++) {
+    const [x, z] = pts[i], [ax, az] = pts[Math.max(i - 1, 0)], [bx, bz] = pts[Math.min(i + 1, pts.length - 1)];
+    let dx = bx - ax, dz = bz - az; const l = Math.hypot(dx, dz) || 1; dx /= l; dz /= l;
+    pos.push(x - dz * w / 2, 2.0, z + dx * w / 2, x + dz * w / 2, 2.0, z - dx * w / 2);
+    if (i) { const a = (i - 1) * 2; idx.push(a, a + 2, a + 1, a + 1, a + 2, a + 3); }
+  }
+  const bg = new THREE.BufferGeometry();
+  bg.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); bg.setIndex(idx); bg.computeVertexNormals();
+  g.add(new THREE.Mesh(bg, M.marble));
+  return g;
+}
+
+// 舍利塔：宝瓶式，通高 13.2 m
+export function shelita(F, M) {
+  const g = bottlePagoda(13.2, M.pale);
+  at(g, F.shelita.c[0], 0, F.shelita.c[1]);
+  g.userData.top = 13.2;
+  return g;
+}
+
+// 东镇门（宋城墙城门）
+export function dongzhenmen(F, M) {
+  const g = new THREE.Group();
+  g.add(new THREE.Mesh(extrudeRing(F.dongzhenmen.o, 7.5), M.stone));
+  const t = hall([{ w: 12, d: 6, h: 4, cw: 13, cd: 7, roof: { h: 3, ridge: 7, over: 1.6, rise: 3 } }], M.hallGray);
+  at(t, F.dongzhenmen.c[0], 7.5, F.dongzhenmen.c[1], ringAngle(F.dongzhenmen.o));
+  g.add(t);
+  return g;
+}

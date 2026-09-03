@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#f8f5ef">
+<link rel="icon" href="data:,">
+<title>云游桂林 · 多美小记</title>
+<style>
+  :root {
+    --paper: rgba(250, 247, 240, 0.9);
+    --paper-solid: #faf7f0;
+    --paper-soft: #f0ebe1;
+    --ink: #20201d;
+    --muted: #6f6b63;
+    --accent: #6f7d63;
+    --line: rgba(32, 32, 29, 0.16);
+    --focus: #52664c;
+    --label-halo: #fffdf7;
+    --scene-sky: #dfe9f0;
+    --night-paper: rgba(18, 25, 32, 0.86);
+    --night-ink: #f2ead6;
+    --night-muted: rgba(242, 234, 214, 0.62);
+    --night-line: rgba(245, 240, 225, 0.18);
+    --night-accent: #a8dadc;
+    --night-halo: #0d1830;
+    --font-display: Georgia, "Times New Roman", serif;
+    --font-body: Inter, "Noto Sans SC", "Microsoft YaHei", sans-serif;
+    --radius-card: 12px;
+    --radius-pill: 999px;
+    --size-hit: 44px;
+    --shadow-panel: 0 12px 36px rgba(32, 32, 29, 0.12);
+    --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+    --dur-short: 220ms;
+    --dur-long: 420ms;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; width: 100%; height: 100%; overflow: clip; font-family: var(--font-body); color: var(--ink); background: var(--scene-sky); }
+  button, a, input { font: inherit; }
+  button, a { -webkit-tap-highlight-color: transparent; }
+  button:focus-visible, a:focus-visible, input:focus-visible { outline: 2px solid var(--focus); outline-offset: 3px; }
+  #app { position: fixed; inset: 0; }
+  #app canvas { display: block; touch-action: none; }
+  #labels { position: fixed; inset: 0; pointer-events: none; overflow: hidden; }
+
+  .lbl { pointer-events: none; white-space: nowrap; transform: translate(-50%, -100%); font-size: 12px; letter-spacing: 0.02em; }
+  .lbl.main { color: var(--ink); font-weight: 600; text-shadow: 0 0 3px var(--label-halo), 0 0 6px var(--label-halo), 0 1px 0 var(--label-halo); }
+  .lbl.main::after { content: ""; display: block; width: 1px; height: 14px; margin: 3px auto 0; background: currentColor; opacity: 0.6; }
+  .lbl.minor { color: var(--muted); font-size: 11px; text-shadow: 0 0 3px var(--label-halo), 0 0 5px var(--label-halo); }
+  .lbl.lake { color: var(--accent); font-size: 11px; text-shadow: 0 0 3px var(--label-halo), 0 0 6px var(--label-halo); }
+  .lbl.hidden, .lbl.minor.far { display: none; }
+  .lbl.hit { pointer-events: auto; cursor: pointer; padding: 6px 8px; margin: -6px -8px; }
+
+  #panel {
+    position: fixed; top: 16px; left: 16px; width: 280px; height: min(740px, calc(100% - 32px));
+    display: flex; flex-direction: column; overflow: hidden; background: var(--paper); backdrop-filter: blur(14px);
+    border: 1px solid var(--line); border-radius: var(--radius-card); box-shadow: var(--shadow-panel);
+  }
+  #panel header { padding: 8px 12px 0; border-bottom: 1px solid var(--line); }
+  .back-home { display: inline-flex; min-height: var(--size-hit); align-items: center; color: var(--muted); font-size: 12px; text-decoration: none; }
+  .back-home:hover { color: var(--ink); }
+  #panel-toggle { display: grid; width: 100%; min-height: var(--size-hit); grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 10px; padding: 4px 0 10px; border: 0; color: inherit; text-align: left; background: transparent; cursor: pointer; }
+  #panel-toggle strong { min-width: 0; font-family: var(--font-display); font-size: 17px; font-style: normal; line-height: 1.2; overflow-wrap: anywhere; }
+  #panel-toggle small { display: block; margin-top: 4px; color: var(--muted); font-family: var(--font-body); font-size: 11px; font-weight: 400; letter-spacing: 0.02em; }
+  .panel-chevron { color: var(--muted); transition: transform var(--dur-short) var(--ease-out); }
+  #panel.collapsed .panel-chevron { transform: rotate(-90deg); }
+  #panel.collapsed { height: auto; }
+  #panel.collapsed #panel-body { display: none; }
+  #panel-body { display: flex; min-height: 0; flex: 1 1 auto; flex-direction: column; overflow: hidden; }
+
+  #toggles { display: flex; flex-wrap: wrap; gap: 6px 12px; padding: 8px 16px; border-bottom: 1px solid var(--line); font-size: 12px; color: var(--muted); }
+  #toggles label { display: flex; min-height: 32px; align-items: center; gap: 4px; cursor: pointer; user-select: none; }
+  #toggles input { accent-color: var(--accent); margin: 0; }
+  .mode-row { gap: 6px !important; letter-spacing: 0.08em; }
+  .mode-switch { position: relative; width: 46px; height: 26px; border-radius: var(--radius-pill); border: 1px solid var(--line); background: var(--paper-soft); cursor: pointer; padding: 0; transition: background var(--dur-long) var(--ease-out), border-color var(--dur-long) var(--ease-out); }
+  .mode-knob { position: absolute; top: 2px; left: 2px; width: 20px; height: 20px; border-radius: 50%; background: var(--accent); color: var(--paper-solid); display: grid; place-items: center; transition: transform var(--dur-long) var(--ease-out), background var(--dur-long) var(--ease-out), color var(--dur-long) var(--ease-out); box-shadow: 0 2px 6px var(--line); }
+  .mode-knob svg { width: 12px; height: 12px; position: absolute; transition: opacity var(--dur-short) var(--ease-out), transform var(--dur-short) var(--ease-out); }
+  .mode-knob .ico-moon { opacity: 0; transform: scale(0.7) rotate(-24deg); }
+  .mode-knob .ico-sun circle { fill: currentColor; }
+  body.night { --paper: var(--night-paper); --ink: var(--night-ink); --muted: var(--night-muted); --line: var(--night-line); --accent: var(--night-accent); --label-halo: var(--night-halo); }
+  body.night .mode-knob { transform: translateX(20px); }
+  body.night .mode-knob .ico-sun { opacity: 0; transform: scale(0.7) rotate(32deg); }
+  body.night .mode-knob .ico-moon { opacity: 1; transform: scale(1) rotate(0); }
+  body, #panel, #card, #compass, #coords { transition: background var(--dur-long) var(--ease-out), color var(--dur-long) var(--ease-out), border-color var(--dur-long) var(--ease-out), box-shadow var(--dur-long) var(--ease-out); }
+  body.night #list li:hover, body.night #list li.active { background: var(--line); }
+  body.night #list li.active { color: var(--accent); }
+
+  #list { min-height: 0; flex: 1 1 auto; list-style: none; margin: 0; padding: 6px 0; overflow-y: auto; }
+  #list li { display: flex; min-height: 36px; align-items: center; gap: 8px; padding: 6px 16px; cursor: pointer; font-size: 13px; line-height: 1.3; }
+  #list li:hover, #list li.active { background: var(--line); }
+  #list li.active { color: var(--accent); }
+  #list .k { flex: none; width: 14px; font-size: 10px; color: var(--muted); text-align: center; }
+  #list .m { margin-left: auto; font-size: 11px; color: var(--muted); font-variant-numeric: tabular-nums; }
+  #panel footer { padding: 8px 16px 10px; border-top: 1px solid var(--line); font-size: 11px; color: var(--muted); line-height: 1.5; }
+
+  #card { position: fixed; right: 16px; bottom: 16px; width: 320px; padding: 14px 44px 14px 16px; background: var(--paper); backdrop-filter: blur(14px); border: 1px solid var(--line); border-radius: var(--radius-card); box-shadow: var(--shadow-panel); font-size: 13px; line-height: 1.55; }
+  #card[hidden] { display: none; }
+  #card h2 { margin: 0 0 2px; font-family: var(--font-display); font-size: 17px; font-style: normal; }
+  #card .meta { color: var(--muted); font-size: 11px; font-variant-numeric: tabular-nums; margin-bottom: 6px; }
+  #card button { position: absolute; top: 6px; right: 6px; width: var(--size-hit); height: var(--size-hit); border: 0; background: transparent; color: var(--muted); font-size: 18px; cursor: pointer; }
+
+  #compass { position: fixed; top: 16px; right: 16px; width: 56px; height: 56px; border-radius: 50%; background: var(--paper); backdrop-filter: blur(14px); border: 1px solid var(--line); box-shadow: var(--shadow-panel); display: grid; place-items: center; color: var(--ink); cursor: pointer; padding: 0; }
+  #compass svg { width: 40px; height: 40px; transition: transform 80ms linear; }
+  .compass-ring { fill: none; stroke: currentColor; opacity: 0.22; }
+  .compass-north { fill: var(--accent); }
+  .compass-south { fill: currentColor; opacity: 0.45; }
+  .compass-label { fill: var(--paper-solid); font-weight: 700; }
+  #coords { position: fixed; left: 16px; bottom: 16px; padding: 5px 10px; background: var(--paper); border: 1px solid var(--line); border-radius: 8px; font-size: 11px; color: var(--muted); font-variant-numeric: tabular-nums; pointer-events: none; }
+
+  #loading { position: fixed; inset: 0; z-index: 50; display: grid; place-items: center; padding: 24px; background: var(--paper-solid); transition: opacity var(--dur-short) var(--ease-out), visibility 0ms linear var(--dur-short); }
+  #loading[hidden] { opacity: 0; visibility: hidden; pointer-events: none; }
+  .loading-card { display: grid; gap: 8px; max-width: 24rem; text-align: center; }
+  .loading-card strong { font-family: var(--font-display); font-size: 28px; font-style: normal; }
+  .loading-card span { color: var(--muted); font-size: 14px; }
+
+  #map-fallback { position: fixed; inset: 0; z-index: 60; display: grid; place-items: center; padding: 24px; background: var(--paper-solid) url("./assets/map-fallback.webp") center / cover no-repeat; }
+  #map-fallback[hidden] { display: none; }
+  .fallback-card { display: grid; gap: 14px; width: min(100%, 32rem); padding: 24px; border: 1px solid var(--line); border-radius: var(--radius-card); color: var(--ink); background: var(--paper); box-shadow: var(--shadow-panel); backdrop-filter: blur(14px); }
+  .fallback-card h1 { margin: 0; font-family: var(--font-display); font-size: 30px; font-style: normal; }
+  .fallback-card p { margin: 0; color: var(--muted); line-height: 1.7; }
+  .fallback-card a { display: inline-flex; width: fit-content; min-height: var(--size-hit); align-items: center; color: var(--accent); font-weight: 600; text-decoration: none; }
+  .map-failed #panel, .map-failed #compass, .map-failed #coords, .map-failed #card { display: none; }
+  .noscript { position: fixed; inset: 0; z-index: 70; display: grid; place-items: center; margin: 0; padding: 24px; color: var(--ink); background: var(--paper-solid); text-align: center; }
+
+  @media (max-width: 720px) {
+    #panel { width: calc(100% - 92px); height: calc(100% - 24px); top: 12px; left: 12px; }
+    #panel header { padding-inline: 10px; }
+    #panel-toggle strong { font-size: 15px; }
+    #panel.collapsed { width: auto; max-width: calc(100% - 92px); }
+    #panel.collapsed #panel-toggle { padding-block: 0 8px; }
+    #panel.collapsed #panel-toggle small { display: none; }
+    #compass { top: 12px; right: 12px; }
+    #card { width: calc(100% - 24px); right: 12px; bottom: 12px; }
+    #coords { display: none; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { scroll-behavior: auto !important; animation: none !important; transition-duration: 0.01ms !important; transition-delay: 0ms !important; }
+  }
+</style>
+<script type="importmap">
+{ "imports": {
+  "three": "./vendor/three/three.module.js",
+  "three/addons/": "./vendor/three/addons/"
+} }
+</script>
+</head>
+<body>
+<div id="app"></div>
+<div id="labels"></div>
+
+<aside id="panel" aria-label="桂林景点控制面板">
+  <header>
+    <a class="back-home" href="/#yunyou">← 返回多美</a>
+    <button type="button" id="panel-toggle" aria-expanded="true" aria-controls="panel-body">
+      <strong>桂林两江四湖 · 3D 景点地图<small>OSM 坐标与足迹，地标按公开尺寸同比例建模</small></strong>
+      <span class="panel-chevron" aria-hidden="true">▾</span>
+    </button>
+  </header>
+  <div id="panel-body">
+    <div id="toggles">
+      <label><input type="checkbox" id="t-roads" checked> 道路</label>
+      <label><input type="checkbox" id="t-labels" checked> 景点名</label>
+      <label><input type="checkbox" id="t-city" checked> 建筑/树</label>
+      <label><input type="checkbox" id="t-grid"> 500m 网格</label>
+      <label class="mode-row" title="日夜切换">
+        <span>日</span>
+        <button type="button" id="t-night" class="mode-switch" aria-pressed="false" aria-label="切换夜景">
+          <span class="mode-knob" aria-hidden="true">
+            <svg class="ico-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+            <svg class="ico-moon" viewBox="0 0 24 24"><path d="M18 14.5A7.5 7.5 0 0 1 9.5 6 7 7 0 1 0 18 14.5Z" fill="currentColor"/></svg>
+          </span>
+        </button>
+        <span>夜</span>
+      </label>
+      <label><input type="checkbox" id="t-spin" checked> 自动旋转</label>
+    </div>
+    <ul id="list"></ul>
+    <footer>拖动旋转 · 滚轮/双指朝落点推进 · 右键/双指平移 · 点击景点看简介<br>数据 © OpenStreetMap 贡献者（ODbL）</footer>
+  </div>
+</aside>
+
+<button type="button" id="compass" aria-label="回到北向"><svg viewBox="0 0 40 40" aria-hidden="true"><circle class="compass-ring" cx="20" cy="20" r="18"/><path class="compass-north" d="M20 4 L25 20 L20 17 L15 20 Z"/><path class="compass-south" d="M20 36 L25 20 L20 23 L15 20 Z"/><text class="compass-label" x="20" y="13" font-size="7" text-anchor="middle">N</text></svg></button>
+<div id="coords" aria-hidden="true">—</div>
+<section id="card" hidden aria-live="polite"><button type="button" id="card-close" aria-label="关闭景点简介">×</button><h2></h2><div class="meta"></div><p></p></section>
+
+<div id="loading" role="status" aria-live="polite"><div class="loading-card"><strong>正在展开桂林</strong><span>湖面、山色与城中灯火正在就位。</span></div></div>
+<section id="map-fallback" hidden role="alert"><div class="fallback-card"><h1>此设备暂时无法打开 3D 地图</h1><p>浏览器未能启用 WebGL，或地图模块加载失败。你仍可返回多美，稍后换一个支持 WebGL 的浏览器再来。</p><a href="/#yunyou">← 返回多美</a></div></section>
+<noscript><p class="noscript">需要启用 JavaScript 才能打开桂林 3D 地图。<br><a href="/#yunyou">返回多美</a></p></noscript>
+
+<script type="module">
+  const loading = document.getElementById("loading");
+  const fallback = document.getElementById("map-fallback");
+  const showFallback = () => {
+    loading.hidden = true;
+    fallback.hidden = false;
+    document.body.classList.add("map-failed");
+  };
+
+  try {
+    const probe = document.createElement("canvas");
+    if (!probe.getContext("webgl2") && !probe.getContext("webgl")) throw new Error("WebGL unavailable");
+    await import("./src/main.js");
+  } catch (error) {
+    console.error("Yunyou failed to start", error);
+    showFallback();
+  }
+</script>
+</body>
+</html>

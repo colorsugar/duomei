@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import { createHash } from "node:crypto";
+import { existsSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
@@ -9,6 +10,15 @@ const headerSource = readFileSync(join(dirname(fileURLToPath(import.meta.url)), 
 const backToTopSource = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../components/BackToTopButton.tsx"), "utf8");
 const guyuPreviewSource = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../components/GuyuShelfPreview.tsx"), "utf8");
 const noteDetailSource = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../pages/DuomeiNoteDetailPage.tsx"), "utf8");
+const footerSource = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../components/DuomeiFooter.tsx"), "utf8");
+const yunyouSource = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../components/YunyouSection.tsx"), "utf8");
+const yunyouCss = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../components/YunyouSection.css"), "utf8");
+const yunyouIndex = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../../public/yunyou/index.html"), "utf8");
+const yunyouMain = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../../public/yunyou/src/main.js"), "utf8");
+const yunyouCover = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../../public/images/yunyou-guilin-cover.webp"));
+const prValidationWorkflow = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../../.github/workflows/pr-validation.yml"), "utf8");
+const cursorAutoMergeWorkflow = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../../.github/workflows/cursor-auto-merge.yml"), "utf8");
+const edgeOneDeployWorkflow = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../../.github/workflows/deploy-edgeone.yml"), "utf8");
 const guyuCarouselSource = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "./guyuCarousel.ts"), "utf8");
 const guyuCss = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../guyu.css"), "utf8");
 const homeIntroCss = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../components/HomeIntroSection.css"), "utf8");
@@ -77,11 +87,55 @@ test("keeps the note-detail back target visible outside the fixed header", () =>
   assert.doesNotMatch(siteCss, /\.duomei-detail:not\(\.detail-edit-page\)\s*\{[^}]*padding-top:\s*clamp\((?:32|36)px/);
 });
 
-test("keeps the mobile footer compact with all six shortcuts on one row", () => {
+test("keeps the mobile footer compact with all seven shortcuts on one row", () => {
   assert.match(siteCss, /\.duomei-quick-nav ul \{[\s\S]*flex-wrap:\s*nowrap/);
   assert.match(siteCss, /\.duomei-quick-nav li \{[\s\S]*flex:\s*1 1 0/);
+  assert.match(footerSource, /\{ label: "云游", to: "\/#yunyou" \}/);
   assert.match(backToTopSource, /document\.querySelector\("\.duomei-footer"\)/);
-  assert.match(backToTopSource, /visible && !footerVisible/);
+  assert.match(backToTopSource, /document\.querySelector\("\.yunyou-card"\)/);
+  assert.match(backToTopSource, /visible && !footerVisible && !yunyouVisible/);
+});
+
+test("ships Yunyou as a same-origin, vendored, accessible 3D map", () => {
+  assert.match(yunyouSource, /const YUNYOU_HREF = "\/yunyou\/"/);
+  assert.match(yunyouSource, /\/images\/yunyou-guilin-cover\.webp/);
+  assert.doesNotMatch(yunyouSource, /vercel\.app/);
+  assert.match(yunyouCss, /@media \(prefers-reduced-motion: reduce\)/);
+  assert.match(yunyouIndex, /"three": "\.\/vendor\/three\/three\.module\.js"/);
+  assert.doesNotMatch(yunyouIndex, /cdn\.jsdelivr\.net|unpkg\.com/);
+  assert.match(yunyouIndex, /id="map-fallback"/);
+  assert.match(yunyouIndex, /href="\/#yunyou"/);
+  assert.match(yunyouMain, /prefers-reduced-motion: reduce/);
+  assert.equal(
+    existsSync(join(dirname(fileURLToPath(import.meta.url)), "../../public/yunyou/vendor/three/LICENSE.txt")),
+    true,
+  );
+  assert.equal(
+    existsSync(join(dirname(fileURLToPath(import.meta.url)), "../../public/images/yunyou-guilin-cover.webp")),
+    true,
+  );
+  assert.equal(
+    createHash("sha256").update(yunyouCover).digest("hex"),
+    "019158f0433eaa0dfc3b0b53dd566b64bb7d2cce1a6d03ee699211013330d7e0",
+  );
+});
+
+test("keeps Cursor auto-publish behind same-repository validation", () => {
+  assert.match(prValidationWorkflow, /permissions:\s*\n\s+contents: read/);
+  assert.match(prValidationWorkflow, /npm run test:home-hold/);
+  assert.match(prValidationWorkflow, /npm run test:guyu/);
+  assert.match(prValidationWorkflow, /npm run build/);
+  assert.match(prValidationWorkflow, /verify-release\.ps1/);
+  assert.match(cursorAutoMergeWorkflow, /workflow_run:/);
+  assert.match(cursorAutoMergeWorkflow, /workflow_run\.conclusion == 'success'/);
+  assert.match(cursorAutoMergeWorkflow, /\.head\.repo\.full_name[\s\S]*\$GITHUB_REPOSITORY/);
+  assert.match(cursorAutoMergeWorkflow, /\.head\.ref[\s\S]*cursor\/\*/);
+  assert.match(cursorAutoMergeWorkflow, /\.head\.sha[\s\S]*\$VALIDATED_SHA/);
+  assert.match(cursorAutoMergeWorkflow, /protected_paths=/);
+  assert.match(cursorAutoMergeWorkflow, /--match-head-commit "\$VALIDATED_SHA"/);
+  assert.match(cursorAutoMergeWorkflow, /gh workflow run deploy-edgeone\.yml/);
+  assert.doesNotMatch(cursorAutoMergeWorkflow, /actions\/checkout/);
+  assert.match(edgeOneDeployWorkflow, /if: github\.ref == 'refs\/heads\/main'/);
 });
 
 test("keeps short mobile poetry pages clear of clipping and the fixed progress rail", () => {

@@ -22,6 +22,8 @@ The repository-level AI entry files are one documentation unit and must stay ali
 - `.github/copilot-instructions.md`
 - `.cursor/rules/duomei-project.mdc`
 - `.github/workflows/deploy.yml`
+- `.github/workflows/pr-validation.yml`
+- `.github/workflows/cursor-auto-merge.yml`
 - `docs/guyu-book-import.md`
 - `docs/release-source-of-truth.md`
 
@@ -36,6 +38,8 @@ The following files form one release unit. If any of them changes for poetry/快
 - `src/components/HomeIntroSection.css`
 - `src/components/HomeKineticStage.tsx`
 - `src/components/HomeSectionHold.tsx`
+- `src/components/YunyouSection.tsx`
+- `src/components/YunyouSection.css`
 - `src/components/NotesDreamTransition.tsx`
 - `src/components/SkillsDirectory.tsx`
 - `src/components/StickerPackSection.tsx`
@@ -54,6 +58,7 @@ The following files form one release unit. If any of them changes for poetry/快
 - `src/skills.css`
 - `src/styles.css`
 - `public/images/stickers/` supplied preview and QR assets
+- `public/yunyou/` same-origin 3D map runtime, data, textures, fallback and vendored Three.js license
 - `scripts/verify-release.ps1`
 
 Do not stage or deploy only the navigation, anchor, footer, or CSS portion while editor files remain modified or untracked.
@@ -115,13 +120,14 @@ EdgeOne production has a precise client-IP rate-limit rule for `/api/guyu-auth` 
 - Text and images retain selectable entrance effects.
 - Mobile poetry editing remains page-by-page; the public 微言 reader uses the manual horizontal overlapping deck instead of the former vertical sticky stack.
 - “微言” points to `/#weiyan` and opens the homepage's manual, non-looping overlapping poetry deck.
-- The homepage order remains 主视觉 / 小记 / 快活 / 故语 / 颜色 / 微言 / 技能 / 版权脚注.
+- The homepage order remains 主视觉 / 小记 / 快活 / 故语 / 云游 / 颜色 / 微言 / 技能 / 版权脚注.
 - 小记、故语、颜色、微言、技能与既有快活板块统一使用 `230svh / 100svh` sticky 停留节奏；底部进度到 100% 后才释放到下一板块，小记不平移轮播层，减少动态效果模式恢复普通文档流。
 - On short mobile viewports, the static notes stage uses its natural content height inside the unchanged `230svh` track so the complete card clears before the next section; never shrink or clip the card text or alter the tilt pipeline.
 - “故语” sits between “快活” and “颜色”; its preview holds each book for 1.6 seconds, then uses an event-driven 16-fragment scatter/tint/swap/reassembly transition lasting about 1.1 seconds. During settle, the incoming base cover is exposed beneath the still-visible fragments without an opacity transition; the fragments stay mounted until that base image decodes and survives two paint frames, preventing the old cover from flashing back. The whole cover, copy, and “翻开这一本” card opens the current book at `/guyu/{book.id}`; a separate 44px “查看所有” link opens `/guyu`. It supports swipe, Arrow/Home/End keys, pause, clickable progress dots, and first/last looping.
 - “颜色” preserves the supplied 多美 and 多美猪猪 WeChat preview/QR assets and their official short links.
-- Mobile keeps the fixed safe-area shortcut order 首页 / 小记 / 故语 / 颜色 / 微言 / 技能; desktop renders the same shortcuts inside the footer.
-- The mobile footer keeps those six shortcuts on one compact 44px-high row, reduces Guyu shelf-end whitespace, and hides the back-to-top button while the footer intersects the viewport so no link or copyright copy is covered.
+- “云游” sits between “故语” and “颜色”; its homepage card opens the same-origin `/yunyou/` static 3D map, never a Vercel Preview. The map keeps a visible return link, WebGL/module fallback, local Three.js runtime, mobile DPR cap, manual auto-rotate control, and reduced-motion behavior.
+- Mobile keeps the fixed safe-area shortcut order 首页 / 小记 / 故语 / 云游 / 颜色 / 微言 / 技能; desktop renders the same shortcuts inside the footer.
+- The mobile footer keeps those seven shortcuts on one compact 44px-high row, reduces Guyu shelf-end whitespace, and hides the back-to-top button while the footer intersects the viewport so no link or copyright copy is covered.
 - The frozen mobile header uses one synchronous native short-tap path on the portal DOM: buttons activate immediately, anchors call `window.location.assign()` before iOS user activation expires, and the compatibility click is suppressed once. Sticky hover/focus must never override `.is-menu-open` visibility or pointer events.
 - `/guyu/meiyou-yujian` keeps all 53 scans, expands detected two-page scans into aligned logical spreads, preserves the front and back covers, uses the pinned StPageFlip engine for full-screen phone/desktop page turns, and keeps keyboard plus compact overlay controls.
 - `/guyu/zhi-shang-feiyan`, `/guyu/xinshuo-01`, `/guyu/xinshuo-02`, and `/guyu/gui-xiang-huan-xiang` appear under the public `新说` shelf and reuse the same GuyuFlipbook. Each has exactly 30 complete `full` pages and never enters the old-book split/stack pipeline.
@@ -152,10 +158,11 @@ If any bundle file is still modified, staged, or untracked after the commit, the
 
 ## EdgeOne Production Automation
 
+- Same-repository, non-draft `cursor/*` pull requests with ordinary site changes are eligible for guarded auto-publish. `PR Validation / validate` is the required branch status; the default-branch `.github/workflows/cursor-auto-merge.yml` never checks out PR code with write credentials, revalidates the exact tested SHA and protected-path denylist, squash-merges eligible changes, then explicitly dispatches EdgeOne production. Failed/draft/stale PRs and changes to workflows, dependencies, deployment/server infrastructure, credentials, or canonical release policy remain open and receive no deployment secrets.
 - Pushes to `main` deploy the repository root to the existing direct-upload Makers project `duomei-guyu` (`makers-brifmhu31vjf`).
 - The workflow must keep `edgeone.json`, `cloud-functions/`, and the full source tree together; never replace the deploy command with a `dist`-only upload.
 - `EDGEONE_API_TOKEN` exists only as a GitHub Actions Secret. Runtime `GUYU_*` values remain in the EdgeOne console and must never be copied into GitHub.
 - The media Worker keeps its exact Linux x64 native companion packages as optional dependencies so `npm ci` works on GitHub's Ubuntu runner without changing Windows development.
 - Note image uploads use the authenticated media Worker at `/v1/upload`; production CORS includes only `duomei.site` plus retained reviewed origins, and SVG uploads remain rejected.
-- Production is accepted only when the generated `/.well-known/duomei-build.json` matches the pushed commit and the homepage/auth/private-page checks return `200/200/401`.
+- Production is accepted only when the generated `/.well-known/duomei-build.json` matches the pushed commit, the homepage/auth/private-page checks return `200/200/401`, and `/yunyou/index.html` plus `/yunyou/src/main.js` resolve as the real static map rather than the SPA fallback.
 - `.github/workflows/deploy.yml` is a manual-only legacy GitHub Pages fallback and must not run on pushes to `main`.
