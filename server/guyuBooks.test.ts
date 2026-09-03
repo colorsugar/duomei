@@ -112,11 +112,40 @@ test("maps watercolor xinshuo-02 with an independent cover and 30 full body page
   assert.match(book.previewAccent, /^var\(--color-guyu-cover-/u);
 });
 
+test("maps gui-xiang-huan-xiang as a public full-page Guilin album", () => {
+  const book = guyuBooks.find((candidate) => candidate.id === "gui-xiang-huan-xiang");
+  assert.ok(book);
+  assert.equal(book.title, "桂巷还香");
+  assert.equal(book.chapter, "新说");
+  assert.equal(book.kind, "册页");
+  assert.equal(book.access, "public");
+  assert.equal(book.pageCount, 30);
+  assert.equal(book.pages.length, 30);
+  assert.equal(book.pageDescriptions.length, 30);
+  assert.equal(book.logicalPages.length, 30);
+  assert.equal(book.coverSrc, "/images/guyu/gui-xiang-huan-xiang/pages/001.webp");
+  assert.equal(book.previewCoverSrc, "/images/guyu-gui-xiang-huan-xiang-cover.webp");
+  assert.match(book.previewAccent, /^var\(--color-guyu-cover-/u);
+  assert.doesNotMatch(book.pages.join("\n"), /api\/guyu-page|private-media|workers\.dev|r2\./u);
+  assert.ok(book.logicalPages.every((page) => page.placement === "full"));
+  assert.deepEqual(
+    book.pages,
+    Array.from({ length: 30 }, (_, index) =>
+      `/images/guyu/gui-xiang-huan-xiang/pages/${String(index + 1).padStart(3, "0")}.webp`),
+  );
+  assert.deepEqual(book.logicalPages.map((page) => page.src), book.pages);
+  assert.deepEqual(book.logicalPages.map((page) => page.sourcePage), book.pages.map((_, index) => index + 1));
+  assert.equal(book.logicalPages[0].description, "象鼻山远影与一角花桥，下半纸留白给书名");
+  assert.equal(book.logicalPages[27]?.description, "一碗桂林米粉热气，摊只露出桌沿");
+  assert.equal(book.logicalPages.at(-1)?.description, "一角青砖与一小簇桂花，大片纸空");
+});
+
 test("keeps every public new-book page present, ordered, and byte-stable", () => {
   const expectedHashes = {
     "zhi-shang-feiyan": "3500dbe09effcf7f8cc6d14616caad110a8c8c3d59d1520be8962149bece2c20",
     "xinshuo-01": "39621cb2ce866b65f64fd2d305e73d5e4035c264cf302a8993909576542cfba8",
     "xinshuo-02": "98f439c37b83abbb52da41334d531c7df9fc30f07a9805535d3bb96be8c6fab2",
+    "gui-xiang-huan-xiang": "7f69bdcf24ee701365908cdc412f3cec137951639ccc1087e5339a99f74c40ad",
   } as const;
   const expectedNames = Array.from({ length: 30 }, (_, index) => `${String(index + 1).padStart(3, "0")}.webp`);
 

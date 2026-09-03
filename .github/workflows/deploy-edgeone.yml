@@ -128,7 +128,7 @@ jobs:
           for (let attempt = 1; attempt <= 18; attempt += 1) {
             try {
               const nonce = `${Date.now()}-${attempt}`;
-              const [marker, home, auth, protectedOldPage, publicFeiyanPage, publicXinshuoOnePage, publicXinshuoTwoPage] = await Promise.all([
+              const [marker, home, auth, protectedOldPage, publicFeiyanPage, publicXinshuoOnePage, publicXinshuoTwoPage, publicGuiXiangPage] = await Promise.all([
                 fetch(`https://duomei.site/.well-known/duomei-build.json?ci=${nonce}`, { cache: "no-store" }),
                 fetch(`https://duomei.site/?ci=${nonce}`, { cache: "no-store" }),
                 fetch(`https://duomei.site/api/guyu-auth?ci=${nonce}`, { cache: "no-store" }),
@@ -136,6 +136,7 @@ jobs:
                 fetch(`https://duomei.site/images/guyu/zhi-shang-feiyan/pages/001.webp?ci=${nonce}`, { cache: "no-store" }),
                 fetch(`https://duomei.site/images/guyu/xinshuo-01/pages/001.webp?ci=${nonce}`, { cache: "no-store" }),
                 fetch(`https://duomei.site/images/guyu/xinshuo-02/pages/001.webp?ci=${nonce}`, { cache: "no-store" }),
+                fetch(`https://duomei.site/images/guyu/gui-xiang-huan-xiang/pages/001.webp?ci=${nonce}`, { cache: "no-store" }),
               ]);
               const markerBody = marker.ok ? await marker.json() : null;
               const authBody = auth.ok ? await auth.json() : null;
@@ -149,13 +150,14 @@ jobs:
                 protectedOldPage.status === 401 &&
                 publicFeiyanPage.status === 200 &&
                 publicXinshuoOnePage.status === 200 &&
-                publicXinshuoTwoPage.status === 200
+                publicXinshuoTwoPage.status === 200 &&
+                publicGuiXiangPage.status === 200
               ) {
                 console.log(`Production verified on attempt ${attempt}.`);
                 process.exit(0);
               }
 
-              lastError = `marker=${marker.status}/${markerBody?.commit ?? "missing"} home=${home.status} auth=${auth.status}/${authBody?.authorized} protected-old=${protectedOldPage.status} public-feiyan=${publicFeiyanPage.status} public-xinshuo-01=${publicXinshuoOnePage.status} public-xinshuo-02=${publicXinshuoTwoPage.status}`;
+              lastError = `marker=${marker.status}/${markerBody?.commit ?? "missing"} home=${home.status} auth=${auth.status}/${authBody?.authorized} protected-old=${protectedOldPage.status} public-feiyan=${publicFeiyanPage.status} public-xinshuo-01=${publicXinshuoOnePage.status} public-xinshuo-02=${publicXinshuoTwoPage.status} public-gui-xiang=${publicGuiXiangPage.status}`;
             } catch (error) {
               lastError = error instanceof Error ? error.message : String(error);
             }

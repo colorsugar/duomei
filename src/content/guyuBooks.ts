@@ -305,6 +305,47 @@ const xinshuoTwoLogicalPages: GuyuLogicalPage[] = [
   },
 ];
 
+const guiXiangHuanXiangPages = publicBookPages("gui-xiang-huan-xiang", 30);
+
+const guiXiangHuanXiangPageDescriptions = [
+  "象鼻山远影与一角花桥，下半纸留白给书名",
+  "东西巷石板与青砖二层，晨光",
+  "靖江王城朱红墙与黛瓦城垛",
+  "王城内独秀峰独立，淡墨远树",
+  "正阳门朱红门扇与石狮剪影",
+  "承运殿黄琉璃脊与朱红廊柱",
+  "花桥石拱、古榕气根、榕湖水",
+  "榕湖静水，远一座淡峰",
+  "古南门城楼贴着湖水",
+  "巨型古榕气根垂到岸石",
+  "杉湖黄昏，灯影刚起",
+  "日月双塔立在湖上，倒影拉长",
+  "逍遥楼飞檐层叠，远山淡青",
+  "象鼻山伸入漓江，水月洞透空",
+  "从水月洞内看江光和一角天",
+  "伏波山临江石壁与听涛阁一角",
+  "还珠洞内钟乳与一束外光",
+  "叠彩山层叠石纹与风洞口",
+  "木龙塔傍江，石岸如龙",
+  "木龙古渡石阶入水，一艘空竹筏",
+  "桂湖夜色，堤灯一串",
+  "漓江竹筏，篙在画面外，远峰淡",
+  "江上几点渔火，山只剩剪影",
+  "芦笛岩洞内石幔，矿物色",
+  "七星岩洞口外光与钟乳",
+  "訾洲绿洲横在江心，远象鼻",
+  "南溪山双峰如戟，溪在脚下",
+  "一碗桂林米粉热气，摊只露出桌沿",
+  "漓江夜，山影与一条亮水",
+  "一角青砖与一小簇桂花，大片纸空",
+] as const;
+
+const guiXiangHuanXiangLogicalPages = fullLogicalPages(
+  "gui-xiang-huan-xiang",
+  guiXiangHuanXiangPages,
+  guiXiangHuanXiangPageDescriptions,
+);
+
 export const guyuBooks: readonly GuyuBook[] = [
   {
     id: "meiyou-yujian",
@@ -370,6 +411,22 @@ export const guyuBooks: readonly GuyuBook[] = [
     pages: xinshuoTwoPages,
     pageDescriptions: xinshuoTwoPageDescriptions,
     logicalPages: xinshuoTwoLogicalPages,
+  },
+  {
+    id: "gui-xiang-huan-xiang",
+    title: "桂巷还香",
+    kind: "册页",
+    chapter: "新说",
+    access: "public",
+    description: "桂林册页集。浅绛、岩彩、水印木刻、针管水彩、粉彩、油画棒混搭。每页一个地标，有题跋落款。人只以背影出现。",
+    accessibilityNote: "本册为桂林地标册页；每页有地标落款，人只以背影出现，每一页都有画面说明。",
+    pageCount: 30,
+    coverSrc: guiXiangHuanXiangPages[0],
+    previewCoverSrc: "/images/guyu-gui-xiang-huan-xiang-cover.webp",
+    previewAccent: "var(--color-guyu-cover-guilin)",
+    pages: guiXiangHuanXiangPages,
+    pageDescriptions: guiXiangHuanXiangPageDescriptions,
+    logicalPages: guiXiangHuanXiangLogicalPages,
   },
 ];
 
