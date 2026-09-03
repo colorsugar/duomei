@@ -439,7 +439,7 @@ export function GuyuShelfPreview() {
       <header className="guyu-home-shelf-heading">
         <h2 id="guyu-home-shelf-title">故语</h2>
         <p>把旧日收好，等后来的人翻阅。</p>
-        <Link className="guyu-home-shelf-all" to="/guyu">查看所有</Link>
+        <Link className="guyu-home-shelf-all" to="/guyu">翻遍藏书</Link>
       </header>
 
       <div

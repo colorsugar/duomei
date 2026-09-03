@@ -86,6 +86,76 @@ html.lenis {
   animation: none;
 }
 
+/* Ambient loops that animate paint properties (box-shadow, background-position,
+   filter) repaint their whole box every frame: the hero section drifted its
+   background by 1% over 68s, the footer / detail page are full-width boxes.
+   Transform/opacity loops stay; only the paint-bound ones go. */
+.duomei-motion-ambient-background,
+.duomei-motion-ambient-shadow,
+.duomei-footer,
+.duomei-page,
+.note-detail-page,
+.admin-shell,
+.footer-dream-section,
+.dream-card,
+.studio-hero-panel,
+.studio-health-card,
+.studio-storage-card,
+.studio-publish-panel,
+.admin-utilities,
+.detail-note-nav-card,
+.detail-note-nav-home {
+  animation: none;
+}
+
+/* Same breath as duomeiHomepageNameBreath minus the per-frame drop-shadow filter. */
+@keyframes duomeiHomepageNameBreathLite {
+  0%,
+  100% {
+    opacity: 0.96;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+
+  50% {
+    opacity: 1;
+    transform: translate3d(0, -5px, 0) scale(1.006);
+  }
+}
+
+.illustration-layer .bounce-name.duomei-hero-title-motion {
+  filter: drop-shadow(0 14px 19px rgba(31, 31, 27, 0.13));
+  will-change: transform, opacity;
+  animation: duomeiHomepageNameBreathLite 7.2s cubic-bezier(0.45, 0, 0.55, 1) infinite !important;
+}
+
+/* The paper curve breathed a 0.04-alpha drop-shadow on a full-width SVG every
+   frame; the opacity half of that breath is the only visible part. */
+@keyframes duomeiHeroCurveBreathLite {
+  0% {
+    opacity: 0.92;
+  }
+
+  100% {
+    opacity: 1;
+  }
+}
+
+.paper-curve {
+  animation: duomeiHeroCurveBreathLite var(--motion-ambient-shadow-duration, 14000ms) var(--motion-ease-ambient, ease-in-out) infinite alternate;
+}
+
+/* On touch devices the 8px blur-in on every revealed block is the single most
+   expensive transition in the page; the rise + fade carries the reveal alone. */
+@media (pointer: coarse) {
+  .duomei-motion-reveal-section:not(.is-revealed) > .duomei-motion-reveal-item,
+  .duomei-motion-reveal-section:not(.is-revealed) > * > .duomei-motion-reveal-item,
+  .duomei-motion-reveal-section.is-revealed > .duomei-motion-reveal-item,
+  .duomei-motion-reveal-section.is-revealed > * > .duomei-motion-reveal-item {
+    filter: none;
+    clip-path: none;
+  }
+}
+
 /* will-change only while something can actually move. */
 .duomei-motion-card,
 .duomei-motion-button,
