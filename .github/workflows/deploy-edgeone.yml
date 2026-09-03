@@ -3,7 +3,7 @@ name: Deploy DUOMEI to EdgeOne
 on:
   push:
     branches:
-      - candidate/guyu-edgeone-global-20260901
+      - main
   workflow_dispatch:
 
 permissions:

@@ -1,5 +1,7 @@
 # “没有遇见 何来艳遇”EdgeOne 隔离包（历史候选）
 
+> **重要：本 README 只作历史证据，禁止照里面 login/token/deploy 步骤执行。** 公开新说画册的现行导入规则见 [`docs/guyu-book-import.md`](../../docs/guyu-book-import.md)；正式发布由仓库现有 GitHub Actions 在推送后使用已有 Secret 完成。
+
 > 状态更新（2026-09-02）：本目录不再是正式部署根目录。当前完整站从仓库根目录部署到 EdgeOne Makers `duomei-guyu`（`makers-brifmhu31vjf`），正式域名为 `duomei.site`。根 `cloud-functions/api/[[default]].js` 仍复用本目录的 `server/guyu-core.cjs`，因此这里保留为隔离验证包。下方“尚未授权/新建候选/DNS 待执行”等内容是历史记录，不得作为当前操作步骤。开始维护前先读 `../../PROJECT_CONTEXT.md`。
 
 本目录是与现有正式站完全隔离的 EdgeOne Makers 可部署制品。长期入口固定为 `duomei.site`，加速区域必须选择**全球可用区（不含中国大陆）**，因此按 EdgeOne 当前官方规则不要求 ICP 备案。

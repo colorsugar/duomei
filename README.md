@@ -7,6 +7,7 @@ DUOMEI 多美小记是保存旅途记录、生活片段、照片、诗页和旧�
 1. [`AGENTS.md`](AGENTS.md)
 2. [`PROJECT_CONTEXT.md`](PROJECT_CONTEXT.md)
 3. [`docs/release-source-of-truth.md`](docs/release-source-of-truth.md)
+4. 新增故语画册时再读 [`docs/guyu-book-import.md`](docs/guyu-book-import.md)
 
 `PROJECT_CONTEXT.md` 记录当前架构、正式环境、路由、数据流、用户维护偏好、发布验收和已知审计问题。任何 AI 开工前都必须先核对它与 Git/线上构建标记。
 
@@ -33,12 +34,14 @@ Windows PowerShell 中优先使用对应的 `npm.cmd` 命令。构建产物输�
 
 - 正式域名：`https://duomei.site`
 - 正式平台：EdgeOne Makers
-- 正式分支：`candidate/guyu-edgeone-global-20260901`
+- 正式分支：`main`
 - 自动流程：`.github/workflows/deploy-edgeone.yml`
 
 推送正式分支后，流水线会测试、构建、执行发布门禁、部署到固定 EdgeOne 项目，并核对线上提交标记与受保护接口。完整流程见 [`PROJECT_CONTEXT.md`](PROJECT_CONTEXT.md)。
 
-Vercel、GitHub Pages 和 `main` 仅为保留的兼容/备用路径，不是当前正式发布目标。
+Vercel、GitHub Pages 和旧 candidate 分支仅为保留的兼容/迁移路径，不是当前正式发布目标。
+
+公开 `新说` 画册直接作为 Git 静态资源保存：封面使用 `public/images/guyu-<book-id>-cover.webp`，书页使用 `public/images/guyu/<book-id>/pages/`。它们随 `main` 的 EdgeOne workflow 发布，不需要 Cloudflare、腾讯云、R2 或 EdgeOne Token。只有现有 `meiyou-yujian` 是 EdgeOne Blob 私有册；新增私有册必须先取得明确授权。
 
 ## 凭据与私有内容
 

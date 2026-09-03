@@ -21,6 +21,8 @@ The repository-level AI entry files are one documentation unit and must stay ali
 - `GEMINI.md`
 - `.github/copilot-instructions.md`
 - `.cursor/rules/duomei-project.mdc`
+- `.github/workflows/deploy.yml`
+- `docs/guyu-book-import.md`
 - `docs/release-source-of-truth.md`
 
 Agent-specific files are pointers only. `PROJECT_CONTEXT.md` contains the shared facts; do not duplicate changing architecture or deployment state into every pointer.
@@ -85,6 +87,12 @@ The “故语” library and reader are one release unit. Review, commit, and de
 - `cloudflare/duomei-media/` source, configuration, lockfile, and tests
 - the shared route and navigation files `src/App.tsx` and `src/components/DuomeiHeader.tsx`
 
+### Guyu asset and storage contract
+
+- Public `新说` books are Git-tracked static assets: preview covers use `public/images/guyu-<book-id>-cover.webp`, and pages use `public/images/guyu/<book-id>/pages/`. The root EdgeOne workflow publishes them from `main`; importing them never requires Cloudflare, Tencent, R2, EdgeOne, or other account credentials.
+- `meiyou-yujian` is the only private/class-gated book and uses EdgeOne Pages Blob `guyu-private`. Adding another private book requires explicit user authorization and a security review.
+- Cloudflare R2 serves note media and the retained fallback only. Never upload a public Guyu book there or ask the user for a Token to do so. Follow `docs/guyu-book-import.md`.
+
 Current EdgeOne production keeps only the 53-page `meiyou-yujian` class book behind the original server-verified question and private `guyu-private` Pages Blob path. `/guyu` is a public shelf. `纸上飞檐`, `xinshuo-01`, and the watercolor `xinshuo-02` are approved public `新说` books with 30 ordered static WebP pages each. The retained Vercel fallback still contains only the 53-page old-book copy in private `duomei-private` R2. Never commit the answer or signing secrets.
 
 `纸上飞檐` is pinned to audited source commit `249736f5dd4914f1797a6eb5b4e8d9226edb6be9`; production never fetches its source Vercel preview. `xinshuo-01` is the approved first cloud-task output and must not be regenerated during website maintenance. The abstract-geometric and adult photorealistic second outputs were both rejected on 2026-09-03 and must not enter the public bundle. The approved replacement is `xinshuo-02` / `月亮下的童梦`, imported from package SHA-256 `e5489da43ef4dc5c00d9c42290503a1041c3cedce0dc8720123ed17b8817dde7`; its 30 actual 1100×1684 WebP files, five six-page chapters, `full` placements, manifest, cover, and contact sheet were checked before integration. The root book test verifies every approved public page sequence, WebP signature, and aggregate hash.
@@ -144,9 +152,10 @@ If any bundle file is still modified, staged, or untracked after the commit, the
 
 ## EdgeOne Production Automation
 
-- Pushes to `candidate/guyu-edgeone-global-20260901` deploy the repository root to the existing direct-upload Makers project `duomei-guyu` (`makers-brifmhu31vjf`).
+- Pushes to `main` deploy the repository root to the existing direct-upload Makers project `duomei-guyu` (`makers-brifmhu31vjf`).
 - The workflow must keep `edgeone.json`, `cloud-functions/`, and the full source tree together; never replace the deploy command with a `dist`-only upload.
 - `EDGEONE_API_TOKEN` exists only as a GitHub Actions Secret. Runtime `GUYU_*` values remain in the EdgeOne console and must never be copied into GitHub.
 - The media Worker keeps its exact Linux x64 native companion packages as optional dependencies so `npm ci` works on GitHub's Ubuntu runner without changing Windows development.
 - Note image uploads use the authenticated media Worker at `/v1/upload`; production CORS includes only `duomei.site` plus retained reviewed origins, and SVG uploads remain rejected.
 - Production is accepted only when the generated `/.well-known/duomei-build.json` matches the pushed commit and the homepage/auth/private-page checks return `200/200/401`.
+- `.github/workflows/deploy.yml` is a manual-only legacy GitHub Pages fallback and must not run on pushes to `main`.

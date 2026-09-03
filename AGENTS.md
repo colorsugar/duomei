@@ -7,7 +7,7 @@ Before editing, committing, or deploying anything, read:
 - `PROJECT_CONTEXT.md`
 - `docs/release-source-of-truth.md`
 
-Then read any task-specific document referenced there, including `docs/note-card-tilt.md` before note-card interaction work.
+Then read any task-specific document referenced there, including `docs/note-card-tilt.md` before note-card interaction work and `docs/guyu-book-import.md` before changing `src/content/guyuBooks.ts` or importing a Guyu book.
 
 `PROJECT_CONTEXT.md` is the cross-AI source for current production architecture, routes, platform boundaries, user preferences, verification requirements, and known audit findings. Do not follow a historical candidate document when it conflicts with that file.
 
@@ -24,7 +24,9 @@ Before every production deployment, run:
 
 If `release:check` fails, stop. Do not deploy around it or silently exclude files.
 
-The current production target is the repository root on EdgeOne Makers project `duomei-guyu` (`makers-brifmhu31vjf`), deployed from `candidate/guyu-edgeone-global-20260901`. Do not substitute Vercel, GitHub Pages, `main`, or `deploy/guyu-edgeone/` without explicit user direction.
+The current production checkout on this Windows host is `C:\Users\刘诚颢\Documents\color`, branch `main`. The repository root deploys to EdgeOne Makers project `duomei-guyu` (`makers-brifmhu31vjf`). Do not substitute the retired candidate branch, Vercel, GitHub Pages, or `deploy/guyu-edgeone/` without explicit user direction.
+
+Public `新说` books are Git-tracked static assets: preview covers use `public/images/guyu-<book-id>-cover.webp`, and pages use `public/images/guyu/<book-id>/pages/`. They deploy through the existing `main` GitHub Actions workflow. Importing or publishing a public book requires no Cloudflare, Tencent, R2, EdgeOne, or other account secret; never ask the user for one. `meiyou-yujian` remains the only class-gated private book and uses EdgeOne Pages Blob. Any additional private/class-gated book is a security and product change that requires explicit user authorization before implementation.
 
 Never change or expose production access answers, hashes, salts, tokens, Cookies, or private Guyu originals unless the user explicitly authorizes that exact action. A successful build or API response is not a webpage or real-device acceptance test; inspect the actual production page and reproduce the reported interaction.
 

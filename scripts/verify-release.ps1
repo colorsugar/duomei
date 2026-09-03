@@ -9,6 +9,7 @@ Set-Location $root
 $maintenanceBundle = @(
   ".cursor/rules/duomei-project.mdc",
   ".github/copilot-instructions.md",
+  ".github/workflows/deploy.yml",
   "AGENTS.md",
   "CLAUDE.md",
   "deploy/guyu-edgeone/README.md",
@@ -18,7 +19,8 @@ $maintenanceBundle = @(
   "deploy/guyu-edgeone/docs/supabase-boundary.md",
   "GEMINI.md",
   "PROJECT_CONTEXT.md",
-  "README.md"
+  "README.md",
+  "docs/guyu-book-import.md"
 )
 
 $poetryBundle = @(
@@ -115,9 +117,12 @@ $bundle = @($maintenanceBundle + $poetryBundle + $guyuBundle | Sort-Object -Uniq
 $requiredMarkers = @(
   @{ File = "AGENTS.md"; Marker = "PROJECT_CONTEXT.md" },
   @{ File = "PROJECT_CONTEXT.md"; Marker = "makers-brifmhu31vjf" },
-  @{ File = "PROJECT_CONTEXT.md"; Marker = "candidate/guyu-edgeone-global-20260901" },
+  @{ File = "PROJECT_CONTEXT.md"; Marker = 'Production branch: `main`' },
   @{ File = "PROJECT_CONTEXT.md"; Marker = "Never read, print, commit, rotate, or replace" },
+  @{ File = "PROJECT_CONTEXT.md"; Marker = "No Cloudflare, Tencent, R2, EdgeOne, or other secret is required" },
   @{ File = "README.md"; Marker = "EdgeOne Makers" },
+  @{ File = "docs/guyu-book-import.md"; Marker = "Never request or use account credentials" },
+  @{ File = ".github/workflows/deploy-edgeone.yml"; Marker = "      - main" },
   @{ File = ".github/workflows/deploy-edgeone.yml"; Marker = "EDGEONE_PROJECT_ID: makers-brifmhu31vjf" },
   @{ File = ".github/workflows/deploy-edgeone.yml"; Marker = 'EDGEONE_API_TOKEN: ${{ secrets.EDGEONE_API_TOKEN }}' },
   @{ File = ".github/workflows/deploy-edgeone.yml"; Marker = "public/.well-known/duomei-build.json" },
@@ -215,6 +220,11 @@ $requiredMarkers = @(
 )
 
 $errors = [System.Collections.Generic.List[string]]::new()
+
+$legacyPagesWorkflow = Get-Content -Raw -LiteralPath ".github/workflows/deploy.yml"
+if ($legacyPagesWorkflow -match '(?m)^\s*push:\s*$') {
+  $errors.Add("Legacy GitHub Pages workflow must remain manual-only and may not run on pushes.")
+}
 
 $publicCoverHashes = @{
   "public/images/guyu-zhi-shang-feiyan-cover.webp" = "69644B7DFFDBF78FE5D2D624678B0005AF65FA6E9029340176615FAFCE332D6B"

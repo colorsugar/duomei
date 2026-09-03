@@ -6,11 +6,11 @@ This is the canonical cross-AI maintenance entry for DUOMEI. Read it before chan
 
 ## Start Every Task Here
 
-1. On this Windows host, confirm the checkout is `C:\Users\刘诚颢\Documents\color-edgeone-guyu`; on another host, confirm the DUOMEI repository root. The intended production branch is `candidate/guyu-edgeone-global-20260901`.
+1. On this Windows host, confirm the checkout is `C:\Users\刘诚颢\Documents\color`; on another host, confirm the DUOMEI repository root. The production branch is `main`.
 2. Read `AGENTS.md`, this file, and `docs/release-source-of-truth.md` completely.
-3. Run `git status --short`, `git diff --stat`, and `git rev-list --left-right --count HEAD...origin/candidate/guyu-edgeone-global-20260901`.
+3. Run `git status --short`, `git diff --stat`, and `git rev-list --left-right --count HEAD...origin/main`.
 4. Preserve all existing dirty work. Never reset, discard, or partially publish another task's changes.
-5. Identify whether the request targets the production root, the retained Vercel/Cloudflare fallback, or the isolated package under `deploy/guyu-edgeone/`.
+5. Use the production root by default. Touch the retained Vercel/Cloudflare fallback or isolated package under `deploy/guyu-edgeone/` only when the user explicitly names that target.
 6. Never read, print, commit, rotate, or replace a production password, token, hash, salt, Cookie, private page, or signing secret unless the user explicitly authorizes that exact action.
 
 ## Current Production Source of Truth
@@ -20,11 +20,11 @@ This is the canonical cross-AI maintenance entry for DUOMEI. Read it before chan
 - Existing project name: `duomei-guyu`.
 - EdgeOne project ID: `makers-brifmhu31vjf`.
 - Production source: the repository root, including `edgeone.json`, `src/`, and `cloud-functions/`.
-- Production branch: `candidate/guyu-edgeone-global-20260901`.
+- Production branch: `main`.
 - Production workflow: `.github/workflows/deploy-edgeone.yml`.
 - Live build identity: `https://duomei.site/.well-known/duomei-build.json` must report the commit that was pushed.
 
-`main`, `.github/workflows/deploy.yml`, GitHub Pages, `vercel.json`, and root `api/` are retained compatibility or fallback paths. They are not evidence of the current EdgeOne production release. Do not deploy to them unless the user explicitly changes the target.
+The former `candidate/guyu-edgeone-global-20260901` branch and `C:\Users\刘诚颢\Documents\color-edgeone-guyu` worktree are retained migration fallbacks, not production entry points. The pre-promotion `main` tip is preserved at `archive/main-before-edgeone-promotion-20260903`. `.github/workflows/deploy.yml`, GitHub Pages, `vercel.json`, and root `api/` are compatibility paths and are not evidence of the current EdgeOne production release.
 
 `deploy/guyu-edgeone/` is an isolated historical candidate package and testable reference implementation. It is not the current full-site build root. Production still reuses its server core through `cloud-functions/api/[[default]].js`, so edits to the Guyu protocol must keep the root UI, Cloud Function adapter, isolated core, mirrored gate, and tests consistent.
 
@@ -58,6 +58,13 @@ Browser at duomei.site
 ```
 
 Only the 53-page class book uses the protected EdgeOne Blob path and the original server-verified class question. The `/guyu` shelf and every `新说` book are public static content. The retained Vercel path instead signs a short-lived URL for the Cloudflare Worker. Do not combine these storage paths or assume one platform's secrets exist on another.
+
+### Guyu book import routing
+
+- Before changing `src/content/guyuBooks.ts` or importing a book, read `docs/guyu-book-import.md`.
+- A public `新说` book stores its preview cover at `public/images/guyu-<book-id>-cover.webp` and ordered pages under `public/images/guyu/<book-id>/pages/`; `main` and the existing EdgeOne workflow publish them. No Cloudflare, Tencent, R2, EdgeOne, or other secret is required, and no AI may ask the user for one.
+- `meiyou-yujian` remains the only private/class-gated book and uses EdgeOne Pages Blob. Adding another private book expands the security boundary and requires explicit user authorization.
+- Cloudflare R2 is for note media and the retained fallback only. Never route a public Guyu import through it.
 
 ## Current Data Ownership — 2026-09-03
 
@@ -173,7 +180,7 @@ Do not treat a build, unit test, source marker, API status, or desktop click as 
 6. Stage the complete intended bundle and review the staged diff.
 7. Commit it.
 8. Run `npm.cmd run release:check` against the committed, clean bundle. Do not bypass a failure.
-9. Push `candidate/guyu-edgeone-global-20260901`. This triggers the EdgeOne production workflow.
+9. Push `main`. This triggers the EdgeOne production workflow.
 10. Wait for every workflow step to finish. Record the real Actions run and EdgeOne deployment IDs.
 11. Verify the live build marker equals the pushed commit.
 12. Verify production homepage `200`, anonymous auth `200` with `authorized:false`, and an unauthenticated private page `401`.
