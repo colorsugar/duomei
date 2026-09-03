@@ -1,4 +1,5 @@
 import { BrowserRouter, Navigate, Route, Routes, useLocation } from "react-router-dom";
+import { useReducedMotion } from "framer-motion";
 import { DuomeiAdmin } from "./pages/DuomeiAdmin";
 import { DuomeiHomePage } from "./pages/DuomeiHomePage";
 import { DuomeiNoteDetailPage } from "./pages/DuomeiNoteDetailPage";
@@ -21,7 +22,8 @@ function AppRoutes() {
   const isAdmin = location.pathname.startsWith("/admin");
   const isTimePage = location.pathname === "/time";
   const isGuyuReader = location.pathname.startsWith("/guyu/");
-  useSmoothScroll(isAdmin || isTimePage || isGuyuReader);
+  const reduceMotion = useReducedMotion() ?? false;
+  useSmoothScroll(isAdmin || isTimePage || isGuyuReader || reduceMotion);
 
   return (
     <DuomeiEditProvider>

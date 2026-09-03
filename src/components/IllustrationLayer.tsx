@@ -62,6 +62,8 @@ export function IllustrationLayer() {
   }, []);
 
   useEffect(() => {
+    // Reduced motion: the hero stays put; the CSS side already freezes its keyframes.
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     let readFrame = 0;
     let targetProgress = 0;
     let displayedProgress = -1;

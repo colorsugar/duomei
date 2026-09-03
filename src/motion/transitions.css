@@ -70,3 +70,40 @@ html {
   transition: none !important;
   animation: none !important;
 }
+
+/* Settling fights found in the motion audit. Later sheet, same or higher
+   specificity, so these win without touching styles.css. */
+
+/* Note cards: the living idle keyframe animated transform on the same element
+   the pointer tilt owns (docs/note-card-tilt.md). Tilt keeps transform alone. */
+.duomei-note-card {
+  animation: none !important;
+}
+
+/* Header: animating backdrop-filter repaints the whole blurred strip every frame. */
+.duomei-header {
+  transition:
+    transform 480ms var(--motion-ease-standard, cubic-bezier(0.16, 1, 0.3, 1)),
+    background-color 360ms var(--motion-ease-standard, cubic-bezier(0.16, 1, 0.3, 1)),
+    box-shadow 360ms var(--motion-ease-standard, cubic-bezier(0.16, 1, 0.3, 1)) !important;
+}
+
+/* will-change only while something can actually move. */
+.duomei-motion-card,
+.duomei-motion-button,
+.duomei-note-card {
+  will-change: auto;
+}
+
+.duomei-motion-card:hover,
+.duomei-motion-button:hover,
+.duomei-note-card.is-tilting,
+.duomei-note-card.is-resetting-tilt {
+  will-change: transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .illustration-layer .duomei-hero-cover-motion {
+    animation: none !important;
+  }
+}
