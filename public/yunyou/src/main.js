@@ -51,7 +51,7 @@ controls.maxPolarAngle = Math.PI * 0.49;
 controls.minDistance = 25;
 controls.maxDistance = 9000;
 controls.enableZoom = false; // 自管缩放：朝光标下的地面/地标推进（见后文 zoomToward）
-controls.zoomSpeed = 1.6;
+controls.zoomSpeed = 1.0;
 controls.autoRotateSpeed = 0.35; // Google Earth 式慢转
 controls.target.set(-80, 8, 1100); // 对准杉湖双塔方向
 // 自动转圈：默认开；拖动时停，松手 6 s 后续转；飞行动画期间不转。每帧回写，避免夜景切换/其它逻辑把 autoRotate 掐死后不转。
@@ -640,7 +640,9 @@ document.getElementById('compass').addEventListener('click', () => {
     const focus = focusUnder(clientX, clientY);
     if (!focus) return;
     focus.y = Math.min(Math.max(focus.y, 0), 80);
-    const steps = Math.min(8, Math.max(1, Math.round(Math.abs(deltaY) / 40)));
+    // 一格滚轮 ≈ 100px 算 1 步；不取整、不抬到整步，触控板的小 delta 才不会被放大
+    const steps = Math.min(4, Math.abs(deltaY) / 100);
+    if (steps < 0.01) return;
     const k = 1 - Math.pow(0.82, steps * controls.zoomSpeed);
     const cam = camera.position, tgt = controls.target;
     if (deltaY < 0) { cam.lerp(focus, k * 0.42); tgt.lerp(focus, k * 0.55); }
@@ -651,7 +653,11 @@ document.getElementById('compass').addEventListener('click', () => {
     if (cam.y < 8) cam.y = 8;
     controls.autoRotate = false; spinResume(); controls.update(); invalidate();
   };
-  renderer.domElement.addEventListener('wheel', (e) => { e.preventDefault(); zoomToward(e.clientX, e.clientY, e.deltaY); }, { passive: false });
+  renderer.domElement.addEventListener('wheel', (e) => {
+    e.preventDefault();
+    const px = e.deltaMode === 1 ? e.deltaY * 16 : e.deltaMode === 2 ? e.deltaY * 100 : e.deltaY;
+    zoomToward(e.clientX, e.clientY, px);
+  }, { passive: false });
   let pinch0 = 0;
   renderer.domElement.addEventListener('touchstart', (e) => {
     if (e.touches.length === 2) pinch0 = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
@@ -660,7 +666,7 @@ document.getElementById('compass').addEventListener('click', () => {
     if (e.touches.length !== 2 || !pinch0) return;
     const d = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
     const cx = (e.touches[0].clientX + e.touches[1].clientX) / 2, cy = (e.touches[0].clientY + e.touches[1].clientY) / 2;
-    if (Math.abs(d / pinch0 - 1) > 0.02) { zoomToward(cx, cy, d > pinch0 ? -80 : 80); pinch0 = d; }
+    if (Math.abs(d / pinch0 - 1) > 0.02) { zoomToward(cx, cy, (1 - d / pinch0) * 1500); pinch0 = d; }
   }, { passive: true });
   renderer.domElement.addEventListener('touchend', () => { pinch0 = 0; }, { passive: true });
 }
