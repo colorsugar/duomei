@@ -8,11 +8,11 @@ import {
   useRef,
   useState,
 } from "react";
-import type { TouchEvent as ReactTouchEvent } from "react";
 import { useReducedMotion } from "framer-motion";
 import HTMLFlipBook from "react-pageflip";
 import { formatGuyuPageNumber } from "../content/guyuBooks";
 import type { GuyuBook, GuyuLogicalPage } from "../content/guyuBooks";
+import { useBookGestures } from "../hooks/useBookGestures";
 
 type PageFlipController = {
   destroy: () => void;
@@ -47,7 +47,6 @@ type PageLoadContextValue = {
 const PageLoadContext = createContext<PageLoadContextValue | null>(null);
 const FLIP_TIME = 600;
 const LOAD_TIMEOUT = 15_000;
-const NATIVE_TOUCH_DELAY = 250;
 
 function withRetry(src: string, retryEpoch: number) {
   if (retryEpoch === 0) return src;
@@ -159,14 +158,6 @@ function turnLoadWindow(current: number, direction: -1 | 1, lastIndex: number) {
   return [...pages];
 }
 
-function visiblePagesAfterTurn(current: number, direction: -1 | 1, lastIndex: number) {
-  if ((direction < 0 && current <= 0) || (direction > 0 && current >= lastIndex)) return [];
-  const target = direction > 0
-    ? Math.min(lastIndex, current === 0 ? 1 : current + 2)
-    : Math.max(0, current <= 1 ? 0 : current - 2);
-  if (target === 0 || target === lastIndex) return [target];
-  return [target, Math.min(lastIndex - 1, target + 1)];
-}
 
 export function GuyuFlipbook({
   book,
@@ -186,7 +177,6 @@ export function GuyuFlipbook({
   const [phase, setPhase] = useState<"idle" | "loading" | "flipping">("idle");
   const [loadError, setLoadError] = useState("");
   const [retryEpoch, setRetryEpoch] = useState(0);
-  const [loadedRevision, setLoadedRevision] = useState(0);
   const flipbookRef = useRef<PageFlipRef | null>(null);
   const controllerRef = useRef<PageFlipController | undefined>(undefined);
   const activePagesRef = useRef<Set<number>>(initialActivePages);
@@ -195,7 +185,8 @@ export function GuyuFlipbook({
   const requestIdRef = useRef(0);
   const busyRef = useRef(false);
   const fallbackTimerRef = useRef<number | undefined>(undefined);
-  const touchStartRef = useRef<{ x: number; y: number; time: number } | null>(null);
+  const shellRef = useRef<HTMLDivElement | null>(null);
+  const zoomRef = useRef<HTMLDivElement | null>(null);
 
   const resolveWaiters = useCallback((index: number) => {
     const waiters = waitersRef.current.get(index);
@@ -219,21 +210,18 @@ export function GuyuFlipbook({
 
   const onPageReady = useCallback((index: number) => {
     loadedPagesRef.current.add(index);
-    setLoadedRevision((value) => value + 1);
     if (index === 0) setCoverReady(true);
     resolveWaiters(index);
   }, [resolveWaiters]);
 
   const onPageError = useCallback((index: number) => {
     loadedPagesRef.current.delete(index);
-    setLoadedRevision((value) => value + 1);
     setLoadError("页面没有载入，请再点一次。");
     rejectWaiters(index, "这一页没有载入");
   }, [rejectWaiters]);
 
   const onPageReleased = useCallback((index: number) => {
     loadedPagesRef.current.delete(index);
-    setLoadedRevision((value) => value + 1);
   }, []);
 
   const loadingContext = useMemo<PageLoadContextValue>(() => ({
@@ -359,45 +347,21 @@ export function GuyuFlipbook({
     }
   }, [ensurePages, finishInteraction, lastIndex, loadError, reduceMotion, setActiveWindow]);
 
-  const nativeTouchReady = useMemo(() => {
-    if (busy || loadError) return false;
-    const required = [
-      ...visiblePagesAfterTurn(pageIndex, -1, lastIndex),
-      ...visiblePagesAfterTurn(pageIndex, 1, lastIndex),
-    ];
-    return required.every((index) => {
-      const page = book.logicalPages[index];
-      return page?.placement === "blank" || loadedPagesRef.current.has(index);
-    });
-  }, [book.logicalPages, busy, lastIndex, loadError, loadedRevision, pageIndex]);
+  const pageIndexRef = useRef(0);
+  pageIndexRef.current = pageIndex;
+  const turnDirection = useCallback((ratio: number): -1 | 1 | 0 => {
+    const current = pageIndexRef.current;
+    if (current === 0) return coverReady || loadError ? 1 : 0;
+    if (current >= lastIndex) return -1;
+    return ratio >= 0.5 ? 1 : -1;
+  }, [coverReady, lastIndex, loadError]);
 
-  const onBookTouchStart = useCallback((event: ReactTouchEvent<HTMLDivElement>) => {
-    if (event.touches.length !== 1) {
-      touchStartRef.current = null;
-      return;
-    }
-    const touch = event.touches[0];
-    touchStartRef.current = { x: touch.clientX, y: touch.clientY, time: performance.now() };
-  }, []);
+  const onGestureTurn = useCallback((direction: -1 | 1) => {
+    void requestTurn(direction);
+  }, [requestTurn]);
 
-  const onBookTouchEnd = useCallback((event: ReactTouchEvent<HTMLDivElement>) => {
-    const start = touchStartRef.current;
-    touchStartRef.current = null;
-    const touch = event.changedTouches[0];
-    if (!start || !touch || busyRef.current) return;
-    const dx = touch.clientX - start.x;
-    const dy = touch.clientY - start.y;
-    const duration = performance.now() - start.time;
-    const horizontalSwipe = Math.abs(dx) >= 30 && Math.abs(dy) < 60;
-    if (horizontalSwipe) {
-      if (!nativeTouchReady) void requestTurn(dx < 0 ? 1 : -1);
-      return;
-    }
-    if (Math.abs(dx) > 12 || Math.abs(dy) > 12) return;
-    if (nativeTouchReady ? duration >= NATIVE_TOUCH_DELAY : duration > 500) return;
-    const bounds = event.currentTarget.getBoundingClientRect();
-    void requestTurn(pageIndex === 0 || touch.clientX >= bounds.left + bounds.width / 2 ? 1 : -1);
-  }, [nativeTouchReady, pageIndex, requestTurn]);
+  const gestures = useBookGestures({ stageRef: shellRef, zoomRef, onTurn: onGestureTurn, turnDirection });
+  const { resetZoom, stepZoom, toggleZoom } = gestures;
 
   const jumpToPage = useCallback(async (target: number) => {
     if (busyRef.current) return;
@@ -445,11 +409,19 @@ export function GuyuFlipbook({
       } else if (event.key === "End") {
         event.preventDefault();
         void jumpToPage(lastIndex);
+      } else if (event.key === "+" || event.key === "=") {
+        event.preventDefault();
+        stepZoom(1.25);
+      } else if (event.key === "-" || event.key === "_") {
+        event.preventDefault();
+        stepZoom(0.8);
+      } else if (event.key === "0" || event.key === "Escape") {
+        resetZoom();
       }
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [jumpToPage, lastIndex, requestTurn]);
+  }, [jumpToPage, lastIndex, requestTurn, resetZoom, stepZoom]);
 
   useEffect(() => () => {
     requestIdRef.current += 1;
@@ -475,53 +447,51 @@ export function GuyuFlipbook({
     <PageLoadContext.Provider value={loadingContext}>
       <section className="guyu-flipbook" aria-label={`翻阅《${book.title}》`} aria-busy={busy}>
         <div
-          className={`guyu-pageflip-shell is-${bookPosition}${nativeTouchReady ? " is-touch-ready" : ""}`}
-          onTouchStart={onBookTouchStart}
-          onTouchEnd={onBookTouchEnd}
-          onTouchCancel={() => {
-            touchStartRef.current = null;
-          }}
+          ref={shellRef}
+          className={`guyu-pageflip-shell is-${bookPosition}${gestures.zoomed ? " is-zoomed" : ""}${gestures.dragging ? " is-dragging" : ""}`}
         >
-          <HTMLFlipBook
-            ref={flipbookRef}
-            className="guyu-pageflip"
-            style={{}}
-            startPage={0}
-            size="stretch"
-            width={1100}
-            height={1684}
-            minWidth={120}
-            maxWidth={550}
-            minHeight={184}
-            maxHeight={842}
-            drawShadow
-            flippingTime={reduceMotion ? 160 : FLIP_TIME}
-            usePortrait={false}
-            startZIndex={1}
-            autoSize
-            maxShadowOpacity={0.48}
-            showCover
-            mobileScrollSupport={false}
-            clickEventForward={false}
-            useMouseEvents
-            swipeDistance={30}
-            showPageCorners={false}
-            disableFlipByClick={false}
-            renderOnlyPageLengthChange
-            onFlip={onFlip}
-            onChangeState={onChangeState}
-            onInit={onInit}
-          >
-            {book.logicalPages.map((page, index) => (
-              <GuyuFlipPage
-                key={page.id}
-                page={page}
-                index={index}
-                lastIndex={lastIndex}
-                bookTitle={book.title}
-              />
-            ))}
-          </HTMLFlipBook>
+          <div ref={zoomRef} className="guyu-pageflip-zoom">
+            <HTMLFlipBook
+              ref={flipbookRef}
+              className="guyu-pageflip"
+              style={{}}
+              startPage={0}
+              size="stretch"
+              width={1100}
+              height={1684}
+              minWidth={120}
+              maxWidth={550}
+              minHeight={184}
+              maxHeight={842}
+              drawShadow
+              flippingTime={reduceMotion ? 160 : FLIP_TIME}
+              usePortrait={false}
+              startZIndex={1}
+              autoSize
+              maxShadowOpacity={0.48}
+              showCover
+              mobileScrollSupport={false}
+              clickEventForward={false}
+              useMouseEvents={false}
+              swipeDistance={30}
+              showPageCorners={false}
+              disableFlipByClick
+              renderOnlyPageLengthChange
+              onFlip={onFlip}
+              onChangeState={onChangeState}
+              onInit={onInit}
+            >
+              {book.logicalPages.map((page, index) => (
+                <GuyuFlipPage
+                  key={page.id}
+                  page={page}
+                  index={index}
+                  lastIndex={lastIndex}
+                  bookTitle={book.title}
+                />
+              ))}
+            </HTMLFlipBook>
+          </div>
 
           <button
             className="guyu-page-zone is-previous"
@@ -539,6 +509,13 @@ export function GuyuFlipbook({
           />
         </div>
 
+        <div
+          ref={gestures.layerRef}
+          className="guyu-gesture-layer"
+          aria-hidden="true"
+          {...gestures.layerProps}
+        />
+
         <p className="guyu-book-status guyu-visually-hidden" aria-live="polite" aria-atomic="true">
           {visibleStatus}
         </p>
@@ -552,7 +529,20 @@ export function GuyuFlipbook({
           >
             <span aria-hidden="true">‹</span>
           </button>
-          <p aria-hidden="true">{statusText}</p>
+          <button
+            className="guyu-zoom-button"
+            type="button"
+            aria-pressed={gestures.zoomed}
+            aria-label={gestures.zoomed ? "还原大小" : "放大页面"}
+            onClick={toggleZoom}
+          >
+            <span aria-hidden="true">{statusText}</span>
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              {gestures.zoomed
+                ? <path d="M9 4H4v5M15 4h5v5M9 20H4v-5M15 20h5v-5" />
+                : <path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" />}
+            </svg>
+          </button>
           <button
             className="guyu-turn-button"
             type="button"
@@ -563,7 +553,7 @@ export function GuyuFlipbook({
             <span aria-hidden="true">›</span>
           </button>
         </nav> : null}
-        <p className="guyu-reader-help guyu-visually-hidden">轻点画册左右两侧，或左右滑动翻页；键盘可用 ← →、Home、End。</p>
+        <p className="guyu-reader-help guyu-visually-hidden">轻点画册左右两侧或左右滑动翻页；双指或 Ctrl 加滚轮放大，放大后单指拖动查看；键盘可用 ← →、Home、End、+ − 0。</p>
         <p className="guyu-accessibility-note guyu-visually-hidden">{book.accessibilityNote}</p>
         {pageIndex === 0 ? (
           <p className="guyu-open-hint" aria-hidden="true">

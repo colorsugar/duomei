@@ -3,6 +3,7 @@ import { createRoot } from "react-dom/client";
 import App from "./App";
 import "./styles.css";
 import "./guyu.css";
+import "./guyu-gestures.css";
 import "./motion/transitions.css";
 
 createRoot(document.getElementById("root")!).render(

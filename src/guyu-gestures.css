@@ -1,0 +1,149 @@
+/* Guyu reader gesture layer. Loaded after guyu.css. One pointer surface owns
+   tap / swipe / pinch / pan (see hooks/useBookGestures.ts); StPageFlip only
+   renders the turn. Keyboard and assistive-tech targets stay in place. */
+
+.guyu-pageflip-shell {
+  touch-action: none;
+  animation: guyu-book-enter 1100ms var(--ease-out) both;
+}
+
+@keyframes guyu-book-enter {
+  from {
+    opacity: 0;
+    transform: translate3d(0, var(--space-lg), 0) scale(0.965);
+    filter: blur(6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+    filter: blur(0);
+  }
+}
+
+/* The shell used to sit higher via transform; the entrance animation owns
+   transform now, so the offset moves to margin. */
+@media (min-width: 40.001rem) {
+  .guyu-pageflip-shell {
+    margin-block-start: calc(var(--space-xl) * -1);
+    transform: none;
+  }
+}
+
+/* The zoom wrapper is the only element the gesture layer transforms, so the
+   flip engine below it keeps measuring an unscaled box. */
+.guyu-pageflip-zoom {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  transform-origin: center center;
+}
+
+.guyu-pageflip-shell.is-zoomed .guyu-pageflip-zoom,
+.guyu-pageflip-shell.is-dragging .guyu-pageflip-zoom {
+  will-change: transform;
+}
+
+.guyu-pageflip-shell img {
+  -webkit-touch-callout: none;
+  -webkit-user-drag: none;
+}
+
+.guyu-pageflip-shell .guyu-pageflip,
+.guyu-pageflip-shell .guyu-pageflip.stf__parent {
+  transition: transform 720ms var(--ease-out);
+}
+
+/* Keyboard and assistive-tech targets only; every pointer goes to the gesture layer. */
+.guyu-pageflip-shell > .guyu-page-zone {
+  pointer-events: none;
+}
+
+.guyu-gesture-layer {
+  position: absolute;
+  inset: 0;
+  touch-action: none;
+  cursor: pointer;
+  z-index: var(--z-page-controls);
+}
+
+.guyu-flipbook:has(.guyu-pageflip-shell.is-zoomed) .guyu-gesture-layer {
+  cursor: grab;
+}
+
+.guyu-flipbook:has(.guyu-pageflip-shell.is-dragging) .guyu-gesture-layer {
+  cursor: grabbing;
+}
+
+.guyu-flipbook[aria-busy="true"] .guyu-gesture-layer {
+  cursor: progress;
+}
+
+.guyu-open-hint {
+  pointer-events: none;
+}
+
+/* Page counter doubles as the zoom toggle in the controls pill. */
+.guyu-reader-page .guyu-zoom-button {
+  min-inline-size: 0;
+  min-block-size: var(--size-hit);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-xs);
+  padding: 0 var(--space-sm);
+  color: var(--color-muted-strong);
+  font-size: var(--text-xs);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.2;
+  white-space: nowrap;
+  background: transparent;
+  border: 0;
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  transition:
+    color var(--dur-short) var(--ease-out),
+    background-color var(--dur-short) var(--ease-out);
+}
+
+.guyu-reader-page .guyu-zoom-button svg {
+  inline-size: 1rem;
+  block-size: 1rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0.7;
+  transition:
+    opacity var(--dur-short) var(--ease-out),
+    transform var(--dur-long) var(--ease-out);
+}
+
+.guyu-reader-page .guyu-zoom-button[aria-pressed="true"] {
+  color: var(--color-accent);
+}
+
+.guyu-reader-page .guyu-zoom-button[aria-pressed="true"] svg {
+  opacity: 1;
+  transform: rotate(90deg);
+}
+
+@media (hover: hover) {
+  .guyu-reader-page .guyu-zoom-button:hover {
+    color: var(--color-ink);
+    background: color-mix(in oklch, var(--color-paper-3) 60%, transparent);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .guyu-pageflip-shell {
+    animation: none;
+  }
+
+  .guyu-pageflip-shell .guyu-pageflip,
+  .guyu-pageflip-shell .guyu-pageflip.stf__parent {
+    transition-duration: 1ms;
+  }
+}
