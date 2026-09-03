@@ -38,7 +38,7 @@ export function DuomeiGuyuPage() {
                   <span className="guyu-book-spine" />
                 </span>
                 <span className="guyu-book-meta">
-                  <span className="guyu-book-kind">{book.kind} · 旧册</span>
+                  <span className="guyu-book-kind">{book.kind === "新说" ? "新说 · 新册" : `${book.kind} · 旧册`}</span>
                   <strong>{book.title}</strong>
                   <span>{book.description}</span>
                   <span className="guyu-book-open">翻阅</span>

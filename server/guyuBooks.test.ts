@@ -32,3 +32,16 @@ test("formats physical book pages without exposing scan numbers", () => {
   assert.equal(formatGuyuPageNumber(77, 80), "77–78 / 78");
   assert.equal(formatGuyuPageNumber(79, 80), "封底");
 });
+
+test("keeps every 桂巷还香 plate as one full logical page", () => {
+  const book = guyuBooks.find((entry) => entry.id === "gui-xiang-huan-xiang");
+  assert.ok(book);
+  assert.equal(book.kind, "新说");
+  assert.equal(book.pages.length, 30);
+  assert.equal(book.logicalPages.length, 30);
+  assert.ok(book.logicalPages.every((page, index) => page.placement === "full" && page.sourcePage === index + 1));
+  assert.equal(book.pages[29], "/api/guyu-page?book=gui-xiang-huan-xiang&page=030");
+  assert.match(book.previewCoverSrc, /^https:\/\/[^/]+\/media\/covers\/[A-Za-z0-9._-]+\.webp$/u);
+  assert.equal(formatGuyuPageNumber(0, 30), "封面");
+  assert.equal(formatGuyuPageNumber(29, 30), "封底");
+});

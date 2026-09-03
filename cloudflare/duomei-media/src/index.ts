@@ -1,7 +1,13 @@
 const MAX_OBJECT_BYTES = 15 * 1024 * 1024;
 const STORAGE_HARD_LIMIT_BYTES = 1_000_000_000;
 const PUBLIC_KEY_PATTERN = /^(?:article|covers|notes|poetry)\/[A-Za-z0-9._-]{1,240}\.(?:gif|jpe?g|png|svg|webp)$/i;
-const PRIVATE_KEY_PATTERN = /^guyu\/meiyou-yujian\/pages\/(?:00[1-9]|0[1-4]\d|05[0-3])\.webp$/u;
+const PRIVATE_KEY_PATTERN = new RegExp(
+  "^guyu/(?:"
+  + "meiyou-yujian/pages/(?:00[1-9]|0[1-4]\\d|05[0-3])"
+  + "|gui-xiang-huan-xiang/pages/(?:00[1-9]|0[1-2]\\d|030)"
+  + ")\\.webp$",
+  "u",
+);
 const MAX_SIGNED_URL_SECONDS = 120;
 const ALLOWED_MIME_TYPES = new Set([
   "image/gif",
