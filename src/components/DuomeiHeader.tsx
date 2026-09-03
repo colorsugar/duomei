@@ -216,6 +216,9 @@ export function DuomeiHeader() {
         <a href="/" onClick={closeAfterNativeNavigation}>
           首页
         </a>
+        <a href="/#zaobao" onClick={closeAfterNativeNavigation}>
+          早报
+        </a>
         <a href="/#notes" onClick={closeAfterNativeNavigation}>
           小记
         </a>
