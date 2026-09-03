@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { Link } from "react-router-dom";
+import { TransitionLink as Link } from "../motion";
 import { guyuBooks } from "../content/guyuBooks";
 
 export function DuomeiGuyuPage() {

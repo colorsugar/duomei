@@ -1,0 +1,117 @@
+/* Site-wide motion layer. Loaded last so it can settle the few places where two
+   motion systems used to fight. Motion tokens are mirrored on <html> by
+   MotionProvider, so the portaled header/companion/back-to-top and the
+   ::view-transition pseudo-elements can all read them. */
+
+/* Lenis owns smooth scrolling while it is mounted (it adds `lenis` to <html>).
+   Native smoothing stacked on top of it stuttered and desynced the two. */
+html.lenis {
+  scroll-behavior: auto !important;
+}
+
+/* Route changes breathe: the old page lifts and fades, the new one settles in
+   from a soft blur. The note journey (card → detail) keeps its own variant. */
+@supports (view-transition-name: duomei-page) {
+  ::view-transition {
+    pointer-events: none;
+  }
+
+  /* Fixed chrome persists between routes and never takes part in the page fade. */
+  :root[data-view-transition="page"] .duomei-header {
+    view-transition-name: duomei-header;
+  }
+
+  :root[data-view-transition="page"] .duomei-companion {
+    view-transition-name: duomei-companion;
+  }
+
+  :root[data-view-transition="page"] .back-to-top {
+    view-transition-name: duomei-back-to-top;
+  }
+
+  ::view-transition-group(duomei-header),
+  ::view-transition-group(duomei-companion),
+  ::view-transition-group(duomei-back-to-top) {
+    animation-duration: var(--motion-duration-s, 220ms);
+  }
+
+  :root[data-view-transition="page"]::view-transition-old(root) {
+    animation: duomeiPageLeave var(--motion-duration-m, 420ms) var(--motion-ease-standard, cubic-bezier(0.16, 1, 0.3, 1)) both;
+    mix-blend-mode: normal;
+  }
+
+  :root[data-view-transition="page"]::view-transition-new(root) {
+    animation: duomeiPageEnter var(--motion-duration-xl, 900ms) var(--motion-ease-standard, cubic-bezier(0.16, 1, 0.3, 1)) both;
+    mix-blend-mode: normal;
+  }
+
+  @keyframes duomeiPageLeave {
+    to {
+      opacity: 0;
+      transform: translate3d(0, -14px, 0) scale(0.992);
+    }
+  }
+
+  @keyframes duomeiPageEnter {
+    from {
+      opacity: 0;
+      transform: translate3d(0, 26px, 0) scale(1.008);
+      filter: blur(10px);
+    }
+
+    45% {
+      opacity: 1;
+    }
+
+    to {
+      opacity: 1;
+      transform: translate3d(0, 0, 0) scale(1);
+      filter: blur(0);
+    }
+  }
+}
+
+/* Guyu reader: the spine shift (cover → open → back cover) lands on the same
+   frame as StPageFlip's 600ms curl instead of finishing 20ms early. */
+.guyu-pageflip-shell .guyu-pageflip,
+.guyu-pageflip-shell .guyu-pageflip.stf__parent {
+  transition-duration: 600ms;
+}
+
+/* The 0.4px "idle" translate on every card was invisible at any device pixel
+   ratio but kept one compositor animation alive per card and restarted each
+   time the note-card tilt released its transform. */
+.duomei-note-card,
+.duomei-motion-card {
+  animation: none;
+}
+
+/* will-change only while something can actually move. */
+.duomei-motion-card,
+.duomei-motion-button,
+.detail-note-nav-card,
+.detail-note-nav-home {
+  will-change: auto;
+}
+
+.duomei-motion-card:hover,
+.duomei-motion-button:hover,
+.detail-note-nav-card:hover,
+.detail-note-nav-home:hover {
+  will-change: transform;
+}
+
+/* Portaled controls sit outside .duomei-motion-root, so its reduced-motion
+   rules never reached them. */
+:root[data-reduced-motion="true"] .back-to-top,
+:root[data-reduced-motion="true"] .duomei-companion,
+:root[data-reduced-motion="true"] .duomei-companion * {
+  transition: none !important;
+  animation: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .illustration-layer .duomei-hero-cover-motion {
+    animation: none !important;
+  }
+}

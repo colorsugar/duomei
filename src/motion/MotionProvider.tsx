@@ -76,6 +76,20 @@ export function MotionProvider({ children }: { children: ReactNode }) {
     return () => query.removeEventListener("change", update);
   }, []);
 
+  // The header, companion, back-to-top button and ::view-transition pseudo
+  // elements render outside .duomei-motion-root, so the same tokens are mirrored
+  // on <html> where every portal and the transition layer can read them.
+  useEffect(() => {
+    const root = document.documentElement;
+    const vars = cssVars(motionTokens) as Record<string, string>;
+    Object.entries(vars).forEach(([name, value]) => root.style.setProperty(name, value));
+    return () => Object.keys(vars).forEach((name) => root.style.removeProperty(name));
+  }, []);
+
+  useEffect(() => {
+    document.documentElement.dataset.reducedMotion = prefersReducedMotion ? "true" : "false";
+  }, [prefersReducedMotion]);
+
   const value = useMemo(() => ({ tokens: motionTokens, prefersReducedMotion }), [prefersReducedMotion]);
 
   return (
