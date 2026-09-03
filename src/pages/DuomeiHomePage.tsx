@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { KineticHeroStage } from "../components/HomeKineticStage";
 import { NotesDreamTransition } from "../components/NotesDreamTransition";
 import { PaperLayer } from "../components/PaperLayer";
+import { ZaobaoSection } from "../components/ZaobaoSection";
 import { NOTE_UPDATED_EVENT, getPublishedNotes } from "../lib/noteStore";
 import { fetchPublishedNotes } from "../lib/supabaseNotes";
 import { useDuomeiEdit } from "../components/DuomeiEditProvider";
@@ -9,6 +10,7 @@ import type { DuomeiNote } from "../lib/noteTypes";
 
 const homeProgressSections = [
   { id: "home", label: "首页" },
+  { id: "zaobao", label: "早报" },
   { id: "notes", label: "小记" },
   { id: "kuaihuo", label: "快活" },
   { id: "guyu", label: "故语" },
@@ -112,6 +114,7 @@ export function DuomeiHomePage() {
       <main className="duomei-stage duomei-kinetic-active">
         <KineticHeroStage />
         <PaperLayer>
+          <ZaobaoSection />
           <NotesDreamTransition canCreate={editMode || localPoetryPreview} notes={notes} onCreate={() => openNoteEditor()} />
         </PaperLayer>
       </main>

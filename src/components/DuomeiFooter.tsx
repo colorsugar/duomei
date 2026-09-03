@@ -10,6 +10,7 @@ import { AnimatedParagraph, AnimatedTitle, RevealSection } from "../motion";
 
 const quickLinks = [
   { label: "首页", to: "/" },
+  { label: "早报", to: "/#zaobao" },
   { label: "小记", to: "/#notes" },
   { label: "故语", to: "/#guyu" },
   { label: "云游", to: "/#yunyou" },

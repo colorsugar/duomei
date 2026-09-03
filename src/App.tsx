@@ -7,6 +7,7 @@ import { DuomeiNotFoundPage } from "./pages/DuomeiNotFoundPage";
 import { DuomeiGuyuPage } from "./pages/DuomeiGuyuPage";
 import { DuomeiGuyuReaderPage } from "./pages/DuomeiGuyuReaderPage";
 import { DuomeiSkillsPage } from "./pages/DuomeiSkillsPage";
+import { DuomeiZaobaoPage } from "./pages/DuomeiZaobaoPage";
 import { DuomeiHeader } from "./components/DuomeiHeader";
 import { DuomeiFooter } from "./components/DuomeiFooter";
 import { BackToTopButton } from "./components/BackToTopButton";
@@ -21,14 +22,17 @@ function AppRoutes() {
   const isAdmin = location.pathname.startsWith("/admin");
   const isTimePage = location.pathname === "/time";
   const isGuyuReader = location.pathname.startsWith("/guyu/");
-  useSmoothScroll(isAdmin || isTimePage || isGuyuReader);
+  const isZaobao = location.pathname === "/zaobao";
+  const bareChrome = isAdmin || isGuyuReader || isZaobao;
+  useSmoothScroll(bareChrome || isTimePage);
 
   return (
     <DuomeiEditProvider>
       <RouteScrollManager />
-      {!isAdmin && !isGuyuReader ? <DuomeiHeader /> : null}
+      {!bareChrome ? <DuomeiHeader /> : null}
       <Routes>
         <Route path="/" element={<DuomeiHomePage />} />
+        <Route path="/zaobao" element={<DuomeiZaobaoPage />} />
         <Route path="/time" element={<DuomeiTimePage />} />
         <Route path="/note/:slug" element={<DuomeiNoteDetailPage />} />
         <Route path="/guyu" element={<DuomeiGuyuPage />} />
@@ -40,9 +44,9 @@ function AppRoutes() {
         <Route path="/admin/notes" element={<DuomeiAdmin mode="notes" />} />
         <Route path="*" element={<DuomeiNotFoundPage />} />
       </Routes>
-      {!isAdmin && !isGuyuReader ? <DuomeiFooter /> : null}
-      {!isAdmin && !isGuyuReader ? <DuomeiCompanion /> : null}
-      {!isAdmin && !isGuyuReader ? <BackToTopButton /> : null}
+      {!bareChrome ? <DuomeiFooter /> : null}
+      {!bareChrome ? <DuomeiCompanion /> : null}
+      {!bareChrome ? <BackToTopButton /> : null}
     </DuomeiEditProvider>
   );
 }

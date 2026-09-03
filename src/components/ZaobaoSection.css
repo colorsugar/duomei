@@ -1,0 +1,288 @@
+.zaobao-section {
+  position: relative;
+  z-index: var(--z-base);
+  display: grid;
+  align-content: center;
+  gap: var(--space-2xl);
+  inline-size: 100%;
+  min-inline-size: 0;
+  min-block-size: 100svh;
+  padding: var(--space-3xl) clamp(var(--space-md), 6vw, var(--space-3xl));
+  color: var(--color-ink);
+}
+
+.zaobao-heading,
+.zaobao-card {
+  inline-size: min(100%, var(--layout-wide));
+  margin-inline: auto;
+}
+
+.zaobao-heading {
+  display: grid;
+  gap: var(--space-md);
+  min-inline-size: 0;
+}
+
+.zaobao-heading h2 {
+  min-inline-size: 0;
+  margin: 0;
+  color: var(--color-ink);
+  font-family: var(--font-display);
+  font-size: var(--text-display-s);
+  font-style: normal;
+  font-weight: 700;
+  letter-spacing: -0.035em;
+  line-height: 1;
+  overflow-wrap: anywhere;
+  text-wrap: balance;
+}
+
+.zaobao-heading p {
+  margin: 0;
+  max-inline-size: var(--layout-reading);
+  color: var(--color-muted-strong);
+  font-size: var(--text-base);
+  line-height: 1.65;
+}
+
+.zaobao-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(18rem, 0.65fr);
+  grid-template-areas:
+    "cover kicker"
+    "cover title"
+    "cover copy"
+    "cover cta";
+  align-items: start;
+  gap: var(--space-sm) var(--space-xl);
+  min-inline-size: 0;
+  padding-block: var(--space-xl);
+  border-block: var(--rule-hairline) solid var(--color-rule);
+  color: inherit;
+  text-decoration: none;
+  background: var(--color-paper);
+  transition: transform var(--dur-short) var(--ease-out);
+}
+
+.zaobao-card:focus-visible {
+  outline: var(--rule-focus) solid var(--color-focus);
+  outline-offset: var(--space-2xs);
+}
+
+.zaobao-card-cover {
+  grid-area: cover;
+  align-self: stretch;
+  display: grid;
+  place-items: center;
+  min-inline-size: 0;
+  min-block-size: 18rem;
+  overflow: clip;
+  border: var(--rule-hairline) solid var(--color-rule);
+  background:
+    radial-gradient(circle at 50% 0%, rgba(255, 253, 247, 0.9), transparent 60%),
+    var(--color-paper-3);
+}
+
+.zaobao-masthead {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-xl);
+  text-align: center;
+}
+
+.zaobao-masthead small {
+  color: var(--color-muted-strong);
+  font-size: var(--text-xs);
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+}
+
+.zaobao-masthead strong {
+  color: var(--color-ink);
+  font-family: var(--font-display);
+  font-size: clamp(3.5rem, 12vw, 7.5rem);
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  line-height: 1;
+}
+
+.zaobao-masthead em {
+  padding-block-start: var(--space-sm);
+  border-block-start: var(--rule-hairline) solid var(--color-rule);
+  color: var(--color-muted-strong);
+  font-size: var(--text-sm);
+  font-style: normal;
+  letter-spacing: 0.08em;
+}
+
+.zaobao-card-kicker {
+  grid-area: kicker;
+  min-block-size: var(--size-hit);
+  display: flex;
+  align-items: center;
+  border-block-end: var(--rule-hairline) solid var(--color-rule);
+  color: var(--color-muted-strong);
+  font-size: var(--text-xs);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.zaobao-card-title {
+  grid-area: title;
+  min-inline-size: 0;
+  color: var(--color-ink);
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  font-style: normal;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+  text-wrap: balance;
+}
+
+.zaobao-card-copy {
+  grid-area: copy;
+  min-inline-size: 0;
+  max-inline-size: var(--layout-reading);
+  color: var(--color-muted-strong);
+  line-height: 1.65;
+  overflow-wrap: anywhere;
+}
+
+.zaobao-card-cta {
+  grid-area: cta;
+  inline-size: fit-content;
+  min-block-size: var(--size-hit);
+  display: inline-flex;
+  align-items: center;
+  color: var(--color-accent);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+/* Full-screen embed route */
+main.zaobao-page {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-sticky);
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  color: var(--color-ink);
+  font-family: var(--font-body);
+  background: var(--color-paper);
+}
+
+.zaobao-page-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+  padding: max(var(--space-2xs), env(safe-area-inset-top)) clamp(var(--space-md), 4vw, var(--space-2xl)) var(--space-2xs);
+  border-block-end: var(--rule-hairline) solid var(--color-rule);
+}
+
+.zaobao-page-bar h1 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.zaobao-page-back,
+.zaobao-page-open {
+  display: inline-flex;
+  align-items: center;
+  min-block-size: var(--size-hit);
+  color: var(--color-accent);
+  font-size: var(--text-base);
+  line-height: 1.3;
+  text-decoration: none;
+  border-block-end: var(--rule-hairline) solid currentColor;
+  white-space: nowrap;
+}
+
+.zaobao-page-back:focus-visible,
+.zaobao-page-open:focus-visible {
+  outline: var(--rule-focus) solid var(--color-focus);
+  outline-offset: var(--space-2xs);
+}
+
+.zaobao-frame {
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+  border: 0;
+  background: var(--color-paper);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .zaobao-card:hover {
+    transform: translate3d(0, calc(var(--space-2xs) * -1), 0);
+  }
+}
+
+@media (max-width: 48rem), (hover: none) and (pointer: coarse) {
+  .zaobao-section {
+    padding-block: var(--space-2xl);
+  }
+
+  .zaobao-card {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      "cover"
+      "kicker"
+      "title"
+      "copy"
+      "cta";
+    gap: var(--space-sm);
+  }
+
+  .zaobao-card-cover {
+    min-block-size: 0;
+    aspect-ratio: 16 / 9;
+  }
+
+  .zaobao-page-bar {
+    padding-inline: var(--space-md);
+  }
+
+  .zaobao-page-back,
+  .zaobao-page-open {
+    font-size: var(--text-sm);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .zaobao-card {
+    transition: none;
+  }
+}
+
+@media (max-width: 48rem) and (max-height: 720px) {
+  .zaobao-section {
+    align-content: start;
+    gap: var(--space-lg);
+    padding-block-start: calc(var(--space-3xl) + var(--size-hit));
+  }
+
+  .zaobao-heading {
+    gap: var(--space-sm);
+  }
+
+  .zaobao-heading h2 {
+    font-size: clamp(var(--text-2xl), 14vw, var(--text-display-s));
+  }
+
+  .zaobao-card {
+    padding-block: var(--space-lg);
+  }
+
+  .zaobao-card-copy {
+    font-size: var(--text-sm);
+    line-height: 1.5;
+  }
+}
