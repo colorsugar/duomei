@@ -56,7 +56,10 @@ test("the reader captures touch before StPageFlip and blocks compatibility mouse
   assert.match(source, /event\.stopPropagation\(\)/);
   assert.match(source, /window\.visualViewport\?\.scale/);
   assert.match(source, /const isTurnBlocked/);
-  assert.match(source, /await ensurePages\(required\)[\s\S]{0,220}if \(isTurnBlocked\(\)\)/);
+  assert.match(source, /await ensurePages\(required\)[\s\S]{0,220}if \(isTurnBlocked\(allowZoomed\)\)/);
+  // Zoomed in, a drag is the native pan: swipes stay blocked while a deliberate tap may turn.
+  assert.match(source, /if \(!update\.blocksTurn\) void requestTurn\(dx < 0 \? 1 : -1\)/);
+  assert.match(source, /void requestTurn\(pageIndex === 0 \|\| [^;]*, true\);/);
   assert.match(source, /window\.addEventListener\("pageshow", syncViewportZoom\)/);
   assert.match(source, /duration >= TAP_MAX_DURATION/);
   assert.doesNotMatch(source, /onBookTouch(?:Start|Move|End|Cancel)[\s\S]{0,500}event\.preventDefault\(\)/);
