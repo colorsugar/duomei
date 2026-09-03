@@ -40,7 +40,7 @@ Windows PowerShell 中优先使用对应的 `npm.cmd` 命令。构建产物输�
 
 推送正式分支后，流水线会测试、构建、执行发布门禁、部署到固定 EdgeOne 项目，并核对线上提交标记与受保护接口。完整流程见 [`PROJECT_CONTEXT.md`](PROJECT_CONTEXT.md)。
 
-同仓库 `cursor/*` 分支提交的普通站点 ready PR 会先运行 `PR Validation`；可信工作流随后复核精确 SHA 和改动路径，自动 squash 合并 `main` 并显式触发 EdgeOne 正式流程。失败、Draft 或修改工作流/依赖/部署与服务端安全边界的 PR 不会自动发布，也不需要把任何平台 Token 交给 Cursor。
+同仓库 `cursor/*` 分支提交的普通站点 ready PR 会先运行 [`PR Validation`](.github/workflows/pr-validation.yml)；可信工作流随后复核精确 SHA 和改动路径，自动 squash 合并 `main` 并显式触发 [EdgeOne 正式流程](.github/workflows/deploy-edgeone.yml)。失败、Draft 或修改工作流/依赖/部署与服务端安全边界的 PR 不会自动发布，也不需要把任何平台 Token 交给 Cursor。
 
 Vercel、GitHub Pages 和旧 candidate 分支仅为保留的兼容/迁移路径，不是当前正式发布目标。
 
