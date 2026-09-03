@@ -41,7 +41,10 @@
   --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
   --dur-micro: 120ms;
   --dur-short: 220ms;
+  --dur-normal: 320ms;
   --dur-long: 420ms;
+  --dur-slow: 720ms;
+  --dur-page: 900ms;
 
   --radius-card: 1.125rem;
   --radius-pill: 999px;

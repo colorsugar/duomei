@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link } from "../motion";
 import { GuyuAccessGate } from "../components/GuyuAccessGate";
 import { guyuBooks } from "../content/guyuBooks";
 

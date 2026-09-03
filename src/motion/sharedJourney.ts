@@ -1,3 +1,5 @@
+import { runPageTransition } from "./pageTransition";
+
 const JOURNEY_LIST_STATE_KEY = "duomei:journey:list-state";
 
 export const sharedJourneyNames = {
@@ -13,27 +15,10 @@ export type JourneyListState = {
   savedAt: number;
 };
 
-type ViewTransitionDocument = Document & {
-  startViewTransition?: (callback: () => void) => {
-    finished: Promise<void>;
-    ready: Promise<void>;
-    updateCallbackDone: Promise<void>;
-    skipTransition: () => void;
-  };
-};
-
 const prefetchedImages = new Set<string>();
 
 export function runSharedJourneyTransition(callback: () => void) {
-  const viewTransitionDocument = document as ViewTransitionDocument;
-  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-  if (reduceMotion || !viewTransitionDocument.startViewTransition) {
-    callback();
-    return;
-  }
-
-  viewTransitionDocument.startViewTransition(callback);
+  runPageTransition(callback, "shared");
 }
 
 export function saveJourneyListState(state: Omit<JourneyListState, "windowX" | "windowY" | "savedAt">) {

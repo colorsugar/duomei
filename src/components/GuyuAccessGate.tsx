@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useId, useState } from "react";
 import type { FormEvent, PropsWithChildren } from "react";
-import { Link } from "react-router-dom";
+import { Link } from "../motion";
 
 type AccessState = "checking" | "locked" | "submitting" | "unlocked" | "error";
 

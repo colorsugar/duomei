@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useMemo, useState, type CSSProperties, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { motionTokens, type DuomeiMotionTokens } from "./motionTokens";
 
 type MotionContextValue = {
@@ -11,7 +11,7 @@ const MotionContext = createContext<MotionContextValue>({
   prefersReducedMotion: false,
 });
 
-function cssVars(tokens: DuomeiMotionTokens) {
+function cssVars(tokens: DuomeiMotionTokens): Record<string, string> {
   return {
     "--motion-duration-xs": `${tokens.duration.xs}ms`,
     "--motion-duration-s": `${tokens.duration.s}ms`,
@@ -62,7 +62,7 @@ function cssVars(tokens: DuomeiMotionTokens) {
     "--motion-hero-background-opacity": String(tokens.hero.backgroundOpacity),
     "--motion-hero-breath-scale": String(tokens.hero.breathScale),
     "--motion-hero-title-opacity": String(tokens.hero.titleOpacity),
-  } as CSSProperties;
+  };
 }
 
 export function MotionProvider({ children }: { children: ReactNode }) {
@@ -76,15 +76,23 @@ export function MotionProvider({ children }: { children: ReactNode }) {
     return () => query.removeEventListener("change", update);
   }, []);
 
+  // Tokens go on <html> so portaled chrome and view-transition pseudo-elements share them.
+  useEffect(() => {
+    const root = document.documentElement;
+    const vars = cssVars(motionTokens);
+    Object.entries(vars).forEach(([name, value]) => root.style.setProperty(name, value));
+    return () => Object.keys(vars).forEach((name) => root.style.removeProperty(name));
+  }, []);
+
+  useEffect(() => {
+    document.documentElement.dataset.reducedMotion = prefersReducedMotion ? "true" : "false";
+  }, [prefersReducedMotion]);
+
   const value = useMemo(() => ({ tokens: motionTokens, prefersReducedMotion }), [prefersReducedMotion]);
 
   return (
     <MotionContext.Provider value={value}>
-      <div
-        className="duomei-motion-root"
-        data-reduced-motion={prefersReducedMotion ? "true" : "false"}
-        style={cssVars(motionTokens)}
-      >
+      <div className="duomei-motion-root" data-reduced-motion={prefersReducedMotion ? "true" : "false"}>
         {children}
       </div>
     </MotionContext.Provider>

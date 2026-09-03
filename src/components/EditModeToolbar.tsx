@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link } from "../motion";
 import { useInlineEdit } from "./InlineEditProvider";
 
 export function EditModeToolbar() {

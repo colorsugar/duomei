@@ -22,3 +22,5 @@ export {
   sharedJourneyNames,
 } from "./sharedJourney";
 export type { JourneyListState } from "./sharedJourney";
+export { Link, runPageTransition, useTransitionNavigate } from "./pageTransition";
+export type { PageTransitionKind } from "./pageTransition";

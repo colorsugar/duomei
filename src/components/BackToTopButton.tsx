@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
+import { scrollWindowTo } from "../hooks/useSmoothScroll";
 
 export function BackToTopButton() {
   const [visible, setVisible] = useState(false);
@@ -16,7 +17,7 @@ export function BackToTopButton() {
       className={`back-to-top${visible ? " is-visible" : ""}`}
       type="button"
       aria-label="返回顶部"
-      onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+      onClick={() => scrollWindowTo(0)}
     >
       <svg viewBox="0 0 32 32" aria-hidden="true">
         <path d="M8.5 15.5 16 8l7.5 7.5" />
