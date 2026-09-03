@@ -48,7 +48,10 @@ type PageLoadContextValue = {
 const PageLoadContext = createContext<PageLoadContextValue | null>(null);
 const FLIP_TIME = 600;
 const LOAD_TIMEOUT = 15_000;
-const TAP_MAX_DURATION = 250;
+// A deliberate, slower tap still reads as a tap; only movement turns it into a swipe or pan.
+const TAP_MAX_DURATION = 400;
+const TAP_MAX_MOVE = 12;
+const SWIPE_MIN_DISTANCE = 30;
 const COMPATIBILITY_MOUSE_DELAY = 700;
 
 function withRetry(src: string, retryEpoch: number) {
@@ -446,12 +449,14 @@ export function GuyuFlipbook({
     const dx = touch.clientX - start.x;
     const dy = touch.clientY - start.y;
     const duration = performance.now() - start.time;
-    const horizontalSwipe = Math.abs(dx) >= 30 && Math.abs(dy) < 60;
+    // Dominant-axis test: a mostly vertical drag is the page scrolling, not a turn,
+    // even when it drifts sideways by more than the swipe distance.
+    const horizontalSwipe = Math.abs(dx) >= SWIPE_MIN_DISTANCE && Math.abs(dx) > Math.abs(dy) * 1.2;
     if (horizontalSwipe) {
       void requestTurn(dx < 0 ? 1 : -1);
       return;
     }
-    if (Math.abs(dx) > 12 || Math.abs(dy) > 12) return;
+    if (Math.abs(dx) > TAP_MAX_MOVE || Math.abs(dy) > TAP_MAX_MOVE) return;
     if (duration >= TAP_MAX_DURATION) return;
     const bounds = event.currentTarget.getBoundingClientRect();
     void requestTurn(pageIndex === 0 || touch.clientX >= bounds.left + bounds.width / 2 ? 1 : -1);

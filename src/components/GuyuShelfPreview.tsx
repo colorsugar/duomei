@@ -10,7 +10,7 @@ import {
   type TransitionEvent as ReactTransitionEvent,
 } from "react";
 import { useReducedMotion } from "framer-motion";
-import { Link } from "react-router-dom";
+import { TransitionLink as Link } from "../motion";
 import { guyuBooks, type GuyuBook } from "../content/guyuBooks";
 import {
   GUYU_ASSEMBLE_FALLBACK_MS,
