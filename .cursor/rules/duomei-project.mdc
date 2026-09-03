@@ -6,3 +6,5 @@ alwaysApply: true
 ---
 
 Before analysis or edits, read `AGENTS.md`, `PROJECT_CONTEXT.md`, and `docs/release-source-of-truth.md` completely. They are canonical. Preserve dirty work, keep production credentials and Guyu originals out of Git, and verify UI work on the actual production webpage before claiming completion.
+
+This site's repository is `colorsugar/duomei`, not the private `colorsugar/-` asset-source repository. Work from current `origin/main`, push a same-repository `cursor/*` branch, run every required check, and open the PR as ready rather than draft. For ordinary site changes, the guarded GitHub auto-publish workflow revalidates the exact SHA and paths, squash-merges after `PR Validation` passes, and explicitly dispatches EdgeOne production. Do not ask the user to click Merge, do not publish to Vercel as production, and do not request platform Tokens. Workflow, dependency, credential, deployment, server-infrastructure, and canonical release-policy changes intentionally remain manual-review PRs.

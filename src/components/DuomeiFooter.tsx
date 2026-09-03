@@ -12,6 +12,7 @@ const quickLinks = [
   { label: "首页", to: "/" },
   { label: "小记", to: "/#notes" },
   { label: "故语", to: "/#guyu" },
+  { label: "云游", to: "/#yunyou" },
   { label: "颜色", to: "/#color" },
   { label: "微言", to: "/#weiyan" },
   { label: "技能", to: "/#skills" },

@@ -12,6 +12,7 @@ const homeProgressSections = [
   { id: "notes", label: "小记" },
   { id: "kuaihuo", label: "快活" },
   { id: "guyu", label: "故语" },
+  { id: "yunyou", label: "云游" },
   { id: "color", label: "颜色" },
   { id: "weiyan", label: "微言" },
   { id: "skills", label: "技能" },

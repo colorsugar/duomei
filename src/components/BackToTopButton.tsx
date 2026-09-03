@@ -4,9 +4,15 @@ import { createPortal } from "react-dom";
 export function BackToTopButton() {
   const [visible, setVisible] = useState(false);
   const [footerVisible, setFooterVisible] = useState(false);
+  const [yunyouVisible, setYunyouVisible] = useState(false);
 
   useEffect(() => {
-    const update = () => setVisible(window.scrollY > 520);
+    const update = () => {
+      setVisible(window.scrollY > 520);
+      const yunyouCard = document.querySelector(".yunyou-card");
+      const bounds = yunyouCard?.getBoundingClientRect();
+      setYunyouVisible(Boolean(bounds && bounds.bottom > 0 && bounds.top < window.innerHeight));
+    };
     update();
     window.addEventListener("scroll", update, { passive: true });
     return () => window.removeEventListener("scroll", update);
@@ -20,7 +26,7 @@ export function BackToTopButton() {
     return () => observer.disconnect();
   }, []);
 
-  const shown = visible && !footerVisible;
+  const shown = visible && !footerVisible && !yunyouVisible;
 
   return createPortal(
     <button

@@ -1,0 +1,203 @@
+.yunyou-section {
+  position: relative;
+  z-index: var(--z-base);
+  display: grid;
+  align-content: center;
+  gap: var(--space-2xl);
+  inline-size: 100%;
+  min-inline-size: 0;
+  min-block-size: 100svh;
+  padding: var(--space-3xl) clamp(var(--space-md), 6vw, var(--space-3xl));
+  color: var(--color-ink);
+  background: var(--color-paper-2);
+}
+
+.yunyou-heading,
+.yunyou-card {
+  inline-size: min(100%, var(--layout-wide));
+  margin-inline: auto;
+}
+
+.yunyou-heading {
+  display: grid;
+  gap: var(--space-md);
+  min-inline-size: 0;
+}
+
+.yunyou-heading h2 {
+  min-inline-size: 0;
+  margin: 0;
+  color: var(--color-ink);
+  font-family: var(--font-display);
+  font-size: var(--text-display-s);
+  font-style: normal;
+  font-weight: 700;
+  letter-spacing: -0.035em;
+  line-height: 1;
+  overflow-wrap: anywhere;
+  text-wrap: balance;
+}
+
+.yunyou-heading p {
+  margin: 0;
+  max-inline-size: var(--layout-reading);
+  color: var(--color-muted-strong);
+  font-size: var(--text-base);
+  line-height: 1.65;
+}
+
+.yunyou-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(18rem, 0.65fr);
+  grid-template-areas:
+    "cover kicker"
+    "cover title"
+    "cover copy"
+    "cover cta";
+  align-items: start;
+  gap: var(--space-sm) var(--space-xl);
+  min-inline-size: 0;
+  padding-block: var(--space-xl);
+  border-block: var(--rule-hairline) solid var(--color-rule);
+  color: inherit;
+  text-decoration: none;
+  background: var(--color-paper);
+  transition: transform var(--dur-short) var(--ease-out);
+}
+
+.yunyou-card-cover {
+  grid-area: cover;
+  align-self: stretch;
+  min-inline-size: 0;
+  overflow: clip;
+  border: var(--rule-hairline) solid var(--color-rule);
+  background: var(--color-paper-3);
+}
+
+.yunyou-card-cover img {
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+  min-block-size: 18rem;
+  object-fit: cover;
+}
+
+.yunyou-card:focus-visible {
+  outline: var(--rule-focus) solid var(--color-focus);
+  outline-offset: var(--space-2xs);
+}
+
+.yunyou-card-kicker {
+  grid-area: kicker;
+  min-block-size: var(--size-hit);
+  display: flex;
+  align-items: center;
+  border-block-end: var(--rule-hairline) solid var(--color-rule);
+  color: var(--color-muted-strong);
+  font-size: var(--text-xs);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  writing-mode: horizontal-tb;
+}
+
+.yunyou-card-title {
+  grid-area: title;
+  min-inline-size: 0;
+  color: var(--color-ink);
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  font-style: normal;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+  text-wrap: balance;
+}
+
+.yunyou-card-copy {
+  grid-area: copy;
+  min-inline-size: 0;
+  max-inline-size: var(--layout-reading);
+  color: var(--color-muted-strong);
+  line-height: 1.65;
+  overflow-wrap: anywhere;
+}
+
+.yunyou-card-cta {
+  grid-area: cta;
+  inline-size: fit-content;
+  min-block-size: var(--size-hit);
+  display: inline-flex;
+  align-items: center;
+  color: var(--color-accent);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .yunyou-card:hover {
+    transform: translate3d(0, calc(var(--space-2xs) * -1), 0);
+  }
+}
+
+@media (max-width: 48rem), (hover: none) and (pointer: coarse) {
+  .yunyou-section {
+    padding-block: var(--space-2xl);
+  }
+
+  .yunyou-card {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      "cover"
+      "kicker"
+      "title"
+      "copy"
+      "cta";
+    gap: var(--space-sm);
+  }
+
+  .yunyou-card-cover img {
+    min-block-size: 0;
+    aspect-ratio: 16 / 9;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .yunyou-card {
+    transition: none;
+  }
+}
+
+@media (max-width: 48rem) and (max-height: 720px) {
+  .yunyou-section {
+    align-content: start;
+    gap: var(--space-lg);
+    padding-block-start: calc(var(--space-3xl) + var(--size-hit));
+  }
+
+  .yunyou-heading {
+    gap: var(--space-sm);
+  }
+
+  .yunyou-heading h2 {
+    font-size: clamp(var(--text-2xl), 14vw, var(--text-display-s));
+  }
+
+  .yunyou-card {
+    padding-block: var(--space-lg);
+  }
+
+  .yunyou-card-copy {
+    font-size: var(--text-sm);
+    line-height: 1.5;
+  }
+}
+
+@media (max-width: 360px) and (max-height: 720px) {
+  .yunyou-card-title,
+  .yunyou-card-copy,
+  .yunyou-card-cta {
+    max-inline-size: calc(100% - var(--size-hit) - var(--space-md));
+  }
+}

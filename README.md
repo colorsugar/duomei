@@ -14,6 +14,7 @@ DUOMEI 多美小记是保存旅途记录、生活片段、照片、诗页和旧�
 ## 当前技术栈
 
 - React 19、Vite、TypeScript、React Router
+- 原生 Three.js 0.170.0：同源 `/yunyou/` 桂林两江四湖 3D 地图
 - EdgeOne Makers：`duomei.site` 的正式托管、Node Cloud Functions、私有 Guyu Blob
 - Supabase：笔记数据库和管理员 Auth/RLS
 - Cloudflare Worker/R2：笔记媒体和保留的签名媒体路径
@@ -39,9 +40,13 @@ Windows PowerShell 中优先使用对应的 `npm.cmd` 命令。构建产物输�
 
 推送正式分支后，流水线会测试、构建、执行发布门禁、部署到固定 EdgeOne 项目，并核对线上提交标记与受保护接口。完整流程见 [`PROJECT_CONTEXT.md`](PROJECT_CONTEXT.md)。
 
+同仓库 `cursor/*` 分支提交的普通站点 ready PR 会先运行 `PR Validation`；可信工作流随后复核精确 SHA 和改动路径，自动 squash 合并 `main` 并显式触发 EdgeOne 正式流程。失败、Draft 或修改工作流/依赖/部署与服务端安全边界的 PR 不会自动发布，也不需要把任何平台 Token 交给 Cursor。
+
 Vercel、GitHub Pages 和旧 candidate 分支仅为保留的兼容/迁移路径，不是当前正式发布目标。
 
 公开 `新说` 画册直接作为 Git 静态资源保存：封面使用 `public/images/guyu-<book-id>-cover.webp`，书页使用 `public/images/guyu/<book-id>/pages/`。它们随 `main` 的 EdgeOne workflow 发布，不需要 Cloudflare、腾讯云、R2 或 EdgeOne Token。只有现有 `meiyou-yujian` 是 EdgeOne Blob 私有册；新增私有册必须先取得明确授权。
+
+桂林 3D 地图随正式站静态发布到 `https://duomei.site/yunyou/`，不依赖 Vercel Preview。运行文件位于 `public/yunyou/`；Three.js 必要模块已固定并本地化，许可证保存在同目录。
 
 ## 凭据与私有内容
 

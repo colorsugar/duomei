@@ -1,0 +1,67 @@
+name: Cursor Auto Publish
+
+on:
+  workflow_run:
+    workflows:
+      - PR Validation
+    types:
+      - completed
+
+permissions:
+  actions: write
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: cursor-auto-publish-${{ github.event.workflow_run.id }}
+  cancel-in-progress: false
+
+jobs:
+  merge-and-deploy:
+    if: github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Verify trusted Cursor PR, merge, and dispatch production
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.workflow_run.pull_requests[0].number }}
+          VALIDATED_SHA: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          set -euo pipefail
+
+          if [[ -z "${PR_NUMBER:-}" || -z "${VALIDATED_SHA:-}" ]]; then
+            echo "No pull request is attached to this validation run; nothing to publish."
+            exit 0
+          fi
+
+          pr_json="$(gh api "repos/${GITHUB_REPOSITORY}/pulls/${PR_NUMBER}")"
+          [[ "$(jq -r '.state' <<<"$pr_json")" == "open" ]]
+          [[ "$(jq -r '.draft' <<<"$pr_json")" == "false" ]]
+          [[ "$(jq -r '.base.ref' <<<"$pr_json")" == "main" ]]
+          [[ "$(jq -r '.head.repo.full_name' <<<"$pr_json")" == "$GITHUB_REPOSITORY" ]]
+          [[ "$(jq -r '.head.ref' <<<"$pr_json")" == cursor/* ]]
+          [[ "$(jq -r '.head.sha' <<<"$pr_json")" == "$VALIDATED_SHA" ]]
+
+          protected_paths='^(\.github/|\.cursor/|AGENTS\.md$|PROJECT_CONTEXT\.md$|docs/release-source-of-truth\.md$|edgeone\.json$|vercel\.json$|package(-lock)?\.json$|scripts/verify-release\.ps1$|api/|cloud-functions/|cloudflare/|deploy/)'
+          changed_files="$(gh api --paginate "repos/${GITHUB_REPOSITORY}/pulls/${PR_NUMBER}/files?per_page=100" --jq '.[].filename')"
+          if grep -Eq "$protected_paths" <<<"$changed_files"; then
+            echo "Protected infrastructure or release-policy paths changed; leaving PR #${PR_NUMBER} for manual review."
+            exit 0
+          fi
+
+          gh pr merge "$PR_NUMBER" \
+            --repo "$GITHUB_REPOSITORY" \
+            --squash \
+            --match-head-commit "$VALIDATED_SHA"
+
+          merge_sha="$(gh pr view "$PR_NUMBER" --repo "$GITHUB_REPOSITORY" --json mergeCommit --jq '.mergeCommit.oid')"
+          if [[ -z "$merge_sha" ]]; then
+            echo "PR #${PR_NUMBER} did not produce a merge commit." >&2
+            exit 1
+          fi
+
+          gh workflow run deploy-edgeone.yml --repo "$GITHUB_REPOSITORY" --ref main
+          echo "Merged PR #${PR_NUMBER} at ${merge_sha} and dispatched EdgeOne production."

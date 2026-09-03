@@ -1,6 +1,6 @@
 # DUOMEI Project Context — Required AI Reading
 
-Last reviewed: 2026-09-03.
+Last reviewed: 2026-09-04.
 
 This is the canonical cross-AI maintenance entry for DUOMEI. Read it before changing code, configuration, content, credentials, or deployment state. If another document conflicts with this file, stop and verify the live repository and production marker before acting.
 
@@ -36,6 +36,10 @@ Browser at duomei.site
 │  ├─ public notes → Supabase Data API (`notes`, RLS)
 │  ├─ admin → Supabase Auth + RLS; media upload → Cloudflare Worker/R2
 │  └─ Guyu UI → public shelf/new-book assets; old class book → same-origin auth/page API
+│
+├─ Yunyou static 3D map (`public/yunyou/` → `/yunyou/`)
+│  ├─ Guilin map, landmarks and OSM-derived geometry
+│  └─ vendored Three.js 0.170.0 runtime with local MIT license
 │
 ├─ EdgeOne Node Cloud Function (`cloud-functions/api/[[default]].js`)
 │  └─ Guyu core (`deploy/guyu-edgeone/server/guyu-core.cjs`)
@@ -78,6 +82,7 @@ Only the 53-page class book uses the protected EdgeOne Blob path and the origina
 | Legacy Supabase `note-images` | Supabase Storage | 0 objects; retained only as a locked rollback boundary after the upload migration |
 | Protected class-book pages | EdgeOne Pages Blob `guyu-private` | 53-page `meiyou-yujian`; only this book uses `/api/guyu-auth` and `/api/guyu-page` |
 | Public `新说` pages | EdgeOne static deployment | 120 ordered WebP pages: `纸上飞檐`, `xinshuo-01`, `xinshuo-02`, and `gui-xiang-huan-xiang`; hashes and page sequences are release-tested |
+| Yunyou 3D map | EdgeOne static deployment | same-origin `/yunyou/`; source pinned to a private-source commit and Three.js runtime vendored locally |
 | Retained `纸上飞檐` Blob copy | EdgeOne Pages Blob `guyu-private` | 30 objects retained only as an unused rollback copy; not a live read path |
 | Retained Guyu fallback | Cloudflare R2 `duomei-private` | 53 objects, 11.4 MB; not the current EdgeOne read path |
 
@@ -97,6 +102,7 @@ External runtime hosts intentionally referenced by the site are `duomei.site`, `
 | `/guyu/xinshuo-01` | `新说 / 想象画本`, 30 complete `full` pages | No |
 | `/guyu/xinshuo-02` | `新说 / 月亮下的童梦`, 30 complete `full` watercolor pages | No |
 | `/guyu/gui-xiang-huan-xiang` | `新说 / 桂巷还香`, 30 complete `full` Guilin landmark plates | No |
+| `/yunyou/` | Same-origin Guilin Liangjiang Sihu interactive 3D map | Standalone map chrome with `返回多美` |
 | `/skills` | Skill directory | Yes |
 | `/admin/login` | Supabase admin login | No |
 | `/admin`, `/admin/notes` | Note management | No |
@@ -104,7 +110,7 @@ External runtime hosts intentionally referenced by the site are `duomei.site`, `
 ## Product Behavior That Must Not Regress
 
 - Preserve the quiet warm-paper DUOMEI design, existing content, typography, mascot, and information architecture. Do not replace it with a generic template or redesign a scoped bug fix.
-- Homepage order stays: hero / 小记 / 快活 / 故语 / 颜色 / 微言 / 技能 / copyright footer.
+- Homepage order stays: hero / 小记 / 快活 / 故语 / 云游 / 颜色 / 微言 / 技能 / copyright footer.
 - 小记、快活、故语、颜色、微言、技能 share the `230svh` track and `100svh` sticky-stage rhythm. A section releases only after its bottom progress reaches 100%.
 - 小记 keeps its horizontal carousel but does not vertically transform the carousel content; this avoids mobile scroll jank.
 - The fixed header hides while scrolling down and returns while scrolling up. Mobile navigation must work from the homepage and from secondary pages, especially `/guyu`.
@@ -114,8 +120,10 @@ External runtime hosts intentionally referenced by the site are `duomei.site`, `
 - Guyu reader touch ownership is frozen: the capture layer owns single-finger tap/swipe while leaving native vertical scroll and pinch zoom enabled. Once any touch sequence contains two fingers, that whole sequence is latched as zoom-only until every finger is released. While `visualViewport.scale > 1.01`, the page surface enables native horizontal and vertical panning and every page-turn path remains blocked; only a fresh single-finger gesture after returning to 100% may turn pages.
 - The `/guyu` shelf has a visible 44px `← 返回首页` link targeting `/#guyu`; a closed Guyu reader still shows `返回故语`, and an open reader replaces it with `合上`, which returns to the cover without leaving the route or destroying the reader. Shelf titles must wrap fully inside their card without ellipsis or clipping.
 - The homepage Guyu preview displays each book for 1.6 seconds, then keeps 16 visible cover fragments through an approximately 1.1-second scatter/tint/swap/reassembly. After reassembly the incoming base cover is exposed beneath the still-visible fragments with no opacity transition; the fragments stay mounted until that base image decodes and survives two paint frames, so the prior cover cannot flash back. The whole cover, copy, and “翻开这一本” card opens the current book at `/guyu/{book.id}`; a separate 44px “查看所有” link opens `/guyu`. It supports left/right swipe, Arrow/Home/End keys, a pause control, clickable IG-style progress dots, and seamless first/last looping; reduced-motion mode disables autoplay and uses immediate state changes.
-- On mobile, the Guyu shelf ending uses compact spacing and the footer keeps all six shortcuts in one 44px-high row. The back-to-top control hides while the footer is visible so it never covers navigation or copyright text.
+- On mobile, the Guyu shelf ending uses compact spacing and the footer keeps all seven shortcuts in one 44px-high row. The back-to-top control hides while the footer is visible so it never covers navigation or copyright text.
 - The header menu item `故语` targets `/#guyu`; it must never bypass the homepage preview by navigating directly to `/guyu`.
+- The header and footer item `云游` targets `/#yunyou`; the homepage card then opens the same-origin `/yunyou/` map. Production must never link this card to a Vercel Preview.
+- `/yunyou/` keeps a visible `← 返回多美` target, a loading state, a WebGL/module failure fallback, mobile DPR limits, touch rotation/zoom, a user-controlled auto-rotate toggle, and reduced-motion mode with auto-rotate disabled.
 - WeChat sticker actions copy the official short link and explain that it must be pasted into WeChat. Do not navigate the browser directly to the WeChat short link.
 - Mobile and desktop text must not clip, overlap, or create horizontal overflow. Recheck all affected supported widths after UI work.
 - Note detail keeps a visible 44px `← 返回小记` target in loading, missing, and loaded states; its normal-reading top spacing must remain below the fixed header.
@@ -148,6 +156,8 @@ Never commit or echo values for:
 Production Guyu runtime values belong only in EdgeOne project environment settings. `EDGEONE_API_TOKEN` belongs only in the GitHub Actions Secret with that name. The 53 protected `meiyou-yujian` pages remain private and may never be copied under `public/`; the four approved `新说` books are intentionally public static assets.
 
 `纸上飞檐` was audited from private source repository `colorsugar/-` at commit `249736f5dd4914f1797a6eb5b4e8d9226edb6be9`. Its 30 pages are now committed public derivatives and the production reader never fetches the source Vercel preview. `xinshuo-01` is the approved first cloud-task album and must not be regenerated or replaced. Both the abstract-geometric and adult photorealistic second drafts were rejected on 2026-09-03 and must never be published. The approved `xinshuo-02` is the 30-page elementary-school watercolor album `月亮下的童梦`, imported from audited package SHA-256 `e5489da43ef4dc5c00d9c42290503a1041c3cedce0dc8720123ed17b8817dde7`; all 30 files are 1100×1684, use `full` placement, and have aggregate page SHA-256 `98f439c37b83abbb52da41334d531c7df9fc30f07a9805535d3bb96be8c6fab2`. `gui-xiang-huan-xiang` / `桂巷还香` is the 30-plate Guilin landmark album imported from private source repository `colorsugar/-`, branch `cursor/guilin-gui-xiang-1c0c`, commit `575b1e2` (the 落款版); every page and the preview cover were copied byte-for-byte (Git blob SHAs match the source tree), all 31 files are VP8 1100×1684, pages use `full` placement, the aggregate page SHA-256 is `7f69bdcf24ee701365908cdc412f3cec137951639ccc1087e5339a99f74c40ad`, and the preview cover SHA-256 is `a9f5888860feabce30e20e676a01370e602b949082372bd5eec2a8c75b5719f4`. The source repository's `book.pdf`, `contact-sheet.jpg`, standalone reader, and `editorial/` were deliberately not imported. `server/guyuBooks.test.ts` fixes every approved public book's page sequence and aggregate SHA-256.
+
+The Yunyou map runtime was imported from private source repository `colorsugar/-`, branch `cursor/guilin-3d-map-d49c`, commit `934c6782222c003a3bf626b1607e2fa74033f0d7`. Only runtime HTML, JavaScript, OSM-derived data and six texture assets were copied; the build tool and source README were not published. OpenStreetMap attribution and ODbL notice remain visible in the map. Three.js 0.170.0 was vendored from npm package integrity `sha512-FQK+LEpYc0fBD+J8g6oSEyyNzjp+Q7Ks1C568WWaoMRLW+TkNNWmenWeGgJjV105Gd+p/2ql1ZcjYvNiPZBhuQ==` under its MIT license; production has no jsDelivr dependency. The homepage cover `public/images/yunyou-guilin-cover.webp` is a text-free editorial derivative of a real render from this map, not a replacement geography source; SHA-256 is `019158f0433eaa0dfc3b0b53dd566b64bb7d2cce1a6d03ee699211013330d7e0`.
 
 ## Local Verification
 
@@ -187,6 +197,8 @@ Do not treat a build, unit test, source marker, API status, or desktop click as 
 11. Verify the live build marker equals the pushed commit.
 12. Verify production homepage `200`, anonymous auth `200` with `authorized:false`, and an unauthenticated private page `401`.
 13. Open the real production webpage, verify the visible copy and layout, and repeat the user's exact interaction. Real-device behavior remains a separate claim when the device is not under agent control.
+
+Ready same-repository PRs whose branch begins `cursor/` use `.github/workflows/pr-validation.yml` as a required status gate. After a successful run, `.github/workflows/cursor-auto-merge.yml` executes only from default-branch code, never checks out PR code with write credentials, revalidates the open/non-draft PR, same repository, `cursor/*` branch, exact tested SHA, and a denylist of release/security paths. Eligible ordinary site changes are squash-merged, then the workflow explicitly dispatches `deploy-edgeone.yml` because events created by `GITHUB_TOKEN` do not create a second push workflow. Failed/draft/stale PRs or PRs touching workflows, dependencies, deployment configuration, server infrastructure, credentials, or canonical release policy remain open for manual review. This is the only authorized unattended Cursor production path.
 
 ## User Maintenance Preferences
 

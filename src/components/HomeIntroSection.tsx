@@ -11,6 +11,8 @@ import { GuyuShelfPreview } from "./GuyuShelfPreview";
 import { HomeSkillsSection } from "./SkillsDirectory";
 import { HomeSectionHold } from "./HomeSectionHold";
 import { StickerPackSection } from "./StickerPackSection";
+import { YunyouSection } from "./YunyouSection";
+import "./YunyouSection.css";
 import { PoetryCanvasEditor } from "./PoetryCanvasEditor";
 import "./HomeIntroSection.css";
 
@@ -928,6 +930,7 @@ export function HomeIntroSection({ canCreate }: HomeIntroSectionProps) {
       </section>
 
       <GuyuShelfPreview />
+      <YunyouSection />
       <StickerPackSection />
 
       <PoetryStackDeck pages={pages} canCreate={canCreate} onEdit={openEditor} />
