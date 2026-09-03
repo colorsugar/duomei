@@ -104,6 +104,7 @@ $guyuBundle = @(
   "src/guyu.css",
   "src/main.tsx",
   "public/images/guyu",
+  "public/images/guyu-gui-xiang-huan-xiang-cover.webp",
   "public/images/guyu-xinshuo-01-cover.webp",
   "public/images/guyu-xinshuo-02-cover.webp",
   "public/images/guyu-zhi-shang-feiyan-cover.webp",
@@ -173,6 +174,7 @@ $requiredMarkers = @(
   @{ File = "src/content/guyuBooks.ts"; Marker = 'id: "zhi-shang-feiyan"' },
   @{ File = "src/content/guyuBooks.ts"; Marker = 'id: "xinshuo-01"' },
   @{ File = "src/content/guyuBooks.ts"; Marker = 'id: "xinshuo-02"' },
+  @{ File = "src/content/guyuBooks.ts"; Marker = 'id: "gui-xiang-huan-xiang"' },
   @{ File = "src/content/guyuBooks.ts"; Marker = 'access: "class-gated"' },
   @{ File = "src/content/guyuBooks.ts"; Marker = 'access: "public"' },
   @{ File = "src/lib/guyuCarousel.ts"; Marker = 'GUYU_CAROUSEL_DWELL_MS = 1_600' },
@@ -198,6 +200,7 @@ $requiredMarkers = @(
   @{ File = "deploy/guyu-edgeone/server/guyu-core.cjs"; Marker = 'Object.hasOwn(BOOKS, book)' },
   @{ File = ".github/workflows/deploy-edgeone.yml"; Marker = "/images/guyu/xinshuo-01/pages/001.webp" },
   @{ File = ".github/workflows/deploy-edgeone.yml"; Marker = "/images/guyu/xinshuo-02/pages/001.webp" },
+  @{ File = ".github/workflows/deploy-edgeone.yml"; Marker = "/images/guyu/gui-xiang-huan-xiang/pages/001.webp" },
   @{ File = "src/content/guyuBooks.ts"; Marker = '/api/guyu-page?book=' },
   @{ File = "package.json"; Marker = '"react-pageflip": "2.0.3"' },
   @{ File = "package.json"; Marker = '"page-flip": "2.0.7"' },
@@ -230,6 +233,7 @@ $publicCoverHashes = @{
   "public/images/guyu-zhi-shang-feiyan-cover.webp" = "69644B7DFFDBF78FE5D2D624678B0005AF65FA6E9029340176615FAFCE332D6B"
   "public/images/guyu-xinshuo-01-cover.webp" = "A993DF1567F85CC70D814E27ED7C8F201CDF115495D5B38B4DED47EA5F74EF8D"
   "public/images/guyu-xinshuo-02-cover.webp" = "C779F4CD56A3162C3C16631A72F3033015A02CEBBBA39C05427F3923382A5369"
+  "public/images/guyu-gui-xiang-huan-xiang-cover.webp" = "A9F5888860FEABCE30E20E676A01370E602B949082372BD5EEC2A8C75B5719F4"
 }
 
 foreach ($cover in $publicCoverHashes.GetEnumerator()) {
