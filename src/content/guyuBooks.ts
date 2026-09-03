@@ -366,7 +366,7 @@ export const guyuBooks: readonly GuyuBook[] = [
   {
     id: "zhi-shang-feiyan",
     title: "纸上飞檐",
-    kind: "画本",
+    kind: "画册",
     chapter: "新说",
     access: "public",
     description: "用彩铅在暖纸上，跟一处无名旧园走完从晨到夜、从雨到月的一日。",
@@ -382,7 +382,7 @@ export const guyuBooks: readonly GuyuBook[] = [
   {
     id: "xinshuo-01",
     title: "想象画本",
-    kind: "画本",
+    kind: "画册",
     chapter: "新说",
     access: "public",
     description: "自由绘画、观察记录、幻想片段、手作、色彩实验与纸上小发现。",
@@ -415,7 +415,7 @@ export const guyuBooks: readonly GuyuBook[] = [
   {
     id: "gui-xiang-huan-xiang",
     title: "桂巷还香",
-    kind: "册页",
+    kind: "画册",
     chapter: "新说",
     access: "public",
     description: "桂林册页集。浅绛、岩彩、水印木刻、针管水彩、粉彩、油画棒混搭。每页一个地标，有题跋落款。人只以背影出现。",

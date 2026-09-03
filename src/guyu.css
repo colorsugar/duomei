@@ -302,6 +302,7 @@ body {
   display: grid;
   grid-template-columns: minmax(0, 0.86fr) minmax(0, 1.14fr);
   gap: var(--space-lg);
+  block-size: 100%;
   min-block-size: 20rem;
   padding: var(--space-lg);
   color: var(--color-ink);
@@ -1387,7 +1388,8 @@ body {
   }
 
   .guyu-shelf {
-    grid-auto-columns: minmax(17rem, calc(100% - var(--space-lg)));
+    /* One fixed track: a single-book row and a four-book row get the same card width. */
+    grid-auto-columns: calc(100% - var(--space-lg));
     gap: var(--space-md);
   }
 
@@ -1782,19 +1784,38 @@ body {
     padding: 0;
   }
 
-  .guyu-reader-heading {
-    inset-block-start: calc(env(safe-area-inset-top, 0px) + var(--size-guyu-mobile-edge));
+  /* One thumb zone: 返回故语 / 合上 sit bottom-left, the page controls take the
+     rest of the bottom row, and the cover hint moves up out of their way. */
+  .guyu-reader-heading,
+  .guyu-reader-close {
+    inset-block-start: auto;
+    /* + 0.5625rem centres the 44px pill on the 62px control bar beside it. */
+    inset-block-end: calc(env(safe-area-inset-bottom, 0px) + var(--size-guyu-mobile-edge) + 0.5625rem);
     inset-inline-start: calc(env(safe-area-inset-left, 0px) + var(--size-guyu-mobile-edge));
   }
 
-  .guyu-reader-close {
-    inset-block-start: calc(env(safe-area-inset-top, 0px) + var(--size-guyu-mobile-edge));
-    inset-inline-start: calc(env(safe-area-inset-left, 0px) + var(--size-guyu-mobile-edge));
+  .guyu-reader-back[aria-hidden="true"] {
+    transform: translateY(var(--space-sm));
   }
 
   .guyu-reader-page .guyu-book-controls {
-    inline-size: min(calc(100vw - var(--space-xl)), var(--size-guyu-controls-mobile-max));
+    inset-inline-start: auto;
+    inset-inline-end: calc(env(safe-area-inset-right, 0px) + var(--size-guyu-mobile-edge));
     inset-block-end: calc(env(safe-area-inset-bottom, 0px) + var(--size-guyu-mobile-edge));
+    /* Leaves room for the 合上 pill (about 5.25rem) plus a clear gap on its right. */
+    inline-size: min(
+      calc(100vw - var(--size-guyu-mobile-edge) * 2 - 5.25rem - var(--space-md)),
+      var(--size-guyu-controls-mobile-max)
+    );
+    transform: translate(0, var(--space-md));
+  }
+
+  .guyu-reader-page.is-book-open .guyu-book-controls {
+    transform: translate(0, 0);
+  }
+
+  .guyu-open-hint {
+    inset-block-end: calc(env(safe-area-inset-bottom, 0px) + var(--size-guyu-mobile-edge) + var(--size-hit) + var(--space-md));
   }
 }
 

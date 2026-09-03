@@ -7,9 +7,27 @@ declare global {
   }
 }
 
+function prefersReducedMotion() {
+  return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+}
+
+/**
+ * Every programmatic window scroll goes through here so Lenis (when mounted)
+ * stays the only scroll animator. Native `behavior: "smooth"` stacked on top of
+ * Lenis produced a stutter and left the two disagreeing about the position.
+ */
+export function scrollWindowTo(top: number) {
+  const lenis = window.__duomeiLenis;
+  if (lenis) {
+    lenis.scrollTo(top, { immediate: prefersReducedMotion() });
+    return;
+  }
+  window.scrollTo({ top, behavior: prefersReducedMotion() ? "auto" : "smooth" });
+}
+
 export function useSmoothScroll(disabled = false) {
   useEffect(() => {
-    if (disabled) return;
+    if (disabled || prefersReducedMotion()) return;
 
     const lenis = new Lenis({
       lerp: 0.08,

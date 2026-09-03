@@ -10,7 +10,7 @@ import {
   type TransitionEvent as ReactTransitionEvent,
 } from "react";
 import { useReducedMotion } from "framer-motion";
-import { Link } from "react-router-dom";
+import { TransitionLink as Link } from "../motion";
 import { guyuBooks, type GuyuBook } from "../content/guyuBooks";
 import {
   GUYU_ASSEMBLE_FALLBACK_MS,
@@ -69,7 +69,7 @@ const FRAGMENTS = Array.from({ length: FRAGMENT_COLUMNS * FRAGMENT_ROWS }, (_, i
 
 function getBookLabels(book: GuyuBook) {
   return {
-    section: book.chapter === "新说" ? "新说" : "故语",
+    section: book.chapter,
     shelf: book.kind,
   };
 }
@@ -439,7 +439,7 @@ export function GuyuShelfPreview() {
       <header className="guyu-home-shelf-heading">
         <h2 id="guyu-home-shelf-title">故语</h2>
         <p>把旧日收好，等后来的人翻阅。</p>
-        <Link className="guyu-home-shelf-all" to="/guyu">查看所有</Link>
+        <Link className="guyu-home-shelf-all" to="/guyu">翻遍藏书</Link>
       </header>
 
       <div

@@ -45,7 +45,7 @@ test("maps zhi-shang-feiyan as a full-page new-book", () => {
   const book = guyuBooks.find((candidate) => candidate.id === "zhi-shang-feiyan");
   assert.ok(book);
   assert.equal(book.chapter, "新说");
-  assert.equal(book.kind, "画本");
+  assert.equal(book.kind, "画册");
   assert.equal(book.access, "public");
   assert.equal(book.pages.length, 30);
   assert.equal(book.logicalPages.length, 30);
@@ -68,7 +68,7 @@ test("maps the existing xinshuo-01 artwork as a public full-page book", () => {
   assert.ok(book);
   assert.equal(book.title, "想象画本");
   assert.equal(book.chapter, "新说");
-  assert.equal(book.kind, "画本");
+  assert.equal(book.kind, "画册");
   assert.equal(book.access, "public");
   assert.equal(book.pages.length, 30);
   assert.equal(book.pageDescriptions.length, 30);
@@ -117,7 +117,7 @@ test("maps gui-xiang-huan-xiang as a public full-page Guilin album", () => {
   assert.ok(book);
   assert.equal(book.title, "桂巷还香");
   assert.equal(book.chapter, "新说");
-  assert.equal(book.kind, "册页");
+  assert.equal(book.kind, "画册");
   assert.equal(book.access, "public");
   assert.equal(book.pageCount, 30);
   assert.equal(book.pages.length, 30);

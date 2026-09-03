@@ -9,6 +9,7 @@ export {
   RevealSection,
   SharedMotionElement,
 } from "./Animated";
+export { TransitionLink, runPageTransition } from "./pageTransition";
 export { motionTokens } from "./motionTokens";
 export type { DuomeiMotionTokens } from "./motionTokens";
 export {
