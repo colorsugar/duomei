@@ -1,5 +1,5 @@
 import type { ChangeEvent, CSSProperties, KeyboardEvent, PointerEvent as ReactPointerEvent } from "react";
-import { useEffect, useRef, useState } from "react";
+import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { animate, motion, useMotionValue, useReducedMotion, useScroll, useSpring, useTransform } from "framer-motion";
 import type { MotionValue, PanInfo } from "framer-motion";
 import type { DuomeiNote } from "../lib/noteTypes";
@@ -13,7 +13,7 @@ import { HomeSectionHold } from "./HomeSectionHold";
 import { StickerPackSection } from "./StickerPackSection";
 import { YunyouSection } from "./YunyouSection";
 import "./YunyouSection.css";
-import { PoetryCanvasEditor } from "./PoetryCanvasEditor";
+const PoetryCanvasEditor = lazy(() => import("./PoetryCanvasEditor").then(module => ({ default: module.PoetryCanvasEditor })));
 import "./HomeIntroSection.css";
 
 type HomeIntroSectionProps = {
@@ -938,6 +938,7 @@ export function HomeIntroSection({ canCreate }: HomeIntroSectionProps) {
       <HomeSkillsSection />
 
       {canCreate && editorIndex !== null ? (
+        <Suspense fallback={<div className="cinema-editor-loading" role="status">正在打开编辑器…</div>}>
         <PoetryCanvasEditor
           pages={pages}
           activeIndex={editorIndex}
@@ -955,6 +956,7 @@ export function HomeIntroSection({ canCreate }: HomeIntroSectionProps) {
           onMove={(direction) => movePage(editorIndex, direction)}
           onUpdate={(updater) => updatePage(editorIndex, updater)}
         />
+        </Suspense>
       ) : null}
     </section>
   );

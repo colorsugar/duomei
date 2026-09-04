@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import { lazy, Suspense, createContext, useContext, useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
 import type { DuomeiNote } from "../lib/noteTypes";
@@ -13,7 +13,7 @@ import {
 } from "../lib/noteStore";
 import { slugify } from "../lib/slugify";
 import { deleteCloudNote, saveCloudNote } from "../lib/supabaseNotes";
-import { NoteEditDrawer } from "./NoteEditDrawer";
+const NoteEditDrawer = lazy(() => import("./NoteEditDrawer").then(module => ({ default: module.NoteEditDrawer })));
 
 type EditContext = {
   isLoggedIn: boolean;
@@ -126,7 +126,7 @@ export function DuomeiEditProvider({ children }: { children: ReactNode }) {
   return (
     <Context.Provider value={value}>
       {children}
-      <NoteEditDrawer note={editingNote} onClose={() => setEditingNote(null)} onSave={save} />
+      {editingNote ? <Suspense fallback={<div className="cinema-editor-loading" role="status">正在打开编辑器…</div>}><NoteEditDrawer note={editingNote} onClose={() => setEditingNote(null)} onSave={save} /></Suspense> : null}
       {pendingDelete ? (
         <div className="duomei-delete-confirm" role="dialog" aria-live="polite" aria-label="删除确认">
           <span>确定删除这条小记吗？</span>

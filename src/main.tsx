@@ -4,6 +4,7 @@ import App from "./App";
 import "./styles.css";
 import "./guyu.css";
 import "./header-tablet-nav.css";
+import "./experience/cinematic.css";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>

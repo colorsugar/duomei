@@ -63,6 +63,7 @@ function neteaseMusicDevApi() {
 }
 
 export default defineConfig({
+  server: { host: "0.0.0.0", allowedHosts: ["terminal.local"] },
   base: process.env.GITHUB_PAGES ? "/duomei/" : "/",
   plugins: [react(), neteaseMusicDevApi()],
 });

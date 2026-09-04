@@ -1,5 +1,6 @@
-import { useEffect, useRef, useState } from "react";
-import { KineticHeroStage } from "../components/HomeKineticStage";
+import { useEffect, useState } from "react";
+import { CinematicHero } from "../experience/CinematicHero";
+import { ChapterAtmosphere } from "../experience/ChapterAtmosphere";
 import { NotesDreamTransition } from "../components/NotesDreamTransition";
 import { PaperLayer } from "../components/PaperLayer";
 import { ZaobaoSection } from "../components/ZaobaoSection";
@@ -19,72 +20,6 @@ const homeProgressSections = [
   { id: "weiyan", label: "微言" },
   { id: "skills", label: "Skill" },
 ] as const;
-
-function HomeSectionProgress() {
-  const progressRef = useRef<HTMLDivElement | null>(null);
-  const [activeLabel, setActiveLabel] = useState("首页");
-  const [visible, setVisible] = useState(false);
-
-  useEffect(() => {
-    let frame = 0;
-    const update = () => {
-      frame = 0;
-      const viewportTop = window.scrollY;
-      const boundaries = homeProgressSections.map((section) => ({
-        ...section,
-        top: section.id === "home"
-          ? 0
-          : (document.getElementById(section.id)?.getBoundingClientRect().top ?? Number.POSITIVE_INFINITY) + window.scrollY,
-      }));
-      const footerTop = (document.querySelector<HTMLElement>(".duomei-footer")?.getBoundingClientRect().top ?? Number.POSITIVE_INFINITY) + window.scrollY;
-      const activationLine = viewportTop + Math.min(72, window.innerHeight * 0.1);
-      let activeIndex = 0;
-      for (let index = 1; index < boundaries.length; index += 1) {
-        if (boundaries[index].top <= activationLine) activeIndex = index;
-      }
-      const current = boundaries[activeIndex];
-      const nextTop = boundaries[activeIndex + 1]?.top ?? footerTop;
-      const currentElement = current.id === "home" ? null : document.getElementById(current.id);
-      const currentBottom = currentElement
-        ? currentElement.getBoundingClientRect().bottom + window.scrollY
-        : nextTop;
-      const stageHeight = currentElement
-        ?.querySelector<HTMLElement>(".home-section-hold-stage, .poetry-portal-stage")
-        ?.getBoundingClientRect().height ?? window.innerHeight;
-      const progressEnd = currentElement?.hasAttribute("data-home-section-hold") ? currentBottom : nextTop;
-      const holdDistance = Math.max(1, progressEnd - current.top - stageHeight);
-      const sectionProgress = Math.min(1, Math.max(0, (viewportTop - current.top) / holdDistance));
-      progressRef.current?.style.setProperty("--home-section-progress", String(sectionProgress));
-      setActiveLabel(current.label);
-      setVisible(window.scrollY > 48 && window.scrollY + window.innerHeight < footerTop);
-    };
-    const onScroll = () => {
-      if (frame) return;
-      frame = window.requestAnimationFrame(update);
-    };
-    update();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", onScroll);
-    return () => {
-      if (frame) window.cancelAnimationFrame(frame);
-      window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", onScroll);
-    };
-  }, []);
-
-  return (
-    <div
-      className={`home-section-progress${visible ? " is-visible" : ""}`}
-      ref={progressRef}
-      aria-live="polite"
-      aria-label={`当前板块：${activeLabel}`}
-    >
-      <span>当前</span>
-      <i aria-hidden="true"><b /></i>
-      <strong>{activeLabel}</strong>
-    </div>
-  );
-}
 
 export function DuomeiHomePage() {
   const { editMode, openNoteEditor, refreshKey } = useDuomeiEdit();
@@ -111,14 +46,14 @@ export function DuomeiHomePage() {
 
   return (
     <>
-      <main className="duomei-stage duomei-kinetic-active">
-        <KineticHeroStage />
+      <main className="duomei-stage duomei-kinetic-active cinema-home">
+        <CinematicHero />
         <PaperLayer>
           <ZaobaoSection />
           <NotesDreamTransition canCreate={editMode || localPoetryPreview} notes={notes} onCreate={() => openNoteEditor()} />
         </PaperLayer>
       </main>
-      <HomeSectionProgress />
+      <ChapterAtmosphere chapters={homeProgressSections} />
     </>
   );
 }
