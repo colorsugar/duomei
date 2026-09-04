@@ -14,7 +14,7 @@ export const LANDMARKS = [
     desc: '杉湖中的九级八角铜塔，高 41 m，钢筋混凝土外包黄铜 350 t，塔刹、瓦面、翘角、斗拱、门窗皆为铜制，塔内设电梯，为世界最高铜塔、最高水中塔。夜间金黄灯光。' },
   { id: 'yueta', name: '月塔', kind: 'pagoda', lat: 25.274178, lon: 110.290154, h: 35, span: 90,
     desc: '七级八角琉璃塔，高 35 m，与日塔以 18 m 长的湖底水族隧道相连；一层临湖有太极鼓，地宫绘明代青花梅瓶壁画。夜间银白灯光。' },
-  { id: 'xiaoyaolou', name: '逍遥楼', kind: 'building', lat: 25.281308, lon: 110.297253, h: 24, span: 170,
+  { id: 'xiaoyaolou', name: '逍遥楼', kind: 'building', lat: 25.281308, lon: 110.297253, h: 24, span: 170, view: [-.9,.55,.4],
     photo: { src: './assets/photos/xiaoyaolou.webp', alt: '逍遥楼正面的木构楼阁', caption: '多美实拍 · 2026' },
     desc: '唐武德四年（621）桂州大总管李靖始建于东城楼上，与黄鹤楼、滕王阁齐名；2016 年于解放桥北滨江路重建。二层三檐楼阁式，仿唐宋风格，连同基座总高约 24 m。深棕木构、灰瓦飞檐、白墙与二层回廊；正面有宽阶梯和凸出的门廊，滨江路侧则有高石砌挡墙。' },
   { id: 'dongxixiang', name: '东西巷', kind: 'street', lat: 25.28140, lon: 110.29548, span: 350, view: [.2,.9,1],

@@ -61,7 +61,7 @@ export function build({F,TEX}) {
   const light=new THREE.PointLight(0xffcc85,28,55,1.7);light.position.set(0,6,13);g.add(light);
   g.updateMatrixWorld(true);const bounds=new THREE.Box3().setFromObject(g);
   g.scale.y=24/(bounds.max.y-bounds.min.y);
-  g.rotation.y=ringAngle(F.xiaoyaolou.o)+Math.PI/2;
+  g.rotation.y=ringAngle(F.xiaoyaolou.o)-Math.PI/2;
   g.position.set(F.xiaoyaolou.c[0],0,F.xiaoyaolou.c[1]);g.userData.top=24;
   // The western plaza is above the riverside road. Keep both platform and
   // tower within 24m; the visible east retaining wall is not another 8m tower.

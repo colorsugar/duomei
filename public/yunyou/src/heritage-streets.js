@@ -38,7 +38,7 @@ export function createHeritageStreets(TEX){
   }
  }
  // Small traditional entry frame on the eastern alley, leaving the footpath open.
- const portal=new THREE.Group();portal.position.set(311,0,148);portal.rotation.y=.22;group.add(portal);
+ const portal=new THREE.Group();portal.position.set(311,0,148);portal.rotation.y=Math.PI/2-.22;group.add(portal);
  for(const x of [-4,4]){box(.6,5.3,.6,wood,x,2.65,0,0,portal);box(1,.6,1,trim,x,.3,0,0,portal);}
  box(9,.8,.65,wood,0,4.6,0,0,portal);const sign=plaque('东西巷',3.4,.85);sign.position.set(0,4.6,.36);portal.add(sign);
  portal.add(polyRoof({sides:4,rx:4.4,rz:.65,h:1,ridge:7,over:.6,curl:.3,y:5.1,rows:3,segs:5,mats:{roof:K.tile,ridge:K.ridge,eaveWood:wood}}));
