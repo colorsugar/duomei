@@ -138,7 +138,7 @@ EdgeOne production has a precise client-IP rate-limit rule for `/api/guyu-auth` 
 - At supported mobile widths and short viewports, complete poetry cards, captions, controls, and the fixed section progress rail must remain visible without clipping or overlap.
 - Note detail keeps a visible 44px `← 返回小记` target in loading, missing, and loaded states, below the fixed header.
 - The poetry portal target keeps `id="kuaihuo"`.
-- The admin reflects EdgeOne production plus the live homepage map: 早报 / 小记 / 快活 / 故语 / 云游 / 颜色 / 微言 / 技能, and only 小记 is editable in `/admin`.
+- The admin reflects 首页 / 微言 / 小记管理.
 - The homepage paper curve reaches the full right edge.
 - The full-site footer remains at the end of the site without duplicating the companion.
 - `/skills` remains the standalone full Skill index, while the homepage also renders the shared Skill directory before the copyright footer.
