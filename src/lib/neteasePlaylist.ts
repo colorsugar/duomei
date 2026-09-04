@@ -1,6 +1,7 @@
 export const NETEASE_PLAYLIST_ID = "316500315";
 export const NETEASE_PLAYLIST_MAX_TRACKS = 3_000;
 export const NETEASE_PLAYLIST_URL = "/api/music-playlist";
+export const NETEASE_DEFAULT_TRACK_ID = "28568227";
 
 export type NeteasePlaylistTrack = {
   id: string;
@@ -19,6 +20,17 @@ export type NeteasePlaylist = {
 };
 
 export type NeteasePlaylistErrorKind = "network" | "format";
+
+export function findInitialNeteaseTrackIndex(
+  tracks: NeteasePlaylistTrack[],
+  failedIds: ReadonlySet<string> = new Set(),
+) {
+  const preferred = tracks.findIndex(
+    (track) => track.id === NETEASE_DEFAULT_TRACK_ID && track.playable && !failedIds.has(track.id),
+  );
+  if (preferred >= 0) return preferred;
+  return tracks.findIndex((track) => track.playable && !failedIds.has(track.id));
+}
 
 export class NeteasePlaylistError extends Error {
   readonly kind: NeteasePlaylistErrorKind;

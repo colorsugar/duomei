@@ -1965,18 +1965,36 @@ body {
   }
 
   .guyu-reader-heading {
-    inset-block-start: calc(env(safe-area-inset-top, 0px) + var(--size-guyu-mobile-edge));
-    inset-inline-start: calc(env(safe-area-inset-left, 0px) + var(--size-guyu-mobile-edge));
+    inset-block-start: auto;
+    inset-block-end: calc(env(safe-area-inset-bottom, 0px) + var(--size-guyu-mobile-edge));
+    inset-inline-start: auto;
+    inset-inline-end: calc(env(safe-area-inset-right, 0px) + var(--size-guyu-mobile-edge));
   }
 
   .guyu-reader-close {
-    inset-block-start: calc(env(safe-area-inset-top, 0px) + var(--size-guyu-mobile-edge));
-    inset-inline-start: calc(env(safe-area-inset-left, 0px) + var(--size-guyu-mobile-edge));
+    inset-block-start: auto;
+    inset-block-end: calc(env(safe-area-inset-bottom, 0px) + var(--size-guyu-mobile-edge));
+    inset-inline-start: auto;
+    inset-inline-end: calc(env(safe-area-inset-right, 0px) + var(--size-guyu-mobile-edge));
   }
 
   .guyu-reader-page .guyu-book-controls {
     inline-size: min(calc(100vw - var(--space-xl)), var(--size-guyu-controls-mobile-max));
-    inset-block-end: calc(env(safe-area-inset-bottom, 0px) + var(--size-guyu-mobile-edge));
+    inset-block-end: calc(
+      env(safe-area-inset-bottom, 0px)
+      + var(--size-guyu-mobile-edge)
+      + var(--size-hit)
+      + var(--space-sm)
+    );
+  }
+
+  .guyu-reader-page .guyu-open-hint {
+    inset-block-end: calc(
+      env(safe-area-inset-bottom, 0px)
+      + var(--size-guyu-mobile-edge)
+      + var(--size-hit)
+      + var(--space-sm)
+    );
   }
 }
 

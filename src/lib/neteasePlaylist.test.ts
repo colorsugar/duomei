@@ -7,6 +7,7 @@ const {
   NETEASE_PLAYLIST_MAX_TRACKS,
   NeteasePlaylistError,
   fetchNeteasePlaylist,
+  findInitialNeteaseTrackIndex,
   parseNeteasePlaylist,
 } = playlist;
 
@@ -107,4 +108,15 @@ test("uses the same-origin endpoint and distinguishes transport failures", async
   } finally {
     globalThis.fetch = originalFetch;
   }
+});
+
+test("prefers 花枝春野 and falls back to the first remaining playable track", () => {
+  const tracks = [
+    track("1"),
+    track("28568227", { name: "花枝春野", artist: "蔡明希（不才）" }),
+    track("3"),
+  ];
+  assert.equal(findInitialNeteaseTrackIndex(tracks), 1);
+  assert.equal(findInitialNeteaseTrackIndex(tracks, new Set(["28568227", "1"])), 2);
+  assert.equal(findInitialNeteaseTrackIndex(tracks.map((item) => ({ ...item, playable: false }))), -1);
 });

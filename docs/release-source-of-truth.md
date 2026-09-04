@@ -34,12 +34,15 @@ Agent-specific files are pointers only. `PROJECT_CONTEXT.md` contains the shared
 The following files form one release unit. If any of them changes for poetry/快活/微言 work, inspect the entire group and publish the complete intended version together:
 
 - `.github/workflows/deploy-edgeone.yml`
+- `index.html`
 - `src/components/HomeIntroSection.tsx`
 - `src/components/HomeIntroSection.css`
 - `src/components/HomeKineticStage.tsx`
 - `src/components/HomeSectionHold.tsx`
 - `src/components/YunyouSection.tsx`
 - `src/components/YunyouSection.css`
+- `src/pages/DuomeiYunyouPage.tsx`
+- `src/yunyou-page.css`
 - `src/components/NotesDreamTransition.tsx`
 - `src/components/SkillsDirectory.tsx`
 - `src/components/DuomeiMusicPlayer.tsx`
@@ -70,7 +73,7 @@ The following files form one release unit. If any of them changes for poetry/快
 - `src/styles.css`
 - `vite.config.ts`
 - `public/images/stickers/` supplied preview and QR assets
-- `public/yunyou/` same-origin 3D map runtime, data, textures, fallback and vendored Three.js license
+- `public/yunyou/` same-origin embedded 3D map runtime, redirect/embedding boundary, data, textures, fallback and vendored Three.js license
 - `scripts/verify-release.ps1`
 
 Do not stage or deploy only the navigation, anchor, footer, or CSS portion while editor files remain modified or untracked.
@@ -116,7 +119,7 @@ Current EdgeOne production keeps only the 53-page `meiyou-yujian` class book beh
 
 The reader pins `react-pageflip@2.0.3` and `page-flip@2.0.7`. Scan numbers 10, 16, 21, 23–27, 30, 34, 39–40, and 42–51 are paired visual spreads; the source remains one private object while the reader crops it across two persistent logical pages. Scan 15 is a wide single page and must not be split.
 
-All logical leaves deliberately use StPageFlip's hard-page density to match the referenced rigid-board album rather than a soft paper curl. The reader's visible back control and browser-history exit force a full document navigation so the pinned upstream render loop cannot accumulate across repeated SPA reader mounts; the component also calls `destroy()` as production cleanup.
+All logical leaves deliberately use StPageFlip's hard-page density to match the referenced rigid-board album rather than a soft paper curl. Reader exits stay inside React Router so the global audio element survives; every production unmount calls StPageFlip's documented `destroy()` cleanup to remove its root and event handlers. Repeated reader open/back cycles are a release check because full-document reload is no longer used as cleanup.
 
 If an unpushed local commit ever contains the protected `meiyou-yujian` pages, amend or squash that commit before pushing. A later deletion commit is not enough because the public repository would retain the original blobs in history.
 
@@ -137,14 +140,14 @@ EdgeOne production has a precise client-IP rate-limit rule for `/api/guyu-auth` 
 - On short mobile viewports, the static notes stage uses its natural content height inside the unchanged `230svh` track so the complete card clears before the next section; never shrink or clip the card text or alter the tilt pipeline.
 - “故语” sits between “快活” and “颜色”; its event-driven 16-fragment transition now scatters and reassembles through a soft paper mist, crossfades the two copy layers, waits for the incoming base cover decode, and completes a 1.6-second settle before starting a separate five-second dwell. The settled text uses a clear five-second breathing cycle. The whole card opens `/guyu/{book.id}`; the 44px “查看所有” link opens `/guyu`, with swipe, Arrow/Home/End keys, pause, progress dots, first/last looping, and reduced-motion fallbacks preserved.
 - “颜色” preserves the supplied 多美 and 多美猪猪 WeChat preview/QR assets and their official short links.
-- “云游” sits between “故语” and “颜色”; its homepage card opens the same-origin `/yunyou/` static 3D map, never a Vercel Preview. The map keeps a visible return link, WebGL/module fallback, local Three.js runtime, mobile DPR cap, manual auto-rotate control, and reduced-motion behavior.
+- “云游” sits between “故语” and “颜色”; its homepage card opens the React `/yunyou-map` shell, never a Vercel Preview. The shell keeps the shared music player mounted and embeds the isolated same-origin `/yunyou/index.html?embed=1` static map. Top-level `/yunyou/` redirects to the shell unless `?standalone=1`; the iframe hides its duplicate return link while preserving WebGL/module fallback, local Three.js runtime, mobile DPR cap, manual auto-rotate control, and reduced-motion behavior. `edgeone.json` keeps global `X-Frame-Options: DENY` and overrides only `/yunyou/*` to `SAMEORIGIN` with `Content-Security-Policy: frame-ancestors 'self'`; production verification checks both sides of that boundary.
 - Mobile keeps the fixed safe-area shortcut order 首页 / 早报 / 小记 / 故语 / 云游 / 颜色 / 微言 / Skill; desktop renders the same shortcuts inside the footer.
 - The mobile footer keeps those eight shortcuts on one compact 44px-high row, reduces Guyu shelf-end whitespace, and hides the back-to-top button while the footer intersects the viewport so no link or copyright copy is covered.
 - The frozen mobile header uses one synchronous native short-tap path on the portal DOM: buttons activate immediately, anchors call `window.location.assign()` before iOS user activation expires, and the compatibility click is suppressed once. Sticky hover/focus must never override `.is-menu-open` visibility or pointer events.
 - `/guyu/meiyou-yujian` keeps all 53 scans, expands detected two-page scans into aligned logical spreads, preserves the front and back covers, uses the pinned StPageFlip engine for full-screen phone/desktop page turns, and keeps keyboard plus compact overlay controls.
 - `/guyu/zhi-shang-feiyan`, `/guyu/xinshuo-01`, `/guyu/xinshuo-02`, and `/guyu/gui-xiang-huan-xiang` appear under the public `新说` shelf and reuse the same GuyuFlipbook. Each has exactly 30 complete `full` pages and never enters the old-book split/stack pipeline.
 - The Guyu book surface keeps browser-native pan and pinch zoom enabled. The reader capture layer is the sole page-turn gesture owner: a sequence that ever reaches two fingers stays zoom-only until all fingers are released, and its later touchend or compatibility mouse event must never turn a page. While the visual viewport remains above 100%, the book enables native two-axis panning and blocks touch, mouse, keyboard, and programmatic page turns; returning to 100% restores turning only for the next fresh gesture.
-- The `/guyu` shelf has a visible 44px `← 返回首页` link targeting `/#guyu`; on the closed cover the top control is `返回故语`, and after opening it is replaced by `合上`, which calls the existing preload-safe jump to page zero. Guyu shelf titles wrap completely inside their cards at 320px and wider.
+- The `/guyu` shelf has a visible 44px `← 返回首页` link targeting `/#guyu`; on the closed cover the control is `返回故语`, and after opening it is replaced by `合上`, which calls the existing preload-safe jump to page zero. On phones those actions sit in the bottom-right safe-area thumb zone and the page rail/open hint sits one control row above; desktop keeps the top placement. Reader back/history exits remain SPA navigations. Guyu shelf titles wrap completely inside their cards at 320px and wider.
 - Only `/guyu/meiyou-yujian` and its `/api/guyu-page` requests remain behind the original server-verified class question. `/guyu` and all `新说` readers are public; no other route may display the class gate.
 - The header menu item `故语` targets the homepage `/#guyu` position, not `/guyu` directly.
 - At supported mobile widths and short viewports, complete poetry cards, captions, controls, and the tiny fixed section-progress hint must remain visible without clipping or overlap; the hint must not regain a card, pill, border, or shadow.
@@ -156,7 +159,7 @@ EdgeOne production has a precise client-IP rate-limit rule for `/api/guyu-auth` 
 - `/skills` remains the standalone full Skill index, while the homepage also renders the shared Skill directory before the copyright footer.
 - Both Skill surfaces link to the public `colorsugar/agent-skills` repository and preserve the site-wide header, footer, and mobile menu-close behavior.
 - `/zaobao` is a bare-chrome immersive reader: it fetches the CORS-enabled daily HTML, renders only parsed text/images/source links in the local React layout, and falls back to the original iframe if parsing fails.
-- The NetEase player uses playlist `316500315` through same-origin EdgeOne playlist, stream, and lyric handlers that call only NetEase's anonymous official web endpoints. The service validates the source order, derives in-site playability strictly from `privilege.pl > 0`, redirects playable audio to HTTPS NetEase CDN URLs, and returns bounded original/translated lyric text. The UI removes non-playable rows and real playback failures, and no player action navigates away. No NetEase login, cookie, password, or QR session is accepted or stored. Its single Warm Archive control bar exposes mode, lyrics, volume, queue, and a slim timeline that expands on hover/focus and supports direct seeking. It auto-minimizes into a record orb; the orb or expanded cover can be long-pressed to move and persists one bounded position. All public content routes expose the complete controls, while immersive readers enter collapsed and admin hides the player.
+- The NetEase player uses playlist `316500315` through same-origin EdgeOne playlist, stream, and lyric handlers that call only NetEase's anonymous official web endpoints. The service validates source order, derives in-site playability strictly from `privilege.pl > 0`, redirects playable audio to HTTPS NetEase CDN URLs, and returns bounded original/translated lyric text. The UI removes non-playable rows and real playback failures, and no player action navigates away. No NetEase login, cookie, password, or QR session is accepted or stored. New sessions default to playable track `28568227`, 《花枝春野》 by 蔡明希（不才）, with shuffle as the default subsequent mode unless the visitor stored another choice. The single Warm Archive bar exposes mode, lyrics, volume, queue, and direct seeking. It auto-minimizes into a movable record orb. All public React routes, including Guyu readers and the iframe-backed Yunyou shell, keep one audio element mounted so track, progress, and play state survive navigation; a fresh audible play still obeys Safari's user-gesture policy. Admin hides the player.
 - Public pathname changes share a 1.3-second paper-fog reveal. Hash-only homepage movement does not replay it, admin is excluded, and Guyu readers keep their separate decode-gated reveal plus 1.4-second native page turn.
 
 ## Required Release Procedure
@@ -179,5 +182,5 @@ If any bundle file is still modified, staged, or untracked after the commit, the
 - `EDGEONE_API_TOKEN` exists only as a GitHub Actions Secret. Runtime `GUYU_*` values remain in the EdgeOne console and must never be copied into GitHub.
 - The media Worker keeps its exact Linux x64 native companion packages as optional dependencies so `npm ci` works on GitHub's Ubuntu runner without changing Windows development.
 - Note image uploads use the authenticated media Worker at `/v1/upload`; production CORS includes only `duomei.site` plus retained reviewed origins, and SVG uploads remain rejected.
-- Production is accepted only when the generated `/.well-known/duomei-build.json` matches the pushed commit, the homepage/auth/private-page checks return `200/200/401`, and `/yunyou/index.html` plus `/yunyou/src/main.js` resolve as the real static map rather than the SPA fallback.
+- Production is accepted only when the generated `/.well-known/duomei-build.json` matches the pushed commit, the homepage/auth/private-page checks return `200/200/401`, `/yunyou-map` loads the React shell, and `/yunyou/index.html` plus `/yunyou/src/main.js` resolve as the real embedded static map rather than the SPA fallback.
 - `.github/workflows/deploy.yml` is a manual-only legacy GitHub Pages fallback and must not run on pushes to `main`.

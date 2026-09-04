@@ -19,6 +19,7 @@ import { useSmoothScroll } from "./hooks/useSmoothScroll";
 import { MotionProvider } from "./motion";
 import { DuomeiCompanion } from "./components/companion";
 import { DuomeiMusicPlayer } from "./components/DuomeiMusicPlayer";
+import { DuomeiYunyouPage } from "./pages/DuomeiYunyouPage";
 
 function PublicRoutePaperVeil({ pathname, disabled }: { pathname: string; disabled: boolean }) {
   const previousPathRef = useRef(pathname);
@@ -51,7 +52,8 @@ function AppRoutes() {
   const isTimePage = location.pathname === "/time";
   const isGuyuReader = location.pathname.startsWith("/guyu/");
   const isZaobao = location.pathname === "/zaobao" || location.pathname.startsWith("/zaobao/");
-  const bareChrome = isAdmin || isGuyuReader || isZaobao;
+  const isYunyouMap = location.pathname === "/yunyou-map";
+  const bareChrome = isAdmin || isGuyuReader || isZaobao || isYunyouMap;
   useSmoothScroll(bareChrome || isTimePage);
 
   return (
@@ -68,6 +70,7 @@ function AppRoutes() {
         <Route path="/guyu" element={<DuomeiGuyuPage />} />
         <Route path="/guyu/:bookId" element={<DuomeiGuyuReaderPage />} />
         <Route path="/skills" element={<DuomeiSkillsPage />} />
+        <Route path="/yunyou-map" element={<DuomeiYunyouPage />} />
         <Route path="/about" element={<Navigate to="/#kuaihuo" replace />} />
         <Route path="/admin/login" element={<DuomeiAdmin mode="login" />} />
         <Route path="/admin" element={<DuomeiAdmin mode="notes" />} />
@@ -76,7 +79,7 @@ function AppRoutes() {
       </Routes>
       <PublicRoutePaperVeil pathname={location.pathname} disabled={isAdmin || isGuyuReader} />
       {!bareChrome ? <DuomeiFooter /> : null}
-      {!isAdmin ? <DuomeiMusicPlayer compactContext={isGuyuReader || isZaobao} /> : null}
+      {!isAdmin ? <DuomeiMusicPlayer compactContext={isGuyuReader || isZaobao || isYunyouMap} /> : null}
       {!bareChrome ? <DuomeiCompanion /> : null}
       {!bareChrome ? <BackToTopButton /> : null}
     </DuomeiEditProvider>

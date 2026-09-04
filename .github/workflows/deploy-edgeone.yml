@@ -132,7 +132,7 @@ jobs:
           for (let attempt = 1; attempt <= 18; attempt += 1) {
             try {
               const nonce = `${Date.now()}-${attempt}`;
-              const [marker, home, auth, protectedOldPage, publicFeiyanPage, publicXinshuoOnePage, publicXinshuoTwoPage, publicGuiXiangPage, yunyouIndex, yunyouMain, musicPlaylist] = await Promise.all([
+              const [marker, home, auth, protectedOldPage, publicFeiyanPage, publicXinshuoOnePage, publicXinshuoTwoPage, publicGuiXiangPage, yunyouShell, yunyouIndex, yunyouMain, musicPlaylist] = await Promise.all([
                 fetch(`https://duomei.site/.well-known/duomei-build.json?ci=${nonce}`, { cache: "no-store" }),
                 fetch(`https://duomei.site/?ci=${nonce}`, { cache: "no-store" }),
                 fetch(`https://duomei.site/api/guyu-auth?ci=${nonce}`, { cache: "no-store" }),
@@ -141,6 +141,7 @@ jobs:
                 fetch(`https://duomei.site/images/guyu/xinshuo-01/pages/001.webp?ci=${nonce}`, { cache: "no-store" }),
                 fetch(`https://duomei.site/images/guyu/xinshuo-02/pages/001.webp?ci=${nonce}`, { cache: "no-store" }),
                 fetch(`https://duomei.site/images/guyu/gui-xiang-huan-xiang/pages/001.webp?ci=${nonce}`, { cache: "no-store" }),
+                fetch(`https://duomei.site/yunyou-map?ci=${nonce}`, { cache: "no-store" }),
                 fetch(`https://duomei.site/yunyou/index.html?ci=${nonce}`, { cache: "no-store" }),
                 fetch(`https://duomei.site/yunyou/src/main.js?ci=${nonce}`, { cache: "no-store" }),
                 fetch(`https://duomei.site/api/music-playlist?ci=${nonce}`, { cache: "no-store" }),
@@ -148,6 +149,9 @@ jobs:
               const markerBody = marker.ok ? await marker.json() : null;
               const authBody = auth.ok ? await auth.json() : null;
               const yunyouBody = yunyouIndex.ok ? await yunyouIndex.text() : "";
+              const homeFrameOptions = home.headers.get("x-frame-options") ?? "";
+              const yunyouFrameOptions = yunyouIndex.headers.get("x-frame-options") ?? "";
+              const yunyouFrameAncestors = yunyouIndex.headers.get("content-security-policy") ?? "";
               const musicBody = musicPlaylist.ok ? await musicPlaylist.json() : null;
               const playableTrack = musicBody?.tracks?.find((track) => track.playable === true);
               const musicStream = playableTrack
@@ -163,6 +167,7 @@ jobs:
                 marker.status === 200 &&
                 markerBody?.commit === expectedCommit &&
                 home.status === 200 &&
+                homeFrameOptions.toUpperCase() === "DENY" &&
                 auth.status === 200 &&
                 authBody?.authorized === false &&
                 protectedOldPage.status === 401 &&
@@ -170,9 +175,14 @@ jobs:
                 publicXinshuoOnePage.status === 200 &&
                 publicXinshuoTwoPage.status === 200 &&
                 publicGuiXiangPage.status === 200 &&
+                yunyouShell.status === 200 &&
                 yunyouIndex.status === 200 &&
                 yunyouBody.includes("云游桂林 · 多美小记") &&
                 yunyouBody.includes("./vendor/three/three.module.js") &&
+                yunyouBody.includes('window.location.replace("/yunyou-map")') &&
+                yunyouBody.includes("window.self !== window.top") &&
+                yunyouFrameOptions.toUpperCase() === "SAMEORIGIN" &&
+                yunyouFrameAncestors.includes("frame-ancestors 'self'") &&
                 yunyouMain.status === 200 &&
                 musicPlaylist.status === 200 &&
                 musicBody?.playlistId === 316500315 &&
@@ -189,7 +199,7 @@ jobs:
                 process.exit(0);
               }
 
-              lastError = `marker=${marker.status}/${markerBody?.commit ?? "missing"} home=${home.status} auth=${auth.status}/${authBody?.authorized} protected-old=${protectedOldPage.status} public-feiyan=${publicFeiyanPage.status} public-xinshuo-01=${publicXinshuoOnePage.status} public-xinshuo-02=${publicXinshuoTwoPage.status} public-gui-xiang=${publicGuiXiangPage.status} yunyou=${yunyouIndex.status}/${yunyouBody.includes("云游桂林 · 多美小记")} yunyou-main=${yunyouMain.status} music=${musicPlaylist.status}/${musicBody?.total ?? "missing"}/${musicBody?.tracks?.length ?? "missing"} music-stream=${musicStream?.status ?? "missing"}/${musicLocation} music-lyric=${musicLyric?.status ?? "missing"}/${musicLyricBody?.id ?? "missing"}`;
+              lastError = `marker=${marker.status}/${markerBody?.commit ?? "missing"} home=${home.status}/${homeFrameOptions} auth=${auth.status}/${authBody?.authorized} protected-old=${protectedOldPage.status} public-feiyan=${publicFeiyanPage.status} public-xinshuo-01=${publicXinshuoOnePage.status} public-xinshuo-02=${publicXinshuoTwoPage.status} public-gui-xiang=${publicGuiXiangPage.status} yunyou-shell=${yunyouShell.status} yunyou=${yunyouIndex.status}/${yunyouBody.includes("云游桂林 · 多美小记")}/${yunyouBody.includes('window.location.replace("/yunyou-map")')}/${yunyouFrameOptions}/${yunyouFrameAncestors} yunyou-main=${yunyouMain.status} music=${musicPlaylist.status}/${musicBody?.total ?? "missing"}/${musicBody?.tracks?.length ?? "missing"} music-stream=${musicStream?.status ?? "missing"}/${musicLocation} music-lyric=${musicLyric?.status ?? "missing"}/${musicLyricBody?.id ?? "missing"}`;
             } catch (error) {
               lastError = error instanceof Error ? error.message : String(error);
             }

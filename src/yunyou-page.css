@@ -1,0 +1,85 @@
+/* Hallmark · component: immersive map shell · genre: editorial · theme: Warm Archive
+ * states: default · hover · focus · active · reduced motion
+ * pre-emit critique: P5 H4 E5 S4 R5 V4 · contrast: pass · mobile: pass (34, 49, 50–57)
+ */
+.yunyou-map-page {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-base);
+  overflow: hidden;
+  color: var(--color-ink);
+  background: var(--color-paper-3);
+}
+
+.duomei-motion-root > .yunyou-map-page {
+  position: fixed;
+  inset: 0;
+  inline-size: 100%;
+  block-size: 100svh;
+}
+
+.yunyou-map-frame {
+  inline-size: 100%;
+  block-size: 100%;
+  display: block;
+  background: var(--color-paper-3);
+  border: 0;
+}
+
+.yunyou-map-back {
+  position: fixed;
+  inset-block-start: max(var(--space-md), env(safe-area-inset-top, 0px));
+  inset-inline-start: var(--space-lg);
+  z-index: var(--z-sticky);
+  min-block-size: var(--size-hit);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding-inline: var(--space-md);
+  color: var(--color-ink);
+  background: color-mix(in oklch, var(--color-paper) 88%, transparent);
+  border: var(--rule-hairline) solid var(--color-rule);
+  border-radius: var(--radius-pill);
+  box-shadow: var(--shadow-book-soft);
+  font-size: var(--text-sm);
+  text-decoration: none;
+  white-space: nowrap;
+  backdrop-filter: blur(var(--space-sm));
+  transition:
+    background-color var(--dur-short) var(--ease-out),
+    opacity var(--dur-short) var(--ease-out),
+    transform var(--dur-micro) var(--ease-out);
+}
+
+body:has(.duomei-music-player:not(.is-minimized)) .yunyou-map-back {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(var(--space-xs));
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .yunyou-map-back:hover {
+    background: var(--color-paper);
+  }
+}
+
+.yunyou-map-back:active {
+  transform: translateY(var(--space-3xs));
+}
+
+.yunyou-map-back:focus-visible {
+  outline: var(--rule-focus) solid var(--color-focus);
+  outline-offset: var(--space-2xs);
+}
+
+@media (max-width: 40rem) {
+  .yunyou-map-back {
+    inset: auto max(var(--space-md), env(safe-area-inset-right, 0px)) max(var(--space-md), env(safe-area-inset-bottom, 0px)) auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .yunyou-map-back {
+    transition: none;
+  }
+}

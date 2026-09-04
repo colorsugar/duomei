@@ -1,6 +1,6 @@
 # DUOMEI Project Context — Required AI Reading
 
-Last reviewed: 2026-09-04.
+Last reviewed: 2026-09-05.
 
 This is the canonical cross-AI maintenance entry for DUOMEI. Read it before changing code, configuration, content, credentials, or deployment state. If another document conflicts with this file, stop and verify the live repository and production marker before acting.
 
@@ -37,9 +37,9 @@ Browser at duomei.site
 │  ├─ admin → Supabase Auth + RLS; media upload → Cloudflare Worker/R2
 │  └─ Guyu UI → public shelf/new-book assets; old class book → same-origin auth/page API
 │
-├─ Yunyou static 3D map (`public/yunyou/` → `/yunyou/`)
-│  ├─ Guilin map, landmarks and OSM-derived geometry
-│  └─ vendored Three.js 0.170.0 runtime with local MIT license
+├─ Yunyou immersive shell (`/yunyou-map`)
+│  ├─ persistent React music layer + same-origin iframe `/yunyou/index.html?embed=1`
+│  └─ isolated static Guilin map, OSM-derived geometry and vendored Three.js 0.170.0 runtime
 │
 ├─ EdgeOne Node Cloud Function (`cloud-functions/api/[[default]].js`)
 │  └─ Guyu core (`deploy/guyu-edgeone/server/guyu-core.cjs`)
@@ -82,7 +82,7 @@ Only the 53-page class book uses the protected EdgeOne Blob path and the origina
 | Legacy Supabase `note-images` | Supabase Storage | 0 objects; retained only as a locked rollback boundary after the upload migration |
 | Protected class-book pages | EdgeOne Pages Blob `guyu-private` | 53-page `meiyou-yujian`; only this book uses `/api/guyu-auth` and `/api/guyu-page` |
 | Public `新说` pages | EdgeOne static deployment | 120 ordered WebP pages: `纸上飞檐`, `xinshuo-01`, `xinshuo-02`, and `gui-xiang-huan-xiang`; hashes and page sequences are release-tested |
-| Yunyou 3D map | EdgeOne static deployment | same-origin `/yunyou/`; source pinned to a private-source commit and Three.js runtime vendored locally |
+| Yunyou 3D map | EdgeOne static deployment inside React shell | `/yunyou-map` keeps the site music layer mounted and embeds same-origin `/yunyou/index.html?embed=1`; source pinned and Three.js vendored locally |
 | Retained `纸上飞檐` Blob copy | EdgeOne Pages Blob `guyu-private` | 30 objects retained only as an unused rollback copy; not a live read path |
 | Retained Guyu fallback | Cloudflare R2 `duomei-private` | 53 objects, 11.4 MB; not the current EdgeOne read path |
 
@@ -103,7 +103,8 @@ External runtime hosts intentionally referenced by the site are `duomei.site`, `
 | `/guyu/xinshuo-01` | `新说 / 想象画本`, 30 complete `full` pages | No |
 | `/guyu/xinshuo-02` | `新说 / 月亮下的童梦`, 30 complete `full` watercolor pages | No |
 | `/guyu/gui-xiang-huan-xiang` | `新说 / 桂巷还香`, 30 complete `full` Guilin landmark plates | No |
-| `/yunyou/` | Same-origin Guilin Liangjiang Sihu interactive 3D map | Standalone map chrome with `返回多美` |
+| `/yunyou-map` | Immersive React shell for the Guilin map; preserves global music | No; bottom-safe `返回多美` on phones |
+| `/yunyou/` | Isolated static map runtime embedded by `/yunyou-map`; top-level visits redirect to the shell unless `?standalone=1` | Embedded chrome hides its duplicate return link |
 | `/skills` | Skill directory | Yes |
 | `/admin/login` | Supabase admin login | No |
 | `/admin`, `/admin/notes` | Note management | No |
@@ -119,14 +120,14 @@ External runtime hosts intentionally referenced by the site are `duomei.site`, `
 - The Guyu gate uses the original class-question wording and a numeric class-number field. Do not display a generated password length. Never place the real answer in source, tests, documentation, or public history, and never change the answer without explicit authorization.
 - The Guyu reader keeps the 53 physical old-book scans with their reviewed spread mapping. Only that class book is password-gated. The public shelf and all `新说` books reuse the same touch/keyboard reader with public static WebP pages.
 - Guyu reader touch ownership is frozen: the capture layer owns single-finger tap/swipe while leaving native vertical scroll and pinch zoom enabled. Once any touch sequence contains two fingers, that whole sequence is latched as zoom-only until every finger is released. While `visualViewport.scale > 1.01`, the page surface enables native horizontal and vertical panning and every page-turn path remains blocked; only a fresh single-finger gesture after returning to 100% may turn pages.
-- The `/guyu` shelf has a visible 44px `← 返回首页` link targeting `/#guyu`; a closed Guyu reader still shows `返回故语`, and an open reader replaces it with `合上`, which returns to the cover without leaving the route or destroying the reader. Shelf titles must wrap fully inside their card without ellipsis or clipping.
+- The `/guyu` shelf has a visible 44px `← 返回首页` link targeting `/#guyu`; a closed Guyu reader still shows `返回故语`, and an open reader replaces it with `合上`, which returns to the cover without leaving the route or destroying the reader. On phones both actions sit in the bottom-right safe-area thumb zone, while the page rail/open hint moves one control row higher. Reader exits use React Router SPA navigation and the production `destroy()` cleanup, so the global audio element stays mounted. Shelf titles must wrap fully inside their card without ellipsis or clipping.
 - The homepage Guyu preview starts its five-second dwell only after the incoming cover has decoded, completed the slow misted fragment reassembly, and finished its 1.6-second settle. Cover and copy crossfade instead of hard-switching, and the settled copy uses a deliberately visible five-second breath. The whole cover, copy, and “翻开这一本” card opens the current book at `/guyu/{book.id}`; a separate 44px “查看所有” link opens `/guyu`. It supports left/right swipe, Arrow/Home/End keys, pause, clickable progress dots, and seamless first/last looping; reduced-motion disables autoplay and uses immediate state changes.
 - On mobile, the Guyu shelf ending uses compact spacing and the footer keeps all eight shortcuts in one 44px-high row. The back-to-top control hides while the footer is visible so it never covers navigation or copyright text.
 - The header menu item `故语` targets `/#guyu`; it must never bypass the homepage preview by navigating directly to `/guyu`.
-- The header and footer item `云游` targets `/#yunyou`; the homepage card then opens the same-origin `/yunyou/` map. Production must never link this card to a Vercel Preview.
-- `/yunyou/` keeps a visible `← 返回多美` target, a loading state, a WebGL/module failure fallback, mobile DPR limits, touch rotation/zoom, a user-controlled auto-rotate toggle, and reduced-motion mode with auto-rotate disabled.
+- The header and footer item `云游` targets `/#yunyou`; the homepage card uses a React Router link to `/yunyou-map`, which keeps the existing global player alive around the isolated same-origin map iframe. Production must never link this card to a Vercel Preview.
+- `/yunyou-map` keeps a visible `← 返回多美` target and embeds `/yunyou/index.html?embed=1`; the embedded static map hides its duplicate return link but retains loading, WebGL/module failure fallback, mobile DPR limits, touch rotation/zoom, user-controlled auto-rotate, and reduced-motion mode. Direct top-level `/yunyou/` visits redirect to the shell; `?standalone=1` remains the explicit diagnostic escape hatch. Global pages retain `X-Frame-Options: DENY`; only `/yunyou/*` is narrowed to `SAMEORIGIN` plus `Content-Security-Policy: frame-ancestors 'self'` so the map cannot be framed off-site.
 - `/zaobao` removes the global site chrome, extracts only inert text/image/source fields from the CORS-enabled daily HTML, and renders a wide two-column editorial reader on desktop with a direct iframe fallback. Remote scripts are never executed.
-- The optional NetEase player uses playlist `316500315` through same-origin `/api/music-playlist`, `/api/music-stream`, and `/api/music-lyric` handlers backed only by NetEase's anonymous official web endpoints. The service validates the complete source order, while the UI removes tracks whose current anonymous privilege is not `pl > 0` and drops any row that fails during real playback; no player action navigates away to NetEase. It never stores a NetEase password, QR session, or cookie. The NetEase-inspired controls use the site's Warm Archive skin, keep the slim timeline inside the single control bar, and include synchronized original/translated lyrics plus sequence/shuffle/single-repeat modes. The bar folds into a small record orb, reveals on mouse dwell or touch/click, and its orb or expanded cover can be long-pressed with touch or mouse to place it within viewport bounds; there is no dedicated move/fix button. Position key `duomei-music-player-position-v4` intentionally discards obsolete pre-orb/test placement once, then persists the new bounded position. Home, notes, time, Guyu shelf, Skill, immersive `/zaobao`, and `/guyu/:bookId` all expose the same complete mode/lyrics/volume/list controls; immersive routes merely enter collapsed so playback survives route changes without covering reading. Admin routes hide the player.
+- The optional NetEase player uses playlist `316500315` through same-origin `/api/music-playlist`, `/api/music-stream`, and `/api/music-lyric` handlers backed only by NetEase's anonymous official web endpoints. The service validates the complete source order, while the UI removes tracks whose current anonymous privilege is not `pl > 0` and drops any row that fails during real playback; no player action navigates away to NetEase. It never stores a NetEase password, QR session, or cookie. New sessions select playable track `28568227`, 《花枝春野》 by 蔡明希（不才）, and default to shuffle after it unless the visitor previously chose another playback mode. The controls use the site's Warm Archive skin, keep the slim timeline inside the single bar, and include synchronized original/translated lyrics plus sequence/shuffle/single-repeat modes. The bar folds into a small record orb, reveals on mouse dwell or touch/click, and its orb or expanded cover can be long-pressed with touch or mouse to place it within viewport bounds; there is no dedicated move/fix button. Position key `duomei-music-player-position-v4` persists the bounded position. Home, notes, time, Guyu shelf/readers, Skill, Zaobao, and the Yunyou shell share one mounted audio element so SPA navigation keeps the current track, progress, and play state. Immersive readers and the map enter with the orb collapsed but retain every control after opening. Safari still requires a direct user gesture before the first audible play in a fresh document; never claim this system policy is bypassed. Admin routes hide the player.
 - Public pathname changes use one 1.3-second paper-fog reveal for Zaobao, note detail, shelves, Skill, and the time page. Hash-only homepage scrolling does not replay it; admin is excluded, and Guyu readers retain their own decode-gated paper reveal and 1.4-second page turn.
 - WeChat sticker actions copy the official short link and explain that it must be pasted into WeChat. Do not navigate the browser directly to the WeChat short link.
 - Mobile and desktop text must not clip, overlap, or create horizontal overflow. Recheck all affected supported widths after UI work.
