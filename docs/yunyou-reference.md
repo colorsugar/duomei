@@ -58,3 +58,8 @@ npm run test:guyu
 - [ambientCG LeafSet024](https://ambientcg.com/view?id=LeafSet024)：CC0，2K Color / Opacity / NormalGL 图（保持尺寸，优化 JPEG 体积），用于 `assets/tex/foliage/`。不是生成树叶或无授权扫描模型。未使用不可下载的 Sketchfab 象鼻山扫描。
 - 新增 `Water.js` 和 `waternormals.jpg` 来自 [Three.js r170](https://github.com/mrdoob/three.js/tree/r170/examples)，沿用仓库已有 MIT 许可；未改动依赖清单。
 - 额外通过实际 Three.js 网格导出做了离线 CPU 视图检查，检查象山轮廓/洞口和正阳街店面尺度。离线光照与网站 WebGL 不同，不能将该图作为网站截图或浏览器验收。最终几何检查覆盖整条洞口射线、全部近景网格、完整游船往返及街面出生点/建筑碰撞。
+
+
+## 灯柱位置纠正（2026-09-05）
+
+根据用户现场位置说明及截图，前版灯柱与台阶平台误放在滨江路西侧，并与逍遥楼台基重叠。本次将六座灯柱、上下平台及台阶整体移至道路东侧的临江步道，更新地标标签/导览中心。以保留的 OSM 道路线段 `[375,321] → [524,-139]` 为分隔，核对全部灯柱、平台与台阶位于逍遥楼对面，并避开道路和江面；具体间距仍为近似建模。
