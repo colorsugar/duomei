@@ -64,6 +64,12 @@ export function build({ F, TEX }) {
 
   g.position.set(cx, 0, cz);
   g.userData.top = top + 6.5;
+  // Fit physical height; previous accumulated tiers exceeded the documented height.
+  g.updateMatrixWorld(true);
+  const bounds = new THREE.Box3().setFromObject(g);
+  const actualHeight = bounds.max.y - bounds.min.y;
+  if (actualHeight > 0) g.scale.y *= 35 / actualHeight;
+  g.userData.top = 35;
   return g;
 }
 export const night = applyNight;

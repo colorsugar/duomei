@@ -36,39 +36,42 @@ export function makeMaterials() {
 const ellipse = (cx, cz, rx, rz, n = 36) => Array.from({ length: n }, (_, i) => { const a = i / n * Math.PI * 2; return [cx + Math.cos(a) * rx, cz + Math.sin(a) * rz]; });
 const at = (obj, x, y, z, ry = 0) => { obj.position.set(x, y, z); obj.rotation.y = ry; return obj; };
 
-// 象鼻山：隐式体（SDF + Marching Cubes）。象身 108×100 m、顶 55 m 平缓；象臀在南，象头在北端桃花江口、略低成鞍部；
-// 象鼻为粗石柱在东北角（两江汇流处）自象头东侧垂下直插漓江——从桃花江北岸爱情岛望去象鼻在左；
-// 鼻与前腿之间自然形成南北贯通的水月洞（≈13 m 宽、14 m 高）；三层噪声叠出溶沟与竖向石纹；象背普贤塔 13.6 m。
-export const XBS = { cx: -198, cz: 1450, box: { x0: -198 - 66, x1: -198 + 86, y0: -4, y1: 66, z0: 1450 - 100, z1: 1450 + 80 } };
+// Photo-guided reconstruction: broad vegetated back, lower river-facing head,
+// a thick flared trunk and an irregular THROUGH cave at the north-east end.
+// Geometry is baked by scripts/bake-yunyou.mjs; no million-voxel startup work.
+export const XBS = { cx: -198, cz: 1450, box: { x0: -280, x1: -106, y0: -8, y1: 66, z0: 1350, z1: 1534 } };
 XBS.sdf = (x, y, z) => {
-  const cx = XBS.cx, cz = XBS.cz;
-  {
-    const px = x - cx, py = y, pz = z - cz;
-    // 象身：近直立崖壁的长方体（100×92 m），顶部圆肩，背部缓隆；东崖直落漓江岸（x≈+50）
-    let d = sdRoundBox(px - 2, py - 22, pz - 4, 50, 26, 46, 20);
-    d += 5 * fbm3(x * 0.02 + 7, y * 0.008, z * 0.02, 1);                                  // 大尺度轮廓起伏：平面不成规则矩形
-    d = smin(d, sdEllipsoid(px - 12, py - 30, pz + 18, 26, 24, 30), 9);                 // 象背隆起（普贤塔处，最高 ≈54 m）
-    d = smin(d, sdEllipsoid(px + 10, py - 26, pz - 30, 30, 22, 28), 9);                 // 象臀（南端，足迹偏西）
-    // 象头（北端）：略低于背成鞍部（颈），顶仍较平
-    d = smin(d, sdRoundBox(px - 30, py - 27, pz + 54, 22, 20, 14, 9), 10);
-    // 额/鼻根：从象头向东跨在洞顶之上，连接头与鼻
-    d = smin(d, sdRoundBox(px - 58, py - 31, pz + 58, 16, 14, 10, 6), 6);
-    // 象鼻：粗石柱自鼻根近直下插江中（东北角，鼻端抵两江汇流处岸线 x≈+78）
-    d = smin(d, sdCone(px, py, pz, [66, 34, -58], [70, -6, -62], 11, 9), 5);
-    // 水月洞：鼻与前腿之间南北贯通（≈13 m 宽、14 m 高，圆拱）
-    d = Math.max(d, -sdRoundBox(px - 50, py - 6.5, pz + 58, 6.5, 7, 34, 3));
-    if (Math.abs(d) < 9) d += 2.2 * fbm3(x * 0.045, y * 0.045, z * 0.045, 3) + 1.1 * fbm3(x * 0.15, y * 0.15, z * 0.15, 6) + 0.7 * fbm(px * 0.22 + py * 0.02, pz * 0.22, 9);
-    return d;
-  }
+  const px = x - XBS.cx, pz = z - XBS.cz;
+  // Elliptical cliff footprint with a sloping, rounded crown (not a cuboid).
+  const outline = Math.hypot((px + 10) / 58, (pz - 10) / 68) / (1 + .06 * fbm(px * .04, pz * .04, 11));
+  const crown = 55 * Math.pow(Math.max(0, 1 - Math.pow(Math.min(outline, 1), 2.7)), .67)
+    + 4.8 * fbm(px * .075, pz * .075, 7);
+  let d = Math.max((outline - 1) * 48, y - crown, -y - 5);
+  d = smin(d, sdEllipsoid(px - 25, y - 24, pz + 29, 39, 26, 37), 13);
+  // Water Moon Cave opens east/west. Rotate only the head/trunk coordinates;
+  // the trunk points north toward the confluence, not sideways out of the flank.
+  const hx = 51 - (pz + 58), hz = px - 109;
+  d = smin(d, sdEllipsoid(hx - 27, y - 22, hz + 47, 29, 24, 27), 10);
+  // Upper rock bridge is deep: cave never becomes a detached thin ring.
+  d = smin(d, sdRoundBox(hx - 52, y - 24, hz + 59, 25, 13, 14, 7), 6);
+  d = smin(d, sdCone(hx, y, hz, [68, 29, -59], [72, -4, -62], 10.5, 12), 5);
+  const strata = .12 * Math.sin(y * .8 + 4 * fbm(px * .06, pz * .06, 4));
+  const grooves = 1.5 * fbm(px * .32 + y * .008, pz * .32, 9);
+  if (Math.abs(d) < 5) d += strata + grooves + 1.05 * fbm3(x * .095, y * .05, z * .095, 3);
+  // Arch profile extends below the waterline; slightly irregular flattened vault.
+  const caveX = hx - 51 + .7 * Math.sin(hz * .12);
+  const arch = (Math.pow(Math.abs(caveX / 7.2), 2.3) + Math.pow(Math.abs((y - 3.7) / 10.2), 2.3) - 1) * 5;
+  const tunnel = arch + .16 * Math.sin(y * 1.8 + hz * .6);
+  return Math.max(d, -tunnel);
 };
-export function xiangbishan(F, M) {
+export function xiangbishan(F, M, bakedHill) {
   const g = new THREE.Group();
   const { cx, cz, sdf, box } = XBS;
-  const hill = sdfHill({ sdf, box, res: 108, seed: 3, cx, cz });
+  const hill = bakedHill || sdfHill({ sdf, box, res: 40, seed: 3, cx, cz });
   g.add(hill);
-  const px = -184, pz = 1432; // 普贤塔在象背
-  g.add(at(bottlePagoda(13.6, M.pale), px, hill.userData.heightAt(px, pz) - 0.6, pz));
-  g.userData.top = 55 + 13.6;
+  const px = -184, pz = 1432;
+  g.add(at(bottlePagoda(13.6, M.pale), px, hill.userData.heightAt(px, pz) - .35, pz));
+  g.userData.top = 68.6;
   return g;
 }
 
@@ -89,13 +92,16 @@ export function twinPagodas(F, M) {
 // 逍遥楼：二层三檐楼阁，高 24 m，面阔进深 22 m，1.5 m 台基。仿唐：青瓦、朱柱、白壁。
 export function xiaoyaolou(F, M) {
   const g = hall([
-    { w: 20, d: 20, h: 6.5, cw: 24, cd: 24, roof: { h: 2.8, ridge: 7, over: 2.4 } },
-    { w: 17, d: 17, h: 6, cw: 19, cd: 19, balcony: true, roof: { h: 2.6, ridge: 6, over: 2.4 } },
-    { w: 14, d: 14, h: 3.6, cw: 15, cd: 15, balcony: true, roof: { h: 5, ridge: 8, over: 2.6, rise: 5 } },
-  ], M.hallGray, { baseH: 1.5, baseW: 34, baseD: 34 });
-  at(g, F.xiaoyaolou.c[0], 0, F.xiaoyaolou.c[1], ringAngle(F.xiaoyaolou.o));
-  g.userData.top = 24;
-  return g;
+    { w: 15.6, d: 15.6, h: 6.6, cw: 20, cd: 20, roof: { h: 1.7, ridge: 8, over: 1.7 } },
+    { w: 15.2, d: 15.2, h: 5.5, cw: 18, cd: 18, balcony: true, roof: { h: 1.8, ridge: 7, over: 2.1 } },
+    { w: 14.3, d: 14.3, h: 2.25, cw: 16, cd: 16, roof: { h: 4.25, ridge: 7, over: 2.8, rise: 4.25 } },
+  ], M.hallGray, { baseH: 1.5, baseW: 29, baseD: 29 });
+  g.updateMatrixWorld(true);const bounds=new THREE.Box3().setFromObject(g);
+  g.scale.y=21/(bounds.max.y-bounds.min.y);
+  at(g,F.xiaoyaolou.c[0],3,F.xiaoyaolou.c[1],ringAngle(F.xiaoyaolou.o)+Math.PI/2);
+  const root=new THREE.Group(),base=new THREE.Mesh(new THREE.BoxGeometry(37,3,42),M.stone);
+  base.position.set(F.xiaoyaolou.c[0],1.5,F.xiaoyaolou.c[1]);base.rotation.y=g.rotation.y;root.add(base,g);
+  root.userData.top=24;return root;
 }
 
 // 正阳门落位：OSM 门楼足迹比城墙线深（南缘即城墙线），门楼中心投影到最近的城墙段上，和墙体对齐

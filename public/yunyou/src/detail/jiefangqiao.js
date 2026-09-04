@@ -196,6 +196,8 @@ export function build({ F, TEX }) {
   buildApproachRamp(g, 1, halfL, rampLen, halfW, deckY, groundY, K, laneW, roadHalf, plantW);
   buildApproachRamp(g, -1, halfL, rampLen, halfW, deckY, groundY, K, laneW, roadHalf, plantW);
 
+  const archLight = new THREE.MeshStandardMaterial({ color:0x49b9df, emissive:0x29bce8, emissiveIntensity:0, roughness:.4, userData:{night:{color:0x29bce8,intensity:2.3}} });
+  const warmLight = new THREE.MeshStandardMaterial({ color:0xffd599, emissive:0xffc97d, emissiveIntensity:0, userData:{night:{color:0xffc97d,intensity:1.5}} });
   const spans = [41.5, 61, 72, 61, 41.5];
   let x = -spans.reduce((a, b) => a + b, 0) / 2;
   const pierXs = [];
@@ -204,6 +206,11 @@ export function build({ F, TEX }) {
     const rise = L * 0.1;
     const cxSpan = x + L / 2;
     g.add(archRib(L, deckY, rise, 44, K.concrete, cxSpan, L > 50 ? 6 : 4));
+    for(const side of [-1,1]){
+      const pts=[];for(let i=0;i<=32;i++){const u=i/32;pts.push(new THREE.Vector3(x+u*L,1+rise*(1-(2*u-1)**2)+.24,side*22.14));}
+      g.add(new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts),32,.16,5,false),archLight));
+      const strip=new THREE.Mesh(new THREE.BoxGeometry(L,.12,.14),warmLight);strip.position.set(cxSpan,deckY+1.68,side*22.5);g.add(strip);
+    }
     x += L;
     if (si < spans.length - 1) pierXs.push(x);
   }
