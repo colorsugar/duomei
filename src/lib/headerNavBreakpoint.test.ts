@@ -15,6 +15,7 @@ const yunyouSource = readFileSync(join(dirname(fileURLToPath(import.meta.url)), 
 const yunyouCss = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../components/YunyouSection.css"), "utf8");
 const yunyouIndex = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../../public/yunyou/index.html"), "utf8");
 const yunyouMain = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../../public/yunyou/src/main.js"), "utf8");
+const yunyouLandmarks = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../../public/yunyou/data/landmarks.js"), "utf8");
 const yunyouCover = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../../public/images/yunyou-guilin-cover.webp"));
 const prValidationWorkflow = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../../.github/workflows/pr-validation.yml"), "utf8");
 const cursorAutoMergeWorkflow = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../../.github/workflows/cursor-auto-merge.yml"), "utf8");
@@ -118,6 +119,33 @@ test("ships Yunyou as a same-origin, vendored, accessible 3D map", () => {
     createHash("sha256").update(yunyouCover).digest("hex"),
     "019158f0433eaa0dfc3b0b53dd566b64bb7d2cce1a6d03ee699211013330d7e0",
   );
+});
+
+test("shows optional local Yunyou photos without exposing camera metadata", () => {
+  assert.match(yunyouIndex, /id="card-photo" hidden/);
+  assert.match(yunyouIndex, /loading="lazy" decoding="async"/);
+  assert.match(yunyouIndex, /#card-photo\[hidden\]\s*\{\s*display:\s*none/);
+  assert.match(yunyouIndex, /#card\s*\{[^}]*max-height:[^}]*overflow:\s*auto/);
+  assert.match(yunyouIndex, /bottom:\s*max\(12px, env\(safe-area-inset-bottom\)\)/);
+  assert.match(yunyouMain, /function updateCardPhoto\(lm\)/);
+  assert.match(yunyouMain, /cardPhoto\.hidden = !photo/);
+  assert.match(yunyouMain, /cardPhotoImage\.onerror/);
+  assert.match(yunyouMain, /photo\.alt \|\| `\$\{lm\.name\}实拍`/);
+
+  const photoPaths = [...yunyouLandmarks.matchAll(/src: '\.\/assets\/photos\/([^']+\.webp)'/g)].map((match) => match[1]);
+  assert.equal(photoPaths.length, 4);
+  assert.equal(new Set(photoPaths).size, photoPaths.length);
+  for (const photoPath of photoPaths) {
+    const file = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../../public/yunyou/assets/photos", photoPath));
+    assert.equal(file.subarray(0, 4).toString("ascii"), "RIFF");
+    assert.equal(file.subarray(8, 12).toString("ascii"), "WEBP");
+    for (let offset = 12; offset + 8 <= file.length;) {
+      const chunk = file.subarray(offset, offset + 4).toString("ascii");
+      const length = file.readUInt32LE(offset + 4);
+      assert.notEqual(chunk, "EXIF", `${photoPath} must not retain EXIF/GPS metadata`);
+      offset += 8 + length + (length % 2);
+    }
+  }
 });
 
 test("keeps Cursor auto-publish behind same-repository validation", () => {

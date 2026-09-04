@@ -331,6 +331,10 @@ for (const lm of LANDMARKS) {
 const kindMark = { hill: '山', pagoda: '塔', building: '阁', bridge: '桥', lake: '湖', poi: '点' };
 const list = document.getElementById('list');
 const card = document.getElementById('card');
+const cardPhoto = document.getElementById('card-photo');
+const cardPhotoImage = cardPhoto.querySelector('img');
+const cardPhotoCaption = cardPhoto.querySelector('figcaption');
+let cardPhotoRequest = 0;
 const [cx0, cz0] = toXZ(25.2836, 110.2949); // 独秀峰，用于显示到市中心距离
 for (const lm of LANDMARKS) {
   const li = document.createElement('li');
@@ -341,6 +345,32 @@ for (const lm of LANDMARKS) {
   list.appendChild(li);
 }
 document.getElementById('card-close').addEventListener('click', () => { card.hidden = true; setActive(null); });
+
+function updateCardPhoto(lm) {
+  const request = ++cardPhotoRequest;
+  const photo = lm.photo;
+  cardPhoto.hidden = !photo;
+  cardPhotoImage.removeAttribute('src');
+  cardPhotoImage.alt = '';
+  delete cardPhotoImage.dataset.loading;
+  cardPhotoCaption.textContent = '';
+  if (!photo) return;
+
+  cardPhotoImage.dataset.loading = 'true';
+  cardPhotoImage.alt = photo.alt || `${lm.name}实拍`;
+  cardPhotoCaption.textContent = photo.caption || '多美实拍';
+  cardPhotoImage.onload = () => {
+    if (request === cardPhotoRequest) delete cardPhotoImage.dataset.loading;
+  };
+  cardPhotoImage.onerror = () => {
+    if (request !== cardPhotoRequest) return;
+    cardPhoto.hidden = true;
+    cardPhotoImage.removeAttribute('src');
+    delete cardPhotoImage.dataset.loading;
+  };
+  cardPhotoImage.src = photo.src;
+  if (cardPhotoImage.complete && cardPhotoImage.naturalWidth > 0) delete cardPhotoImage.dataset.loading;
+}
 
 // ---- 细节 LOD：选中地标时按需加载 src/detail/<id>.js 的精模；加载后按相机距离在简模/精模间切换（关简介不再回退，避免模型"变来变去"） ----
 const detailGroup = new THREE.Group();
@@ -538,6 +568,7 @@ function select(lm, instant = false) {
   if (isMobile) panel.classList.add('collapsed');
   card.querySelector('h2').textContent = lm.name;
   card.querySelector('.meta').textContent = `${lm.lat.toFixed(5)}°N, ${lm.lon.toFixed(5)}°E` + (lm.h ? ` · 高约 ${lm.h} m` : '');
+  updateCardPhoto(lm);
   card.querySelector('p').textContent = lm.desc || '';
   card.hidden = false;
   history.replaceState(null, '', `#${lm.id}`);
