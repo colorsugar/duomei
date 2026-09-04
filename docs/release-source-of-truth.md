@@ -46,10 +46,13 @@ The following files form one release unit. If any of them changes for poetry/快
 - `src/music-player.css`
 - `src/lib/neteasePlaylist.ts`
 - `src/lib/neteasePlaylist.test.ts`
+- `src/lib/neteaseLyrics.ts`
+- `src/lib/neteaseLyrics.test.ts`
 - `server/neteaseMusic.mjs`
 - `server/neteaseMusic.test.mjs`
 - `cloud-functions/api/music-playlist.js`
 - `cloud-functions/api/music-stream.js`
+- `cloud-functions/api/music-lyric.js`
 - `src/components/StickerPackSection.tsx`
 - `src/components/PoetryCanvasEditor.tsx`
 - `src/components/RouteScrollManager.tsx`
@@ -144,7 +147,7 @@ EdgeOne production has a precise client-IP rate-limit rule for `/api/guyu-auth` 
 - The `/guyu` shelf has a visible 44px `← 返回首页` link targeting `/#guyu`; on the closed cover the top control is `返回故语`, and after opening it is replaced by `合上`, which calls the existing preload-safe jump to page zero. Guyu shelf titles wrap completely inside their cards at 320px and wider.
 - Only `/guyu/meiyou-yujian` and its `/api/guyu-page` requests remain behind the original server-verified class question. `/guyu` and all `新说` readers are public; no other route may display the class gate.
 - The header menu item `故语` targets the homepage `/#guyu` position, not `/guyu` directly.
-- At supported mobile widths and short viewports, complete poetry cards, captions, controls, and the fixed section progress rail must remain visible without clipping or overlap.
+- At supported mobile widths and short viewports, complete poetry cards, captions, controls, and the tiny fixed section-progress hint must remain visible without clipping or overlap; the hint must not regain a card, pill, border, or shadow.
 - Note detail keeps a visible 44px `← 返回小记` target in loading, missing, and loaded states, below the fixed header.
 - The poetry portal target keeps `id="kuaihuo"`.
 - The admin reflects 首页 / 微言 / 小记管理.
@@ -153,7 +156,7 @@ EdgeOne production has a precise client-IP rate-limit rule for `/api/guyu-auth` 
 - `/skills` remains the standalone full Skill index, while the homepage also renders the shared Skill directory before the copyright footer.
 - Both Skill surfaces link to the public `colorsugar/agent-skills` repository and preserve the site-wide header, footer, and mobile menu-close behavior.
 - `/zaobao` is a bare-chrome immersive reader: it fetches the CORS-enabled daily HTML, renders only parsed text/images/source links in the local React layout, and falls back to the original iframe if parsing fails.
-- The NetEase player uses playlist `316500315` through same-origin EdgeOne handlers that call only NetEase's anonymous official web endpoints. It returns the complete 2,270-track order, derives in-site playability strictly from `privilege.pl > 0`, redirects playable audio to HTTPS NetEase CDN URLs, and sends all other rows to official song pages. No NetEase login, cookie, password, or QR session is accepted or stored. Its NetEase-inspired control geometry is skinned with the site's Warm Archive tokens; the bar auto-minimizes into a record orb and keeps fixed/free position browser-local.
+- The NetEase player uses playlist `316500315` through same-origin EdgeOne playlist, stream, and lyric handlers that call only NetEase's anonymous official web endpoints. The service validates the source order, derives in-site playability strictly from `privilege.pl > 0`, redirects playable audio to HTTPS NetEase CDN URLs, and returns bounded original/translated lyric text. The UI removes non-playable rows and real playback failures, and no player action navigates away. No NetEase login, cookie, password, or QR session is accepted or stored. Its single Warm Archive control bar exposes mode, lyrics, volume, queue, and a slim timeline that expands on hover/focus and supports direct seeking. It auto-minimizes into a record orb; the orb or expanded cover can be long-pressed to move and persists one bounded position. All public content routes expose the complete controls, while immersive readers enter collapsed and admin hides the player.
 - Public pathname changes share a 1.3-second paper-fog reveal. Hash-only homepage movement does not replay it, admin is excluded, and Guyu readers keep their separate decode-gated reveal plus 1.4-second native page turn.
 
 ## Required Release Procedure

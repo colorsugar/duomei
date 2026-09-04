@@ -11,7 +11,7 @@
     "typecheck": "tsc -b",
     "typecheck:server": "tsc -p tsconfig.server.json",
     "test:home-hold": "node --experimental-strip-types --test src/lib/homeSectionHold.test.ts src/lib/headerNavBreakpoint.test.ts src/lib/guyuCarousel.test.ts",
-    "test:music": "node --experimental-strip-types --test src/lib/neteasePlaylist.test.ts && node --test server/neteaseMusic.test.mjs",
+    "test:music": "node --experimental-strip-types --test src/lib/neteasePlaylist.test.ts src/lib/neteaseLyrics.test.ts && node --test server/neteaseMusic.test.mjs",
     "test:guyu": "node --experimental-strip-types --test server/guyuSession.test.ts server/guyuRateLimit.test.ts server/guyuBooks.test.ts server/guyuEdgeOneAdapter.test.mjs src/lib/guyuTouchSequence.test.ts deploy/guyu-edgeone/tests/auth-core.test.js",
     "lint": "tsc -b",
     "preview": "vite preview",
