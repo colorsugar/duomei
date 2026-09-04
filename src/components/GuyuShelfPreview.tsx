@@ -19,6 +19,7 @@ import {
   GUYU_FRAGMENT_HOLD_MS,
   GUYU_FRAGMENT_SCATTER_MS,
   GUYU_SCATTER_FALLBACK_MS,
+  GUYU_SETTLE_MS,
   GUYU_SETTLE_FALLBACK_MS,
   getGuyuSwipeDirection,
   wrapGuyuCarouselIndex,
@@ -115,7 +116,7 @@ export function GuyuShelfPreview() {
   const book = guyuBooks[bookIndex] ?? guyuBooks[0];
   const incomingBook = incomingIndex === null ? null : guyuBooks[incomingIndex] ?? null;
   const indicatedIndex = incomingIndex ?? bookIndex;
-  const linkedBook = transitionPhase === "assemble" || transitionPhase === "settle" ? incomingBook ?? book : book;
+  const linkedBook = transitionPhase === "settle" ? incomingBook ?? book : book;
 
   const clearPhaseFallback = useCallback(() => {
     if (phaseFallbackRef.current !== null) window.clearTimeout(phaseFallbackRef.current);
@@ -266,20 +267,29 @@ export function GuyuShelfPreview() {
         transitionPhaseRef.current !== "settle" ||
         phaseStartedAtRef.current !== phaseStartedAt
       ) return;
-      phaseRafRef.current = window.requestAnimationFrame(() => {
+      clearPhaseFallback();
+      const remainingSettleMs = Math.max(0, GUYU_SETTLE_MS - (performance.now() - phaseStartedAt));
+      phaseFallbackRef.current = window.setTimeout(() => {
         if (
           cycleTokenRef.current !== cycleToken ||
           transitionPhaseRef.current !== "settle" ||
           phaseStartedAtRef.current !== phaseStartedAt
         ) return;
-        phaseRafRef.current = window.requestAnimationFrame(() => finishSettle(cycleToken, phaseStartedAt));
-      });
+        phaseRafRef.current = window.requestAnimationFrame(() => {
+          if (
+            cycleTokenRef.current !== cycleToken ||
+            transitionPhaseRef.current !== "settle" ||
+            phaseStartedAtRef.current !== phaseStartedAt
+          ) return;
+          phaseRafRef.current = window.requestAnimationFrame(() => finishSettle(cycleToken, phaseStartedAt));
+        });
+      }, remainingSettleMs);
     }).catch(() => {
       // Keep the decoded incoming fragments visible until the guarded settle fallback.
     });
 
     return clearPhaseRaf;
-  }, [bookIndex, clearPhaseRaf, finishSettle, transitionPhase]);
+  }, [bookIndex, clearPhaseFallback, clearPhaseRaf, finishSettle, transitionPhase]);
 
   useEffect(() => {
     guyuBooks.forEach((candidate) => {

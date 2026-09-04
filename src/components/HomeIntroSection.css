@@ -116,15 +116,31 @@
   writing-mode: vertical-rl;
   text-orientation: upright;
   white-space: nowrap;
-  will-change: transform, clip-path;
+  animation: poetryTitleBreath 6.4s ease-in-out infinite;
+  will-change: transform, clip-path, filter;
 }
 
 .poetry-portal-title > span:nth-child(2) {
   margin-top: 0.7em;
+  animation-delay: 420ms;
 }
 
 .poetry-portal-title > span:nth-child(3) {
   margin-top: 1.4em;
+  animation-delay: 840ms;
+}
+
+@keyframes poetryTitleBreath {
+  0%,
+  100% {
+    filter: blur(0.65px) brightness(0.84);
+    text-shadow: 0 0 0 color-mix(in srgb, var(--poetry-ink) 0%, transparent);
+  }
+
+  50% {
+    filter: blur(0) brightness(1.08);
+    text-shadow: 0 16px 34px color-mix(in srgb, var(--poetry-ink) 18%, transparent);
+  }
 }
 
 .poetry-index {
@@ -727,6 +743,12 @@
     transform: none !important;
     opacity: 1 !important;
     clip-path: none !important;
+  }
+
+  .poetry-portal-title > span:not(.poetry-sr-only) {
+    animation: none !important;
+    filter: none !important;
+    text-shadow: none !important;
   }
 }
 

@@ -6,8 +6,11 @@ import test from "node:test";
 import { fileURLToPath } from "node:url";
 // @ts-expect-error Node's strip-types test runner needs the explicit source extension.
 import * as adminSiteInventory from "./adminSiteInventory.ts";
+// @ts-expect-error Node's strip-types test runner needs the explicit source extension.
+import { containFloatingWidget } from "./floatingWidget.ts";
 
 const css = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../header-tablet-nav.css"), "utf8");
+const appSource = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../App.tsx"), "utf8");
 const headerSource = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../components/DuomeiHeader.tsx"), "utf8");
 const backToTopSource = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../components/BackToTopButton.tsx"), "utf8");
 const guyuPreviewSource = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../components/GuyuShelfPreview.tsx"), "utf8");
@@ -17,6 +20,15 @@ const yunyouSource = readFileSync(join(dirname(fileURLToPath(import.meta.url)), 
 const yunyouCss = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../components/YunyouSection.css"), "utf8");
 const zaobaoSource = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../components/ZaobaoSection.tsx"), "utf8");
 const zaobaoCss = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../components/ZaobaoSection.css"), "utf8");
+const zaobaoPageSource = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../pages/DuomeiZaobaoPage.tsx"), "utf8");
+const skillsSource = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../components/SkillsDirectory.tsx"), "utf8");
+const skillsPageSource = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../pages/DuomeiSkillsPage.tsx"), "utf8");
+const skillsCss = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../skills.css"), "utf8");
+const homePageSource = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../pages/DuomeiHomePage.tsx"), "utf8");
+const musicPlayerSource = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../components/DuomeiMusicPlayer.tsx"), "utf8");
+const musicPlayerCss = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../music-player.css"), "utf8");
+const neteaseClientSource = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "./neteasePlaylist.ts"), "utf8");
+const neteaseServerSource = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../../server/neteaseMusic.mjs"), "utf8");
 const yunyouIndex = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../../public/yunyou/index.html"), "utf8");
 const yunyouMain = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../../public/yunyou/src/main.js"), "utf8");
 const yunyouLandmarks = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../../public/yunyou/data/landmarks.js"), "utf8");
@@ -58,6 +70,24 @@ test("keeps a reachable hamburger on phones and tablets without collapsing touch
   assert.match(css, /@media \(min-width: 1025px\) and \(hover: none\) and \(pointer: coarse\)[\s\S]*\.duomei-header nav \{[\s\S]*display:\s*flex\s*!important[\s\S]*visibility:\s*visible\s*!important/);
 });
 
+test("uses one reduced-motion-safe paper reveal across public route changes", () => {
+  assert.match(appSource, /function PublicRoutePaperVeil/);
+  assert.match(appSource, /if \(previousPathRef\.current === pathname\) return/);
+  assert.match(appSource, /disabled=\{isAdmin \|\| isGuyuReader\}/);
+  assert.match(appSource, /pathname\.startsWith\("\/note\/"\)/);
+  assert.match(siteCss, /duomeiRoutePaperReveal 1300ms cubic-bezier/);
+  assert.match(siteCss, /duomeiRouteNoteReveal[\s\S]*?animation-duration:\s*880ms/);
+  assert.match(siteCss, /\.duomei-motion-root > \.duomei-route-paper-veil\s*\{[\s\S]*?position:\s*fixed/);
+  assert.doesNotMatch(siteCss, /var\(--paper-warm\)/);
+  assert.match(siteCss, /prefers-reduced-motion[\s\S]*?\.duomei-motion-root > \.duomei-route-paper-veil[\s\S]*?display:\s*none/);
+});
+
+test("keeps the Zaobao cover inside the SPA route transition", () => {
+  assert.match(zaobaoSource, /import \{ Link \} from "react-router-dom"/);
+  assert.match(zaobaoSource, /<Link className="zaobao-card" to=\{ZAOBAO_ROUTE\}/);
+  assert.doesNotMatch(zaobaoSource, /<a className="zaobao-card"/);
+});
+
 test("keeps iOS header touch activation synchronous and deterministic", () => {
   assert.match(headerSource, /lastTouchActivationRef\.current = window\.performance\.now\(\)/);
   assert.match(headerSource, /lastTouchActivationRef = useRef\(Number\.NEGATIVE_INFINITY\)/);
@@ -81,15 +111,67 @@ test("uses a real local morning illustration for the Zaobao magazine cover", () 
   );
 });
 
-test("keeps the homepage Guyu preview deliberate, fragmented, manual, and linked to the current book", () => {
+test("keeps Zaobao immersive while safely falling back to the original edition", () => {
+  assert.match(appSource, /const isZaobao = location\.pathname === "\/zaobao"/);
+  assert.match(appSource, /bareChrome = isAdmin \|\| isGuyuReader \|\| isZaobao/);
+  assert.match(zaobaoPageSource, /function parseEdition\(html: string\)/);
+  assert.match(zaobaoPageSource, /\.page > section\[id\]/);
+  assert.match(zaobaoPageSource, /className="zaobao-story-grid"/);
+  assert.match(zaobaoPageSource, /className="zaobao-frame"/);
+  assert.doesNotMatch(zaobaoPageSource, /dangerouslySetInnerHTML|srcDoc/);
+  assert.match(zaobaoCss, /main\.zaobao-page \{[\s\S]*position:\s*fixed;[\s\S]*overflow-y:\s*auto/);
+  assert.match(zaobaoCss, /\.zaobao-story-grid \{[\s\S]*repeat\(2, minmax\(0, 1fr\)\)/);
+  assert.match(zaobaoCss, /@media \(max-width: 64rem\)[\s\S]*\.zaobao-story-grid \{[\s\S]*minmax\(0, 1fr\)/);
+});
+
+test("uses Skill naming and a three-column desktop directory", () => {
+  assert.match(headerSource, /href="\/skills"[\s\S]*>\s*Skill\s*</);
+  assert.match(footerSource, /\{ label: "Skill", to: "\/#skills" \}/);
+  assert.match(homePageSource, /\{ id: "skills", label: "Skill" \}/);
+  assert.match(skillsSource, />Skill<|>Skill 目录</);
+  assert.match(skillsSource, /查看 Skill 页/);
+  assert.match(skillsPageSource, /document\.title = "Skill \| 多美小记"/);
+  assert.match(skillsPageSource, /<h1>Skill<\/h1>/);
+  assert.match(skillsCss, /@media \(min-width: 60rem\)[\s\S]*grid-template-columns:\s*repeat\(3, minmax\(0, 1fr\)\)/);
+});
+
+test("keeps the full NetEase playlist native, movable, bounded, and autoplay-off", () => {
+  assert.match(appSource, /!bareChrome \? <DuomeiMusicPlayer \/> : null/);
+  assert.match(musicPlayerSource, /NETEASE_PLAYLIST_ID = "316500315"/);
+  assert.match(musicPlayerSource, /<audio[\s\S]*preload="metadata"/);
+  assert.doesNotMatch(musicPlayerSource, /<iframe|autoPlay/);
+  assert.match(musicPlayerSource, /\/api\/music-stream\?id=/);
+  assert.match(musicPlayerSource, /findPlayableIndex/);
+  assert.match(musicPlayerSource, /需在网易云播放/);
+  assert.match(musicPlayerSource, /setPointerCapture\(event\.pointerId\)/);
+  assert.match(musicPlayerSource, /duomei-music-player-position/);
+  assert.match(musicPlayerSource, /scheduleAutoMinimize/);
+  assert.match(musicPlayerSource, /className="duomei-music-orb"/);
+  assert.match(musicPlayerSource, /event\.pointerType !== "mouse"/);
+  assert.match(musicPlayerSource, /window\.setTimeout\(revealCompactPlayer, 180\)/);
+  assert.match(neteaseClientSource, /fetch\(NETEASE_PLAYLIST_URL, \{ signal, credentials: "same-origin" \}\)/);
+  assert.match(neteaseServerSource, /NETEASE_PLAYLIST_ID = 316500315/);
+  assert.match(neteaseServerSource, /NETEASE_MAX_TRACKS = 3000/);
+  assert.match(musicPlayerCss, /\.duomei-music-player\.is-free/);
+  assert.match(musicPlayerCss, /\.duomei-music-player\.is-minimized/);
+  assert.match(musicPlayerCss, /theme: Warm Archive/);
+  assert.match(musicPlayerCss, /"cover previous play next spacer mute queue"/);
+  assert.match(musicPlayerCss, /inline-size 620ms cubic-bezier/);
+  assert.match(musicPlayerCss, /\.duomei-motion-root > \.duomei-music-player\s*\{[\s\S]*?position:\s*fixed/);
+  assert.deepEqual(containFloatingWidget({ x: -20, y: 900 }, 200, 100, 800, 600), { x: 16, y: 484 });
+  assert.deepEqual(containFloatingWidget({ x: Number.NaN, y: Number.POSITIVE_INFINITY }, 200, 100, 800, 600), { x: 16, y: 16 });
+});
+
+test("keeps the homepage Guyu preview slow, misted, manual, and linked only after settling", () => {
   const beginSettle = guyuPreviewSource.slice(
     guyuPreviewSource.indexOf("const beginSettle"),
     guyuPreviewSource.indexOf("const beginAssembly"),
   );
-  assert.match(guyuCarouselSource, /GUYU_CAROUSEL_DWELL_MS = 1_600/);
-  assert.match(guyuCarouselSource, /GUYU_FRAGMENT_SCATTER_MS = 340/);
-  assert.match(guyuCarouselSource, /GUYU_FRAGMENT_ASSEMBLE_MS = 500/);
-  assert.match(guyuCarouselSource, /GUYU_SETTLE_FALLBACK_MS = 1_200/);
+  assert.match(guyuCarouselSource, /GUYU_CAROUSEL_DWELL_MS = 5_000/);
+  assert.match(guyuCarouselSource, /GUYU_FRAGMENT_SCATTER_MS = 760/);
+  assert.match(guyuCarouselSource, /GUYU_FRAGMENT_ASSEMBLE_MS = 1_180/);
+  assert.match(guyuCarouselSource, /GUYU_SETTLE_MS = 1_600/);
+  assert.match(guyuCarouselSource, /GUYU_SETTLE_FALLBACK_MS = 2_400/);
   assert.match(guyuPreviewSource, /data-phase=\{transitionPhase\}/);
   assert.match(guyuPreviewSource, /guyu-home-fragment/);
   assert.match(guyuPreviewSource, /onPointerMove=\{handlePointerMove\}/);
@@ -102,9 +184,12 @@ test("keeps the homepage Guyu preview deliberate, fragmented, manual, and linked
   assert.match(guyuPreviewSource, /requestAnimationFrame\(\(\) => \{[\s\S]*requestAnimationFrame\(\(\) => finishSettle/);
   assert.match(beginSettle, /setBookIndex\(completedIndex\)[\s\S]*setTransitionPhase\("settle"\)/);
   assert.doesNotMatch(beginSettle, /setIncomingIndex\(null\)|setTransitionPhase\("idle"\)/);
-  assert.match(guyuCss, /data-phase="settle"\]\s+\.guyu-home-book-base\s*\{\s*opacity:\s*1;\s*transition:\s*none;/);
+  assert.match(guyuPreviewSource, /Math\.max\(0, GUYU_SETTLE_MS - \(performance\.now\(\) - phaseStartedAt\)\)/);
+  assert.match(guyuCss, /animation:\s*guyuCoverSettle var\(--guyu-settle-duration\)/);
+  assert.match(guyuCss, /animation:\s*guyuCopyBreath 5s ease-in-out infinite/);
+  assert.match(guyuCss, /filter:\s*blur\(2\.4px\) saturate\(0\.72\)/);
   assert.doesNotMatch(guyuCss, /\.guyu-home-carousel\[data-phase="settle"\][^{}]*\.guyu-home-book-base\s*\{[^}]*opacity:\s*0/);
-  assert.match(guyuPreviewSource, /const linkedBook = transitionPhase === "assemble" \|\| transitionPhase === "settle"/);
+  assert.match(guyuPreviewSource, /const linkedBook = transitionPhase === "settle"/);
   assert.match(guyuPreviewSource, /to=\{\`\/guyu\/\$\{linkedBook\.id\}\`\}/);
   assert.match(guyuPreviewSource, /className="guyu-home-shelf-all"\s+to="\/guyu"/);
   assert.match(guyuPreviewSource, /翻开\$\{getBookLabels\(linkedBook\)\.section\}《\$\{linkedBook\.title\}》/);
@@ -123,9 +208,10 @@ test("keeps the note-detail back target visible outside the fixed header", () =>
   assert.doesNotMatch(siteCss, /\.duomei-detail:not\(\.detail-edit-page\)\s*\{[^}]*padding-top:\s*clamp\((?:32|36)px/);
 });
 
-test("keeps the mobile footer compact with all seven shortcuts on one row", () => {
+test("keeps the mobile footer compact with all eight shortcuts on one row", () => {
   assert.match(siteCss, /\.duomei-quick-nav ul \{[\s\S]*flex-wrap:\s*nowrap/);
   assert.match(siteCss, /\.duomei-quick-nav li \{[\s\S]*flex:\s*1 1 0/);
+  assert.equal(footerSource.match(/\{ label:/g)?.length, 8);
   assert.match(footerSource, /\{ label: "云游", to: "\/#yunyou" \}/);
   assert.match(backToTopSource, /document\.querySelector\("\.duomei-footer"\)/);
   assert.match(backToTopSource, /document\.querySelector\("\.yunyou-card"\)/);
@@ -135,6 +221,9 @@ test("keeps the mobile footer compact with all seven shortcuts on one row", () =
 test("ships Yunyou as a same-origin, vendored, accessible 3D map", () => {
   assert.match(yunyouSource, /const YUNYOU_HREF = "\/yunyou\/"/);
   assert.match(yunyouSource, /\/images\/yunyou-guilin-cover\.webp/);
+  assert.match(yunyouSource, /沿着水岸，慢慢看桂林/);
+  assert.match(yunyouSource, /开始云游 →/);
+  assert.doesNotMatch(yunyouSource, /Guilin · 1:1|点进去慢慢转/);
   assert.doesNotMatch(yunyouSource, /vercel\.app/);
   assert.match(yunyouCss, /@media \(prefers-reduced-motion: reduce\)/);
   assert.match(yunyouIndex, /"three": "\.\/vendor\/three\/three\.module\.js"/);

@@ -448,6 +448,9 @@ body {
 
 .guyu-home-carousel {
   --guyu-drag-x: 0px;
+  --guyu-scatter-duration: 760ms;
+  --guyu-assemble-duration: 1180ms;
+  --guyu-settle-duration: 1600ms;
   display: grid;
   grid-template-areas:
     "work"
@@ -536,6 +539,30 @@ body {
     background-color var(--dur-short) var(--ease-out);
 }
 
+.guyu-home-book::after {
+  position: absolute;
+  z-index: 3;
+  inset: 0;
+  border-radius: inherit;
+  background:
+    radial-gradient(circle at 42% 38%, color-mix(in oklch, var(--color-paper) 82%, transparent), transparent 58%),
+    linear-gradient(135deg, color-mix(in oklch, var(--color-paper-2) 62%, transparent), transparent 72%);
+  content: "";
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--guyu-settle-duration) cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.guyu-home-carousel[data-phase="scatter"] .guyu-home-book::after {
+  opacity: 0.58;
+  transition-duration: var(--guyu-scatter-duration);
+}
+
+.guyu-home-carousel[data-phase="assemble"] .guyu-home-book::after {
+  opacity: 0.26;
+  transition-duration: var(--guyu-assemble-duration);
+}
+
 .guyu-home-book-base {
   position: absolute;
   inset: 0;
@@ -545,7 +572,10 @@ body {
   object-fit: cover;
   border-radius: inherit;
   opacity: 1;
-  transition: opacity var(--dur-micro) var(--ease-in);
+  filter: blur(0) saturate(1);
+  transition:
+    opacity var(--guyu-scatter-duration) var(--ease-in),
+    filter var(--guyu-settle-duration) cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .guyu-home-carousel[data-phase="scatter"] .guyu-home-book-base,
@@ -554,8 +584,7 @@ body {
 }
 
 .guyu-home-carousel[data-phase="settle"] .guyu-home-book-base {
-  opacity: 1;
-  transition: none;
+  animation: guyuCoverSettle var(--guyu-settle-duration) cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 .guyu-home-fragment-grid {
@@ -566,13 +595,24 @@ body {
   grid-template-rows: repeat(4, minmax(0, 1fr));
   opacity: 0;
   pointer-events: none;
-  transition: opacity var(--dur-micro) var(--ease-out);
+  filter: blur(0) saturate(1);
+  transition:
+    opacity var(--dur-short) var(--ease-out),
+    filter var(--guyu-assemble-duration) cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .guyu-home-carousel[data-phase="scatter"] .guyu-home-fragment-grid,
 .guyu-home-carousel[data-phase="assemble"] .guyu-home-fragment-grid,
 .guyu-home-carousel[data-phase="settle"] .guyu-home-fragment-grid {
   opacity: 1;
+}
+
+.guyu-home-carousel[data-phase="scatter"] .guyu-home-fragment-grid {
+  filter: blur(2.4px) saturate(0.72);
+}
+
+.guyu-home-carousel[data-phase="assemble"] .guyu-home-fragment-grid {
+  filter: blur(1.2px) saturate(0.86);
 }
 
 .guyu-home-fragment {
@@ -582,7 +622,7 @@ body {
   overflow: hidden;
   opacity: 1;
   transform: translate3d(0, 0, 0) rotate(0) scale(1.002);
-  transition: transform 340ms var(--ease-in);
+  transition: transform var(--guyu-scatter-duration) cubic-bezier(0.55, 0, 0.45, 1);
   transition-delay: var(--guyu-fragment-delay);
   will-change: transform;
 }
@@ -613,7 +653,7 @@ body {
   background-repeat: no-repeat;
   background-size: 400% 400%;
   opacity: 1;
-  transition: opacity var(--dur-micro) var(--ease-out);
+  transition: opacity var(--guyu-assemble-duration) cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .guyu-home-fragment-image.is-incoming {
@@ -623,14 +663,14 @@ body {
 .guyu-home-fragment-tint {
   background: var(--guyu-fragment-accent);
   opacity: 0;
-  transition: opacity var(--dur-micro) var(--ease-out);
+  transition: opacity var(--guyu-assemble-duration) cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .guyu-home-carousel[data-phase="scatter"] .guyu-home-fragment {
   transform:
     translate3d(var(--guyu-fragment-x), var(--guyu-fragment-y), 0)
     rotate(var(--guyu-fragment-rotation))
-    scale(0.88);
+    scale(0.93);
 }
 
 .guyu-home-carousel[data-phase="scatter"] .guyu-home-fragment-tint {
@@ -639,8 +679,8 @@ body {
 
 .guyu-home-carousel[data-phase="assemble"] .guyu-home-fragment {
   transform: translate3d(0, 0, 0) rotate(0) scale(1.002);
-  transition-duration: 500ms;
-  transition-timing-function: var(--ease-out);
+  transition-duration: var(--guyu-assemble-duration);
+  transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .guyu-home-carousel[data-phase="assemble"] .guyu-home-fragment-image.is-current,
@@ -673,21 +713,122 @@ body {
   gap: var(--space-md);
   min-inline-size: 0;
   opacity: 1;
-  transition: opacity var(--dur-micro) var(--ease-out);
+  filter: blur(0);
+  transform: translate3d(0, 0, 0);
+  transform-origin: left center;
+  transition:
+    opacity 1080ms cubic-bezier(0.22, 1, 0.36, 1),
+    filter 1080ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 1080ms cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform, opacity, filter;
 }
 
 .guyu-home-work-copy.is-incoming {
   opacity: 0;
+  filter: blur(7px);
+  transform: translate3d(0, 0.7rem, 0) scale(0.985);
 }
 
-.guyu-home-carousel[data-phase="assemble"] .guyu-home-work-copy.is-current,
-.guyu-home-carousel[data-phase="settle"] .guyu-home-work-copy.is-current {
+.guyu-home-carousel[data-phase="assemble"] .guyu-home-work-copy.is-current {
   opacity: 0;
+  filter: blur(5px);
+  transform: translate3d(0, -0.45rem, 0) scale(1.012);
 }
 
-.guyu-home-carousel[data-phase="assemble"] .guyu-home-work-copy.is-incoming,
-.guyu-home-carousel[data-phase="settle"] .guyu-home-work-copy.is-incoming {
+.guyu-home-carousel[data-phase="assemble"] .guyu-home-work-copy.is-incoming {
   opacity: 1;
+  filter: blur(0);
+  transform: translate3d(0, 0, 0) scale(1);
+}
+
+.guyu-home-carousel[data-phase="settle"] .guyu-home-work-copy.is-current {
+  animation: guyuCopySettle var(--guyu-settle-duration) cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.guyu-home-carousel[data-phase="settle"] .guyu-home-work-copy.is-incoming {
+  opacity: 0;
+  filter: blur(4px);
+  transform: translate3d(0, -0.2rem, 0) scale(1.008);
+}
+
+.guyu-home-carousel[data-phase="idle"] .guyu-home-work-copy.is-current {
+  animation: guyuCopyBreath 5s ease-in-out infinite;
+}
+
+.guyu-home-carousel[data-phase="idle"] .guyu-home-work-copy.is-current .guyu-title-phrases > span {
+  animation: guyuPhraseBreath 5s ease-in-out infinite;
+}
+
+.guyu-home-carousel[data-phase="idle"] .guyu-home-work-copy.is-current .guyu-title-phrases > span:nth-child(2) {
+  animation-delay: 240ms;
+}
+
+@keyframes guyuCoverSettle {
+  0% {
+    opacity: 0.42;
+    filter: blur(7px) saturate(0.7);
+    transform: scale(1.024);
+  }
+
+  58% {
+    opacity: 1;
+    filter: blur(0.6px) saturate(0.98);
+    transform: scale(0.997);
+  }
+
+  100% {
+    opacity: 1;
+    filter: blur(0) saturate(1);
+    transform: scale(1);
+  }
+}
+
+@keyframes guyuCopySettle {
+  0% {
+    opacity: 0;
+    filter: blur(7px);
+    transform: translate3d(0, 0.8rem, 0) scale(0.985);
+  }
+
+  62% {
+    opacity: 1;
+    filter: blur(0.4px);
+    transform: translate3d(0, -0.2rem, 0) scale(1.006);
+  }
+
+  100% {
+    opacity: 1;
+    filter: blur(0);
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+@keyframes guyuCopyBreath {
+  0%,
+  100% {
+    opacity: 0.76;
+    filter: blur(0.35px);
+    transform: translate3d(0, 0.18rem, 0) scale(0.992);
+  }
+
+  50% {
+    opacity: 1;
+    filter: blur(0);
+    transform: translate3d(0, -0.28rem, 0) scale(1.01);
+  }
+}
+
+@keyframes guyuPhraseBreath {
+  0%,
+  100% {
+    opacity: 0.68;
+    transform: translate3d(0, 0.18em, 0);
+  }
+
+  50% {
+    opacity: 1;
+    transform: translate3d(0, -0.08em, 0);
+  }
 }
 
 .guyu-home-work-kind {
@@ -881,15 +1022,30 @@ body {
 
   .guyu-home-book-base {
     opacity: 1 !important;
+    animation: none !important;
+    filter: none !important;
     transition-duration: var(--dur-micro);
+  }
+
+  .guyu-home-book::after {
+    display: none;
   }
 
   .guyu-home-work,
   .guyu-home-work-copy,
+  .guyu-home-work-copy .guyu-title-phrases > span,
   .guyu-home-rotation-control,
   .guyu-home-dots button > span,
   .guyu-home-book {
     transition-duration: var(--dur-micro);
+  }
+
+  .guyu-home-work-copy,
+  .guyu-home-work-copy .guyu-title-phrases > span {
+    animation: none !important;
+    filter: none !important;
+    opacity: 1;
+    transform: none !important;
   }
 
   .guyu-home-work:hover .guyu-home-book,
@@ -1504,8 +1660,8 @@ body {
   transform: translateX(0);
   backdrop-filter: blur(var(--space-sm));
   transition:
-    opacity var(--dur-normal) var(--ease-out),
-    transform var(--dur-normal) var(--ease-out),
+    opacity 700ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 700ms cubic-bezier(0.22, 1, 0.36, 1),
     color var(--dur-short) var(--ease-out);
   white-space: nowrap;
 }
@@ -1542,6 +1698,7 @@ body {
   font: inherit;
   white-space: nowrap;
   backdrop-filter: blur(var(--space-sm));
+  animation: guyuReaderControlIn 700ms cubic-bezier(0.22, 1, 0.36, 1) both;
   cursor: pointer;
   z-index: calc(var(--z-page-controls) + 2);
 }
@@ -1693,8 +1850,8 @@ body {
   transform: translate(-50%, var(--space-md));
   backdrop-filter: blur(var(--space-md));
   transition:
-    opacity var(--dur-normal) var(--ease-out),
-    transform var(--dur-normal) var(--ease-out);
+    opacity 700ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 700ms cubic-bezier(0.22, 1, 0.36, 1);
   z-index: calc(var(--z-page-controls) + 1);
 }
 
@@ -1702,6 +1859,31 @@ body {
   opacity: 1;
   pointer-events: auto;
   transform: translate(-50%, 0);
+  animation: guyuReaderControlsIn 700ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes guyuReaderControlIn {
+  from {
+    opacity: 0;
+    transform: translate3d(-0.75rem, 0, 0);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes guyuReaderControlsIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, var(--space-lg));
+  }
+
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
 }
 
 .guyu-reader-page .guyu-book-controls p {
@@ -1818,7 +2000,38 @@ body {
   place-items: center;
   margin: 0;
   touch-action: pan-y pinch-zoom;
+  opacity: 0.14;
+  filter: blur(10px) saturate(0.72);
+  transition:
+    opacity 1100ms cubic-bezier(0.22, 1, 0.36, 1),
+    filter 1300ms cubic-bezier(0.22, 1, 0.36, 1);
   isolation: isolate;
+}
+
+.guyu-pageflip-shell.is-visual-ready {
+  opacity: 1;
+  filter: blur(0) saturate(1);
+}
+
+.guyu-reader-reveal {
+  position: absolute;
+  z-index: calc(var(--z-page-controls) - 1);
+  inset: -10%;
+  border-radius: 48%;
+  background:
+    radial-gradient(circle at 50% 45%, color-mix(in oklch, var(--color-paper-2) 94%, transparent) 0 24%, transparent 70%),
+    linear-gradient(112deg, color-mix(in oklch, var(--color-paper) 92%, transparent), transparent 72%);
+  opacity: 1;
+  filter: blur(4px);
+  pointer-events: none;
+  transition:
+    opacity 1300ms cubic-bezier(0.22, 1, 0.36, 1),
+    filter 1300ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.guyu-pageflip-shell.is-visual-ready .guyu-reader-reveal {
+  opacity: 0;
+  filter: blur(20px);
 }
 
 .guyu-pageflip-shell::after {
@@ -1834,6 +2047,25 @@ body {
   z-index: -1;
 }
 
+.guyu-flipbook[data-phase="flipping"] .guyu-pageflip-shell::after {
+  animation: guyuReaderShadowBreath 1400ms ease-in-out both;
+}
+
+@keyframes guyuReaderShadowBreath {
+  0%,
+  100% {
+    opacity: 0.72;
+    filter: blur(var(--space-md));
+    transform: scaleX(1);
+  }
+
+  48% {
+    opacity: 0.98;
+    filter: blur(var(--space-lg));
+    transform: scaleX(1.14);
+  }
+}
+
 .guyu-pageflip,
 .guyu-pageflip.stf__parent {
   inline-size: 100% !important;
@@ -1844,7 +2076,7 @@ body {
   overflow: visible !important;
   /* StPageFlip ships pan-y here; keep native pinch zoom on its actual touch surface. */
   touch-action: pan-y pinch-zoom;
-  transition: transform 580ms cubic-bezier(0.22, 0.8, 0.24, 1);
+  transition: transform 900ms cubic-bezier(0.22, 0.8, 0.24, 1);
 }
 
 .guyu-pageflip-shell.is-viewport-zoomed,
@@ -2003,6 +2235,27 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .guyu-reader-back,
+  .guyu-reader-close,
+  .guyu-reader-page.is-book-open .guyu-book-controls,
+  .guyu-pageflip-shell,
+  .guyu-pageflip,
+  .guyu-pageflip.stf__parent,
+  .guyu-reader-reveal,
+  .guyu-flipbook[data-phase="flipping"] .guyu-pageflip-shell::after {
+    animation: none !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .guyu-pageflip-shell {
+    opacity: 1;
+    filter: none;
+  }
+
+  .guyu-reader-reveal {
+    display: none;
+  }
+
   .guyu-flip-page-placeholder {
     animation: none;
   }

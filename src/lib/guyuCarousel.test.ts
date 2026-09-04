@@ -12,6 +12,7 @@ const {
   GUYU_FRAGMENT_SCATTER_MS,
   GUYU_FRAGMENT_VISUAL_MS,
   GUYU_SCATTER_FALLBACK_MS,
+  GUYU_SETTLE_MS,
   GUYU_SETTLE_FALLBACK_MS,
   getGuyuSwipeDirection,
   wrapGuyuCarouselIndex,
@@ -31,17 +32,18 @@ test("switches only for a deliberate horizontal swipe", () => {
   assert.equal(getGuyuSwipeDirection({ deltaX: 20, deltaY: 8, velocityX: 0.2 }), 0);
 });
 
-test("uses the faster automatic dwell", () => {
-  assert.equal(GUYU_CAROUSEL_DWELL_MS, 1_600);
+test("waits five seconds after the settled cover is fully visible", () => {
+  assert.equal(GUYU_CAROUSEL_DWELL_MS, 5_000);
 });
 
-test("keeps the fragment transition deliberate and fallbacks safely after CSS", () => {
-  assert.equal(GUYU_FRAGMENT_SCATTER_MS, 340);
-  assert.equal(GUYU_FRAGMENT_MAX_DELAY_MS, 72);
-  assert.equal(GUYU_FRAGMENT_HOLD_MS, 110);
-  assert.equal(GUYU_FRAGMENT_ASSEMBLE_MS, 500);
-  assert.ok(GUYU_FRAGMENT_VISUAL_MS >= 1_050 && GUYU_FRAGMENT_VISUAL_MS <= 1_150);
+test("keeps the fragment transition slow and fallbacks safely after CSS", () => {
+  assert.equal(GUYU_FRAGMENT_SCATTER_MS, 760);
+  assert.equal(GUYU_FRAGMENT_MAX_DELAY_MS, 144);
+  assert.equal(GUYU_FRAGMENT_HOLD_MS, 260);
+  assert.equal(GUYU_FRAGMENT_ASSEMBLE_MS, 1_180);
+  assert.equal(GUYU_FRAGMENT_VISUAL_MS, 2_488);
   assert.ok(GUYU_SCATTER_FALLBACK_MS > GUYU_FRAGMENT_SCATTER_MS + GUYU_FRAGMENT_MAX_DELAY_MS);
   assert.ok(GUYU_ASSEMBLE_FALLBACK_MS > GUYU_FRAGMENT_ASSEMBLE_MS + GUYU_FRAGMENT_MAX_DELAY_MS);
-  assert.equal(GUYU_SETTLE_FALLBACK_MS, 1_200);
+  assert.equal(GUYU_SETTLE_MS, 1_600);
+  assert.ok(GUYU_SETTLE_FALLBACK_MS > GUYU_SETTLE_MS);
 });

@@ -17,7 +17,7 @@ const homeProgressSections = [
   { id: "yunyou", label: "云游" },
   { id: "color", label: "颜色" },
   { id: "weiyan", label: "微言" },
-  { id: "skills", label: "技能" },
+  { id: "skills", label: "Skill" },
 ] as const;
 
 function HomeSectionProgress() {

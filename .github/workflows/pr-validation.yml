@@ -39,6 +39,9 @@ jobs:
       - name: Test homepage and navigation contracts
         run: npm run test:home-hold
 
+      - name: Test NetEase playlist and playback gateway
+        run: npm run test:music
+
       - name: Test protected Guyu delivery
         run: npm run test:guyu
 

@@ -31,7 +31,7 @@ export const skillsRepositoryUrl = "https://github.com/colorsugar/agent-skills";
 export function SkillsDirectory({ headingId }: { headingId: string }) {
   return (
     <section className="duomei-skills-directory" aria-labelledby={headingId}>
-      <h2 id={headingId} className="duomei-skills-sr-only">技能目录</h2>
+      <h2 id={headingId} className="duomei-skills-sr-only">Skill 目录</h2>
       <ol>
         {skills.map((skill) => (
           <li key={skill.name}>
@@ -62,10 +62,10 @@ export function HomeSkillsSection() {
   return (
     <HomeSectionHold id="skills" className="duomei-home-skills" ariaLabelledBy="duomei-home-skills-title">
       <header className="duomei-home-skills-heading">
-        <h2 id="duomei-home-skills-title">技能</h2>
+        <h2 id="duomei-home-skills-title">Skill</h2>
         <div>
           <p>把真正走过的流程，整理成可以继续使用的 Skill。</p>
-          <Link to="/skills">查看技能页 <span aria-hidden="true">→</span></Link>
+          <Link to="/skills">查看 Skill 页 <span aria-hidden="true">→</span></Link>
         </div>
       </header>
       <SkillsDirectory headingId="duomei-home-skills-directory-title" />

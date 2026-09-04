@@ -262,7 +262,7 @@ export function DuomeiHeader() {
           微言
         </a>
         <a href="/skills" onClick={closeAfterNativeNavigation}>
-          技能
+          Skill
         </a>
         {!isLoggedIn ? (
           <a href="/admin/login" onClick={closeAfterNativeNavigation}>

@@ -5636,10 +5636,28 @@ body.front-editing .notes-bottom-spacer {
   display: flex;
   flex-wrap: wrap;
   gap: 0.12em;
+  animation: dreamPoemBreath 6.4s ease-in-out infinite;
+  transform-origin: left center;
+  will-change: transform, opacity, filter;
 }
 
 .dream-poem-text span {
   white-space: nowrap;
+}
+
+@keyframes dreamPoemBreath {
+  0%,
+  100% {
+    opacity: 0.56;
+    filter: blur(0.55px);
+    transform: translate3d(0, 0.45rem, 0) scale(0.985);
+  }
+
+  50% {
+    opacity: 1;
+    filter: blur(0);
+    transform: translate3d(0, -0.32rem, 0) scale(1.025);
+  }
 }
 
 .poem-wind-lines {
@@ -9106,9 +9124,25 @@ body.duomei-modal-open {
 .duomei-motion-root[data-reduced-motion="true"] .duomei-note-card,
 .duomei-motion-root[data-reduced-motion="true"] .duomei-motion-card,
 .duomei-motion-root[data-reduced-motion="true"] .duomei-footer,
-.duomei-motion-root[data-reduced-motion="true"] .dream-card {
+.duomei-motion-root[data-reduced-motion="true"] .dream-card,
+.duomei-motion-root[data-reduced-motion="true"] .dream-name,
+.duomei-motion-root[data-reduced-motion="true"] .dream-tami,
+.duomei-motion-root[data-reduced-motion="true"] .dream-poem-text {
   animation: none !important;
   filter: none !important;
+  opacity: 1 !important;
+  transform: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dream-name,
+  .dream-tami,
+  .dream-poem-text {
+    animation: none !important;
+    filter: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
 }
 
 /* RC stability layer: keep the notes/dream handoff simple and predictable. */
@@ -12775,5 +12809,77 @@ html.duomei-modal-open .home-section-progress {
 @media (prefers-reduced-motion: reduce) {
   .home-section-progress {
     transition: none;
+  }
+}
+
+/* Public route reveal: one paper-fog gesture across Zaobao, notes, shelves and Skill. */
+.duomei-motion-root > .duomei-route-paper-veil {
+  position: fixed;
+  z-index: 9000;
+  inset: 0;
+  display: block;
+  background:
+    radial-gradient(circle at 50% 44%, color-mix(in oklch, var(--paper) 96%, transparent) 0 22%, transparent 68%),
+    linear-gradient(118deg, var(--paper), color-mix(in oklch, var(--color-paper-2) 86%, white) 48%, var(--paper));
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  animation: duomeiRoutePaperReveal 1300ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  will-change: opacity, filter, transform;
+}
+
+.duomei-motion-root > .duomei-route-paper-veil.is-note-detail {
+  animation-name: duomeiRouteNoteReveal;
+  animation-duration: 880ms;
+}
+
+@keyframes duomeiRoutePaperReveal {
+  0% {
+    opacity: 0.98;
+    visibility: visible;
+    filter: blur(0);
+    transform: scale(1);
+  }
+
+  42% {
+    opacity: 0.82;
+    visibility: visible;
+    filter: blur(2px);
+  }
+
+  100% {
+    opacity: 0;
+    visibility: hidden;
+    filter: blur(18px);
+    transform: scale(1.025);
+  }
+}
+
+@keyframes duomeiRouteNoteReveal {
+  0% {
+    opacity: 0.72;
+    visibility: visible;
+    filter: blur(0);
+    transform: scale(1);
+  }
+
+  48% {
+    opacity: 0.34;
+    visibility: visible;
+    filter: blur(2px);
+  }
+
+  100% {
+    opacity: 0;
+    visibility: hidden;
+    filter: blur(14px);
+    transform: scale(1.016);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .duomei-motion-root > .duomei-route-paper-veil {
+    display: none;
+    animation: none;
   }
 }

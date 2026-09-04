@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { HomeSectionHold } from "./HomeSectionHold";
 import "./ZaobaoSection.css";
 
@@ -63,7 +64,7 @@ export function ZaobaoSection() {
         <p>每日一纸，给多美的今早。</p>
       </header>
 
-      <a className="zaobao-card" href={ZAOBAO_ROUTE} aria-label={daily ? `打开今日早报：${daily.headline}` : "打开今日早报"}>
+      <Link className="zaobao-card" to={ZAOBAO_ROUTE} aria-label={daily ? `打开今日早报：${daily.headline}` : "打开今日早报"}>
         <span className="zaobao-card-cover" aria-hidden="true">
           <img
             key={coverSrc}
@@ -95,7 +96,7 @@ export function ZaobaoSection() {
         <strong className="zaobao-card-title">今日早报</strong>
         <span className="zaobao-card-copy">国际、国内、科技、AI、兴趣、日常，加上堺与大阪本周能去的展和祭。每天早上更新一版。</span>
         <span className="zaobao-card-cta">翻开今早 →</span>
-      </a>
+      </Link>
     </HomeSectionHold>
   );
 }
