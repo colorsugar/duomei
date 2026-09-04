@@ -4,7 +4,9 @@ import { HomeSectionHold } from "./HomeSectionHold";
 import "./ZaobaoSection.css";
 
 export const ZAOBAO_ROUTE = "/zaobao";
+export const ZAOBAO_ARCHIVE_ROUTE = "/zaobao/archive";
 export const ZAOBAO_URL = "https://zaobao-six.vercel.app";
+export const ZAOBAO_ARCHIVE_URL = `${ZAOBAO_URL}/archive/`;
 const ZAOBAO_FALLBACK_COVER = "/images/note-default-covers/duomei-default-cover-02.png";
 
 type ZaobaoDaily = {
@@ -61,7 +63,12 @@ export function ZaobaoSection() {
     <HomeSectionHold id="zaobao" className="zaobao-section" ariaLabelledBy="zaobao-title">
       <header className="zaobao-heading">
         <h2 id="zaobao-title">早报</h2>
-        <p>每日一纸，给多美的今早。</p>
+        <div className="zaobao-heading-copy">
+          <p>每日一纸，给多美的今早。</p>
+          <Link className="zaobao-heading-archive" to={ZAOBAO_ARCHIVE_ROUTE}>
+            往期早报 →
+          </Link>
+        </div>
       </header>
 
       <Link className="zaobao-card" to={ZAOBAO_ROUTE} aria-label={daily ? `打开今日早报：${daily.headline}` : "打开今日早报"}>

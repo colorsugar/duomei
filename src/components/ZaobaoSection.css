@@ -48,6 +48,31 @@
   line-height: 1.65;
 }
 
+.zaobao-heading-copy {
+  display: grid;
+  justify-items: start;
+  gap: var(--space-2xs);
+  min-inline-size: 0;
+}
+
+.zaobao-heading-archive {
+  display: inline-flex;
+  align-items: center;
+  min-block-size: var(--size-hit);
+  color: var(--color-accent);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-decoration: none;
+  border-block-end: var(--rule-hairline) solid currentColor;
+  white-space: nowrap;
+}
+
+.zaobao-heading-archive:focus-visible {
+  outline: var(--rule-focus) solid var(--color-focus);
+  outline-offset: var(--space-2xs);
+}
+
 .zaobao-card {
   display: grid;
   grid-template-columns: minmax(0, 1.35fr) minmax(18rem, 0.65fr);
@@ -316,7 +341,8 @@ main.zaobao-page {
 }
 
 .zaobao-page-back,
-.zaobao-page-open {
+.zaobao-page-open,
+.zaobao-page-archive {
   display: inline-flex;
   align-items: center;
   min-block-size: var(--size-hit);
@@ -332,12 +358,17 @@ main.zaobao-page {
   justify-self: start;
 }
 
-.zaobao-page-open {
+.zaobao-reader-actions {
   justify-self: end;
+  display: flex;
+  align-items: center;
+  gap: clamp(var(--space-sm), 2vw, var(--space-lg));
+  min-inline-size: 0;
 }
 
 .zaobao-page-back:focus-visible,
-.zaobao-page-open:focus-visible {
+.zaobao-page-open:focus-visible,
+.zaobao-page-archive:focus-visible {
   outline: var(--rule-focus) solid var(--color-focus);
   outline-offset: var(--space-2xs);
 }
@@ -566,6 +597,119 @@ main.zaobao-page.is-fallback {
   white-space: nowrap;
 }
 
+.zaobao-archive {
+  inline-size: min(100%, var(--layout-wide));
+  margin-inline: auto;
+  padding: var(--space-2xl) clamp(var(--space-md), 5vw, var(--space-3xl)) var(--space-4xl);
+}
+
+.zaobao-archive-hero {
+  display: grid;
+  gap: var(--space-md);
+  padding-block: var(--space-xl) var(--space-2xl);
+  border-block-end: var(--rule-hairline) solid var(--color-rule);
+}
+
+.zaobao-archive-hero h1 {
+  margin: 0;
+  color: var(--color-ink);
+  font-family: var(--font-display);
+  font-size: clamp(var(--text-2xl), 5vw, var(--text-display-s));
+  font-style: normal;
+  font-weight: 700;
+  letter-spacing: -0.035em;
+  line-height: 1.05;
+}
+
+.zaobao-archive-hero p {
+  max-inline-size: var(--layout-reading);
+  margin: 0;
+  color: var(--color-muted-strong);
+  line-height: 1.65;
+}
+
+.zaobao-archive-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.zaobao-archive-list a {
+  display: grid;
+  grid-template-columns: minmax(11rem, 0.3fr) minmax(0, 1fr) auto;
+  align-items: baseline;
+  gap: var(--space-md) var(--space-xl);
+  min-block-size: var(--size-hit);
+  padding-block: var(--space-lg);
+  border-block-end: var(--rule-hairline) solid var(--color-rule);
+  color: var(--color-ink);
+  text-decoration: none;
+}
+
+.zaobao-archive-list a:focus-visible {
+  outline: var(--rule-focus) solid var(--color-focus);
+  outline-offset: var(--space-2xs);
+}
+
+.zaobao-archive-list time {
+  color: var(--color-muted-strong);
+  font-size: var(--text-sm);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.zaobao-archive-list strong {
+  min-inline-size: 0;
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  font-weight: 700;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+  text-wrap: balance;
+}
+
+.zaobao-archive-list span {
+  color: var(--color-accent);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.zaobao-archive-empty {
+  display: grid;
+  justify-items: start;
+  gap: var(--space-md);
+  padding-block: var(--space-2xl);
+  color: var(--color-muted-strong);
+}
+
+.zaobao-archive-empty p {
+  margin: 0;
+  line-height: 1.65;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .zaobao-archive-list a:hover strong {
+    color: var(--color-accent);
+  }
+}
+
+@media (max-width: 48rem) {
+  .zaobao-archive {
+    padding-block: var(--space-xl) var(--space-3xl);
+  }
+
+  .zaobao-archive-list a {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-xs);
+    padding-block: var(--space-md);
+  }
+
+  .zaobao-archive-list strong {
+    font-size: var(--text-lg);
+  }
+}
+
 @media (min-width: 64rem) {
   .zaobao-story.is-featured {
     grid-column: 1 / -1;
@@ -704,7 +848,8 @@ main.zaobao-page.is-fallback {
   }
 
   .zaobao-page-back,
-  .zaobao-page-open {
+  .zaobao-page-open,
+  .zaobao-page-archive {
     font-size: var(--text-sm);
   }
 }
