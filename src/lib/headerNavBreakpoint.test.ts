@@ -136,6 +136,7 @@ test("keeps the Zaobao archive inside duomei.site and reuses the same reader", (
   assert.match(zaobaoPageSource, /if \(invalidDate\) \{\s*return <Navigate to=\{ZAOBAO_ARCHIVE_ROUTE\} replace \/>/);
   assert.match(zaobaoPageSource, /<Link className="zaobao-page-archive" to=\{ZAOBAO_ARCHIVE_ROUTE\}>/);
   assert.match(zaobaoPageSource, /href=\{originalUrl\} target="_blank"/);
+  assert.match(zaobaoPageSource, /\.page > section\[id\], \.page > \.group\[id\]/);
   assert.match(zaobaoArchivePageSource, /`\$\{ZAOBAO_URL\}\/archive\/manifest\.json`/);
   assert.match(zaobaoArchivePageSource, /<Link to=\{`\$\{ZAOBAO_ROUTE\}\/\$\{entry\.date\}`\}>/);
   assert.match(zaobaoArchivePageSource, /href=\{ZAOBAO_ARCHIVE_URL\} target="_blank"/);
