@@ -98,7 +98,7 @@ export function xiaoyaolou(F, M) {
   ], M.hallGray, { baseH: 1.5, baseW: 29, baseD: 29 });
   g.updateMatrixWorld(true);const bounds=new THREE.Box3().setFromObject(g);
   g.scale.y=21/(bounds.max.y-bounds.min.y);
-  at(g,F.xiaoyaolou.c[0],3,F.xiaoyaolou.c[1],ringAngle(F.xiaoyaolou.o)+Math.PI/2);
+  at(g,F.xiaoyaolou.c[0],3,F.xiaoyaolou.c[1],ringAngle(F.xiaoyaolou.o)-Math.PI/2);
   const root=new THREE.Group(),base=new THREE.Mesh(new THREE.BoxGeometry(37,3,42),M.stone);
   base.position.set(F.xiaoyaolou.c[0],1.5,F.xiaoyaolou.c[1]);base.rotation.y=g.rotation.y;root.add(base,g);
   root.userData.top=24;return root;
