@@ -21,6 +21,7 @@ const yunyouCss = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "..
 const zaobaoSource = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../components/ZaobaoSection.tsx"), "utf8");
 const zaobaoCss = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../components/ZaobaoSection.css"), "utf8");
 const zaobaoPageSource = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../pages/DuomeiZaobaoPage.tsx"), "utf8");
+const zaobaoArchivePageSource = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../pages/DuomeiZaobaoArchivePage.tsx"), "utf8");
 const skillsSource = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../components/SkillsDirectory.tsx"), "utf8");
 const skillsPageSource = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../pages/DuomeiSkillsPage.tsx"), "utf8");
 const skillsCss = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../skills.css"), "utf8");
@@ -114,7 +115,7 @@ test("uses a real local morning illustration for the Zaobao magazine cover", () 
 test("keeps Zaobao immersive while safely falling back to the original edition", () => {
   assert.match(appSource, /const isZaobao = location\.pathname === "\/zaobao"/);
   assert.match(appSource, /bareChrome = isAdmin \|\| isGuyuReader \|\| isZaobao/);
-  assert.match(zaobaoPageSource, /function parseEdition\(html: string\)/);
+  assert.match(zaobaoPageSource, /function parseEdition\(html: string, base: string = ZAOBAO_URL\)/);
   assert.match(zaobaoPageSource, /\.page > section\[id\]/);
   assert.match(zaobaoPageSource, /className="zaobao-story-grid"/);
   assert.match(zaobaoPageSource, /className="zaobao-frame"/);
@@ -122,6 +123,24 @@ test("keeps Zaobao immersive while safely falling back to the original edition",
   assert.match(zaobaoCss, /main\.zaobao-page \{[\s\S]*position:\s*fixed;[\s\S]*overflow-y:\s*auto/);
   assert.match(zaobaoCss, /\.zaobao-story-grid \{[\s\S]*repeat\(2, minmax\(0, 1fr\)\)/);
   assert.match(zaobaoCss, /@media \(max-width: 64rem\)[\s\S]*\.zaobao-story-grid \{[\s\S]*minmax\(0, 1fr\)/);
+});
+
+test("keeps the Zaobao archive inside duomei.site and reuses the same reader", () => {
+  assert.match(appSource, /location\.pathname\.startsWith\("\/zaobao\/"\)/);
+  assert.match(appSource, /<Route path="\/zaobao\/archive" element=\{<DuomeiZaobaoArchivePage \/>\} \/>/);
+  assert.match(appSource, /<Route path="\/zaobao\/:date" element=\{<DuomeiZaobaoPage \/>\} \/>/);
+  assert.match(zaobaoSource, /ZAOBAO_ARCHIVE_ROUTE = "\/zaobao\/archive"/);
+  assert.match(zaobaoSource, /<Link className="zaobao-heading-archive" to=\{ZAOBAO_ARCHIVE_ROUTE\}/);
+  assert.match(zaobaoPageSource, /ZAOBAO_DATE_PATTERN = \/\^\\d\{4\}-\\d\{2\}-\\d\{2\}\$\//);
+  assert.match(zaobaoPageSource, /return date \? `\$\{ZAOBAO_URL\}\/\$\{date\}\/` : ZAOBAO_URL/);
+  assert.match(zaobaoPageSource, /if \(invalidDate\) \{\s*return <Navigate to=\{ZAOBAO_ARCHIVE_ROUTE\} replace \/>/);
+  assert.match(zaobaoPageSource, /<Link className="zaobao-page-archive" to=\{ZAOBAO_ARCHIVE_ROUTE\}>/);
+  assert.match(zaobaoPageSource, /href=\{originalUrl\} target="_blank"/);
+  assert.match(zaobaoArchivePageSource, /`\$\{ZAOBAO_URL\}\/archive\/manifest\.json`/);
+  assert.match(zaobaoArchivePageSource, /<Link to=\{`\$\{ZAOBAO_ROUTE\}\/\$\{entry\.date\}`\}>/);
+  assert.match(zaobaoArchivePageSource, /href=\{ZAOBAO_ARCHIVE_URL\} target="_blank"/);
+  assert.doesNotMatch(zaobaoArchivePageSource, /dangerouslySetInnerHTML|srcDoc|<iframe/);
+  assert.doesNotMatch(zaobaoSource, /zaobao-heading-archive"[^>]*target=/);
 });
 
 test("uses Skill naming and a three-column desktop directory", () => {
