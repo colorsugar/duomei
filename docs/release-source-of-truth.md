@@ -42,6 +42,14 @@ The following files form one release unit. If any of them changes for poetry/快
 - `src/components/YunyouSection.css`
 - `src/components/NotesDreamTransition.tsx`
 - `src/components/SkillsDirectory.tsx`
+- `src/components/DuomeiMusicPlayer.tsx`
+- `src/music-player.css`
+- `src/lib/neteasePlaylist.ts`
+- `src/lib/neteasePlaylist.test.ts`
+- `server/neteaseMusic.mjs`
+- `server/neteaseMusic.test.mjs`
+- `cloud-functions/api/music-playlist.js`
+- `cloud-functions/api/music-stream.js`
 - `src/components/StickerPackSection.tsx`
 - `src/components/PoetryCanvasEditor.tsx`
 - `src/components/RouteScrollManager.tsx`
@@ -57,6 +65,7 @@ The following files form one release unit. If any of them changes for poetry/快
 - `src/components/PaperLayer.tsx`
 - `src/skills.css`
 - `src/styles.css`
+- `vite.config.ts`
 - `public/images/stickers/` supplied preview and QR assets
 - `public/yunyou/` same-origin 3D map runtime, data, textures, fallback and vendored Three.js license
 - `scripts/verify-release.ps1`
@@ -120,14 +129,14 @@ EdgeOne production has a precise client-IP rate-limit rule for `/api/guyu-auth` 
 - Text and images retain selectable entrance effects.
 - Mobile poetry editing remains page-by-page; the public 微言 reader uses the manual horizontal overlapping deck instead of the former vertical sticky stack.
 - “微言” points to `/#weiyan` and opens the homepage's manual, non-looping overlapping poetry deck.
-- The homepage order remains 主视觉 / 小记 / 快活 / 故语 / 云游 / 颜色 / 微言 / 技能 / 版权脚注.
-- 小记、故语、颜色、微言、技能与既有快活板块统一使用 `230svh / 100svh` sticky 停留节奏；底部进度到 100% 后才释放到下一板块，小记不平移轮播层，减少动态效果模式恢复普通文档流。
+- The homepage order remains 主视觉 / 早报 / 小记 / 快活 / 故语 / 云游 / 颜色 / 微言 / Skill / 版权脚注.
+- 小记、故语、颜色、微言、Skill 与既有快活板块统一使用 `230svh / 100svh` sticky 停留节奏；底部进度到 100% 后才释放到下一板块，小记不平移轮播层，减少动态效果模式恢复普通文档流。
 - On short mobile viewports, the static notes stage uses its natural content height inside the unchanged `230svh` track so the complete card clears before the next section; never shrink or clip the card text or alter the tilt pipeline.
-- “故语” sits between “快活” and “颜色”; its preview holds each book for 1.6 seconds, then uses an event-driven 16-fragment scatter/tint/swap/reassembly transition lasting about 1.1 seconds. During settle, the incoming base cover is exposed beneath the still-visible fragments without an opacity transition; the fragments stay mounted until that base image decodes and survives two paint frames, preventing the old cover from flashing back. The whole cover, copy, and “翻开这一本” card opens the current book at `/guyu/{book.id}`; a separate 44px “查看所有” link opens `/guyu`. It supports swipe, Arrow/Home/End keys, pause, clickable progress dots, and first/last looping.
+- “故语” sits between “快活” and “颜色”; its event-driven 16-fragment transition now scatters and reassembles through a soft paper mist, crossfades the two copy layers, waits for the incoming base cover decode, and completes a 1.6-second settle before starting a separate five-second dwell. The settled text uses a clear five-second breathing cycle. The whole card opens `/guyu/{book.id}`; the 44px “查看所有” link opens `/guyu`, with swipe, Arrow/Home/End keys, pause, progress dots, first/last looping, and reduced-motion fallbacks preserved.
 - “颜色” preserves the supplied 多美 and 多美猪猪 WeChat preview/QR assets and their official short links.
 - “云游” sits between “故语” and “颜色”; its homepage card opens the same-origin `/yunyou/` static 3D map, never a Vercel Preview. The map keeps a visible return link, WebGL/module fallback, local Three.js runtime, mobile DPR cap, manual auto-rotate control, and reduced-motion behavior.
-- Mobile keeps the fixed safe-area shortcut order 首页 / 小记 / 故语 / 云游 / 颜色 / 微言 / 技能; desktop renders the same shortcuts inside the footer.
-- The mobile footer keeps those seven shortcuts on one compact 44px-high row, reduces Guyu shelf-end whitespace, and hides the back-to-top button while the footer intersects the viewport so no link or copyright copy is covered.
+- Mobile keeps the fixed safe-area shortcut order 首页 / 早报 / 小记 / 故语 / 云游 / 颜色 / 微言 / Skill; desktop renders the same shortcuts inside the footer.
+- The mobile footer keeps those eight shortcuts on one compact 44px-high row, reduces Guyu shelf-end whitespace, and hides the back-to-top button while the footer intersects the viewport so no link or copyright copy is covered.
 - The frozen mobile header uses one synchronous native short-tap path on the portal DOM: buttons activate immediately, anchors call `window.location.assign()` before iOS user activation expires, and the compatibility click is suppressed once. Sticky hover/focus must never override `.is-menu-open` visibility or pointer events.
 - `/guyu/meiyou-yujian` keeps all 53 scans, expands detected two-page scans into aligned logical spreads, preserves the front and back covers, uses the pinned StPageFlip engine for full-screen phone/desktop page turns, and keeps keyboard plus compact overlay controls.
 - `/guyu/zhi-shang-feiyan`, `/guyu/xinshuo-01`, `/guyu/xinshuo-02`, and `/guyu/gui-xiang-huan-xiang` appear under the public `新说` shelf and reuse the same GuyuFlipbook. Each has exactly 30 complete `full` pages and never enters the old-book split/stack pipeline.
@@ -143,10 +152,13 @@ EdgeOne production has a precise client-IP rate-limit rule for `/api/guyu-auth` 
 - The full-site footer remains at the end of the site without duplicating the companion.
 - `/skills` remains the standalone full Skill index, while the homepage also renders the shared Skill directory before the copyright footer.
 - Both Skill surfaces link to the public `colorsugar/agent-skills` repository and preserve the site-wide header, footer, and mobile menu-close behavior.
+- `/zaobao` is a bare-chrome immersive reader: it fetches the CORS-enabled daily HTML, renders only parsed text/images/source links in the local React layout, and falls back to the original iframe if parsing fails.
+- The NetEase player uses playlist `316500315` through same-origin EdgeOne handlers that call only NetEase's anonymous official web endpoints. It returns the complete 2,270-track order, derives in-site playability strictly from `privilege.pl > 0`, redirects playable audio to HTTPS NetEase CDN URLs, and sends all other rows to official song pages. No NetEase login, cookie, password, or QR session is accepted or stored. Its NetEase-inspired control geometry is skinned with the site's Warm Archive tokens; the bar auto-minimizes into a record orb and keeps fixed/free position browser-local.
+- Public pathname changes share a 1.3-second paper-fog reveal. Hash-only homepage movement does not replay it, admin is excluded, and Guyu readers keep their separate decode-gated reveal plus 1.4-second native page turn.
 
 ## Required Release Procedure
 
-1. Run the root build and Guyu session tests, then run the Worker typecheck, tests, and dry deploy.
+1. Run the root build, homepage/Guyu tests, and `npm run test:music`, then run the Worker typecheck, tests, and dry deploy.
 2. Stage the complete intended feature bundle.
 3. Review `git diff --cached --stat` and `git diff --cached`.
 4. Commit the bundle.

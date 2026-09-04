@@ -98,6 +98,41 @@
   transition: color var(--dur-short) var(--ease-out);
 }
 
+@media (min-width: 60rem) {
+  .duomei-skills-directory ol {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .duomei-skills-directory li {
+    border-inline-end: var(--rule-hairline) solid var(--color-rule);
+  }
+
+  .duomei-skills-directory li:nth-child(3n) {
+    border-inline-end: 0;
+  }
+
+  .duomei-skills-directory li > a {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto 1fr auto;
+    block-size: 100%;
+    gap: var(--space-lg);
+    padding-inline: var(--space-xl);
+  }
+
+  .duomei-skills-directory li:first-child > a {
+    padding-inline-start: 0;
+  }
+
+  .duomei-skills-directory li:nth-child(3n) > a {
+    padding-inline-end: 0;
+  }
+
+  .duomei-skill-open {
+    align-self: end;
+  }
+}
+
 .duomei-skill-number {
   color: var(--color-muted);
   font-size: var(--text-sm);
@@ -197,6 +232,9 @@
     font-size: var(--text-base);
   }
 
+}
+
+@media (max-width: 59.99rem) {
   .duomei-skills-directory {
     padding-block-start: var(--space-xl);
   }

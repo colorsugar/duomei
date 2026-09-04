@@ -78,3 +78,20 @@ test("the reader keeps zoomed panning native and exposes return, close, and wrap
   assert.match(styles, /\.guyu-flip-page[\s\S]*?-webkit-touch-callout: none/);
   assert.match(styles, /\.guyu-book-meta \.guyu-title-phrases > span[\s\S]*?overflow-wrap: anywhere[\s\S]*?white-space: normal/);
 });
+
+test("the reader reveals decoded covers softly and uses a deliberate page turn", () => {
+  const flipbook = readFileSync(new URL("../components/GuyuFlipbook.tsx", import.meta.url), "utf8");
+  const styles = readFileSync(new URL("../guyu.css", import.meta.url), "utf8");
+
+  assert.match(flipbook, /const FLIP_TIME = 1_400/);
+  assert.match(flipbook, /coverReady \? " is-visual-ready"/);
+  assert.match(flipbook, /data-phase=\{phase\}/);
+  assert.match(flipbook, /className="guyu-reader-reveal"/);
+  assert.match(flipbook, /maxShadowOpacity=\{0\.62\}/);
+  assert.match(styles, /\.guyu-reader-reveal[\s\S]*?pointer-events: none/);
+  assert.match(styles, /\.guyu-pageflip-shell\.is-visual-ready[\s\S]*?filter: blur\(0\) saturate\(1\)/);
+  assert.match(styles, /guyuReaderShadowBreath 1400ms/);
+  assert.match(styles, /transition: transform 900ms/);
+  assert.doesNotMatch(styles, /--dur-normal/);
+  assert.match(styles, /prefers-reduced-motion[\s\S]*?\.guyu-reader-reveal[\s\S]*?display: none/);
+});

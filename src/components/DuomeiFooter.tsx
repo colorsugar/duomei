@@ -16,7 +16,7 @@ const quickLinks = [
   { label: "云游", to: "/#yunyou" },
   { label: "颜色", to: "/#color" },
   { label: "微言", to: "/#weiyan" },
-  { label: "技能", to: "/#skills" },
+  { label: "Skill", to: "/#skills" },
 ] as const;
 
 function splitCopyrightPhrases(value: string) {

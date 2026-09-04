@@ -46,7 +46,7 @@ type PageLoadContextValue = {
 };
 
 const PageLoadContext = createContext<PageLoadContextValue | null>(null);
-const FLIP_TIME = 600;
+const FLIP_TIME = 1_400;
 const LOAD_TIMEOUT = 15_000;
 const TAP_MAX_DURATION = 250;
 const COMPATIBILITY_MOUSE_DELAY = 700;
@@ -559,9 +559,14 @@ export function GuyuFlipbook({
 
   return (
     <PageLoadContext.Provider value={loadingContext}>
-      <section className="guyu-flipbook" aria-label={`翻阅《${book.title}》`} aria-busy={busy}>
+      <section
+        className="guyu-flipbook"
+        data-phase={phase}
+        aria-label={`翻阅《${book.title}》`}
+        aria-busy={busy}
+      >
         <div
-          className={`guyu-pageflip-shell is-${bookPosition}${nativeTouchReady ? " is-touch-ready" : ""}${viewportZoomed ? " is-viewport-zoomed" : ""}`}
+          className={`guyu-pageflip-shell is-${bookPosition}${coverReady ? " is-visual-ready" : ""}${nativeTouchReady ? " is-touch-ready" : ""}${viewportZoomed ? " is-viewport-zoomed" : ""}`}
           onTouchStartCapture={onBookTouchStart}
           onTouchMoveCapture={onBookTouchMove}
           onTouchEndCapture={onBookTouchEnd}
@@ -587,7 +592,7 @@ export function GuyuFlipbook({
             usePortrait={false}
             startZIndex={1}
             autoSize
-            maxShadowOpacity={0.48}
+            maxShadowOpacity={0.62}
             showCover
             mobileScrollSupport={true}
             clickEventForward={false}
@@ -610,6 +615,8 @@ export function GuyuFlipbook({
               />
             ))}
           </HTMLFlipBook>
+
+          <span className="guyu-reader-reveal" aria-hidden="true" />
 
           <button
             className="guyu-page-zone is-previous"
