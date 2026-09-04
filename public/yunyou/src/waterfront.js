@@ -5,6 +5,10 @@ import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { hash } from './lib.js';
 
 export const BINJIANG = [[-225,1299],[-214,1213],[-65,903],[-12,922],[7,922],[21,915],[52,892],[323,424],[358,364]];
+// Lamps and both terraces belong to the river side of the mapped road
+// ([375,321] -> [524,-139]), opposite Xiaoyao Tower.
+export const XIAOYAO_LIGHTS = [[448,162],[439,189],[430,216],[421,243],[412,270],[403,297]];
+export const XIAOYAO_TERRACE = { upper:[[450,152],[399,309]], lower:[[461,156],[410,313]] };
 const V = (x,y,z) => new THREE.Vector3(x,y,z);
 export function ribbonGeometry(points, width, y) {
   const pos=[], uv=[], ix=[];
@@ -59,13 +63,13 @@ export function createWaterfront(TEX) {
   }
   // Six visually confirmed pointed light frames by Xiaoyao Tower, north of bridge.
   // Placement and heights are photo estimates, not a surveyed 2026 asset inventory.
-  const lights=[[403,147],[394,174],[385,201],[376,228],[367,255],[358,282]];
+  const lights=XIAOYAO_LIGHTS;
   const angle=-.322;
   const world=(x,y,z,cx,cz)=>V(cx+Math.cos(angle)*x+Math.sin(angle)*z,y,cz-Math.sin(angle)*x+Math.cos(angle)*z);
   // Two-level waterfront terrace and a sloped embankment.
-  add(ribbonGeometry([[405,137],[354,294]],12,2.6),paving);
-  add(ribbonGeometry([[416,141],[365,298]],9,.9),stone);
-  for(let i=0;i<10;i++) add(ribbonGeometry([[409+i*.55,144],[359+i*.55,294]],.7,2.5-i*.16),stone);
+  add(ribbonGeometry(XIAOYAO_TERRACE.upper,12,2.6),paving);
+  add(ribbonGeometry(XIAOYAO_TERRACE.lower,9,.9),stone);
+  for(let i=0;i<10;i++) add(ribbonGeometry([[454+i*.55,159],[404+i*.55,309]],.7,2.5-i*.16),stone);
   for(const [cx,cz] of lights){
     box(3.2,1.1,2.2,stone,cx,3.15,cz,angle);
     for(const depth of [-.55,.55])for(const off of [0,.42]){
