@@ -40,6 +40,8 @@ function imgTex(name) {
 }
 export function makeTextures() {
   for (const n of ['stone', 'tile', 'copper', 'glaze', 'brick', 'karst']) TEX[n] = imgTex(n);
+  TEX.leafColor=imgTex('foliage/leaves-color');TEX.leafAlpha=imgTex('foliage/leaves-opacity');TEX.leafNormal=imgTex('foliage/leaves-normal');
+  TEX.leafAlpha.colorSpace=THREE.NoColorSpace;TEX.leafNormal.colorSpace=THREE.NoColorSpace;
   TEX.karst.wrapS = TEX.karst.wrapT = THREE.MirroredRepeatWrapping; // 岩壁图非无缝：镜像平铺消接缝
   // 水面：淡涟漪（偏翡翠绿，贴桂林实景）
   TEX.water = canvasTex(256, 256, (g, w, h) => {

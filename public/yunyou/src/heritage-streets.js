@@ -1,6 +1,7 @@
 // Streets follow the retained OSM footpath network. Shop modules / tree positions
 // are photo-guided approximations, not surveyed individual commercial premises.
 import * as THREE from 'three';
+import { createLeafyTrees } from './foliage.js';
 import { hash } from './lib.js';
 import { ribbonGeometry } from './waterfront.js';
 import { mergeStatic } from './mesh-utils.js';
@@ -10,7 +11,7 @@ export const CLOCK=[1,529]; // OSM circular plaza, Zhengyang / Yiren intersectio
 export const ALLEYS=[[[62,128],[228,152]],[[55,169],[175,184],[176,176],[221,182],[232,131]],[[118,177],[111,225],[48,211]],[[111,225],[230,261]],[[311,148],[279,141],[275,157],[290,163],[274,217],[263,222],[242,223],[225,278]],[[352,157],[311,148]],[[359,159],[349,188],[354,208],[353,216],[327,223],[311,202],[282,193]],[[124,137],[118,177]],[[46,227],[66,105]]];
 export const ZHENGYANG=[[44,237],[2,521],[-2,539],[-127,874]];
 export function createHeritageStreets(TEX){
- const group=new THREE.Group(),K=kitMats(TEX),night=[];
+ const group=new THREE.Group(),K=kitMats(TEX),night=[],leafPoints=[];
  const mat=(c,extra={})=>new THREE.MeshStandardMaterial({color:c,roughness:.82,...extra});
  const paving=mat(0xb8b4aa),trim=mat(0x7e827c),wall=mat(0xdad4c6),brick=mat(0x999c96,{map:TEX.brick}),wood=mat(0x47382c),red=mat(0x96392e,{metalness:.35}),white=mat(0xe4e3d5),blue=mat(0x236988),bark=mat(0x635e4c),leaves=[mat(0x365b3b),mat(0x4c7046),mat(0x52794c)];
  const warm=mat(0xe7bc77,{emissive:0xffc983,emissiveIntensity:0}),lantern=mat(0xa42f24,{emissive:0xe96629,emissiveIntensity:0});night.push([warm,1.8],[lantern,.8]);
@@ -47,14 +48,14 @@ export function createHeritageStreets(TEX){
   box(9,.42,8,trim,0,.21,0,0,g);
   for(let i=0;i<7;i++){const a=i*2.4,r=.8+hash(seed+i);beam(V(Math.cos(a)*r,0,Math.sin(a)*r),V(Math.cos(a)*.6,7,Math.sin(a)*.6),.45,bark,g);beam(V(Math.cos(a)*r,.1,Math.sin(a)*r),V(Math.cos(a)*r,.95,Math.sin(a)*r),.46,white,g);}
   for(let i=0;i<11;i++){const a=i*2.4+seed,r=7+hash(seed+'b'+i)*6,x=Math.cos(a)*r,z=Math.sin(a)*r,y=8+hash(seed+'y'+i)*6;beam(V(0,4.5,0),V(x,y-1,z),.25,bark,g);
-   const crown=new THREE.IcosahedronGeometry(5+hash(seed+'r'+i)*2,2);crown.scale(1.15,.63,1);add(crown,leaves[i%3],x,y,z,0,g);
+   const crown=new THREE.IcosahedronGeometry(5+hash(seed+'r'+i)*2,2);crown.scale(.65,.36,.6);add(crown,leaves[i%3],x,y,z,0,g);leafPoints.push([cx+x,cz+z,y-6.45,5]);
    for(let j=0;j<2;j++)beam(V(x+j*.3,y-1,z),V(x+j*.3,2+hash(seed+i+j)*3,z+.3),.035,bark,g);
   }
  };
  banyan(40,123,11);banyan(90,132,29);
  // Zhengyang street: paving seams, shop awnings, planters and pedestrian lamps.
  for(let i=0;i<31;i++){const s=17+i*19;const seg=s<286?[ZHENGYANG[0],ZHENGYANG[1],s]:[ZHENGYANG[2],ZHENGYANG[3],s-286],a=seg[0],b=seg[1],L=Math.hypot(b[0]-a[0],b[1]-a[1]),t=seg[2]/L;if(t>1)continue;const x=a[0]+(b[0]-a[0])*t,z=a[1]+(b[1]-a[1])*t;
-  for(const side of [-1,1]){box(.12,4.2,.12,wood,x+side*5.5,2.4,z);box(.6,.7,.6,warm,x+side*5.5,4.5,z);box(2.5,.6,1.4,trim,x+side*7,.3,z+5);add(new THREE.IcosahedronGeometry(1.25,1),leaves[i%3],x+side*7,1.6,z+5);}
+  for(const side of [-1,1]){box(.12,4.2,.12,wood,x+side*5.5,2.4,z);box(.6,.7,.6,warm,x+side*5.5,4.5,z);box(2.5,.6,1.4,trim,x+side*7,.3,z+5);leafPoints.push([x+side*7,z+5,.1,1.25]);}
  }
  // Open red lattice clock tower, four blue-rimmed clock faces and a suspended bell.
  const clock=new THREE.Group();clock.name='正阳街钟楼';clock.position.set(...[CLOCK[0],0,CLOCK[1]]);group.add(clock);
@@ -70,6 +71,6 @@ export function createHeritageStreets(TEX){
  for(let i=0;i<4;i++){const f=new THREE.Group();f.rotation.y=i*Math.PI/2;clock.add(f);add(new THREE.TorusGeometry(1,.12,8,40),blue,0,10.6,1.25,0,f);add(new THREE.CircleGeometry(.94,40),dial,0,10.6,1.27,0,f);}
  const bellProfile=[[0,0],[.65,0],[.72,.15],[.54,.3],[.42,.9],[.22,1.1],[0,1.1]].map(p=>new THREE.Vector2(...p));add(new THREE.LatheGeometry(bellProfile,20),K.gold,0,8.4,0,0,clock);beam(V(0,9.5,0),V(0,12,0),.08,red,clock);
  const panel=new THREE.Shape();panel.moveTo(-1.15,0);panel.lineTo(1.15,0);panel.lineTo(0,3.1);panel.closePath();const panelMat=mat(0xd8ddd6,{side:THREE.DoubleSide});add(new THREE.ShapeGeometry(panel),panelMat,0,12,-.05,0,clock);
- mergeStatic(group);group.name='东西巷 · 正阳街 · 王城古榕';
+ mergeStatic(group);group.add(createLeafyTrees(leafPoints,TEX));group.name='东西巷 · 正阳街 · 王城古榕';
  return {group,clock,setNight:t=>{for(const [m,k] of night)m.emissiveIntensity=k*t;}};
 }

@@ -1,7 +1,7 @@
 // 桂林市中心（两江四湖）地标。坐标 WGS84（OpenStreetMap），高度单位米，来自公开资料；模型在 src/landmarks.js 按这些尺寸手工构建。
 // kind: hill 山 | pagoda 塔 | building 楼阁/城 | bridge 桥 | lake 湖 | poi 点     span: 飞行到此处时的相机距离
 export const LANDMARKS = [
-  { id: 'xiangbishan', name: '象鼻山', kind: 'hill', lat: 25.2700731, lon: 110.2915099, h: 55, span: 260, view: [1,0.40,-0.15],
+  { id: 'xiangbishan', name: '象鼻山', kind: 'hill', lat: 25.2700731, lon: 110.2915099, h: 55, span: 240, view: [.12,.09,-1],
     photo: { src: './assets/photos/xiangbishan-overlook.webp', alt: '从象鼻山俯瞰桂林城与水道', caption: '多美实拍 · 2017' },
     desc: '桂林城徽，桃花江与漓江汇流处。高出江面 55 m，长 108 m、宽 100 m，纯石灰岩。象鼻与象腿之间的水月洞长 17 m、宽 9.5 m、高 12 m，东西通透，「象山水月」。山顶东端普贤塔为明代实心砖塔，高 13.6 m，双层八角须弥座，宝瓶式塔身。' },
   { id: 'binjianglu', name: '滨江路', kind: 'street', lat: 25.2756, lon: 110.2945, span: 620, view: [1,.65,.6],
