@@ -136,27 +136,51 @@ test("uses Skill naming and a three-column desktop directory", () => {
 });
 
 test("keeps the full NetEase playlist native, movable, bounded, and autoplay-off", () => {
-  assert.match(appSource, /!bareChrome \? <DuomeiMusicPlayer \/> : null/);
+  assert.match(appSource, /!isAdmin \? <DuomeiMusicPlayer compactContext=\{isGuyuReader \|\| isZaobao\} \/> : null/);
   assert.match(musicPlayerSource, /NETEASE_PLAYLIST_ID = "316500315"/);
   assert.match(musicPlayerSource, /<audio[\s\S]*preload="metadata"/);
   assert.doesNotMatch(musicPlayerSource, /<iframe|autoPlay/);
   assert.match(musicPlayerSource, /\/api\/music-stream\?id=/);
   assert.match(musicPlayerSource, /findPlayableIndex/);
-  assert.match(musicPlayerSource, /需在网易云播放/);
+  assert.match(musicPlayerSource, /track\.playable && !failedTrackIdsRef\.current\.has\(track\.id\)/);
+  assert.match(musicPlayerSource, /搜索 \$\{playableCount\} 首可播放歌曲/);
+  assert.doesNotMatch(musicPlayerSource, /2_270|PLAYABLE \/|原歌单/);
   assert.match(musicPlayerSource, /setPointerCapture\(event\.pointerId\)/);
-  assert.match(musicPlayerSource, /duomei-music-player-position/);
+  assert.match(musicPlayerSource, /duomei-music-player-position-v4/);
   assert.match(musicPlayerSource, /scheduleAutoMinimize/);
   assert.match(musicPlayerSource, /className="duomei-music-orb"/);
   assert.match(musicPlayerSource, /event\.pointerType !== "mouse"/);
   assert.match(musicPlayerSource, /window\.setTimeout\(revealCompactPlayer, 180\)/);
+  assert.match(musicPlayerSource, /addEventListener\("wheel", containWheel, \{ passive: false \}\)/);
+  assert.match(musicPlayerSource, /event\.preventDefault\(\)[\s\S]*event\.stopPropagation\(\)/);
+  assert.match(musicPlayerSource, /event\.ctrlKey/);
+  assert.match(musicPlayerSource, /type PlaybackMode = "sequence" \| "shuffle" \| "one"/);
+  assert.match(musicPlayerSource, /Math\.random\(\) \* choices\.length/);
+  assert.match(musicPlayerSource, /playbackMode === "one"/);
+  assert.match(musicPlayerSource, /duomei-music-playback-mode/);
+  assert.match(musicPlayerSource, /--music-progress/);
+  assert.match(musicPlayerSource, /LONG_PRESS_MS = 320/);
+  assert.match(musicPlayerSource, /beginOrbLongPress/);
+  assert.match(musicPlayerSource, /if \(dragRef\.current \|\| pointerFocusGuardRef\.current\) return/);
+  assert.match(musicPlayerSource, /className="duomei-music-cover"[\s\S]*onPointerDown=\{beginOrbLongPress\}/);
+  assert.match(musicPlayerSource, /onPointerDown=\{seekFromPointer\}/);
+  assert.match(musicPlayerSource, /fetchNeteaseLyrics/);
+  assert.match(musicPlayerSource, /className="duomei-music-lyrics-toggle"/);
   assert.match(neteaseClientSource, /fetch\(NETEASE_PLAYLIST_URL, \{ signal, credentials: "same-origin" \}\)/);
   assert.match(neteaseServerSource, /NETEASE_PLAYLIST_ID = 316500315/);
   assert.match(neteaseServerSource, /NETEASE_MAX_TRACKS = 3000/);
-  assert.match(musicPlayerCss, /\.duomei-music-player\.is-free/);
+  assert.match(musicPlayerCss, /\.duomei-music-player\.is-placed/);
   assert.match(musicPlayerCss, /\.duomei-music-player\.is-minimized/);
   assert.match(musicPlayerCss, /theme: Warm Archive/);
-  assert.match(musicPlayerCss, /"cover previous play next spacer mute queue"/);
+  assert.match(musicPlayerCss, /"cover previous play next spacer mode lyrics mute queue"/);
+  assert.doesNotMatch(musicPlayerCss, /is-immersive[\s\S]{0,160}duomei-music-(?:queue|lyrics-toggle)/);
+  assert.match(musicPlayerCss, /\.duomei-music-orb\s*\{[\s\S]*touch-action:\s*none[\s\S]*cursor:\s*grab/);
+  assert.doesNotMatch(musicPlayerCss, /\.duomei-music-drag|\.duomei-music-placement|\.is-fixed|\.is-free/);
+  assert.match(musicPlayerCss, /inline-size:\s*min\(var\(--music-player-width\), calc\(100% - \(var\(--space-md\) \* 2\)\)\)/);
   assert.match(musicPlayerCss, /inline-size 620ms cubic-bezier/);
+  assert.match(musicPlayerCss, /::-webkit-slider-thumb[\s\S]*inline-size:\s*0\.625rem/);
+  assert.match(musicPlayerCss, /:is\(:hover, :active, :focus-visible\)::-webkit-slider-runnable-track\s*\{[\s\S]*block-size:\s*6px/);
+  assert.match(musicPlayerCss, /body:has\(\.duomei-music-player:not\(\.is-minimized\)\)[\s\S]*\.back-to-top, \.home-section-progress/);
   assert.match(musicPlayerCss, /\.duomei-motion-root > \.duomei-music-player\s*\{[\s\S]*?position:\s*fixed/);
   assert.deepEqual(containFloatingWidget({ x: -20, y: 900 }, 200, 100, 800, 600), { x: 16, y: 484 });
   assert.deepEqual(containFloatingWidget({ x: Number.NaN, y: Number.POSITIVE_INFINITY }, 200, 100, 800, 600), { x: 16, y: 16 });
@@ -290,10 +314,11 @@ test("keeps Cursor auto-publish behind same-repository validation", () => {
   assert.match(edgeOneDeployWorkflow, /if: github\.ref == 'refs\/heads\/main'/);
 });
 
-test("keeps short mobile poetry pages clear of clipping and the fixed progress rail", () => {
+test("keeps short mobile poetry pages clear of clipping and the tiny progress hint", () => {
   assert.match(homeIntroCss, /@media \(max-width: 48rem\) and \(max-height: 720px\)/);
   assert.match(homeIntroCss, /font-size:\s*clamp\(1rem, 4\.5vw, 1\.2rem\) !important/);
-  assert.match(siteCss, /inset-block-end:\s*max\([\s\S]*var\(--space-md\)/);
+  assert.match(siteCss, /\.home-section-progress\s*\{[\s\S]*background:\s*transparent[\s\S]*box-shadow:\s*none/);
+  assert.match(siteCss, /inset-block-end:\s*max\([\s\S]*var\(--space-sm\)/);
 });
 
 test("admin inventory matches the live homepage section set", () => {

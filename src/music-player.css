@@ -1,6 +1,6 @@
 /* Hallmark · 网易云结构参考播放器 · genre: editorial utility · theme: Warm Archive
  * geometry: 448px top controls + title rail + paper list drawer; small record orb at rest
- * states: loading · ready · buffering · playing · restricted · fixed/free · reduced motion
+ * states: loading · ready · buffering · playing · restricted · orb-long-press-drag · reduced motion
  */
 .duomei-music-player {
   --music-bg: color-mix(in oklch, var(--color-paper) 96%, transparent);
@@ -40,7 +40,7 @@
   z-index: var(--z-sticky);
 }
 
-.duomei-music-player.is-free {
+.duomei-music-player.is-placed {
   inset: auto;
 }
 
@@ -73,6 +73,8 @@
   border-radius: 50%;
   font-family: var(--font-display);
   font-size: var(--text-xl);
+  touch-action: none;
+  cursor: grab;
   opacity: 0;
   pointer-events: none;
   transform: rotate(-18deg) scale(0.7);
@@ -95,8 +97,7 @@
   transform: rotate(0) scale(1);
 }
 
-.duomei-music-player.is-playing .duomei-music-orb img,
-.duomei-music-player.is-playing .duomei-music-cover img {
+.duomei-music-player.is-playing .duomei-music-orb img {
   animation: duomeiMusicDiscSpin 12s linear infinite;
 }
 
@@ -117,11 +118,11 @@
 .duomei-music-bar {
   display: grid;
   grid-template-areas:
-    "drag cover previous play next spacer mute queue"
-    "drag cover now now now now now now"
-    "progress progress progress progress progress progress progress progress";
-  grid-template-columns: 1.25rem 4rem 2.5rem 3.25rem 2.5rem minmax(0, 1fr) 2.5rem 2.5rem;
-  grid-template-rows: 4rem 2rem 2px;
+    "cover previous play next spacer mode lyrics mute queue"
+    "cover now now now now now now now now"
+    "progress progress progress progress progress progress progress progress progress";
+  grid-template-columns: 4rem 2.25rem 3.25rem 2.25rem minmax(0, 1fr) repeat(4, 2.5rem);
+  grid-template-rows: 4rem 1.5rem 0.625rem;
   align-items: center;
   inline-size: 100%;
   min-block-size: var(--music-bar-height);
@@ -133,14 +134,6 @@
     opacity 360ms 90ms var(--ease-out),
     transform 620ms cubic-bezier(0.22, 1, 0.36, 1),
     visibility 0s linear 0s;
-}
-
-.duomei-music-player.is-fixed .duomei-music-bar {
-  grid-template-areas:
-    "cover previous play next spacer mute queue"
-    "cover now now now now now now"
-    "progress progress progress progress progress progress progress";
-  grid-template-columns: 4rem 2.5rem 3.25rem 2.5rem minmax(0, 1fr) 2.5rem 2.5rem;
 }
 
 .duomei-music-player.is-minimized .duomei-music-bar {
@@ -156,7 +149,7 @@
 .duomei-music-bar button {
   display: grid;
   place-items: center;
-  min-inline-size: var(--size-hit);
+  min-inline-size: 0;
   min-block-size: var(--size-hit);
   padding: 0;
   color: var(--music-muted);
@@ -165,35 +158,42 @@
   cursor: pointer;
 }
 
-.duomei-music-drag {
-  grid-area: drag;
-  align-self: stretch;
+.duomei-music-bar svg {
   inline-size: 1.25rem;
-  min-inline-size: 1.25rem !important;
-  color: var(--color-muted) !important;
-  touch-action: none;
-  cursor: grab !important;
-  user-select: none;
+  block-size: 1.25rem;
+  overflow: visible;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
-.duomei-music-drag:active {
-  cursor: grabbing !important;
+.duomei-music-bar svg .is-filled {
+  fill: currentColor;
+  stroke: none;
 }
 
-.duomei-music-player.is-fixed .duomei-music-drag {
-  display: none;
+.duomei-music-bar svg .is-label {
+  fill: currentColor;
+  stroke: none;
+  font-family: var(--font-body);
+  font-size: 0.55rem;
+  font-weight: 700;
 }
 
 .duomei-music-cover {
   grid-area: cover;
-  inline-size: 4rem;
-  block-size: 4rem;
+  inline-size: 3.25rem;
+  block-size: 3.25rem;
+  justify-self: center;
   overflow: hidden;
   color: var(--music-ink) !important;
-  background:
-    radial-gradient(circle, var(--music-accent) 0 9%, transparent 10%),
-    repeating-radial-gradient(circle, color-mix(in oklch, var(--color-ink) 78%, var(--color-paper)) 0 2px, var(--color-ink) 3px 5px) !important;
-  border-inline-end: var(--rule-hairline) solid var(--color-rule) !important;
+  background: var(--color-paper-2) !important;
+  border: var(--rule-hairline) solid color-mix(in oklch, var(--color-rule) 76%, transparent) !important;
+  border-radius: 0.625rem;
+  touch-action: none;
+  cursor: grab !important;
 }
 
 .duomei-music-now {
@@ -242,12 +242,14 @@
 .duomei-music-skip.is-previous { grid-area: previous; }
 .duomei-music-skip.is-next { grid-area: next; }
 .duomei-music-play { grid-area: play; }
+.duomei-music-mode { grid-area: mode; }
+.duomei-music-lyrics-toggle { grid-area: lyrics; }
 .duomei-music-mute { grid-area: mute; }
 .duomei-music-queue { grid-area: queue; }
 
-.duomei-music-skip {
-  font-size: 2rem !important;
-  font-weight: 200 !important;
+.duomei-music-skip svg {
+  inline-size: 1.35rem;
+  block-size: 1.35rem;
 }
 
 .duomei-music-play {
@@ -261,16 +263,29 @@
   border-radius: 50%;
 }
 
-.duomei-music-play span {
-  font-size: var(--text-sm);
-  transform: translateX(0.06em);
+.duomei-music-play svg {
+  inline-size: 1.2rem;
+  block-size: 1.2rem;
 }
 
+.duomei-music-mode,
+.duomei-music-lyrics-toggle,
 .duomei-music-mute,
 .duomei-music-queue {
   inline-size: 2.5rem;
   min-inline-size: 2.5rem !important;
-  font-size: var(--text-lg) !important;
+  border-radius: 50%;
+}
+
+.duomei-music-player.is-dragging :is(.duomei-music-orb, .duomei-music-cover) {
+  cursor: grabbing;
+  transform: scale(0.96);
+}
+
+.duomei-music-queue[aria-pressed="true"],
+.duomei-music-lyrics-toggle[aria-pressed="true"],
+.duomei-music-mute[aria-pressed="true"] {
+  color: var(--music-accent);
 }
 
 .duomei-music-bar button:disabled {
@@ -280,13 +295,88 @@
 
 .duomei-music-progress {
   grid-area: progress;
-  align-self: end;
+  position: relative;
+  z-index: 3;
+  align-self: center;
   inline-size: 100%;
-  block-size: 2px;
+  block-size: 1rem;
   margin: 0;
   padding: 0;
-  accent-color: var(--music-accent);
+  appearance: none;
+  background: transparent;
+  touch-action: none;
   cursor: pointer;
+}
+
+.duomei-music-progress::-webkit-slider-runnable-track {
+  block-size: 2px;
+  background: linear-gradient(
+    to right,
+    var(--music-accent) 0 var(--music-progress),
+    color-mix(in oklch, var(--color-rule) 76%, transparent) var(--music-progress) 100%
+  );
+  border-radius: var(--radius-pill);
+  transition: block-size 180ms var(--ease-out);
+}
+
+.duomei-music-progress::-webkit-slider-thumb {
+  inline-size: 0.625rem;
+  block-size: 0.625rem;
+  margin-block-start: -4px;
+  appearance: none;
+  background: var(--music-accent);
+  border: 2px solid var(--color-paper);
+  border-radius: 50%;
+  box-shadow: 0 1px 4px color-mix(in oklch, var(--color-ink) 20%, transparent);
+  transition:
+    inline-size 180ms var(--ease-out),
+    block-size 180ms var(--ease-out),
+    margin-block-start 180ms var(--ease-out);
+}
+
+.duomei-music-progress:is(:hover, :active, :focus-visible)::-webkit-slider-runnable-track {
+  block-size: 6px;
+}
+
+.duomei-music-progress:is(:hover, :active, :focus-visible)::-webkit-slider-thumb {
+  inline-size: 0.75rem;
+  block-size: 0.75rem;
+  margin-block-start: -3px;
+}
+
+.duomei-music-progress::-moz-range-track {
+  block-size: 2px;
+  background: color-mix(in oklch, var(--color-rule) 76%, transparent);
+  border-radius: var(--radius-pill);
+  transition: block-size 180ms var(--ease-out);
+}
+
+.duomei-music-progress::-moz-range-progress {
+  block-size: 2px;
+  background: var(--music-accent);
+  border-radius: var(--radius-pill);
+  transition: block-size 180ms var(--ease-out);
+}
+
+.duomei-music-progress::-moz-range-thumb {
+  inline-size: 0.625rem;
+  block-size: 0.625rem;
+  background: var(--music-accent);
+  border: 2px solid var(--color-paper);
+  border-radius: 50%;
+  transition:
+    inline-size 180ms var(--ease-out),
+    block-size 180ms var(--ease-out);
+}
+
+.duomei-music-progress:is(:hover, :active, :focus-visible)::-moz-range-track,
+.duomei-music-progress:is(:hover, :active, :focus-visible)::-moz-range-progress {
+  block-size: 6px;
+}
+
+.duomei-music-progress:is(:hover, :active, :focus-visible)::-moz-range-thumb {
+  inline-size: 0.75rem;
+  block-size: 0.75rem;
 }
 
 .duomei-music-progress:disabled {
@@ -297,8 +387,9 @@
   block-size: var(--music-panel-height);
   min-block-size: 0;
   display: grid;
-  grid-template-rows: auto auto minmax(0, 1fr) auto;
+  grid-template-rows: auto minmax(0, 1fr) auto;
   overflow: hidden;
+  overscroll-behavior: contain;
   color: var(--music-ink);
   background: var(--music-bg-deep);
   border-block-start: var(--rule-hairline) solid var(--color-rule);
@@ -324,39 +415,6 @@
     visibility 0s linear 520ms;
 }
 
-.duomei-music-panel > header {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto auto;
-  align-items: center;
-  gap: var(--space-xs);
-  padding: var(--space-sm) var(--space-md);
-  background: var(--color-paper);
-  border-block-end: var(--rule-hairline) solid var(--music-rule);
-}
-
-.duomei-music-panel > header > div {
-  min-inline-size: 0;
-  display: grid;
-  gap: 0.15rem;
-}
-
-.duomei-music-panel > header small {
-  color: var(--music-muted);
-  font-size: 0.62rem;
-  letter-spacing: 0.12em;
-}
-
-.duomei-music-panel > header strong {
-  overflow: hidden;
-  color: var(--music-ink);
-  font-family: var(--font-display);
-  font-size: var(--text-base);
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.duomei-music-panel > header button,
-.duomei-music-panel > header a,
 .duomei-music-empty button,
 .duomei-music-more {
   min-block-size: var(--size-hit);
@@ -407,8 +465,55 @@
   min-block-size: 0;
   overflow-y: auto;
   overscroll-behavior: contain;
+  touch-action: pan-y;
   scrollbar-width: thin;
   scrollbar-color: var(--color-rule-strong) transparent;
+}
+
+.duomei-music-lyrics {
+  grid-row: 1 / -1;
+  min-block-size: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 42% var(--space-xl);
+  scroll-behavior: smooth;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-rule-strong) transparent;
+  touch-action: pan-y;
+}
+
+.duomei-music-lyrics > p {
+  margin: 0;
+  padding-block: var(--space-sm);
+  color: color-mix(in oklch, var(--music-muted) 72%, transparent);
+  font-family: var(--font-display);
+  font-size: var(--text-md);
+  line-height: 1.65;
+  text-align: center;
+  opacity: 0.72;
+  transform: scale(0.96);
+  transition:
+    color 700ms var(--ease-out),
+    opacity 700ms var(--ease-out),
+    transform 900ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.duomei-music-lyrics > p.is-active {
+  color: var(--music-ink);
+  opacity: 1;
+  transform: scale(1.05);
+}
+
+.duomei-music-lyrics span,
+.duomei-music-lyrics small {
+  display: block;
+}
+
+.duomei-music-lyrics small {
+  margin-block-start: var(--space-2xs);
+  color: var(--music-muted);
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
 }
 
 .duomei-music-track-list > :is(button, a) {
@@ -482,10 +587,6 @@
   content: "";
 }
 
-.duomei-music-track-list > a.is-external {
-  opacity: 0.58;
-}
-
 .duomei-music-loading,
 .duomei-music-empty {
   margin: 0;
@@ -536,6 +637,7 @@
 
   .duomei-music-bar > button:not(.duomei-music-now):not(.duomei-music-cover):hover {
     background: color-mix(in oklch, var(--color-accent) 7%, transparent);
+    border-radius: 50%;
   }
 
   .duomei-music-track-list > :is(button, a):hover {
@@ -546,39 +648,26 @@
 @media (max-width: 48rem) {
   .duomei-music-player {
     inset-inline-start: var(--space-md);
-    inset-block-end: calc(var(--space-4xl) + env(safe-area-inset-bottom, 0px));
-    inline-size: calc(100% - (var(--space-md) * 2));
+    inset-block-end: max(var(--space-md), env(safe-area-inset-bottom, 0px));
+    inline-size: min(var(--music-player-width), calc(100% - (var(--space-md) * 2)));
     --music-panel-height: min(23rem, calc(100svh - 13rem));
   }
 
-  .duomei-music-bar,
-  .duomei-music-player.is-fixed .duomei-music-bar {
-    grid-template-columns: 3.5rem 2.1rem 2.8rem 2.1rem minmax(0, 1fr) 2.3rem 2.3rem;
+  .duomei-music-bar {
+    grid-template-columns: 3.5rem 2rem 2.8rem 2rem minmax(0, 1fr) repeat(4, 2rem);
   }
 
-  .duomei-music-player.is-free .duomei-music-bar {
-    grid-template-columns: 1.1rem 3.5rem 2.1rem 2.8rem 2.1rem minmax(0, 1fr) 2.3rem 2.3rem;
+  .duomei-music-mode,
+  .duomei-music-lyrics-toggle,
+  .duomei-music-mute,
+  .duomei-music-queue {
+    inline-size: 2rem;
+    min-inline-size: 2rem !important;
   }
 
   .duomei-music-cover {
-    inline-size: 3.5rem;
-    block-size: 4rem;
-  }
-
-  .duomei-music-panel > header {
-    grid-template-columns: minmax(0, 1fr) auto;
-  }
-
-  .duomei-music-panel > header > div {
-    grid-column: 1 / -1;
-  }
-
-  .duomei-music-panel > header button {
-    justify-self: start;
-  }
-
-  .duomei-music-panel > header a {
-    justify-self: end;
+    inline-size: 3rem;
+    block-size: 3rem;
   }
 
   .duomei-music-search {
@@ -590,6 +679,13 @@
   }
 }
 
+@media (max-width: 22.5rem) {
+  .duomei-music-player {
+    inset-inline-start: var(--space-xs);
+    inline-size: calc(100% - (var(--space-xs) * 2));
+  }
+}
+
 .duomei-motion-root > .duomei-music-player.is-minimized {
   inline-size: var(--music-orb-size);
 }
@@ -598,6 +694,12 @@ body.front-editing .duomei-music-player,
 body.duomei-modal-open .duomei-music-player,
 html.duomei-modal-open .duomei-music-player {
   display: none;
+}
+
+body:has(.duomei-music-player:not(.is-minimized)) :is(.back-to-top, .home-section-progress) {
+  opacity: 0 !important;
+  pointer-events: none;
+  transform: translate3d(0, var(--space-md), 0) scale(0.92) !important;
 }
 
 @media (prefers-reduced-motion: reduce) {

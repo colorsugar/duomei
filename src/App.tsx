@@ -73,7 +73,7 @@ function AppRoutes() {
       </Routes>
       <PublicRoutePaperVeil pathname={location.pathname} disabled={isAdmin || isGuyuReader} />
       {!bareChrome ? <DuomeiFooter /> : null}
-      {!bareChrome ? <DuomeiMusicPlayer /> : null}
+      {!isAdmin ? <DuomeiMusicPlayer compactContext={isGuyuReader || isZaobao} /> : null}
       {!bareChrome ? <DuomeiCompanion /> : null}
       {!bareChrome ? <BackToTopButton /> : null}
     </DuomeiEditProvider>

@@ -1,6 +1,7 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import {
+  handleMusicLyricRequest,
   handleMusicPlaylistRequest,
   handleMusicStreamRequest,
 } from "./server/neteaseMusic.mjs";
@@ -17,9 +18,11 @@ function neteaseMusicDevApi() {
         const requestUrl = request.url ? new URL(request.url, "http://localhost") : undefined;
         const handler = requestUrl?.pathname === "/api/music-playlist"
           ? handleMusicPlaylistRequest
-          : requestUrl?.pathname === "/api/music-stream"
-            ? handleMusicStreamRequest
-            : undefined;
+          : requestUrl?.pathname === "/api/music-lyric"
+            ? handleMusicLyricRequest
+            : requestUrl?.pathname === "/api/music-stream"
+              ? handleMusicStreamRequest
+              : undefined;
         if (!handler || !requestUrl) {
           next();
           return;

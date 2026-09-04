@@ -154,6 +154,10 @@ jobs:
                 ? await fetch(`https://duomei.site/api/music-stream?id=${playableTrack.id}&ci=${nonce}`, { cache: "no-store", redirect: "manual" })
                 : null;
               const musicLocation = musicStream?.headers.get("location") ?? "";
+              const musicLyric = playableTrack
+                ? await fetch(`https://duomei.site/api/music-lyric?id=${playableTrack.id}&ci=${nonce}`, { cache: "no-store" })
+                : null;
+              const musicLyricBody = musicLyric?.ok ? await musicLyric.json() : null;
 
               if (
                 marker.status === 200 &&
@@ -176,13 +180,16 @@ jobs:
                 musicBody?.tracks?.length === musicBody.total &&
                 playableTrack &&
                 musicStream?.status === 302 &&
-                /^https:\/\/[^/]+\.music\.126\.net\//.test(musicLocation)
+                /^https:\/\/[^/]+\.music\.126\.net\//.test(musicLocation) &&
+                musicLyric?.status === 200 &&
+                musicLyricBody?.id === Number(playableTrack.id) &&
+                typeof musicLyricBody?.lyric === "string"
               ) {
                 console.log(`Production verified on attempt ${attempt}.`);
                 process.exit(0);
               }
 
-              lastError = `marker=${marker.status}/${markerBody?.commit ?? "missing"} home=${home.status} auth=${auth.status}/${authBody?.authorized} protected-old=${protectedOldPage.status} public-feiyan=${publicFeiyanPage.status} public-xinshuo-01=${publicXinshuoOnePage.status} public-xinshuo-02=${publicXinshuoTwoPage.status} public-gui-xiang=${publicGuiXiangPage.status} yunyou=${yunyouIndex.status}/${yunyouBody.includes("云游桂林 · 多美小记")} yunyou-main=${yunyouMain.status} music=${musicPlaylist.status}/${musicBody?.total ?? "missing"}/${musicBody?.tracks?.length ?? "missing"} music-stream=${musicStream?.status ?? "missing"}/${musicLocation}`;
+              lastError = `marker=${marker.status}/${markerBody?.commit ?? "missing"} home=${home.status} auth=${auth.status}/${authBody?.authorized} protected-old=${protectedOldPage.status} public-feiyan=${publicFeiyanPage.status} public-xinshuo-01=${publicXinshuoOnePage.status} public-xinshuo-02=${publicXinshuoTwoPage.status} public-gui-xiang=${publicGuiXiangPage.status} yunyou=${yunyouIndex.status}/${yunyouBody.includes("云游桂林 · 多美小记")} yunyou-main=${yunyouMain.status} music=${musicPlaylist.status}/${musicBody?.total ?? "missing"}/${musicBody?.tracks?.length ?? "missing"} music-stream=${musicStream?.status ?? "missing"}/${musicLocation} music-lyric=${musicLyric?.status ?? "missing"}/${musicLyricBody?.id ?? "missing"}`;
             } catch (error) {
               lastError = error instanceof Error ? error.message : String(error);
             }

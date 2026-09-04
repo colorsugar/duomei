@@ -4,6 +4,7 @@ export const NETEASE_PLAYLIST_ID = 316500315;
 export const NETEASE_DETAIL_BATCH_SIZE = 200;
 export const NETEASE_MAX_TRACKS = 3000;
 export const NETEASE_CACHE_TTL_MS = 5 * 60 * 1000;
+export const NETEASE_MAX_LYRIC_BYTES = 200 * 1024;
 
 const upstreamHeaders = {
   Accept: "application/json",
@@ -140,6 +141,28 @@ function playerUrl(id) {
   return `${NETEASE_ORIGIN}/api/song/enhance/player/url?ids=${encodeURIComponent(`[${id}]`)}&br=128000`;
 }
 
+function lyricUrl(id) {
+  return `${NETEASE_ORIGIN}/api/song/lyric?id=${id}&lv=-1&kv=-1&tv=-1`;
+}
+
+function readLyricText(value) {
+  if (value === undefined || value === null) return "";
+  if (typeof value !== "string") throw new Error("NETEASE_LYRIC_INVALID");
+  if (new TextEncoder().encode(value).byteLength > NETEASE_MAX_LYRIC_BYTES) {
+    throw new Error("NETEASE_LYRIC_TOO_LARGE");
+  }
+  return value;
+}
+
+function readLyricPayload(id, payload) {
+  if (payload?.code !== 200) throw new Error("NETEASE_LYRIC_INVALID");
+  return {
+    id,
+    lyric: readLyricText(payload?.lrc?.lyric),
+    translatedLyric: readLyricText(payload?.tlyric?.lyric),
+  };
+}
+
 export function createNeteaseMusicService({
   fetchImpl = globalThis.fetch,
   now = Date.now,
@@ -149,6 +172,7 @@ export function createNeteaseMusicService({
 
   let identityCache;
   let playlistCache;
+  const lyricCache = new Map();
 
   function cached(load, readCache, writeCache, clearCache) {
     const current = readCache();
@@ -218,6 +242,15 @@ export function createNeteaseMusicService({
       () => playlistCache,
       (value) => { playlistCache = value; },
       () => { playlistCache = undefined; },
+    );
+  }
+
+  function getLyric(id) {
+    return cached(
+      async () => readLyricPayload(id, await fetchJson(fetchImpl, lyricUrl(id))),
+      () => lyricCache.get(id),
+      (value) => { lyricCache.set(id, value); },
+      () => { lyricCache.delete(id); },
     );
   }
 
@@ -313,10 +346,65 @@ export function createNeteaseMusicService({
     }
   }
 
+  async function handleLyricRequest(request) {
+    if (request.method !== "GET" && request.method !== "HEAD") {
+      return jsonResponse(
+        { error: "METHOD_NOT_ALLOWED" },
+        405,
+        { Allow: "GET, HEAD", "Cache-Control": "no-store" },
+      );
+    }
+
+    const respond = (body, status, headers) => {
+      const response = jsonResponse(body, status, headers);
+      return request.method === "HEAD" ? emptyHeadResponse(response) : response;
+    };
+
+    const rawId = new URL(request.url).searchParams.get("id");
+    if (!rawId || !/^\d+$/u.test(rawId)) {
+      return respond(
+        { error: "INVALID_TRACK_ID" },
+        400,
+        { "Cache-Control": "no-store" },
+      );
+    }
+
+    const id = normalizePositiveInteger(rawId);
+    if (!id) {
+      return respond(
+        { error: "INVALID_TRACK_ID" },
+        400,
+        { "Cache-Control": "no-store" },
+      );
+    }
+
+    try {
+      const identity = await getPlaylistIdentity();
+      if (!identity.trackIdSet.has(id)) {
+        return respond(
+          { error: "TRACK_NOT_IN_PLAYLIST" },
+          404,
+          { "Cache-Control": "public, max-age=300" },
+        );
+      }
+
+      return respond(await getLyric(id), 200, {
+        "Cache-Control": "public, max-age=300, stale-while-revalidate=3600",
+      });
+    } catch {
+      return respond(
+        { error: "LYRIC_UNAVAILABLE" },
+        502,
+        { "Cache-Control": "no-store" },
+      );
+    }
+  }
+
   return {
     getPlaylist,
     handlePlaylistRequest,
     handleStreamRequest,
+    handleLyricRequest,
   };
 }
 
@@ -328,4 +416,8 @@ export function handleMusicPlaylistRequest(request) {
 
 export function handleMusicStreamRequest(request) {
   return defaultService.handleStreamRequest(request);
+}
+
+export function handleMusicLyricRequest(request) {
+  return defaultService.handleLyricRequest(request);
 }

@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import {
   NETEASE_DETAIL_BATCH_SIZE,
+  NETEASE_MAX_LYRIC_BYTES,
   NETEASE_MAX_TRACKS,
   NETEASE_PLAYLIST_ID,
   createNeteaseMusicService,
@@ -27,6 +28,11 @@ function createMockFetch({
   detailOrder = (ids) => ids,
   privileges = (ids) => ids.map((id) => ({ id, pl: 128000 })),
   playerResponse = (id) => ({ code: 200, data: [{ id, code: 200, url: `http://audio.example.test/${id}.mp3` }] }),
+  lyricResponse = (id) => ({
+    code: 200,
+    lrc: { lyric: `[00:00.00]歌词 ${id}` },
+    tlyric: { lyric: `[00:00.00]Translation ${id}` },
+  }),
 } = {}) {
   const calls = [];
   const ids = trackIds ?? [11, 22, 33];
@@ -60,6 +66,15 @@ function createMockFetch({
       assert.match(rawIds ?? "", /^\[\d+\]$/u);
       assert.equal(url.searchParams.get("br"), "128000");
       return json(playerResponse(Number(rawIds.slice(1, -1))));
+    }
+
+    if (url.pathname === "/api/song/lyric") {
+      const id = Number(url.searchParams.get("id"));
+      assert.ok(Number.isSafeInteger(id) && id > 0);
+      assert.equal(url.searchParams.get("lv"), "-1");
+      assert.equal(url.searchParams.get("kv"), "-1");
+      assert.equal(url.searchParams.get("tv"), "-1");
+      return json(lyricResponse(id));
     }
 
     return json({ secret: "upstream body must never escape" }, 500);
@@ -235,4 +250,140 @@ test("playlist route emits cache and nosniff headers without upstream details", 
   assert.equal(response.status, 200);
   assert.match(response.headers.get("cache-control") ?? "", /max-age=300/u);
   assert.equal(response.headers.get("x-content-type-options"), "nosniff");
+});
+
+test("lyric accepts only decimal ids from the fixed playlist", async () => {
+  const { calls, fetchImpl } = createMockFetch({ trackIds: [101, 202] });
+  const service = createNeteaseMusicService({ fetchImpl });
+
+  const invalid = await service.handleLyricRequest(
+    new Request("https://duomei.site/api/music-lyric?id=1e2"),
+  );
+  const outside = await service.handleLyricRequest(
+    new Request("https://duomei.site/api/music-lyric?id=303"),
+  );
+
+  assert.equal(invalid.status, 400);
+  assert.deepEqual(await invalid.json(), { error: "INVALID_TRACK_ID" });
+  assert.equal(outside.status, 404);
+  assert.deepEqual(await outside.json(), { error: "TRACK_NOT_IN_PLAYLIST" });
+  assert.equal(calls.filter((call) => call.pathname === "/api/song/lyric").length, 0);
+});
+
+test("lyric returns original and translated text with public cache headers", async () => {
+  const { calls, fetchImpl } = createMockFetch({ trackIds: [202] });
+  const service = createNeteaseMusicService({ fetchImpl });
+
+  const response = await service.handleLyricRequest(
+    new Request("https://duomei.site/api/music-lyric?id=202"),
+  );
+
+  assert.equal(response.status, 200);
+  assert.deepEqual(await response.json(), {
+    id: 202,
+    lyric: "[00:00.00]歌词 202",
+    translatedLyric: "[00:00.00]Translation 202",
+  });
+  assert.match(response.headers.get("cache-control") ?? "", /max-age=300/u);
+  assert.equal(response.headers.get("x-content-type-options"), "nosniff");
+  assert.equal(calls.filter((call) => call.pathname === "/api/song/lyric").length, 1);
+});
+
+test("lyric represents a song without lyric data as empty strings", async () => {
+  const { fetchImpl } = createMockFetch({
+    trackIds: [202],
+    lyricResponse: () => ({ code: 200, nolyric: true }),
+  });
+  const service = createNeteaseMusicService({ fetchImpl });
+
+  const response = await service.handleLyricRequest(
+    new Request("https://duomei.site/api/music-lyric?id=202"),
+  );
+
+  assert.equal(response.status, 200);
+  assert.deepEqual(await response.json(), { id: 202, lyric: "", translatedLyric: "" });
+});
+
+test("lyric rejects an upstream string larger than 200KB without exposing it", async () => {
+  const oversized = "x".repeat(NETEASE_MAX_LYRIC_BYTES + 1);
+  const { fetchImpl } = createMockFetch({
+    trackIds: [202],
+    lyricResponse: () => ({ code: 200, lrc: { lyric: oversized } }),
+  });
+  const service = createNeteaseMusicService({ fetchImpl });
+
+  const response = await service.handleLyricRequest(
+    new Request("https://duomei.site/api/music-lyric?id=202"),
+  );
+  const body = await response.text();
+
+  assert.equal(response.status, 502);
+  assert.deepEqual(JSON.parse(body), { error: "LYRIC_UNAVAILABLE" });
+  assert.ok(body.length < 100);
+});
+
+test("lyric returns a generic error when the official upstream fails", async () => {
+  const { fetchImpl: successFetch } = createMockFetch({ trackIds: [202] });
+  const fetchImpl = async (input, init) => {
+    const url = new URL(String(input));
+    if (url.pathname === "/api/song/lyric") {
+      return json({ private: "must not escape" }, 503);
+    }
+    return successFetch(input, init);
+  };
+  const service = createNeteaseMusicService({ fetchImpl });
+
+  const response = await service.handleLyricRequest(
+    new Request("https://duomei.site/api/music-lyric?id=202"),
+  );
+  const body = await response.text();
+
+  assert.equal(response.status, 502);
+  assert.deepEqual(JSON.parse(body), { error: "LYRIC_UNAVAILABLE" });
+  assert.doesNotMatch(body, /private/u);
+});
+
+test("lyric HEAD has the same metadata and no body", async () => {
+  const { calls, fetchImpl } = createMockFetch({ trackIds: [202] });
+  const service = createNeteaseMusicService({ fetchImpl });
+
+  const response = await service.handleLyricRequest(
+    new Request("https://duomei.site/api/music-lyric?id=202", { method: "HEAD" }),
+  );
+
+  assert.equal(response.status, 200);
+  assert.equal(await response.text(), "");
+  assert.equal(response.headers.get("content-type"), "application/json; charset=utf-8");
+  assert.match(response.headers.get("cache-control") ?? "", /max-age=300/u);
+  assert.equal(response.headers.get("x-content-type-options"), "nosniff");
+  assert.equal(calls.filter((call) => call.pathname === "/api/song/lyric").length, 1);
+});
+
+test("lyric HEAD suppresses error bodies too", async () => {
+  const { fetchImpl: successFetch } = createMockFetch({ trackIds: [202] });
+  const fetchImpl = async (input, init) => {
+    const url = new URL(String(input));
+    if (url.pathname === "/api/song/lyric") return json({ private: "secret" }, 503);
+    return successFetch(input, init);
+  };
+  const service = createNeteaseMusicService({ fetchImpl });
+
+  const invalid = await service.handleLyricRequest(
+    new Request("https://duomei.site/api/music-lyric?id=abc", { method: "HEAD" }),
+  );
+  const outside = await service.handleLyricRequest(
+    new Request("https://duomei.site/api/music-lyric?id=303", { method: "HEAD" }),
+  );
+  const upstreamFailure = await service.handleLyricRequest(
+    new Request("https://duomei.site/api/music-lyric?id=202", { method: "HEAD" }),
+  );
+
+  assert.deepEqual(
+    await Promise.all([invalid, outside, upstreamFailure].map((response) => response.text())),
+    ["", "", ""],
+  );
+  assert.deepEqual(
+    [invalid.status, outside.status, upstreamFailure.status],
+    [400, 404, 502],
+  );
 });

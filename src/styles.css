@@ -12710,24 +12710,21 @@ html.duomei-modal-open .duomei-companion {
 .home-section-progress {
   --home-section-progress: 0;
   position: fixed;
-  inset: auto auto var(--space-lg) clamp(var(--space-lg), 4vw, var(--space-2xl));
+  inset: auto clamp(calc(var(--size-hit) + var(--space-lg)), 8vw, 7rem) max(var(--space-sm), env(safe-area-inset-bottom, 0px)) auto;
   z-index: 62;
-  display: grid;
-  grid-template-columns: auto minmax(var(--space-2xl), calc(var(--space-3xl) + var(--space-md)));
+  display: inline-grid;
+  grid-template-columns: auto clamp(3rem, 6vw, 4.5rem);
   align-items: center;
-  gap: var(--space-sm);
-  min-inline-size: calc(var(--space-3xl) + var(--space-xl));
-  max-inline-size: calc(100% - var(--space-3xl));
-  padding: var(--space-sm) var(--space-md);
-  border: var(--rule-hairline) solid color-mix(in oklch, var(--color-ink) 12%, transparent);
-  border-radius: var(--radius-pill);
+  gap: var(--space-xs);
+  padding: 0;
+  border: 0;
   color: var(--color-muted-strong);
-  background: var(--color-paper);
-  box-shadow: 0 var(--space-2xs) var(--space-lg) color-mix(in oklch, var(--color-ink) 8%, transparent);
+  background: transparent;
+  box-shadow: none;
   font-size: var(--text-xs);
-  font-weight: 600;
+  font-weight: 500;
   line-height: 1;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.08em;
   opacity: 0;
   pointer-events: none;
   transform: translate3d(0, var(--space-sm), 0);
@@ -12748,18 +12745,16 @@ html.duomei-modal-open .duomei-companion {
 .home-section-progress i {
   position: relative;
   display: block;
-  block-size: calc(var(--rule-hairline) * 2);
+  block-size: var(--rule-hairline);
   overflow: hidden;
-  border-radius: var(--radius-pill);
-  background: var(--color-paper-3);
+  background: color-mix(in oklch, var(--color-rule) 62%, transparent);
 }
 
 .home-section-progress b {
   position: absolute;
   inset: 0;
   display: block;
-  border-radius: inherit;
-  background: var(--color-accent);
+  background: color-mix(in oklch, var(--color-accent) 68%, var(--color-rule));
   transform: scaleX(var(--home-section-progress));
   transform-origin: left center;
 }
@@ -12767,9 +12762,8 @@ html.duomei-modal-open .duomei-companion {
 .home-section-progress strong {
   grid-column: 1;
   grid-row: 1;
-  min-inline-size: var(--space-2xl);
   color: var(--color-ink);
-  font-weight: 600;
+  font-weight: 500;
   text-align: end;
   white-space: nowrap;
 }
@@ -12787,22 +12781,13 @@ html.duomei-modal-open .home-section-progress {
 
 @media (max-width: 768px) {
   .home-section-progress {
-    inset-inline-start: auto;
-    inset-inline-end: calc(var(--space-2xl) + var(--space-xl));
+    inset-inline-end: calc(var(--size-hit) + var(--space-md));
     inset-block-end: max(
-      var(--space-md),
+      var(--space-sm),
       env(safe-area-inset-bottom, 0px)
     );
-    min-inline-size: min(calc(var(--space-3xl) + var(--space-xl)), calc(100% - var(--space-4xl)));
-    max-inline-size: calc(100% - var(--space-4xl));
-    gap: var(--space-sm);
-    padding: var(--space-sm) var(--space-md);
-  }
-}
-
-@media (max-width: 760px) {
-  .home-section-progress {
-    inset-inline-end: var(--space-md);
+    grid-template-columns: auto 3rem;
+    gap: var(--space-xs);
   }
 }
 
