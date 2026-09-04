@@ -71,6 +71,7 @@
 
   #toggles { display: flex; flex-wrap: wrap; gap: 6px 12px; padding: 8px 16px; border-bottom: 1px solid var(--line); font-size: 12px; color: var(--muted); }
   #toggles label { display: flex; min-height: 32px; align-items: center; gap: 4px; cursor: pointer; user-select: none; }
+  #quality { min-height: 36px; color: inherit; background: var(--paper-solid); border: 1px solid var(--line); border-radius: 5px; }
   #toggles input { accent-color: var(--accent); margin: 0; }
   .mode-row { gap: 6px !important; letter-spacing: 0.08em; }
   .mode-switch { position: relative; width: 46px; height: 26px; border-radius: var(--radius-pill); border: 1px solid var(--line); background: var(--paper-soft); cursor: pointer; padding: 0; transition: background var(--dur-long) var(--ease-out), border-color var(--dur-long) var(--ease-out); }
@@ -148,7 +149,7 @@
   #tour button { min-height: 44px; min-width: 44px; border: 0; border-radius: 8px; background: transparent; color: var(--ink); cursor: pointer; font-size: 15px; }
   #tour button:hover { background: var(--line); }
   #tour-play { padding-inline: 16px; }
-  .map-failed #tour { display: none; }
+  .map-failed #tour, .map-failed #walk-toggle, .map-failed #walk-pad, .map-failed #walk-hint { display: none; }
   @media (max-width: 720px) {
     #card { bottom: max(82px, calc(70px + env(safe-area-inset-bottom))); max-height: 34svh; font-size: 14px; }
     #card-photo img { height: 100px; }
@@ -172,6 +173,13 @@
   @media (max-width: 640px) { .is-embedded #panel { top: max(10px, env(safe-area-inset-top)); } }
   .is-embedded .back-home,
   .is-embedded .fallback-card a { display: none; }
+
+ #walk-toggle { position:fixed;right:18px;top:78px;z-index:4;border:1px solid #fff8;border-radius:22px;background:#173d38e8;color:white;padding:12px 18px;font:inherit;font-size:14px;font-weight:600;min-height:44px;cursor:pointer;backdrop-filter:blur(12px); }
+ #walk-pad { position:fixed;left:20px;bottom:100px;z-index:5;display:grid;grid-template-columns:repeat(3,48px);grid-template-rows:repeat(2,48px);gap:5px;touch-action:none; }
+ #walk-pad[hidden] {display:none} #walk-pad button {background:#183d36dc;border:1px solid #fff7;color:white;border-radius:12px;font-size:23px;touch-action:none;} #walk-pad button:first-child {grid-column:2} #walk-pad button:nth-child(2) {grid-column:1}
+ #walk-hint {display:none;position:fixed;bottom:28px;left:50%;transform:translateX(-50%);z-index:3;background:#173d38e8;color:#fff;padding:9px 16px;border-radius:20px;white-space:nowrap;font-size:12px;pointer-events:none;}
+ .walking #walk-hint {display:block} .walking #tour,.walking #coords {display:none} .walking #app canvas {cursor:grab!important;touch-action:none} .walking #app canvas:active {cursor:grabbing!important}
+ .is-embedded #walk-hint {bottom:85px} @media(max-width:720px){#walk-toggle {right:12px;top:72px} #walk-hint {bottom:22px;font-size:11px} .is-embedded #walk-pad {bottom:135px}}
 </style>
 <script type="importmap">
 { "imports": {
@@ -189,6 +197,9 @@
 <body>
 <div id="app"></div>
 <div id="labels"></div>
+<button id="walk-toggle" type="button" aria-pressed="false">街面漫游</button>
+<div id="walk-pad" aria-label="街面移动方向" hidden><button data-move="KeyW" aria-label="前进">↑</button><button data-move="KeyA" aria-label="向左移动">←</button><button data-move="KeyS" aria-label="后退">↓</button><button data-move="KeyD" aria-label="向右移动">→</button></div>
+<div id="walk-hint">拖动转头 · 方向键 / WASD 行走 · Esc 返回</div>
 <nav id="tour" aria-label="桂林地标导览"><button id="tour-prev" aria-label="上一个地标">‹</button><button id="tour-play" aria-pressed="false">沿江导览</button><button id="tour-next" aria-label="下一个地标">›</button></nav>
 
 <aside id="panel" aria-label="桂林景点控制面板">
@@ -204,6 +215,7 @@
       <label><input type="checkbox" id="t-roads" checked> 道路</label>
       <label><input type="checkbox" id="t-labels" checked> 景点名</label>
       <label><input type="checkbox" id="t-city" checked> 建筑/树</label>
+      <label>画质 <select id="quality" aria-label="画质"><option value="high">高清</option><option value="balanced">均衡</option><option value="flow">流畅</option></select></label>
       <label><input type="checkbox" id="t-grid"> 500m 网格</label>
       <label class="mode-row" title="日夜切换">
         <span>日</span>

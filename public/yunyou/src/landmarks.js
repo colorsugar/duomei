@@ -36,33 +36,33 @@ export function makeMaterials() {
 const ellipse = (cx, cz, rx, rz, n = 36) => Array.from({ length: n }, (_, i) => { const a = i / n * Math.PI * 2; return [cx + Math.cos(a) * rx, cz + Math.sin(a) * rz]; });
 const at = (obj, x, y, z, ry = 0) => { obj.position.set(x, y, z); obj.rotation.y = ry; return obj; };
 
-// Photo-guided reconstruction: broad vegetated back, lower river-facing head,
-// a thick flared trunk and an irregular THROUGH cave at the north-east end.
+// Restore the pre-regression silhouette; retain its broad cliff, northern head
+// and independent projecting trunk. Fine foliage and materials are separate.
 // Geometry is baked by scripts/bake-yunyou.mjs; no million-voxel startup work.
-export const XBS = { cx: -198, cz: 1450, box: { x0: -280, x1: -106, y0: -8, y1: 66, z0: 1350, z1: 1534 } };
+export const XBS = { cx: -198, cz: 1450, box: { x0: -198 - 66, x1: -198 + 86, y0: -4, y1: 66, z0: 1450 - 100, z1: 1450 + 80 } };
 XBS.sdf = (x, y, z) => {
-  const px = x - XBS.cx, pz = z - XBS.cz;
-  // Elliptical cliff footprint with a sloping, rounded crown (not a cuboid).
-  const outline = Math.hypot((px + 10) / 58, (pz - 10) / 68) / (1 + .06 * fbm(px * .04, pz * .04, 11));
-  const crown = 55 * Math.pow(Math.max(0, 1 - Math.pow(Math.min(outline, 1), 2.7)), .67)
-    + 4.8 * fbm(px * .075, pz * .075, 7);
-  let d = Math.max((outline - 1) * 48, y - crown, -y - 5);
-  d = smin(d, sdEllipsoid(px - 25, y - 24, pz + 29, 39, 26, 37), 13);
-  // Water Moon Cave opens east/west. Rotate only the head/trunk coordinates;
-  // the trunk points north toward the confluence, not sideways out of the flank.
-  const hx = 51 - (pz + 58), hz = px - 109;
-  d = smin(d, sdEllipsoid(hx - 27, y - 22, hz + 47, 29, 24, 27), 10);
-  // Upper rock bridge is deep: cave never becomes a detached thin ring.
-  d = smin(d, sdRoundBox(hx - 52, y - 24, hz + 59, 25, 13, 14, 7), 6);
-  d = smin(d, sdCone(hx, y, hz, [68, 29, -59], [72, -4, -62], 10.5, 12), 5);
-  const strata = .12 * Math.sin(y * .8 + 4 * fbm(px * .06, pz * .06, 4));
-  const grooves = 1.5 * fbm(px * .32 + y * .008, pz * .32, 9);
-  if (Math.abs(d) < 5) d += strata + grooves + 1.05 * fbm3(x * .095, y * .05, z * .095, 3);
-  // Arch profile extends below the waterline; slightly irregular flattened vault.
-  const caveX = hx - 51 + .7 * Math.sin(hz * .12);
-  const arch = (Math.pow(Math.abs(caveX / 7.2), 2.3) + Math.pow(Math.abs((y - 3.7) / 10.2), 2.3) - 1) * 5;
-  const tunnel = arch + .16 * Math.sin(y * 1.8 + hz * .6);
-  return Math.max(d, -tunnel);
+  const cx = XBS.cx, cz = XBS.cz;
+  {
+    const px = x - cx, py = y, pz = z - cz;
+    // 象身：近直立崖壁的长方体（100×92 m），顶部圆肩，背部缓隆；东崖直落漓江岸（x≈+50）
+    let d = sdRoundBox(px - 2, py - 22, pz - 4, 50, 26, 46, 20);
+    d += 5 * fbm3(x * 0.02 + 7, y * 0.008, z * 0.02, 1);                                  // 大尺度轮廓起伏：平面不成规则矩形
+    d = smin(d, sdEllipsoid(px - 12, py - 30, pz + 18, 26, 24, 30), 9);                 // 象背隆起（普贤塔处，最高 ≈54 m）
+    d = smin(d, sdEllipsoid(px + 10, py - 26, pz - 30, 30, 22, 28), 9);                 // 象臀（南端，足迹偏西）
+    // A sloping wooded summit replaces the former flat cylinder-like roof.
+    const summit=29+25*Math.exp(-(((px+4)/44)**2+((pz+1)/40)**2))+2.8*fbm(x*.065,z*.065,18);
+    d=Math.max(d,py-summit);
+    // 象头（北端）向江面逐级降低，洞顶有明显拱券轮廓
+    d = smin(d, sdRoundBox(px - 30, py - 21, pz + 54, 22, 17, 14, 9), 10);
+    // 额/鼻根：从象头向东跨在洞顶之上，连接头与鼻
+    d = smin(d, sdRoundBox(px - 58, py - 23, pz + 58, 16, 11, 10, 6), 6);
+    // 象鼻：粗石柱自鼻根近直下插江中（东北角，鼻端抵两江汇流处岸线 x≈+78）
+    d = smin(d, sdCone(px, py, pz, [66, 27, -58], [70, -6, -62], 10, 9), 5);
+    // 水月洞：鼻与前腿之间贯通，椭圆拱券延伸穿过岩体。
+    d = Math.max(d, -(Math.hypot((px - 50) / 9, (py - 5) / 12) - 1) * 9);
+    if (Math.abs(d) < 9) d += 2.2 * fbm3(x * 0.045, y * 0.045, z * 0.045, 3) + 1.1 * fbm3(x * 0.15, y * 0.15, z * 0.15, 6) + 0.7 * fbm(px * 0.22 + py * 0.02, pz * 0.22, 9);
+    return d;
+  }
 };
 export function xiangbishan(F, M, bakedHill) {
   const g = new THREE.Group();
