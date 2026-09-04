@@ -10,6 +10,7 @@ import {
 } from "react";
 import {
   fetchNeteasePlaylist,
+  findInitialNeteaseTrackIndex,
   type NeteasePlaylist,
   type NeteasePlaylistTrack,
 } from "../lib/neteasePlaylist";
@@ -46,9 +47,9 @@ type DragState = {
 };
 
 function readPlaybackMode(): PlaybackMode {
-  if (typeof window === "undefined") return "sequence";
+  if (typeof window === "undefined") return "shuffle";
   const value = window.localStorage.getItem(PLAYBACK_MODE_KEY);
-  return value === "shuffle" || value === "one" ? value : "sequence";
+  return value === "sequence" || value === "one" ? value : "shuffle";
 }
 
 function readPosition(): FloatingWidgetPosition | null {
@@ -184,9 +185,9 @@ export function DuomeiMusicPlayer({ compactContext = false }: { compactContext?:
     positionRef.current = stored;
     return stored;
   });
-  const [panelClosed, setPanelClosed] = useState(readPanelClosed);
+  const [panelClosed, setPanelClosed] = useState(() => compactContext || readPanelClosed());
   const [panelView, setPanelView] = useState<PanelView>("queue");
-  const [minimized, setMinimized] = useState(false);
+  const [minimized, setMinimized] = useState(compactContext);
   const [dragging, setDragging] = useState(false);
   const [playlist, setPlaylist] = useState<NeteasePlaylist | null>(null);
   const [playlistStatus, setPlaylistStatus] = useState<"idle" | "loading" | "ready" | "error">("idle");
@@ -225,8 +226,8 @@ export function DuomeiMusicPlayer({ compactContext = false }: { compactContext?:
         playlistRef.current = next;
         setPlaylist(next);
         setPlaylistStatus("ready");
-        const first = findPlayableIndex(next.tracks, 0, 1, failedTrackIdsRef.current);
-        setCurrentIndex((value) => value >= 0 ? value : first);
+        const initial = findInitialNeteaseTrackIndex(next.tracks, failedTrackIdsRef.current);
+        setCurrentIndex((value) => value >= 0 ? value : initial);
         return next;
       })
       .catch((error: unknown) => {
@@ -445,7 +446,7 @@ export function DuomeiMusicPlayer({ compactContext = false }: { compactContext?:
     }
     const target = currentIndex >= 0 && list.tracks[currentIndex]?.playable
       ? currentIndex
-      : findPlayableIndex(list.tracks, 0, 1, failedTrackIdsRef.current);
+      : findInitialNeteaseTrackIndex(list.tracks, failedTrackIdsRef.current);
     if (target >= 0) void playTrackAt(target);
   };
 

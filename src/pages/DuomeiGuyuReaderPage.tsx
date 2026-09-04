@@ -18,12 +18,6 @@ export function DuomeiGuyuReaderPage() {
     };
   }, [book]);
 
-  useEffect(() => {
-    const reloadAfterHistoryExit = () => window.location.reload();
-    window.addEventListener("popstate", reloadAfterHistoryExit);
-    return () => window.removeEventListener("popstate", reloadAfterHistoryExit);
-  }, []);
-
   if (!book) return <Navigate to="/guyu" replace />;
 
   const reader = (
@@ -32,7 +26,6 @@ export function DuomeiGuyuReaderPage() {
         <Link
           className="guyu-reader-back"
           to="/guyu"
-          reloadDocument
           aria-label="返回故语"
           aria-hidden={isBookOpen}
           tabIndex={isBookOpen ? -1 : 0}

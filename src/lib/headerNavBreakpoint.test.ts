@@ -18,6 +18,8 @@ const noteDetailSource = readFileSync(join(dirname(fileURLToPath(import.meta.url
 const footerSource = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../components/DuomeiFooter.tsx"), "utf8");
 const yunyouSource = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../components/YunyouSection.tsx"), "utf8");
 const yunyouCss = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../components/YunyouSection.css"), "utf8");
+const yunyouPageSource = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../pages/DuomeiYunyouPage.tsx"), "utf8");
+const yunyouPageCss = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../yunyou-page.css"), "utf8");
 const zaobaoSource = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../components/ZaobaoSection.tsx"), "utf8");
 const zaobaoCss = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../components/ZaobaoSection.css"), "utf8");
 const zaobaoPageSource = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../pages/DuomeiZaobaoPage.tsx"), "utf8");
@@ -37,10 +39,13 @@ const yunyouCover = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "
 const prValidationWorkflow = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../../.github/workflows/pr-validation.yml"), "utf8");
 const cursorAutoMergeWorkflow = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../../.github/workflows/cursor-auto-merge.yml"), "utf8");
 const edgeOneDeployWorkflow = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../../.github/workflows/deploy-edgeone.yml"), "utf8");
+const edgeOneConfig = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../../edgeone.json"), "utf8");
 const guyuCarouselSource = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "./guyuCarousel.ts"), "utf8");
 const guyuCss = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../guyu.css"), "utf8");
+const guyuReaderPageSource = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../pages/DuomeiGuyuReaderPage.tsx"), "utf8");
 const homeIntroCss = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../components/HomeIntroSection.css"), "utf8");
 const siteCss = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../styles.css"), "utf8");
+const rootIndex = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../../index.html"), "utf8");
 const adminSource = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../pages/DuomeiAdmin.tsx"), "utf8");
 const {
   ADMIN_DEPLOYMENT,
@@ -114,7 +119,7 @@ test("uses a real local morning illustration for the Zaobao magazine cover", () 
 
 test("keeps Zaobao immersive while safely falling back to the original edition", () => {
   assert.match(appSource, /const isZaobao = location\.pathname === "\/zaobao"/);
-  assert.match(appSource, /bareChrome = isAdmin \|\| isGuyuReader \|\| isZaobao/);
+  assert.match(appSource, /bareChrome = isAdmin \|\| isGuyuReader \|\| isZaobao \|\| isYunyouMap/);
   assert.match(zaobaoPageSource, /function parseEdition\(html: string, base: string = ZAOBAO_URL\)/);
   assert.match(zaobaoPageSource, /\.page > section\[id\]/);
   assert.match(zaobaoPageSource, /className="zaobao-story-grid"/);
@@ -156,7 +161,7 @@ test("uses Skill naming and a three-column desktop directory", () => {
 });
 
 test("keeps the full NetEase playlist native, movable, bounded, and autoplay-off", () => {
-  assert.match(appSource, /!isAdmin \? <DuomeiMusicPlayer compactContext=\{isGuyuReader \|\| isZaobao\} \/> : null/);
+  assert.match(appSource, /!isAdmin \? <DuomeiMusicPlayer compactContext=\{isGuyuReader \|\| isZaobao \|\| isYunyouMap\} \/> : null/);
   assert.match(musicPlayerSource, /NETEASE_PLAYLIST_ID = "316500315"/);
   assert.match(musicPlayerSource, /<audio[\s\S]*preload="metadata"/);
   assert.doesNotMatch(musicPlayerSource, /<iframe|autoPlay/);
@@ -178,6 +183,10 @@ test("keeps the full NetEase playlist native, movable, bounded, and autoplay-off
   assert.match(musicPlayerSource, /Math\.random\(\) \* choices\.length/);
   assert.match(musicPlayerSource, /playbackMode === "one"/);
   assert.match(musicPlayerSource, /duomei-music-playback-mode/);
+  assert.match(musicPlayerSource, /return "shuffle"/);
+  assert.match(musicPlayerSource, /findInitialNeteaseTrackIndex/);
+  assert.match(musicPlayerSource, /useState\(compactContext\)/);
+  assert.match(neteaseClientSource, /NETEASE_DEFAULT_TRACK_ID = "28568227"/);
   assert.match(musicPlayerSource, /--music-progress/);
   assert.match(musicPlayerSource, /LONG_PRESS_MS = 320/);
   assert.match(musicPlayerSource, /beginOrbLongPress/);
@@ -246,6 +255,16 @@ test("keeps the public Guyu shelf reachable with a 44px home link", () => {
   assert.match(guyuCss, /\.guyu-library-back,\s*\.guyu-home-shelf-all\s*\{[^}]*min-block-size:\s*var\(--size-hit\)/);
 });
 
+test("keeps Guyu reader exits inside the SPA and moves phone actions above the safe area", () => {
+  assert.doesNotMatch(guyuReaderPageSource, /reloadDocument|popstate|window\.location\.reload/);
+  assert.match(guyuReaderPageSource, /className="guyu-reader-back"[\s\S]*to="\/guyu"/);
+  assert.match(rootIndex, /width=device-width, initial-scale=1\.0, viewport-fit=cover/);
+  assert.match(guyuCss, /@media \(max-width: 40rem\)[\s\S]*\.guyu-reader-heading\s*\{[\s\S]*inset-block-start:\s*auto[\s\S]*inset-block-end:[^;]*safe-area-inset-bottom[\s\S]*inset-inline-end:[^;]*safe-area-inset-right/);
+  assert.match(guyuCss, /\.guyu-reader-close\s*\{[\s\S]*inset-block-start:\s*auto[\s\S]*inset-block-end:[^;]*safe-area-inset-bottom[\s\S]*inset-inline-end:[^;]*safe-area-inset-right/);
+  assert.match(guyuCss, /\.guyu-reader-page \.guyu-book-controls\s*\{[\s\S]*inset-block-end:[^;]*var\(--size-hit\)[^;]*var\(--space-sm\)/);
+  assert.match(musicPlayerCss, /body:has\(\.guyu-reader-page\) \.duomei-music-player:not\(\.is-placed\)/);
+});
+
 test("keeps the note-detail back target visible outside the fixed header", () => {
   assert.equal(noteDetailSource.match(/className="detail-back"/g)?.length, 3);
   assert.match(siteCss, /\.detail-back\s*\{[^}]*min-block-size:\s*var\(--size-hit\)/);
@@ -263,7 +282,8 @@ test("keeps the mobile footer compact with all eight shortcuts on one row", () =
 });
 
 test("ships Yunyou as a same-origin, vendored, accessible 3D map", () => {
-  assert.match(yunyouSource, /const YUNYOU_HREF = "\/yunyou\/"/);
+  assert.match(yunyouSource, /const YUNYOU_HREF = "\/yunyou-map"/);
+  assert.match(yunyouSource, /<Link className="yunyou-card" to=\{YUNYOU_HREF\}/);
   assert.match(yunyouSource, /\/images\/yunyou-guilin-cover\.webp/);
   assert.match(yunyouSource, /沿着水岸，慢慢看桂林/);
   assert.match(yunyouSource, /开始云游 →/);
@@ -274,6 +294,20 @@ test("ships Yunyou as a same-origin, vendored, accessible 3D map", () => {
   assert.doesNotMatch(yunyouIndex, /cdn\.jsdelivr\.net|unpkg\.com/);
   assert.match(yunyouIndex, /id="map-fallback"/);
   assert.match(yunyouIndex, /href="\/#yunyou"/);
+  assert.match(yunyouIndex, /window\.self !== window\.top/);
+  assert.match(yunyouIndex, /window\.location\.replace\("\/yunyou-map"\)/);
+  assert.match(yunyouIndex, /\.is-embedded \.back-home/);
+  assert.match(yunyouPageSource, /className="yunyou-map-frame" src="\/yunyou\/index\.html\?embed=1"/);
+  assert.match(yunyouPageSource, /className="yunyou-map-back" to="\/#yunyou"/);
+  assert.match(appSource, /<Route path="\/yunyou-map" element=\{<DuomeiYunyouPage \/>\}/);
+  assert.match(yunyouPageCss, /component: immersive map shell/);
+  assert.match(yunyouPageCss, /\.duomei-motion-root > \.yunyou-map-page\s*\{[\s\S]*position:\s*fixed[\s\S]*block-size:\s*100svh/);
+  assert.match(yunyouPageCss, /body:has\(\.duomei-music-player:not\(\.is-minimized\)\) \.yunyou-map-back/);
+  assert.match(yunyouPageCss, /@media \(max-width: 40rem\)/);
+  assert.match(edgeOneConfig, /"source": "\/\*"[\s\S]*"X-Frame-Options", "value": "DENY"/);
+  assert.match(edgeOneConfig, /"source": "\/yunyou\/\*"[\s\S]*"X-Frame-Options", "value": "SAMEORIGIN"[\s\S]*"Content-Security-Policy", "value": "frame-ancestors 'self'"/);
+  assert.match(edgeOneDeployWorkflow, /homeFrameOptions\.toUpperCase\(\) === "DENY"/);
+  assert.match(edgeOneDeployWorkflow, /yunyouFrameOptions\.toUpperCase\(\) === "SAMEORIGIN"/);
   assert.match(yunyouMain, /prefers-reduced-motion: reduce/);
   assert.equal(
     existsSync(join(dirname(fileURLToPath(import.meta.url)), "../../public/yunyou/vendor/three/LICENSE.txt")),

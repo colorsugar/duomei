@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#f8f5ef">
 <link rel="icon" href="data:,">
 <title>云游桂林 · 多美小记</title>
@@ -144,12 +144,20 @@
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after { scroll-behavior: auto !important; animation: none !important; transition-duration: 0.01ms !important; transition-delay: 0ms !important; }
   }
+  .is-embedded .back-home,
+  .is-embedded .fallback-card a { display: none; }
 </style>
 <script type="importmap">
 { "imports": {
   "three": "./vendor/three/three.module.js",
   "three/addons/": "./vendor/three/addons/"
 } }
+</script>
+<script>
+  const isEmbedded = window.self !== window.top;
+  const isStandalone = new URLSearchParams(window.location.search).get("standalone") === "1";
+  if (!isEmbedded && !isStandalone) window.location.replace("/yunyou-map");
+  if (isEmbedded) document.documentElement.classList.add("is-embedded");
 </script>
 </head>
 <body>

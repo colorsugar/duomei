@@ -677,6 +677,14 @@
   .duomei-music-search > small {
     display: none;
   }
+
+}
+
+@media (max-width: 40rem) {
+  body:has(.guyu-reader-page) .duomei-music-player:not(.is-placed) {
+    inset-block-start: max(var(--space-md), env(safe-area-inset-top, 0px));
+    inset-block-end: auto;
+  }
 }
 
 @media (max-width: 22.5rem) {

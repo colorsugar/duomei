@@ -14,7 +14,7 @@ DUOMEI 多美小记是保存旅途记录、生活片段、照片、诗页和旧�
 ## 当前技术栈
 
 - React 19、Vite、TypeScript、React Router
-- 原生 Three.js 0.170.0：同源 `/yunyou/` 桂林两江四湖 3D 地图
+- 原生 Three.js 0.170.0：React `/yunyou-map` 音乐外壳内嵌同源桂林两江四湖 3D 地图
 - EdgeOne Makers：`duomei.site` 的正式托管、Node Cloud Functions、私有 Guyu Blob
 - Supabase：笔记数据库和管理员 Auth/RLS
 - Cloudflare Worker/R2：笔记媒体和保留的签名媒体路径
@@ -46,7 +46,7 @@ Vercel、GitHub Pages 和旧 candidate 分支仅为保留的兼容/迁移路径�
 
 公开 `新说` 画册直接作为 Git 静态资源保存：封面使用 `public/images/guyu-<book-id>-cover.webp`，书页使用 `public/images/guyu/<book-id>/pages/`。它们随 `main` 的 EdgeOne workflow 发布，不需要 Cloudflare、腾讯云、R2 或 EdgeOne Token。只有现有 `meiyou-yujian` 是 EdgeOne Blob 私有册；新增私有册必须先取得明确授权。
 
-桂林 3D 地图随正式站静态发布到 `https://duomei.site/yunyou/`，不依赖 Vercel Preview。运行文件位于 `public/yunyou/`；Three.js 必要模块已固定并本地化，许可证保存在同目录。
+桂林 3D 地图通过 `https://duomei.site/yunyou-map` 进入，外层沿用主站音乐播放器，内层从 `/yunyou/index.html?embed=1` 加载，不依赖 Vercel Preview。运行文件位于 `public/yunyou/`；Three.js 必要模块已固定并本地化，许可证保存在同目录。顶层 `/yunyou/` 会进入音乐外壳，`?standalone=1` 仅保留给诊断。正式站只允许 `/yunyou/*` 被同源页面嵌入，其他页面继续拒绝 framing。
 
 ## 凭据与私有内容
 
