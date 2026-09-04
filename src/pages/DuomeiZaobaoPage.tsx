@@ -54,7 +54,8 @@ function parseEdition(html: string, base: string = ZAOBAO_URL): ZaobaoEdition | 
   const headline = doc.querySelector(".page > h1, h1")?.textContent?.trim();
   if (!headline) return null;
 
-  const groups = Array.from(doc.querySelectorAll<HTMLElement>(".page > section[id]"))
+  // Editions before 2026-09-02 wrap each column in `<div class="group" id>` instead of `<section id>`.
+  const groups = Array.from(doc.querySelectorAll<HTMLElement>(".page > section[id], .page > .group[id]"))
     .map((section, groupIndex): ZaobaoGroup | null => {
       const name = section.querySelector(".sec, .group-name, h2")?.textContent?.trim();
       if (!name) return null;
@@ -118,6 +119,8 @@ export function DuomeiZaobaoPage() {
   const editionLabel = date ? `${date} 早报` : "今日早报";
   const [edition, setEdition] = useState<ZaobaoEdition | null>(null);
   const [failed, setFailed] = useState(false);
+  // Some archived days point at images the source no longer serves; drop those figures instead of showing broken icons.
+  const [brokenImages, setBrokenImages] = useState<ReadonlySet<string>>(() => new Set());
 
   useEffect(() => {
     if (invalidDate) return;
@@ -125,6 +128,7 @@ export function DuomeiZaobaoPage() {
     document.title = `${editionLabel} | DUOMEI`;
     setEdition(null);
     setFailed(false);
+    setBrokenImages(new Set());
     const controller = new AbortController();
     fetch(editionUrl, { signal: controller.signal, mode: "cors" })
       .then(async (response) => {
@@ -194,7 +198,7 @@ export function DuomeiZaobaoPage() {
                       className={`zaobao-story${groupIndex === 0 && storyIndex === 0 ? " is-featured" : ""}`}
                       key={`${group.id}-${story.id}`}
                     >
-                      {story.image ? (
+                      {story.image && !brokenImages.has(story.image) ? (
                         <figure>
                           <img
                             src={story.image}
@@ -202,6 +206,7 @@ export function DuomeiZaobaoPage() {
                             loading={groupIndex === 0 && storyIndex === 0 ? "eager" : "lazy"}
                             decoding="async"
                             referrerPolicy="no-referrer"
+                            onError={() => setBrokenImages((current) => new Set(current).add(story.image as string))}
                           />
                           {story.imageSource ? <figcaption>{story.imageSource}</figcaption> : null}
                         </figure>
