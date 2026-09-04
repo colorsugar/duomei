@@ -131,7 +131,7 @@ External runtime hosts intentionally referenced by the site are `duomei.site`, `
 ### Frozen Mobile Header Contract
 
 - Do not change the header event chain, navigation hrefs, portal mount, `header-tablet-nav.css`, or hide/reveal behavior unless the user explicitly requests header work.
-- At `<=768px` or on a coarse/hoverless primary pointer, the hamburger is always reachable. A closed menu is hidden and non-hit-testable; `.is-menu-open` must make the nav and every item visible and hit-testable even when WebKit leaves `:hover` or `:focus` stuck.
+- At `<=768px`, plus coarse/hoverless tablet viewports up to `1024px`, the hamburger is always reachable. Touch-capable desktop viewports wider than `1024px` keep the desktop layout. A closed menu is hidden and non-hit-testable; `.is-menu-open` must make the nav and every item visible and hit-testable even when WebKit leaves `:hover` or `:focus` stuck, then dismiss on downward scroll, an outside pointer press, or Escape.
 - Never defer the native touch activation with `requestAnimationFrame`: iOS WebViews can drop the synthetic default navigation after user activation expires. Anchors navigate synchronously; the following compatibility click is suppressed once.
 - `npm.cmd run test:home-hold` is a release gate. After every authorized header change, test the toggle and every destination on `/` and `/guyu` at a phone viewport; a desktop click alone is not acceptance.
 - The frozen `故语` menu destination is `/#guyu`. Do not restore `/guyu` there unless the user explicitly changes this product rule.
@@ -223,7 +223,7 @@ Do not send another AI passwords, tokens, Cookies, private page files, or platfo
 
 These findings are not automatically authorized fixes. Reverify before acting.
 
-- **P1 — 768px coarse-pointer navigation:** repaired. `@media (max-width: 768px), (hover: none) and (pointer: coarse)` now keeps the hamburger reachable and opens the menu with `.is-menu-open` instead of hover-reveal. Reverify at `768×900` coarse/hover-none on `/` and `/guyu` after deploy.
+- **P1 — phone/tablet coarse-pointer navigation:** repaired. The hamburger fallback now covers `<=768px` and hoverless coarse-pointer tablets through `1024px`, while wider touch-capable desktops retain the desktop layout. `.is-menu-open` remains authoritative over sticky hover state. Reverify at `768×900` and `1024×768` coarse/hover-none on `/` and `/guyu` after deploy, plus a desktop width above `1024px`.
 - **Resolved — Guyu brute-force boundary:** EdgeOne precise rate-limit rule `Guyu登录限流` now matches `/api/guyu-auth`, counts by client IP, blocks after more than 6 requests in 10 seconds, and holds the block for 30 seconds. The process-local 10-minute failure map remains defense in depth.
 - **Resolved — Legacy Supabase Storage migration:** note upload helpers now target the authenticated Cloudflare Worker/R2 path. Keep the empty `note-images` bucket private and admin-only as a rollback boundary; do not restore it as the primary upload path.
 - **Resolved — SVG uploads:** the Cloudflare media Worker now accepts only JPG, PNG, WebP and GIF; SVG paths and MIME types are rejected.

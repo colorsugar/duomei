@@ -1,6 +1,6 @@
-/* Tablet / coarse-pointer header: keep a reachable menu when hover-reveal cannot work.
-   768×900 hover-none/coarse previously hid both the toggle (max-width: 760) and the desktop nav. */
-@media (max-width: 768px), (hover: none) and (pointer: coarse) {
+/* Phone and tablet header: keep a reachable menu when hover-reveal cannot work.
+   Bound coarse-pointer fallback so touch-capable desktop PCs keep the desktop layout. */
+@media (max-width: 768px), (max-width: 1024px) and (hover: none) and (pointer: coarse) {
   .duomei-header-hover-zone {
     display: none !important;
   }
@@ -10,9 +10,9 @@
     display: inline-flex !important;
     position: relative !important;
     pointer-events: auto !important;
-    width: 42px !important;
-    height: 42px !important;
-    min-width: 42px !important;
+    width: calc(var(--size-hit) + var(--space-3xs)) !important;
+    height: calc(var(--size-hit) + var(--space-3xs)) !important;
+    min-width: calc(var(--size-hit) + var(--space-3xs)) !important;
     align-items: center !important;
     justify-content: center !important;
     opacity: 1 !important;
@@ -21,12 +21,21 @@
 
   .duomei-header nav {
     position: absolute !important;
-    top: calc(100% + 8px) !important;
-    right: 14px !important;
+    top: calc(100% + var(--space-xs)) !important;
+    right: var(--space-lg) !important;
     display: grid !important;
-    width: min(148px, calc(100vw - 28px)) !important;
-    max-width: calc(100vw - 28px) !important;
+    width: min(calc(var(--space-3xl) + var(--space-2xl)), calc(100% - var(--space-xl))) !important;
+    max-width: calc(100% - var(--space-xl)) !important;
+    max-height: calc(100svh - var(--space-4xl)) !important;
     grid-template-columns: 1fr !important;
+    gap: var(--space-2xs) !important;
+    overflow-y: auto !important;
+    overscroll-behavior: contain !important;
+    padding: var(--space-xs) !important;
+    border: var(--rule-hairline) solid var(--color-rule) !important;
+    border-radius: var(--radius-card) !important;
+    background: var(--color-paper) !important;
+    box-shadow: 0 var(--space-xs) var(--space-xl) color-mix(in oklch, var(--color-ink) 10%, transparent) !important;
   }
 
   .duomei-header:not(.is-menu-open) nav {
@@ -47,11 +56,30 @@
   .duomei-header nav button {
     display: flex !important;
     width: 100% !important;
-    min-height: 36px !important;
-    justify-content: center !important;
+    min-height: calc(var(--size-hit) + var(--space-2xs)) !important;
+    justify-content: flex-start !important;
+    padding: var(--space-sm) var(--space-md) !important;
+    border: 0 !important;
+    border-radius: calc(var(--radius-card) - var(--space-xs)) !important;
+    background: transparent !important;
+    font-size: var(--text-sm) !important;
     opacity: 0 !important;
     pointer-events: none !important;
     white-space: nowrap !important;
+  }
+
+  .duomei-header nav a:focus-visible,
+  .duomei-header nav button:focus-visible {
+    outline: var(--rule-focus) solid var(--color-focus) !important;
+    outline-offset: 0 !important;
+  }
+
+  .duomei-header.is-menu-open .duomei-menu-toggle span,
+  .duomei-header.is-menu-open .duomei-menu-toggle span:nth-child(1),
+  .duomei-header.is-menu-open .duomei-menu-toggle span:nth-child(2),
+  .duomei-header.is-menu-open .duomei-menu-toggle span:nth-child(3) {
+    opacity: 1 !important;
+    transform: none !important;
   }
 
   .duomei-header.is-menu-open nav a,
@@ -59,5 +87,52 @@
     opacity: 1 !important;
     pointer-events: auto !important;
     transform: translate3d(0, 0, 0) scale(1) !important;
+  }
+}
+
+/* Wide touch PCs have no reliable hover, so expose the original desktop row
+   instead of turning the whole page into a phone-style rail. */
+@media (min-width: 1025px) and (hover: none) and (pointer: coarse) {
+  .duomei-header-hover-zone,
+  .duomei-menu-toggle,
+  .duomei-header .duomei-menu-toggle {
+    display: none !important;
+  }
+
+  .duomei-header nav {
+    position: static !important;
+    display: flex !important;
+    width: auto !important;
+    max-width: none !important;
+    max-height: none !important;
+    grid-template-columns: none !important;
+    gap: clamp(var(--space-sm), 1.6vw, var(--space-lg)) !important;
+    overflow: visible !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+    transform: none !important;
+  }
+
+  .duomei-header nav a,
+  .duomei-header nav button {
+    display: inline-flex !important;
+    width: auto !important;
+    min-height: var(--size-hit) !important;
+    align-items: center !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+    transform: none !important;
+    white-space: nowrap !important;
   }
 }

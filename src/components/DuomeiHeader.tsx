@@ -14,7 +14,7 @@ export function DuomeiHeader() {
   const lastScrollYRef = useRef(typeof window === "undefined" ? 0 : window.scrollY);
   const scrollFrameRef = useRef(0);
   const menuTouchStartRef = useRef<{ x: number; y: number } | null>(null);
-  const lastTouchActivationRef = useRef(0);
+  const lastTouchActivationRef = useRef(Number.NEGATIVE_INFINITY);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -28,6 +28,8 @@ export function DuomeiHeader() {
         setHoverRevealed(false);
         setScrollRevealed(true);
       } else if (currentScrollY - lastScrollYRef.current > 6) {
+        setMenuOpen(false);
+        setHoverRevealed(false);
         setScrollRevealed(false);
       } else if (lastScrollYRef.current - currentScrollY > 6) {
         setScrollRevealed(true);
@@ -120,6 +122,31 @@ export function DuomeiHeader() {
     setMenuOpen(false);
     setHoverRevealed(false);
   };
+
+  useEffect(() => {
+    if (!menuOpen) return;
+
+    const dismissMenu = () => {
+      setMenuOpen(false);
+      setHoverRevealed(false);
+    };
+    const closeOnOutsidePointer = (event: PointerEvent) => {
+      const header = headerRef.current;
+      if (header && event.target instanceof Node && !header.contains(event.target)) dismissMenu();
+    };
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key !== "Escape") return;
+      dismissMenu();
+      if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
+    };
+
+    document.addEventListener("pointerdown", closeOnOutsidePointer);
+    window.addEventListener("keydown", closeOnEscape);
+    return () => {
+      document.removeEventListener("pointerdown", closeOnOutsidePointer);
+      window.removeEventListener("keydown", closeOnEscape);
+    };
+  }, [menuOpen]);
 
   const scrollHomeTop = (behavior: ScrollBehavior = "smooth") => {
     const scroll = () => {
