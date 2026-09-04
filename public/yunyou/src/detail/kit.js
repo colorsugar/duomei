@@ -3,6 +3,7 @@
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 
+let sharedKit = null;
 const std = (o) => new THREE.MeshStandardMaterial(o);
 export const V2 = (x, y) => new THREE.Vector2(x, y);
 
@@ -56,6 +57,7 @@ export const beamTex = () => canvas(256, 64, (g, w, h) => {
 
 // ---- 材质包 ----
 export function kitMats(TEX) {
+  if (sharedKit?.textures === TEX) return { ...sharedKit.materials };
   const lat = latticeTex(), pl = plasterTex(), mb = marbleTex(), bm = beamTex();
   const M = {
     tile: std({ map: TEX.tile, bumpMap: TEX.tile, bumpScale: 0.35, roughness: 0.85, userData: { night: { color: 0x3a3c40, intensity: 0.35, map: true } } }),
@@ -91,7 +93,8 @@ export function kitMats(TEX) {
   M.tileGreen.side = THREE.DoubleSide;
   M.tileYellow.side = THREE.DoubleSide;
   M.glazeRoof.side = THREE.DoubleSide;
-  return M;
+  sharedKit = { textures: TEX, materials: M };
+  return { ...M };
 }
 
 // ---- 夜景切换：按材质 userData.night 开自发光；group.userData.lights 里的灯开关 ----
@@ -105,7 +108,8 @@ export function applyNight(group, on) {
       seen.add(m);
       const n = m.userData.night;
       m.emissive.setHex(on ? n.color : 0); m.emissiveIntensity = n.intensity;
-      m.emissiveMap = on && n.map ? m.map : null; m.needsUpdate = true;
+      const wantedMap = n.map ? m.map : null;
+      if (m.emissiveMap !== wantedMap) { m.emissiveMap = wantedMap; m.needsUpdate = true; }
     }
   });
 }
@@ -150,6 +154,24 @@ export function polyRoof({ sides = 4, rx, rz = rx, h, ridge = 0, over = 1.6, cur
     for (let r = 0; r <= rows; r++) { const s = r / rows; hp.push(new THREE.Vector3(A[0] + (TA[0] - A[0]) * s, y + h * Math.pow(s, 1.55) + curl * Math.pow(1 - s, 2.2) + 0.12, A[1] + (TA[1] - A[1]) * s)); }
     hipPts.push(hp);
   }
+  // Physical tile ridges follow the curved pitch. One merged mesh per roof.
+  const tiles=[];
+  for(let f=0;f<sides;f++){
+    const A=corners[f],B=corners[(f+1)%sides],[TA,TB]=tops[f];
+    const count=Math.min(64,Math.max(5,Math.round(Math.hypot(B[0]-A[0],B[1]-A[1])/.55)));
+    for(let c=1;c<count;c++){
+      const t=c/count,u=t*2-1,points=[];
+      for(let k=0;k<=5;k++){
+        const s=k/5*.9;
+        points.push(new THREE.Vector3(
+          THREE.MathUtils.lerp(A[0]+(B[0]-A[0])*t,TA[0]+(TB[0]-TA[0])*t,s),
+          y+h*Math.pow(s,1.55)+curl*Math.pow(Math.abs(u),3)*Math.pow(1-s,2.2)+.045,
+          THREE.MathUtils.lerp(A[1]+(B[1]-A[1])*t,TA[1]+(TB[1]-TA[1])*t,s)));
+      }
+      tiles.push(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(points),5,.048,4,false));
+    }
+  }
+  if(tiles.length){grp.add(new THREE.Mesh(mergeGeometries(tiles),mats.roof));tiles.forEach(g=>g.dispose());}
   const roof = new THREE.Mesh(mergeGeometries(geos), mats.roof);
   grp.add(roof);
   // 法线朝上：检查一处，反了就翻

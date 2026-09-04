@@ -141,8 +141,33 @@
     #coords { display: none; }
   }
 
+  #list li { min-height: 44px; font-size: 14px; }
+  #card { font-size: 15px; }
+  #toggles label { min-height: 44px; }
+  #tour { position: fixed; bottom: max(20px, env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%); display: flex; gap: 4px; padding: 5px; background: var(--paper); border: 1px solid var(--line); border-radius: 12px; backdrop-filter: blur(14px); }
+  #tour button { min-height: 44px; min-width: 44px; border: 0; border-radius: 8px; background: transparent; color: var(--ink); cursor: pointer; font-size: 15px; }
+  #tour button:hover { background: var(--line); }
+  #tour-play { padding-inline: 16px; }
+  .map-failed #tour { display: none; }
+  @media (max-width: 720px) {
+    #card { bottom: max(82px, calc(70px + env(safe-area-inset-bottom))); max-height: 34svh; font-size: 14px; }
+    #card-photo img { height: 100px; }
+    #panel:not(.collapsed) { z-index: 4; max-height: calc(100svh - 100px); }
+    #tour { bottom: max(12px, env(safe-area-inset-bottom)); }
+    .lbl.hit { font-size: 12px; }
+  }
+  @media (min-width: 721px) and (max-width: 1100px) { #card { bottom: 84px; max-height: calc(100svh - 110px); } }
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after { scroll-behavior: auto !important; animation: none !important; transition-duration: 0.01ms !important; transition-delay: 0ms !important; }
+  }
+  /* Leave room for the persistent music shell's return button. */
+  .is-embedded #panel { top: 72px; height: min(680px, calc(100% - 88px)); }
+  .is-embedded #panel.collapsed { height: auto; }
+  @media (max-width: 720px) {
+    .is-embedded #panel { top: max(10px, env(safe-area-inset-top)); height: auto; }
+    .is-embedded #panel:not(.collapsed) { max-height: calc(100svh - 148px); }
+    .is-embedded #tour { bottom: calc(68px + env(safe-area-inset-bottom)); }
+    .is-embedded #card { bottom: calc(130px + env(safe-area-inset-bottom)); max-height: 30svh; }
   }
   .is-embedded .back-home,
   .is-embedded .fallback-card a { display: none; }
@@ -163,12 +188,13 @@
 <body>
 <div id="app"></div>
 <div id="labels"></div>
+<nav id="tour" aria-label="桂林地标导览"><button id="tour-prev" aria-label="上一个地标">‹</button><button id="tour-play" aria-pressed="false">沿江导览</button><button id="tour-next" aria-label="下一个地标">›</button></nav>
 
 <aside id="panel" aria-label="桂林景点控制面板">
   <header>
     <a class="back-home" href="/#yunyou">← 返回多美</a>
     <button type="button" id="panel-toggle" aria-expanded="true" aria-controls="panel-body">
-      <strong>桂林两江四湖 · 3D 景点地图<small>OSM 坐标与足迹，地标按公开尺寸同比例建模</small></strong>
+      <strong>桂林两江四湖 · 3D 景点地图<small>沿着漓江，认识我的家乡</small></strong>
       <span class="panel-chevron" aria-hidden="true">▾</span>
     </button>
   </header>
@@ -188,7 +214,8 @@
         </button>
         <span>夜</span>
       </label>
-      <label><input type="checkbox" id="t-spin" checked> 自动旋转</label>
+      <label><input type="checkbox" id="t-spin"> 自动旋转</label>
+      <label><input type="checkbox" id="t-boats" checked> 游船行驶</label>
     </div>
     <ul id="list"></ul>
     <footer>拖动旋转 · 滚轮/双指朝落点推进 · 右键/双指平移 · 点击景点看简介<br>数据 © OpenStreetMap 贡献者（ODbL）</footer>

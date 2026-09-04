@@ -117,7 +117,7 @@ export function ringAngle(ring) {
 
 // ---- 山体表面：岩/植被顶点色 + 绕竖轴的柱面 UV（岩壁贴图竖向不拉伸） ----
 const TILE_M = 38; // 一张岩壁贴图覆盖的米数
-function hillSurface(g, cx, cz, seed) {
+export function hillSurface(g, cx, cz, seed) {
   const pos = g.attributes.position, nrm = g.attributes.normal, n = pos.count;
   const col = new Float32Array(n * 3), uv = new Float32Array(n * 2);
   const rock = new THREE.Color(0xf2f0ea), rockDark = new THREE.Color(0xb9b6ae), veg = new THREE.Color(0x6a9a4c), vegLight = new THREE.Color(0x98c26a), c = new THREE.Color();
@@ -131,15 +131,18 @@ function hillSurface(g, cx, cz, seed) {
     const strata = 0.5 + 0.5 * Math.sin(y * 0.6 + fbm(x * 0.1, z * 0.1, seed + 3) * 2);
     const r = rock.clone().lerp(rockDark, strata * 0.6);
     const v = veg.clone().lerp(vegLight, 0.5 + 0.5 * fbm(x * 0.08, z * 0.08, seed + 5));
-    const k = THREE.MathUtils.smoothstep(ny, 0.45, 0.85) * (0.75 + 0.25 * fbm(x * 0.3, z * 0.3, seed + 7));
+    const k = THREE.MathUtils.smoothstep(ny, 0.25, 0.72) * (0.75 + 0.25 * fbm(x * 0.3, z * 0.3, seed + 7));
     c.copy(r).lerp(v, k);
+    // Damp waterline and darker undersides give cliffs depth at grazing views.
+    const wet = 1 - THREE.MathUtils.smoothstep(y, .5, 3.5);
+    c.multiplyScalar((1 - wet * .30) * (ny < -.15 ? .64 : 1));
     col[i * 3] = c.r; col[i * 3 + 1] = c.g; col[i * 3 + 2] = c.b;
     uv[i * 2] = (Math.atan2(z - cz, x - cx) / (2 * Math.PI) + 0.5) * N;
     uv[i * 2 + 1] = y / TILE_M;
   }
   g.setAttribute('color', new THREE.BufferAttribute(col, 3));
   g.setAttribute('uv', new THREE.BufferAttribute(uv, 2));
-  const mat = new THREE.MeshStandardMaterial({ map: TEX.karst, bumpMap: TEX.karst, bumpScale: 2.5, vertexColors: true, roughness: 0.95 });
+  const mat = new THREE.MeshStandardMaterial({ map: TEX.karst, bumpMap: TEX.karst, bumpScale: 0.7, vertexColors: true, roughness: 0.95 });
   HILL_MATS.push(mat);
   return new THREE.Mesh(g, mat);
 }
@@ -223,6 +226,7 @@ export function sdfHill({ sdf, box, res = 88, seed = 1, cx, cz }) {
   const nr = g.attributes.normal, ps = g.attributes.position; let dot = 0;
   for (let i = 0; i < ps.count; i += 7) dot += nr.getX(i) * (ps.getX(i) - mx) + nr.getY(i) * (ps.getY(i) - my) + nr.getZ(i) * (ps.getZ(i) - mz);
   if (dot < 0) { const ix = g.index.array; for (let i = 0; i < ix.length; i += 3) { const t = ix[i + 1]; ix[i + 1] = ix[i + 2]; ix[i + 2] = t; } g.computeVertexNormals(); }
+  mc.geometry.dispose(); mc.material.dispose();
   const mesh = hillSurface(g, cx ?? mx, cz ?? mz, seed);
   // 高度采样：自顶向下找第一处岩体（供撒树/放塔）
   mesh.userData.heightAt = (x, z) => { for (let y = box.y1; y > 0; y -= 0.5) if (sdf(x, y, z) < 0) return y; return 0; };
@@ -425,4 +429,25 @@ export function bottlePagoda(h, mat) {
   top.position.y = 13.0 * s;
   grp.add(canopy, top);
   return grp;
+}
+
+// Compact baked mesh: header [magic, vertexCount, indexCount], bounds, uint16
+// positions, int16 normals, uint32 indices. All views aligned, validated first.
+export async function loadBakedHill(url, { cx, cz, sdf, box }) {
+  const response = await fetch(url);
+  if (!response.ok) throw new Error('Hill asset HTTP ' + response.status);
+  const buffer = await response.arrayBuffer(), header = new DataView(buffer);
+  if (buffer.byteLength < 36 || header.getUint32(0, true) !== 0x47554c31) throw new Error('Invalid hill asset');
+  const n = header.getUint32(4, true), ni = header.getUint32(8, true);
+  if (n > 200000 || ni > 1200000 || buffer.byteLength !== 36 + n * 12 + ni * 4) throw new Error('Invalid hill mesh size');
+  const bounds = new Float32Array(buffer, 12, 6), q = new Uint16Array(buffer, 36, n * 3), normal = new Int16Array(buffer, 36 + n * 6, n * 3);
+  const pos = new Float32Array(n * 3), nor = new Float32Array(n * 3);
+  for (let i = 0; i < pos.length; i++) { const a = i % 3; pos[i] = bounds[a] + q[i] / 65535 * bounds[a + 3]; nor[i] = normal[i] / 32767; }
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  g.setAttribute('normal', new THREE.BufferAttribute(nor, 3));
+  g.setIndex(new THREE.BufferAttribute(new Uint32Array(buffer, 36 + n * 12, ni), 1));
+  const mesh = hillSurface(g, cx, cz, 3);
+  mesh.userData.heightAt = (x, z) => { for (let y = box.y1; y > 0; y -= 1) if (sdf(x, y, z) < 0) return y; return 0; };
+  return mesh;
 }
