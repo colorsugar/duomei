@@ -141,7 +141,7 @@
   }
 }
 
-@media (max-width: 48rem), (hover: none) and (pointer: coarse) {
+@media (max-width: 48rem), (max-width: 64rem) and (hover: none) and (pointer: coarse) {
   .yunyou-section {
     padding-block: var(--space-2xl);
   }

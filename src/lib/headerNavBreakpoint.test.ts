@@ -13,6 +13,8 @@ const noteDetailSource = readFileSync(join(dirname(fileURLToPath(import.meta.url
 const footerSource = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../components/DuomeiFooter.tsx"), "utf8");
 const yunyouSource = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../components/YunyouSection.tsx"), "utf8");
 const yunyouCss = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../components/YunyouSection.css"), "utf8");
+const zaobaoSource = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../components/ZaobaoSection.tsx"), "utf8");
+const zaobaoCss = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../components/ZaobaoSection.css"), "utf8");
 const yunyouIndex = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../../public/yunyou/index.html"), "utf8");
 const yunyouMain = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../../public/yunyou/src/main.js"), "utf8");
 const yunyouLandmarks = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../../public/yunyou/data/landmarks.js"), "utf8");
@@ -24,26 +26,48 @@ const guyuCarouselSource = readFileSync(join(dirname(fileURLToPath(import.meta.u
 const guyuCss = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../guyu.css"), "utf8");
 const homeIntroCss = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../components/HomeIntroSection.css"), "utf8");
 const siteCss = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../styles.css"), "utf8");
-const query = "@media (max-width: 768px), (hover: none) and (pointer: coarse)";
+const query = "@media (max-width: 768px), (max-width: 1024px) and (hover: none) and (pointer: coarse)";
 
-test("keeps a reachable hamburger on 768px and coarse/hover-none viewports", () => {
+test("keeps a reachable hamburger on phones and tablets without collapsing touch desktops", () => {
   const start = css.lastIndexOf(query);
   assert.notEqual(start, -1, "missing tablet/coarse header media query");
   const block = css.slice(start);
   assert.match(block, /\.duomei-menu-toggle[\s\S]*display:\s*inline-flex\s*!important/);
+  assert.match(block, /\.duomei-menu-toggle[\s\S]*width:\s*calc\(var\(--size-hit\) \+ var\(--space-3xs\)\)\s*!important/);
   assert.match(block, /\.duomei-header:not\(\.is-menu-open\) nav[\s\S]*pointer-events:\s*none\s*!important/);
   assert.match(block, /\.duomei-header\.is-menu-open nav[\s\S]*pointer-events:\s*auto\s*!important/);
   assert.match(block, /\.duomei-header-hover-zone[\s\S]*display:\s*none\s*!important/);
+  assert.match(block, /\.duomei-header nav \{[\s\S]*gap:\s*var\(--space-2xs\)\s*!important/);
+  assert.match(block, /\.duomei-header nav \{[\s\S]*background:\s*var\(--color-paper\)\s*!important/);
+  assert.match(block, /\.duomei-header nav a,[\s\S]*min-height:\s*calc\(var\(--size-hit\) \+ var\(--space-2xs\)\)\s*!important/);
   assert.doesNotMatch(block, /\.duomei-menu-toggle:hover\s*~\s*nav/);
+  assert.doesNotMatch(css, /@media \(max-width: 768px\), \(hover: none\) and \(pointer: coarse\)/);
+  assert.doesNotMatch(zaobaoCss, /@media \(max-width: 48rem\), \(hover: none\) and \(pointer: coarse\)/);
+  assert.doesNotMatch(yunyouCss, /@media \(max-width: 48rem\), \(hover: none\) and \(pointer: coarse\)/);
+  assert.match(css, /@media \(min-width: 1025px\) and \(hover: none\) and \(pointer: coarse\)[\s\S]*\.duomei-header nav \{[\s\S]*display:\s*flex\s*!important[\s\S]*visibility:\s*visible\s*!important/);
 });
 
 test("keeps iOS header touch activation synchronous and deterministic", () => {
   assert.match(headerSource, /lastTouchActivationRef\.current = window\.performance\.now\(\)/);
+  assert.match(headerSource, /lastTouchActivationRef = useRef\(Number\.NEGATIVE_INFINITY\)/);
   assert.match(headerSource, /window\.location\.assign\(\(target as HTMLAnchorElement\)\.href\)/);
   assert.match(headerSource, /href="\/#guyu"/);
   assert.match(headerSource, /href="\/#yunyou"/);
   assert.doesNotMatch(headerSource, /href="\/guyu"/);
   assert.doesNotMatch(headerSource, /pendingTouchActivationRef/);
+  assert.match(headerSource, /currentScrollY - lastScrollYRef\.current > 6\)[\s\S]*setMenuOpen\(false\)/);
+  assert.match(headerSource, /document\.addEventListener\("pointerdown", closeOnOutsidePointer\)/);
+  assert.match(headerSource, /event\.key !== "Escape"/);
+});
+
+test("uses a real local morning illustration for the Zaobao magazine cover", () => {
+  assert.match(zaobaoSource, /duomei-default-cover-02\.png/);
+  assert.match(zaobaoSource, /className="zaobao-cover-image"/);
+  assert.match(zaobaoCss, /\.zaobao-cover-image\s*\{/);
+  assert.equal(
+    existsSync(join(dirname(fileURLToPath(import.meta.url)), "../../public/images/note-default-covers/duomei-default-cover-02.png")),
+    true,
+  );
 });
 
 test("keeps the homepage Guyu preview deliberate, fragmented, manual, and linked to the current book", () => {

@@ -12624,17 +12624,24 @@ html.duomei-modal-open .duomei-companion {
 .home-section-progress {
   --home-section-progress: 0;
   position: fixed;
-  inset: auto clamp(var(--space-lg), 4vw, var(--space-2xl)) var(--space-lg);
+  inset: auto auto var(--space-lg) clamp(var(--space-lg), 4vw, var(--space-2xl));
   z-index: 62;
   display: grid;
-  grid-template-columns: auto minmax(5rem, 1fr) auto;
+  grid-template-columns: auto minmax(var(--space-2xl), calc(var(--space-3xl) + var(--space-md)));
   align-items: center;
-  gap: var(--space-md);
+  gap: var(--space-sm);
+  min-inline-size: calc(var(--space-3xl) + var(--space-xl));
+  max-inline-size: calc(100% - var(--space-3xl));
+  padding: var(--space-sm) var(--space-md);
+  border: var(--rule-hairline) solid color-mix(in oklch, var(--color-ink) 12%, transparent);
+  border-radius: var(--radius-pill);
   color: var(--color-muted-strong);
+  background: var(--color-paper);
+  box-shadow: 0 var(--space-2xs) var(--space-lg) color-mix(in oklch, var(--color-ink) 8%, transparent);
   font-size: var(--text-xs);
   font-weight: 600;
   line-height: 1;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.06em;
   opacity: 0;
   pointer-events: none;
   transform: translate3d(0, var(--space-sm), 0);
@@ -12648,27 +12655,42 @@ html.duomei-modal-open .duomei-companion {
   transform: translate3d(0, 0, 0);
 }
 
+.home-section-progress > span {
+  display: none;
+}
+
 .home-section-progress i {
   position: relative;
   display: block;
-  block-size: var(--rule-hairline);
+  block-size: calc(var(--rule-hairline) * 2);
   overflow: hidden;
-  background: var(--color-rule);
+  border-radius: var(--radius-pill);
+  background: var(--color-paper-3);
 }
 
 .home-section-progress b {
   position: absolute;
   inset: 0;
   display: block;
-  background: var(--color-ink);
+  border-radius: inherit;
+  background: var(--color-accent);
   transform: scaleX(var(--home-section-progress));
   transform-origin: left center;
 }
 
 .home-section-progress strong {
-  color: var(--color-muted-strong);
+  grid-column: 1;
+  grid-row: 1;
+  min-inline-size: var(--space-2xl);
+  color: var(--color-ink);
   font-weight: 600;
+  text-align: end;
   white-space: nowrap;
+}
+
+.home-section-progress i {
+  grid-column: 2;
+  grid-row: 1;
 }
 
 body.front-editing .home-section-progress,
@@ -12677,14 +12699,24 @@ html.duomei-modal-open .home-section-progress {
   display: none;
 }
 
-@media (max-width: 760px) {
+@media (max-width: 768px) {
   .home-section-progress {
-    inset-inline: var(--space-lg);
+    inset-inline-start: auto;
+    inset-inline-end: calc(var(--space-2xl) + var(--space-xl));
     inset-block-end: max(
       var(--space-md),
       env(safe-area-inset-bottom, 0px)
     );
+    min-inline-size: min(calc(var(--space-3xl) + var(--space-xl)), calc(100% - var(--space-4xl)));
+    max-inline-size: calc(100% - var(--space-4xl));
     gap: var(--space-sm);
+    padding: var(--space-sm) var(--space-md);
+  }
+}
+
+@media (max-width: 760px) {
+  .home-section-progress {
+    inset-inline-end: var(--space-md);
   }
 }
 

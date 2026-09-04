@@ -23,11 +23,25 @@ export function ZaobaoSection() {
 
       <a className="zaobao-card" href={ZAOBAO_ROUTE} aria-label="打开今日早报">
         <span className="zaobao-card-cover" aria-hidden="true">
+          <img
+            className="zaobao-cover-image"
+            src="/images/note-default-covers/duomei-default-cover-02.png"
+            alt=""
+            width="1448"
+            height="1086"
+            loading="lazy"
+            decoding="async"
+          />
+          <span className="zaobao-cover-topline">
+            <small>Duomei Daily</small>
+            <small>Morning Edition</small>
+          </span>
           <span className="zaobao-masthead">
-            <small>Zaobao · Daily</small>
+            <small>今日读本</small>
             <strong>早报</strong>
             <em>{todayLabel()}</em>
           </span>
+          <span className="zaobao-cover-topics">世界 · 科技 · AI · 大阪</span>
         </span>
         <span className="zaobao-card-kicker" aria-hidden="true">Daily · 今日</span>
         <strong className="zaobao-card-title">今日早报</strong>
