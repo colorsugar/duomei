@@ -22,8 +22,7 @@ function AppRoutes() {
   const isAdmin = location.pathname.startsWith("/admin");
   const isTimePage = location.pathname === "/time";
   const isGuyuReader = location.pathname.startsWith("/guyu/");
-  const isZaobao = location.pathname === "/zaobao";
-  const bareChrome = isAdmin || isGuyuReader || isZaobao;
+  const bareChrome = isAdmin || isGuyuReader;
   useSmoothScroll(bareChrome || isTimePage);
 
   return (
