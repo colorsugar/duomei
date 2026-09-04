@@ -3561,6 +3561,58 @@ body.front-editing .card-edit-actions {
   box-shadow: 0 0 0 6px rgba(143, 182, 163, 0.16);
 }
 
+.studio-status-pill.is-local span {
+  background: #c4a574;
+  box-shadow: 0 0 0 6px rgba(196, 165, 116, 0.16);
+}
+
+.studio-deploy-pill {
+  display: inline-flex;
+  width: fit-content;
+  align-items: center;
+  border: 1px solid rgba(32, 32, 29, 0.1);
+  border-radius: 999px;
+  background: rgba(255, 253, 247, 0.76);
+  padding: 10px 14px;
+  color: #77736b;
+  box-shadow: 0 12px 28px rgba(32, 32, 29, 0.08);
+}
+
+.studio-section-map {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+}
+
+.studio-section-chip {
+  display: grid;
+  gap: 6px;
+  border: 1px solid rgba(32, 32, 29, 0.1);
+  border-radius: 22px;
+  background: rgba(255, 253, 247, 0.72);
+  padding: 14px 16px;
+  color: inherit;
+  text-decoration: none;
+  box-shadow: 0 16px 36px rgba(32, 32, 29, 0.06);
+}
+
+.studio-section-chip strong {
+  font-size: 1.02rem;
+}
+
+.studio-section-chip em {
+  color: #8a7b68;
+  font-style: normal;
+  font-size: 0.82rem;
+}
+
+.studio-section-chip span {
+  color: #77736b;
+  line-height: 1.55;
+  font-size: 0.9rem;
+}
+
+
 .admin-notice.is-danger {
   color: #8b4a42;
 }

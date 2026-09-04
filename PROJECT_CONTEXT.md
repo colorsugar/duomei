@@ -105,7 +105,7 @@ External runtime hosts intentionally referenced by the site are `duomei.site`, `
 | `/yunyou/` | Same-origin Guilin Liangjiang Sihu interactive 3D map | Standalone map chrome with `返回多美` |
 | `/skills` | Skill directory | Yes |
 | `/admin/login` | Supabase admin login | No |
-| `/admin`, `/admin/notes` | Note management | No |
+| `/admin`, `/admin/notes` | Note management; dashboard maps EdgeOne deploy + live site sections, only notes are editable here | No |
 
 ## Product Behavior That Must Not Regress
 

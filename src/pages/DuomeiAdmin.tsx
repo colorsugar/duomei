@@ -1,6 +1,7 @@
 import { CSSProperties, FormEvent, useEffect, useState } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
 import type { DuomeiNote } from "../lib/noteTypes";
+import { guyuBooks } from "../content/guyuBooks";
 import {
   createDraftNote,
   deleteNote,
@@ -20,6 +21,15 @@ import {
   logoutCloudAdmin,
   saveCloudNote,
 } from "../lib/supabaseNotes";
+import {
+  ADMIN_DEPLOYMENT,
+  ADMIN_SITE_SECTIONS,
+  type AdminBuildMarker,
+  channelLabel,
+  computeAdminHealthScore,
+  shortCommit,
+  summarizeGuyuShelf,
+} from "../lib/adminSiteInventory";
 import { AnimatedButton, AnimatedCard, AnimatedParagraph, AnimatedTitle, RevealSection } from "../motion";
 
 function formatBytes(bytes: number) {
@@ -58,9 +68,11 @@ export function DuomeiAdmin({ mode }: { mode: "login" | "notes" }) {
   const [notesOpen, setNotesOpen] = useState(false);
   const [version, setVersion] = useState(0);
   const [cloudReady, setCloudReady] = useState(false);
+  const [buildMarker, setBuildMarker] = useState<AdminBuildMarker | null>(null);
   const [notes, setNotes] = useState<DuomeiNote[]>(() => getAllNotes());
 
   const refresh = () => setVersion((value) => value + 1);
+  const guyuShelf = summarizeGuyuShelf(guyuBooks);
 
   useEffect(() => {
     if (!notice) return;
@@ -89,6 +101,28 @@ export function DuomeiAdmin({ mode }: { mode: "login" | "notes" }) {
     };
   }, [version]);
 
+  useEffect(() => {
+    let active = true;
+    const loadBuild = async () => {
+      try {
+        const response = await fetch(`${ADMIN_DEPLOYMENT.buildMarkerPath}?admin=${Date.now()}`, {
+          cache: "no-store",
+        });
+        if (!response.ok) throw new Error("build marker missing");
+        const payload = (await response.json()) as AdminBuildMarker;
+        if (!active) return;
+        setBuildMarker(payload);
+      } catch {
+        if (!active) return;
+        setBuildMarker(null);
+      }
+    };
+    loadBuild();
+    return () => {
+      active = false;
+    };
+  }, []);
+
   if (mode === "login") {
     const submit = async (event: FormEvent) => {
       event.preventDefault();
@@ -113,7 +147,12 @@ export function DuomeiAdmin({ mode }: { mode: "login" | "notes" }) {
           </label>
           <label>
             密码
-            <input type="password" value={password} onChange={(event) => setPassword(event.target.value)} autoComplete="current-password" />
+            <input
+              type="password"
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+              autoComplete="current-password"
+            />
           </label>
           {error ? <p className="admin-notice is-danger">{error}</p> : null}
           <AnimatedButton type="submit">登录</AnimatedButton>
@@ -126,10 +165,20 @@ export function DuomeiAdmin({ mode }: { mode: "login" | "notes" }) {
 
   const published = notes.filter((note) => note.status === "published").length;
   const drafts = notes.length - published;
-  const imageCount = notes.reduce((sum, note) => sum + (note.bodyImages?.length ?? 0) + (note.coverImageUrl ? 1 : 0), 0);
+  const imageCount = notes.reduce(
+    (sum, note) => sum + (note.bodyImages?.length ?? 0) + (note.coverImageUrl ? 1 : 0),
+    0,
+  );
   const bytes = localStorageBytes();
   const storagePercent = Math.min(100, Math.round((bytes / (4.5 * 1024 * 1024)) * 100));
-  const healthScore = Math.max(70, Math.min(98, 94 - drafts * 2 + Math.min(4, imageCount)));
+  const healthScore = computeAdminHealthScore({
+    draftCount: drafts,
+    imageCount,
+    cloudReady,
+  });
+  const buildLabel = buildMarker?.commit
+    ? `${ADMIN_DEPLOYMENT.platformLabel} · ${shortCommit(buildMarker.commit)}`
+    : `${ADMIN_DEPLOYMENT.platformLabel} · 正式站`;
 
   const createAndEdit = async () => {
     const draft = createDraftNote();
@@ -156,7 +205,7 @@ export function DuomeiAdmin({ mode }: { mode: "login" | "notes" }) {
       setUtilityText(JSON.stringify({ notes: cloudNotes }, null, 2));
       setImportText("");
       setCloudReady(true);
-      setNotice("云端已连接：内容会写入 Supabase，不需要 Git Push。");
+      setNotice("云端已连接：小记写入 Supabase，图片走 Cloudflare R2；不需要为小记做 Git Push。");
     } catch {
       setNotice("云端连接失败，请检查 Supabase 登录状态或网络。");
     }
@@ -205,7 +254,11 @@ export function DuomeiAdmin({ mode }: { mode: "login" | "notes" }) {
         <strong>DUOMEI</strong>
         <span>多美内容工作室</span>
         <a href="/">首页</a>
-        <a href="/#kuaihuo">微言</a>
+        <a href="/#zaobao">早报</a>
+        <a href="/#notes">小记</a>
+        <a href="/#guyu">故语</a>
+        <a href="/#yunyou">云游</a>
+        <a href="/#weiyan">微言</a>
         <a href="#note-management">小记管理</a>
         <AnimatedButton type="button" onClick={createAndEdit}>
           新增小记
@@ -228,9 +281,12 @@ export function DuomeiAdmin({ mode }: { mode: "login" | "notes" }) {
             <AnimatedParagraph>DUOMEI STUDIO</AnimatedParagraph>
             <AnimatedTitle as="h1">工作室</AnimatedTitle>
           </div>
-          <div className="studio-status-pill">
+          <div className={`studio-status-pill${cloudReady ? "" : " is-local"}`}>
             <span />
             {cloudReady ? "云端已连接" : "本地备用模式"}
+          </div>
+          <div className="studio-deploy-pill" title={buildMarker?.commit ?? ADMIN_DEPLOYMENT.productionHost}>
+            {buildLabel}
           </div>
           <AnimatedButton type="button" onClick={checkCloudPublish}>
             检查云端
@@ -250,29 +306,58 @@ export function DuomeiAdmin({ mode }: { mode: "login" | "notes" }) {
         ) : null}
 
         <AnimatedCard as="div" className="studio-hero-panel">
-          <AnimatedParagraph>首页、微言与小记，都在这里保持同步。</AnimatedParagraph>
-          <AnimatedTitle>你的网站内容状态良好。</AnimatedTitle>
+          <AnimatedParagraph>正式站在 EdgeOne；后台只管小记，其余板块看清发布通道。</AnimatedParagraph>
+          <AnimatedTitle>按部署位置和内容归属整理后的工作室。</AnimatedTitle>
           <div>
-            <span>3 个内容入口</span>
+            <span>{ADMIN_SITE_SECTIONS.length} 个站点板块</span>
             <span>{notes.length} 条小记</span>
             <span>{published} 已发布</span>
             <span>{drafts} 草稿</span>
             <span>{imageCount} 张图片</span>
+            <span>
+              故语 {guyuShelf.total} 册 · 公开 {guyuShelf.publicCount} / 班级 {guyuShelf.gatedCount}
+            </span>
+          </div>
+        </AnimatedCard>
+
+        <AnimatedCard as="div" className="studio-publish-panel">
+          <div>
+            <AnimatedParagraph>内容归属</AnimatedParagraph>
+            <AnimatedTitle>只有小记在这个后台即时发布</AnimatedTitle>
+            <span>
+              小记走 {ADMIN_DEPLOYMENT.notesBackend} + {ADMIN_DEPLOYMENT.mediaBackend}。早报、快活、故语、云游、颜色、微言、技能随{" "}
+              {ADMIN_DEPLOYMENT.releasePath} 上线，不在这里改正文。
+            </span>
+          </div>
+          <div className="studio-section-map">
+            {ADMIN_SITE_SECTIONS.map((section) => (
+              <a key={section.id} className="studio-section-chip" href={section.href}>
+                <strong>{section.label}</strong>
+                <em>{channelLabel(section.channel)}</em>
+                <span>{section.blurb}</span>
+              </a>
+            ))}
           </div>
         </AnimatedCard>
 
         <AnimatedCard as="div" className="studio-publish-panel">
           <div>
             <AnimatedParagraph>站点页面</AnimatedParagraph>
-            <AnimatedTitle>按当前网站结构管理内容</AnimatedTitle>
-            <span>首页展示品牌与小记，微言进入快活页面，小记管理继续使用云端发布。</span>
+            <AnimatedTitle>按当前网站结构跳转核对</AnimatedTitle>
+            <span>侧栏和这里都指向真实锚点：微言是 /#weiyan，快活是 /#kuaihuo，别再混成一个入口。</span>
           </div>
           <div className="studio-publish-actions">
             <AnimatedButton as="a" href="/">
               查看首页
             </AnimatedButton>
-            <AnimatedButton as="a" href="/#kuaihuo">
+            <AnimatedButton as="a" href="/#weiyan">
               查看微言
+            </AnimatedButton>
+            <AnimatedButton as="a" href="/guyu">
+              故语书架
+            </AnimatedButton>
+            <AnimatedButton as="a" href="/yunyou/">
+              打开云游
             </AnimatedButton>
             <AnimatedButton as="a" href="#note-management">
               管理小记
@@ -288,8 +373,8 @@ export function DuomeiAdmin({ mode }: { mode: "login" | "notes" }) {
             </div>
             <div>
               <AnimatedParagraph>健康评分</AnimatedParagraph>
-              <AnimatedTitle as="h3">{healthScore >= 90 ? "优秀" : "良好"}</AnimatedTitle>
-              <span>正式数据来自 Supabase。本地只作为草稿和离线兜底。</span>
+              <AnimatedTitle as="h3">{healthScore >= 90 ? "优秀" : cloudReady ? "良好" : "待连云端"}</AnimatedTitle>
+              <span>正式小记来自 Supabase。未连云端、草稿偏多，分数会降。本地只做草稿和离线兜底。</span>
             </div>
           </AnimatedCard>
           <AnimatedCard className="studio-storage-card">
@@ -301,15 +386,18 @@ export function DuomeiAdmin({ mode }: { mode: "login" | "notes" }) {
             <i>
               <b style={{ width: `${storagePercent}%` }} />
             </i>
-            <span>LocalStorage 以后只用于草稿缓存，不再承担正式发布。</span>
+            <span>LocalStorage 只缓存小记草稿，正式发布与 EdgeOne 静态包无关。</span>
           </AnimatedCard>
         </div>
 
         <AnimatedCard as="div" className="studio-publish-panel">
           <div>
             <AnimatedParagraph>发布同步</AnimatedParagraph>
-            <AnimatedTitle>手机后台直接发布到 Supabase</AnimatedTitle>
-            <span>上传图片、写小记、点击发布后，线上 Vercel 网站会读取同一份云端数据。</span>
+            <AnimatedTitle>小记上云，站点上 EdgeOne</AnimatedTitle>
+            <span>
+              上传图片、写小记、点击发布后，{ADMIN_DEPLOYMENT.productionHost} 立刻读 Supabase。早报 / 故语 / 云游等静态内容要等 GitHub
+              合进 main，由 EdgeOne 工作流发布后才会变。
+            </span>
           </div>
           <div className="studio-publish-actions">
             <AnimatedButton type="button" onClick={backupNotes}>
@@ -318,13 +406,21 @@ export function DuomeiAdmin({ mode }: { mode: "login" | "notes" }) {
             <AnimatedButton type="button" onClick={checkCloudPublish}>
               检查云端
             </AnimatedButton>
-            <AnimatedButton as="a" href="https://github.com/colorsugar/duomei/actions" target="_blank" rel="noreferrer">
+            <AnimatedButton as="a" href={ADMIN_DEPLOYMENT.actionsUrl} target="_blank" rel="noreferrer">
               GitHub Actions
+            </AnimatedButton>
+            <AnimatedButton as="a" href={ADMIN_DEPLOYMENT.productionHost} target="_blank" rel="noreferrer">
+              打开正式站
             </AnimatedButton>
           </div>
         </AnimatedCard>
 
-        <details id="note-management" className="studio-notes-panel" open={notesOpen} onToggle={(event) => setNotesOpen(event.currentTarget.open)}>
+        <details
+          id="note-management"
+          className="studio-notes-panel"
+          open={notesOpen}
+          onToggle={(event) => setNotesOpen(event.currentTarget.open)}
+        >
           <summary>
             <span>
               <strong>小记管理</strong>
@@ -364,7 +460,9 @@ export function DuomeiAdmin({ mode }: { mode: "login" | "notes" }) {
         <AnimatedCard as="div" className="admin-utilities studio-utilities">
           <div>
             <strong>数据工具</strong>
-            <AnimatedParagraph>云端发布不再需要生成 defaultNotes.ts。这里保留 JSON 备份和恢复，用来防止误删。</AnimatedParagraph>
+            <AnimatedParagraph>
+              小记云端发布不再生成 defaultNotes.ts。JSON 备份只服务小记；故语页面和云游地图仍在仓库里，别指望从这里导出整站。
+            </AnimatedParagraph>
           </div>
           <div className="admin-utility-actions">
             <AnimatedButton type="button" onClick={backupNotes}>
