@@ -164,11 +164,12 @@
   .is-embedded #panel { top: 72px; height: min(680px, calc(100% - 88px)); }
   .is-embedded #panel.collapsed { height: auto; }
   @media (max-width: 720px) {
-    .is-embedded #panel { top: max(10px, env(safe-area-inset-top)); height: auto; }
+    .is-embedded #panel { height: auto; }
     .is-embedded #panel:not(.collapsed) { max-height: calc(100svh - 148px); }
     .is-embedded #tour { bottom: calc(68px + env(safe-area-inset-bottom)); }
     .is-embedded #card { bottom: calc(130px + env(safe-area-inset-bottom)); max-height: 30svh; }
   }
+  @media (max-width: 640px) { .is-embedded #panel { top: max(10px, env(safe-area-inset-top)); } }
   .is-embedded .back-home,
   .is-embedded .fallback-card a { display: none; }
 </style>
