@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type CSSProperties } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from 'react';
 import { createPortal } from 'react-dom';
 import { useMotionPlan } from './MotionPlans';
 import { clamp01, smooth } from './xianyouTimeline';
@@ -43,9 +43,9 @@ function Scene({chapter}:{chapter:Chapter}){
 /** Presentation-only siblings: existing sticky tracks, gesture owners and text are untouched. */
 export function MotionChapters({chapters}:{chapters:readonly Chapter[]}){
  const [mounts,setMounts]=useState<Mount[]>([]);const {paused}=useMotionPlan();
- useEffect(()=>{
+ useLayoutEffect(()=>{
   if(paused)return;const created:Mount[]=[];let raf=0;
-  const scan=()=>{raf=0;for(const chapter of chapters){if(!scenes[chapter.id]||created.some(m=>m.chapter.id===chapter.id))continue;const target=document.getElementById(chapter.id);if(!target)continue;const host=document.createElement('div');host.className='xianyou-scene-host';host.dataset.forChapter=chapter.id;target.before(host);created.push({chapter,host});}setMounts([...created]);};
+  const scan=()=>{raf=0;const previousCount=created.length;for(const chapter of chapters){if(!scenes[chapter.id]||created.some(m=>m.chapter.id===chapter.id))continue;const target=document.getElementById(chapter.id);if(!target)continue;const host=document.createElement('div');host.className='xianyou-scene-host';host.dataset.forChapter=chapter.id;target.before(host);created.push({chapter,host});}if(created.length!==previousCount)setMounts([...created]);};
   // Some original sections are mounted by their own lazy components.
   const observer=new MutationObserver(()=>{if(!raf)raf=requestAnimationFrame(scan);});observer.observe(document.querySelector('.motion-home')??document.body,{childList:true,subtree:true});scan();
   return()=>{observer.disconnect();cancelAnimationFrame(raf);created.forEach(({host})=>host.remove());setMounts([]);};
