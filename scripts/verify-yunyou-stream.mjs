@@ -1,0 +1,16 @@
+import assert from 'node:assert/strict';
+import { DetailStream } from '../public/yunyou/src/detail-stream.js';
+let paused=true,now=0,resolve,started=[],disposed=[];
+const stream=new DetailStream({limit:2,paused:()=>paused,clock:()=>now,load:id=>{started.push(id);return new Promise(r=>resolve=r);},dispose:(id,value)=>disposed.push([id,value])});
+await stream.update(['a','b']);assert.equal(started.length,0,'must not build while interacting');
+paused=false;const a=stream.update(['a','b']);assert.deepEqual(started,['a']);
+await stream.update(['b','c']);assert.equal(started.length,1,'loads must stay serial');
+resolve('A');await a;assert.deepEqual(disposed,[['a','A']],'stale result must be released');
+const b=stream.update(['b','c']);resolve('B');await b;
+const c=stream.update(['b','c']);resolve('C');await c;assert.equal(stream.cache.size,2);
+now=100;const d=stream.update(['c','d']);assert(!stream.cache.has('b'),'evict old model before allocating next');resolve('D');await d;assert.equal(stream.cache.size,2);
+assert(stream.cache.has('c')&&stream.cache.has('d'));
+stream.limit=1;await stream.update(['d']);assert.equal(stream.cache.size,1);
+let attempts=0;const failed=new DetailStream({load:async()=>{attempts++;throw new Error('expected test failure');},dispose(){},clock:()=>now});
+const warn=console.warn;console.warn=()=>{};await failed.update(['bad']);await failed.update(['bad']);assert.equal(attempts,1);now+=16000;await failed.update(['bad']);console.warn=warn;assert.equal(attempts,2);
+console.log('PASS: paused construction, serial load, stale disposal, bounded LRU, reduced budget, failure cooldown.');

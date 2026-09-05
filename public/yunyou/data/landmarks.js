@@ -1,3 +1,5 @@
+import { PLACE_PHOTOS } from './place-photos.js';
+import { CITY_PLACES } from './city-places.js';
 // 桂林市中心（两江四湖）地标。坐标 WGS84（OpenStreetMap），高度单位米，来自公开资料；模型在 src/landmarks.js 按这些尺寸手工构建。
 // kind: hill 山 | pagoda 塔 | building 楼阁/城 | bridge 桥 | lake 湖 | poi 点     span: 飞行到此处时的相机距离
 export const LANDMARKS = [
@@ -48,4 +50,7 @@ export const LANDMARKS = [
   { id: 'guihu', name: '桂湖', kind: 'lake', lat: 25.286396, lon: 110.2875386, span: 800, desc: '两江四湖西段，宋代护城河。' },
   { id: 'mulonghu', name: '木龙湖', kind: 'lake', lat: 25.2940816, lon: 110.2948823, span: 600, desc: '两江四湖最北一湖，紧邻叠彩山、宋城墙与木龙塔。' },
   { id: 'zizhou', name: '訾洲岛', kind: 'poi', lat: 25.2707716, lon: 110.2960767, span: 600, desc: '漓江江心洲，与象鼻山隔水相望，「訾洲烟雨」为桂林老八景之一。' },
+  ...CITY_PLACES,
 ];
+
+for(const place of LANDMARKS) place.photo=PLACE_PHOTOS[place.id];

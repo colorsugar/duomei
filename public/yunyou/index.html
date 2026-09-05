@@ -180,6 +180,7 @@
  #walk-hint {display:none;position:fixed;bottom:28px;left:50%;transform:translateX(-50%);z-index:3;background:#173d38e8;color:#fff;padding:9px 16px;border-radius:20px;white-space:nowrap;font-size:12px;pointer-events:none;}
  .walking #walk-hint {display:block} .walking #tour,.walking #coords {display:none} .walking #app canvas {cursor:grab!important;touch-action:none} .walking #app canvas:active {cursor:grabbing!important}
  .is-embedded #walk-hint {bottom:85px} @media(max-width:720px){#walk-toggle {right:12px;top:72px} #walk-hint {bottom:22px;font-size:11px} .is-embedded #walk-pad {bottom:135px}}
+.place-search{padding:0 18px 10px}.place-search input{width:100%;box-sizing:border-box;border:1px solid #cbc5b8;border-radius:8px;padding:10px;background:#fffaf0;color:#343d33;font:inherit}.place-search span{display:block;margin-top:6px;font-size:11px;opacity:.65}#list li[hidden]{display:none}#card-photo a{color:inherit;text-underline-offset:3px}#card-photo img{object-fit:contain;background:#e8e5dc}
 </style>
 <script type="importmap">
 { "imports": {
@@ -200,13 +201,13 @@
 <button id="walk-toggle" type="button" aria-pressed="false">街面漫游</button>
 <div id="walk-pad" aria-label="街面移动方向" hidden><button data-move="KeyW" aria-label="前进">↑</button><button data-move="KeyA" aria-label="向左移动">←</button><button data-move="KeyS" aria-label="后退">↓</button><button data-move="KeyD" aria-label="向右移动">→</button></div>
 <div id="walk-hint">拖动转头 · 方向键 / WASD 行走 · Esc 返回</div>
-<nav id="tour" aria-label="桂林地标导览"><button id="tour-prev" aria-label="上一个地标">‹</button><button id="tour-play" aria-pressed="false">沿江导览</button><button id="tour-next" aria-label="下一个地标">›</button></nav>
+<nav id="tour" aria-label="桂林地标导览"><button id="tour-prev" aria-label="上一个地标">‹</button><button id="tour-play" aria-pressed="false">城中导览</button><button id="tour-next" aria-label="下一个地标">›</button></nav>
 
 <aside id="panel" aria-label="桂林景点控制面板">
   <header>
     <a class="back-home" href="/#yunyou">← 返回多美</a>
     <button type="button" id="panel-toggle" aria-expanded="true" aria-controls="panel-body">
-      <strong>桂林两江四湖 · 3D 景点地图<small>沿着漓江，认识我的家乡</small></strong>
+      <strong>桂林城中 · 3D 景点地图<small>两江四湖 · 七星 · 穿山 · 西山 · 虞山</small></strong>
       <span class="panel-chevron" aria-hidden="true">▾</span>
     </button>
   </header>
@@ -230,8 +231,9 @@
       <label><input type="checkbox" id="t-spin"> 自动旋转</label>
       <label><input type="checkbox" id="t-boats" checked> 游船行驶</label>
     </div>
+    <div class="place-search"><input id="place-search" type="search" placeholder="找景点，如七星、花桥、西山" aria-label="搜索桂林景点"><span id="place-count" aria-live="polite"></span></div>
     <ul id="list"></ul>
-    <footer>拖动旋转 · 滚轮/双指朝落点推进 · 右键/双指平移 · 点击景点看简介<br>数据 © OpenStreetMap 贡献者（ODbL）</footer>
+    <footer>拖动旋转 · 滚轮/双指缩放 · 右键/双指平移 · 点击景点看简介<br>数据 © OpenStreetMap 贡献者（ODbL）</footer>
   </div>
 </aside>
 
