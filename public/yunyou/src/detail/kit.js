@@ -2,6 +2,8 @@
 // 约定：材质 userData.night = { color, intensity, map } 时，applyNight 会把它切成自发光；PointLight 放进 group.userData.lights。
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
+import { heritageMaterials } from '../surface-materials.js';
+import { chamferBox, metricUV } from './architectural.js';
 
 let sharedKit = null;
 const std = (o) => new THREE.MeshStandardMaterial(o);
@@ -58,22 +60,22 @@ export const beamTex = () => canvas(256, 64, (g, w, h) => {
 // ---- 材质包 ----
 export function kitMats(TEX) {
   if (sharedKit?.textures === TEX) return { ...sharedKit.materials };
-  const lat = latticeTex(), pl = plasterTex(), mb = marbleTex(), bm = beamTex();
+  const lat = latticeTex(), bm = beamTex(), P = heritageMaterials(TEX);
   const M = {
     tile: std({ map: TEX.tile, bumpMap: TEX.tile, bumpScale: 0.35, roughness: 0.85, userData: { night: { color: 0x3a3c40, intensity: 0.35, map: true } } }),
     tileGreen: std({ map: TEX.tile, color: 0x5c8f7a, roughness: 0.4, metalness: 0.15, userData: { night: { color: 0x6aa080, intensity: 0.35, map: true } } }),
     tileYellow: std({ map: TEX.tile, color: 0xd9a63a, roughness: 0.35, metalness: 0.2 }),
     ridge: std({ color: 0x2a2d31, roughness: 0.7 }),
     ridgeGreen: std({ color: 0x2f5a4a, roughness: 0.5, metalness: 0.1 }),
-    eaveWood: std({ color: 0x5a3220, roughness: 0.8, userData: { night: { color: 0xff9a3a, intensity: 0.45 } } }),
-    woodDark: std({ color: 0x4a2e1c, roughness: 0.7, userData: { night: { color: 0xffa040, intensity: 0.6 } } }),
+    eaveWood: P.wood.clone(),
+    woodDark: P.wood.clone(),
     redWall: std({ color: 0x9a3b2c, roughness: 0.9, userData: { night: { color: 0xff8a4a, intensity: 0.35 } } }),
     lacquer: std({ color: 0x8e2b21, roughness: 0.45, userData: { night: { color: 0xff7a3a, intensity: 0.45 } } }),
     beam: std({ map: bm, roughness: 0.6, userData: { night: { color: 0xffb060, intensity: 0.5, map: true } } }),
-    wall: std({ map: pl, roughness: 0.95, userData: { night: { color: 0xffc27a, intensity: 0.32, map: true } } }),
+    wall: P.plaster.clone(),
     lattice: std({ map: lat, roughness: 0.7, userData: { night: { color: 0xffc67a, intensity: 1.4, map: true } } }),
-    stoneBase: std({ map: TEX.stone, bumpMap: TEX.stone, bumpScale: 0.5, roughness: 0.95, userData: { night: { color: 0x8a7350, intensity: 0.4, map: true } } }),
-    marble: std({ map: mb, roughness: 0.5, userData: { night: { color: 0xc9bfa6, intensity: 0.28, map: true } } }),
+    stoneBase: std({ map: TEX.stone, normalMap: TEX.pbr?.plaster.normal ?? null, normalScale: new THREE.Vector2(.28,.28), roughnessMap: TEX.pbr?.plaster.roughness ?? null, roughness: .94, userData: { metres: 3 } }),
+    marble: P.dressedStone.clone(),
     gold: std({ color: 0xe6b84a, metalness: 0.85, roughness: 0.3 }),
     dark: std({ color: 0x1f1c1a, roughness: 0.9 }),
     lantern: std({ color: 0xd8321c, roughness: 0.6, userData: { night: { color: 0xff5a2a, intensity: 2.2 } } }),
@@ -219,6 +221,7 @@ export function dougong({ sides = 4, rx, rz = rx, y, pitch = 1.6, mats, scale = 
     new THREE.BoxGeometry(0.4 * s, 0.22 * s, 1.4 * s).translate(0, 0.72 * s, 0.55 * s),
     new THREE.BoxGeometry(2.1 * s, 0.2 * s, 0.4 * s).translate(0, 1.0 * s, 0.7 * s),
   ]);
+  metricUV(one, .6, 0);
   const mats4 = [];
   const corners = polyCorners(sides, rx, rz);
   const m = new THREE.Matrix4();
@@ -264,16 +267,16 @@ export function balustrade({ sides = 4, rx, rz = rx, y, mats, post = 1.2, panel 
 export function colonnade({ sides = 4, rx, rz = rx, y, h, mats, pitch = 3, r = 0.24, beam = true }) {
   const grp = new THREE.Group();
   const corners = polyCorners(sides, rx, rz);
-  const colG = mergeGeometries([new THREE.CylinderGeometry(r, r * 1.08, h, 10).translate(0, h / 2, 0)]);
-  const baseG = new THREE.CylinderGeometry(r * 1.5, r * 1.7, 0.3, 10).translate(0, 0.15, 0);
+  const colG = mergeGeometries([metricUV(new THREE.CylinderGeometry(r, r * 1.08, h, 20), .6, 1).translate(0, h / 2, 0)]);
+  const baseG = metricUV(new THREE.CylinderGeometry(r * 1.5, r * 1.7, 0.3, 16), .75).translate(0, 0.15, 0);
   const ms = [], m = new THREE.Matrix4();
   for (let f = 0; f < sides; f++) {
     const A = corners[f], B = corners[(f + 1) % sides], L = Math.hypot(B[0] - A[0], B[1] - A[1]), n = Math.max(1, Math.round(L / pitch));
     for (let i = 0; i < n; i++) { const t = i / n; m.makeTranslation(A[0] + (B[0] - A[0]) * t, y, A[1] + (B[1] - A[1]) * t); ms.push(m.clone()); }
     if (beam) {
       const ang = Math.atan2(-(B[1] - A[1]), B[0] - A[0]);
-      const bmesh = new THREE.Mesh(new THREE.BoxGeometry(L + r, 0.55, r * 2), mats.beam); bmesh.position.set((A[0] + B[0]) / 2, y + h - 0.3, (A[1] + B[1]) / 2); bmesh.rotation.y = ang;
-      const lower = new THREE.Mesh(new THREE.BoxGeometry(L + r, 0.3, r * 1.6), mats.lacquer); lower.position.set((A[0] + B[0]) / 2, y + h - 0.75, (A[1] + B[1]) / 2); lower.rotation.y = ang;
+      const bmesh = new THREE.Mesh(chamferBox(L + r, 0.55, r * 2, .025, .6, 0), mats.beam); bmesh.position.set((A[0] + B[0]) / 2, y + h - 0.3, (A[1] + B[1]) / 2); bmesh.rotation.y = ang;
+      const lower = new THREE.Mesh(chamferBox(L + r, 0.3, r * 1.6, .02, .6, 0), mats.lacquer); lower.position.set((A[0] + B[0]) / 2, y + h - 0.75, (A[1] + B[1]) / 2); lower.rotation.y = ang;
       grp.add(bmesh, lower);
     }
   }
