@@ -28,7 +28,8 @@ export function runSharedJourneyTransition(callback: () => void) {
   const viewTransitionDocument = document as ViewTransitionDocument;
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-  if (reduceMotion || !viewTransitionDocument.startViewTransition) {
+  // The candidate's route coordinator owns its single snapshot transition.
+  if (document.documentElement.dataset.cinematicNavigation === "true" || reduceMotion || !viewTransitionDocument.startViewTransition) {
     callback();
     return;
   }

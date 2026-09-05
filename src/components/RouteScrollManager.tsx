@@ -1,5 +1,5 @@
 import { useLayoutEffect } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, type Location } from "react-router-dom";
 import { readJourneyListState, restoreJourneyWindowScroll } from "../motion";
 
 function scrollWindowTop() {
@@ -15,8 +15,9 @@ function scrollHashTarget(hash: string) {
   return true;
 }
 
-export function RouteScrollManager() {
-  const location = useLocation();
+export function RouteScrollManager({ locationOverride }: {locationOverride?: Location}) {
+  const currentLocation = useLocation();
+  const location = locationOverride ?? currentLocation;
 
   useLayoutEffect(() => {
     if ("scrollRestoration" in window.history) {

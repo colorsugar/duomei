@@ -8,6 +8,8 @@ import { fileURLToPath } from "node:url";
 import * as adminSiteInventory from "./adminSiteInventory.ts";
 // @ts-expect-error Node's strip-types test runner needs the explicit source extension.
 import { containFloatingWidget } from "./floatingWidget.ts";
+// @ts-expect-error Node's strip-types test runner needs the explicit source extension.
+import { shouldAnimateRoute } from "../experience/routeMotion.ts";
 
 const css = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../header-tablet-nav.css"), "utf8");
 const appSource = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../App.tsx"), "utf8");
@@ -76,16 +78,17 @@ test("keeps a reachable hamburger on phones and tablets without collapsing touch
   assert.match(css, /@media \(min-width: 1025px\) and \(hover: none\) and \(pointer: coarse\)[\s\S]*\.duomei-header nav \{[\s\S]*display:\s*flex\s*!important[\s\S]*visibility:\s*visible\s*!important/);
 });
 
-test("uses one reduced-motion-safe paper reveal across public route changes", () => {
-  assert.match(appSource, /function PublicRoutePaperVeil/);
-  assert.match(appSource, /if \(previousPathRef\.current === pathname\) return/);
-  assert.match(appSource, /disabled=\{isAdmin \|\| isGuyuReader\}/);
-  assert.match(appSource, /pathname\.startsWith\("\/note\/"\)/);
-  assert.match(siteCss, /duomeiRoutePaperReveal 1300ms cubic-bezier/);
-  assert.match(siteCss, /duomeiRouteNoteReveal[\s\S]*?animation-duration:\s*880ms/);
-  assert.match(siteCss, /\.duomei-motion-root > \.duomei-route-paper-veil\s*\{[\s\S]*?position:\s*fixed/);
-  assert.doesNotMatch(siteCss, /var\(--paper-warm\)/);
-  assert.match(siteCss, /prefers-reduced-motion[\s\S]*?\.duomei-motion-root > \.duomei-route-paper-veil[\s\S]*?display:\s*none/);
+test("joins public route journeys while leaving anchors, reduced motion and administration immediate", () => {
+  for (const target of ['/zaobao', '/note/a', '/guyu', '/guyu/xinshuo-01', '/yunyou-map', '/skills']) {
+    assert.equal(shouldAnimateRoute('/', target, false, false), true, target);
+    assert.equal(shouldAnimateRoute(target, '/', false, false), true, `return from ${target}`);
+    assert.equal(shouldAnimateRoute('/', target, true, false), false, 'reduced motion');
+    assert.equal(shouldAnimateRoute('/', target, false, true), false, 'background navigation');
+  }
+  assert.equal(shouldAnimateRoute('/', '/', false, false), false, 'homepage chapter anchors');
+  assert.equal(shouldAnimateRoute('/guyu', '/guyu', false, false), false, 'query-only changes');
+  assert.equal(shouldAnimateRoute('/', '/admin/login', false, false), false);
+  assert.equal(shouldAnimateRoute('/admin', '/', false, false), false);
 });
 
 test("keeps the Zaobao cover inside the SPA route transition", () => {

@@ -38,10 +38,14 @@ export function ChapterAtmosphere({chapters}: {chapters: readonly Chapter[]}) {
       entries.forEach(entry => {const el = entry.target as HTMLElement; if(entry.isIntersecting) {visible.add(el); el.classList.add('cinema-entered');} else visible.delete(el);});
       request();
     }, {rootMargin:'100px'});
-    nodes.forEach(row => {row.element!.dataset.chapter = String(row.index + 1).padStart(2,'0'); ro.observe(row.element!); io.observe(row.element!);});
+    // Each chapter owns a different shot. Re-entry replays it, without listeners on cards.
+    const shots = new IntersectionObserver(entries => {
+      entries.forEach(entry => entry.target.classList.toggle('cinema-shot-live', entry.isIntersecting));
+    }, {rootMargin:'0px 0px -15% 0px'});
+    nodes.forEach(row => {row.element!.dataset.chapter = String(row.index + 1).padStart(2,'0'); ro.observe(row.element!); io.observe(row.element!); shots.observe(row.element!);});
     window.addEventListener('scroll', request, {passive:true}); window.addEventListener('resize', resize); reduce.addEventListener('change', request);
     update();
-    return () => {cancelAnimationFrame(frame); ro.disconnect(); io.disconnect(); window.removeEventListener('scroll',request); window.removeEventListener('resize',resize); reduce.removeEventListener('change',request);};
+    return () => {cancelAnimationFrame(frame); ro.disconnect(); io.disconnect(); shots.disconnect(); window.removeEventListener('scroll',request); window.removeEventListener('resize',resize); reduce.removeEventListener('change',request);};
   }, [chapters]);
   return <>
     <button className="cinema-index-trigger" onClick={() => dialog.current?.showModal()} aria-haspopup="dialog"><span>{active}</span><i aria-hidden="true">☷</i><span className="cinema-index-label">章节</span></button>
