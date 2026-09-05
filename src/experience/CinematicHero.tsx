@@ -1,12 +1,10 @@
 import { useEffect, useRef, useState, type CSSProperties } from 'react';
+import { CinematicVideo } from './CinematicVideo';
 import { useDuomeiEdit } from '../components/DuomeiEditProvider';
 import { getHeroTextSettings, saveHeroTextSettings, HERO_TEXT_UPDATED_EVENT, type HeroTextSettings } from '../lib/heroSettings';
 
-export function CinematicHero() {
+export function CinematicHero({paused, setPaused}: {paused: boolean; setPaused: (value: boolean) => void}) {
   const root = useRef<HTMLElement>(null);
-  const video = useRef<HTMLVideoElement>(null);
-  const [mobile] = useState(() => matchMedia('(max-width: 768px)').matches);
-  const [paused, setPaused] = useState(() => matchMedia('(prefers-reduced-motion: reduce)').matches);
   const [settings, setSettings] = useState(getHeroTextSettings);
   const { isLoggedIn, editMode } = useDuomeiEdit();
   const editable = isLoggedIn && editMode;
@@ -23,30 +21,6 @@ export function CinematicHero() {
     const change = () => setPaused(media.matches);
     media.addEventListener('change', change);
     return () => media.removeEventListener('change', change);
-  }, []);
-
-  useEffect(() => {
-    const film = video.current, section = root.current;
-    if (!film || !section) return;
-    let visible = false, cancelled = false;
-    const sync = () => {
-      if (cancelled) return;
-      if (paused || !visible || document.hidden) { film.pause(); return; }
-      // Choose one rendition before loading: phones never fetch the desktop film.
-      if (!film.getAttribute('src')) {
-        film.src = '/experience/guilin-film' + (mobile ? '-mobile' : '') + '.mp4';
-      }
-      film.play().catch(() => { if (!cancelled && visible && !document.hidden) setPaused(true); });
-    };
-    const observer = new IntersectionObserver(([entry]) => { visible = entry.isIntersecting; sync(); }, {threshold:0.01});
-    observer.observe(section);
-    document.addEventListener('visibilitychange', sync);
-    return () => { cancelled = true; observer.disconnect(); document.removeEventListener('visibilitychange', sync); };
-  }, [paused, mobile]);
-
-  useEffect(() => {
-    const film = video.current;
-    return () => film?.pause();
   }, []);
 
   useEffect(() => {
@@ -80,12 +54,7 @@ export function CinematicHero() {
   });
 
   const togglePlayback = () => {
-    const film = video.current;
-    if (paused && film) {
-      if (!film.getAttribute('src')) film.src = '/experience/guilin-film' + (mobile ? '-mobile' : '') + '.mp4';
-      // Keep the explicit retry inside the visitor's gesture for mobile playback policies.
-      void film.play().catch(() => {});
-    } else film?.pause();
+    if (paused) void root.current?.querySelector("video")?.play().catch(() => {});
     setPaused(!paused);
   };
 
@@ -93,8 +62,7 @@ export function CinematicHero() {
     <section ref={root} className={'cinema-film' + (paused ? ' is-paused' : '')} id="home" aria-label="多美小记">
       <div className="cinema-film-stage">
         <div className="cinema-film-landscape" aria-hidden="true">
-          <video ref={video} muted playsInline loop preload="none" poster={'/experience/guilin-film' + (mobile ? '-mobile' : '') + '-poster.webp'}
-            onError={() => setPaused(true)} />
+          <CinematicVideo scene={1} hero paused={paused} onBlocked={() => setPaused(true)} />
         </div>
         <div className="cinema-film-shade" aria-hidden="true" />
         <div className="cinema-film-aperture" aria-hidden="true" />
@@ -107,8 +75,8 @@ export function CinematicHero() {
         </div>
         <div className="cinema-film-bottom">
           <a href="#zaobao" className="cinema-film-explore"><span>向下探索</span><b aria-hidden="true">↓</b></a>
-          <span className="cinema-film-location">桂林 · 漓江<span>GUILIN, CHINA</span></span>
-          <button className="cinema-film-pause" onClick={togglePlayback} aria-pressed={paused} aria-label={paused ? '播放主视觉' : '暂停主视觉'}>
+          <span className="cinema-film-location">生活 · 旅途 · 自己<span>THE DUOMEI JOURNAL</span></span>
+          <button className="cinema-film-pause liquid-glass" onClick={togglePlayback} aria-pressed={paused} aria-label={paused ? '播放主视觉' : '暂停主视觉'}>
             <span className={'cinema-film-playmark' + (paused ? ' is-stopped' : '')} aria-hidden="true"><i /><i /><i /></span>
             {paused ? '播放' : '暂停'}
           </button>

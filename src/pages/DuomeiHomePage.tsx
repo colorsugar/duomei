@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { CinematicHero } from "../experience/CinematicHero";
+import { ChapterScenes } from "../experience/ChapterScenes";
 import { ChapterAtmosphere } from "../experience/ChapterAtmosphere";
 import { NotesDreamTransition } from "../components/NotesDreamTransition";
 import { PaperLayer } from "../components/PaperLayer";
@@ -22,6 +23,7 @@ const homeProgressSections = [
 ] as const;
 
 export function DuomeiHomePage() {
+  const [paused, setPaused] = useState(() => matchMedia("(prefers-reduced-motion: reduce)").matches);
   const { editMode, openNoteEditor, refreshKey } = useDuomeiEdit();
   const localPoetryPreview = import.meta.env.DEV && new URLSearchParams(window.location.search).get("poetryEditor") === "1";
   const [notes, setNotes] = useState<DuomeiNote[]>(() => getPublishedNotes());
@@ -47,13 +49,14 @@ export function DuomeiHomePage() {
   return (
     <>
       <main className="duomei-stage duomei-kinetic-active cinema-home">
-        <CinematicHero />
+        <CinematicHero paused={paused} setPaused={setPaused} />
         <PaperLayer>
           <ZaobaoSection />
           <NotesDreamTransition canCreate={editMode || localPoetryPreview} notes={notes} onCreate={() => openNoteEditor()} />
         </PaperLayer>
       </main>
-      <ChapterAtmosphere chapters={homeProgressSections} />
+      <ChapterScenes paused={paused} />
+      <ChapterAtmosphere chapters={homeProgressSections} paused={paused} setPaused={setPaused} />
     </>
   );
 }

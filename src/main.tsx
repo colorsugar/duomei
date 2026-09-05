@@ -13,3 +13,5 @@ createRoot(document.getElementById("root")!).render(
     <App />
   </StrictMode>,
 );
+
+import "./experience/cinematic-world.css";

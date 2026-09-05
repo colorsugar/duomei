@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 
 type Chapter = {id: string; label: string};
 
-export function ChapterAtmosphere({chapters}: {chapters: readonly Chapter[]}) {
+export function ChapterAtmosphere({chapters, paused, setPaused}: {chapters: readonly Chapter[]; paused: boolean; setPaused: (value: boolean) => void}) {
   const dialog = useRef<HTMLDialogElement>(null);
   const [active, setActive] = useState('首页');
   useEffect(() => {
@@ -26,6 +26,9 @@ export function ChapterAtmosphere({chapters}: {chapters: readonly Chapter[]}) {
         if (!visible.has(row.element!)) continue;
         const enter = Math.max(0, Math.min(1, (scroll + viewport - row.top) / (viewport * .75)));
         const progress = Math.max(0, Math.min(1, (scroll - row.top) / Math.max(1, row.height - viewport)));
+        const reveal = reduce.matches ? 1 : Math.max(0, Math.min(1, (progress - .06) / .25));
+        row.element!.style.setProperty('--scene-reveal', String(reveal));
+        row.element!.style.setProperty('--scene-intro', String(reduce.matches ? 0 : Math.max(0, 1 - progress / .18)));
         row.element!.style.setProperty('--chapter-enter', String(reduce.matches ? 1 : enter));
         row.element!.style.setProperty('--chapter-progress', String(reduce.matches ? .5 : progress));
       }
@@ -48,12 +51,12 @@ export function ChapterAtmosphere({chapters}: {chapters: readonly Chapter[]}) {
     return () => {cancelAnimationFrame(frame); ro.disconnect(); io.disconnect(); shots.disconnect(); window.removeEventListener('scroll',request); window.removeEventListener('resize',resize); reduce.removeEventListener('change',request);};
   }, [chapters]);
   return <>
-    <button className="cinema-index-trigger" onClick={() => dialog.current?.showModal()} aria-haspopup="dialog"><span>{active}</span><i aria-hidden="true">☷</i><span className="cinema-index-label">章节</span></button>
+    <button className="cinema-index-trigger liquid-glass" onClick={() => dialog.current?.showModal()} aria-haspopup="dialog"><span>{active}</span><i aria-hidden="true">☷</i><span className="cinema-index-label">章节</span></button>
     <dialog className="cinema-index" ref={dialog} aria-labelledby="cinema-index-title" onClick={event => {if(event.target === event.currentTarget) dialog.current?.close();}}>
       <div className="cinema-index-inner">
         <header><span id="cinema-index-title">多美 · 章节索引</span><button autoFocus onClick={() => dialog.current?.close()} aria-label="关闭章节索引">×</button></header>
         <nav>{chapters.map(({id,label},i) => <a key={id} href={`#${id}`} onClick={() => dialog.current?.close()} aria-current={active === label ? 'location' : undefined}><small>{String(i + 1).padStart(2,'0')}</small><span>{label}</span><b aria-hidden="true">↗</b></a>)}</nav>
-        <footer>DUOMEI JOURNAL</footer>
+        <footer>DUOMEI JOURNAL <button className="liquid-glass cinema-motion-control" onClick={() => setPaused(!paused)} aria-pressed={paused}>{paused ? "播放场景" : "暂停场景"}</button></footer>
       </div>
     </dialog>
   </>;
