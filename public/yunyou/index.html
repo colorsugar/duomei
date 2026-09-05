@@ -180,6 +180,22 @@
  #walk-hint {display:none;position:fixed;bottom:28px;left:50%;transform:translateX(-50%);z-index:3;background:#173d38e8;color:#fff;padding:9px 16px;border-radius:20px;white-space:nowrap;font-size:12px;pointer-events:none;}
  .walking #walk-hint {display:block} .walking #tour,.walking #coords {display:none} .walking #app canvas {cursor:grab!important;touch-action:none} .walking #app canvas:active {cursor:grabbing!important}
  .is-embedded #walk-hint {bottom:85px} @media(max-width:720px){#walk-toggle {right:12px;top:72px} #walk-hint {bottom:22px;font-size:11px} .is-embedded #walk-pad {bottom:135px}}
+.place-search{padding:0 18px 10px}.place-search input{width:100%;box-sizing:border-box;border:1px solid #cbc5b8;border-radius:8px;padding:10px;background:#fffaf0;color:#343d33;font:inherit}.place-search span{display:block;margin-top:6px;font-size:11px;opacity:.65}#list li[hidden]{display:none}#card-photo a{color:inherit;text-underline-offset:3px}#card-photo img{object-fit:contain;background:#e8e5dc}
+#toggles label{min-height:44px;display:flex;align-items:center;gap:6px}#toggles input[type=checkbox]{width:18px;height:18px}
+.model-version{display:flex;align-items:center;gap:8px;padding:0 18px 10px;font-size:13px}.model-version select{flex:1;min-height:36px;background:var(--paper);color:var(--ink);border:1px solid var(--line);border-radius:6px}
+
+  /* Keep the primary landmark list usable even when every effect is exposed. */
+  #panel { max-height: calc(100dvh - 24px); }
+  #panel header { flex-shrink: 0; }
+  #panel-body { overflow-y: auto; overscroll-behavior: contain; }
+  .place-search { padding-top: 12px; flex-shrink: 0; }
+  .model-version { flex-shrink: 0; }
+  #list { flex: 1 0 220px; min-height: 220px; overflow-y: auto; overscroll-behavior: contain; }
+  #map-settings { flex-shrink: 0; border-top: 1px solid var(--line); }
+  #map-settings summary { padding: 12px 16px; min-height: 44px; box-sizing: border-box; cursor: pointer; font-size: 14px; }
+  #panel footer { flex-shrink: 0; }
+  @media (max-width: 720px) { #panel { height: calc(100dvh - 110px); } }
+
 </style>
 <script type="importmap">
 { "imports": {
@@ -200,22 +216,31 @@
 <button id="walk-toggle" type="button" aria-pressed="false">街面漫游</button>
 <div id="walk-pad" aria-label="街面移动方向" hidden><button data-move="KeyW" aria-label="前进">↑</button><button data-move="KeyA" aria-label="向左移动">←</button><button data-move="KeyS" aria-label="后退">↓</button><button data-move="KeyD" aria-label="向右移动">→</button></div>
 <div id="walk-hint">拖动转头 · 方向键 / WASD 行走 · Esc 返回</div>
-<nav id="tour" aria-label="桂林地标导览"><button id="tour-prev" aria-label="上一个地标">‹</button><button id="tour-play" aria-pressed="false">沿江导览</button><button id="tour-next" aria-label="下一个地标">›</button></nav>
+<nav id="tour" aria-label="桂林地标导览"><button id="tour-prev" aria-label="上一个地标">‹</button><button id="tour-play" aria-pressed="false">城中导览</button><button id="tour-next" aria-label="下一个地标">›</button></nav>
 
 <aside id="panel" aria-label="桂林景点控制面板">
   <header>
     <a class="back-home" href="/#yunyou">← 返回多美</a>
     <button type="button" id="panel-toggle" aria-expanded="true" aria-controls="panel-body">
-      <strong>桂林两江四湖 · 3D 景点地图<small>沿着漓江，认识我的家乡</small></strong>
+      <strong>桂林城中 · 3D 景点地图<small>两江四湖 · 七星 · 穿山 · 西山 · 虞山</small></strong>
       <span class="panel-chevron" aria-hidden="true">▾</span>
     </button>
   </header>
   <div id="panel-body">
+    <div class="place-search"><input id="place-search" type="search" placeholder="找景点，如七星、花桥、西山" aria-label="搜索桂林景点"><span id="place-count" aria-live="polite"></span></div>
+    <label class="model-version">模型 <select id="model-version" aria-label="选择精细模型或回退原版"><option value="blender">精细模型 · Blender</option><option value="original">原版模型 · 可回退</option></select></label>
+    <ul id="list" aria-label="地标列表"></ul>
+    <details id="map-settings"><summary>画面与效果设置</summary>
     <div id="toggles">
       <label><input type="checkbox" id="t-roads" checked> 道路</label>
       <label><input type="checkbox" id="t-labels" checked> 景点名</label>
       <label><input type="checkbox" id="t-city" checked> 建筑/树</label>
-      <label>画质 <select id="quality" aria-label="画质"><option value="high">高清</option><option value="balanced">均衡</option><option value="flow">流畅</option></select></label>
+      <label>分辨率 <select id="quality" aria-label="画质"><option value="high">高清</option><option value="balanced">均衡</option><option value="flow">流畅</option></select></label>
+      <label><input type="checkbox" id="t-reflection"> 水面倒影</label>
+      <label><input type="checkbox" id="t-shadows" checked> 静态建筑阴影</label>
+      <label><input type="checkbox" id="t-ripples" checked> 水面波纹</label>
+      <label><input type="checkbox" id="t-leaves" checked> 精细树叶</label>
+      <label><input type="checkbox" id="t-lighting" checked> 景观亮灯</label>
       <label><input type="checkbox" id="t-grid"> 500m 网格</label>
       <label class="mode-row" title="日夜切换">
         <span>日</span>
@@ -228,10 +253,11 @@
         <span>夜</span>
       </label>
       <label><input type="checkbox" id="t-spin"> 自动旋转</label>
-      <label><input type="checkbox" id="t-boats" checked> 游船行驶</label>
+      <label><input type="checkbox" id="t-boats"> 游船行驶</label>
     </div>
-    <ul id="list"></ul>
-    <footer>拖动旋转 · 滚轮/双指朝落点推进 · 右键/双指平移 · 点击景点看简介<br>数据 © OpenStreetMap 贡献者（ODbL）</footer>
+    </details>
+
+    <footer>拖动旋转 · 滚轮/双指缩放 · 右键/双指平移 · 点击景点看简介<br>数据 © OpenStreetMap 贡献者（ODbL）</footer>
   </div>
 </aside>
 

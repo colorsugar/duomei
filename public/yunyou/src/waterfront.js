@@ -3,6 +3,9 @@
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { hash } from './lib.js';
+import { heritageMaterials } from './surface-materials.js';
+import { chamferBox } from './detail/architectural.js';
+import { createUrbanTrees } from './urban-trees.js';
 
 export const BINJIANG = [[-225,1299],[-214,1213],[-65,903],[-12,922],[7,922],[21,915],[52,892],[323,424],[358,364]];
 // Lamps and both terraces belong to the river side of the mapped road
@@ -11,11 +14,12 @@ export const XIAOYAO_LIGHTS = [[448,162],[439,189],[430,216],[421,243],[412,270]
 export const XIAOYAO_TERRACE = { upper:[[450,152],[399,309]], lower:[[461,156],[410,313]] };
 const V = (x,y,z) => new THREE.Vector3(x,y,z);
 export function ribbonGeometry(points, width, y) {
-  const pos=[], uv=[], ix=[];
+  const pos=[], uv=[], ix=[]; let distance=0;
   points.forEach(([x,z],i)=>{
     const a=points[Math.max(i-1,0)], b=points[Math.min(i+1,points.length-1)];
     const len=Math.hypot(b[0]-a[0],b[1]-a[1])||1, nx=-(b[1]-a[1])/len, nz=(b[0]-a[0])/len;
-    pos.push(x+nx*width/2,y,z+nz*width/2,x-nx*width/2,y,z-nz*width/2); uv.push(0,i,1,i);
+    if(i)distance+=Math.hypot(x-points[i-1][0],z-points[i-1][1]);
+    pos.push(x+nx*width/2,y,z+nz*width/2,x-nx*width/2,y,z-nz*width/2); uv.push(0,distance/3,width/3,distance/3);
     if(i){const k=i*2;ix.push(k-2,k,k-1,k-1,k,k+1);}
   });
   const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));g.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));g.setIndex(ix);g.computeVertexNormals();return g;
@@ -29,13 +33,13 @@ function samples(points, pitch, offset=0) {
 }
 function shifted(points, offset){return points.map(([x,z],i)=>{const a=points[Math.max(0,i-1)],b=points[Math.min(points.length-1,i+1)],L=Math.hypot(b[0]-a[0],b[1]-a[1]);return [x-(b[1]-a[1])/L*offset,z+(b[0]-a[0])/L*offset];});}
 export function createWaterfront(TEX) {
-  const group=new THREE.Group(), buckets=new Map(), nightMats=[];
+  const group=new THREE.Group(), buckets=new Map(), nightMats=[], leafPoints=[], P=heritageMaterials(TEX);
   const mat=(color,extra={})=>new THREE.MeshStandardMaterial({color,roughness:.85,...extra});
-  const stone=mat(0xa8aaa2,{map:TEX.stone}), paving=mat(0xd1cec3), road=mat(0x434b50), white=mat(0xe8e4d7), yellow=mat(0xd5af62), metal=mat(0x465157,{metalness:.5}), wood=mat(0x755137), trunk=mat(0x5d5645), leaf=mat(0x456348), leaf2=mat(0x54764c), flower=mat(0xac8b83);
+  const stone=P.dressedStone, paving=P.paving, road=mat(0x434b50), yellow=mat(0xd5af62), metal=mat(0x465157,{metalness:.5}), wood=P.wood, trunk=mat(0x5d5645), flower=mat(0xac8b83);
   const glow=(color,intensity=2)=>{const m=mat(color,{emissive:color,emissiveIntensity:0,roughness:.45});nightMats.push([m,intensity]);return m;};
   const warm=glow(0xffcf83), cyan=glow(0x74ece2,2.8), blue=glow(0x5ab4fa,2.3);
-  const add=(geo,m,x=0,y=0,z=0,ry=0)=>{geo.rotateY(ry);geo.translate(x,y,z); const key=m.uuid+':'+Math.floor(x/180)+':'+Math.floor(z/180); if(!buckets.has(key))buckets.set(key,{m,geos:[]});buckets.get(key).geos.push(geo);};
-  const box=(w,h,d,m,x,y,z,ry=0)=>add(new THREE.BoxGeometry(w,h,d),m,x,y,z,ry);
+  const add=(geo,m,x=0,y=0,z=0,ry=0)=>{if(geo.index){const original=geo;geo=geo.toNonIndexed();original.dispose();}geo.rotateY(ry);geo.translate(x,y,z); const key=m.uuid+':'+Math.floor(x/180)+':'+Math.floor(z/180); if(!buckets.has(key))buckets.set(key,{m,geos:[]});buckets.get(key).geos.push(geo);};
+  const box=(w,h,d,m,x,y,z,ry=0)=>add(chamferBox(w,h,d,Math.min(w,h,d)>.3?.02:0,m.userData?.metres??1,m===wood?[w,h,d].indexOf(Math.max(w,h,d)):undefined),m,x,y,z,ry);
   const beam=(a,b,r,m)=>{const d=b.clone().sub(a),geo=new THREE.CylinderGeometry(r,r,d.length(),6);geo.applyQuaternion(new THREE.Quaternion().setFromUnitVectors(V(0,1,0),d.normalize()));add(geo,m,...a.clone().add(b).multiplyScalar(.5));};
   // Road follows existing vertices. Distinct raised walk, kerb and river rail.
   add(ribbonGeometry(BINJIANG,10,.82),road);
@@ -49,16 +53,13 @@ export function createWaterfront(TEX) {
   for(const [x,z,ry] of samples(shifted(BINJIANG,6.5),19)){
     box(.13,4.5,.13,metal,x,3.25,z);box(.85,.14,.85,warm,x,5.5,z);
     box(1.3,.18,1.3,metal,x,5.65,z);
-    box(1.3,.45,2.6,stone,x-2.6,1.1,z,ry);box(1.25,.13,2.5,wood,x-2.6,1.4,z,ry);
+    box(1.3,.45,2.6,stone,x-2.6,1.1,z,ry);
+    for(let slat=0;slat<6;slat++)box(.18,.09,2.5,wood,x-2.6+Math.cos(ry)*(slat-2.5)*.2,1.4,z-Math.sin(ry)*(slat-2.5)*.2,ry);
   }
   // Mature camphor avenue: varied lobed crowns, visible trunks, no floating balls.
   for(const [i,[x,z]] of samples(shifted(BINJIANG,-7),20).entries()){
-    add(new THREE.CylinderGeometry(.34,.65,6,7),trunk,x,3,z);
-    for(let j=0;j<5;j++){
-      const a=j*2.4+i, r=3.4+hash(i+'r'+j)*1.7;
-      const geo=new THREE.IcosahedronGeometry(r,1);geo.scale(1,.8,1);
-      add(geo,j%2?leaf:leaf2,x+Math.cos(a)*2.5,7.5+hash(i+'h'+j)*2,z+Math.sin(a)*2.5);
-    }
+
+    leafPoints.push([x,z,3.6,4.1+hash(i+'crown')*.65]);
     box(2.3,.25,2.3,stone,x,.9,z);
   }
   // Six visually confirmed pointed light frames by Xiaoyao Tower, north of bridge.
@@ -84,8 +85,9 @@ export function createWaterfront(TEX) {
   }
   for(const [x,z,ry] of samples(shifted(BINJIANG,-10),35)) {box(2,.5,4,stone,x,1,z,ry);box(1.6,.3,3.6,flower,x,1.4,z,ry);}
   for(const {m,geos} of buckets.values()){
-    const g=mergeGeometries(geos);geos.forEach(g=>g.dispose());const mesh=new THREE.Mesh(g,m);mesh.receiveShadow=true;group.add(mesh);
+    const g=mergeGeometries(geos);geos.forEach(g=>g.dispose());const mesh=new THREE.Mesh(g,m);mesh.receiveShadow=true;mesh.castShadow=m!==paving&&m!==road;group.add(mesh);
   }
+  createUrbanTrees(leafPoints.map(([x,z,y,r])=>[x,z,0,r,'camphor'])).then(t=>{group.add(t);t.userData.updateTrees=t.userData.update;}).catch(e=>console.warn('Avenue trees',e));
   group.name='滨江路与逍遥楼滨江灯柱';
   return {group,setNight:(t)=>{for(const [m,k] of nightMats)m.emissiveIntensity=k*t;}};
 }

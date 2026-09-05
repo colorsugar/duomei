@@ -1,3 +1,4 @@
+import { installPlaceList } from './place-list.js';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
@@ -13,10 +14,20 @@ import { createWaterfront, createCruises } from './waterfront.js';
 import { createHeritageStreets } from './heritage-streets.js';
 import { createAtmosphere } from './atmosphere.js';
 import { createRiverReflection } from './river-renderer.js';
+import {createParkFallbacks} from './park-fallbacks.js';
+import {createLandmarkLighting} from './landmark-lighting.js';
+import {parkBuildingOwner} from './building-ownership.js';
 import { createCityMaterial, cityUV } from './city-material.js';
-import { createLeafyTrees } from './foliage.js';
+import { createUrbanTrees, setTreeDetail } from './urban-trees.js';
 import { createStreetDistrict } from './street-district.js';
 import { createStreetWalk } from './street-walk.js';
+import { installMapGestures } from './map-gestures.js';
+import { DetailStream } from './detail-stream.js';
+import { createExpandedModels } from './expanded-landmarks.js';
+import { createSectorStream } from './sector-stream.js';
+import { installBlenderModels } from './blender-models.js';
+import { kitMats } from './detail/kit.js';
+import { heritageMaterials } from './surface-materials.js';
 
 // ---- 投影：WGS84 -> 局部米制（X 东，Z 南），与 data/geo.js 生成脚本一致 ----
 const toXZ = (lat, lon) => [(lon - ORIGIN.lon) * ORIGIN.mPerLon, -(lat - ORIGIN.lat) * ORIGIN.mPerLat];
@@ -24,20 +35,22 @@ const toLatLon = (x, z) => [ORIGIN.lat - z / ORIGIN.mPerLat, ORIGIN.lon + x / OR
 const mobileQuery = matchMedia('(max-width: 720px), (pointer: coarse)');
 let isMobile = mobileQuery.matches;
 let quality = 'high', walk = null;
+const effects={reflection:false,shadows:true,ripples:true,lights:true};
 const qualityDpr = () => quality === 'high' ? Math.min(devicePixelRatio,2) : quality === 'balanced' ? Math.min(devicePixelRatio,1.5) : Math.min(devicePixelRatio,1);
 const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 // ---- 渲染器 / 场景 / 相机 ----
 const app = document.getElementById('app');
-// 高清默认使用实时水面反射和柔和阴影；流畅档降低像素与反射成本。
+// Pixel density is independent of optional reflection and shadow passes.
 const renderer = new THREE.WebGLRenderer({ antialias: true, logarithmicDepthBuffer: true, powerPreference: 'high-performance' });
 renderer.setPixelRatio(qualityDpr());
 renderer.setSize(innerWidth, innerHeight);
-renderer.shadowMap.enabled = true;
+renderer.shadowMap.enabled = effects.shadows;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 renderer.shadowMap.autoUpdate = false; // 场景静态、太阳固定：阴影图只在内容变化时重算
+let spatialDirty = true;
 let dirty = true; // 画面是否需要重绘（相机不动、无动画时跳过渲染）
-const invalidate = (shadows = false) => { dirty = true; if (shadows && renderer.shadowMap.enabled) renderer.shadowMap.needsUpdate = true; };
+const invalidate = (shadows = false) => { dirty = true; spatialDirty = true; if (shadows && renderer.shadowMap.enabled) renderer.shadowMap.needsUpdate = true; };
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 1.12;
 renderer.domElement.setAttribute('role', 'application');
@@ -53,19 +66,16 @@ scene.fog = new THREE.Fog(0xc5dceb, 2800, 8200);
 const environment = new RoomEnvironment(), pmrem = new THREE.PMREMGenerator(renderer);
 scene.environment = pmrem.fromScene(environment, 0.04).texture;
 environment.dispose(); pmrem.dispose(); // 金属/琉璃反射用
-scene.environmentIntensity = 0.7;
+scene.environmentIntensity = 0.45;
 
 const camera = new THREE.PerspectiveCamera(48, innerWidth / innerHeight, 1, 30000);
 camera.position.set(-145, 42, 1180); // 入场更近、更低，从漓江一侧看见象鼻山和水月洞
 
 const controls = new OrbitControls(camera, renderer.domElement);
-controls.enableDamping = true;
-controls.dampingFactor = 0.18; // 更大阻尼：缩放/拖动松手后更快停下，少跑几帧重渲染
-controls.maxPolarAngle = Math.PI * 0.49;
+const gestures = installMapGestures(controls, renderer.domElement);
+controls.maxPolarAngle = Math.PI * .475;
 controls.minDistance = 25;
-controls.maxDistance = 9000;
-controls.enableZoom = false; // 自管缩放：朝光标下的地面/地标推进（见后文 zoomToward）
-controls.zoomSpeed = 1.0;
+controls.maxDistance = 12000;
 controls.autoRotateSpeed = 0.35; // Google Earth 式慢转
 controls.target.set(-180, 20, 1420); // 对准象山临江侧
 // 自动转圈：由开关开启；拖动时停，松手 6 s 后续转；飞行动画期间不转。每帧回写，避免夜景切换/其它逻辑把 autoRotate 掐死后不转。
@@ -77,7 +87,7 @@ function spinResume() {
   if (reduceMotion) return;
   spinTimer = setTimeout(() => { if (spin && !fly) { controls.autoRotate = true; invalidate(); } }, 6000);
 }
-controls.addEventListener('start', () => { spinningDrag = true; controls.autoRotate = false; clearTimeout(spinTimer); });
+controls.addEventListener('start', () => { fly = null; spinningDrag = true; controls.autoRotate = false; clearTimeout(spinTimer); });
 controls.addEventListener('end', () => { spinningDrag = false; spinResume(); });
 
 const hemi = new THREE.HemisphereLight(0xe8f1ff, 0x8a9278, 0.75);
@@ -87,14 +97,14 @@ sun.position.set(1400, 2600, 2200);
 sun.castShadow = true;
 sun.shadow.mapSize.set(2048,2048);
 Object.assign(sun.shadow.camera, { left: -1600, right: 1600, top: 1700, bottom: -1700, near: 500, far: 7000 });
-sun.shadow.bias = -0.0004;
-sun.shadow.normalBias = 0.6;
+sun.shadow.bias = -0.00001;
+sun.shadow.normalBias = 0.035; // close-view joinery needs contact shadows at centimetre scale
 scene.add(sun, sun.target);
 const shadowFocus = new THREE.Vector3(-150,0,1400);
 function focusShadows(target,span=350) {
   const delta=target.clone().sub(shadowFocus);sun.position.add(delta);shadowFocus.copy(target);
   sun.target.position.copy(target);sun.target.updateMatrixWorld();
-  const r=THREE.MathUtils.clamp(span*.9,90,1700),c=sun.shadow.camera;
+  const r=THREE.MathUtils.clamp(span*.9,40,1700),c=sun.shadow.camera;
   Object.assign(c,{left:-r,right:r,top:r,bottom:-r});c.updateProjectionMatrix();invalidate(true);
 }
 focusShadows(shadowFocus);
@@ -127,7 +137,7 @@ const water = new THREE.Mesh(mergeGeometries(WATER.map((p) => flatRing(p.o, p.h,
 water.receiveShadow = true;
 scene.add(water);
 const atmosphere = createAtmosphere(waterMat); scene.add(atmosphere.sky);
-const riverReflection = createRiverReflection(water.geometry,{mobile:isMobile}); scene.add(riverReflection.water); water.visible=false;
+const riverReflection = createRiverReflection(water.geometry,{mobile:isMobile}); scene.add(riverReflection.water); riverReflection.setQuality('flow'); water.visible=true;
 // 流畅档水面也跟随日夜色彩。
 waterMat.userData.dayColor = waterMat.color.clone();
 const waterNight = new THREE.Color(0x0a1812), waterEm = new THREE.Color(0x1a4030);
@@ -184,43 +194,26 @@ const onHill = (x, z) => hillRings.some((r) => pointInRing(x, z, r)) || Math.hyp
 const palette = [0xe2d8c8, 0xd5cfc0, 0xd0d2cc, 0xddd4c4, 0xc8ccd2, 0xe0d6c6].map((c) => new THREE.Color(c));
 // 实景航拍：市区楼顶多为灰色，王城内师大校舍黄墙灰瓦——屋顶压暗，地标铜/琉璃才跳出来
 const cityRoof = new THREE.Color(0x7a7e7c), campusWall = new THREE.Color(0xe4c46c), campusRoof = new THREE.Color(0x4a5056);
-// 夜景窗灯：暖黄 / 冷白 / 暗墙 / 暗顶（顶点色伪窗，不用成千上万 PointLight）
-const winWarm = new THREE.Color(0xffc978), winCool = new THREE.Color(0xc8daf8), wallDark = new THREE.Color(0x141820), roofDark = new THREE.Color(0x0c0e12);
 const bGeos = [],cityCells=new Map();
 BUILDINGS.forEach((b, i) => {
   const bb = ringBBox(b.o), cx = (bb.x0 + bb.x1) / 2, cz = (bb.z0 + bb.z1) / 2;
-  if (onHill(cx, cz) || modelled.some(([x, z]) => Math.hypot(x - cx, z - cz) < 28)) return;
+  if (parkBuildingOwner(b.o) || onHill(cx, cz) || modelled.some(([x, z]) => Math.hypot(x - cx, z - cz) < 28)) return;
   const g = extrudeRing(b.o, b.h);cityUV(g);
   const inWangcheng = pointInRing(cx, cz, FOOT.wangcheng.o);
   const c = inWangcheng ? campusWall : palette[Math.floor(hash(i) * palette.length)], n = g.attributes.position.count;
-  const day = new Float32Array(n * 3), night = new Float32Array(n * 3);
-  const pos = g.attributes.position, roof = inWangcheng ? campusRoof : cityRoof;
-  // 整楼有一定概率大部分灭灯（空楼），其余楼按层随机亮窗
-  const occupied = hash(`occ${i}`) > 0.18;
-  for (let k = 0; k < n; k++) {
-    const y = pos.getY(k), isRoof = y >= b.h - 0.05;
-    const dv = isRoof ? roof : c;
-    day.set([dv.r, dv.g, dv.b], k * 3);
-    let nv = isRoof ? roofDark : wallDark;
-    if (!isRoof && occupied && y > 1.2) {
-      const floor = Math.floor(y / 3.2);
-      const lit = hash(`w${i}f${floor}x${pos.getX(k).toFixed(0)}z${pos.getZ(k).toFixed(0)}`) > 0.42;
-      if (lit) nv = hash(`t${i}f${floor}`) > 0.72 ? winCool : winWarm;
-    }
-    night.set([nv.r, nv.g, nv.b], k * 3);
-  }
-  g.setAttribute('color', new THREE.BufferAttribute(day, 3));
-  g.setAttribute('colorDay', new THREE.BufferAttribute(day.slice(), 3));
-  g.setAttribute('colorNight', new THREE.BufferAttribute(night, 3));
+  const day = new Float32Array(n * 3),normal=g.attributes.normal;
+  const roof = inWangcheng ? campusRoof : cityRoof;
+  for (let k=0;k<n;k++){const dv=normal.getY(k)>.5?roof:c;day.set([dv.r,dv.g,dv.b],k*3);}
+  g.setAttribute('color',new THREE.BufferAttribute(day,3));
   const cell=Math.floor(cx/250)+":"+Math.floor(cz/250);if(!cityCells.has(cell))cityCells.set(cell,[]);cityCells.get(cell).push(g);
   bGeos.push(g);
 });
 const cityGroup = new THREE.Group();
+const parkFallbacks=createParkFallbacks();cityGroup.add(parkFallbacks.root);
+const landmarkLighting=createLandmarkLighting(scene);
 const cityMat = createCityMaterial(); // 立面窗格与屋顶分别着色
-let cityMesh = null;
 if (bGeos.length) {
   for(const geos of cityCells.values()){const mesh=shadowed(new THREE.Mesh(mergeGeometries(geos),cityMat));cityGroup.add(mesh);geos.forEach(g=>g.dispose());}
-  cityMesh=cityGroup.children[0];
 }
 
 // ---- 地标：逐个手工模型 ----
@@ -239,6 +232,7 @@ const models = {
 
 // 树：绿地内按面积撒点；山体上按坡度撒（缓坡长树、陡壁露岩）
 let crownMat;
+const urbanTreeGroups=[];
 {
   const pts = [];
   GREEN.forEach((p, pi) => {
@@ -285,48 +279,12 @@ let crownMat;
       pts.push([jx, jz, y - 0.8, (hi===0?2.5:1.7) + hash(`h${hi}${x}${z}s`) * 1.3]); // 山顶乔木冠幅 7–10 m
     }
   });
-  // 树冠：主瓣抖动二十面体；树干细圆柱（不投影）——没有树干会像漂浮绿球
-  const lobe = (r, dx, dy, dz, seed, detail = 1) => {
-    const g = new THREE.IcosahedronGeometry(r, detail), p = g.attributes.position;
-    for (let i = 0; i < p.count; i++) { // 按位置取随机数：二十面体顶点重复，同位同抖动才不裂
-      const k = 0.82 + hash(`${seed}${p.getX(i).toFixed(3)}${p.getY(i).toFixed(3)}${p.getZ(i).toFixed(3)}`) * 0.36;
-      p.setXYZ(i, p.getX(i) * k + dx, p.getY(i) * k * 0.78 + dy, p.getZ(i) * k + dz);
-    }
-    return g;
-  };
-  const crownG = mergeGeometries([lobe(.8,0,.08,0,'a',0),lobe(.65,.42,-.12,.16,'b',0),lobe(.62,-.35,-.15,-.22,'c',0)]); // 三簇低面树冠 → 60 面/棵
-  crownG.computeVertexNormals();
-  crownMat = new THREE.MeshLambertMaterial({ flatShading: false });
-  const trunkG = new THREE.CylinderGeometry(0.22, 0.3, 1, 5);
-  const m4 = new THREE.Matrix4(), c = new THREE.Color(), greens = [0x3d6d33, 0x4f8240, 0x2f5a2a, 0x6a9a4a, 0x587f38, 0x7fa653];
-  const q = new THREE.Quaternion(), s3 = new THREE.Vector3(), p3 = new THREE.Vector3(), up = new THREE.Vector3(0, 1, 0);
-  // 按 300 m 方格分块实例化：贴近看某个地标时视锥外的块整块剔除
-  const heroTrees=pts.filter(([x,z])=>x>-310&&x<650&&z>80&&z<1530).sort((a,b)=>Math.min(Math.hypot(a[0]+185,a[1]-1430),Math.hypot(a[0]-1,a[1]-529))-Math.min(Math.hypot(b[0]+185,b[1]-1430),Math.hypot(b[0]-1,b[1]-529))).slice(0,240);
-  const heroSet=new Set(heroTrees);
-  const CH = 300, chunks = new Map();
-  pts.forEach((p, i) => { const k = `${Math.floor(p[0] / CH)},${Math.floor(p[1] / CH)}`; (chunks.get(k) ?? chunks.set(k, []).get(k)).push(i); });
-  for (const ids of chunks.values()) {
-    const crowns = new THREE.InstancedMesh(crownG, crownMat, ids.length), trunks = new THREE.InstancedMesh(trunkG, M.trunk, ids.length);
-    ids.forEach((i, j) => {
-      const [x, z, y0, r] = pts[i];
-      q.setFromAxisAngle(up, hash(`r${i}`) * Math.PI * 2);
-      s3.set(r * (0.9 + hash(`sx${i}`) * 0.3), r * (0.8 + hash(`sy${i}`) * 0.3), r * (0.9 + hash(`sz${i}`) * 0.3));
-      if(heroSet.has(pts[i]))s3.multiplyScalar(.42);
-      p3.set(x, y0 + r * 1.05 + 1.2, z);
-      m4.compose(p3, q, s3); crowns.setMatrixAt(j, m4);
-      c.setHex(greens[Math.floor(hash(`c${i}`) * greens.length)]).offsetHSL(0, 0, (hash(`l${i}`) - 0.5) * 0.08); crowns.setColorAt(j, c);
-      m4.makeScale(1, r * 0.9 + 1, 1); m4.setPosition(x, y0 + (r * 0.9 + 1) / 2, z); trunks.setMatrixAt(j, m4);
-    });
-    crowns.castShadow = false; trunks.castShadow = false;
-    crowns.computeBoundingSphere(); trunks.computeBoundingSphere();
-    cityGroup.add(crowns, trunks);
-  }
-
-  const leafCanopies=createLeafyTrees(heroTrees,TEX);cityGroup.add(leafCanopies);
+  createUrbanTrees(pts.map(([x,z,y,r],i)=>[x,z,y,r*.85,i%4?'camphor':'banyan'])).then(group=>{cityGroup.add(group);urbanTreeGroups.push(group);invalidate();}).catch(e=>console.warn('Urban trees',e));
   window.__treeCount = pts.length;
 }
 scene.add(cityGroup);
 
+Object.assign(models,createExpandedModels(M));
 const pickables = [];
 const landmarkGroup = new THREE.Group();
 for (const lm of LANDMARKS) {
@@ -349,7 +307,7 @@ scene.add(landmarkGroup);
 const waterfront = createWaterfront(TEX), cruises = createCruises();
 const heritage = createHeritageStreets(TEX), streetDistrict=createStreetDistrict();
 scene.add(waterfront.group, cruises.group, shadowed(heritage.group),streetDistrict.group);
-let boatMotion = !reduceMotion;
+let boatMotion = false;
 
 // ---- 标签 ----
 const labels = { main: [], lake: [] };
@@ -369,23 +327,13 @@ for (const lm of LANDMARKS) {
 }
 
 // ---- 侧栏列表 / 简介卡片 / 飞行 ----
-const kindMark = { hill: '山', pagoda: '塔', building: '阁', bridge: '桥', street: '路', river: '舟', lake: '湖', poi: '点' };
-const list = document.getElementById('list');
 const card = document.getElementById('card');
 const cardPhoto = document.getElementById('card-photo');
 const cardPhotoImage = cardPhoto.querySelector('img');
 const cardPhotoCaption = cardPhoto.querySelector('figcaption');
 let cardPhotoRequest = 0;
 const [cx0, cz0] = toXZ(25.2836, 110.2949); // 独秀峰，用于显示到市中心距离
-for (const lm of LANDMARKS) {
-  const li = document.createElement('li');
-  li.dataset.id = lm.id; li.tabIndex = 0; li.setAttribute('role', 'button'); li.setAttribute('aria-label', lm.name);
-  li.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); select(lm); } });
-  const dist = Math.hypot(lm.x - cx0, lm.z - cz0);
-  li.innerHTML = `<span class="k">${kindMark[lm.kind]}</span><span>${lm.name}</span><span class="m">${dist < 950 ? Math.round(dist) + ' m' : (dist / 1000).toFixed(1) + ' km'}</span>`;
-  li.addEventListener('click', () => select(lm));
-  list.appendChild(li);
-}
+const list=installPlaceList({landmarks:LANDMARKS,onSelect:lm=>select(lm),distance:lm=>Math.hypot(lm.x-cx0,lm.z-cz0)});
 document.getElementById('card-close').addEventListener('click', () => { card.hidden = true; setActive(null); });
 
 function updateCardPhoto(lm) {
@@ -400,7 +348,8 @@ function updateCardPhoto(lm) {
 
   cardPhotoImage.dataset.loading = 'true';
   cardPhotoImage.alt = photo.alt || `${lm.name}实拍`;
-  cardPhotoCaption.textContent = photo.caption || '多美实拍';
+  cardPhotoCaption.textContent = photo.caption || '桂林实景';
+  if(photo.source){const credit=document.createElement('a');credit.href=photo.source;credit.target='_blank';credit.rel='noopener noreferrer';credit.textContent='来源：'+photo.credit;cardPhotoCaption.append(document.createElement('br'),credit);}
   cardPhotoImage.onload = () => {
     if (request === cardPhotoRequest) delete cardPhotoImage.dataset.loading;
   };
@@ -417,61 +366,77 @@ function updateCardPhoto(lm) {
 // ---- 细节 LOD：选中地标时按需加载 src/detail/<id>.js 的精模；加载后按相机距离在简模/精模间切换（关简介不再回退，避免模型"变来变去"） ----
 const detailGroup = new THREE.Group();
 scene.add(detailGroup);
-const detail = { cache: {}, loading: new Set() };
+const detail = { cache: {} };
 const LOD_DIST = isMobile ? 800 : 1100;
-async function showDetail(lm) {
-  const load = DETAIL[lm.id];
-  if (!load || detail.cache[lm.id] || detail.loading.has(lm.id)) return;
-  detail.loading.add(lm.id);
-  let mod;
-  try { mod = await load(); } catch (err) { console.warn('detail load failed', lm.id, err); detail.loading.delete(lm.id); return; }
-  let obj;
-  try {
-    obj = mod.build({ THREE, F: FOOT, M, TEX, lm, night: () => night });
-  } catch (err) { detail.loading.delete(lm.id); console.warn('Detail build failed', lm.id, err); return; }
-  obj.userData.mode = mod.mode ?? 'replace';
-  obj.userData.night = mod.night;
-  obj.userData.lm = lm;
-  obj.userData.lights = [];
-  mergeStatic(obj);
-  shadowed(obj, true, true); // 合批后的近景模型投射细节阴影
-  obj.traverse((o) => { if (o.isMesh) { o.userData.lm = lm; pickables.push(o); } if (o.isLight) obj.userData.lights.push(o); });
-  obj.userData.night?.(obj, detailNightOn);
-  // Compile before insertion; switching back reuses the model and program.
-  try { await renderer.compileAsync(obj, camera, scene); } catch (err) { console.warn('Detail shader warmup', err); }
-  obj.userData.night?.(obj, detailNightOn);
-  obj.visible=false;
-  detailGroup.add(obj);
-  detail.cache[lm.id] = obj;
-  detail.loading.delete(lm.id);
-  invalidate(); // 阴影图等全部精模加载完再统一刷一次，避免每加载一个就重扫一遍
+const idle = () => new Promise(resolve => 'requestIdleCallback' in window ? requestIdleCallback(resolve,{timeout:900}) : setTimeout(resolve,25));
+async function buildDetail(id, stillWanted) {
+  const lm=LANDMARKS.find(l=>l.id===id), mod=await DETAIL[id]();
+  await idle();
+  if (!stillWanted() || gestures.active || spinningDrag || fly || document.hidden) return null;
+  const obj=mod.build({THREE,F:FOOT,M,TEX,lm,night:()=>night});
+  Object.assign(obj.userData,{mode:mod.mode??'replace',night:mod.night,lm,lights:[],nearMeshes:[]});
+  mergeStatic(obj);shadowed(obj,true,true);
+  obj.traverse(o=>{if(o.isMesh){o.userData.lm=lm;pickables.push(o);if(o.userData.nearDetail)obj.userData.nearMeshes.push(o);}if(o.isLight)obj.userData.lights.push(o);});
+  obj.userData.nearDetailVisible=true;
+  obj.userData.night?.(obj,detailNightOn);
+  try {await renderer.compileAsync(obj,camera,scene);} catch(error){console.warn('Detail shader warmup',error);}
+  obj.visible=false;detailGroup.add(obj);detail.cache[id]=obj;invalidate(true);return obj;
 }
-// 精模由上千个小 Mesh 拼成，逐个 draw call 太贵（9 处精模 ≈1800 次）：同材质、同属性布局、同阴影标志的叶子 Mesh 合并成一个
-const _lmPos = new THREE.Vector3();
-// 游戏式 LOD：远距离回退简模；动态灯同屏最多一处（Point/Spot 越多重算越贵，自发光材质扛夜景）
-function updateLod() {
-  let best = null, bestD = Infinity;
-  for (const obj of Object.values(detail.cache)) {
-    const lm = obj.userData.lm;
-    const d = camera.position.distanceTo(_lmPos.set(lm.x, 0, lm.z));
-    const enter = Math.max(isMobile ? 380 : 580, (lm.span || 400) * 1.3);
-    const show = d < enter * (obj.visible ? 1.15 : 1);
-    if (obj.visible !== show) { obj.visible = show; invalidate(true); }
-    if (obj.userData.mode === 'replace' && models[lm.id]) models[lm.id].visible = !show;
-    for (const l of obj.userData.lights) l.visible = false;
-    if (night && show && d < Math.max(LOD_DIST, (lm.span || 400) * 1.5) && d < bestD) { bestD = d; best = obj; }
-  }
-  if (best) for (const l of best.userData.lights) l.visible = true;
-}
-// 首帧后逐个后台加载全部精模（不再只在点开后显示）
-async function preloadDetails() {
-  await new Promise((r) => setTimeout(r, 400));
-  for (const lm of LANDMARKS) if (DETAIL[lm.id]) {
-    while (fly || spinningDrag || document.hidden) await new Promise(r => setTimeout(r, 250));
-    await new Promise(r => 'requestIdleCallback' in window ? requestIdleCallback(r, { timeout: 1200 }) : setTimeout(r, 90));
-    await showDetail(lm);
-  }
+function releaseDetail(id,obj) {
+  const removed=new Set();obj.traverse(o=>removed.add(o));
+  obj.removeFromParent();delete detail.cache[id];
+  if(models[id])models[id].visible=true;
+  for(let i=pickables.length-1;i>=0;i--)if(removed.has(pickables[i]))pickables.splice(i,1);
+  const retainedG=new Set(),retainedM=new Set(Object.values(M));
+  // Shared material packs survive eviction; instance/geometry buffers do not.
+  for(const m of Object.values(kitMats(TEX)))retainedM.add(m);
+  for(const m of Object.values(heritageMaterials(TEX)))retainedM.add(m);
+  scene.traverse(o=>{if(o.geometry)retainedG.add(o.geometry);if(o.material)for(const m of [].concat(o.material))retainedM.add(m);});
+  const retainedT=new Set(),collect=v=>{if(v?.isTexture)retainedT.add(v);else if(v&&typeof v==='object')for(const t of Object.values(v))if(t?.isTexture)retainedT.add(t);};
+  for(const v of Object.values(TEX))collect(v);
+  for(const m of retainedM)if(m)for(const v of Object.values(m))if(v?.isTexture)retainedT.add(v);
+  const geos=new Set(),mats=new Set(),textures=new Set();
+  obj.traverse(o=>{if(o.geometry)geos.add(o.geometry);if(o.isInstancedMesh)o.dispose();if(o.material)for(const m of [].concat(o.material))mats.add(m);});
+  for(const g of geos)if(!retainedG.has(g))g.dispose();
+  for(const m of mats)if(!retainedM.has(m)){for(const v of Object.values(m))if(v?.isTexture&&!retainedT.has(v))textures.add(v);m.dispose();}
+  for(const t of textures)t.dispose();
   invalidate(true);
+}
+const stream=new DetailStream({load:buildDetail,dispose:releaseDetail,limit:isMobile?3:6,paused:()=>gestures.active||spinningDrag||!!fly||document.hidden});
+const sectors=createSectorStream({scene,materials:{water:waterMat,green:new THREE.MeshStandardMaterial({color:0x8da773,roughness:1}),road:new THREE.MeshStandardMaterial({color:0xa8a49b,roughness:1,side:THREE.DoubleSide}),building:cityMat},invalidate,paused:()=>gestures.active||spinningDrag||!!fly||document.hidden,mobile:()=>isMobile,visibility:()=>({road:document.getElementById('t-roads').checked,building:document.getElementById('t-city').checked})});
+const blenderModels=installBlenderModels({onRegions:parkFallbacks.update,scene,camera,landmarks:LANDMARKS,models,detail,pickables,invalidate,paused:()=>gestures.active||spinningDrag||!!fly||document.hidden,mobile:()=>isMobile});
+document.getElementById('model-version').addEventListener('change',e=>{blenderModels.setEnabled(e.target.value==='blender');for(const o of Object.values(models))o.visible=true;nextStreamCheck=0;invalidate(true);});
+let nextStreamCheck=0;
+function requestNearbyDetails(now=performance.now()) {
+  if(now<nextStreamCheck)return;
+  nextStreamCheck=now+350;
+  sectors.update(camera,activeLandmark);
+  landmarkLighting.focus(activeLandmark);
+  blenderModels.update(activeLandmark);
+  stream.limit=isMobile?3:6;
+  const candidates=LANDMARKS.filter(l=>DETAIL[l.id]&&(!blenderModels.enabled||!blenderModels.supports(l.id))).map(l=>({l,d:camera.position.distanceTo(new THREE.Vector3(l.x,(l.h||0)*.3,l.z))}));
+  const wanted=candidates.filter(({l,d})=>d<Math.min(isMobile?850:1250,Math.max(260,(l.span||400)*1.35)))
+    .sort((a,b)=>(a.l===activeLandmark?-10000:a.d)-(b.l===activeLandmark?-10000:b.d)).slice(0,isMobile?2:3).map(x=>x.l.id);
+  stream.update(wanted);
+}
+function showDetail(){nextStreamCheck=0;invalidate();}
+const _lmPos = new THREE.Vector3();
+function updateLod() {
+  for(const obj of Object.values(models))obj.visible=true;
+  let best=null,bestD=Infinity;
+  for(const obj of Object.values(detail.cache)) {
+    const lm=obj.userData.lm,d=camera.position.distanceTo(_lmPos.set(lm.x,0,lm.z));
+    const enter=Math.min(isMobile?850:1250,Math.max(260,(lm.span||400)*1.35));
+    const show=stream.wanted.includes(lm.id)&&d<enter*(obj.visible?1.15:1);
+    if(obj.visible!==show){obj.visible=show;invalidate(true);}
+    if(obj.userData.mode==='replace'&&models[lm.id])models[lm.id].visible=!show;
+    const near=show&&d<(isMobile?125:180)*(obj.userData.nearDetailVisible?1.15:1);
+    if(near!==obj.userData.nearDetailVisible){obj.userData.nearDetailVisible=near;for(const m of obj.userData.nearMeshes)m.visible=near;if(obj.userData.nearMeshes.length)invalidate(true);}
+    for(const l of obj.userData.lights)l.visible=false;
+    if(effects.lights&&night&&show&&d<LOD_DIST&&d<bestD){best=obj;bestD=d;}
+  }
+  if(best)for(const l of best.userData.lights)l.visible=true;
+  blenderModels.applyVisibility();
 }
 
 // ---- 夜景：参考 techartist home-sweet-home —— modeCur 向 modeTarget 指数逼近，灯光/雾色/自发光按 m 插值，不是硬切 ----
@@ -480,14 +445,13 @@ let modeTarget = 0, modeCur = 0, detailNightOn = false;
 const C = (h) => new THREE.Color(h);
 const dayFog = 0xc5dceb, nightFog = 0x0d1830;
 const dayBg = C(dayFog), nightBg = C(nightFog);
-const hemiSkyL = C(0xe8f1ff), hemiSkyD = C(0x223a66);
-const hemiGndL = C(0x8a9278), hemiGndD = C(0x090a10);
+const hemiSkyL = C(0xe8f1ff), hemiSkyD = C(0x7b98c5);
+const hemiGndL = C(0x8a9278), hemiGndD = C(0x28374a);
 const sunDay = C(0xfff1d0), sunNight = C(0x93a9d6);
-const groundDay = C(0xcfc6b6), groundNight = C(0x1a1c22);
-const greenDay = C(0x7fa85e), greenNight = C(0x18241a);
+const groundDay = C(0xaeb4aa), groundNight = C(0x8998a7);
+const greenDay = C(0x658259), greenNight = C(0x547565);
 const crownDay = C(0xffffff), crownNight = C(0x2e3d30);
-const cityDay = C(0xffffff), cityNight = C(0xf2ebe0); // 夜景靠顶点窗灯，材质色别压暗
-const cityEm = C(0xffb060);
+const cityDay = C(0xffffff), cityNight = C(0xf2ebe0);
 const sunDayPos = new THREE.Vector3(1400, 2600, 2200), sunNightPos = new THREE.Vector3(-900, 420, -1600);
 // 地标自发光与水面倒影共同表现夜景；流畅档可关闭反射。
 const stars = (() => {
@@ -515,62 +479,57 @@ const glow = [
 for (const [mat, hex] of glow) { mat.emissive.setHex(hex); mat.emissiveIntensity = 0; if (mat.map) mat.emissiveMap = mat.map; }
 for (const m of HILL_MATS) { m.emissive.setHex(0x8a8f78); m.emissiveIntensity = 0; if (m.map) m.emissiveMap = m.map; }
 
-const roadNight = C(0x1c1e24), roadEm = C(0xffc070);
-function mixCityNight(m) {
-  if (!cityMesh) return;
-  for(const mesh of cityGroup.children){
-  if(!mesh.geometry?.attributes.colorDay)continue;
-  const g = mesh.geometry, day = g.attributes.colorDay, night = g.attributes.colorNight, out = g.attributes.color;
-  if (!day || !night || !out) continue;
-  const d = day.array, n = night.array, o = out.array;
-  for (let i = 0; i < o.length; i++) o[i] = d[i] + (n[i] - d[i]) * m;
-  out.needsUpdate = true;
-  }
-}
+const roadNight = C(0x596571);
+let shadowMode = -1;
 function applyMode(m) {
+  const lighting=effects.lights?m:0;
   scene.background.copy(dayBg).lerp(nightBg, m);
   scene.fog.color.copy(dayBg).lerp(nightBg, m);
-  scene.environmentIntensity = THREE.MathUtils.lerp(0.7, 0.18, m);
+  scene.fog.near=THREE.MathUtils.lerp(2200,1100,m);scene.fog.far=THREE.MathUtils.lerp(7200,4700,m);
+  scene.environmentIntensity = THREE.MathUtils.lerp(0.45, 0.28, m);
   hemi.color.copy(hemiSkyL).lerp(hemiSkyD, m);
   hemi.groundColor.copy(hemiGndL).lerp(hemiGndD, m);
   // 夜景天光略抬：整城窗灯要靠环境光托起来，别只剩地标亮
-  hemi.intensity = THREE.MathUtils.lerp(0.75, 0.42, m);
+  hemi.intensity = THREE.MathUtils.lerp(0.95, 0.72, m);
   sun.color.copy(sunDay).lerp(sunNight, m);
-  sun.intensity = THREE.MathUtils.lerp(2.55, 0.22, m);
+  sun.intensity = THREE.MathUtils.lerp(2.25, 0.38, m);
   sun.position.lerpVectors(sunDayPos, sunNightPos, m).add(shadowFocus);
   // 夜景关实时阴影：自发光已经够轮廓，少一次全场景 shadow pass
-  const wantShadow = m < 0.45;
+  const wantShadow = effects.shadows && m < 0.45;
   if (sun.castShadow !== wantShadow) {
     sun.castShadow = wantShadow;
     renderer.shadowMap.enabled = wantShadow;
     if (wantShadow) renderer.shadowMap.needsUpdate = true;
   }
+  if (wantShadow && m !== shadowMode) renderer.shadowMap.needsUpdate = true;
+  shadowMode = m;
   renderer.toneMappingExposure = THREE.MathUtils.lerp(1.12, 1.05, m);
   ground.material.color.copy(groundDay).lerp(groundNight, m);
   greenMat.color.copy(greenDay).lerp(greenNight, m);
   if (crownMat) crownMat.color.copy(crownDay).lerp(crownNight, m);
   cityMat.color.copy(cityDay).lerp(cityNight, m);
-  cityMat.emissive.copy(cityEm); cityMat.emissiveIntensity = 1.3 * m; // 窗灯暖底，主亮靠顶点色
-  mixCityNight(m);
+  cityMat.userData.setNight(lighting);
   for (const mesh of roadGroup.children) {
     mesh.material.color.setHex(mesh.material.userData.day).lerp(roadNight, m);
-    mesh.material.emissive.copy(roadEm); mesh.material.emissiveIntensity = 1.4 * m; // 路灯感
+    mesh.material.emissiveIntensity = 0;
   }
-  for (const [mat, , k] of glow) mat.emissiveIntensity = k * m;
-  for (const hm of HILL_MATS) hm.emissiveIntensity = 0.35 * m;
+  for (const [mat, , k] of glow) mat.emissiveIntensity = k * lighting;
+  for (const hm of HILL_MATS) hm.emissiveIntensity = 0.35 * lighting;
   stars.material.opacity = Math.max(0, (m - 0.25) / 0.75);
   // 水面只改材质，不换倒影网格
   waterMat.color.copy(waterMat.userData.dayColor).lerp(waterNight, m);
   waterMat.roughness = THREE.MathUtils.lerp(0.14, 0.12, m);
   waterMat.metalness = THREE.MathUtils.lerp(0.22, 0.45, m);
   waterMat.emissive.copy(waterEm); waterMat.emissiveIntensity = 0.22 * m;
-  waterfront.setNight(m); cruises.setNight(m); heritage.setNight(m); streetDistrict.setNight(m); atmosphere.setNight(m); riverReflection.setNight(m,sun.position.clone().sub(shadowFocus));
+  waterfront.setNight(lighting); cruises.setNight(lighting); heritage.setNight(lighting); streetDistrict.setNight(lighting); atmosphere.setNight(m); riverReflection.setNight(m,sun.position.clone().sub(shadowFocus));
+  blenderModels.setNight(effects.lights?m:0);
+  landmarkLighting.setNight(lighting);
   night = m > 0.5;
   // 精模自发光/灯：越过阈值时切一次；灯光强度持续跟 m
-  if (m > 0.18 && !detailNightOn) {
+  if (lighting > 0.18 && !detailNightOn) {
     detailNightOn = true;
     for (const o of Object.values(detail.cache)) o.userData.night?.(o, true);
-  } else if (m < 0.12 && detailNightOn) {
+  } else if (lighting < 0.12 && detailNightOn) {
     detailNightOn = false;
     for (const o of Object.values(detail.cache)) o.userData.night?.(o, false);
   }
@@ -633,7 +592,7 @@ function flyTo(target, dist, instant = false, view) {
 }
 window.__gl = { renderer, scene, camera, controls, select, LANDMARKS, THREE, setNight: (v) => { setNight(!!v); }, detail }; // 调试/自动截图用
 
-const tourIds=['xiangbishan','binjianglu','jiefangqiao','binjianglights','xiaoyaolou','dongxixiang','wangchengtrees','zhengyangjie','zhengyangclock','rita','yueta','wangcheng','fuboshan','diecaishan'];
+const tourIds=LANDMARKS.map(l=>l.id);
 let tourOn=false,tourClock=0;
 function advanceTour(step=1){
   const i=tourIds.indexOf(activeLandmark?.id), next=(i+step+tourIds.length)%tourIds.length;
@@ -642,12 +601,12 @@ function advanceTour(step=1){
 document.getElementById('tour-prev').addEventListener('click',()=>advanceTour(-1));
 document.getElementById('tour-next').addEventListener('click',()=>advanceTour(1));
 document.getElementById('tour-play').addEventListener('click',e=>{
-  tourOn=!tourOn;tourClock=0;e.currentTarget.textContent=tourOn?'暂停导览':'沿江导览';e.currentTarget.setAttribute('aria-pressed',String(tourOn));
+  tourOn=!tourOn;tourClock=0;e.currentTarget.textContent=tourOn?'暂停导览':'城中导览';e.currentTarget.setAttribute('aria-pressed',String(tourOn));
   if(tourOn&&!activeLandmark)select(LANDMARKS[0]);
 });
 
 walk=createStreetWalk({camera,controls,canvas:renderer.domElement,collision:streetDistrict.collision,
- onEnter:()=>{fly=null;tourOn=false;document.getElementById('tour-play').textContent='沿江导览';document.getElementById('tour-play').setAttribute('aria-pressed','false');card.hidden=true;setPanelCollapsed(true);focusShadows(camera.position,120);invalidate(true);},
+ onEnter:()=>{fly=null;tourOn=false;document.getElementById('tour-play').textContent='城中导览';document.getElementById('tour-play').setAttribute('aria-pressed','false');card.hidden=true;setPanelCollapsed(true);focusShadows(camera.position,120);invalidate(true);},
  onExit:()=>{focusShadows(controls.target,activeLandmark?.span||350);invalidate(true);},
  onMove:()=>{if(camera.position.distanceTo(shadowFocus)>45)focusShadows(camera.position,120);invalidate();}
 });
@@ -694,7 +653,13 @@ function pick(e){
 // ---- 开关 / 罗盘 ----
 const bind = (id, fn) => { const el = document.getElementById(id); el.addEventListener('change', () => { fn(el.checked); invalidate(true); }); fn(el.checked); };
 bind('t-roads', (v) => { roadGroup.visible = v; waterfront.group.visible = v; });
-document.getElementById('quality').addEventListener('change',e=>{quality=e.target.value;renderer.setPixelRatio(qualityDpr());riverReflection.setQuality(quality);water.visible=quality==='flow';invalidate(true);});
+document.getElementById('quality').value=quality;
+document.getElementById('quality').addEventListener('change',e=>{quality=e.target.value;renderer.setPixelRatio(qualityDpr());invalidate(true);});
+bind('t-reflection',v=>{effects.reflection=v;riverReflection.setQuality(v?'balanced':'flow');water.visible=!v;});
+bind('t-shadows',v=>{effects.shadows=v;applyMode(modeCur);});
+bind('t-ripples',v=>{effects.ripples=v&&!reduceMotion;});
+bind('t-leaves',v=>setTreeDetail(v));
+bind('t-lighting',v=>{effects.lights=v;applyMode(modeCur);});
 bind('t-boats', v => { boatMotion = v && !reduceMotion; });
 bind('t-labels', (v) => { for (const o of [...labels.main, ...labels.lake]) o.element.classList.toggle('hidden', !v); });
 bind('t-city', (v) => { cityGroup.visible = v; streetDistrict.group.visible=v; });
@@ -703,6 +668,7 @@ bind('t-grid', (v) => { grid.visible = v; });
   const btn = document.getElementById('t-night');
   btn.addEventListener('click', () => setNight(modeTarget < 0.5));
   addEventListener('keydown', (e) => {
+    if (e.target.closest?.('input,textarea,select,[contenteditable]')) return;
     if (e.key === 'l' || e.key === 'L') { if (!e.metaKey && !e.ctrlKey) setNight(modeTarget < 0.5); }
   });
 }
@@ -722,60 +688,6 @@ document.getElementById('compass').addEventListener('click', () => {
   fly = { t: 0, p0: camera.position.clone(), p1: new THREE.Vector3(controls.target.x, camera.position.y, controls.target.z + r), c0: controls.target.clone(), c1: controls.target.clone() };
 });
 
-// Google Earth 式缩放：朝光标下的落点推进镜头和视点（放大 = 往那边飞近；缩小 = 后退）
-{
-  const ray = new THREE.Raycaster(), ndc = new THREE.Vector2(), hit = new THREE.Vector3();
-  const plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
-  const focusUnder = (clientX, clientY) => {
-    const r = renderer.domElement.getBoundingClientRect();
-    ndc.set(((clientX - r.left) / r.width) * 2 - 1, -((clientY - r.top) / r.height) * 2 + 1);
-    ray.setFromCamera(ndc, camera);
-    // Ground ray is O(1); never scan the city and thousands of tree instances per wheel event.
-    const hits = activeLandmark ? ray.intersectObjects(pickables.filter(o => o.userData.lm === activeLandmark && visibleInTree(o)), false) : [];
-    if (hits.length) return hits[0].point.clone();
-    if (ray.ray.intersectPlane(plane, hit)) return hit.clone();
-    return null;
-  };
-  const zoomToward = (clientX, clientY, deltaY) => {
-    if(walk?.active)return;
-    fly = null;
-    const focus = focusUnder(clientX, clientY);
-    if (!focus) return;
-    focus.y = Math.min(Math.max(focus.y, 0), 80);
-    // 一格滚轮 ≈ 100px 算 1 步；不取整、不抬到整步，触控板的小 delta 才不会被放大
-    const steps = Math.min(4, Math.abs(deltaY) / 100);
-    if (steps < 0.01) return;
-    const k = 1 - Math.pow(0.82, steps * controls.zoomSpeed);
-    const cam = camera.position, tgt = controls.target;
-    if (deltaY < 0) { cam.lerp(focus, k * 0.42); tgt.lerp(focus, k * 0.55); }
-    else { cam.sub(focus).multiplyScalar(1 + k * 0.55).add(focus); tgt.lerp(new THREE.Vector3().addVectors(cam, focus).multiplyScalar(0.5), k * 0.12); }
-    const off = cam.clone().sub(tgt); let d = off.length();
-    if (d < 1e-3) { off.set(0, 40, 80); d = off.length(); }
-    cam.copy(tgt).addScaledVector(off.multiplyScalar(1 / d), THREE.MathUtils.clamp(d, controls.minDistance, controls.maxDistance));
-    if (cam.y < 8) cam.y = 8;
-    controls.autoRotate = false; spinResume(); controls.update(); invalidate();
-  };
-  let wheelFrame = 0, wheelDelta = 0, wheelX = 0, wheelY = 0;
-  renderer.domElement.addEventListener('wheel', (e) => {
-    e.preventDefault();
-    const px = e.deltaMode === 1 ? e.deltaY * 16 : e.deltaMode === 2 ? e.deltaY * 100 : e.deltaY;
-    wheelDelta += px; wheelX=e.clientX; wheelY=e.clientY;
-    if (!wheelFrame) wheelFrame=requestAnimationFrame(()=>{wheelFrame=0;zoomToward(wheelX,wheelY,wheelDelta);wheelDelta=0;});
-  }, { passive: false });
-  let pinch0 = 0;
-  renderer.domElement.addEventListener('touchstart', (e) => {
-    if (e.touches.length === 2) pinch0 = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
-  }, { passive: true });
-  renderer.domElement.addEventListener('touchmove', (e) => {
-    if (e.touches.length !== 2 || !pinch0) return;
-    const d = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
-    const cx = (e.touches[0].clientX + e.touches[1].clientX) / 2, cy = (e.touches[0].clientY + e.touches[1].clientY) / 2;
-    if (Math.abs(d / pinch0 - 1) > 0.02) { zoomToward(cx, cy, (1 - d / pinch0) * 1500); pinch0 = d; }
-  }, { passive: true });
-  renderer.domElement.addEventListener('touchend', () => { pinch0 = 0; }, { passive: true });
-  renderer.domElement.addEventListener('touchcancel', () => { pinch0 = 0; }, { passive: true });
-}
-
 // ---- 循环 ----
 addEventListener('resize', () => {
   isMobile = mobileQuery.matches;
@@ -787,23 +699,15 @@ addEventListener('resize', () => {
   invalidate();
 });
 const clock = new THREE.Clock();
-let firstFramePainted = false, qualityFrames = 0, qualityTime = 0;
+let firstFramePainted = false;
 
 function tick() {
   requestAnimationFrame(tick);
   const dt = Math.min(clock.getDelta(), 0.05);
   if (document.hidden) return;
-  // Sustained slow frames lower GPU fill cost, without rebuilding any geometry.
-  if (quality === 'flow' && firstFramePainted && (boatMotion || fly || spinningDrag || spin)) {
-    qualityFrames++; qualityTime += dt;
-    if (qualityFrames >= 150) {
-      if (qualityTime / qualityFrames > .028 && renderer.getPixelRatio() > .95) {
-        renderer.setPixelRatio(Math.max(.9, renderer.getPixelRatio() * .85)); invalidate();
-      }
-      qualityFrames = 0; qualityTime = 0;
-    }
-  }
-  if (boatMotion) { cruises.update(dt); atmosphere.update(dt); riverReflection.update(dt); dirty = true; }
+  requestNearbyDetails();
+  if (boatMotion) { cruises.update(dt); dirty = true; }
+  if (effects.ripples) { atmosphere.update(dt); riverReflection.update(dt); dirty = true; }
   if (tourOn && !fly && !spinningDrag) { tourClock += dt; if (tourClock > 9) advanceTour(); }
   if (fly) {
     fly.t = Math.min(1, fly.t + dt / 1.1);
@@ -826,11 +730,16 @@ function tick() {
   const moved = walk?.active ? walk.update(dt) : controls.update(dt);
   if (!fly && !moved && !dirty) return;
   dirty = false;
+  if (spatialDirty || moved || fly) {
+  spatialDirty = false;
   updateLod();
+  for(const trees of urbanTreeGroups)trees.userData.update(camera);
+  waterfront.group.traverse(o=>{if(o.userData.updateTrees)o.userData.updateTrees(camera);});
   compassSvg.style.transform = `rotate(${controls.getAzimuthalAngle() * 180 / Math.PI}deg)`;
-  renderer.render(scene, camera);
   labelRenderer.render(scene, camera);
-  if (!firstFramePainted) {
+  }
+  renderer.render(scene, camera);
+  if (!firstFramePainted && (!blenderModels.enabled || blenderModels.ready)) {
     firstFramePainted = true;
     document.getElementById('loading')?.setAttribute('hidden', '');
   }
@@ -839,4 +748,3 @@ controls.addEventListener('change', () => invalidate());
 THREE.DefaultLoadingManager.onLoad = () => invalidate(true); // 贴图异步到达后补一帧
 invalidate(true);
 tick();
-preloadDetails();
