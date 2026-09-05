@@ -1,0 +1,168 @@
+{
+  "license": "CC0",
+  "license_url": "https://polyhaven.com/license",
+  "license_verified": true,
+  "resolution": "1K",
+  "channels_are_original_downloads": true,
+  "assets": [
+    {
+      "asset_id": "fine_grained_wood",
+      "integration_name": "wood",
+      "author": "Rob Tuytel",
+      "physical_width_m": 0.6,
+      "source_page": "https://polyhaven.com/a/fine_grained_wood",
+      "appearance_notes": "Fine-grained dark brown aged timber. Dominant grain is vertical in the original image; map timber long axes to UV V and width to UV U.",
+      "channels": {
+        "color": {
+          "source_url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/fine_grained_wood/fine_grained_wood_col_1k.jpg",
+          "color_space": "sRGB",
+          "width_px": 1024,
+          "height_px": 1024,
+          "image_mode": "RGB",
+          "bytes": 336305,
+          "sha256": "d171f45ef01bc6e239b00dfaa4961bcd27f7d8e93e3962da3bd3d0ce703d802c",
+          "path": "wood/color.jpg"
+        },
+        "normal": {
+          "source_url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/fine_grained_wood/fine_grained_wood_nor_gl_1k.jpg",
+          "color_space": "Non-color data",
+          "width_px": 1024,
+          "height_px": 1024,
+          "image_mode": "RGB",
+          "bytes": 193626,
+          "sha256": "ba95eadc009818e161d0f753191f1bacc3fc861e593be0bc6d82b437f9ec8044",
+          "path": "wood/normal.jpg"
+        },
+        "roughness": {
+          "source_url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/fine_grained_wood/fine_grained_wood_rough_1k.jpg",
+          "color_space": "Non-color data",
+          "width_px": 1024,
+          "height_px": 1024,
+          "image_mode": "L",
+          "bytes": 215155,
+          "sha256": "f281f682e62fe322303dfeaa13dac18b5cb9e113617fe0aca43605b49161d82b",
+          "path": "wood/roughness.jpg"
+        },
+        "ao": {
+          "source_url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/fine_grained_wood/fine_grained_wood_ao_1k.jpg",
+          "color_space": "Non-color data",
+          "width_px": 1024,
+          "height_px": 1024,
+          "image_mode": "L",
+          "bytes": 601268,
+          "sha256": "c77f62fcb7b36f525b1143842d7be3e327a14b0b9d2616e3187aa961e3b1d9b4",
+          "path": "wood/ao.jpg"
+        }
+      },
+      "normal_convention": "OpenGL (+Y)",
+      "total_bytes": 1346354
+    },
+    {
+      "asset_id": "large_grey_tiles",
+      "integration_name": "paving",
+      "author": "Rob Tuytel",
+      "physical_width_m": 3.0,
+      "source_page": "https://polyhaven.com/a/large_grey_tiles",
+      "appearance_notes": "Large weathered grey stone paving with uneven faces and joints.",
+      "channels": {
+        "color": {
+          "source_url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/large_grey_tiles/large_grey_tiles_diff_1k.jpg",
+          "color_space": "sRGB",
+          "width_px": 1024,
+          "height_px": 1024,
+          "image_mode": "RGB",
+          "bytes": 445476,
+          "sha256": "2cd00e2ddd516fdc165169252c194bf67b3ee483f2925442dc428cbae5fd04c8",
+          "path": "paving/color.jpg"
+        },
+        "normal": {
+          "source_url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/large_grey_tiles/large_grey_tiles_nor_gl_1k.jpg",
+          "color_space": "Non-color data",
+          "width_px": 1024,
+          "height_px": 1024,
+          "image_mode": "RGB",
+          "bytes": 388446,
+          "sha256": "9185560cc045b0c90434c1bfe64922759a5bebfdad18a1b6af860ed0e332cfc8",
+          "path": "paving/normal.jpg"
+        },
+        "roughness": {
+          "source_url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/large_grey_tiles/large_grey_tiles_rough_1k.jpg",
+          "color_space": "Non-color data",
+          "width_px": 1024,
+          "height_px": 1024,
+          "image_mode": "L",
+          "bytes": 377009,
+          "sha256": "2042fd8d9775e4e91ca6474549e504ec08ded4664cb6b59890142d6fe97709c8",
+          "path": "paving/roughness.jpg"
+        },
+        "ao": {
+          "source_url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/large_grey_tiles/large_grey_tiles_ao_1k.jpg",
+          "color_space": "Non-color data",
+          "width_px": 1024,
+          "height_px": 1024,
+          "image_mode": "L",
+          "bytes": 334662,
+          "sha256": "b429c1d161d348d49c324a643e4ad8f5136036861f5014eff7472ab1a5a08645",
+          "path": "paving/ao.jpg"
+        }
+      },
+      "normal_convention": "OpenGL (+Y)",
+      "total_bytes": 1545593
+    },
+    {
+      "asset_id": "painted_plaster_wall",
+      "integration_name": "plaster",
+      "author": "Amal Kumar",
+      "physical_width_m": 2.0,
+      "source_page": "https://polyhaven.com/a/painted_plaster_wall",
+      "appearance_notes": "Off-white aged painted exterior plaster, chosen as a lime-plaster appearance proxy. Poly Haven does not establish the plaster binder chemistry.",
+      "channels": {
+        "color": {
+          "source_url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/painted_plaster_wall/painted_plaster_wall_diff_1k.jpg",
+          "color_space": "sRGB",
+          "width_px": 1024,
+          "height_px": 1024,
+          "image_mode": "RGB",
+          "bytes": 686726,
+          "sha256": "440310f05af089f2c93353167573403cbc3f805948203237b5d26431eeb9e19c",
+          "path": "plaster/color.jpg"
+        },
+        "normal": {
+          "source_url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/painted_plaster_wall/painted_plaster_wall_nor_gl_1k.jpg",
+          "color_space": "Non-color data",
+          "width_px": 1024,
+          "height_px": 1024,
+          "image_mode": "RGB",
+          "bytes": 900461,
+          "sha256": "8eb01647d126eb5341e2c325821ad48c8ca11349dbef53447c95422c5d91cc9d",
+          "path": "plaster/normal.jpg"
+        },
+        "roughness": {
+          "source_url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/painted_plaster_wall/painted_plaster_wall_rough_1k.jpg",
+          "color_space": "Non-color data",
+          "width_px": 1024,
+          "height_px": 1024,
+          "image_mode": "L",
+          "bytes": 354762,
+          "sha256": "e0564c297b22ab1cf4ef02a82157b84ce3b92eb4fd49d9c64b7256a8b300af82",
+          "path": "plaster/roughness.jpg"
+        },
+        "ao": {
+          "source_url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/painted_plaster_wall/painted_plaster_wall_ao_1k.jpg",
+          "color_space": "Non-color data",
+          "width_px": 1024,
+          "height_px": 1024,
+          "image_mode": "L",
+          "bytes": 555806,
+          "sha256": "4f2080ec7cf0f30b3947c54e707507802acb1b4247afc8cdd35f60d34b54e4a0",
+          "path": "plaster/ao.jpg"
+        }
+      },
+      "normal_convention": "OpenGL (+Y)",
+      "total_bytes": 2497755
+    }
+  ],
+  "total_texture_bytes": 5389702,
+  "channel_file_count": 12,
+  "all_channels_decoded_successfully": true
+}

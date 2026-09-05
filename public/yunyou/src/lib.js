@@ -1,5 +1,6 @@
 // 通用工具：贴图、多边形/高度场、SDF 山体（Marching Cubes）、八角楼阁塔、中式坡屋顶与殿阁。单位：米。
 import * as THREE from 'three';
+import { loadSurfaceTextures } from './surface-materials.js';
 import { MarchingCubes } from 'three/addons/objects/MarchingCubes.js';
 import { mergeVertices } from 'three/addons/utils/BufferGeometryUtils.js';
 
@@ -39,6 +40,7 @@ function imgTex(name) {
   return t;
 }
 export function makeTextures() {
+  TEX.pbr = loadSurfaceTextures();
   for (const n of ['stone', 'tile', 'copper', 'glaze', 'brick', 'karst']) TEX[n] = imgTex(n);
   TEX.leafColor=imgTex('foliage/leaves-color');TEX.leafAlpha=imgTex('foliage/leaves-opacity');TEX.leafNormal=imgTex('foliage/leaves-normal');
   TEX.leafAlpha.colorSpace=THREE.NoColorSpace;TEX.leafNormal.colorSpace=THREE.NoColorSpace;

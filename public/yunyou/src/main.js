@@ -53,7 +53,7 @@ scene.fog = new THREE.Fog(0xc5dceb, 2800, 8200);
 const environment = new RoomEnvironment(), pmrem = new THREE.PMREMGenerator(renderer);
 scene.environment = pmrem.fromScene(environment, 0.04).texture;
 environment.dispose(); pmrem.dispose(); // 金属/琉璃反射用
-scene.environmentIntensity = 0.7;
+scene.environmentIntensity = 0.45;
 
 const camera = new THREE.PerspectiveCamera(48, innerWidth / innerHeight, 1, 30000);
 camera.position.set(-145, 42, 1180); // 入场更近、更低，从漓江一侧看见象鼻山和水月洞
@@ -87,14 +87,14 @@ sun.position.set(1400, 2600, 2200);
 sun.castShadow = true;
 sun.shadow.mapSize.set(2048,2048);
 Object.assign(sun.shadow.camera, { left: -1600, right: 1600, top: 1700, bottom: -1700, near: 500, far: 7000 });
-sun.shadow.bias = -0.0004;
-sun.shadow.normalBias = 0.6;
+sun.shadow.bias = -0.00001;
+sun.shadow.normalBias = 0.035; // close-view joinery needs contact shadows at centimetre scale
 scene.add(sun, sun.target);
 const shadowFocus = new THREE.Vector3(-150,0,1400);
 function focusShadows(target,span=350) {
   const delta=target.clone().sub(shadowFocus);sun.position.add(delta);shadowFocus.copy(target);
   sun.target.position.copy(target);sun.target.updateMatrixWorld();
-  const r=THREE.MathUtils.clamp(span*.9,90,1700),c=sun.shadow.camera;
+  const r=THREE.MathUtils.clamp(span*.9,40,1700),c=sun.shadow.camera;
   Object.assign(c,{left:-r,right:r,top:r,bottom:-r});c.updateProjectionMatrix();invalidate(true);
 }
 focusShadows(shadowFocus);
@@ -433,9 +433,11 @@ async function showDetail(lm) {
   obj.userData.night = mod.night;
   obj.userData.lm = lm;
   obj.userData.lights = [];
+  obj.userData.nearMeshes = [];
   mergeStatic(obj);
   shadowed(obj, true, true); // 合批后的近景模型投射细节阴影
-  obj.traverse((o) => { if (o.isMesh) { o.userData.lm = lm; pickables.push(o); } if (o.isLight) obj.userData.lights.push(o); });
+  obj.traverse((o) => { if (o.isMesh) { o.userData.lm = lm; pickables.push(o); if (o.userData.nearDetail) obj.userData.nearMeshes.push(o); } if (o.isLight) obj.userData.lights.push(o); });
+  obj.userData.nearDetailVisible = true;
   obj.userData.night?.(obj, detailNightOn);
   // Compile before insertion; switching back reuses the model and program.
   try { await renderer.compileAsync(obj, camera, scene); } catch (err) { console.warn('Detail shader warmup', err); }
@@ -458,6 +460,14 @@ function updateLod() {
     const show = d < enter * (obj.visible ? 1.15 : 1);
     if (obj.visible !== show) { obj.visible = show; invalidate(true); }
     if (obj.userData.mode === 'replace' && models[lm.id]) models[lm.id].visible = !show;
+    // Individual roof tiles matter at walking distance; retain the curved roof
+    // shell beyond it. Hysteresis avoids flicker at the transition boundary.
+    const near = show && d < (isMobile ? 125 : 180) * (obj.userData.nearDetailVisible ? 1.15 : 1);
+    if (near !== obj.userData.nearDetailVisible) {
+      obj.userData.nearDetailVisible = near;
+      for (const mesh of obj.userData.nearMeshes) mesh.visible = near;
+      if (obj.userData.nearMeshes.length) invalidate(true);
+    }
     for (const l of obj.userData.lights) l.visible = false;
     if (night && show && d < Math.max(LOD_DIST, (lm.span || 400) * 1.5) && d < bestD) { bestD = d; best = obj; }
   }
@@ -530,11 +540,11 @@ function mixCityNight(m) {
 function applyMode(m) {
   scene.background.copy(dayBg).lerp(nightBg, m);
   scene.fog.color.copy(dayBg).lerp(nightBg, m);
-  scene.environmentIntensity = THREE.MathUtils.lerp(0.7, 0.18, m);
+  scene.environmentIntensity = THREE.MathUtils.lerp(0.45, 0.18, m);
   hemi.color.copy(hemiSkyL).lerp(hemiSkyD, m);
   hemi.groundColor.copy(hemiGndL).lerp(hemiGndD, m);
   // 夜景天光略抬：整城窗灯要靠环境光托起来，别只剩地标亮
-  hemi.intensity = THREE.MathUtils.lerp(0.75, 0.42, m);
+  hemi.intensity = THREE.MathUtils.lerp(0.55, 0.42, m);
   sun.color.copy(sunDay).lerp(sunNight, m);
   sun.intensity = THREE.MathUtils.lerp(2.55, 0.22, m);
   sun.position.lerpVectors(sunDayPos, sunNightPos, m).add(shadowFocus);
