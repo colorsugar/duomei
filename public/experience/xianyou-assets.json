@@ -1,0 +1,31 @@
+{
+  "source": "Original images generated in the owning conversation, compressed to WebP; no MotionSites footage or Grok video.",
+  "method": "Built-in image generation; approved sword/flight/reading scenes, separate clean background and magenta-key foreground. Runtime shader removes key.",
+  "files": [
+    {
+      "file": "journey-v4.webp",
+      "sha256": "c6b92882e1c2c2d5e841ac0fee792dc341426f46138deb1bd1ebad5583b055e0",
+      "bytes": 231724
+    },
+    {
+      "file": "mountains-v4.webp",
+      "sha256": "f7af3c5d5ef2b1984f08fc1966161596e597dee95dccd556ac16675301ee9f5d",
+      "bytes": 332534
+    },
+    {
+      "file": "reading-v4.webp",
+      "sha256": "51c70f1b320dcebecb51f9445435cfb61879e6565c617de02d806036f4c9562e",
+      "bytes": 279944
+    },
+    {
+      "file": "sword-key-v4.webp",
+      "sha256": "6edf2d31565033ebd52cdd3ca4fea4d473d18cb884f8d8bd816b5f2fa2c4bb73",
+      "bytes": 176786
+    },
+    {
+      "file": "sword-v4.webp",
+      "sha256": "2a8689fc842184f99daa21cae58eb907e4da06b14bf075012f538146c757b602",
+      "bytes": 230732
+    }
+  ]
+}

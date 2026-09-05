@@ -1,4 +1,5 @@
 import { lazy, Suspense } from "react";
+import { MotionPlanProvider } from "./experience/MotionPlans";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 const DuomeiAdmin = lazy(() => import("./pages/DuomeiAdmin").then(module => ({ default: module.DuomeiAdmin })));
 import { DuomeiHomePage } from "./pages/DuomeiHomePage";
@@ -78,9 +79,11 @@ export default function App() {
 
   return (
     <BrowserRouter basename={basename}>
+      <MotionPlanProvider>
       <MotionProvider>
         <AppRoutes />
       </MotionProvider>
+      </MotionPlanProvider>
     </BrowserRouter>
   );
 }

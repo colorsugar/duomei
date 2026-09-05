@@ -1,6 +1,7 @@
 import { useCallback, useLayoutEffect, useRef, useState } from 'react';
 import { flushSync } from 'react-dom';
 import { useLocation, type Location } from 'react-router-dom';
+import { useMotionPlan } from './MotionPlans';
 import { shouldAnimateRoute } from './routeMotion';
 
 type Phase = 'idle' | 'native' | 'closing' | 'covered' | 'opening';
@@ -21,6 +22,7 @@ export function routeChapter(path: string) {
 /** The router still owns links, history and modifier keys; only presentation waits. */
 export function useCinematicRoute() {
   const target = useLocation();
+  const {paused} = useMotionPlan();
   const [location, setLocation] = useState<Location>(target);
   const [phase, setPhase] = useState<Phase>('idle');
   const shown = useRef(target);
@@ -52,7 +54,7 @@ export function useCinematicRoute() {
     const reduce = matchMedia('(prefers-reduced-motion: reduce)');
     const commit = () => { shown.current = target; setLocation(target); };
     // Hash navigation, editing and reduced motion keep their direct native behavior.
-    if (!shouldAnimateRoute(previous.pathname, target.pathname, reduce.matches, document.hidden)) {
+    if (!shouldAnimateRoute(previous.pathname, target.pathname, reduce.matches || paused, document.hidden)) {
       commit(); setPhase('idle'); return;
     }
 
@@ -102,7 +104,7 @@ export function useCinematicRoute() {
       run.resolve?.(); run.native?.skipTransition();
       reduce.removeEventListener('change', stopMotion);
     };
-  }, [target, onReady]);
+  }, [target, onReady, paused]);
 
   return {location, phase, onReady, label:routeChapter(target.pathname)};
 }
