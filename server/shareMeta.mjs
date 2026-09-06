@@ -108,7 +108,13 @@ export function injectShareMeta(html, meta, pageUrl) {
   return output;
 }
 
-// Shared by the EdgeOne middleware and the Vite dev server.
+// fetch() hands back a decoded body, so byte-level headers no longer describe it.
+function stripByteHeaders(source) {
+  const headers = new Headers(source);
+  for (const name of ["content-length", "content-encoding", "etag"]) headers.delete(name);
+  return headers;
+}
+
 export async function rewriteShellResponse(request, response, options = {}) {
   const url = new URL(request.url);
   const meta = await resolveShareMeta(url.pathname, {
@@ -120,9 +126,39 @@ export async function rewriteShellResponse(request, response, options = {}) {
   const source = await response.clone().text();
   if (!/<\/head>/i.test(source) || !/<div id="root">/.test(source)) return response;
   const html = injectShareMeta(source, meta, `${url.origin}${url.pathname}`);
-  const headers = new Headers(response.headers);
-  // The body was decoded by text(), so byte-level headers no longer describe it.
-  for (const name of ["content-length", "content-encoding", "etag"]) headers.delete(name);
+  const headers = stripByteHeaders(response.headers);
   headers.set("content-type", "text/html; charset=utf-8");
+  headers.set("x-duomei-share", "rewritten");
   return new Response(html, { status: response.status, headers });
+}
+
+// Edge Function entry shared by every share-aware route. The SPA shell is
+// fetched from the site's own static origin; if that fails the origin's
+// answer is returned untouched so the route degrades to plain static serving.
+export async function handleShellRequest(request, options = {}) {
+  const fetchImpl = options.fetchImpl ?? fetch;
+  try {
+    const shellUrl = new URL("/index.html", request.url);
+    const shell = await fetchImpl(shellUrl.href, { headers: { accept: "text/html" } });
+    if (!shell.ok) return shell;
+    const rewritten = await rewriteShellResponse(request, shell, options);
+    if (rewritten !== shell) return rewritten;
+    const headers = stripByteHeaders(shell.headers);
+    headers.set("x-duomei-share", `pass ${new URL(request.url).pathname}`);
+    return new Response(shell.body, { status: shell.status, headers });
+  } catch (error) {
+    // Last resort: let the platform answer the original URL (SPA fallback) rather than failing the route.
+    const note = `error ${error instanceof Error ? error.message : String(error)}`.slice(0, 200);
+    try {
+      const origin = await fetchImpl(request.url, { headers: { accept: "text/html" } });
+      const headers = stripByteHeaders(origin.headers);
+      headers.set("x-duomei-share", note);
+      return new Response(origin.body, { status: origin.status, headers });
+    } catch {
+      return new Response("早报暂时打不开，请稍后再试。", {
+        status: 503,
+        headers: { "content-type": "text/plain; charset=utf-8", "cache-control": "no-store", "x-duomei-share": note },
+      });
+    }
+  }
 }
