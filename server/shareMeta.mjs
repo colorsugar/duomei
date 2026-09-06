@@ -8,8 +8,14 @@ export const ZAOBAO_SOURCE = "https://zaobao-six.vercel.app";
 const DEFAULT_DESCRIPTION = "记录旅途中的风景、生活片段、旅行照片和心情文字。";
 const ZAOBAO_DESCRIPTION = "国际、国内、日本、科技、AI、新品、兴趣、日常，八个栏目的每日早报。";
 const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
+// WeChat's link crawler and in-app browser both identify as MicroMessenger; both
+// need the edition headline because the share card is built from whatever they load.
 const CRAWLER_PATTERN =
-  /bot|spider|crawl|slurp|facebookexternalhit|twitterbot|linkedinbot|slackbot|telegrambot|whatsapp|discordbot|embedly|pinterest|applebot|bytespider|baiduspider|sogou|yisou|360spider|skypeuripreview|iframely|mastodon|bluesky|dingtalk|feishu|lark|preview/i;
+  /bot|spider|crawl|slurp|facebookexternalhit|twitterbot|linkedinbot|slackbot|telegrambot|whatsapp|discordbot|embedly|pinterest|applebot|bytespider|baiduspider|sogou|yisou|360spider|skypeuripreview|iframely|mastodon|bluesky|dingtalk|feishu|lark|preview|micromessenger|wechat|weixin/i;
+// WeChat renders only absolute https PNG/JPG covers; SVG and WebP show as a grey block.
+const SHARE_IMAGE_PATTERN = /^https:\/\/[^?#\s]+\.(?:png|jpe?g)(?:[?#]|$)/i;
+const DEFAULT_IMAGE = "/og-image.png";
+const ZAOBAO_IMAGE = "/og-zaobao.png";
 
 export function isCrawler(userAgent) {
   return CRAWLER_PATTERN.test(userAgent ?? "");
@@ -36,12 +42,22 @@ function decodeText(fragment) {
     .trim();
 }
 
+// First article image of the edition that WeChat can actually render.
+function firstShareImage(html) {
+  for (const match of html.matchAll(/<img\s[^>]*?src="([^"]+)"/gi)) {
+    const src = decodeText(match[1]);
+    if (SHARE_IMAGE_PATTERN.test(src)) return src;
+  }
+  return "";
+}
+
 export function extractEditionSummary(html) {
   const headline = html.match(/<h1[^>]*>([\s\S]*?)<\/h1>/i)?.[1];
   const lede = html.match(/class="lede"[^>]*>([\s\S]*?)<\/p>/i)?.[1];
   return {
     headline: headline ? decodeText(headline) : "",
     lede: lede ? decodeText(lede) : "",
+    image: firstShareImage(html),
   };
 }
 
@@ -49,9 +65,8 @@ function withTimeout(promise, ms) {
   return Promise.race([promise, new Promise((_, reject) => setTimeout(() => reject(new Error("timeout")), ms))]);
 }
 
-// Static per-route copy. `date` is only set for /zaobao/:date.
-export function staticShareMeta(pathname) {
-  const segments = pathname.split("/").filter(Boolean);
+// Static per-route copy. `sourceUrl` is only set for routes with a live edition.
+function routeCopy(segments) {
   if (segments[0] === "zaobao") {
     if (segments.length === 1) return { title: "今日早报", description: ZAOBAO_DESCRIPTION, sourceUrl: `${ZAOBAO_SOURCE}/` };
     if (segments[1] === "archive" && segments.length === 2) return { title: "往期早报", description: "翻看过去每一天的早报。" };
@@ -69,6 +84,13 @@ export function staticShareMeta(pathname) {
   return null;
 }
 
+// `image` is a site-relative fallback cover; crawlers may get the edition's own image instead.
+export function staticShareMeta(pathname) {
+  const segments = pathname.split("/").filter(Boolean);
+  const copy = routeCopy(segments);
+  return copy && { image: segments[0] === "zaobao" ? ZAOBAO_IMAGE : DEFAULT_IMAGE, ...copy };
+}
+
 export async function resolveShareMeta(pathname, { crawler = false, fetchImpl = fetch, timeoutMs = 1500 } = {}) {
   const meta = staticShareMeta(pathname);
   if (!meta) return null;
@@ -77,10 +99,11 @@ export async function resolveShareMeta(pathname, { crawler = false, fetchImpl = 
   try {
     const response = await withTimeout(fetchImpl(sourceUrl, { headers: { accept: "text/html" } }), timeoutMs);
     if (!response.ok) return rest;
-    const { headline, lede } = extractEditionSummary(await response.text());
+    const { headline, lede, image } = extractEditionSummary(await response.text());
     return {
       title: headline ? `${headline} · ${rest.title}` : rest.title,
       description: lede || rest.description,
+      image: image || rest.image,
     };
   } catch {
     return rest;
@@ -96,15 +119,16 @@ function replaceMeta(html, attribute, name, content) {
 export function injectShareMeta(html, meta, pageUrl) {
   const fullTitle = `${meta.title} | ${SITE_NAME}`;
   const origin = new URL(pageUrl).origin;
+  const image = new URL(meta.image || DEFAULT_IMAGE, origin).href;
   let output = html.replace(/<title>[^<]*<\/title>/i, `<title>${escapeHtml(fullTitle)}</title>`);
   output = replaceMeta(output, "name", "description", meta.description ?? DEFAULT_DESCRIPTION);
   output = replaceMeta(output, "property", "og:title", meta.title);
   output = replaceMeta(output, "property", "og:description", meta.description ?? DEFAULT_DESCRIPTION);
-  output = replaceMeta(output, "property", "og:image", `${origin}/og-image.svg`);
+  output = replaceMeta(output, "property", "og:image", image);
   output = replaceMeta(output, "property", "og:url", pageUrl);
   output = replaceMeta(output, "name", "twitter:title", meta.title);
   output = replaceMeta(output, "name", "twitter:description", meta.description ?? DEFAULT_DESCRIPTION);
-  output = replaceMeta(output, "name", "twitter:image", `${origin}/og-image.svg`);
+  output = replaceMeta(output, "name", "twitter:image", image);
   return output;
 }
 

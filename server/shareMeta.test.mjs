@@ -13,7 +13,10 @@ import {
 
 const shell = await readFile(new URL("../index.html", import.meta.url), "utf8");
 const sourceHtml = `<!doctype html><html><body><div class="page"><h1>小米今晚发18 Fold，伊萨尔火箭入轨</h1>
-<p class="date">2026年9月7日</p><p class="lede">今天重点：小米秋季发布会今晚 &amp; 火箭入轨。</p></div></body></html>`;
+<p class="date">2026年9月7日</p><p class="lede">今天重点：小米秋季发布会今晚 &amp; 火箭入轨。</p>
+<img src="/brand.svg" alt=""><img src="http://insecure.example/a.png" alt=""><img src="https://cdn.example/a.webp" alt="">
+<img class="hero" src="https://img.example/2026/9/first.png?w=1200&amp;h=630" alt="hero"><img src="https://img.example/second.jpg" alt=""></div></body></html>`;
+const FIRST_IMAGE = "https://img.example/2026/9/first.png?w=1200&h=630";
 const fetchSource = async () => new Response(sourceHtml, { status: 200, headers: { "content-type": "text/html" } });
 
 function metaContent(html, attribute, name) {
@@ -23,6 +26,8 @@ function metaContent(html, attribute, name) {
 test("crawler detection covers share bots and skips normal browsers", () => {
   assert.equal(isCrawler("Twitterbot/1.0"), true);
   assert.equal(isCrawler("facebookexternalhit/1.1"), true);
+  assert.equal(isCrawler("Mozilla/5.0 (Linux; Android 14) Mobile Safari/537.36 MicroMessenger/8.0.50"), true);
+  assert.equal(isCrawler("Mozilla/5.0 (Windows NT 10.0) WeChat/3.9"), true);
   assert.equal(isCrawler("Mozilla/5.0 (iPhone) Safari/604.1"), false);
   assert.equal(isCrawler(undefined), false);
 });
@@ -32,6 +37,10 @@ test("static route copy", () => {
   assert.equal(staticShareMeta("/zaobao/archive").title, "往期早报");
   assert.equal(staticShareMeta("/zaobao/2026-09-05").title, "2026-09-05 早报");
   assert.equal(staticShareMeta("/zaobao/2026-09-05").sourceUrl, "https://zaobao-six.vercel.app/2026-09-05/");
+  assert.equal(staticShareMeta("/zaobao").image, "/og-zaobao.png");
+  assert.equal(staticShareMeta("/zaobao/archive").image, "/og-zaobao.png");
+  assert.equal(staticShareMeta("/zaobao/2026-09-05").image, "/og-zaobao.png");
+  assert.equal(staticShareMeta("/guyu").image, "/og-image.png");
   assert.equal(staticShareMeta("/guyu").title, "故语");
   assert.equal(staticShareMeta("/skills").title, "Skill");
   assert.equal(staticShareMeta("/"), null);
@@ -42,7 +51,9 @@ test("edition summary is extracted from the source markup", () => {
   assert.deepEqual(extractEditionSummary(sourceHtml), {
     headline: "小米今晚发18 Fold，伊萨尔火箭入轨",
     lede: "今天重点：小米秋季发布会今晚 & 火箭入轨。",
+    image: FIRST_IMAGE,
   });
+  assert.equal(extractEditionSummary('<img src="/only.svg"><img src="https://x.example/a.gif">').image, "");
 });
 
 test("crawlers get the edition headline, browsers get the static title without fetching", async () => {
@@ -51,9 +62,19 @@ test("crawlers get the edition headline, browsers get the static title without f
   const bot = await resolveShareMeta("/zaobao", { crawler: true, fetchImpl: counting });
   assert.equal(bot.title, "小米今晚发18 Fold，伊萨尔火箭入轨 · 今日早报");
   assert.equal(bot.description, "今天重点：小米秋季发布会今晚 & 火箭入轨。");
+  assert.equal(bot.image, FIRST_IMAGE);
   const human = await resolveShareMeta("/zaobao", { crawler: false, fetchImpl: counting });
   assert.equal(human.title, "今日早报");
+  assert.equal(human.image, "/og-zaobao.png");
   assert.equal(fetched, 1);
+});
+
+test("editions without a usable image keep the fixed zaobao cover", async () => {
+  const noImage = async () => new Response("<h1>Headline</h1><img src=\"https://cdn.example/a.webp\">", { status: 200 });
+  const meta = await resolveShareMeta("/zaobao/2026-09-05", { crawler: true, fetchImpl: noImage });
+  assert.equal(meta.title, "Headline · 2026-09-05 早报");
+  assert.equal(meta.image, "/og-zaobao.png");
+  assert.equal((await resolveShareMeta("/zaobao/archive", { crawler: true, fetchImpl: noImage })).image, "/og-zaobao.png");
 });
 
 test("source failures and timeouts fall back to static copy", async () => {
@@ -73,7 +94,12 @@ test("injection rewrites every share tag in the real shell and escapes content",
   assert.equal(metaContent(html, "property", "og:description"), "desc &amp; more");
   assert.equal(metaContent(html, "name", "description"), "desc &amp; more");
   assert.equal(metaContent(html, "property", "og:url"), "https://duomei.site/zaobao");
-  assert.equal(metaContent(html, "property", "og:image"), "https://duomei.site/og-image.svg");
+  assert.equal(metaContent(html, "property", "og:image"), "https://duomei.site/og-image.png");
+  assert.equal(metaContent(html, "name", "twitter:image"), "https://duomei.site/og-image.png");
+  const cover = injectShareMeta(shell, { title: "x", image: "/og-zaobao.png" }, "https://duomei.site/zaobao");
+  assert.equal(metaContent(cover, "property", "og:image"), "https://duomei.site/og-zaobao.png");
+  const remote = injectShareMeta(shell, { title: "x", image: FIRST_IMAGE }, "https://duomei.site/zaobao");
+  assert.equal(metaContent(remote, "property", "og:image"), "https://img.example/2026/9/first.png?w=1200&amp;h=630");
   assert.equal(metaContent(html, "property", "og:site_name"), "DUOMEI 多美小记");
   assert.match(html, /<div id="root"><\/div>/);
   assert.equal((html.match(/<title>/g) ?? []).length, 1);
@@ -85,8 +111,14 @@ test("rewriteShellResponse only touches HTML responses on share routes", async (
   const rewritten = await rewriteShellResponse(bot, shellResponse(), { fetchImpl: fetchSource });
   const html = await rewritten.text();
   assert.equal(metaContent(html, "property", "og:title"), "小米今晚发18 Fold，伊萨尔火箭入轨 · 2026-09-05 早报");
+  assert.equal(metaContent(html, "property", "og:image"), "https://img.example/2026/9/first.png?w=1200&amp;h=630");
   assert.equal(rewritten.headers.get("content-length"), null);
   assert.equal(rewritten.headers.get("etag"), null);
+
+  const wechat = new Request("https://duomei.site/zaobao", { headers: { "user-agent": "Mozilla/5.0 (iPhone) MicroMessenger/8.0.50" } });
+  const wechatHtml = await (await rewriteShellResponse(wechat, shellResponse(), { fetchImpl: fetchSource })).text();
+  assert.equal(metaContent(wechatHtml, "property", "og:title"), "小米今晚发18 Fold，伊萨尔火箭入轨 · 今日早报");
+  assert.match(metaContent(wechatHtml, "property", "og:image"), /^https:\/\/.+\.png/);
 
   const home = new Request("https://duomei.site/", { headers: { "user-agent": "Twitterbot/1.0" } });
   const untouched = shellResponse();
