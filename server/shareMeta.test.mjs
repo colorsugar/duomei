@@ -3,6 +3,7 @@ import { readFile } from "node:fs/promises";
 import test from "node:test";
 import {
   extractEditionSummary,
+  handleShellRequest,
   injectShareMeta,
   isCrawler,
   resolveShareMeta,
@@ -98,4 +99,40 @@ test("rewriteShellResponse only touches HTML responses on share routes", async (
   const passed = await rewriteShellResponse(bot, notShell, { fetchImpl: fetchSource });
   assert.equal(passed, notShell);
   assert.equal(await passed.text(), "<p>maintenance</p>");
+});
+
+test("handleShellRequest fetches the site's own shell and tags the response", async () => {
+  const seen = [];
+  const fetchImpl = async (input) => {
+    const url = new URL(typeof input === "string" ? input : input.url);
+    seen.push(url.href);
+    if (url.pathname === "/index.html") {
+      return new Response(shell, { status: 200, headers: { "content-type": "text/html", "content-length": "9" } });
+    }
+    return fetchSource();
+  };
+  const bot = await handleShellRequest(new Request("https://duomei.site/zaobao", { headers: { "user-agent": "Twitterbot/1.0" } }), { fetchImpl });
+  assert.equal(seen[0], "https://duomei.site/index.html");
+  assert.equal(bot.headers.get("x-duomei-share"), "rewritten");
+  assert.equal(bot.headers.get("content-length"), null);
+  assert.equal(metaContent(await bot.text(), "property", "og:title"), "小米今晚发18 Fold，伊萨尔火箭入轨 · 今日早报");
+
+  const deep = await handleShellRequest(new Request("https://duomei.site/zaobao/x/y/z"), { fetchImpl });
+  assert.equal(metaContent(await deep.text(), "property", "og:title"), "早报");
+
+  const broken = new Response("gone", { status: 503 });
+  assert.equal(await handleShellRequest(new Request("https://duomei.site/guyu"), { fetchImpl: async () => broken }), broken);
+
+  let calls = 0;
+  const flaky = async (input) => {
+    calls += 1;
+    if (calls === 1) throw new Error("edge fetch refused");
+    return new Response("origin answer", { status: 200, headers: { "content-type": "text/html" } });
+  };
+  const recovered = await handleShellRequest(new Request("https://duomei.site/guyu"), { fetchImpl: flaky });
+  assert.equal(await recovered.text(), "origin answer");
+  assert.match(recovered.headers.get("x-duomei-share"), /^error edge fetch refused/);
+
+  const dead = await handleShellRequest(new Request("https://duomei.site/guyu"), { fetchImpl: async () => { throw new Error("down"); } });
+  assert.equal(dead.status, 503);
 });
