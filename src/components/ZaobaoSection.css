@@ -308,6 +308,8 @@
 main.zaobao-page {
   --zaobao-reader-wide: 90rem;
   --zaobao-reader-bar-height: calc(var(--size-hit) + var(--space-xs));
+  --zaobao-tabs-height: calc(var(--size-hit) + var(--space-sm));
+  --zaobao-tabs-inset: calc(var(--zaobao-tabs-height) + env(safe-area-inset-bottom, 0px));
   position: fixed;
   inset: 0;
   z-index: var(--z-sticky);
@@ -403,7 +405,76 @@ main.zaobao-page.is-fallback {
 .zaobao-edition {
   inline-size: min(100%, var(--zaobao-reader-wide));
   margin-inline: auto;
-  padding: var(--space-2xl) clamp(var(--space-md), 5vw, var(--space-3xl)) var(--space-4xl);
+  padding: var(--space-2xl) clamp(var(--space-md), 5vw, var(--space-3xl))
+    calc(var(--space-4xl) + var(--zaobao-tabs-inset));
+}
+
+/* Bottom column tabs mirror the source edition's fixed `nav.nav`; the top index stays as a desktop aid. */
+.zaobao-edition-tabs {
+  position: fixed;
+  inset-inline: 0;
+  inset-block-end: 0;
+  z-index: var(--z-page-controls);
+  padding-block-end: env(safe-area-inset-bottom, 0px);
+  border-block-start: var(--rule-hairline) solid var(--color-rule);
+  background: color-mix(in oklch, var(--color-paper) 90%, transparent);
+  backdrop-filter: blur(0.75rem);
+  -webkit-backdrop-filter: blur(0.75rem);
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+  scrollbar-width: none;
+}
+
+.zaobao-edition-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.zaobao-edition-tabs-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-xs);
+  inline-size: max-content;
+  min-inline-size: 100%;
+  min-block-size: var(--zaobao-tabs-height);
+  padding-inline: var(--space-md);
+}
+
+.zaobao-edition-tabs a {
+  display: inline-flex;
+  align-items: center;
+  min-block-size: var(--size-hit);
+  padding-inline: var(--space-md);
+  color: var(--color-muted-strong);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  line-height: 1;
+  text-decoration: none;
+  white-space: nowrap;
+  border-radius: var(--radius-pill);
+  transition: color var(--dur-short) var(--ease-out), background-color var(--dur-short) var(--ease-out);
+}
+
+.zaobao-edition-tabs a[aria-current="location"] {
+  color: var(--color-accent-ink);
+  background: var(--color-accent);
+}
+
+.zaobao-edition-tabs a:focus-visible {
+  outline: var(--rule-focus) solid var(--color-focus);
+  outline-offset: var(--space-2xs);
+}
+
+.zaobao-edition-tabs a:not([aria-current]):active {
+  color: var(--color-ink);
+  background: var(--color-paper-3);
+}
+
+/* Keep the shared music orb above the column tabs on phones so the first chip stays tappable. */
+@media (max-width: 48rem) {
+  body:has(.zaobao-edition-tabs) .duomei-music-player:not(.is-placed) {
+    inset-block-end: calc(var(--space-md) + var(--size-hit) + var(--space-sm) + env(safe-area-inset-bottom, 0px));
+  }
 }
 
 .zaobao-edition-hero {
@@ -734,6 +805,11 @@ main.zaobao-page.is-fallback {
   .zaobao-story-body > a:hover {
     color: var(--color-ink);
   }
+
+  .zaobao-edition-tabs a:not([aria-current]):hover {
+    color: var(--color-ink);
+    background: var(--color-paper-3);
+  }
 }
 
 @media (max-width: 64rem) {
@@ -763,7 +839,7 @@ main.zaobao-page.is-fallback {
   }
 
   .zaobao-edition {
-    padding-block-end: var(--space-3xl);
+    padding-block-end: calc(var(--space-3xl) + var(--zaobao-tabs-inset));
   }
 
   .zaobao-edition-hero {
