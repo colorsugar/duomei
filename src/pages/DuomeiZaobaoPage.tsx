@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Link, Navigate, useParams } from "react-router-dom";
 import { ZAOBAO_ARCHIVE_ROUTE, ZAOBAO_URL } from "../components/ZaobaoSection";
 
@@ -121,6 +121,32 @@ export function DuomeiZaobaoPage() {
   const [failed, setFailed] = useState(false);
   // Some archived days point at images the source no longer serves; drop those figures instead of showing broken icons.
   const [brokenImages, setBrokenImages] = useState<ReadonlySet<string>>(() => new Set());
+  const pageRef = useRef<HTMLElement>(null);
+  const tabsRef = useRef<HTMLElement>(null);
+  const [activeGroupId, setActiveGroupId] = useState<string | null>(null);
+
+  // `main.zaobao-page` is the scroll container, so the observer must root there rather than on the viewport.
+  useEffect(() => {
+    const page = pageRef.current;
+    if (!edition || !page) return;
+    setActiveGroupId(edition.groups[0]?.id ?? null);
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const hit = entries.find((entry) => entry.isIntersecting);
+        if (hit) setActiveGroupId(hit.target.id);
+      },
+      { root: page, rootMargin: "-35% 0px -60% 0px" },
+    );
+    page.querySelectorAll<HTMLElement>(".zaobao-edition-group").forEach((section) => observer.observe(section));
+    return () => observer.disconnect();
+  }, [edition]);
+
+  useEffect(() => {
+    const tabs = tabsRef.current;
+    const chip = activeGroupId ? tabs?.querySelector<HTMLElement>(`a[href="#${activeGroupId}"]`) : null;
+    if (!tabs || !chip) return;
+    tabs.scrollTo({ left: chip.offsetLeft - (tabs.clientWidth - chip.offsetWidth) / 2, behavior: "smooth" });
+  }, [activeGroupId]);
 
   useEffect(() => {
     if (invalidDate) return;
@@ -151,7 +177,7 @@ export function DuomeiZaobaoPage() {
   }
 
   return (
-    <main className={`zaobao-page${failed ? " is-fallback" : ""}`}>
+    <main className={`zaobao-page${failed ? " is-fallback" : ""}`} ref={pageRef}>
       <ZaobaoReaderBar originalUrl={editionUrl}>
         <Link className="zaobao-page-archive" to={ZAOBAO_ARCHIVE_ROUTE}>
           往期
@@ -227,6 +253,22 @@ export function DuomeiZaobaoPage() {
             ))}
           </div>
         </div>
+      ) : null}
+
+      {edition ? (
+        <nav className="zaobao-edition-tabs" aria-label="早报栏目" ref={tabsRef}>
+          <div className="zaobao-edition-tabs-row">
+            {edition.groups.map((group) => (
+              <a
+                key={group.id}
+                href={`#${group.id}`}
+                aria-current={group.id === activeGroupId ? "location" : undefined}
+              >
+                {group.name}
+              </a>
+            ))}
+          </div>
+        </nav>
       ) : null}
     </main>
   );
