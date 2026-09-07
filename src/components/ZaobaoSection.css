@@ -375,21 +375,6 @@ main.zaobao-page {
   outline-offset: var(--space-2xs);
 }
 
-.zaobao-frame {
-  display: block;
-  inline-size: 100%;
-  block-size: 100%;
-  min-block-size: 0;
-  border: 0;
-  background: var(--color-paper);
-}
-
-main.zaobao-page.is-fallback {
-  display: grid;
-  grid-template-rows: auto minmax(0, 1fr);
-  overflow: hidden;
-}
-
 .zaobao-reader-loading {
   display: grid;
   min-block-size: calc(100svh - var(--zaobao-reader-bar-height));
@@ -400,6 +385,33 @@ main.zaobao-page.is-fallback {
 
 .zaobao-reader-loading p {
   margin: 0;
+}
+
+.zaobao-reader-failed {
+  align-content: center;
+  gap: var(--space-lg);
+  text-align: center;
+}
+
+.zaobao-reader-failed p {
+  line-height: 1.65;
+}
+
+.zaobao-reader-failed-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: clamp(var(--space-md), 3vw, var(--space-xl));
+}
+
+button.zaobao-page-open {
+  padding: 0;
+  border-block-start: 0;
+  border-inline: 0;
+  background: none;
+  font: inherit;
+  font-size: var(--text-base);
+  cursor: pointer;
 }
 
 .zaobao-edition {
