@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { ZAOBAO_ARCHIVE_URL, ZAOBAO_ROUTE, ZAOBAO_URL } from "../components/ZaobaoSection";
+import { ZAOBAO_ARCHIVE_URL, ZAOBAO_PROXY_ROUTE, ZAOBAO_ROUTE } from "../components/ZaobaoSection";
 import { ZaobaoReaderBar, isZaobaoDate } from "./DuomeiZaobaoPage";
 
-const ZAOBAO_MANIFEST_URL = `${ZAOBAO_URL}/archive/manifest.json`;
+const ZAOBAO_MANIFEST_URL = `${ZAOBAO_PROXY_ROUTE}/archive/manifest.json`;
 
 type ZaobaoArchiveEntry = {
   date: string;
@@ -38,7 +38,7 @@ export function DuomeiZaobaoArchivePage() {
     const previousTitle = document.title;
     document.title = "往期早报 | DUOMEI";
     const controller = new AbortController();
-    fetch(ZAOBAO_MANIFEST_URL, { signal: controller.signal, mode: "cors" })
+    fetch(ZAOBAO_MANIFEST_URL, { signal: controller.signal })
       .then(async (response) => {
         if (!response.ok) throw new Error(`Zaobao manifest returned ${response.status}`);
         setEntries(parseManifest(await response.json()));

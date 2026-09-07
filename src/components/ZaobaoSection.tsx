@@ -7,6 +7,9 @@ export const ZAOBAO_ROUTE = "/zaobao";
 export const ZAOBAO_ARCHIVE_ROUTE = "/zaobao/archive";
 export const ZAOBAO_URL = "https://zaobao-six.vercel.app";
 export const ZAOBAO_ARCHIVE_URL = `${ZAOBAO_URL}/archive/`;
+// Same-origin edge relay (edge-functions/zaobao-src*) — the visitor's browser never
+// has to reach vercel.app, which is unreachable from mainland China.
+export const ZAOBAO_PROXY_ROUTE = "/zaobao-src";
 const ZAOBAO_FALLBACK_COVER = "/images/note-default-covers/duomei-default-cover-02.png";
 
 type ZaobaoDaily = {
@@ -25,10 +28,9 @@ function todayLabel() {
   }).format(new Date());
 }
 
-// zaobao-six serves its HTML with `access-control-allow-origin: *`; the headline
-// is its <h1> and the lead story's <figure><img> is the cover photo of the day.
+// The headline is the edition's <h1> and the lead story's <figure><img> is the cover photo of the day.
 async function fetchZaobaoDaily(signal: AbortSignal): Promise<ZaobaoDaily | null> {
-  const response = await fetch(ZAOBAO_URL, { signal, mode: "cors" });
+  const response = await fetch(ZAOBAO_PROXY_ROUTE, { signal });
   if (!response.ok) return null;
   const doc = new DOMParser().parseFromString(await response.text(), "text/html");
   const headline = doc.querySelector("h1")?.textContent?.trim();

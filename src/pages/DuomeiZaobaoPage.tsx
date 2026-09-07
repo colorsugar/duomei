@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Link, Navigate, useParams } from "react-router-dom";
-import { ZAOBAO_ARCHIVE_ROUTE, ZAOBAO_URL } from "../components/ZaobaoSection";
+import { ZAOBAO_ARCHIVE_ROUTE, ZAOBAO_PROXY_ROUTE, ZAOBAO_URL } from "../components/ZaobaoSection";
 
 // Source archive URLs are /YYYY-MM-DD/; anything else falls back to the archive list.
 export const ZAOBAO_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
@@ -11,8 +11,14 @@ export function isZaobaoDate(value: string | undefined): value is string {
   return !Number.isNaN(parsed.getTime()) && parsed.toISOString().startsWith(value);
 }
 
+// The original on vercel.app: used for "打开原版" and as the base for relative URLs in the parsed HTML.
 export function zaobaoEditionUrl(date?: string) {
   return date ? `${ZAOBAO_URL}/${date}/` : ZAOBAO_URL;
+}
+
+// The same-origin copy the reader actually downloads.
+export function zaobaoProxyUrl(date?: string) {
+  return date ? `${ZAOBAO_PROXY_ROUTE}/${date}/` : ZAOBAO_PROXY_ROUTE;
 }
 
 type ZaobaoStory = {
@@ -119,6 +125,7 @@ export function DuomeiZaobaoPage() {
   const editionLabel = date ? `${date} 早报` : "今日早报";
   const [edition, setEdition] = useState<ZaobaoEdition | null>(null);
   const [failed, setFailed] = useState(false);
+  const [attempt, setAttempt] = useState(0);
   // Some archived days point at images the source no longer serves; drop those figures instead of showing broken icons.
   const [brokenImages, setBrokenImages] = useState<ReadonlySet<string>>(() => new Set());
   const pageRef = useRef<HTMLElement>(null);
@@ -156,7 +163,7 @@ export function DuomeiZaobaoPage() {
     setFailed(false);
     setBrokenImages(new Set());
     const controller = new AbortController();
-    fetch(editionUrl, { signal: controller.signal, mode: "cors" })
+    fetch(zaobaoProxyUrl(date), { signal: controller.signal })
       .then(async (response) => {
         if (!response.ok) throw new Error(`Zaobao returned ${response.status}`);
         const next = parseEdition(await response.text(), editionUrl);
@@ -170,14 +177,14 @@ export function DuomeiZaobaoPage() {
       controller.abort();
       document.title = previousTitle;
     };
-  }, [editionLabel, editionUrl, invalidDate]);
+  }, [attempt, date, editionLabel, editionUrl, invalidDate]);
 
   if (invalidDate) {
     return <Navigate to={ZAOBAO_ARCHIVE_ROUTE} replace />;
   }
 
   return (
-    <main className={`zaobao-page${failed ? " is-fallback" : ""}`} ref={pageRef}>
+    <main className="zaobao-page" ref={pageRef}>
       <ZaobaoReaderBar originalUrl={editionUrl}>
         <Link className="zaobao-page-archive" to={ZAOBAO_ARCHIVE_ROUTE}>
           往期
@@ -191,7 +198,17 @@ export function DuomeiZaobaoPage() {
       ) : null}
 
       {failed ? (
-        <iframe className="zaobao-frame" src={editionUrl} title={editionLabel} referrerPolicy="no-referrer" />
+        <section className="zaobao-reader-loading zaobao-reader-failed" aria-live="polite">
+          <p>{editionLabel}暂时没拿到，可能是网络不太顺。</p>
+          <div className="zaobao-reader-failed-actions">
+            <button type="button" className="zaobao-page-open" onClick={() => setAttempt((current) => current + 1)}>
+              再试一次
+            </button>
+            <a className="zaobao-page-open" href={editionUrl} target="_blank" rel="noreferrer">
+              打开原版 ↗
+            </a>
+          </div>
+        </section>
       ) : null}
 
       {edition ? (

@@ -123,8 +123,9 @@ test("keeps Zaobao immersive while safely falling back to the original edition",
   assert.match(zaobaoPageSource, /function parseEdition\(html: string, base: string = ZAOBAO_URL\)/);
   assert.match(zaobaoPageSource, /\.page > section\[id\]/);
   assert.match(zaobaoPageSource, /className="zaobao-story-grid"/);
-  assert.match(zaobaoPageSource, /className="zaobao-frame"/);
-  assert.doesNotMatch(zaobaoPageSource, /dangerouslySetInnerHTML|srcDoc/);
+  assert.match(zaobaoPageSource, /className="zaobao-reader-loading zaobao-reader-failed"/);
+  assert.match(zaobaoPageSource, /再试一次/);
+  assert.doesNotMatch(zaobaoPageSource, /dangerouslySetInnerHTML|srcDoc|<iframe/);
   assert.match(zaobaoCss, /main\.zaobao-page \{[\s\S]*position:\s*fixed;[\s\S]*overflow-y:\s*auto/);
   assert.match(zaobaoCss, /\.zaobao-story-grid \{[\s\S]*repeat\(2, minmax\(0, 1fr\)\)/);
   assert.match(zaobaoCss, /@media \(max-width: 64rem\)[\s\S]*\.zaobao-story-grid \{[\s\S]*minmax\(0, 1fr\)/);
@@ -142,11 +143,32 @@ test("keeps the Zaobao archive inside duomei.site and reuses the same reader", (
   assert.match(zaobaoPageSource, /<Link className="zaobao-page-archive" to=\{ZAOBAO_ARCHIVE_ROUTE\}>/);
   assert.match(zaobaoPageSource, /href=\{originalUrl\} target="_blank"/);
   assert.match(zaobaoPageSource, /\.page > section\[id\], \.page > \.group\[id\]/);
-  assert.match(zaobaoArchivePageSource, /`\$\{ZAOBAO_URL\}\/archive\/manifest\.json`/);
+  assert.match(zaobaoArchivePageSource, /`\$\{ZAOBAO_PROXY_ROUTE\}\/archive\/manifest\.json`/);
   assert.match(zaobaoArchivePageSource, /<Link to=\{`\$\{ZAOBAO_ROUTE\}\/\$\{entry\.date\}`\}>/);
   assert.match(zaobaoArchivePageSource, /href=\{ZAOBAO_ARCHIVE_URL\} target="_blank"/);
   assert.doesNotMatch(zaobaoArchivePageSource, /dangerouslySetInnerHTML|srcDoc|<iframe/);
   assert.doesNotMatch(zaobaoSource, /zaobao-heading-archive"[^>]*target=/);
+});
+
+// Mainland visitors cannot reach vercel.app, so every browser-side content fetch must
+// go through the same-origin edge relay; vercel stays only behind "打开原版" links.
+test("fetches Zaobao content through the same-origin edge relay, never from vercel.app in the browser", () => {
+  assert.match(zaobaoSource, /ZAOBAO_PROXY_ROUTE = "\/zaobao-src"/);
+  assert.match(zaobaoSource, /fetch\(ZAOBAO_PROXY_ROUTE, \{ signal \}\)/);
+  assert.match(zaobaoPageSource, /return date \? `\$\{ZAOBAO_PROXY_ROUTE\}\/\$\{date\}\/` : ZAOBAO_PROXY_ROUTE/);
+  assert.match(zaobaoPageSource, /fetch\(zaobaoProxyUrl\(date\), \{ signal: controller\.signal \}\)/);
+  assert.match(zaobaoPageSource, /parseEdition\(await response\.text\(\), editionUrl\)/);
+  assert.match(zaobaoArchivePageSource, /fetch\(ZAOBAO_MANIFEST_URL, \{ signal: controller\.signal \}\)/);
+  for (const source of [zaobaoSource, zaobaoPageSource, zaobaoArchivePageSource]) {
+    assert.doesNotMatch(source, /fetch\((?:ZAOBAO_URL|editionUrl|ZAOBAO_ARCHIVE_URL)\b/);
+    assert.doesNotMatch(source, /mode: "cors"/);
+  }
+  const zaobaoProxySource = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../../server/zaobaoProxy.mjs"), "utf8");
+  assert.match(zaobaoProxySource, /ZAOBAO_PROXY_PREFIX = "\/zaobao-src"/);
+  for (const entry of ["zaobao-src.js", "zaobao-src/[[default]].js"]) {
+    const edge = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../../edge-functions", entry), "utf8");
+    assert.match(edge, /handleZaobaoProxyRequest\(context\.request\)/);
+  }
 });
 
 test("uses Skill naming and a three-column desktop directory", () => {
