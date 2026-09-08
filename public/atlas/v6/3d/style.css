@@ -17,6 +17,7 @@
 * { box-sizing: border-box; }
 html, body { margin: 0; height: 100%; overflow: hidden; background: var(--a-bg); color: var(--a-ink); font: 14px/1.6 -apple-system, "PingFang SC", "Noto Sans SC", "Microsoft YaHei", system-ui, sans-serif; -webkit-text-size-adjust: 100%; }
 button { font: inherit; color: inherit; }
+[hidden] { display: none !important; }
 
 .atlas3d { position: fixed; inset: 0; }
 .atlas3d-stage { position: absolute; inset: 0; touch-action: none; user-select: none; -webkit-user-select: none; }
