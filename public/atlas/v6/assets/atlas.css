@@ -7960,6 +7960,119 @@ button,
     padding: 0 8px;
   }
 }
+.atlas-header, .atlas-header *,
+.atlas-modebar, .atlas-modebar *,
+.atlas-contextbar, .atlas-contextbar *,
+.atlas-terrain-picker, .atlas-terrain-picker *,
+.atlas-map-shell, .atlas-map-shell *,
+.atlas-panel-header, .atlas-panel-header *,
+.atlas-filters, .atlas-filters *,
+.atlas-entry-list, .atlas-entry-list *,
+.atlas-gallery-tabs, .atlas-gallery-tabs *,
+.atlas-gallery-tools, .atlas-gallery-tools *,
+.atlas-gallery-frame, .atlas-gallery-frame *,
+.atlas-app button, .atlas-app button * {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+.atlas-map-shell img, .atlas-gallery-frame img {
+  -webkit-user-drag: none;
+}
+.atlas-original-tile {
+  mask-image: linear-gradient(to right,#000 96%,transparent 100%);
+}
+.atlas-eastern-tile {
+  mask-image: linear-gradient(to right,transparent,#000 18%,#000 98%,transparent);
+  transition: opacity .35s;
+}
+.atlas-region-caption {
+  position: absolute;
+  left: 20px;
+  top: 16px;
+  pointer-events: none;
+  color: #d9c18b;
+  font: 500 16px/1.6 'Songti SC',serif;
+  letter-spacing: .1em;
+  text-shadow: 0 2px 5px #001019;
+  z-index: 7;
+}
+.atlas-region-caption span {
+  display: block;
+  color: #a2b7c6;
+  font: 12px/1.6 sans-serif;
+  letter-spacing: 0;
+}
+.atlas-discovery-hint {
+  position: absolute;
+  left: 20px;
+  bottom: 55px;
+  max-width: calc(100% - 40px);
+  padding: 9px 12px;
+  border: 1px solid #d5c38b60;
+  background: #102d3ae8;
+  border-radius: 6px;
+  font-size: 14px;
+  color: #ead6a9;
+  pointer-events: none;
+  z-index: 8;
+}
+.atlas-eastern-status {
+  position: absolute;
+  left: 50%;
+  top: 45%;
+  transform: translateX(-50%);
+  z-index: 9;
+  background: #0b2438ef;
+  padding: 14px 18px;
+  border: 1px solid #b8c5c14f;
+  border-radius: 6px;
+  font-size: 14px;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+.atlas-eastern-status button {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  color: #e1c48b;
+  min-height: 44px;
+}
+.atlas-region-caption,.atlas-discovery-hint,.atlas-eastern-status {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+@media (max-width:680px) {
+  .atlas-modebar [data-slot=tabs-list] {
+    grid-template-columns: repeat(4,minmax(0,1fr));
+  }
+  .atlas-modebar [data-slot=tabs-trigger]:last-child {
+    grid-column: span 2;
+  }
+  .atlas-region-caption {
+    left: 12px;
+    top: 12px;
+    font-size: 14px;
+  }
+  .atlas-region-caption span {
+    font-size: 10px;
+  }
+  .atlas-north {
+    top: 68px;
+  }
+  .atlas-discovery-hint {
+    left: 12px;
+    max-width: calc(100% - 24px);
+    font-size: 12px;
+  }
+}
+.atlas-region-caption {
+  left: 50%;
+  transform: translateX(-50%);
+  text-align: center;
+  max-width: calc(100% - 150px);
+}
 @property --tw-translate-x {
   syntax: "*";
   inherits: false;
@@ -8309,22 +8422,3 @@ button,
     }
   }
 }
-
-/* Map interaction surfaces must not start Safari text selection or image callouts. */
-.atlas-header, .atlas-header *,
-.atlas-modebar, .atlas-modebar *,
-.atlas-contextbar, .atlas-contextbar *,
-.atlas-terrain-picker, .atlas-terrain-picker *,
-.atlas-map-shell, .atlas-map-shell *,
-.atlas-panel-header, .atlas-panel-header *,
-.atlas-filters, .atlas-filters *,
-.atlas-entry-list, .atlas-entry-list *,
-.atlas-gallery-tabs, .atlas-gallery-tabs *,
-.atlas-gallery-tools, .atlas-gallery-tools *,
-.atlas-gallery-frame, .atlas-gallery-frame *,
-.atlas-app button, .atlas-app button * {
-  -webkit-user-select: none;
-  user-select: none;
-  -webkit-touch-callout: none;
-}
-.atlas-map-shell img, .atlas-gallery-frame img { -webkit-user-drag: none; }

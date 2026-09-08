@@ -146,12 +146,12 @@ test("keeps every public new-book page present, ordered, and byte-stable", () =>
     "xinshuo-01": "39621cb2ce866b65f64fd2d305e73d5e4035c264cf302a8993909576542cfba8",
     "xinshuo-02": "98f439c37b83abbb52da41334d531c7df9fc30f07a9805535d3bb96be8c6fab2",
     "gui-xiang-huan-xiang": "7f69bdcf24ee701365908cdc412f3cec137951639ccc1087e5339a99f74c40ad",
-    "hanhai-realms-artbook": "7af57eeca746e81dbe1f9784ed95338ee4ce62148fad5e497a46435fab1ac984",
+    "hanhai-realms-artbook": "b8c031d547dd385a4201277003b342231802e96d6b0b71bc35ca789a3b84e233",
   } as const;
 
 
   for (const [bookId, expectedHash] of Object.entries(expectedHashes)) {
-    const expectedNames = Array.from({ length: bookId === "hanhai-realms-artbook" ? 52 : 30 }, (_, index) => `${String(index + 1).padStart(3, "0")}.webp`);
+    const expectedNames = Array.from({ length: bookId === "hanhai-realms-artbook" ? 64 : 30 }, (_, index) => `${String(index + 1).padStart(3, "0")}.webp`);
     const pageDirectory = path.join(projectRoot, "public", "images", "guyu", bookId, "pages");
     const names = readdirSync(pageDirectory).sort();
     assert.deepEqual(names, expectedNames, `${bookId} page sequence changed`);
@@ -168,23 +168,26 @@ test("keeps every public new-book page present, ordered, and byte-stable", () =>
 });
 
 
-test("maps the 52-page realms artbook to public complete pages and atlas locations", () => {
+test("maps the 64-page realms artbook to public complete pages and atlas locations", () => {
   const book = guyuBooks.find(book => book.id === "hanhai-realms-artbook");
   assert.ok(book);
   assert.equal(book.chapter, "新说");
   assert.equal(book.kind, "艺术设定集");
   assert.equal(book.access, "public");
-  assert.equal(book.pageCount, 52);
-  assert.equal(book.pages.length, 52);
-  assert.equal(book.logicalPages.length, 52);
-  assert.equal(book.pageDescriptions.length, 52);
-  assert.equal(book.mapEntries?.length, 52);
+  assert.equal(book.pageCount, 64);
+  assert.equal(book.pages.length, 64);
+  assert.equal(book.logicalPages.length, 64);
+  assert.equal(book.pageDescriptions.length, 64);
+  assert.equal(book.mapEntries?.length, 64);
   assert.equal(book.companionMap, "/atlas-v6");
   assert.equal(book.previewCoverSrc, "/images/guyu-hanhai-realms-artbook-cover.webp");
   assert.ok(book.logicalPages.every(page => page.placement === "full"));
   assert.deepEqual(book.logicalPages.map(page => page.src), book.pages);
-  assert.deepEqual(book.pages, Array.from({length:52}, (_,i) => `/images/guyu/hanhai-realms-artbook/pages/${String(i+1).padStart(3,"0")}.webp`));
+  assert.deepEqual(book.pages, Array.from({length:64}, (_,i) => `/images/guyu/hanhai-realms-artbook/pages/${String(i+1).padStart(3,"0")}.webp`));
   assert.equal(book.mapEntries?.[46], "site-9");
   assert.equal(book.mapEntries?.[50], "site-11");
-  assert.ok(book.sections?.every(section => Number.isInteger(section.page) && section.page >= 1 && section.page <= 52));
+  assert.deepEqual(book.mapEntries?.slice(57,63), ["beast-dragon","beast-wolf","beast-leviathan","beast-thunderbird","beast-stag","beast-tortoise"]);
+  assert.ok(book.sections?.some(section => section.title === "山河相接" && section.page === 52));
+  assert.ok(book.sections?.some(section => section.title === "烬月·传说栖地" && section.page === 58));
+  assert.ok(book.sections?.every(section => Number.isInteger(section.page) && section.page >= 1 && section.page <= 64));
 });
