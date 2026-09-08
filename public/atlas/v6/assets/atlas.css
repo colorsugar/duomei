@@ -8309,3 +8309,22 @@ button,
     }
   }
 }
+
+/* Map interaction surfaces must not start Safari text selection or image callouts. */
+.atlas-header, .atlas-header *,
+.atlas-modebar, .atlas-modebar *,
+.atlas-contextbar, .atlas-contextbar *,
+.atlas-terrain-picker, .atlas-terrain-picker *,
+.atlas-map-shell, .atlas-map-shell *,
+.atlas-panel-header, .atlas-panel-header *,
+.atlas-filters, .atlas-filters *,
+.atlas-entry-list, .atlas-entry-list *,
+.atlas-gallery-tabs, .atlas-gallery-tabs *,
+.atlas-gallery-tools, .atlas-gallery-tools *,
+.atlas-gallery-frame, .atlas-gallery-frame *,
+.atlas-app button, .atlas-app button * {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+.atlas-map-shell img, .atlas-gallery-frame img { -webkit-user-drag: none; }
