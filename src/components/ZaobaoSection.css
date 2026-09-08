@@ -482,13 +482,6 @@ button.zaobao-page-open {
   background: var(--color-paper-3);
 }
 
-/* Keep the shared music orb above the column tabs on phones so the first chip stays tappable. */
-@media (max-width: 48rem) {
-  body:has(.zaobao-edition-tabs) .duomei-music-player:not(.is-placed) {
-    inset-block-end: calc(var(--space-md) + var(--size-hit) + var(--space-sm) + env(safe-area-inset-bottom, 0px));
-  }
-}
-
 .zaobao-edition-hero {
   display: grid;
   grid-template-columns: minmax(0, 1.3fr) minmax(18rem, 0.7fr);

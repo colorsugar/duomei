@@ -35,13 +35,9 @@
     box-shadow 420ms var(--ease-out);
 }
 
-.duomei-music-player.is-placed {
-  inset: auto;
-}
-
-/* Docked: the resting orb sits in the global header beside the brand; opening slides the bar out from
- * under the header to just below it. The orb outranks the header only while it rests there, so the
- * opened bar and panel can never cover the header or an open menu. */
+/* Docked (fixed, not draggable): the resting orb sits in the global header beside the brand; opening
+ * slides the bar out from under the header to just below it. The orb outranks the header only while it
+ * rests there, so the opened bar and panel can never cover the header or an open menu. */
 .duomei-music-player.is-docked {
   inset: auto;
   transition:
@@ -78,10 +74,6 @@ body:has(.duomei-header.is-scrolled.is-scroll-hidden:not(.is-hover-revealed):not
   transform: translate3d(0, calc(-100% - 1.5rem), 0);
 }
 
-.duomei-music-player.is-dragging {
-  box-shadow: var(--shadow-book);
-}
-
 .duomei-music-player.is-minimized {
   inline-size: var(--music-orb-size);
   block-size: var(--music-orb-size);
@@ -107,8 +99,8 @@ body:has(.duomei-header.is-scrolled.is-scroll-hidden:not(.is-hover-revealed):not
   border-radius: 50%;
   font-family: var(--font-display);
   font-size: var(--text-xl);
-  touch-action: none;
-  cursor: grab;
+  touch-action: manipulation;
+  cursor: pointer;
   opacity: 0;
   pointer-events: none;
   transform: rotate(-18deg) scale(0.7);
@@ -226,8 +218,8 @@ body:has(.duomei-header.is-scrolled.is-scroll-hidden:not(.is-hover-revealed):not
   background: var(--color-paper-2) !important;
   border: var(--rule-hairline) solid color-mix(in oklch, var(--color-rule) 76%, transparent) !important;
   border-radius: 0.625rem;
-  touch-action: none;
-  cursor: grab !important;
+  touch-action: manipulation;
+  cursor: pointer !important;
 }
 
 .duomei-music-now {
@@ -309,11 +301,6 @@ body:has(.duomei-header.is-scrolled.is-scroll-hidden:not(.is-hover-revealed):not
   inline-size: 2.5rem;
   min-inline-size: 2.5rem !important;
   border-radius: 50%;
-}
-
-.duomei-music-player.is-dragging :is(.duomei-music-orb, .duomei-music-cover) {
-  cursor: grabbing;
-  transform: scale(0.96);
 }
 
 .duomei-music-queue[aria-pressed="true"],
@@ -714,11 +701,10 @@ body:has(.duomei-header.is-scrolled.is-scroll-hidden:not(.is-hover-revealed):not
 
 }
 
-@media (max-width: 40rem) {
-  body:has(.guyu-reader-page) .duomei-music-player:not(.is-placed) {
-    inset-block-start: max(var(--space-md), env(safe-area-inset-top, 0px));
-    inset-block-end: auto;
-  }
+/* Immersive scenes without a top bar to dock beside (Guyu readers, the Yunyou shell) keep the orb fixed top-left. */
+.duomei-music-player.is-immersive:not(.is-docked) {
+  inset-block-start: max(var(--space-md), env(safe-area-inset-top, 0px));
+  inset-block-end: auto;
 }
 
 @media (max-width: 22.5rem) {
