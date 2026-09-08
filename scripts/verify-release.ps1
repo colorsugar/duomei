@@ -218,7 +218,7 @@ $requiredMarkers = @(
   @{ File = "src/components/DuomeiMusicPlayer.tsx"; Marker = "scheduleAutoMinimize" },
   @{ File = "src/components/DuomeiMusicPlayer.tsx"; Marker = 'className="duomei-music-orb"' },
   @{ File = "src/components/DuomeiMusicPlayer.tsx"; Marker = "fetchNeteaseLyrics" },
-  @{ File = "src/components/DuomeiMusicPlayer.tsx"; Marker = "beginOrbLongPress" },
+  @{ File = "src/components/DuomeiMusicPlayer.tsx"; Marker = "DOCK_ANCHOR_SELECTOR" },
   @{ File = ".github/workflows/deploy-edgeone.yml"; Marker = "Test NetEase playlist and playback gateway" },
   @{ File = ".github/workflows/deploy-edgeone.yml"; Marker = 'yunyouFrameOptions.toUpperCase() === "SAMEORIGIN"' },
   @{ File = ".github/workflows/pr-validation.yml"; Marker = "Test NetEase playlist and playback gateway" },
