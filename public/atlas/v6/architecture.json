@@ -1,0 +1,288 @@
+{
+  "sourceCommit": "415ae7bdc8fe18be841855660f3ac17f27e2f14b",
+  "places": [
+    {
+      "id": "palace-aivernor",
+      "name": "艾维诺尔 · 金穗王宫",
+      "parent": "aivernor",
+      "related": [
+        "IV",
+        "site-3"
+      ],
+      "images": [
+        "aivernor-panorama",
+        "aivernor-market"
+      ],
+      "kind": "王宫与下城",
+      "where": "王城粮河桥渡上方的台地；王宫、下城集市、河港与王畿庄园同属一个生活圈。",
+      "formation": "白石塔群与金顶以河谷采石、船运和封臣工匠营造；礼仪庭园位于高台，粮仓和水磨沿水岸布置。",
+      "routes": "王宫通过坡街下接谷穗集市，跨桥通向银穗粮原；税粮沿粮河送往西门港。",
+      "story": "王室在收获节展示封臣旗帜，集市以双麦穗标记公秤。华丽宫廷依赖诸侯交粮，封臣拒绝供给就会中断庆典与驻军。"
+    },
+    {
+      "id": "castle-cold-lake",
+      "name": "寒汀 · 镜湖堡",
+      "parent": "north-seat",
+      "related": [
+        "III"
+      ],
+      "images": [
+        "cold-lake-castle"
+      ],
+      "kind": "雪山湖堡",
+      "where": "寒汀王城雪线以下的湖畔岩台；背风山谷供给牧草和少量耕地。",
+      "formation": "城堡把主厅、冬仓和七座高低不同的守塔压在稳定岩台上；湖岸留出码头，不把房屋铺到雪崩沟里。",
+      "routes": "湖船抵达寒汀码头，驮道连向阶湖城与霜鞍古道；封冻后改用经勘验的岸路。",
+      "story": "冰蓝矿脉被视为古约的痕迹，不能随意释放魔法热量融化整湖。冬仓分粮比宫廷排场更能决定王权。"
+    },
+    {
+      "id": "village-dragon-bone",
+      "name": "魔焰龙渊 · 龙骨谷",
+      "parent": "beast-dragon",
+      "related": [],
+      "images": [
+        "dragon-bone-valley"
+      ],
+      "kind": "龙骨祭村",
+      "where": "魔焰龙渊外围冷却的支谷，村落位于远离活火道的溪流台地。",
+      "formation": "巨龙旧骨由崩积坡半掩，骨拱议事堂和石木屋顺溪分布；饮水取上游泉，祭场不截断水路。",
+      "routes": "村道接入魔焰龙渊既有进山路线，兽族向导在此交换护符、补给和禁行消息。",
+      "story": "兽族守骨者将巨龙视为古约见证；取骨制器须议会同意。村民只知道骨架属于远古巨龙，无法确认它是否仍与深谷中的龙族共享记忆。"
+    },
+    {
+      "id": "castle-sea-gate",
+      "name": "东门港 · 赤铜海堡",
+      "parent": "east-port",
+      "related": [
+        "VI",
+        "site-1"
+      ],
+      "images": [
+        "sea-gate-castle"
+      ],
+      "kind": "临海城堡",
+      "where": "双港海门东岸岬角，俯瞰东门港查验水面和对岸西门港。",
+      "formation": "红铜屋顶宫堡沿岸坡递升；低层是海关、军仓与防浪堤，高处设信号塔和守望台。",
+      "routes": "坡路下达查验码头，海路通向烬帆港；西门港粮船仍必须通过实际航槽与引水程序。",
+      "story": "远处巨龙仅在约定季节巡视，不能替代舰队、粮货与灯塔。两岸关系恶化时，宫堡能封港，也会失去税收。"
+    },
+    {
+      "id": "palace-imperial",
+      "name": "敕垣帝都 · 天阶宫",
+      "parent": "imperial-seat",
+      "related": [
+        "VI"
+      ],
+      "images": [
+        "imperial-palace"
+      ],
+      "kind": "帝国仪典宫",
+      "where": "敕垣帝都中央的高台，接入既有内陆大道与军需仓储体系。",
+      "formation": "白石塔群、阶梯庭园和仪仗广场逐级展开，暗红日轮旗与艾维诺尔金穗纹章分开。",
+      "routes": "宽阔礼仪大道连接税署和城门，后勤坡道通仓场；宫内供水由蓄池与引水渠承担。",
+      "story": "天阶仪典宣示统一军需与法令。护城符光依赖定期补充晶石，不能长期覆盖全国，也无法消除税粮矛盾。"
+    },
+    {
+      "id": "castle-saddle",
+      "name": "霜鞍城 · 守隘堡",
+      "parent": "saddle-city",
+      "related": [
+        "X",
+        "site-2"
+      ],
+      "images": [
+        "saddle-castle"
+      ],
+      "kind": "中世纪山城堡",
+      "where": "霜鞍城上方的低鞍侧脊；守住古道出口，同时避开最高积雪脊。",
+      "formation": "灰白石主堡、圆塔和层叠城墙顺山势展开，深绿屋顶下设草料仓；山脚有驮队冬营。",
+      "routes": "城门坡道下接霜鞍古道，桥梁与向导站串联湖谷、关城和西方道路。",
+      "story": "关税供养救援与路面维护。占据城堡不能保证冬季通行，缺草料或桥毁时驻军也难以补给。"
+    },
+    {
+      "id": "palace-sky",
+      "name": "炉环城 · 云帆浮空宫",
+      "parent": "forge-city",
+      "related": [
+        "V",
+        "site-5"
+      ],
+      "images": [
+        "sky-windmill"
+      ],
+      "kind": "浮空宫与风车坡",
+      "where": "炉环城外补给场上方的限定空域；风车坡是观察浮空宫和飞船的地面地点。",
+      "formation": "晶石稳定环维持空岛姿态，系泊链限制漂移；铜木风车和地面升降货台承担供应。",
+      "routes": "所有重货先沿炉谷道路抵达地面仓场，再通过货台或飞船运入空宫；空岛不替代大陆贸易路线。",
+      "story": "技师与风术师共同值守。暴风、晶石耗尽和负载超限会迫使停航，浮空能力不能供整座王国随意迁徙。"
+    },
+    {
+      "id": "palace-dragon-coast",
+      "name": "潮隐王城 · 鳞潮海崖宫",
+      "parent": "island-seat",
+      "related": [
+        "VII",
+        "site-11"
+      ],
+      "images": [
+        "dragon-coast"
+      ],
+      "kind": "龙裔海崖宫",
+      "where": "潮隐王城邻近的暖海石灰岩高岸，阶梯宫苑俯视礁湾。",
+      "formation": "宫室置于稳定高位台地，阶梯、蓄水池和潮门连接海岸；洞层受浪蚀与溶蚀，不作为主宫承重层。",
+      "routes": "上层步道通王城，下层潮门通小船泊处；潮蚀迷宫的进入窗口仍由潮位和岛内降雨共同决定。",
+      "story": "龙裔守卫负责潮历和海难救助。鳞甲不意味着无限潜水，暴雨后的洞穴洪峰仍会封路。"
+    },
+    {
+      "id": "village-rabbit",
+      "name": "树人之森 · 泉耳溪村",
+      "parent": "site-10",
+      "related": [
+        "II",
+        "gray-camp"
+      ],
+      "images": [
+        "rabbit-valley"
+      ],
+      "kind": "兔族聚落",
+      "where": "树人之森边缘的湿润低山泉溪，靠近兽族往来林道。",
+      "formation": "石木民居沿稳定溪岸分散，木桥跨窄溪，废哨塔留作瞭望；林缘花圃与药田不侵占整片根网。",
+      "routes": "采药路通长旌城的季节市场，林间轻装道接入万兽走廊；雨季改走高岸。",
+      "story": "兔族采药人以泉水、足迹和草木辨路。善听不能隔山听见一切，暴雨会遮蔽声音并冲走旧足迹。"
+    },
+    {
+      "id": "manor-lake",
+      "name": "阶湖城 · 晴汀庄园",
+      "parent": "lake-city",
+      "related": [
+        "VIII",
+        "site-7"
+      ],
+      "images": [
+        "lake-manor"
+      ],
+      "kind": "湖畔华丽庄园",
+      "where": "阶湖城下湖背风向阳的缓坡，位于洪水线以上。",
+      "formation": "庄园主楼面湖，梯级花园、温室、果园和私人码头顺坡相接；高处保留林地以稳定土壤。",
+      "routes": "庄园路通阶湖城公共仓场，货物跨上下湖仍需缆道换装，私人码头没有绕开公共航规的特权。",
+      "story": "主人以庭园宴会接待各国商使；丰水年要让蓄水灌溉服从下游需求。园艺法术能辅助生长，不能免除冬季供暖成本。"
+    },
+    {
+      "id": "palace-elven",
+      "name": "森冠王庭 · 瀑光宫苑",
+      "parent": "forest-court",
+      "related": [
+        "I",
+        "site-10"
+      ],
+      "images": [
+        "elven-palace"
+      ],
+      "kind": "精灵宫苑",
+      "where": "森冠王庭河谷台地上的古树与支流瀑布之间。",
+      "formation": "石木宫室绕树生长，桥廊跨溪而不截断主河；林冠庭院与河港共同组成王庭。",
+      "routes": "沿河码头连接船材市场和雾灯港的运输体系，林下道路通向内陆村落。",
+      "story": "精灵园师与共治国船材公会共同管理树龄和水源。根网遇裸岩与断林即中断，宫苑不能靠魔法无限采伐后复原。"
+    },
+    {
+      "id": "fortress-orc",
+      "name": "烬月西岸 · 归羽誓堡",
+      "parent": "beast-thunderbird",
+      "related": [],
+      "images": [
+        "orc-fortress"
+      ],
+      "kind": "兽族出海古堡",
+      "where": "归羽湾登陆端旁的沿岸台地，作为雷羽天峡进山通路的海上补给前哨。",
+      "formation": "黑石墙、骨刻门架、宽坡道、兽族议事台和船坞相接；多种身体形态共用地面与高台。",
+      "routes": "海上先抵归羽湾，再沿既有峡谷道路进入雷羽天峡；它是远渡终点与返航起点，不是跨海陆桥。",
+      "story": "誓堡纪念旧大陆兽族远渡和与传说生物订立古约。舰船仍须候风、补水，飞行族不能无限越海运粮。"
+    },
+    {
+      "id": "ruin-dragon",
+      "name": "魔焰龙渊 · 龙誓废宫",
+      "parent": "beast-dragon",
+      "related": [],
+      "images": [
+        "dragon-ruin"
+      ],
+      "kind": "古代废宫",
+      "where": "魔焰龙渊旧火山台地边缘，避开现今活跃火道。",
+      "formation": "断裂石拱、坍塌仪典庭与兽族誓坛围绕巨龙休憩地；保存的承重墙与新裂缝清楚可辨。",
+      "routes": "从龙骨谷的向导站进入旧宫外围，深入龙渊须按季节与古约获准；不开放无向导横穿。",
+      "story": "废宫记录兽人与巨龙共同守护、后来破裂的盟约。巨龙守卫的是有限谷地，离巢过久会危及幼龙与熔晶巢床。"
+    }
+  ],
+  "plates": {
+    "aivernor-market.webp": {
+      "width": 1536,
+      "height": 1024,
+      "sha256": "24e6c73a8c825152a8eb4c6f891f3592b2e70e3850044614f480247bb6520702"
+    },
+    "aivernor-panorama.webp": {
+      "width": 1536,
+      "height": 1024,
+      "sha256": "033219c8c8faa95eaaa89d5cd05448211421bdc56f778dc32f33207ef7d090cf"
+    },
+    "cold-lake-castle.webp": {
+      "width": 1536,
+      "height": 1024,
+      "sha256": "458755e93563427740e0fd9c1323c64c49c382cedf17465cc867a83c38bedb4f"
+    },
+    "dragon-bone-valley.webp": {
+      "width": 1536,
+      "height": 1024,
+      "sha256": "c988867806bfba957acc6a6be391e0badf3845534da0de56e2d715358f2d9aa8"
+    },
+    "dragon-coast.webp": {
+      "width": 1536,
+      "height": 1024,
+      "sha256": "cf00f3934d7c274ccb51aa4c839fcbec5dc066c807a9d1b381edfbe848924ba4"
+    },
+    "dragon-ruin.webp": {
+      "width": 1536,
+      "height": 1024,
+      "sha256": "376c6dac644ee12ce3fe91d682af0dbc06881169516c480b031a7bfcc0563bc9"
+    },
+    "elven-palace.webp": {
+      "width": 1536,
+      "height": 1024,
+      "sha256": "d7b1917b1eca77599565ef4794fd8d57d860f53223969caab1f3622281c3395f"
+    },
+    "imperial-palace.webp": {
+      "width": 1536,
+      "height": 1024,
+      "sha256": "17550b63be52b15694865fa632a1e1aa14ac847d43be549abaffe2f2e0a1aa24"
+    },
+    "lake-manor.webp": {
+      "width": 1536,
+      "height": 1024,
+      "sha256": "4aef91c92e9a50034bf0ce4d1a8ddf2245c6b81a89600dc4c35d2b0c1c613d15"
+    },
+    "orc-fortress.webp": {
+      "width": 1536,
+      "height": 1024,
+      "sha256": "48433e0922221a536760af7b3a4acbb9e9df4196c85f37ecd341bed1b0350928"
+    },
+    "rabbit-valley.webp": {
+      "width": 1536,
+      "height": 1024,
+      "sha256": "c06ee4e2666fb5fe83bf0d71bca0d21787656d464006e984635e85c3725d1249"
+    },
+    "saddle-castle.webp": {
+      "width": 1536,
+      "height": 1024,
+      "sha256": "b28e3bbed8366483d5e89427f9f6fb1c2ef8acf97ce488a5396ce594048b9e56"
+    },
+    "sea-gate-castle.webp": {
+      "width": 1536,
+      "height": 1024,
+      "sha256": "d238becc5221baf4572b1c622e41c3d9dc61b8503adb5fef28ed1140032c203d"
+    },
+    "sky-windmill.webp": {
+      "width": 1536,
+      "height": 1024,
+      "sha256": "f4b71d56779d1b305f6d4ad5deb6c0a4a0769ed766b23c15b23b92095e80c9f3"
+    }
+  }
+}
