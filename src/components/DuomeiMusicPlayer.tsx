@@ -8,6 +8,7 @@ import {
   type KeyboardEvent,
   type PointerEvent,
 } from "react";
+import { createPortal } from "react-dom";
 import {
   fetchNeteasePlaylist,
   findInitialNeteaseTrackIndex,
@@ -20,7 +21,12 @@ import "../music-player.css";
 
 const NETEASE_PLAYLIST_ID = "316500315";
 const PLAYBACK_MODE_KEY = "duomei-music-playback-mode";
-const POSITION_KEY = "duomei-music-player-position-v4";
+// v5: the resting orb moved into the global header, so older hand-placed positions are dropped once.
+const POSITION_KEY = "duomei-music-player-position-v5";
+const DOCK_GAP = 12;
+const DOCK_DROP = 8;
+// Events that grant user activation in Safari and Chrome; scroll-only touches never fire `click`.
+const AUTOPLAY_GESTURES: Array<keyof DocumentEventMap> = ["click", "keydown"];
 const PANEL_KEY = "duomei-music-player-panel-v2";
 const INITIAL_VISIBLE_TRACKS = 80;
 const PLAYER_MARGIN = 16;
@@ -31,6 +37,8 @@ const LONG_PRESS_MS = 320;
 
 type PlaybackMode = "sequence" | "shuffle" | "one";
 type PanelView = "queue" | "lyrics";
+// Where the resting orb sits beside the header brand and where the opened bar drops beneath the header.
+type DockPositions = { orb: FloatingWidgetPosition; open: FloatingWidgetPosition };
 type MusicProgressStyle = CSSProperties & { "--music-progress": string };
 type DragState = {
   pointerId: number;
@@ -179,6 +187,8 @@ export function DuomeiMusicPlayer({ compactContext = false }: { compactContext?:
   const playlistRef = useRef<NeteasePlaylist | null>(null);
   const positionRef = useRef<FloatingWidgetPosition | null>(null);
   const failedTrackIdsRef = useRef(new Set<string>());
+  const stopAutoplayListeningRef = useRef<(() => void) | null>(null);
+  const [dock, setDock] = useState<DockPositions | null>(null);
   const [playbackMode, setPlaybackMode] = useState<PlaybackMode>(readPlaybackMode);
   const [position, setPosition] = useState<FloatingWidgetPosition | null>(() => {
     const stored = readPosition();
@@ -294,9 +304,71 @@ export function DuomeiMusicPlayer({ compactContext = false }: { compactContext?:
     void loadPlaylist().catch(() => undefined);
   };
 
+  const dockAnchor = !position && !compactContext ? dock : null;
+  const docked = dockAnchor !== null;
+
+  // Without a hand-placed position the orb rests in the global header beside the brand and the opened
+  // bar drops just below the header. Measured from layout boxes so the brand's ambient motion cannot jitter it.
+  useEffect(() => {
+    if (position || compactContext) {
+      setDock(null);
+      return;
+    }
+    const header = document.querySelector<HTMLElement>(".duomei-header");
+    const brand = header?.querySelector<HTMLElement>(".duomei-brand");
+    if (!header || !brand) {
+      setDock(null);
+      return;
+    }
+    const measure = () => {
+      const orbSize = playerRef.current?.querySelector<HTMLElement>(".duomei-music-orb")?.offsetWidth || 52;
+      setDock({
+        orb: { x: brand.offsetLeft + brand.offsetWidth + DOCK_GAP, y: brand.offsetTop + (brand.offsetHeight - orbSize) / 2 },
+        open: { x: brand.offsetLeft, y: header.offsetHeight + DOCK_DROP },
+      });
+    };
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(header);
+    observer.observe(brand);
+    void document.fonts?.ready.then(measure);
+    return () => observer.disconnect();
+  }, [compactContext, position]);
+
   useEffect(() => {
     const preloadTimer = window.setTimeout(() => void loadPlaylist().catch(() => undefined), 1_200);
     return () => window.clearTimeout(preloadTimer);
+  }, [loadPlaylist]);
+
+  // Ambient music starts on its own where the browser allows it; where unsolicited audio is blocked
+  // (Safari, fresh Chrome profiles) the first tap or key anywhere outside the player starts it instead.
+  useEffect(() => {
+    let disposed = false;
+    const stop = () => {
+      for (const name of AUTOPLAY_GESTURES) document.removeEventListener(name, onGesture, true);
+      stopAutoplayListeningRef.current = null;
+    };
+    const tryAutoplay = async () => {
+      const audio = audioRef.current;
+      if (disposed || !audio || !audio.paused) return;
+      const list = playlistRef.current ?? (await loadPlaylist().catch(() => null));
+      if (disposed || !list || !audioRef.current?.paused) return;
+      const played = await playTrackAt(findInitialNeteaseTrackIndex(list.tracks, failedTrackIdsRef.current), { quiet: true });
+      if (played || disposed) return;
+      for (const name of AUTOPLAY_GESTURES) document.addEventListener(name, onGesture, { capture: true, passive: true });
+      stopAutoplayListeningRef.current = stop;
+    };
+    const onGesture = (event: Event) => {
+      // The player's own controls decide for themselves.
+      if (event.target instanceof Node && playerRef.current?.contains(event.target)) return;
+      stop();
+      void tryAutoplay();
+    };
+    void tryAutoplay();
+    return () => {
+      disposed = true;
+      stop();
+    };
   }, [loadPlaylist]);
 
   useEffect(() => {
@@ -391,11 +463,12 @@ export function DuomeiMusicPlayer({ compactContext = false }: { compactContext?:
     }
   }, []);
 
-  const playTrackAt = async (index: number) => {
+  // `quiet` is the unsolicited autoplay attempt: a browser refusal is expected there and must not read as a broken track.
+  const playTrackAt = async (index: number, { quiet = false } = {}) => {
     const list = playlistRef.current;
     const audio = audioRef.current;
     const track = list?.tracks[index];
-    if (!list || !audio || !track?.playable || failedTrackIdsRef.current.has(track.id)) return;
+    if (!list || !audio || !track?.playable || failedTrackIdsRef.current.has(track.id)) return false;
     setCurrentIndex(index);
     setPlaybackMessage("");
     setCurrentTime(0);
@@ -408,9 +481,11 @@ export function DuomeiMusicPlayer({ compactContext = false }: { compactContext?:
     setIsBuffering(true);
     try {
       await audio.play();
+      return true;
     } catch {
       setIsBuffering(false);
-      setPlaybackMessage(`《${track.name}》当前无法播放，请换一首。`);
+      if (!quiet) setPlaybackMessage(`《${track.name}》当前无法播放，请换一首。`);
+      return false;
     }
   };
 
@@ -649,27 +724,32 @@ export function DuomeiMusicPlayer({ compactContext = false }: { compactContext?:
   const progressStyle = {
     "--music-progress": `${duration > 0 ? Math.min(100, Math.max(0, currentTime / duration * 100)) : 0}%`,
   } as MusicProgressStyle;
-  const playerStyle: CSSProperties = position
-    ? { left: position.x, top: position.y, right: "auto", bottom: "auto" }
+  const anchor = position ?? (dockAnchor ? (minimized ? dockAnchor.orb : dockAnchor.open) : null);
+  const playerStyle: CSSProperties = anchor
+    ? { left: anchor.x, top: anchor.y, right: "auto", bottom: "auto" }
     : {};
 
-  return (
+  // Rendered on <body> like the header: the motion root isolates its stacking context, and the
+  // docked orb has to be able to sit above the fixed header.
+  return createPortal(
     <aside
       ref={playerRef}
-      className={`duomei-music-player${position ? " is-placed" : ""}${compactContext ? " is-immersive" : ""}${panelClosed ? " is-panel-closed" : " is-panel-open"}${minimized ? " is-minimized" : ""}${dragging ? " is-dragging" : ""}${isPlaying ? " is-playing" : ""}`}
+      className={`duomei-music-player${position ? " is-placed" : ""}${docked ? " is-docked" : ""}${compactContext ? " is-immersive" : ""}${panelClosed ? " is-panel-closed" : " is-panel-open"}${minimized ? " is-minimized" : ""}${dragging ? " is-dragging" : ""}${isPlaying ? " is-playing" : ""}`}
       style={playerStyle}
       aria-label="正在听"
       onPointerEnter={(event) => {
         pointerInsideRef.current = true;
         clearAutoMinimize();
-        if (event.pointerType !== "mouse" || !minimized) return;
+        // A docked orb opens below the header, out from under the pointer; hover-reveal would loop, so it opens on click.
+        if (event.pointerType !== "mouse" || !minimized || docked) return;
         clearHoverReveal();
         hoverRevealTimerRef.current = window.setTimeout(revealCompactPlayer, 180);
       }}
       onPointerLeave={() => {
         pointerInsideRef.current = false;
         clearHoverReveal();
-        scheduleAutoMinimize(900);
+        // Opening a docked orb moves the bar out from under the pointer, so that "leave" gets the normal rest delay.
+        scheduleAutoMinimize(docked ? 2_600 : 900);
       }}
       onPointerDownCapture={() => {
         pointerFocusGuardRef.current = true;
@@ -883,7 +963,10 @@ export function DuomeiMusicPlayer({ compactContext = false }: { compactContext?:
       <audio
         ref={audioRef}
         preload="metadata"
-        onPlay={() => setIsPlaying(true)}
+        onPlay={() => {
+          setIsPlaying(true);
+          stopAutoplayListeningRef.current?.();
+        }}
         onPause={() => setIsPlaying(false)}
         onPlaying={() => setIsBuffering(false)}
         onWaiting={() => setIsBuffering(true)}
@@ -908,6 +991,7 @@ export function DuomeiMusicPlayer({ compactContext = false }: { compactContext?:
           }, 250);
         }}
       />
-    </aside>
+    </aside>,
+    document.body,
   );
 }

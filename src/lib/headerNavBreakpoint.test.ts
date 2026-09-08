@@ -182,7 +182,7 @@ test("uses Skill naming and a three-column desktop directory", () => {
   assert.match(skillsCss, /@media \(min-width: 60rem\)[\s\S]*grid-template-columns:\s*repeat\(3, minmax\(0, 1fr\)\)/);
 });
 
-test("keeps the full NetEase playlist native, movable, bounded, and autoplay-off", () => {
+test("keeps the full NetEase playlist native, movable, bounded, header-docked, and gesture-started", () => {
   assert.match(appSource, /!isAdmin \? <DuomeiMusicPlayer compactContext=\{isGuyuReader \|\| isZaobao \|\| isYunyouMap \|\| isAtlasMap\} \/> : null/);
   assert.match(musicPlayerSource, /NETEASE_PLAYLIST_ID = "316500315"/);
   assert.match(musicPlayerSource, /<audio[\s\S]*preload="metadata"/);
@@ -193,7 +193,20 @@ test("keeps the full NetEase playlist native, movable, bounded, and autoplay-off
   assert.match(musicPlayerSource, /搜索 \$\{playableCount\} 首可播放歌曲/);
   assert.doesNotMatch(musicPlayerSource, /2_270|PLAYABLE \/|原歌单/);
   assert.match(musicPlayerSource, /setPointerCapture\(event\.pointerId\)/);
-  assert.match(musicPlayerSource, /duomei-music-player-position-v4/);
+  assert.match(musicPlayerSource, /duomei-music-player-position-v5/);
+  // Resting orb docks beside the header brand and opens below the header; a hand-placed position wins.
+  assert.match(musicPlayerSource, /querySelector<HTMLElement>\("\.duomei-header"\)/);
+  assert.match(musicPlayerSource, /brand\.offsetLeft \+ brand\.offsetWidth \+ DOCK_GAP/);
+  assert.match(musicPlayerSource, /header\.offsetHeight \+ DOCK_DROP/);
+  assert.match(musicPlayerSource, /const dockAnchor = !position && !compactContext \? dock : null/);
+  assert.match(musicPlayerSource, /createPortal\([\s\S]*document\.body,\s*\);/);
+  assert.match(musicPlayerCss, /\.duomei-music-player\.is-docked\.is-minimized\s*\{[\s\S]*?z-index:\s*5201/);
+  assert.match(musicPlayerCss, /body:has\(\.duomei-header\.is-scrolled\.is-scroll-hidden:not\(\.is-hover-revealed\):not\(\.is-menu-open\):not\(:focus-within\)\)\s*\.duomei-music-player\.is-docked\.is-minimized/);
+  // Ambient music tries to start on load and otherwise on the first click/key outside the player; no autoplay attribute.
+  assert.match(musicPlayerSource, /AUTOPLAY_GESTURES: Array<keyof DocumentEventMap> = \["click", "keydown"\]/);
+  assert.match(musicPlayerSource, /playTrackAt\(findInitialNeteaseTrackIndex\(list\.tracks, failedTrackIdsRef\.current\), \{ quiet: true \}\)/);
+  assert.match(musicPlayerSource, /playerRef\.current\?\.contains\(event\.target\)\) return/);
+  assert.match(musicPlayerSource, /stopAutoplayListeningRef\.current\?\.\(\);/);
   assert.match(musicPlayerSource, /scheduleAutoMinimize/);
   assert.match(musicPlayerSource, /className="duomei-music-orb"/);
   assert.match(musicPlayerSource, /event\.pointerType !== "mouse"/);
@@ -232,7 +245,7 @@ test("keeps the full NetEase playlist native, movable, bounded, and autoplay-off
   assert.match(musicPlayerCss, /::-webkit-slider-thumb[\s\S]*inline-size:\s*0\.625rem/);
   assert.match(musicPlayerCss, /:is\(:hover, :active, :focus-visible\)::-webkit-slider-runnable-track\s*\{[\s\S]*block-size:\s*6px/);
   assert.match(musicPlayerCss, /body:has\(\.duomei-music-player:not\(\.is-minimized\)\)[\s\S]*\.back-to-top, \.home-section-progress/);
-  assert.match(musicPlayerCss, /\.duomei-motion-root > \.duomei-music-player\s*\{[\s\S]*?position:\s*fixed/);
+  assert.doesNotMatch(musicPlayerCss, /\.duomei-motion-root > \.duomei-music-player/);
   assert.deepEqual(containFloatingWidget({ x: -20, y: 900 }, 200, 100, 800, 600), { x: 16, y: 484 });
   assert.deepEqual(containFloatingWidget({ x: Number.NaN, y: Number.POSITIVE_INFINITY }, 200, 100, 800, 600), { x: 16, y: 16 });
 });
