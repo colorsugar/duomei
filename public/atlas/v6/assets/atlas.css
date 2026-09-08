@@ -8073,6 +8073,40 @@ button,
   text-align: center;
   max-width: calc(100% - 150px);
 }
+.atlas-gallery-routes {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  margin-top: 8px;
+  color: #9bb7bb;
+  font-size: 14px;
+}
+.atlas-gallery-routes button {
+  min-height: 44px;
+  max-width: 100%;
+  text-align: left;
+  white-space: normal;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+.atlas-open-connection {
+  color: #ead29c !important;
+}
+.atlas-discovery-action {
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  padding-block: 4px;
+}
+.atlas-discovery-action button {
+  min-height: 44px;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
 @property --tw-translate-x {
   syntax: "*";
   inherits: false;

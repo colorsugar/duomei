@@ -15,6 +15,7 @@ import { Link } from "react-router-dom";
 import { formatGuyuPageNumber } from "../content/guyuBooks";
 import type { GuyuBook, GuyuLogicalPage } from "../content/guyuBooks";
 import { isGuyuViewportZoomed, updateGuyuTouchSequence } from "../lib/guyuTouchSequence";
+import { formatGuyuPhysicalPageNumber, getGuyuPageSpread } from "../lib/guyuPageSpread";
 
 type PageFlipController = {
   destroy: () => void;
@@ -478,28 +479,37 @@ export function GuyuFlipbook({
     busyRef.current = true;
     setBusy(true);
     setPhase("loading");
+    const requestId = requestIdRef.current + 1;
+    requestIdRef.current = requestId;
+    if (loadError) {
+      activePagesRef.current.forEach((index) => loadedPagesRef.current.delete(index));
+      setRetryEpoch((value) => value + 1);
+    }
     setLoadError("");
-    const required = target === 0
+    const destination = getGuyuPageSpread(target, lastIndex + 1);
+    const required = destination.pageIndex === 0
       ? [0, 1, 2].filter((index) => index <= lastIndex)
-      : [Math.max(0, target - 1), target];
+      : destination.visiblePages;
     const current = controller.getCurrentPageIndex();
-    const visibleCurrent = [current, current + 1].filter((index) => index <= lastIndex);
+    const visibleCurrent = getGuyuPageSpread(current, lastIndex + 1).visiblePages;
     try {
       await ensurePages([...new Set([...visibleCurrent, ...required])], true);
+      if (requestIdRef.current !== requestId) return;
       if (isTurnBlocked()) {
         finishInteraction();
         return;
       }
-      controller.turnToPage(target);
-      setPageIndex(target);
-      setBookPosition(target === 0 ? "start" : target >= lastIndex ? "end" : "open");
-      setActiveWindow(target);
+      controller.turnToPage(destination.pageIndex);
+      setPageIndex(destination.pageIndex);
+      setBookPosition(destination.pageIndex === 0 ? "start" : destination.pageIndex >= lastIndex ? "end" : "open");
+      setActiveWindow(destination.pageIndex);
       finishInteraction();
     } catch {
+      if (requestIdRef.current !== requestId) return;
       setLoadError("页面没有载入，请再试一次。");
       finishInteraction();
     }
-  }, [ensurePages, finishInteraction, isTurnBlocked, lastIndex, setActiveWindow]);
+  }, [ensurePages, finishInteraction, isTurnBlocked, lastIndex, loadError, setActiveWindow]);
 
   useEffect(() => {
     onOpenChange?.(pageIndex > 0);
@@ -555,7 +565,9 @@ export function GuyuFlipbook({
     }
   }, []);
 
-  const statusText = formatGuyuPageNumber(pageIndex, book.logicalPages.length);
+  const statusText = book.companionMap
+    ? formatGuyuPhysicalPageNumber(pageIndex, book.logicalPages.length)
+    : formatGuyuPageNumber(pageIndex, book.logicalPages.length);
   const visibleStatus = loadError || (phase === "loading" ? "正在载入下一页…" : phase === "flipping" ? "正在翻页…" : statusText);
 
   return (
@@ -658,7 +670,22 @@ export function GuyuFlipbook({
           >
             <span aria-hidden="true">‹</span>
           </button>
-          <p><span aria-hidden="true">{statusText}</span>{book.companionMap ? <Link
+          <p className={book.companionMap ? "guyu-book-rail-content" : undefined}>
+            <span aria-hidden="true">{statusText}</span>
+            {book.companionMap && book.sections?.length ? <select
+              className="guyu-chapter-select"
+              aria-label="选择设定集章节"
+              value=""
+              disabled={busy || viewportZoomed}
+              onChange={(event) => void jumpToPage(Number(event.currentTarget.value) - 1)}
+            >
+              <option value="" disabled>目录</option>
+              <option value="1">封面 · 第 1 页</option>
+              {book.sections.map((section) => <option key={`${section.page}-${section.title}`} value={section.page}>
+                {section.title} · 第 {section.page} 页
+              </option>)}
+            </select> : null}
+            {book.companionMap ? <Link
             className="guyu-companion-link"
             to={`${book.companionMap}${book.mapEntries?.[pageIndex] ? `?entry=${encodeURIComponent(book.mapEntries[pageIndex])}` : ""}`}
             aria-label="在地图中查看当前书页对应地点"

@@ -2290,3 +2290,44 @@ body {
   text-decoration: underline;
   text-underline-offset: 3px;
 }
+
+/* The atlas chapter picker stays inside the shared page rail. */
+.guyu-reader-page .guyu-book-controls .guyu-book-rail-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0 4px;
+  min-inline-size: 0;
+}
+
+.guyu-reader-page .guyu-book-rail-content .guyu-companion-link {
+  min-inline-size: var(--size-hit);
+  justify-content: center;
+  margin-inline-start: 0;
+  padding-inline: 0;
+}
+
+.guyu-reader-page .guyu-chapter-select {
+  inline-size: 4rem;
+  min-inline-size: var(--size-hit);
+  min-block-size: var(--size-hit);
+  padding: 0;
+  color: inherit;
+  background: transparent;
+  border: 0;
+  border-radius: var(--space-xs);
+  font-family: inherit;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.guyu-reader-page .guyu-chapter-select:focus-visible {
+  outline: var(--rule-focus) solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+.guyu-reader-page .guyu-chapter-select:disabled {
+  opacity: 0.45;
+  cursor: wait;
+}
