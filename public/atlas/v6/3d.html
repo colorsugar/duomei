@@ -7,7 +7,7 @@
 <script>if(window.self===window.top&&new URLSearchParams(location.search).get("standalone")!=="1")location.replace("/dalu/map"+location.search)</script>
 <title>七国战略图志 · 立体 | 多美小记</title>
 <meta name="description" content="七国、中立政体、战略要地、烬月传说栖地与宫堡庄园的立体地图：自由缩放、旋转、俯仰，点选地点读介绍与图版。">
-<link rel="stylesheet" href="./3d/style.css?v=20260908-3d2">
+<link rel="stylesheet" href="./3d/style.css?v=20260908-3d3">
 <link rel="preload" as="image" href="./assets/seven-kingdoms-basemap.webp">
 <script type="importmap">
 {
@@ -24,6 +24,7 @@
   <header class="atlas3d-bar" id="bar">
     <div class="atlas3d-title"><small>THE SEVEN REALMS · 3D</small><strong>七国战略图志</strong></div>
     <nav class="atlas3d-tools" aria-label="地图工具">
+      <button type="button" id="help-open" aria-haspopup="dialog">操作说明</button>
       <button type="button" id="tilt" aria-pressed="true">斜看</button>
       <button type="button" id="reset">复位</button>
       <button type="button" id="artbook">设定集</button>
@@ -53,9 +54,46 @@
     <img id="lightbox-img" alt="">
     <p id="lightbox-caption"></p>
   </div>
+  <div class="atlas3d-help" id="help" role="dialog" aria-modal="true" aria-labelledby="help-title" hidden>
+    <div class="atlas3d-help-panel">
+      <button type="button" class="atlas3d-help-close" id="help-close" aria-label="关闭操作说明">×</button>
+      <p class="atlas3d-card-kicker">怎么看这张地图</p>
+      <h2 id="help-title">操作说明</h2>
+      <section class="atlas3d-help-touch">
+        <h3>手机 · 平板</h3>
+        <dl>
+          <dt>单指拖动</dt><dd>平移地图</dd>
+          <dt>双指张合</dt><dd>放大 / 缩小</dd>
+          <dt>双指一起左右拖</dt><dd>旋转方向（只有双指才会转，单指不会）</dd>
+          <dt>双指一起上下拖</dt><dd>抬高 / 压低视角（俯视 ↔ 斜看）</dd>
+        </dl>
+      </section>
+      <section class="atlas3d-help-mouse">
+        <h3>电脑</h3>
+        <dl>
+          <dt>左键拖动</dt><dd>平移地图</dd>
+          <dt>滚轮</dt><dd>放大 / 缩小</dd>
+          <dt>右键拖动</dt><dd>左右旋转，上下俯仰</dd>
+          <dt>方向键</dt><dd>平移；Esc 收起介绍或退出清屏</dd>
+        </dl>
+      </section>
+      <section>
+        <h3>标记与按钮</h3>
+        <dl>
+          <dt>点地名标记</dt><dd>弹出介绍与图版，点图版放大；点空处收起</dd>
+          <dt>拉近</dt><dd>城池、要地、宫堡庄园的标记会随着拉近逐层出现</dd>
+          <dt>斜看 / 俯视</dt><dd>一键切换立体斜视与平面俯视</dd>
+          <dt>复位</dt><dd>回到七国全景</dd>
+          <dt>清屏</dt><dd>只留地图和标记，右下角退出</dd>
+          <dt>分类按钮</dt><dd>国家 / 城池 / 要地 / 传说 / 宫堡，点一下隐藏或显示这一类标记</dd>
+        </dl>
+      </section>
+      <button type="button" class="atlas3d-help-ok" id="help-ok">知道了，开始探索</button>
+    </div>
+  </div>
   <div class="atlas3d-loading" id="loading"><p>正在展开大陆…</p></div>
 </div>
 <noscript>立体地图需要开启 JavaScript。<a href="/dalu/map?view=2d">打开平面版</a></noscript>
-<script type="module" src="./3d/main.js?v=20260908-3d"></script>
+<script type="module" src="./3d/main.js?v=20260908-3d3"></script>
 </body>
 </html>

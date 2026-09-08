@@ -396,6 +396,21 @@ $("artbook").addEventListener("click", () => {
   else window.top.location.href = "/guyu/hanhai-realms-artbook";
 });
 
+// --- Help sheet -------------------------------------------------------------
+const help = $("help");
+const HELP_SEEN_KEY = "duomei-atlas3d-help-seen";
+function setHelp(open) {
+  help.hidden = !open;
+  if (open) $("help-ok").focus({ preventScroll: true });
+  else try { localStorage.setItem(HELP_SEEN_KEY, "1"); } catch { /* private mode */ }
+}
+$("help-open").addEventListener("click", () => setHelp(true));
+$("help-close").addEventListener("click", () => setHelp(false));
+$("help-ok").addEventListener("click", () => setHelp(false));
+help.addEventListener("click", (event) => { if (event.target === help) setHelp(false); });
+let helpSeen = true;
+try { helpSeen = localStorage.getItem(HELP_SEEN_KEY) === "1"; } catch { /* private mode: never nag */ }
+
 function setImmersive(on) {
   root.classList.toggle("is-immersive", on);
   $("exit-immersive").hidden = !on;
@@ -405,7 +420,8 @@ $("immersive").addEventListener("click", () => setImmersive(true));
 $("exit-immersive").addEventListener("click", () => setImmersive(false));
 window.addEventListener("keydown", (event) => {
   if (event.key !== "Escape") return;
-  if (!lightbox.hidden) lightbox.hidden = true;
+  if (!help.hidden) setHelp(false);
+  else if (!lightbox.hidden) lightbox.hidden = true;
   else if (!card.hidden) select(null);
   else if (root.classList.contains("is-immersive")) setImmersive(false);
 });
@@ -481,6 +497,8 @@ renderer.setAnimationLoop((now) => {
       flyTo({ target: toWorld(wanted.x, wanted.y), radius: wanted.kind === "kingdom" ? 980 : 700 }, 1400);
     }
     loading.classList.add("is-done");
+    // First visit: show the gesture guide once the chart is up, unless a deep link already opened a place.
+    if (!helpSeen && !wanted) setHelp(true);
     document.title = `${wanted ? `${wanted.name} · ` : ""}七国战略图志 · 立体 | 多美小记`;
   } catch (error) {
     console.error(error);
