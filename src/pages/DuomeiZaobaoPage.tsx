@@ -21,6 +21,48 @@ export function zaobaoProxyUrl(date?: string) {
   return date ? `${ZAOBAO_PROXY_ROUTE}/${date}/` : ZAOBAO_PROXY_ROUTE;
 }
 
+// "2026年9月8日 星期二" → "2026-09-08", so today's stories get a link that still works tomorrow.
+export function isoDateFromLabel(label: string) {
+  const match = label.match(/(\d{4})年(\d{1,2})月(\d{1,2})日/);
+  return match ? `${match[1]}-${match[2].padStart(2, "0")}-${match[3].padStart(2, "0")}` : undefined;
+}
+
+// Same-origin path for one story; the edge rewrites its share metadata from the same id.
+export function zaobaoStoryPath(storyId: string, date?: string) {
+  return `${date ? `/zaobao/${date}` : "/zaobao"}/i/${encodeURIComponent(storyId)}`;
+}
+
+function zaobaoStoryDomId(storyId: string) {
+  return `zaobao-story-${storyId}`;
+}
+
+function ZaobaoStoryShare({ title, text, path }: { title: string; text: string; path: string }) {
+  const [copied, setCopied] = useState(false);
+  const share = async () => {
+    const url = new URL(path, window.location.origin).href;
+    if (typeof navigator.share === "function") {
+      try {
+        await navigator.share({ title, text, url });
+        return;
+      } catch (error) {
+        if (error instanceof DOMException && error.name === "AbortError") return;
+      }
+    }
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 2000);
+    } catch {
+      window.prompt("复制这条的链接", url);
+    }
+  };
+  return (
+    <button type="button" className="zaobao-story-share" onClick={share} aria-label={`分享「${title}」`}>
+      {copied ? "已复制链接" : "分享这条"}
+    </button>
+  );
+}
+
 type ZaobaoStory = {
   id: string;
   title: string;
@@ -118,7 +160,7 @@ export function ZaobaoReaderBar({ originalUrl, children }: { originalUrl: string
 }
 
 export function DuomeiZaobaoPage() {
-  const { date: dateParam } = useParams<{ date: string }>();
+  const { date: dateParam, storyId } = useParams<{ date: string; storyId: string }>();
   const date = isZaobaoDate(dateParam) ? dateParam : undefined;
   const invalidDate = dateParam !== undefined && !date;
   const editionUrl = zaobaoEditionUrl(date);
@@ -154,6 +196,17 @@ export function DuomeiZaobaoPage() {
     if (!tabs || !chip) return;
     tabs.scrollTo({ left: chip.offsetLeft - (tabs.clientWidth - chip.offsetWidth) / 2, behavior: "smooth" });
   }, [activeGroupId]);
+
+  // A story link lands on that card: figures reserve their 16:9 box, so one scroll after render is stable.
+  const sharedStory = storyId ? edition?.groups.flatMap((group) => group.stories).find((story) => story.id === storyId) : undefined;
+  useEffect(() => {
+    if (!sharedStory) return;
+    document.title = `${sharedStory.title} | DUOMEI`;
+    const frame = requestAnimationFrame(() => {
+      pageRef.current?.querySelector(`#${CSS.escape(zaobaoStoryDomId(sharedStory.id))}`)?.scrollIntoView({ block: "start" });
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [sharedStory]);
 
   useEffect(() => {
     if (invalidDate) return;
@@ -238,7 +291,8 @@ export function DuomeiZaobaoPage() {
                 <div className="zaobao-story-grid">
                   {group.stories.map((story, storyIndex) => (
                     <article
-                      className={`zaobao-story${groupIndex === 0 && storyIndex === 0 ? " is-featured" : ""}`}
+                      className={`zaobao-story${groupIndex === 0 && storyIndex === 0 ? " is-featured" : ""}${story.id === storyId ? " is-shared" : ""}`}
+                      id={zaobaoStoryDomId(story.id)}
                       key={`${group.id}-${story.id}`}
                     >
                       {story.image && !brokenImages.has(story.image) ? (
@@ -257,11 +311,18 @@ export function DuomeiZaobaoPage() {
                       <div className="zaobao-story-body">
                         <h3>{story.title}</h3>
                         {story.paragraphs.map((paragraph, index) => <p key={index}>{paragraph}</p>)}
-                        {story.sourceUrl ? (
-                          <a href={story.sourceUrl} target="_blank" rel="noreferrer">
-                            来源 · {story.sourceLabel || "原文"} ↗
-                          </a>
-                        ) : null}
+                        <div className="zaobao-story-actions">
+                          {story.sourceUrl ? (
+                            <a href={story.sourceUrl} target="_blank" rel="noreferrer">
+                              来源 · {story.sourceLabel || "原文"} ↗
+                            </a>
+                          ) : null}
+                          <ZaobaoStoryShare
+                            title={story.title}
+                            text={story.paragraphs[0] ?? edition.headline}
+                            path={zaobaoStoryPath(story.id, date ?? isoDateFromLabel(edition.date))}
+                          />
+                        </div>
                       </div>
                     </article>
                   ))}
