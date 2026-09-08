@@ -50,6 +50,9 @@ jobs:
       - name: Test protected Guyu delivery
         run: npm run test:guyu
 
+      - name: Verify campus models and asset hashes
+        run: node scripts/verify-lingchuan.mjs
+
       - name: Build full site
         run: npm run build
 
@@ -231,3 +234,6 @@ jobs:
 
           throw new Error(`Production verification failed: ${lastError}`);
           NODE
+
+      - name: Verify published campus assets
+        run: node scripts/verify-lingchuan.mjs --production

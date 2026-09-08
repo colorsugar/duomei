@@ -192,3 +192,7 @@ If any bundle file is still modified, staged, or untracked after the commit, the
 `/atlas-v6` 是七国战略图志的 React 同源地图壳，嵌入 `/atlas/v6/index.html?embed=duomei`，保留全局音乐；`entry` 查询参数定位已有国家、城市、要地或传说栖地。仅 `/atlas/v6/*` 与既有 `/yunyou/*` 使用 SAMEORIGIN，其他页面继续 DENY。设定集与地图互链。64书页、独立封面、书册元数据、阅读器、React地图壳、完整静态地图目录、样式、测试与生产探针构成同一发布单元。详细导入事实见 `docs/atlas-artbook-import.md`。
 
 扩展版新增“山河相接”（第52页）与“烬月·传说栖地”（第58页）；原1–51页保持原图，原书页印刷页码保留初版总数52，新增章节及阅读器按64页连续编排，封底为64/64。六处栖地为魔焰龙渊、无月狼鞍、回声内海、雷羽天峡、梦角雨庭、负岳盐泉。其形成、兽族古约、能力边界、冲突与海陆接驳写入地图说明；栖地光墙不代表国家主权。地图保留长按防误选、锁定、复位、灵敏度与既有故语阅读器。
+
+## 灵川中学校园 — 2026-09-08
+
+`/lingchuan/index.html` is the standalone public campus map, with directory entry `/lingchuan/`. Runtime, Three.js, textures, posters and compressed GLBs are Git-tracked under `public/lingchuan/` and deploy through the existing EdgeOne workflow. No ChatGPT preview origin or external CDN is required for rendering. Source revision `4b9eb26cc9e51e1f6dac3863298c13cf269d7c0b` preserves the office/laboratory join and corrected table-tennis location. The full-scene raw GLB is restored byte-for-byte from its tracked gzip by `scripts/prepare-lingchuan.mjs` before build; its ignored raw output is still included in the deployment for older browsers. Its geometry remains a reconstruction under review; deployment is not iPhone performance acceptance. `deployment.json` pins every delivered asset. Run `node scripts/verify-lingchuan.mjs` before publishing; check actual HTML, JavaScript, poster and gzip model bytes on production. The campus return link targets `/#yunyou`.

@@ -21,3 +21,6 @@ Thumbs.db
 .vercel
 /private/books/guyu/
 /tmp/
+
+# Reconstructed byte-for-byte from the tracked campus gzip before build.
+/public/lingchuan/models/lingchuan-whole.glb

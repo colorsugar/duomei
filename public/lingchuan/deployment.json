@@ -1,0 +1,230 @@
+{
+  "sourceCommit": "4b9eb26cc9e51e1f6dac3863298c13cf269d7c0b",
+  "files": [
+    {
+      "path": "campus.js",
+      "size": 39978,
+      "sha256": "fecd75d64714e798c104bd7ee32fe01023b380625b87cd92c6e49e6a3d390a91"
+    },
+    {
+      "path": "evidence.json",
+      "size": 24262,
+      "sha256": "dddf8626b533de1f0934413dff1cbf16cd0032a7fed5d4b491a31d8669ae1a1e"
+    },
+    {
+      "path": "historic-entry.js",
+      "size": 26639,
+      "sha256": "673853bca4447422b19888f532bcb1dc1ea16712ec7884ad7af10c5fb343a220"
+    },
+    {
+      "path": "index.html",
+      "size": 5491,
+      "sha256": "6325757456e745edf24583b9d2ae1e5a38cadf4a8a88ef4468b6e4e545a1e254"
+    },
+    {
+      "path": "landmarks.js",
+      "size": 5413,
+      "sha256": "fbd1c8aa229db5f768bc2cc79945c6de211122c45d16087256befca89da457c3"
+    },
+    {
+      "path": "load-glb.js",
+      "size": 21622,
+      "sha256": "693948e0c55f16783071fe3abad160bdabdc555ccf7392136c0e387594cf07de"
+    },
+    {
+      "path": "main.js",
+      "size": 7459,
+      "sha256": "efd54cc9e052870f65ff8c9e1ddd5c183f115060cbefbbe1b4ee5907598d78bc"
+    },
+    {
+      "path": "models/lingchuan-academic.glb",
+      "size": 2163756,
+      "sha256": "905adf7e36c744f4ea0e690529941db653cf33ce6c0bf1fee02273fc6739b40c"
+    },
+    {
+      "path": "models/lingchuan-academic.glb.gz",
+      "size": 1415596,
+      "sha256": "3f62f17315452cb09c26c4da14786286032f37854f577200509cd1640d4be14b"
+    },
+    {
+      "path": "models/lingchuan-athletics.glb",
+      "size": 3547844,
+      "sha256": "b3a7a5be488fc9b51aa23dcbd467cd040f816e72c616b726c2f0bb1c49791193"
+    },
+    {
+      "path": "models/lingchuan-athletics.glb.gz",
+      "size": 2242238,
+      "sha256": "7ba2b776d0fc669b20be0d822a5ac4f2f1e9642663f0204a282458dde77fd453"
+    },
+    {
+      "path": "models/lingchuan-courtyard.glb",
+      "size": 10723260,
+      "sha256": "70f10b0f9ff105c2bdbe38788614ab755e179df4b3ade0fcb9851fc15e33a4f4"
+    },
+    {
+      "path": "models/lingchuan-courtyard.glb.gz",
+      "size": 5501395,
+      "sha256": "b108f94544a7b2ca3fbeeb297a40e408fac0a33c17bfadc0fa7eba9ea1d0086e"
+    },
+    {
+      "path": "models/lingchuan-whole.glb",
+      "size": 23067232,
+      "sha256": "d32878571905ad79ed7949f8dede849654755c1560f366ef517e7ae7ffa65b7e"
+    },
+    {
+      "path": "models/lingchuan-whole.glb.gz",
+      "size": 9900842,
+      "sha256": "bcc1ad58522186e3616f619007cc1be29eb9fc6a2149781f2c15ae0adb80dc60"
+    },
+    {
+      "path": "models/stats.json",
+      "size": 1009,
+      "sha256": "fa0afd09d49896b8c1387167e0bd2155861d30e3145785a711e895940a95a33a"
+    },
+    {
+      "path": "photo-details.js",
+      "size": 7655,
+      "sha256": "5872ea446ce8243bcacfa065bb56c97bc437b873061589ad5200987ef512f35c"
+    },
+    {
+      "path": "posters/academic.webp",
+      "size": 159462,
+      "sha256": "9ef0b8dd1d00c5bc587597da15ab68a2f6f5c0c924ca8015f91bd0a29fe35fcc"
+    },
+    {
+      "path": "posters/athletics.webp",
+      "size": 110282,
+      "sha256": "642deb810695bbc2fd4ed6a00114bd264864c4568533eb2c6bf23602876434ec"
+    },
+    {
+      "path": "posters/courtyard-front.webp",
+      "size": 335130,
+      "sha256": "7f82905a896ddfff1b17c5bc446e4523e964ed7ac8fa145bccca37d300159bfd"
+    },
+    {
+      "path": "posters/courtyard.webp",
+      "size": 142312,
+      "sha256": "dc8afb4d33a2641178fd247336e9833dd957df2550f997aac0bb34a1a3e1767a"
+    },
+    {
+      "path": "posters/whole.webp",
+      "size": 220544,
+      "sha256": "245e6da64bfcbd7f4000dea84f1f608512f45733bfbdef3d729b5b78d3383fbb"
+    },
+    {
+      "path": "style.css",
+      "size": 6814,
+      "sha256": "88203a111f100f5b724572e2e106f7c05bb983206b14da9b8f7fc1176db7139f"
+    },
+    {
+      "path": "textures/bark.png",
+      "size": 326051,
+      "sha256": "9bba4a2e848ed3627e637f03b626c6b9f9268aff2b9c91f3208ba69797aa32cd"
+    },
+    {
+      "path": "textures/grass.png",
+      "size": 344409,
+      "sha256": "228721415214b383909014ffb4c78c974f8aa341ea9981d2accfae7b95abc82b"
+    },
+    {
+      "path": "textures/laboratory-label.png",
+      "size": 17752,
+      "sha256": "79e99c78dcdfc89f824ea9584711b6861eec02cee66da8aa808ca33d691a2dae"
+    },
+    {
+      "path": "textures/library-label.png",
+      "size": 12807,
+      "sha256": "f1ae67d21f078f4249297c143d7d9948d28bf5145f966dcb6e5df893e86f4bf7"
+    },
+    {
+      "path": "textures/lingxi-road-44-plate.png",
+      "size": 18289,
+      "sha256": "11f3256a03fd1a291b37d192fc3245d44f0aee15e62e8f9a0ad26e97b63608b3"
+    },
+    {
+      "path": "textures/office-label.png",
+      "size": 17758,
+      "sha256": "b81fa82b20c373bfae452097dd2394906d57a2931ce00b81ac8bd6ad60547472"
+    },
+    {
+      "path": "textures/paving.png",
+      "size": 274726,
+      "sha256": "4c78fcde22694f255725442ce648a8125d0ecafee658f79c47568484f16ed7fa"
+    },
+    {
+      "path": "textures/peixian-label.png",
+      "size": 20114,
+      "sha256": "d8ab2b189e254e2784aacdb69a90d88bee33079ea3f05bbecb9eca8e31b03f81"
+    },
+    {
+      "path": "textures/pink.png",
+      "size": 227185,
+      "sha256": "60b05aba2bbae1e0e5899dcb684f6cf0d54606c3969310a9c2c204a0bc789802"
+    },
+    {
+      "path": "textures/planetarium-label.png",
+      "size": 15736,
+      "sha256": "7fb67be14b9d8a1544e44d6e94490c6e29a31b70c5c31445941994ec5fb459c4"
+    },
+    {
+      "path": "textures/qiusuo-label.png",
+      "size": 34278,
+      "sha256": "ac84a93a5af86a69ed701fc25c174f567acf64ec7edb88e72bf71c5134464c49"
+    },
+    {
+      "path": "textures/school-name-gold.png",
+      "size": 39384,
+      "sha256": "b3016937687f801dda35939073371ac0ebc8f388e4cb4bf5136d561eecdcd337"
+    },
+    {
+      "path": "textures/stone.png",
+      "size": 345261,
+      "sha256": "653f6819a23a7497f1070f82847de17799de9131940abedbac23c46875b104af"
+    },
+    {
+      "path": "textures/tile.png",
+      "size": 184134,
+      "sha256": "e93540c5931cdd86715f9bb4b97c68b7eb17e1a358e24b8cdd9f041f99e46ea8"
+    },
+    {
+      "path": "textures/track.png",
+      "size": 251203,
+      "sha256": "63c225b41566f67ae5da19898e5a8418338f6702882044be67a1092adb727658"
+    },
+    {
+      "path": "textures/xinxing-label.png",
+      "size": 19252,
+      "sha256": "1368411228c623efd8442f554fa568265588e7a03b8058e4887eed628a517838"
+    },
+    {
+      "path": "textures/yuying-label.png",
+      "size": 50473,
+      "sha256": "de7947ece5231bc17e97cbc199f17e73683faa6db9ab3497e286856778f2ebd1"
+    },
+    {
+      "path": "tree-natural.js",
+      "size": 13096,
+      "sha256": "bd93b59685c4013959a8b5132e1110c69d1a1b90134a1b96bb68ed0c4280bae5"
+    },
+    {
+      "path": "vendor/LICENSE.txt",
+      "size": 1081,
+      "sha256": "4c40a1ef62450b857c3b2aaf294936304cd552d965fbcd9d32d4c5bcf4ba4454"
+    },
+    {
+      "path": "vendor/addons/controls/OrbitControls.js",
+      "size": 32150,
+      "sha256": "0c41a3d2a33d1068eee0cf958403c9312c964615b869ac2ea704e957a04538a6"
+    },
+    {
+      "path": "vendor/three.module.js",
+      "size": 691648,
+      "sha256": "08fd7545d13d2c7fb65ab691530a802dafefd638596501854f267d0fb13c39e7"
+    },
+    {
+      "path": "viewer.js",
+      "size": 12281,
+      "sha256": "e4a6469d336383f61018ad130c94dc279c15c3a7f191b2671b9c37b459387ba2"
+    }
+  ]
+}

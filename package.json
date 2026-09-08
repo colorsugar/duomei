@@ -15,7 +15,8 @@
     "test:guyu": "node --experimental-strip-types --test server/guyuSession.test.ts server/guyuRateLimit.test.ts server/guyuBooks.test.ts server/guyuEdgeOneAdapter.test.mjs src/lib/guyuTouchSequence.test.ts deploy/guyu-edgeone/tests/auth-core.test.js",
     "lint": "tsc -b",
     "preview": "vite preview",
-    "release:check": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/verify-release.ps1"
+    "release:check": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/verify-release.ps1",
+    "prebuild": "node scripts/prepare-lingchuan.mjs"
   },
   "dependencies": {
     "@edgeone/pages-blob": "0.0.16",

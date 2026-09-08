@@ -1,0 +1,50 @@
+[
+  {
+    "region": "whole",
+    "meshes": 198,
+    "triangles": 506916,
+    "path": "models/lingchuan-whole.glb",
+    "bytes": 23067232,
+    "nodes": 231,
+    "materials": 100,
+    "textures": 17,
+    "vertices": 1005481,
+    "gzipBytes": 9900842
+  },
+  {
+    "region": "courtyard",
+    "meshes": 87,
+    "triangles": 241930,
+    "path": "models/lingchuan-courtyard.glb",
+    "bytes": 10723260,
+    "nodes": 102,
+    "materials": 60,
+    "textures": 9,
+    "vertices": 433622,
+    "gzipBytes": 5501395
+  },
+  {
+    "region": "academic",
+    "meshes": 23,
+    "triangles": 26496,
+    "path": "models/lingchuan-academic.glb",
+    "bytes": 2163756,
+    "nodes": 27,
+    "materials": 16,
+    "textures": 5,
+    "vertices": 61071,
+    "gzipBytes": 1415596
+  },
+  {
+    "region": "athletics",
+    "meshes": 13,
+    "triangles": 48118,
+    "path": "models/lingchuan-athletics.glb",
+    "bytes": 3547844,
+    "nodes": 18,
+    "materials": 11,
+    "textures": 4,
+    "vertices": 120368,
+    "gzipBytes": 2242238
+  }
+]
