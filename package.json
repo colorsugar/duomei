@@ -16,6 +16,8 @@
     "lint": "tsc -b",
     "preview": "vite preview",
     "release:check": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/verify-release.ps1",
+    "zaobao:wechat-draft": "node scripts/zaobao-wechat-draft.mjs",
+    "zaobao:wechat-self-check": "node scripts/zaobao-wechat-draft.mjs --self-check",
     "prebuild": "node scripts/prepare-lingchuan.mjs && node scripts/prepare-dalu-artbook.mjs"
   },
   "dependencies": {
