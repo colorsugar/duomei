@@ -578,6 +578,9 @@ export function GuyuFlipbook({
 
   const statusText = singlePage && pageIndex > 0 && pageIndex < lastIndex ? `${pageIndex} / ${lastIndex - 1}` : formatGuyuPageNumber(pageIndex, book.logicalPages.length);
   const visibleStatus = loadError || (phase === "loading" ? "正在载入下一页…" : phase === "flipping" ? "正在翻页…" : statusText);
+  const spreadOpen = !singlePage && pageIndex > 0 && pageIndex < lastIndex;
+  const visibleMapPages = (spreadOpen ? [pageIndex, pageIndex + 1] : [pageIndex])
+    .filter(index => Boolean(book.mapEntries?.[index]));
 
   return (
     <PageLoadContext.Provider value={loadingContext}>
@@ -661,7 +664,10 @@ export function GuyuFlipbook({
           {visibleStatus}
         </p>
         {book.companionMap ? <div className="guyu-atlas-tools">
-          <Link to={`${book.companionMap}${book.mapEntries?.[pageIndex] ? `?entry=${encodeURIComponent(book.mapEntries[pageIndex])}` : ""}`}>在地图中查看 ↗</Link>
+          {visibleMapPages.length ? visibleMapPages.map(index => <Link
+            key={index}
+            to={`${book.companionMap}?entry=${encodeURIComponent(book.mapEntries![index])}`}
+          >{spreadOpen ? (index === pageIndex ? "左页地图 ↗" : "右页地图 ↗") : "在地图中查看 ↗"}</Link>) : <Link to={book.companionMap}>在地图中查看 ↗</Link>}
           <button type="button" aria-expanded={contentsOpen} onClick={() => setContentsOpen(!contentsOpen)}>目录</button>
           {contentsOpen ? <nav className="guyu-atlas-contents" aria-label="设定集目录">
             <button type="button" onClick={() => setContentsOpen(false)}>收起目录 ×</button>
