@@ -45,6 +45,9 @@ jobs:
       - name: Test protected Guyu delivery
         run: npm run test:guyu
 
+      - name: Verify campus models and asset hashes
+        run: node scripts/verify-lingchuan.mjs
+
       - name: Build full site
         run: npm run build
 

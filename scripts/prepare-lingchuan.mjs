@@ -1,0 +1,13 @@
+import fs from 'node:fs/promises';
+import {gunzipSync} from 'node:zlib';
+import {createHash} from 'node:crypto';
+import assert from 'node:assert/strict';
+const root=new URL('../public/lingchuan/',import.meta.url);
+const name='models/lingchuan-whole.glb';
+const manifest=JSON.parse(await fs.readFile(new URL('deployment.json',root)));
+const expected=manifest.files.find(file=>file.path===name);
+const bytes=gunzipSync(await fs.readFile(new URL(name+'.gz',root)));
+assert.equal(bytes.length,expected.size);
+assert.equal(createHash('sha256').update(bytes).digest('hex'),expected.sha256);
+await fs.writeFile(new URL(name,root),bytes);
+console.log('Full campus GLB restored and hash verified.');

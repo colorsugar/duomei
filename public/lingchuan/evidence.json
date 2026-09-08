@@ -1,0 +1,562 @@
+{
+  "assets": [
+    {
+      "file": "20110517488.jpg",
+      "source_page": "http://www.xiaozhang.com.cn/school/gxgllczx/photo_Img_1543_9563.html",
+      "url": "http://www.xiaozhang.com.cn/upload/schoolImags/2015-01-20/20110517488.jpg",
+      "content": "白色主楼与前庭院，最高价值旧照片",
+      "date_evidence": "相册上传目录2015-01-20；文件名暗示2011，但拍摄日期未独立核验",
+      "license": "未发现开放许可，仅作为建模研究参考"
+    },
+    {
+      "file": "20110517486.jpg",
+      "source_page": "http://www.xiaozhang.com.cn/school/gxgllczx/photo_Img_1543_9562.html",
+      "url": "http://www.xiaozhang.com.cn/upload/schoolImags/2015-01-20/20110517486.jpg",
+      "content": "校内道路正望白色主楼、主楼前绿化",
+      "date_evidence": "同上",
+      "license": "未发现开放许可，仅作为建模研究参考"
+    },
+    {
+      "file": "20110516427.jpg",
+      "source_page": "http://www.xiaozhang.com.cn/school/gxgllczx/photo_Img_1543_9561.html",
+      "url": "http://www.xiaozhang.com.cn/upload/schoolImags/2015-01-20/20110516427.jpg",
+      "content": "橙粉色主5层+左3层翼楼、蓝窗、左侧弧面玻璃楼梯塔",
+      "date_evidence": "同上",
+      "license": "未发现开放许可，仅作为建模研究参考"
+    },
+    {
+      "file": "20110518005.jpg",
+      "source_page": "http://www.xiaozhang.com.cn/school/gxgllczx/photo_Img_1543_9564.html",
+      "url": "http://www.xiaozhang.com.cn/upload/schoolImags/2015-01-20/20110518005.jpg",
+      "content": "红字景石、石铺步道、碎石砌挡墙",
+      "date_evidence": "同上",
+      "license": "未发现开放许可，仅作为建模研究参考"
+    },
+    {
+      "file": "20110518054.jpg",
+      "source_page": "http://www.xiaozhang.com.cn/school/gxgllczx/photo_Img_1543_9565.html",
+      "url": "http://www.xiaozhang.com.cn/upload/schoolImags/2015-01-20/20110518054.jpg",
+      "content": "求索景石、蒲葵、粉墙蓝门",
+      "date_evidence": "同上",
+      "license": "未发现开放许可，仅作为建模研究参考"
+    },
+    {
+      "file": "2015120115787.jpg",
+      "source_page": "http://www.xiaozhang.com.cn/school/gxgllczx",
+      "url": "http://www.xiaozhang.com.cn/upload/schoolflash/201501/2015120115787.jpg",
+      "content": "运动场红跑道、天然草、前景石栏杆台阶看台、远处旧楼",
+      "date_evidence": "2015-01上传目录；具体拍摄日期未核验",
+      "license": "未发现开放许可，仅作为建模研究参考"
+    },
+    {
+      "file": "jingyan-campus.jpg",
+      "source_page": "https://jingyan.baidu.com/article/e9fb46e149b6bd3421f76687.html",
+      "url": "https://exp-picture.cdn.bcebos.com/e86ba4b842406afe3f020a721eee41c1b6279fb2.jpg",
+      "content": "白主楼600x400正面；与2015旧站学校头像xz-school.jpg同一照片",
+      "date_evidence": "转载页2022-12-10；图像已出现于2015上传目录头像，拍摄日未知",
+      "license": "未发现开放许可，仅作为建模研究参考"
+    }
+  ],
+  "maps": [
+    {
+      "file": "wayback-28163-campus.jpg",
+      "archive_release": "World Imagery (Wayback 2015-12-16)",
+      "source_page": "https://www.arcgis.com/home/item.html?id=520249a818984ead8f72194f3505b442",
+      "tile_template": "https://wayback.maptiles.arcgis.com/arcgis/rest/services/World_Imagery/WMTS/1.0.0/default028mm/MapServer/tile/28163/{level}/{row}/{col}",
+      "tiles_z": 17,
+      "tile_bounds_inclusive": [
+        105698,
+        55960,
+        105700,
+        55962
+      ],
+      "north": "up",
+      "meters_per_pixel": 1.079,
+      "capture_date": "未证实；发布日期只提供影像年代上界，切勿混同采集日",
+      "license": "Esri影像条款；仅作为研究参考"
+    },
+    {
+      "file": "wayback-3319-campus.jpg",
+      "archive_release": "World Imagery (Wayback 2017-07-14)",
+      "source_page": "https://www.arcgis.com/home/item.html?id=af9bb3197b6d4d0eb8039acf34a25b85",
+      "tile_template": "https://wayback.maptiles.arcgis.com/arcgis/rest/services/World_Imagery/WMTS/1.0.0/default028mm/MapServer/tile/3319/{level}/{row}/{col}",
+      "tiles_z": 17,
+      "tile_bounds_inclusive": [
+        105698,
+        55960,
+        105700,
+        55962
+      ],
+      "north": "up",
+      "meters_per_pixel": 1.079,
+      "capture_date": "未证实；发布日期只提供影像年代上界，切勿混同采集日",
+      "license": "Esri影像条款；仅作为研究参考"
+    },
+    {
+      "file": "wayback-25521-campus.jpg",
+      "archive_release": "World Imagery (Wayback 2017-11-16)",
+      "source_page": "https://www.arcgis.com/home/item.html?id=b794bc15295e4be3896b5b91ebfd2c20",
+      "tile_template": "https://wayback.maptiles.arcgis.com/arcgis/rest/services/World_Imagery/WMTS/1.0.0/default028mm/MapServer/tile/25521/{level}/{row}/{col}",
+      "tiles_z": 17,
+      "tile_bounds_inclusive": [
+        105698,
+        55960,
+        105700,
+        55962
+      ],
+      "north": "up",
+      "meters_per_pixel": 1.079,
+      "capture_date": "未证实；发布日期只提供影像年代上界，切勿混同采集日",
+      "license": "Esri影像条款；仅作为研究参考"
+    }
+  ],
+  "current_map": {
+    "file": "esri-campus-wide.jpg",
+    "capture_date": "2024-09-12",
+    "provider": "Vantor / WV02",
+    "source_resolution_m": 0.5,
+    "nominal_horizontal_accuracy_m": 8.47
+  },
+  "pixel_reference": {
+    "image": "wayback-3319-campus.jpg",
+    "origin": "top-left",
+    "scale_m_per_px": 1.079,
+    "white_main_building_long_axis": [
+      [
+        355,
+        278
+      ],
+      [
+        414,
+        252
+      ]
+    ],
+    "white_main_confidence": "较高，但仍为旧照片与卫星形态匹配",
+    "north_parallel_white_block_long_axis": [
+      [
+        336,
+        238
+      ],
+      [
+        388,
+        218
+      ]
+    ],
+    "front_garden_polygon": [
+      [
+        356,
+        283
+      ],
+      [
+        407,
+        265
+      ],
+      [
+        420,
+        294
+      ],
+      [
+        422,
+        347
+      ],
+      [
+        397,
+        359
+      ],
+      [
+        374,
+        327
+      ]
+    ],
+    "circular_landscape_center": [
+      390,
+      314
+    ],
+    "basketball_area_polygon": [
+      [
+        277,
+        317
+      ],
+      [
+        359,
+        288
+      ],
+      [
+        380,
+        350
+      ],
+      [
+        296,
+        377
+      ]
+    ],
+    "basketball_count": "历史场线不能清楚计数",
+    "stadium_outer_polygon_approx": [
+      [
+        444,
+        303
+      ],
+      [
+        560,
+        277
+      ],
+      [
+        591,
+        290
+      ],
+      [
+        610,
+        316
+      ],
+      [
+        604,
+        345
+      ],
+      [
+        582,
+        368
+      ],
+      [
+        465,
+        391
+      ],
+      [
+        442,
+        381
+      ],
+      [
+        428,
+        359
+      ],
+      [
+        428,
+        330
+      ]
+    ],
+    "dome_building_center": [
+      315,
+      272
+    ],
+    "dome_center": [
+      324,
+      270
+    ],
+    "orange_building_to_dome_match": "仅推测，照片未直接展示圆顶，勿称已确认"
+  },
+  "modeling_status": {
+    "version": "1.0.0",
+    "target": "2014—2017",
+    "classification": "web-ready historical reconstruction with explicit uncertainty",
+    "complete_surveyed_reconstruction": false,
+    "inferences": [
+      "absolute dimensions",
+      "unseen elevations",
+      "heights of aerial-only buildings",
+      "nine basketball courts follow early school introduction; 2017 arrangement unconfirmed",
+      "partial planting locations",
+      "campus boundary"
+    ],
+    "unresolved": [
+      "orange building name and footprint match",
+      "names and functions of other buildings",
+      "precise 2014–2017 change chronology"
+    ]
+  },
+  "official_archive": {
+    "school": "广西桂林市灵川县灵川中学",
+    "retrieved": "2026-09-05",
+    "rights": "原官网图片版权所有/授权状态未知，仅供研究比对；不得默认为开放许可。",
+    "selected_assets": {
+      "20130426165006463.jpg": {
+        "subject": "育英楼正面",
+        "confidence": "high",
+        "date": "相册发布 2013-04-26；具体拍摄日期未给出",
+        "page_id": 173,
+        "notes": "门牌可读育英楼；5 层中部、4 层两翼；顶部连续玻璃多功能厅。",
+        "original_image_url": "http://www.gllczx.com/UpLoad/20130426165006463.jpg",
+        "archived_image_url": "https://web.archive.org/web/20130913181900id_/http://www.gllczx.com/UpLoad/20130426165006463.jpg",
+        "archive_capture": "20130913181900",
+        "source_page_url": "http://gllczx.com/Photo_Show.asp?InfoId=173&ClassId=34",
+        "archived_page_url": "https://web.archive.org/web/20170206185949/http://gllczx.com/Photo_Show.asp?InfoId=173&ClassId=34"
+      },
+      "20130426165006381.jpg": {
+        "subject": "橙色楼正面",
+        "confidence": "high for form; low for names",
+        "date": "相册发布 2013-04-26；具体拍摄日期未给出",
+        "page_id": 173,
+        "notes": "左侧 3 层翼楼与圆柱形蓝玻璃楼梯间，右侧约 5 层高体；两处楼名未可靠识读。不可确定与天象馆所在楼同栋。",
+        "original_image_url": "http://gllczx.com/UpLoad/20130426165006381.jpg",
+        "archived_image_url": "https://web.archive.org/web/20131222172111id_/http://gllczx.com/UpLoad/20130426165006381.jpg",
+        "archive_capture": "20131222172111",
+        "source_page_url": "http://gllczx.com/Photo_Show.asp?InfoId=173&ClassId=34",
+        "archived_page_url": "https://web.archive.org/web/20170206185949/http://gllczx.com/Photo_Show.asp?InfoId=173&ClassId=34"
+      },
+      "20130426165458150.jpg": {
+        "subject": "从育英楼方向望向主庭院与校门",
+        "confidence": "high",
+        "date": "相册发布 2013-04-26；具体拍摄日期未给出",
+        "page_id": 174,
+        "notes": "完整曲线园路、圆形花坛、白色廊架、石桌椅、校门弧形雨篷、轴线上雕塑；运动场在此画面左侧。",
+        "original_image_url": "http://www.gllczx.com/UpLoad/20130426165458150.jpg",
+        "archived_image_url": "https://web.archive.org/web/20130913164655id_/http://www.gllczx.com/UpLoad/20130426165458150.jpg",
+        "archive_capture": "20130913164655",
+        "source_page_url": "http://gllczx.com/Photo_Show.asp?InfoId=174&ClassId=34",
+        "archived_page_url": "https://web.archive.org/web/20170207021557/http://gllczx.com/Photo_Show.asp?InfoId=174&ClassId=34"
+      },
+      "20130427101954848.jpg": {
+        "subject": "2007 校庆，校门弧形雨篷背面",
+        "confidence": "high",
+        "date": "相册 2007-11-20；70 周年横幅与年份相符；2013 重新上传",
+        "page_id": 175,
+        "notes": "证明大跨度弧形雨篷与银色雕塑在 2007 年已存在；雨篷右端连接门房，浅灰白面板、露出的钢构。",
+        "original_image_url": "http://www.gllczx.com/UpLoad/20130427101954848.jpg",
+        "archived_image_url": "https://web.archive.org/web/20130913175027id_/http://www.gllczx.com/UpLoad/20130427101954848.jpg",
+        "archive_capture": "20130913175027",
+        "source_page_url": "http://gllczx.com/Photo_Show.asp?InfoId=175&ClassId=40",
+        "archived_page_url": "https://web.archive.org/web/20170207190428/http://gllczx.com/Photo_Show.asp?InfoId=175&ClassId=40"
+      },
+      "20130427101954931.jpg": {
+        "subject": "2007 校庆，从入口看银色雕塑与育英楼、圆顶",
+        "confidence": "high",
+        "date": "相册 2007-11-20；70 周年横幅与年份相符；2013 重新上传",
+        "page_id": 175,
+        "notes": "银色双曲带状雕塑与上方金色球、红棕梯形石基座。天象馆圆顶在画面左侧，白色育英楼在主轴后方。",
+        "original_image_url": "http://gllczx.com/UpLoad/20130427101954931.jpg",
+        "archived_image_url": "https://web.archive.org/web/20131222174855id_/http://gllczx.com/UpLoad/20130427101954931.jpg",
+        "archive_capture": "20131222174855",
+        "source_page_url": "http://gllczx.com/Photo_Show.asp?InfoId=175&ClassId=40",
+        "archived_page_url": "https://web.archive.org/web/20170207190428/http://gllczx.com/Photo_Show.asp?InfoId=175&ClassId=40"
+      },
+      "20160827170299709970.jpg": {
+        "subject": "校门门房及伸缩门特写",
+        "confidence": "high",
+        "date": "2016-08-26 开学报到；新闻发布 2016-08-27",
+        "info_id": 478,
+        "notes": "蓝色灵西路 44 号门牌，米灰色石材/面砖、粗石材基座、铝合金窗、内侧竖向六边形洞口、伸缩门地轨与红色 V 字门柱。",
+        "original_image_url": "http://gllczx.com/upload/image/20160827/20160827170299709970.jpg",
+        "archived_image_url": "https://web.archive.org/web/20161208110411id_/http://gllczx.com/upload/image/20160827/20160827170299709970.jpg",
+        "archive_capture": "20161208110411",
+        "source_page_url": "http://gllczx.com/info_Show.asp?InfoId=478&ClassId=27",
+        "archived_page_url": "https://web.archive.org/web/20170207033148/http://gllczx.com/info_Show.asp?InfoId=478&ClassId=27"
+      },
+      "20160827170340964096.jpg": {
+        "subject": "校门另一方向近照",
+        "confidence": "high",
+        "date": "2016-08-26 开学报到；新闻发布 2016-08-27",
+        "info_id": 478,
+        "notes": "补充伸缩门端柱、门房材料和地面细节。",
+        "original_image_url": "http://gllczx.com/upload/image/20160827/20160827170340964096.jpg",
+        "archived_image_url": "https://web.archive.org/web/20161208114036id_/http://gllczx.com/upload/image/20160827/20160827170340964096.jpg",
+        "archive_capture": "20161208114036",
+        "source_page_url": "http://gllczx.com/info_Show.asp?InfoId=478&ClassId=27",
+        "archived_page_url": "https://web.archive.org/web/20170207033148/http://gllczx.com/info_Show.asp?InfoId=478&ClassId=27"
+      },
+      "20160427094941894189.jpg": {
+        "subject": "篮球场旁宿舍楼外廊",
+        "confidence": "high",
+        "date": "2016 年春篮球赛于 4 月 26 日结束；新闻发布 2016-04-27",
+        "info_id": 451,
+        "notes": "白灰小方砖、红褐色水平带、敞开阳台/外廊，晾晒衣物。建筑精确总层数与总图对应尚不确定。",
+        "original_image_url": "http://gllczx.com/upload/image/20160427/20160427094941894189.jpg",
+        "archived_image_url": "https://web.archive.org/web/20161210011426id_/http://gllczx.com/upload/image/20160427/20160427094941894189.jpg",
+        "archive_capture": "20161210011426",
+        "source_page_url": "http://gllczx.com/info_Show.asp?InfoId=451&ClassId=27",
+        "archived_page_url": "https://web.archive.org/web/20170206152009/http://gllczx.com/info_Show.asp?InfoId=451&ClassId=27"
+      },
+      "20130427154946237.jpg": {
+        "subject": "篮球场旁白色楼与橙色瓦檐旗台",
+        "confidence": "high",
+        "date": "相册活动日期 2012-12-31；2013 重新上传",
+        "page_id": 177,
+        "notes": "可见白楼 3 层外廊，橙瓦单坡小门檐/旗台，前侧白色球顶栏杆。",
+        "original_image_url": "http://gllczx.com/UpLoad/20130427154946237.jpg",
+        "archived_image_url": "https://web.archive.org/web/20131222173253id_/http://gllczx.com/UpLoad/20130427154946237.jpg",
+        "archive_capture": "20131222173253",
+        "source_page_url": "http://gllczx.com/Photo_Show.asp?InfoId=177&ClassId=41",
+        "archived_page_url": "https://web.archive.org/web/20170208173659/http://gllczx.com/Photo_Show.asp?InfoId=177&ClassId=41"
+      },
+      "20141205165519561956.jpg": {
+        "subject": "旗台与白楼近景",
+        "confidence": "high for image; article not yet recovered",
+        "date": "上传路径 2014-12-05；不能仅凭路径保证拍摄日期",
+        "notes": "与篮球场旁橙瓦檐旗台一致。",
+        "original_image_url": "http://gllczx.com/upload/image/20141205/20141205165519561956.jpg",
+        "archived_image_url": "https://web.archive.org/web/20150930062055id_/http://gllczx.com/upload/image/20141205/20141205165519561956.jpg",
+        "archive_capture": "20150930062055"
+      },
+      "20150527133765206520.jpg": {
+        "subject": "银色雕塑前视察照片",
+        "confidence": "high for object; article not yet recovered",
+        "date": "上传路径 2015-05-27；具体事件页尚未绑定",
+        "notes": "同一银色雕塑，育英楼在后。更强年份证据已有 2007 相册。",
+        "original_image_url": "http://gllczx.com/upload/image/20150527/20150527133765206520.jpg",
+        "archived_image_url": "https://web.archive.org/web/20151001223543id_/http://gllczx.com/upload/image/20150527/20150527133765206520.jpg",
+        "archive_capture": "20151001223543"
+      },
+      "2015121009380121121.jpg": {
+        "subject": "县人民会堂正门（排除）",
+        "confidence": "high exclusion",
+        "date": "2015-12-04 法制活动；2015-12-10 上传",
+        "info_id": 440,
+        "notes": "旧官网新闻清楚写活动在县人民会堂，此照片不是校园建筑，禁止用于校园建模。",
+        "original_image_url": "http://gllczx.com/upload/image/20151210/2015121009380121121.jpg",
+        "archived_image_url": "https://web.archive.org/web/20160716100450id_/http://gllczx.com/upload/image/20151210/2015121009380121121.jpg",
+        "archive_capture": "20160716100450",
+        "source_page_url": "http://gllczx.com/info_Show.asp?InfoId=440&ClassId=27&Topid=0",
+        "archived_page_url": "https://web.archive.org/web/20160115093206/http://gllczx.com/info_Show.asp?InfoId=440&ClassId=27&Topid=0"
+      },
+      "20151124155353415341.jpg": {
+        "subject": "2015 年 78 周年校庆礼堂舞台",
+        "confidence": "high",
+        "date": "2015-11-20 活动，2015-11-24 新闻",
+        "info_id": 439,
+        "notes": "校大礼堂内部；无完整外立面定位。",
+        "original_image_url": "http://gllczx.com/upload/image/20151124/20151124155353415341.jpg",
+        "archived_image_url": "https://web.archive.org/web/20160715160411id_/http://gllczx.com/upload/image/20151124/20151124155353415341.jpg",
+        "archive_capture": "20160715160411",
+        "source_page_url": "http://gllczx.com/info_Show.asp?InfoId=439&ClassId=27&Topid=0",
+        "archived_page_url": "https://web.archive.org/web/20160114234417/http://gllczx.com/info_Show.asp?InfoId=439&ClassId=27&Topid=0"
+      }
+    },
+    "text_evidence": [
+      {
+        "claim": "育英楼五楼当时用于放电影",
+        "event_date": "2011-03-29",
+        "source": "https://web.archive.org/web/20130917050124/http://gllczx.com/info_Show.asp?InfoId=234&ClassId=35&Topid=27"
+      },
+      {
+        "claim": "并排 9 个篮球场，室内体育馆，天象馆等",
+        "event_date": "2005-03-30 网页末尾更新时间；2012 存档",
+        "source": "https://web.archive.org/web/20120319221351/http://www.gllczx.com:80/lzgm/xxjjtupian/lzss.asp",
+        "limitation": "9 个场是早期资料，不能直接确认为 2017 数量"
+      },
+      {
+        "claim": "2003 年重建校大门、科技楼与塑胶跑道；2002 年图书楼工程",
+        "source": "https://web.archive.org/web/20120319004807/http://www.gllczx.com:80/lczxgh/xwgkl/xwgkl4.asp"
+      }
+    ],
+    "remaining_uncertainties": [
+      "2017 校庆照片/视频未找到可信可见源；有 2007 和 2015 相册。",
+      "橙色建筑两处门牌未能可靠识读，不应猜测用途。",
+      "橙色楼是否为天象馆所在同一栋，仍未严格匹配。",
+      "旧照片与 2017 总图之间的尺寸、摄影透视、树木和遮挡仍需模型校准。"
+    ]
+  },
+  "user_corrections_2026_09_06": {
+    "gate": "Same gate unchanged through 2026.",
+    "xinxing": "Behind Yuying; name and entrance confirmed by user and attached photos.",
+    "peixian": "Three-storey building beside basketball courts, user confirmed.",
+    "dormitory": "Two distinct buildings with facing corridors, user confirmed.",
+    "sports_access": "Video double-view shows road beneath transverse pedestrian connection; previous long staircase interpretation rejected.",
+    "office": "Superseded: identified as Zonghe office building by the user-supplied 2017-07-19 Tieba caption and photo.",
+    "references": "sources/user-map-2026/manifest.json"
+  },
+  "user_2017_details": {
+    "target": "2014–2017",
+    "facts_from_user": [
+      "校门一直未变",
+      "2022视频中仅育英楼改变",
+      "育英楼后方为新星楼",
+      "篮球场旁两栋宿舍",
+      "乒乓球照片中建筑为培贤楼",
+      "食堂与宿舍之间有独立饭卡充值楼"
+    ],
+    "files": [
+      "IMG_3578.jpeg",
+      "IMG_3579.jpeg",
+      "IMG_3580.jpeg",
+      "IMG_3581.jpeg",
+      "IMG_3582.jpeg",
+      "IMG_3583.jpeg",
+      "IMG_3584.jpeg",
+      "IMG_3585.jpeg",
+      "IMG_3586.jpeg",
+      "IMG_3587.jpeg",
+      "IMG_3588.jpeg",
+      "IMG_3589.jpeg",
+      "123773F1-1AAB-48A4-90E5-1F7F02E86E51.jpeg",
+      "4E6A32EF-DC6A-42A7-8554-E6B64E2F7D53.jpeg"
+    ],
+    "identifications": {
+      "IMG_3578.jpeg": "新星楼端面，2017-07-19",
+      "IMG_3579.jpeg": "综合楼（校长办公室、教务处）与求实楼/图书馆功能文字",
+      "IMG_3580.jpeg": "求实楼五层窗带和后方图书馆",
+      "IMG_3581.jpeg": "小卖部和社团卷闸门，准确位置尚未确认，未擅自放置",
+      "IMG_3583.jpeg": "体育场校内阶梯入口",
+      "IMG_3584.jpeg": "体育场平台石栏杆",
+      "IMG_3585.jpeg": "场侧下行阶梯",
+      "IMG_3586.jpeg": "2017灰色篮球场与旧篮架",
+      "IMG_3587.jpeg": "培贤楼端部与露天乒乓球区",
+      "IMG_3588.jpeg": "校园树池、石凳和林荫通道",
+      "IMG_3589.jpeg": "2017-08-11雨水流过阶梯，非独立瀑布设施"
+    },
+    "limitations": [
+      "尺寸与绝对定位为比例估计",
+      "饭卡楼具体立面与层数尚缺近照",
+      "帖子的发布日期不等同照片拍摄日"
+    ],
+    "reference_only": true
+  },
+  "latest_identifications": {
+    "office": "综合楼，2017帖子文字与照片确认",
+    "laboratory": "求实楼，2017帖子明确实验用途",
+    "library": "求实楼后方图书馆，门牌与说明相符",
+    "tabletennis": "培贤楼端部露天场，用户确认楼名",
+    "recharge": "食堂与宿舍之间独立楼，用户确认"
+  },
+  "pingpong_position_correction": {
+    "reason": "用户指出位置反了；由培贤楼东端移至西端（食堂侧）。从西端看向楼体，天象馆圆顶在左后方，与IMG_3587相符。",
+    "previous": [
+      354,
+      291,
+      110
+    ],
+    "corrected": [
+      265,
+      313,
+      290
+    ],
+    "coordinates": "2017 image pixels; yaw in degrees",
+    "accuracy": "相邻关系按用户更正，精确区界和间距仍为比例估计"
+  },
+  "latest_layout_correction": {
+    "user_confirmation": "食堂和实验楼近乎同一直线；实验楼和办公楼方向不能斜置；饭卡楼与食堂宿舍过挤",
+    "adjustment": "实验楼与办公楼长轴改为与食堂平行，位置落在食堂延长方向；食堂北移、两栋宿舍整体南移，留出饭卡楼两侧通道；过滤穿建筑的树冠",
+    "estimated_image_coordinates": {
+      "dining": [
+        245,
+        283,
+        43
+      ],
+      "laboratory": [
+        323,
+        210,
+        43
+      ],
+      "office": [
+        297,
+        227,
+        43
+      ],
+      "dormA": [
+        238,
+        343,
+        20
+      ],
+      "dormB": [
+        249,
+        368,
+        200
+      ]
+    },
+    "accuracy": "方位关系由校友确认；绝对位移和建筑间距为照片及卫星图比例估计"
+  },
+  "academic_join_review": {
+    "basis": [
+      "用户2017实拍IMG_3579/IMG_3580",
+      "Minecraft长片03:03–03:30连续镜头辅助理解"
+    ],
+    "change": "办公低翼与实验高楼贴接，同向排列；总图与局部近景同步。",
+    "limits": "米制尺寸仍按模型比例估计；不把玩家作品当测绘图。"
+  }
+}
