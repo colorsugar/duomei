@@ -183,7 +183,7 @@ test("uses Skill naming and a three-column desktop directory", () => {
 });
 
 test("keeps the full NetEase playlist native, movable, bounded, and autoplay-off", () => {
-  assert.match(appSource, /!isAdmin \? <DuomeiMusicPlayer compactContext=\{isGuyuReader \|\| isZaobao \|\| isYunyouMap\} \/> : null/);
+  assert.match(appSource, /!isAdmin \? <DuomeiMusicPlayer compactContext=\{isGuyuReader \|\| isZaobao \|\| isYunyouMap \|\| isAtlasMap\} \/> : null/);
   assert.match(musicPlayerSource, /NETEASE_PLAYLIST_ID = "316500315"/);
   assert.match(musicPlayerSource, /<audio[\s\S]*preload="metadata"/);
   assert.doesNotMatch(musicPlayerSource, /<iframe|autoPlay/);
@@ -383,7 +383,7 @@ test("keeps Cursor auto-publish behind same-repository validation", () => {
   assert.match(cursorAutoMergeWorkflow, /\.head\.repo\.full_name[\s\S]*\$GITHUB_REPOSITORY/);
   assert.match(cursorAutoMergeWorkflow, /\.head\.ref[\s\S]*cursor\/\*/);
   assert.match(cursorAutoMergeWorkflow, /\.head\.sha[\s\S]*\$VALIDATED_SHA/);
-  assert.match(cursorAutoMergeWorkflow, /protected_paths=/);
+  assert.doesNotMatch(cursorAutoMergeWorkflow, /protected_paths=|leaving PR[^\n]*manual review/);
   assert.match(cursorAutoMergeWorkflow, /--match-head-commit "\$VALIDATED_SHA"/);
   assert.match(cursorAutoMergeWorkflow, /gh workflow run deploy-edgeone\.yml/);
   assert.doesNotMatch(cursorAutoMergeWorkflow, /actions\/checkout/);

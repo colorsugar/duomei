@@ -203,7 +203,7 @@ Do not treat a build, unit test, source marker, API status, or desktop click as 
 12. Verify production homepage `200`, anonymous auth `200` with `authorized:false`, and an unauthenticated private page `401`.
 13. Open the real production webpage, verify the visible copy and layout, and repeat the user's exact interaction. Real-device behavior remains a separate claim when the device is not under agent control.
 
-Ready same-repository PRs whose branch begins `cursor/` use `.github/workflows/pr-validation.yml` as a required status gate. After a successful run, `.github/workflows/cursor-auto-merge.yml` executes only from default-branch code, never checks out PR code with write credentials, revalidates the open/non-draft PR, same repository, `cursor/*` branch, exact tested SHA, and a denylist of release/security paths. Eligible ordinary site changes are squash-merged, then the workflow explicitly dispatches `deploy-edgeone.yml` because events created by `GITHUB_TOKEN` do not create a second push workflow. Failed/draft/stale PRs or PRs touching workflows, dependencies, deployment configuration, server infrastructure, credentials, or canonical release policy remain open for manual review. This is the only authorized unattended Cursor production path.
+Ready same-repository, non-draft `cursor/*` PRs for user-authorized work may publish after `PR Validation / validate` passes. The default-branch `.github/workflows/cursor-auto-merge.yml` must revalidate the open PR, base `main`, same repository, branch prefix and exact tested head SHA; it never checks out PR code with write credentials. It squash-merges eligible changes and explicitly dispatches `deploy-edgeone.yml`. Per the user's 2026-09-08 instruction, changed file paths (including workflows, dependencies, deployment configuration, server infrastructure and canonical release documents) do not impose an additional manual-review gate. Do not ask the user to click Merge or reconfirm an already authorized release; an authorized agent may merge the exact validated head through the connected GitHub tool when bootstrapping this policy update. Failed, draft or stale PRs remain unpublished. Build, tests, release verification, platform access controls and all existing secret/private-content protections remain mandatory; this policy does not authorize disclosure or modification of credentials or private data.
 
 ## User Maintenance Preferences
 
@@ -242,3 +242,9 @@ These findings are not automatically authorized fixes. Reverify before acting.
 Update this file in the same commit whenever production hosting, branch, project ID, routes, data ownership, storage path, authentication behavior, release commands, required UI behavior, or known-risk status changes. Do not hardcode a “latest commit”; query the production marker and Git instead.
 
 Historical planning documents under `deploy/guyu-edgeone/docs/` remain useful evidence, but their pre-production instructions are not current operations. Their status banners and this file take precedence.
+
+## 七国设定集与地图 — 2026-09-08
+
+新增公开新说册 `hanhai-realms-artbook` / 《七国 · 地理与风物设定集》，52 页1536×2352完整 WebP。沿用既有硬页翻书，手机竖屏单页，实际单双页模式由引擎报告；目录、地图链接使用引擎当前页。书页聚合 SHA-256 `7af57eeca746e81dbe1f9784ed95338ee4ce62148fad5e497a46435fab1ac984`，封面 SHA-256 `a538ceab803fad6d1403e82a79b72ebaf019f22daae155a809ec591fcfc463a3`。已有五册与53页私有册不改变。
+
+`/atlas-v6` 是七国战略图志的 React 同源地图壳，嵌入 `/atlas/v6/index.html?embed=duomei`，保留全局音乐；`entry` 查询参数定位已有国家、城市或要地。仅 `/atlas/v6/*` 与既有 `/yunyou/*` 使用 SAMEORIGIN，其他页面继续 DENY。设定集与地图互链。52书页、独立封面、书册元数据、阅读器、React地图壳、完整静态地图目录、样式、测试与生产探针构成同一发布单元。详细导入事实见 `docs/atlas-artbook-import.md`。

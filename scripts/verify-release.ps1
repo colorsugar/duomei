@@ -128,6 +128,11 @@ $guyuBundle = @(
   "src/main.tsx",
   "public/images/guyu",
   "public/images/guyu-gui-xiang-huan-xiang-cover.webp",
+  "public/images/guyu-hanhai-realms-artbook-cover.webp",
+  "src/content/hanhaiArtbook.json",
+  "src/pages/DuomeiAtlasPage.tsx",
+  "src/atlas-page.css",
+  "public/atlas/v6",
   "public/images/guyu-xinshuo-01-cover.webp",
   "public/images/guyu-xinshuo-02-cover.webp",
   "public/images/guyu-zhi-shang-feiyan-cover.webp",
@@ -293,6 +298,7 @@ if ($legacyPagesWorkflow -match '(?m)^\s*push:\s*$') {
 }
 
 $publicCoverHashes = @{
+  "public/images/guyu-hanhai-realms-artbook-cover.webp" = "A538CEAB803FAD6D1403E82A79B72EBAF019F22DAAE155A809EC591FCFC463A3"
   "public/images/guyu-zhi-shang-feiyan-cover.webp" = "69644B7DFFDBF78FE5D2D624678B0005AF65FA6E9029340176615FAFCE332D6B"
   "public/images/guyu-xinshuo-01-cover.webp" = "A993DF1567F85CC70D814E27ED7C8F201CDF115495D5B38B4DED47EA5F74EF8D"
   "public/images/guyu-xinshuo-02-cover.webp" = "C779F4CD56A3162C3C16631A72F3033015A02CEBBBA39C05427F3923382A5369"

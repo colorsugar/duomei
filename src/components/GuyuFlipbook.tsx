@@ -11,6 +11,7 @@ import {
 import type { TouchEvent as ReactTouchEvent } from "react";
 import { useReducedMotion } from "framer-motion";
 import HTMLFlipBook from "react-pageflip";
+import { Link } from "react-router-dom";
 import { formatGuyuPageNumber } from "../content/guyuBooks";
 import type { GuyuBook, GuyuLogicalPage } from "../content/guyuBooks";
 import { isGuyuViewportZoomed, updateGuyuTouchSequence } from "../lib/guyuTouchSequence";
@@ -20,6 +21,8 @@ type PageFlipController = {
   flipNext: (corner?: "top" | "bottom") => void;
   flipPrev: (corner?: "top" | "bottom") => void;
   getCurrentPageIndex: () => number;
+  getOrientation: () => "portrait" | "landscape";
+  update: () => void;
   turnToPage: (page: number) => void;
 };
 
@@ -161,8 +164,9 @@ function turnLoadWindow(current: number, direction: -1 | 1, lastIndex: number) {
   return [...pages];
 }
 
-function visiblePagesAfterTurn(current: number, direction: -1 | 1, lastIndex: number) {
+function visiblePagesAfterTurn(current: number, direction: -1 | 1, lastIndex: number, singlePage = false) {
   if ((direction < 0 && current <= 0) || (direction > 0 && current >= lastIndex)) return [];
+  if (singlePage) return [Math.min(lastIndex, Math.max(0, current + direction))];
   const target = direction > 0
     ? Math.min(lastIndex, current === 0 ? 1 : current + 2)
     : Math.max(0, current <= 1 ? 0 : current - 2);
@@ -178,6 +182,17 @@ export function GuyuFlipbook({
   onOpenChange?: (isOpen: boolean) => void;
 }) {
   const reduceMotion = useReducedMotion() ?? false;
+  const [portraitViewport, setPortraitViewport] = useState(() => window.matchMedia("(max-width: 900px) and (orientation: portrait)").matches);
+  const desiredPortraitLayout = Boolean(book.companionMap) && portraitViewport;
+  const [actualPortrait, setActualPortrait] = useState(desiredPortraitLayout);
+  const singlePage = Boolean(book.companionMap) && actualPortrait;
+  const [contentsOpen, setContentsOpen] = useState(false);
+  useEffect(() => {
+    const media = window.matchMedia("(max-width: 900px) and (orientation: portrait)");
+    const update = () => setPortraitViewport(media.matches);
+    media.addEventListener("change", update);
+    return () => media.removeEventListener("change", update);
+  }, []);
   const lastIndex = book.logicalPages.length - 1;
   const initialActivePages = useMemo(() => pageWindow(0, lastIndex), [lastIndex]);
   const [activePages, setActivePages] = useState<Set<number>>(initialActivePages);
@@ -192,6 +207,10 @@ export function GuyuFlipbook({
   const [viewportZoomed, setViewportZoomed] = useState(() => isGuyuViewportZoomed(window.visualViewport?.scale));
   const flipbookRef = useRef<PageFlipRef | null>(null);
   const controllerRef = useRef<PageFlipController | undefined>(undefined);
+  useEffect(() => {
+    const tick = window.requestAnimationFrame(() => controllerRef.current?.update());
+    return () => window.cancelAnimationFrame(tick);
+  }, [desiredPortraitLayout]);
   const activePagesRef = useRef<Set<number>>(initialActivePages);
   const loadedPagesRef = useRef(new Set<number>());
   const waitersRef = useRef(new Map<number, Set<PageWaiter>>());
@@ -321,6 +340,7 @@ export function GuyuFlipbook({
 
   const onInit = useCallback((event: FlipEvent) => {
     controllerRef.current = flipbookRef.current?.pageFlip();
+    setActualPortrait(controllerRef.current?.getOrientation() === "portrait");
     onFlip(event);
   }, [onFlip]);
 
@@ -357,13 +377,14 @@ export function GuyuFlipbook({
       }
       setPhase("flipping");
       if (reduceMotion) {
-        const target = direction > 0
+        const target = singlePage ? Math.min(lastIndex, Math.max(0, current + direction)) : direction > 0
           ? Math.min(lastIndex, current === 0 ? 1 : current + 2)
           : Math.max(0, current <= 1 ? 0 : current - 2);
         controller.turnToPage(target);
-        setPageIndex(target);
-        setBookPosition(target === 0 ? "start" : target >= lastIndex ? "end" : "open");
-        setActiveWindow(target);
+        const shown = controller.getCurrentPageIndex();
+        setPageIndex(shown);
+        setBookPosition(shown === 0 ? "start" : shown >= lastIndex ? "end" : "open");
+        setActiveWindow(shown);
         finishInteraction();
         return;
       }
@@ -381,19 +402,19 @@ export function GuyuFlipbook({
       setLoadError("页面没有载入，请再点一次。");
       finishInteraction();
     }
-  }, [ensurePages, finishInteraction, isTurnBlocked, lastIndex, loadError, reduceMotion, setActiveWindow]);
+  }, [ensurePages, finishInteraction, isTurnBlocked, lastIndex, loadError, reduceMotion, setActiveWindow, singlePage]);
 
   const nativeTouchReady = useMemo(() => {
     if (busy || loadError) return false;
     const required = [
-      ...visiblePagesAfterTurn(pageIndex, -1, lastIndex),
-      ...visiblePagesAfterTurn(pageIndex, 1, lastIndex),
+      ...visiblePagesAfterTurn(pageIndex, -1, lastIndex, singlePage),
+      ...visiblePagesAfterTurn(pageIndex, 1, lastIndex, singlePage),
     ];
     return required.every((index) => {
       const page = book.logicalPages[index];
       return page?.placement === "blank" || loadedPagesRef.current.has(index);
     });
-  }, [book.logicalPages, busy, lastIndex, loadError, loadedRevision, pageIndex]);
+  }, [book.logicalPages, busy, lastIndex, loadError, loadedRevision, pageIndex, singlePage]);
 
   const stopNativePageFlipTouch = useCallback((event: ReactTouchEvent<HTMLDivElement>) => {
     event.stopPropagation();
@@ -480,7 +501,7 @@ export function GuyuFlipbook({
     setLoadError("");
     const required = target === 0
       ? [0, 1, 2].filter((index) => index <= lastIndex)
-      : [Math.max(0, target - 1), target];
+      : [Math.max(0, target - 1), target, Math.min(lastIndex, target + 1)];
     const current = controller.getCurrentPageIndex();
     const visibleCurrent = [current, current + 1].filter((index) => index <= lastIndex);
     try {
@@ -490,9 +511,10 @@ export function GuyuFlipbook({
         return;
       }
       controller.turnToPage(target);
-      setPageIndex(target);
-      setBookPosition(target === 0 ? "start" : target >= lastIndex ? "end" : "open");
-      setActiveWindow(target);
+      const shown = controller.getCurrentPageIndex();
+      setPageIndex(shown);
+      setBookPosition(shown === 0 ? "start" : shown >= lastIndex ? "end" : "open");
+      setActiveWindow(shown);
       finishInteraction();
     } catch {
       setLoadError("页面没有载入，请再试一次。");
@@ -554,13 +576,13 @@ export function GuyuFlipbook({
     }
   }, []);
 
-  const statusText = formatGuyuPageNumber(pageIndex, book.logicalPages.length);
+  const statusText = singlePage && pageIndex > 0 && pageIndex < lastIndex ? `${pageIndex} / ${lastIndex - 1}` : formatGuyuPageNumber(pageIndex, book.logicalPages.length);
   const visibleStatus = loadError || (phase === "loading" ? "正在载入下一页…" : phase === "flipping" ? "正在翻页…" : statusText);
 
   return (
     <PageLoadContext.Provider value={loadingContext}>
       <section
-        className="guyu-flipbook"
+        className={`guyu-flipbook${book.companionMap ? " is-atlas-artbook" : ""}${singlePage ? " is-single-page" : ""}${desiredPortraitLayout ? " is-portrait-layout" : ""}`}
         data-phase={phase}
         aria-label={`翻阅《${book.title}》`}
         aria-busy={busy}
@@ -583,13 +605,13 @@ export function GuyuFlipbook({
             size="stretch"
             width={1100}
             height={1684}
-            minWidth={120}
+            minWidth={book.companionMap ? 280 : 120}
             maxWidth={550}
             minHeight={184}
             maxHeight={842}
             drawShadow
             flippingTime={reduceMotion ? 160 : FLIP_TIME}
-            usePortrait={false}
+            usePortrait={Boolean(book.companionMap)}
             startZIndex={1}
             autoSize
             maxShadowOpacity={0.62}
@@ -604,6 +626,7 @@ export function GuyuFlipbook({
             onFlip={onFlip}
             onChangeState={onChangeState}
             onInit={onInit}
+            onChangeOrientation={(event: FlipEvent) => setActualPortrait(event.data === "portrait")}
           >
             {book.logicalPages.map((page, index) => (
               <GuyuFlipPage
@@ -637,6 +660,14 @@ export function GuyuFlipbook({
         <p className="guyu-book-status guyu-visually-hidden" aria-live="polite" aria-atomic="true">
           {visibleStatus}
         </p>
+        {book.companionMap ? <div className="guyu-atlas-tools">
+          <Link to={`${book.companionMap}${book.mapEntries?.[pageIndex] ? `?entry=${encodeURIComponent(book.mapEntries[pageIndex])}` : ""}`}>在地图中查看 ↗</Link>
+          <button type="button" aria-expanded={contentsOpen} onClick={() => setContentsOpen(!contentsOpen)}>目录</button>
+          {contentsOpen ? <nav className="guyu-atlas-contents" aria-label="设定集目录">
+            <button type="button" onClick={() => setContentsOpen(false)}>收起目录 ×</button>
+            {book.sections?.map(section => <button type="button" key={section.page} disabled={busy || viewportZoomed} onClick={() => { setContentsOpen(false); void jumpToPage(section.page - 1); }}>{section.title}<span>{section.page}</span></button>)}
+          </nav> : null}
+        </div> : null}
         {pageIndex > 0 ? (
           <button
             className="guyu-reader-close"

@@ -176,7 +176,7 @@ If any bundle file is still modified, staged, or untracked after the commit, the
 
 ## EdgeOne Production Automation
 
-- Same-repository, non-draft `cursor/*` pull requests with ordinary site changes are eligible for guarded auto-publish. `PR Validation / validate` is the required branch status; the default-branch `.github/workflows/cursor-auto-merge.yml` never checks out PR code with write credentials, revalidates the exact tested SHA and protected-path denylist, squash-merges eligible changes, then explicitly dispatches EdgeOne production. Failed/draft/stale PRs and changes to workflows, dependencies, deployment/server infrastructure, credentials, or canonical release policy remain open and receive no deployment secrets.
+- Ready same-repository, non-draft `cursor/*` PRs for user-authorized work may publish after `PR Validation / validate` passes. The default-branch `.github/workflows/cursor-auto-merge.yml` must revalidate the open PR, base `main`, same repository, branch prefix and exact tested head SHA; it never checks out PR code with write credentials. It squash-merges eligible changes and explicitly dispatches `deploy-edgeone.yml`. Per the user's 2026-09-08 instruction, changed file paths (including workflows, dependencies, deployment configuration, server infrastructure and canonical release documents) do not impose an additional manual-review gate. Do not ask the user to click Merge or reconfirm an already authorized release; an authorized agent may merge the exact validated head through the connected GitHub tool when bootstrapping this policy update. Failed, draft or stale PRs remain unpublished. Build, tests, release verification, platform access controls and all existing secret/private-content protections remain mandatory; this policy does not authorize disclosure or modification of credentials or private data.
 - Pushes to `main` deploy the repository root to the existing direct-upload Makers project `duomei-guyu` (`makers-brifmhu31vjf`).
 - The workflow must keep `edgeone.json`, `cloud-functions/`, and the full source tree together; never replace the deploy command with a `dist`-only upload.
 - `EDGEONE_API_TOKEN` exists only as a GitHub Actions Secret. Runtime `GUYU_*` values remain in the EdgeOne console and must never be copied into GitHub.
@@ -184,3 +184,9 @@ If any bundle file is still modified, staged, or untracked after the commit, the
 - Note image uploads use the authenticated media Worker at `/v1/upload`; production CORS includes only `duomei.site` plus retained reviewed origins, and SVG uploads remain rejected.
 - Production is accepted only when the generated `/.well-known/duomei-build.json` matches the pushed commit, the homepage/auth/private-page checks return `200/200/401`, `/yunyou-map` loads the React shell, and `/yunyou/index.html` plus `/yunyou/src/main.js` resolve as the real embedded static map rather than the SPA fallback.
 - `.github/workflows/deploy.yml` is a manual-only legacy GitHub Pages fallback and must not run on pushes to `main`.
+
+## 七国设定集与地图 — 2026-09-08
+
+新增公开新说册 `hanhai-realms-artbook` / 《七国 · 地理与风物设定集》，52 页1536×2352完整 WebP。沿用既有硬页翻书，手机竖屏单页，实际单双页模式由引擎报告；目录、地图链接使用引擎当前页。书页聚合 SHA-256 `7af57eeca746e81dbe1f9784ed95338ee4ce62148fad5e497a46435fab1ac984`，封面 SHA-256 `a538ceab803fad6d1403e82a79b72ebaf019f22daae155a809ec591fcfc463a3`。已有五册与53页私有册不改变。
+
+`/atlas-v6` 是七国战略图志的 React 同源地图壳，嵌入 `/atlas/v6/index.html?embed=duomei`，保留全局音乐；`entry` 查询参数定位已有国家、城市或要地。仅 `/atlas/v6/*` 与既有 `/yunyou/*` 使用 SAMEORIGIN，其他页面继续 DENY。设定集与地图互链。52书页、独立封面、书册元数据、阅读器、React地图壳、完整静态地图目录、样式、测试与生产探针构成同一发布单元。详细导入事实见 `docs/atlas-artbook-import.md`。

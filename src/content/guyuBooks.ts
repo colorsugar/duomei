@@ -1,3 +1,4 @@
+import hanhaiArtbook from "./hanhaiArtbook.json" with { type: "json" };
 export type GuyuPagePlacement =
   | "full"
   | "spread-left"
@@ -30,6 +31,9 @@ export type GuyuBook = {
   pages: readonly string[];
   pageDescriptions: readonly string[];
   logicalPages: readonly GuyuLogicalPage[];
+  companionMap?: string;
+  mapEntries?: readonly string[];
+  sections?: readonly { title: string; page: number }[];
 };
 
 export function formatGuyuPageNumber(pageIndex: number, logicalPageCount: number) {
@@ -346,6 +350,8 @@ const guiXiangHuanXiangLogicalPages = fullLogicalPages(
   guiXiangHuanXiangPageDescriptions,
 );
 
+const hanhaiArtbookPages = publicBookPages("hanhai-realms-artbook", hanhaiArtbook.pageCount);
+
 export const guyuBooks: readonly GuyuBook[] = [
   {
     id: "meiyou-yujian",
@@ -427,6 +433,25 @@ export const guyuBooks: readonly GuyuBook[] = [
     pages: guiXiangHuanXiangPages,
     pageDescriptions: guiXiangHuanXiangPageDescriptions,
     logicalPages: guiXiangHuanXiangLogicalPages,
+  },
+  {
+    id: "hanhai-realms-artbook",
+    title: hanhaiArtbook.title,
+    kind: "艺术设定集",
+    chapter: "新说",
+    access: "public",
+    description: "七国与六处中立政体，四十八幅风景，八章旅程。沿山河、贸易与逃亡路线，走入诸国的生活。",
+    accessibilityNote: "52 页全幅设定图版；轻点或滑动翻页，目录可跳转，浏览器双指放大查看细节。每幅图附地形形成原因与结构说明，可打开地图定位。",
+    pageCount: hanhaiArtbook.pageCount,
+    coverSrc: "/images/guyu/hanhai-realms-artbook/pages/001.webp",
+    previewCoverSrc: "/images/guyu-hanhai-realms-artbook-cover.webp",
+    previewAccent: "var(--color-guyu-cover-feiyan)",
+    pages: hanhaiArtbookPages,
+    pageDescriptions: hanhaiArtbook.pageDescriptions,
+    logicalPages: fullLogicalPages("hanhai-realms-artbook", hanhaiArtbookPages, hanhaiArtbook.pageDescriptions),
+    companionMap: "/atlas-v6",
+    mapEntries: hanhaiArtbook.mapEntries,
+    sections: hanhaiArtbook.sections,
   },
 ];
 
