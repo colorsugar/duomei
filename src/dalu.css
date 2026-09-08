@@ -1,0 +1,34 @@
+.dalu-home{width:100%;min-width:0;min-height:100svh;padding:var(--space-3xl) clamp(1rem,6vw,5rem);display:grid;align-content:center;gap:2rem;background:#e9ece2;color:var(--color-ink)}
+.dalu-heading,.dalu-home-card{width:min(100%,var(--layout-wide));margin-inline:auto}
+.dalu-eyebrow{font-size:.75rem;letter-spacing:.16em;color:#637467;line-height:1.7}
+.dalu-heading h1,.dalu-heading h2{font:700 var(--text-display-s)/1.1 var(--font-display);margin:.3em 0;letter-spacing:-.035em}
+.dalu-heading p{font-size:var(--text-base);line-height:1.8;color:var(--color-muted-strong);margin:0}
+.dalu-home-card{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);color:inherit;text-decoration:none;border-block:1px solid #bdc7b8;background:var(--color-paper)}
+.dalu-home-card>img{width:100%;height:100%;min-height:18rem;object-fit:cover}
+.dalu-home-caption{padding:clamp(1rem,3vw,3rem);display:flex;flex-direction:column;gap:1.1rem;justify-content:center;line-height:1.7;min-width:0}
+.dalu-home-caption strong{font:600 clamp(1.5rem,2.7vw,2.5rem)/1.45 var(--font-display);text-wrap:balance}
+.dalu-cta{display:inline-flex;align-items:center;min-height:44px;font-weight:600;color:#365846}
+.dalu-page{max-width:1280px;margin:auto;padding:calc(var(--space-3xl) + 70px) clamp(1rem,5vw,4rem) 5rem;color:var(--color-ink)}
+.dalu-back{display:inline-flex;min-height:44px;align-items:center;color:var(--color-muted-strong);text-decoration:none;margin-bottom:2rem}
+.dalu-page>.dalu-heading{margin-bottom:4rem}
+.dalu-section-heading{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:1rem;margin-bottom:1.3rem}
+.dalu-section-heading h2{font:600 1.8rem/1.4 var(--font-display);margin:0}
+.dalu-section-heading>span,.dalu-note{font-size:.85rem;line-height:1.8;color:var(--color-muted-strong)}
+.dalu-map-card{display:block;position:relative;color:#fff;text-decoration:none;overflow:hidden;background:#203c3b}
+.dalu-map-card>img{display:block;width:100%;height:clamp(22rem,45vw,36rem);object-fit:cover}
+.dalu-map-caption{position:absolute;inset:auto 0 0;display:grid;gap:.6rem;padding:5rem clamp(1rem,3vw,2.5rem) 2rem;background:linear-gradient(transparent,rgba(14,33,30,.93));text-shadow:0 1px 5px #142922;line-height:1.6}
+.dalu-map-caption strong{font:600 clamp(1.5rem,3vw,2.6rem)/1.45 var(--font-display)}
+.dalu-map-caption .dalu-cta{color:#fff}
+.dalu-book-section{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:clamp(1.5rem,4vw,4rem);align-items:center;margin:5rem 0;padding-block:3rem;border-block:1px solid var(--color-rule)}
+.dalu-book-section>img{width:100%;height:auto;display:block}
+.dalu-book-section h2{font:600 clamp(1.6rem,2.5vw,2.3rem)/1.5 var(--font-display);margin:.6em 0}
+.dalu-book-section p{line-height:1.9;color:var(--color-muted-strong)}
+.dalu-actions{display:flex;flex-wrap:wrap;gap:.6rem 1.3rem;margin:1.5rem 0 1rem;align-items:center}
+.dalu-actions a{min-height:44px;display:inline-flex;align-items:center;color:#365846}
+.dalu-actions .dalu-button{padding:.6rem 1.2rem;background:#365846;color:#fff;text-decoration:none}
+.dalu-chapter-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:3rem}
+.dalu-chapter-grid a{display:flex;align-items:center;gap:1rem;min-height:64px;border-top:1px solid var(--color-rule);text-decoration:none;color:inherit;padding:.7rem 0}
+.dalu-chapter-grid a>span{font-size:.8rem;color:var(--color-muted-strong)}
+.dalu-chapter-grid a>span:last-child{margin-left:auto;white-space:nowrap}
+.dalu-home-card:focus-visible,.dalu-page a:focus-visible{outline:2px solid var(--color-focus);outline-offset:5px}
+@media(max-width:48rem){.dalu-home-card,.dalu-book-section{grid-template-columns:minmax(0,1fr)}.dalu-home-card>img{min-height:0;aspect-ratio:3/2}.dalu-home{padding-block:3rem}.dalu-home-caption{gap:.65rem}.dalu-chapter-grid{grid-template-columns:minmax(0,1fr)}.dalu-page>.dalu-heading{margin-bottom:2.5rem}.dalu-book-section{margin:3rem 0;padding-block:2rem}.dalu-map-caption{padding-bottom:1rem}.dalu-map-caption>span:not(.dalu-cta){font-size:.85rem}.dalu-section-heading{gap:.4rem}}
