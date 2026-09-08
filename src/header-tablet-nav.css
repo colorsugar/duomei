@@ -62,7 +62,12 @@
     border: 0 !important;
     border-radius: calc(var(--radius-card) - var(--space-xs)) !important;
     background: transparent !important;
-    font-size: var(--text-sm) !important;
+    color: var(--color-ink) !important;
+    font-size: var(--text-base) !important;
+    font-weight: 700 !important;
+    /* Let devices whose CJK face has no bold still thicken the menu; the root disables synthesis site-wide. */
+    font-synthesis: weight !important;
+    letter-spacing: 0.04em !important;
     opacity: 0 !important;
     pointer-events: none !important;
     white-space: nowrap !important;
