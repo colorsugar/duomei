@@ -24,3 +24,7 @@ Thumbs.db
 
 # Reconstructed byte-for-byte from the tracked campus gzip before build.
 /public/lingchuan/models/lingchuan-whole.glb
+
+# Reassembled and verified from tracked public artbook parts before build.
+/public/downloads/fantasy-continent-artbook.pdf
+/output/

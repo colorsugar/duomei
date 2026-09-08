@@ -1,0 +1,569 @@
+{
+  "title": "奇幻大陆 · 艺术图集",
+  "pageCount": 81,
+  "plateCount": 74,
+  "chapterCount": 11,
+  "buildingCount": 13,
+  "pdf": "/downloads/fantasy-continent-artbook.pdf",
+  "sha256": "19cc3ccf49e461cfa47482d5d187f82c2cc9852620a985ba06e3ca5926797f1b",
+  "bytes": 23059003,
+  "chapters": [
+    {
+      "title": "双庭之间",
+      "page": 7
+    },
+    {
+      "title": "万兽与边境",
+      "page": 14
+    },
+    {
+      "title": "越过寒季",
+      "page": 18
+    },
+    {
+      "title": "粮河汇入海门",
+      "page": 24
+    },
+    {
+      "title": "火与水之间",
+      "page": 33
+    },
+    {
+      "title": "帝国的账册与海岸",
+      "page": 38
+    },
+    {
+      "title": "旧港与远岛",
+      "page": 44
+    },
+    {
+      "title": "盐路与泉约",
+      "page": 53
+    },
+    {
+      "title": "山河相接",
+      "page": 55
+    },
+    {
+      "title": "烬月 · 传说栖地",
+      "page": 61
+    },
+    {
+      "title": "宫堡与庄园",
+      "page": 67
+    }
+  ],
+  "plates": [
+    {
+      "id": "forest-court-aerial",
+      "title": "森冠王庭 · 鸟瞰格局",
+      "page": 7,
+      "entry": "forest-court"
+    },
+    {
+      "id": "forest-court-ground",
+      "title": "森冠王庭 · 近地景观",
+      "page": 8,
+      "entry": "forest-court"
+    },
+    {
+      "id": "red-court-aerial",
+      "title": "赤岩庭城 · 鸟瞰格局",
+      "page": 9,
+      "entry": "red-court"
+    },
+    {
+      "id": "red-court-ground",
+      "title": "赤岩庭城 · 近地景观",
+      "page": 10,
+      "entry": "red-court"
+    },
+    {
+      "id": "mist-port-aerial",
+      "title": "雾灯港 · 鸟瞰格局",
+      "page": 11,
+      "entry": "mist-port"
+    },
+    {
+      "id": "mist-port-ground",
+      "title": "雾灯港 · 近地景观",
+      "page": 12,
+      "entry": "mist-port"
+    },
+    {
+      "id": "treant-forest",
+      "title": "树人之森 · 林冠与根泉",
+      "page": 13,
+      "entry": "site-10"
+    },
+    {
+      "id": "gray-camp-aerial",
+      "title": "长旌城 · 鸟瞰格局",
+      "page": 14,
+      "entry": "gray-camp"
+    },
+    {
+      "id": "gray-camp-ground",
+      "title": "长旌城 · 近地景观",
+      "page": 15,
+      "entry": "gray-camp"
+    },
+    {
+      "id": "ford-fort-aerial",
+      "title": "旌垒城 · 鸟瞰格局",
+      "page": 16,
+      "entry": "ford-fort"
+    },
+    {
+      "id": "ford-fort-ground",
+      "title": "旌垒城 · 近地景观",
+      "page": 17,
+      "entry": "ford-fort"
+    },
+    {
+      "id": "north-seat-aerial",
+      "title": "寒汀王城 · 鸟瞰格局",
+      "page": 18,
+      "entry": "north-seat"
+    },
+    {
+      "id": "north-seat-ground",
+      "title": "寒汀王城 · 近地景观",
+      "page": 19,
+      "entry": "north-seat"
+    },
+    {
+      "id": "lake-city-aerial",
+      "title": "阶湖城 · 鸟瞰格局",
+      "page": 20,
+      "entry": "lake-city"
+    },
+    {
+      "id": "lake-city-ground",
+      "title": "阶湖城 · 近地景观",
+      "page": 21,
+      "entry": "lake-city"
+    },
+    {
+      "id": "saddle-city-aerial",
+      "title": "霜鞍城 · 鸟瞰格局",
+      "page": 22,
+      "entry": "saddle-city"
+    },
+    {
+      "id": "saddle-city-ground",
+      "title": "霜鞍城 · 近地景观",
+      "page": 23,
+      "entry": "saddle-city"
+    },
+    {
+      "id": "aivernor-aerial",
+      "title": "艾维诺尔王城 · 鸟瞰格局",
+      "page": 24,
+      "entry": "aivernor"
+    },
+    {
+      "id": "aivernor-ground",
+      "title": "艾维诺尔王城 · 近地景观",
+      "page": 25,
+      "entry": "aivernor"
+    },
+    {
+      "id": "grain-city-aerial",
+      "title": "谷仓城 · 鸟瞰格局",
+      "page": 26,
+      "entry": "grain-city"
+    },
+    {
+      "id": "grain-city-ground",
+      "title": "谷仓城 · 近地景观",
+      "page": 27,
+      "entry": "grain-city"
+    },
+    {
+      "id": "west-port-aerial",
+      "title": "西门港 · 鸟瞰格局",
+      "page": 28,
+      "entry": "west-port"
+    },
+    {
+      "id": "west-port-ground",
+      "title": "西门港 · 近地景观",
+      "page": 29,
+      "entry": "west-port"
+    },
+    {
+      "id": "east-port-aerial",
+      "title": "东门港 · 鸟瞰格局",
+      "page": 30,
+      "entry": "east-port"
+    },
+    {
+      "id": "east-port-ground",
+      "title": "东门港 · 近地景观",
+      "page": 31,
+      "entry": "east-port"
+    },
+    {
+      "id": "twin-plan",
+      "title": "双港海门 · 整体港域",
+      "page": 32,
+      "entry": "site-1"
+    },
+    {
+      "id": "forge-city-aerial",
+      "title": "炉环城 · 鸟瞰格局",
+      "page": 33,
+      "entry": "forge-city"
+    },
+    {
+      "id": "forge-city-ground",
+      "title": "炉环城 · 近地景观",
+      "page": 34,
+      "entry": "forge-city"
+    },
+    {
+      "id": "landbridge-city-aerial",
+      "title": "铁肩城 · 鸟瞰格局",
+      "page": 35,
+      "entry": "landbridge-city"
+    },
+    {
+      "id": "landbridge-city-ground",
+      "title": "铁肩城 · 近地景观",
+      "page": 36,
+      "entry": "landbridge-city"
+    },
+    {
+      "id": "iron-plan",
+      "title": "铁肩陆桥 · 两湾与陆颈",
+      "page": 37,
+      "entry": "site-12"
+    },
+    {
+      "id": "imperial-seat-aerial",
+      "title": "敕垣帝都 · 鸟瞰格局",
+      "page": 38,
+      "entry": "imperial-seat"
+    },
+    {
+      "id": "imperial-seat-ground",
+      "title": "敕垣帝都 · 近地景观",
+      "page": 39,
+      "entry": "imperial-seat"
+    },
+    {
+      "id": "eastern-arsenal-aerial",
+      "title": "铸潮港 · 鸟瞰格局",
+      "page": 40,
+      "entry": "eastern-arsenal"
+    },
+    {
+      "id": "eastern-arsenal-ground",
+      "title": "铸潮港 · 近地景观",
+      "page": 41,
+      "entry": "eastern-arsenal"
+    },
+    {
+      "id": "delta-city-aerial",
+      "title": "金汊城 · 鸟瞰格局",
+      "page": 42,
+      "entry": "delta-city"
+    },
+    {
+      "id": "delta-city-ground",
+      "title": "金汊城 · 近地景观",
+      "page": 43,
+      "entry": "delta-city"
+    },
+    {
+      "id": "island-seat-aerial",
+      "title": "潮隐王城 · 鸟瞰格局",
+      "page": 44,
+      "entry": "island-seat"
+    },
+    {
+      "id": "island-seat-ground",
+      "title": "潮隐王城 · 近地景观",
+      "page": 45,
+      "entry": "island-seat"
+    },
+    {
+      "id": "free-port-aerial",
+      "title": "烬帆港 · 鸟瞰格局",
+      "page": 46,
+      "entry": "free-port"
+    },
+    {
+      "id": "free-port-ground",
+      "title": "烬帆港 · 近地景观",
+      "page": 47,
+      "entry": "free-port"
+    },
+    {
+      "id": "hanhai-city-aerial",
+      "title": "瀚海古城 · 鸟瞰格局",
+      "page": 48,
+      "entry": "hanhai-city"
+    },
+    {
+      "id": "hanhai-city-ground",
+      "title": "瀚海古城 · 近地景观",
+      "page": 49,
+      "entry": "hanhai-city"
+    },
+    {
+      "id": "cave-cutaway",
+      "title": "潮蚀迷宫 · 洞口、地下河与古墓",
+      "page": 50,
+      "entry": "site-11"
+    },
+    {
+      "id": "trench-cutaway",
+      "title": "沉星海沟 · 岛弧至深沟",
+      "page": 51,
+      "entry": "site-9"
+    },
+    {
+      "id": "trench-depth",
+      "title": "沉星海沟 · 深海斜壁与遗迹",
+      "page": 52,
+      "entry": "site-9"
+    },
+    {
+      "id": "salt-city-aerial",
+      "title": "泉约城 · 鸟瞰格局",
+      "page": 53,
+      "entry": "salt-city"
+    },
+    {
+      "id": "salt-city-ground",
+      "title": "泉约城 · 近地景观",
+      "page": 54,
+      "entry": "salt-city"
+    },
+    {
+      "id": "connection-gates",
+      "title": "双港海门 · 山河相接",
+      "page": 55,
+      "entry": "site-1"
+    },
+    {
+      "id": "connection-iron",
+      "title": "铁肩陆桥 · 山河相接",
+      "page": 56,
+      "entry": "site-12"
+    },
+    {
+      "id": "connection-lakes",
+      "title": "阶湖水门 · 山河相接",
+      "page": 57,
+      "entry": "site-7"
+    },
+    {
+      "id": "connection-frontier",
+      "title": "万兽走廊 · 山河相接",
+      "page": 58,
+      "entry": "site-6"
+    },
+    {
+      "id": "connection-hanhai",
+      "title": "瀚海古城 · 山河相接",
+      "page": 59,
+      "entry": "hanhai-city"
+    },
+    {
+      "id": "connection-mist",
+      "title": "潮蚀迷宫 · 山河相接",
+      "page": 60,
+      "entry": "site-11"
+    },
+    {
+      "id": "beast-dragon",
+      "title": "魔焰龙渊 · 传说栖地",
+      "page": 61,
+      "entry": "beast-dragon"
+    },
+    {
+      "id": "beast-wolf",
+      "title": "无月狼鞍 · 传说栖地",
+      "page": 62,
+      "entry": "beast-wolf"
+    },
+    {
+      "id": "beast-leviathan",
+      "title": "回声内海 · 传说栖地",
+      "page": 63,
+      "entry": "beast-leviathan"
+    },
+    {
+      "id": "beast-thunderbird",
+      "title": "雷羽天峡 · 传说栖地",
+      "page": 64,
+      "entry": "beast-thunderbird"
+    },
+    {
+      "id": "beast-stag",
+      "title": "梦角雨庭 · 传说栖地",
+      "page": 65,
+      "entry": "beast-stag"
+    },
+    {
+      "id": "beast-tortoise",
+      "title": "负岳盐泉 · 传说栖地",
+      "page": 66,
+      "entry": "beast-tortoise"
+    },
+    {
+      "id": "aivernor-panorama",
+      "title": "艾维诺尔 · 金穗王宫 · 王城全景",
+      "page": 67,
+      "entry": "palace-aivernor"
+    },
+    {
+      "id": "aivernor-market",
+      "title": "艾维诺尔 · 金穗王宫 · 谷穗集市",
+      "page": 68,
+      "entry": "palace-aivernor"
+    },
+    {
+      "id": "cold-lake-castle",
+      "title": "寒汀 · 镜湖堡",
+      "page": 69,
+      "entry": "castle-cold-lake"
+    },
+    {
+      "id": "dragon-bone-valley",
+      "title": "魔焰龙渊 · 龙骨谷",
+      "page": 70,
+      "entry": "village-dragon-bone"
+    },
+    {
+      "id": "sea-gate-castle",
+      "title": "东门港 · 赤铜海堡",
+      "page": 71,
+      "entry": "castle-sea-gate"
+    },
+    {
+      "id": "imperial-palace",
+      "title": "敕垣帝都 · 天阶宫",
+      "page": 72,
+      "entry": "palace-imperial"
+    },
+    {
+      "id": "saddle-castle",
+      "title": "霜鞍城 · 守隘堡",
+      "page": 73,
+      "entry": "castle-saddle"
+    },
+    {
+      "id": "sky-windmill",
+      "title": "炉环城 · 云帆浮空宫",
+      "page": 74,
+      "entry": "palace-sky"
+    },
+    {
+      "id": "dragon-coast",
+      "title": "潮隐王城 · 鳞潮海崖宫",
+      "page": 75,
+      "entry": "palace-dragon-coast"
+    },
+    {
+      "id": "rabbit-valley",
+      "title": "树人之森 · 泉耳溪村",
+      "page": 76,
+      "entry": "village-rabbit"
+    },
+    {
+      "id": "lake-manor",
+      "title": "阶湖城 · 晴汀庄园",
+      "page": 77,
+      "entry": "manor-lake"
+    },
+    {
+      "id": "elven-palace",
+      "title": "森冠王庭 · 瀑光宫苑",
+      "page": 78,
+      "entry": "palace-elven"
+    },
+    {
+      "id": "orc-fortress",
+      "title": "烬月西岸 · 归羽誓堡",
+      "page": 79,
+      "entry": "fortress-orc"
+    },
+    {
+      "id": "dragon-ruin",
+      "title": "魔焰龙渊 · 龙誓废宫",
+      "page": 80,
+      "entry": "ruin-dragon"
+    }
+  ],
+  "parts": [
+    {
+      "file": "part-001.bin",
+      "bytes": 1800000,
+      "sha256": "2f442c025005e75f69c5f72d38847cb692613dfc2b997fc96fde4f81892134cb"
+    },
+    {
+      "file": "part-002.bin",
+      "bytes": 1800000,
+      "sha256": "3c9a5ad45ef8e03f244c02b929e3d3141cd6d123644ce791a0dead2bda2fa1e2"
+    },
+    {
+      "file": "part-003.bin",
+      "bytes": 1800000,
+      "sha256": "ecda70a211b34f2e6de434aaaabb66cbd5fa00ab968b886088a6469ebf06ee22"
+    },
+    {
+      "file": "part-004.bin",
+      "bytes": 1800000,
+      "sha256": "9296f8090931b1bcde75b297fef069d56d03ec167e2ed44f0eb002324c46f846"
+    },
+    {
+      "file": "part-005.bin",
+      "bytes": 1800000,
+      "sha256": "07d8952d97b2328ed20f85000b442bb2491590681c83827c299dddf6e3496c58"
+    },
+    {
+      "file": "part-006.bin",
+      "bytes": 1800000,
+      "sha256": "b32371a7e4e85210d5d211e4cc496fc1948cbc26146094232f2c6d3d758528ef"
+    },
+    {
+      "file": "part-007.bin",
+      "bytes": 1800000,
+      "sha256": "85c19af091d27f3ec7a44c5157bd7915f204e6e0a88a24f1dffdb5c5655ea9ff"
+    },
+    {
+      "file": "part-008.bin",
+      "bytes": 1800000,
+      "sha256": "ffb036696b5b582ebfca8b65bc2684eb0789424386a52351a37159a93ea9b6fc"
+    },
+    {
+      "file": "part-009.bin",
+      "bytes": 1800000,
+      "sha256": "cdb1769247c4fbb942a1ac3a5d74376ad4af8031e5fbdc281c7ae8b273a16af9"
+    },
+    {
+      "file": "part-010.bin",
+      "bytes": 1800000,
+      "sha256": "4b712ab37bf2e4596a7354aee289179b8e27b87ab00bbe4c3b88b300c0f2a6ea"
+    },
+    {
+      "file": "part-011.bin",
+      "bytes": 1800000,
+      "sha256": "7a3d816b3126e338a8a89a85b10664a99ad7d8e585cc4a77b31f86ad8bfcd842"
+    },
+    {
+      "file": "part-012.bin",
+      "bytes": 1800000,
+      "sha256": "73099a845d68c0c72689a3b40f1e6fc6f7da04f05afcc6ee6131082868a3f457"
+    },
+    {
+      "file": "part-013.bin",
+      "bytes": 1459003,
+      "sha256": "e0cde6ba55b3612317468f8d30c5aa184f9df0d0fb0fd475ceb19c28e5ce541a"
+    }
+  ]
+}

@@ -16,7 +16,7 @@
     "lint": "tsc -b",
     "preview": "vite preview",
     "release:check": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/verify-release.ps1",
-    "prebuild": "node scripts/prepare-lingchuan.mjs"
+    "prebuild": "node scripts/prepare-lingchuan.mjs && node scripts/prepare-dalu-artbook.mjs"
   },
   "dependencies": {
     "@edgeone/pages-blob": "0.0.16",

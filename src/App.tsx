@@ -20,6 +20,7 @@ import { MotionProvider } from "./motion";
 import { DuomeiCompanion } from "./components/companion";
 import { DuomeiMusicPlayer } from "./components/DuomeiMusicPlayer";
 import { DuomeiYunyouPage } from "./pages/DuomeiYunyouPage";
+import { DuomeiDaluPage } from "./pages/DuomeiDaluPage";
 import { DuomeiAtlasPage } from "./pages/DuomeiAtlasPage";
 
 function PublicRoutePaperVeil({ pathname, disabled }: { pathname: string; disabled: boolean }) {
@@ -54,7 +55,7 @@ function AppRoutes() {
   const isGuyuReader = location.pathname.startsWith("/guyu/");
   const isZaobao = location.pathname === "/zaobao" || location.pathname.startsWith("/zaobao/");
   const isYunyouMap = location.pathname === "/yunyou-map";
-  const isAtlasMap = location.pathname === "/atlas-v6";
+  const isAtlasMap = location.pathname === "/atlas-v6" || location.pathname === "/dalu/map";
   const bareChrome = isAdmin || isGuyuReader || isZaobao || isYunyouMap || isAtlasMap;
   useSmoothScroll(bareChrome || isTimePage);
 
@@ -75,6 +76,8 @@ function AppRoutes() {
         <Route path="/guyu/:bookId" element={<DuomeiGuyuReaderPage />} />
         <Route path="/skills" element={<DuomeiSkillsPage />} />
         <Route path="/yunyou-map" element={<DuomeiYunyouPage />} />
+        <Route path="/dalu" element={<DuomeiDaluPage />} />
+        <Route path="/dalu/map" element={<DuomeiAtlasPage />} />
         <Route path="/atlas-v6" element={<DuomeiAtlasPage />} />
         <Route path="/about" element={<Navigate to="/#kuaihuo" replace />} />
         <Route path="/admin/login" element={<DuomeiAdmin mode="login" />} />

@@ -135,13 +135,13 @@ EdgeOne production has a precise client-IP rate-limit rule for `/api/guyu-auth` 
 - Text and images retain selectable entrance effects.
 - Mobile poetry editing remains page-by-page; the public 微言 reader uses the manual horizontal overlapping deck instead of the former vertical sticky stack.
 - “微言” points to `/#weiyan` and opens the homepage's manual, non-looping overlapping poetry deck.
-- The homepage order remains 主视觉 / 早报 / 小记 / 快活 / 故语 / 云游 / 颜色 / 微言 / Skill / 版权脚注.
+- The homepage order remains 主视觉 / 早报 / 小记 / 快活 / 故语 / 大陆 / 云游 / 颜色 / 微言 / Skill / 版权脚注.
 - 小记、故语、颜色、微言、Skill 与既有快活板块统一使用 `230svh / 100svh` sticky 停留节奏；底部进度到 100% 后才释放到下一板块，小记不平移轮播层，减少动态效果模式恢复普通文档流。
 - On short mobile viewports, the static notes stage uses its natural content height inside the unchanged `230svh` track so the complete card clears before the next section; never shrink or clip the card text or alter the tilt pipeline.
 - “故语” sits between “快活” and “颜色”; its event-driven 16-fragment transition now scatters and reassembles through a soft paper mist, crossfades the two copy layers, waits for the incoming base cover decode, and completes a 1.6-second settle before starting a separate five-second dwell. The settled text uses a clear five-second breathing cycle. The whole card opens `/guyu/{book.id}`; the 44px “查看所有” link opens `/guyu`, with swipe, Arrow/Home/End keys, pause, progress dots, first/last looping, and reduced-motion fallbacks preserved.
 - “颜色” preserves the supplied 多美 and 多美猪猪 WeChat preview/QR assets and their official short links.
 - “云游” sits between “故语” and “颜色”; its homepage card opens the React `/yunyou-map` shell, never a Vercel Preview. The shell keeps the shared music player mounted and embeds the isolated same-origin `/yunyou/index.html?embed=1` static map. Top-level `/yunyou/` redirects to the shell unless `?standalone=1`; the iframe hides its duplicate return link while preserving WebGL/module fallback, local Three.js runtime, mobile DPR cap, manual auto-rotate control, and reduced-motion behavior. `edgeone.json` keeps global `X-Frame-Options: DENY` and overrides only `/yunyou/*` to `SAMEORIGIN` with `Content-Security-Policy: frame-ancestors 'self'`; production verification checks both sides of that boundary.
-- Mobile keeps the fixed safe-area shortcut order 首页 / 早报 / 小记 / 故语 / 云游 / 颜色 / 微言 / Skill; desktop renders the same shortcuts inside the footer.
+- Mobile keeps the fixed safe-area shortcut order 首页 / 早报 / 小记 / 故语 / 大陆 / 云游 / 颜色 / 微言 / Skill; desktop renders the same shortcuts inside the footer.
 - The mobile footer keeps those eight shortcuts on one compact 44px-high row, reduces Guyu shelf-end whitespace, and hides the back-to-top button while the footer intersects the viewport so no link or copyright copy is covered.
 - The frozen mobile header uses one synchronous native short-tap path on the portal DOM: buttons activate immediately, anchors call `window.location.assign()` before iOS user activation expires, and the compatibility click is suppressed once. Sticky hover/focus must never override `.is-menu-open` visibility or pointer events.
 - `/guyu/meiyou-yujian` keeps all 53 scans, expands detected two-page scans into aligned logical spreads, preserves the front and back covers, uses the pinned StPageFlip engine for full-screen phone/desktop page turns, and keeps keyboard plus compact overlay controls.
@@ -196,3 +196,9 @@ If any bundle file is still modified, staged, or untracked after the commit, the
 ## 灵川中学校园 — 2026-09-08
 
 `/lingchuan/index.html` is the standalone public campus map, with directory entry `/lingchuan/`. Runtime, Three.js, textures, posters and compressed GLBs are Git-tracked under `public/lingchuan/` and deploy through the existing EdgeOne workflow. No ChatGPT preview origin or external CDN is required for rendering. Source revision `4b9eb26cc9e51e1f6dac3863298c13cf269d7c0b` preserves the office/laboratory join and corrected table-tennis location. The full-scene raw GLB is restored byte-for-byte from its tracked gzip by `scripts/prepare-lingchuan.mjs` before build; its ignored raw output is still included in the deployment for older browsers. Its geometry remains a reconstruction under review; deployment is not iPhone performance acceptance. `deployment.json` pins every delivered asset. Run `node scripts/verify-lingchuan.mjs` before publishing; check actual HTML, JavaScript, poster and gzip model bytes on production. The campus return link targets `/#yunyou`.
+
+## 大陆专题与艺术图集 PDF — 2026-09-08
+
+首页在故语之后、云游之前增加 `#dalu` 大陆专题，沿用 HomeSectionHold 与全局分段进度。`/dalu` 收纳地图模块、完整艺术图集 PDF 与既有地理风物原册；更新地图的正式专题路径为 `/dalu/map`，`/atlas-v6` 继续兼容已有深链接。两条地图路径均保留全局音乐，同源 iframe 上方提供返回大陆与 PDF 入口。冻结的全局页头不改动。
+
+`public/downloads/fantasy-continent-artbook.pdf` 在构建前从 `artifacts/dalu/` 的公开分片逐个校验并重组（`scripts/prepare-dalu-artbook.mjs`）；为81页、74幅图版、11章的扩充艺术图集，包含原60幅及14幅新增宫堡庄园图。纸面目录有逐幅内部跳转、章节书签，每幅有返回目录与带 entry 的地图定位外链。`src/content/daluArtbook.json` 固定 PDF 哈希、大小和章节页码。既有64页故语原册继续保留，页面明确标为原册。

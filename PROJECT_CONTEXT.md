@@ -112,7 +112,7 @@ External runtime hosts intentionally referenced by the site are `duomei.site`, `
 ## Product Behavior That Must Not Regress
 
 - Preserve the quiet warm-paper DUOMEI design, existing content, typography, mascot, and information architecture. Do not replace it with a generic template or redesign a scoped bug fix.
-- Homepage order stays: hero / 早报 / 小记 / 快活 / 故语 / 云游 / 颜色 / 微言 / Skill / copyright footer.
+- Homepage order stays: hero / 早报 / 小记 / 快活 / 故语 / 大陆 / 云游 / 颜色 / 微言 / Skill / copyright footer.
 - 小记、快活、故语、颜色、微言、Skill share the `230svh` track and `100svh` sticky-stage rhythm. A section releases only after its bottom progress reaches 100%.
 - 小记 keeps its horizontal carousel but does not vertically transform the carousel content; this avoids mobile scroll jank.
 - The fixed header hides while scrolling down and returns while scrolling up. Mobile navigation must work from the homepage and from secondary pages, especially `/guyu`.
@@ -254,3 +254,9 @@ Historical planning documents under `deploy/guyu-edgeone/docs/` remain useful ev
 ## 灵川中学校园 — 2026-09-08
 
 `/lingchuan/index.html` is the standalone public campus map, with directory entry `/lingchuan/`. Runtime, Three.js, textures, posters and compressed GLBs are Git-tracked under `public/lingchuan/` and deploy through the existing EdgeOne workflow. No ChatGPT preview origin or external CDN is required for rendering. Source revision `4b9eb26cc9e51e1f6dac3863298c13cf269d7c0b` preserves the office/laboratory join and corrected table-tennis location. The full-scene raw GLB is restored byte-for-byte from its tracked gzip by `scripts/prepare-lingchuan.mjs` before build; its ignored raw output is still included in the deployment for older browsers. Its geometry remains a reconstruction under review; deployment is not iPhone performance acceptance. `deployment.json` pins every delivered asset. Run `node scripts/verify-lingchuan.mjs` before publishing; check actual HTML, JavaScript, poster and gzip model bytes on production. The campus return link targets `/#yunyou`.
+
+## 大陆专题与艺术图集 PDF — 2026-09-08
+
+首页在故语之后、云游之前增加 `#dalu` 大陆专题，沿用 HomeSectionHold 与全局分段进度。`/dalu` 收纳地图模块、完整艺术图集 PDF 与既有地理风物原册；更新地图的正式专题路径为 `/dalu/map`，`/atlas-v6` 继续兼容已有深链接。两条地图路径均保留全局音乐，同源 iframe 上方提供返回大陆与 PDF 入口。冻结的全局页头不改动。
+
+`public/downloads/fantasy-continent-artbook.pdf` 在构建前从 `artifacts/dalu/` 的公开分片逐个校验并重组（`scripts/prepare-dalu-artbook.mjs`）；为81页、74幅图版、11章的扩充艺术图集，包含原60幅及14幅新增宫堡庄园图。纸面目录有逐幅内部跳转、章节书签，每幅有返回目录与带 entry 的地图定位外链。`src/content/daluArtbook.json` 固定 PDF 哈希、大小和章节页码。既有64页故语原册继续保留，页面明确标为原册。
