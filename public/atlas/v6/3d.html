@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#07111d">
+<script>if(window.self===window.top&&new URLSearchParams(location.search).get("standalone")!=="1")location.replace("/dalu/map"+location.search)</script>
+<title>七国战略图志 · 立体 | 多美小记</title>
+<meta name="description" content="七国、中立政体、战略要地、烬月传说栖地与宫堡庄园的立体地图：自由缩放、旋转、俯仰，点选地点读介绍与图版。">
+<link rel="stylesheet" href="./3d/style.css?v=20260908-3d">
+<link rel="preload" as="image" href="./assets/seven-kingdoms-basemap.webp">
+<script type="importmap">
+{
+  "imports": {
+    "three": "/yunyou/vendor/three/three.module.js",
+    "three/addons/": "/yunyou/vendor/three/addons/"
+  }
+}
+</script>
+</head>
+<body>
+<div id="atlas3d" class="atlas3d">
+  <div class="atlas3d-stage" id="stage"></div>
+  <header class="atlas3d-bar" id="bar">
+    <div class="atlas3d-title"><small>THE SEVEN REALMS · 3D</small><strong>七国战略图志</strong></div>
+    <nav class="atlas3d-tools" aria-label="地图工具">
+      <button type="button" id="tilt" aria-pressed="true">斜看</button>
+      <button type="button" id="reset">复位</button>
+      <button type="button" id="artbook">设定集</button>
+      <a href="/dalu/map?view=2d" target="_top">平面版</a>
+      <button type="button" id="immersive" class="is-accent">清屏</button>
+    </nav>
+  </header>
+  <div class="atlas3d-chips" id="chips" role="group" aria-label="显示的地点类型">
+    <button type="button" data-kind="kingdom" aria-pressed="true">国家</button>
+    <button type="button" data-kind="city" aria-pressed="true">城池</button>
+    <button type="button" data-kind="site" aria-pressed="true">要地</button>
+    <button type="button" data-kind="legend" aria-pressed="true">传说</button>
+    <button type="button" data-kind="architecture" aria-pressed="true">宫堡</button>
+  </div>
+  <div class="atlas3d-zoom" aria-label="缩放">
+    <button type="button" id="zoom-in" aria-label="放大">+</button>
+    <button type="button" id="zoom-out" aria-label="缩小">−</button>
+  </div>
+  <p class="atlas3d-hint" id="hint">单指拖动 · 双指缩放旋转 · 点标记看介绍</p>
+  <button type="button" class="atlas3d-exit" id="exit-immersive" hidden>退出清屏</button>
+  <aside class="atlas3d-card" id="card" hidden aria-live="polite">
+    <button type="button" class="atlas3d-card-close" id="card-close" aria-label="收起介绍">×</button>
+    <div class="atlas3d-card-body" id="card-body"></div>
+  </aside>
+  <div class="atlas3d-lightbox" id="lightbox" hidden>
+    <button type="button" class="atlas3d-lightbox-close" id="lightbox-close" aria-label="关闭大图">×</button>
+    <img id="lightbox-img" alt="">
+    <p id="lightbox-caption"></p>
+  </div>
+  <div class="atlas3d-loading" id="loading"><p>正在展开大陆…</p></div>
+</div>
+<noscript>立体地图需要开启 JavaScript。<a href="/dalu/map?view=2d">打开平面版</a></noscript>
+<script type="module" src="./3d/main.js?v=20260908-3d"></script>
+</body>
+</html>
