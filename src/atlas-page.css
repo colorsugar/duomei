@@ -1,4 +1,7 @@
 .duomei-atlas-page{position:fixed;inset:0;background:#07111d;overflow:hidden;z-index:var(--z-base)}
 .duomei-atlas-page>iframe{display:block;border:0;width:100%;height:calc(100% - 48px);height:calc(100dvh - 48px)}
+.duomei-atlas-page.is-immersive>iframe{height:100%;height:100dvh}
 
 .dalu-map-nav{height:48px;display:flex;align-items:center;justify-content:space-between;padding:0 max(12px,env(safe-area-inset-left));gap:12px;background:#0c1a26;color:#d9e6df;border-bottom:1px solid #28423f}.dalu-map-nav a{min-height:44px;display:inline-flex;align-items:center;color:inherit;font-size:13px;text-decoration:none}.dalu-map-nav a:focus-visible{outline:2px solid #e6c886;outline-offset:-2px}
+.dalu-map-nav-actions{display:inline-flex;align-items:center;gap:16px}
+.dalu-map-nav[hidden]{display:none}

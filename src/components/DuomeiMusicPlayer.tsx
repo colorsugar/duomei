@@ -257,6 +257,11 @@ export function DuomeiMusicPlayer({ compactContext = false }: { compactContext?:
       // The header brand carries ambient motion, so it is measured from layout boxes; other bars are static.
       const a = brand ? { left: brand.offsetLeft, top: brand.offsetTop, width: brand.offsetWidth, height: brand.offsetHeight } : anchor.getBoundingClientRect();
       const barBottom = brand ? bar.offsetHeight : bar.getBoundingClientRect().bottom;
+      // A bar the page has hidden (e.g. the map's immersive mode) is no anchor; fall back to the CSS corner.
+      if (a.height === 0) {
+        setDock(null);
+        return;
+      }
       setDock({
         orb: { x: a.left + a.width + DOCK_GAP, y: a.top + (a.height - orbSize) / 2 },
         open: { x: a.left, y: barBottom + DOCK_DROP },
