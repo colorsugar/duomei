@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "three": "170",
+  "assets": {
+    "xiaoyaolou": {
+      "file": "xiaoyaolou-7339e631d0b8c55c.json.gz",
+      "bytes": 8036584,
+      "sha256": "7339e631d0b8c55cca74f269225e95f31a2ab3d3f0e13c3bb84aa822a0de2ded",
+      "meshes": 12,
+      "ambientOcclusion": true
+    }
+  }
+}
