@@ -182,7 +182,7 @@ test("uses Skill naming and a three-column desktop directory", () => {
   assert.match(skillsCss, /@media \(min-width: 60rem\)[\s\S]*grid-template-columns:\s*repeat\(3, minmax\(0, 1fr\)\)/);
 });
 
-test("keeps the full NetEase playlist native, movable, bounded, and autoplay-off", () => {
+test("keeps the full NetEase playlist native, fixed at the top of every scene, and autoplay-off", () => {
   assert.match(appSource, /!isAdmin \? <DuomeiMusicPlayer compactContext=\{isGuyuReader \|\| isZaobao \|\| isYunyouMap \|\| isAtlasMap\} \/> : null/);
   assert.match(musicPlayerSource, /NETEASE_PLAYLIST_ID = "316500315"/);
   assert.match(musicPlayerSource, /<audio[\s\S]*preload="metadata"/);
@@ -192,8 +192,20 @@ test("keeps the full NetEase playlist native, movable, bounded, and autoplay-off
   assert.match(musicPlayerSource, /track\.playable && !failedTrackIdsRef\.current\.has\(track\.id\)/);
   assert.match(musicPlayerSource, /搜索 \$\{playableCount\} 首可播放歌曲/);
   assert.doesNotMatch(musicPlayerSource, /2_270|PLAYABLE \/|原歌单/);
-  assert.match(musicPlayerSource, /setPointerCapture\(event\.pointerId\)/);
-  assert.match(musicPlayerSource, /duomei-music-player-position-v4/);
+  // The player cannot be dragged or placed: no long-press, pointer capture, stored position, or autoplay.
+  assert.doesNotMatch(musicPlayerSource, /setPointerCapture|LONG_PRESS|beginOrbLongPress|dragRef|music-player-position|containFloatingWidget|长按|AUTOPLAY|tryAutoplay/);
+  assert.doesNotMatch(musicPlayerCss, /is-placed|is-dragging|cursor:\s*grab/);
+  // Resting orb starts hidden beside the header brand, or beside an immersive scene's top-left back control, and opens below that bar.
+  assert.match(musicPlayerSource, /const \[minimized, setMinimized\] = useState\(true\)/);
+  assert.match(musicPlayerSource, /querySelector<HTMLElement>\("\.duomei-header \.duomei-brand"\)/);
+  assert.match(musicPlayerSource, /DOCK_ANCHOR_SELECTOR = "\.zaobao-reader-bar \.zaobao-page-back, \.dalu-map-nav > a:first-child"/);
+  assert.match(musicPlayerSource, /orb: \{ x: a\.left \+ a\.width \+ DOCK_GAP, y: a\.top \+ \(a\.height - orbSize\) \/ 2 \}/);
+  assert.match(musicPlayerSource, /open: \{ x: a\.left, y: barBottom \+ DOCK_DROP \}/);
+  assert.match(musicPlayerSource, /\}, \[compactContext, pathname\]\);/);
+  assert.match(musicPlayerCss, /\.duomei-music-player\.is-immersive:not\(\.is-docked\)\s*\{[\s\S]*?inset-block-start:\s*max\(var\(--space-md\), env\(safe-area-inset-top, 0px\)\)/);
+  assert.match(musicPlayerSource, /createPortal\([\s\S]*document\.body,\s*\);/);
+  assert.match(musicPlayerCss, /\.duomei-music-player\.is-docked\.is-minimized\s*\{[\s\S]*?z-index:\s*5201/);
+  assert.match(musicPlayerCss, /body:has\(\.duomei-header\.is-scrolled\.is-scroll-hidden:not\(\.is-hover-revealed\):not\(\.is-menu-open\):not\(:focus-within\)\)\s*\.duomei-music-player\.is-docked\.is-minimized/);
   assert.match(musicPlayerSource, /scheduleAutoMinimize/);
   assert.match(musicPlayerSource, /className="duomei-music-orb"/);
   assert.match(musicPlayerSource, /event\.pointerType !== "mouse"/);
@@ -207,32 +219,28 @@ test("keeps the full NetEase playlist native, movable, bounded, and autoplay-off
   assert.match(musicPlayerSource, /duomei-music-playback-mode/);
   assert.match(musicPlayerSource, /return "shuffle"/);
   assert.match(musicPlayerSource, /findInitialNeteaseTrackIndex/);
-  assert.match(musicPlayerSource, /useState\(compactContext\)/);
   assert.match(neteaseClientSource, /NETEASE_DEFAULT_TRACK_ID = "28568227"/);
   assert.match(musicPlayerSource, /--music-progress/);
-  assert.match(musicPlayerSource, /LONG_PRESS_MS = 320/);
-  assert.match(musicPlayerSource, /beginOrbLongPress/);
-  assert.match(musicPlayerSource, /if \(dragRef\.current \|\| pointerFocusGuardRef\.current\) return/);
-  assert.match(musicPlayerSource, /className="duomei-music-cover"[\s\S]*onPointerDown=\{beginOrbLongPress\}/);
+  assert.match(musicPlayerSource, /if \(pointerFocusGuardRef\.current\) return/);
+  assert.match(musicPlayerSource, /className="duomei-music-cover"[\s\S]*aria-label="打开歌单"/);
   assert.match(musicPlayerSource, /onPointerDown=\{seekFromPointer\}/);
   assert.match(musicPlayerSource, /fetchNeteaseLyrics/);
   assert.match(musicPlayerSource, /className="duomei-music-lyrics-toggle"/);
   assert.match(neteaseClientSource, /fetch\(NETEASE_PLAYLIST_URL, \{ signal, credentials: "same-origin" \}\)/);
   assert.match(neteaseServerSource, /NETEASE_PLAYLIST_ID = 316500315/);
   assert.match(neteaseServerSource, /NETEASE_MAX_TRACKS = 3000/);
-  assert.match(musicPlayerCss, /\.duomei-music-player\.is-placed/);
   assert.match(musicPlayerCss, /\.duomei-music-player\.is-minimized/);
   assert.match(musicPlayerCss, /theme: Warm Archive/);
   assert.match(musicPlayerCss, /"cover previous play next spacer mode lyrics mute queue"/);
   assert.doesNotMatch(musicPlayerCss, /is-immersive[\s\S]{0,160}duomei-music-(?:queue|lyrics-toggle)/);
-  assert.match(musicPlayerCss, /\.duomei-music-orb\s*\{[\s\S]*touch-action:\s*none[\s\S]*cursor:\s*grab/);
+  assert.match(musicPlayerCss, /\.duomei-music-orb\s*\{[\s\S]*touch-action:\s*manipulation[\s\S]*cursor:\s*pointer/);
   assert.doesNotMatch(musicPlayerCss, /\.duomei-music-drag|\.duomei-music-placement|\.is-fixed|\.is-free/);
   assert.match(musicPlayerCss, /inline-size:\s*min\(var\(--music-player-width\), calc\(100% - \(var\(--space-md\) \* 2\)\)\)/);
   assert.match(musicPlayerCss, /inline-size 620ms cubic-bezier/);
   assert.match(musicPlayerCss, /::-webkit-slider-thumb[\s\S]*inline-size:\s*0\.625rem/);
   assert.match(musicPlayerCss, /:is\(:hover, :active, :focus-visible\)::-webkit-slider-runnable-track\s*\{[\s\S]*block-size:\s*6px/);
   assert.match(musicPlayerCss, /body:has\(\.duomei-music-player:not\(\.is-minimized\)\)[\s\S]*\.back-to-top, \.home-section-progress/);
-  assert.match(musicPlayerCss, /\.duomei-motion-root > \.duomei-music-player\s*\{[\s\S]*?position:\s*fixed/);
+  assert.doesNotMatch(musicPlayerCss, /\.duomei-motion-root > \.duomei-music-player/);
   assert.deepEqual(containFloatingWidget({ x: -20, y: 900 }, 200, 100, 800, 600), { x: 16, y: 484 });
   assert.deepEqual(containFloatingWidget({ x: Number.NaN, y: Number.POSITIVE_INFINITY }, 200, 100, 800, 600), { x: 16, y: 16 });
 });
@@ -284,7 +292,7 @@ test("keeps Guyu reader exits inside the SPA and moves phone actions above the s
   assert.match(guyuCss, /@media \(max-width: 40rem\)[\s\S]*\.guyu-reader-heading\s*\{[\s\S]*inset-block-start:\s*auto[\s\S]*inset-block-end:[^;]*safe-area-inset-bottom[\s\S]*inset-inline-end:[^;]*safe-area-inset-right/);
   assert.match(guyuCss, /\.guyu-reader-close\s*\{[\s\S]*inset-block-start:\s*auto[\s\S]*inset-block-end:[^;]*safe-area-inset-bottom[\s\S]*inset-inline-end:[^;]*safe-area-inset-right/);
   assert.match(guyuCss, /\.guyu-reader-page \.guyu-book-controls\s*\{[\s\S]*inset-block-end:[^;]*var\(--size-hit\)[^;]*var\(--space-sm\)/);
-  assert.match(musicPlayerCss, /body:has\(\.guyu-reader-page\) \.duomei-music-player:not\(\.is-placed\)/);
+  assert.doesNotMatch(musicPlayerCss, /guyu-reader-page/);
 });
 
 test("keeps the note-detail back target visible outside the fixed header", () => {

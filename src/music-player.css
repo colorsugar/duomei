@@ -35,17 +35,43 @@
     box-shadow 420ms var(--ease-out);
 }
 
-.duomei-motion-root > .duomei-music-player {
-  position: fixed;
-  z-index: var(--z-sticky);
-}
-
-.duomei-music-player.is-placed {
+/* Docked (fixed, not draggable): the resting orb sits in the global header beside the brand; opening
+ * slides the bar out from under the header to just below it. The orb outranks the header only while it
+ * rests there, so the opened bar and panel can never cover the header or an open menu. */
+.duomei-music-player.is-docked {
   inset: auto;
+  transition:
+    inline-size 620ms cubic-bezier(0.22, 1, 0.36, 1),
+    block-size 620ms cubic-bezier(0.22, 1, 0.36, 1),
+    border-radius 620ms cubic-bezier(0.22, 1, 0.36, 1),
+    inset-block-start 620ms cubic-bezier(0.22, 1, 0.36, 1),
+    inset-inline-start 620ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 480ms cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 360ms var(--ease-out),
+    box-shadow 420ms var(--ease-out),
+    z-index 0s linear 0s;
 }
 
-.duomei-music-player.is-dragging {
-  box-shadow: var(--shadow-book);
+.duomei-music-player.is-docked.is-minimized {
+  z-index: 5201;
+  transition:
+    inline-size 620ms cubic-bezier(0.22, 1, 0.36, 1),
+    block-size 620ms cubic-bezier(0.22, 1, 0.36, 1),
+    border-radius 620ms cubic-bezier(0.22, 1, 0.36, 1),
+    inset-block-start 620ms cubic-bezier(0.22, 1, 0.36, 1),
+    inset-inline-start 620ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 480ms cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 360ms var(--ease-out),
+    box-shadow 420ms var(--ease-out),
+    z-index 0s linear 620ms;
+}
+
+/* Follow the desktop header when it slides away on downward scroll and comes back on hover or upward scroll. */
+body:has(.duomei-header.is-scrolled.is-scroll-hidden:not(.is-hover-revealed):not(.is-menu-open):not(:focus-within))
+  .duomei-music-player.is-docked.is-minimized {
+  opacity: 0;
+  pointer-events: none;
+  transform: translate3d(0, calc(-100% - 1.5rem), 0);
 }
 
 .duomei-music-player.is-minimized {
@@ -73,8 +99,8 @@
   border-radius: 50%;
   font-family: var(--font-display);
   font-size: var(--text-xl);
-  touch-action: none;
-  cursor: grab;
+  touch-action: manipulation;
+  cursor: pointer;
   opacity: 0;
   pointer-events: none;
   transform: rotate(-18deg) scale(0.7);
@@ -192,8 +218,8 @@
   background: var(--color-paper-2) !important;
   border: var(--rule-hairline) solid color-mix(in oklch, var(--color-rule) 76%, transparent) !important;
   border-radius: 0.625rem;
-  touch-action: none;
-  cursor: grab !important;
+  touch-action: manipulation;
+  cursor: pointer !important;
 }
 
 .duomei-music-now {
@@ -275,11 +301,6 @@
   inline-size: 2.5rem;
   min-inline-size: 2.5rem !important;
   border-radius: 50%;
-}
-
-.duomei-music-player.is-dragging :is(.duomei-music-orb, .duomei-music-cover) {
-  cursor: grabbing;
-  transform: scale(0.96);
 }
 
 .duomei-music-queue[aria-pressed="true"],
@@ -680,11 +701,10 @@
 
 }
 
-@media (max-width: 40rem) {
-  body:has(.guyu-reader-page) .duomei-music-player:not(.is-placed) {
-    inset-block-start: max(var(--space-md), env(safe-area-inset-top, 0px));
-    inset-block-end: auto;
-  }
+/* Immersive scenes without a top bar to dock beside (Guyu readers, the Yunyou shell) keep the orb fixed top-left. */
+.duomei-music-player.is-immersive:not(.is-docked) {
+  inset-block-start: max(var(--space-md), env(safe-area-inset-top, 0px));
+  inset-block-end: auto;
 }
 
 @media (max-width: 22.5rem) {
@@ -692,10 +712,6 @@
     inset-inline-start: var(--space-xs);
     inline-size: calc(100% - (var(--space-xs) * 2));
   }
-}
-
-.duomei-motion-root > .duomei-music-player.is-minimized {
-  inline-size: var(--music-orb-size);
 }
 
 body.front-editing .duomei-music-player,

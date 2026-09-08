@@ -5,9 +5,10 @@ import {
   useRef,
   useState,
   type CSSProperties,
-  type KeyboardEvent,
   type PointerEvent,
 } from "react";
+import { createPortal } from "react-dom";
+import { useLocation } from "react-router-dom";
 import {
   fetchNeteasePlaylist,
   findInitialNeteaseTrackIndex,
@@ -15,53 +16,28 @@ import {
   type NeteasePlaylistTrack,
 } from "../lib/neteasePlaylist";
 import { fetchNeteaseLyrics, type NeteaseLyricLine } from "../lib/neteaseLyrics";
-import { containFloatingWidget, type FloatingWidgetPosition } from "../lib/floatingWidget";
+import type { FloatingWidgetPosition } from "../lib/floatingWidget";
 import "../music-player.css";
 
 const NETEASE_PLAYLIST_ID = "316500315";
 const PLAYBACK_MODE_KEY = "duomei-music-playback-mode";
-const POSITION_KEY = "duomei-music-player-position-v4";
+const DOCK_GAP = 12;
+// Immersive scenes without the global header: dock beside their own top-left back control.
+const DOCK_ANCHOR_SELECTOR = ".zaobao-reader-bar .zaobao-page-back, .dalu-map-nav > a:first-child";
+const DOCK_DROP = 8;
 const PANEL_KEY = "duomei-music-player-panel-v2";
 const INITIAL_VISIBLE_TRACKS = 80;
-const PLAYER_MARGIN = 16;
-const COMPACT_WIDTH = 448;
-const COMPACT_HEIGHT = 98;
-const OPEN_HEIGHT = 550;
-const LONG_PRESS_MS = 320;
 
 type PlaybackMode = "sequence" | "shuffle" | "one";
 type PanelView = "queue" | "lyrics";
+// Where the resting orb sits beside the header brand and where the opened bar drops beneath the header.
+type DockPositions = { orb: FloatingWidgetPosition; open: FloatingWidgetPosition };
 type MusicProgressStyle = CSSProperties & { "--music-progress": string };
-type DragState = {
-  pointerId: number;
-  startX: number;
-  startY: number;
-  latestX: number;
-  latestY: number;
-  offsetX: number;
-  offsetY: number;
-  width: number;
-  height: number;
-  dragging: boolean;
-  moved: boolean;
-};
 
 function readPlaybackMode(): PlaybackMode {
   if (typeof window === "undefined") return "shuffle";
   const value = window.localStorage.getItem(PLAYBACK_MODE_KEY);
   return value === "sequence" || value === "one" ? value : "shuffle";
-}
-
-function readPosition(): FloatingWidgetPosition | null {
-  if (typeof window === "undefined") return null;
-  try {
-    const value = JSON.parse(window.localStorage.getItem(POSITION_KEY) ?? "null") as Partial<FloatingWidgetPosition> | null;
-    return value && typeof value.x === "number" && typeof value.y === "number"
-      ? { x: value.x, y: value.y }
-      : null;
-  } catch {
-    return null;
-  }
 }
 
 function readPanelClosed() {
@@ -161,15 +137,13 @@ function PlaybackModeIcon({ mode }: { mode: PlaybackMode }) {
 }
 
 export function DuomeiMusicPlayer({ compactContext = false }: { compactContext?: boolean }) {
+  const { pathname } = useLocation();
   const playerRef = useRef<HTMLElement>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
   const trackListRef = useRef<HTMLDivElement>(null);
   const lyricListRef = useRef<HTMLDivElement>(null);
-  const dragRef = useRef<DragState | null>(null);
   const autoMinimizeTimerRef = useRef<number | null>(null);
   const hoverRevealTimerRef = useRef<number | null>(null);
-  const longPressTimerRef = useRef<number | null>(null);
-  const suppressOrbClickRef = useRef(false);
   const pointerInsideRef = useRef(false);
   const pointerFocusGuardRef = useRef(false);
   const playlistAbortRef = useRef<AbortController | null>(null);
@@ -177,18 +151,12 @@ export function DuomeiMusicPlayer({ compactContext = false }: { compactContext?:
   const lyricCacheRef = useRef(new Map<string, NeteaseLyricLine[]>());
   const playlistPromiseRef = useRef<Promise<NeteasePlaylist> | null>(null);
   const playlistRef = useRef<NeteasePlaylist | null>(null);
-  const positionRef = useRef<FloatingWidgetPosition | null>(null);
   const failedTrackIdsRef = useRef(new Set<string>());
+  const [dock, setDock] = useState<DockPositions | null>(null);
   const [playbackMode, setPlaybackMode] = useState<PlaybackMode>(readPlaybackMode);
-  const [position, setPosition] = useState<FloatingWidgetPosition | null>(() => {
-    const stored = readPosition();
-    positionRef.current = stored;
-    return stored;
-  });
   const [panelClosed, setPanelClosed] = useState(() => compactContext || readPanelClosed());
   const [panelView, setPanelView] = useState<PanelView>("queue");
-  const [minimized, setMinimized] = useState(compactContext);
-  const [dragging, setDragging] = useState(false);
+  const [minimized, setMinimized] = useState(true);
   const [playlist, setPlaylist] = useState<NeteasePlaylist | null>(null);
   const [playlistStatus, setPlaylistStatus] = useState<"idle" | "loading" | "ready" | "error">("idle");
   const [playlistMessage, setPlaylistMessage] = useState("");
@@ -256,7 +224,6 @@ export function DuomeiMusicPlayer({ compactContext = false }: { compactContext?:
 
   const scheduleAutoMinimize = (delay = 2_600) => {
     clearAutoMinimize();
-    if (dragging) return;
     autoMinimizeTimerRef.current = window.setTimeout(() => {
       setPanelClosed(true);
       window.localStorage.setItem(PANEL_KEY, "closed");
@@ -264,35 +231,44 @@ export function DuomeiMusicPlayer({ compactContext = false }: { compactContext?:
     }, delay);
   };
 
-  const constrainPlayerPosition = (next: FloatingWidgetPosition, width: number, height: number) => {
-    const contained = containFloatingWidget(next, width, height, window.innerWidth, window.innerHeight, PLAYER_MARGIN);
-    const header = document.querySelector<HTMLElement>(".duomei-header");
-    const headerBottom = Math.max(PLAYER_MARGIN, (header?.getBoundingClientRect().bottom ?? 0) + 8);
-    const maxY = Math.max(PLAYER_MARGIN, window.innerHeight - height - PLAYER_MARGIN);
-    return { ...contained, y: Math.min(maxY, Math.max(contained.y, Math.min(headerBottom, maxY))) };
-  };
-
-  const savePosition = (next: FloatingWidgetPosition) => {
-    positionRef.current = next;
-    setPosition(next);
-    window.localStorage.setItem(POSITION_KEY, JSON.stringify(next));
-  };
-
-  const keepPlacedPlayerInsideViewport = (panelOpen: boolean) => {
-    if (!positionRef.current) return;
-    const width = Math.min(COMPACT_WIDTH, Math.max(0, window.innerWidth - PLAYER_MARGIN * 2));
-    const height = Math.min(panelOpen ? OPEN_HEIGHT : COMPACT_HEIGHT, Math.max(0, window.innerHeight - PLAYER_MARGIN * 2));
-    savePosition(constrainPlayerPosition(positionRef.current, width, height));
-  };
-
   const revealCompactPlayer = () => {
-    if (dragRef.current || pointerFocusGuardRef.current) return;
+    if (pointerFocusGuardRef.current) return;
     clearAutoMinimize();
     clearHoverReveal();
     setMinimized(false);
-    keepPlacedPlayerInsideViewport(!panelClosed);
     void loadPlaylist().catch(() => undefined);
   };
+
+  // The player is fixed at the top of every scene and cannot be dragged. It rests right of the page's
+  // top-left anchor (the header brand, or an immersive reader's back link) and opens just below that bar;
+  // scenes without a top bar fall back to the CSS top-left corner.
+  const docked = dock !== null;
+
+  useEffect(() => {
+    const brand = document.querySelector<HTMLElement>(".duomei-header .duomei-brand");
+    const anchor = brand ?? document.querySelector<HTMLElement>(DOCK_ANCHOR_SELECTOR);
+    const bar = anchor?.closest<HTMLElement>("header, nav") ?? null;
+    if (!anchor || !bar) {
+      setDock(null);
+      return;
+    }
+    const measure = () => {
+      const orbSize = playerRef.current?.querySelector<HTMLElement>(".duomei-music-orb")?.offsetWidth || 52;
+      // The header brand carries ambient motion, so it is measured from layout boxes; other bars are static.
+      const a = brand ? { left: brand.offsetLeft, top: brand.offsetTop, width: brand.offsetWidth, height: brand.offsetHeight } : anchor.getBoundingClientRect();
+      const barBottom = brand ? bar.offsetHeight : bar.getBoundingClientRect().bottom;
+      setDock({
+        orb: { x: a.left + a.width + DOCK_GAP, y: a.top + (a.height - orbSize) / 2 },
+        open: { x: a.left, y: barBottom + DOCK_DROP },
+      });
+    };
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(bar);
+    observer.observe(anchor);
+    void document.fonts?.ready.then(measure);
+    return () => observer.disconnect();
+  }, [compactContext, pathname]);
 
   useEffect(() => {
     const preloadTimer = window.setTimeout(() => void loadPlaylist().catch(() => undefined), 1_200);
@@ -300,15 +276,10 @@ export function DuomeiMusicPlayer({ compactContext = false }: { compactContext?:
   }, [loadPlaylist]);
 
   useEffect(() => {
-    if (dragging) {
-      clearAutoMinimize();
-      setMinimized(false);
-      return;
-    }
     if (!panelClosed) setMinimized(false);
     scheduleAutoMinimize(panelClosed ? 2_600 : 8_000);
     return clearAutoMinimize;
-  }, [dragging, panelClosed]);
+  }, [panelClosed]);
 
   useEffect(() => {
     if (!compactContext) return;
@@ -349,17 +320,6 @@ export function DuomeiMusicPlayer({ compactContext = false }: { compactContext?:
   }, [currentTrack, panelClosed, panelView]);
 
   useEffect(() => {
-    const keepInsideViewport = () => {
-      const rect = playerRef.current?.getBoundingClientRect();
-      const current = positionRef.current;
-      if (!rect || !current) return;
-      savePosition(constrainPlayerPosition(current, rect.width, rect.height));
-    };
-    window.addEventListener("resize", keepInsideViewport);
-    return () => window.removeEventListener("resize", keepInsideViewport);
-  }, []);
-
-  useEffect(() => {
     const list = panelView === "lyrics" ? lyricListRef.current : trackListRef.current;
     if (!list) return;
     const containWheel = (event: WheelEvent) => {
@@ -380,7 +340,6 @@ export function DuomeiMusicPlayer({ compactContext = false }: { compactContext?:
   useEffect(() => () => {
     clearAutoMinimize();
     clearHoverReveal();
-    clearLongPress();
     playlistAbortRef.current?.abort();
     lyricAbortRef.current?.abort();
     const audio = audioRef.current;
@@ -454,10 +413,7 @@ export function DuomeiMusicPlayer({ compactContext = false }: { compactContext?:
     const nextClosed = !panelClosed;
     clearAutoMinimize();
     setMinimized(false);
-    if (!nextClosed) {
-      keepPlacedPlayerInsideViewport(true);
-      void loadPlaylist().catch(() => undefined);
-    }
+    if (!nextClosed) void loadPlaylist().catch(() => undefined);
     setPanelClosed(nextClosed);
     window.localStorage.setItem(PANEL_KEY, nextClosed ? "closed" : "open");
     if (nextClosed && blurAfterClose) {
@@ -468,11 +424,6 @@ export function DuomeiMusicPlayer({ compactContext = false }: { compactContext?:
     }
   };
 
-  const clearLongPress = () => {
-    if (longPressTimerRef.current !== null) window.clearTimeout(longPressTimerRef.current);
-    longPressTimerRef.current = null;
-  };
-
   const togglePanelView = (nextView: PanelView, blurAfterClose = false) => {
     const nextClosed = !panelClosed && panelView === nextView;
     clearAutoMinimize();
@@ -481,7 +432,6 @@ export function DuomeiMusicPlayer({ compactContext = false }: { compactContext?:
     setPanelClosed(nextClosed);
     window.localStorage.setItem(PANEL_KEY, nextClosed ? "closed" : "open");
     if (!nextClosed) {
-      keepPlacedPlayerInsideViewport(true);
       void loadPlaylist().catch(() => undefined);
     } else if (blurAfterClose) {
       window.requestAnimationFrame(() => {
@@ -497,64 +447,6 @@ export function DuomeiMusicPlayer({ compactContext = false }: { compactContext?:
     window.localStorage.setItem(PLAYBACK_MODE_KEY, next);
   };
 
-  const beginOrbLongPress = (event: PointerEvent<HTMLButtonElement>) => {
-    if (event.pointerType === "mouse" && event.button !== 0) return;
-    const rect = playerRef.current?.getBoundingClientRect();
-    if (!rect) return;
-    clearAutoMinimize();
-    clearHoverReveal();
-    clearLongPress();
-    dragRef.current = {
-      pointerId: event.pointerId,
-      startX: event.clientX,
-      startY: event.clientY,
-      latestX: event.clientX,
-      latestY: event.clientY,
-      offsetX: event.clientX - rect.left,
-      offsetY: event.clientY - rect.top,
-      width: rect.width,
-      height: rect.height,
-      dragging: false,
-      moved: false,
-    };
-    try {
-      event.currentTarget.setPointerCapture(event.pointerId);
-    } catch {
-      // Pointer capture is optional when the press remains over the orb.
-    }
-    longPressTimerRef.current = window.setTimeout(() => {
-      const drag = dragRef.current;
-      if (!drag || drag.pointerId !== event.pointerId) return;
-      drag.dragging = true;
-      suppressOrbClickRef.current = true;
-      setDragging(true);
-      savePosition(constrainPlayerPosition(
-        { x: drag.latestX - drag.offsetX, y: drag.latestY - drag.offsetY },
-        drag.width,
-        drag.height,
-      ));
-    }, LONG_PRESS_MS);
-  };
-
-  const moveOrbLongPress = (event: PointerEvent<HTMLButtonElement>) => {
-    const drag = dragRef.current;
-    if (!drag || drag.pointerId !== event.pointerId) return;
-    drag.latestX = event.clientX;
-    drag.latestY = event.clientY;
-    if (!drag.dragging) {
-      if (Math.hypot(event.clientX - drag.startX, event.clientY - drag.startY) > 8) {
-        drag.moved = true;
-      }
-      return;
-    }
-    event.preventDefault();
-    savePosition(constrainPlayerPosition(
-      { x: event.clientX - drag.offsetX, y: event.clientY - drag.offsetY },
-      drag.width,
-      drag.height,
-    ));
-  };
-
   const seekFromPointer = (event: PointerEvent<HTMLInputElement>) => {
     const audio = audioRef.current;
     if (!audio || duration <= 0) return;
@@ -564,46 +456,6 @@ export function DuomeiMusicPlayer({ compactContext = false }: { compactContext?:
     const next = ratio * duration;
     audio.currentTime = next;
     setCurrentTime(next);
-  };
-
-  const endOrbLongPress = (event: PointerEvent<HTMLButtonElement>) => {
-    const drag = dragRef.current;
-    if (!drag || drag.pointerId !== event.pointerId) return;
-    clearLongPress();
-    try {
-      event.currentTarget.releasePointerCapture(event.pointerId);
-    } catch {
-      // Pointer capture may already be released by the browser.
-    }
-    dragRef.current = null;
-    setDragging(false);
-    window.requestAnimationFrame(() => {
-      pointerFocusGuardRef.current = false;
-    });
-    if (drag.dragging || drag.moved) {
-      suppressOrbClickRef.current = true;
-      clearHoverReveal();
-      if (drag.dragging) {
-        setMinimized(true);
-        window.requestAnimationFrame(() => setMinimized(true));
-      }
-      window.setTimeout(() => {
-        suppressOrbClickRef.current = false;
-      }, 400);
-    }
-  };
-
-  const nudgeOrbWithKeyboard = (event: KeyboardEvent<HTMLButtonElement>) => {
-    if (!["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(event.key)) return;
-    const rect = playerRef.current?.getBoundingClientRect();
-    if (!rect) return;
-    event.preventDefault();
-    const current = positionRef.current ?? { x: rect.left, y: rect.top };
-    const step = event.shiftKey ? 24 : 8;
-    savePosition(constrainPlayerPosition({
-      x: current.x + (event.key === "ArrowRight" ? step : event.key === "ArrowLeft" ? -step : 0),
-      y: current.y + (event.key === "ArrowDown" ? step : event.key === "ArrowUp" ? -step : 0),
-    }, rect.width, rect.height));
   };
 
   const filteredTracks = useMemo(() => {
@@ -649,27 +501,32 @@ export function DuomeiMusicPlayer({ compactContext = false }: { compactContext?:
   const progressStyle = {
     "--music-progress": `${duration > 0 ? Math.min(100, Math.max(0, currentTime / duration * 100)) : 0}%`,
   } as MusicProgressStyle;
-  const playerStyle: CSSProperties = position
-    ? { left: position.x, top: position.y, right: "auto", bottom: "auto" }
+  const anchor = dock ? (minimized ? dock.orb : dock.open) : null;
+  const playerStyle: CSSProperties = anchor
+    ? { left: anchor.x, top: anchor.y, right: "auto", bottom: "auto" }
     : {};
 
-  return (
+  // Rendered on <body> like the header: the motion root isolates its stacking context, and the
+  // docked orb has to be able to sit above the fixed header.
+  return createPortal(
     <aside
       ref={playerRef}
-      className={`duomei-music-player${position ? " is-placed" : ""}${compactContext ? " is-immersive" : ""}${panelClosed ? " is-panel-closed" : " is-panel-open"}${minimized ? " is-minimized" : ""}${dragging ? " is-dragging" : ""}${isPlaying ? " is-playing" : ""}`}
+      className={`duomei-music-player${docked ? " is-docked" : ""}${compactContext ? " is-immersive" : ""}${panelClosed ? " is-panel-closed" : " is-panel-open"}${minimized ? " is-minimized" : ""}${isPlaying ? " is-playing" : ""}`}
       style={playerStyle}
       aria-label="正在听"
       onPointerEnter={(event) => {
         pointerInsideRef.current = true;
         clearAutoMinimize();
-        if (event.pointerType !== "mouse" || !minimized) return;
+        // A docked orb opens below the header, out from under the pointer; hover-reveal would loop, so it opens on click.
+        if (event.pointerType !== "mouse" || !minimized || docked) return;
         clearHoverReveal();
         hoverRevealTimerRef.current = window.setTimeout(revealCompactPlayer, 180);
       }}
       onPointerLeave={() => {
         pointerInsideRef.current = false;
         clearHoverReveal();
-        scheduleAutoMinimize(900);
+        // Opening a docked orb moves the bar out from under the pointer, so that "leave" gets the normal rest delay.
+        scheduleAutoMinimize(docked ? 2_600 : 900);
       }}
       onPointerDownCapture={() => {
         pointerFocusGuardRef.current = true;
@@ -692,22 +549,11 @@ export function DuomeiMusicPlayer({ compactContext = false }: { compactContext?:
       <button
         className="duomei-music-orb"
         type="button"
-        aria-label="展开正在听；长按可移动"
+        aria-label="展开正在听"
         aria-expanded={!minimized}
         aria-hidden={!minimized}
         tabIndex={minimized ? 0 : -1}
-        onPointerDown={beginOrbLongPress}
-        onPointerMove={moveOrbLongPress}
-        onPointerUp={endOrbLongPress}
-        onPointerCancel={endOrbLongPress}
-        onKeyDown={nudgeOrbWithKeyboard}
         onClick={(event) => {
-          if (suppressOrbClickRef.current) {
-            suppressOrbClickRef.current = false;
-            pointerFocusGuardRef.current = false;
-            event.preventDefault();
-            return;
-          }
           pointerFocusGuardRef.current = false;
           revealCompactPlayer();
           if (event.detail > 0) event.currentTarget.blur();
@@ -721,18 +567,8 @@ export function DuomeiMusicPlayer({ compactContext = false }: { compactContext?:
         <button
           className="duomei-music-cover"
           type="button"
-          aria-label="打开歌单；长按移动播放器"
-          onPointerDown={beginOrbLongPress}
-          onPointerMove={moveOrbLongPress}
-          onPointerUp={endOrbLongPress}
-          onPointerCancel={endOrbLongPress}
+          aria-label="打开歌单"
           onClick={(event) => {
-            if (suppressOrbClickRef.current) {
-              suppressOrbClickRef.current = false;
-              pointerFocusGuardRef.current = false;
-              event.preventDefault();
-              return;
-            }
             pointerFocusGuardRef.current = false;
             togglePanel(event.detail > 0);
           }}
@@ -908,6 +744,7 @@ export function DuomeiMusicPlayer({ compactContext = false }: { compactContext?:
           }, 250);
         }}
       />
-    </aside>
+    </aside>,
+    document.body,
   );
 }
