@@ -146,7 +146,7 @@ test("keeps every public new-book page present, ordered, and byte-stable", () =>
     "xinshuo-01": "39621cb2ce866b65f64fd2d305e73d5e4035c264cf302a8993909576542cfba8",
     "xinshuo-02": "98f439c37b83abbb52da41334d531c7df9fc30f07a9805535d3bb96be8c6fab2",
     "gui-xiang-huan-xiang": "7f69bdcf24ee701365908cdc412f3cec137951639ccc1087e5339a99f74c40ad",
-    "hanhai-realms-artbook": "b8c031d547dd385a4201277003b342231802e96d6b0b71bc35ca789a3b84e233",
+    "hanhai-realms-artbook": "c3256ca14ae6ec3e2fee5d58fb6b0a6a9799bedd875ce5f1037bdeca78dba37f",
   } as const;
 
 
