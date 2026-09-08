@@ -242,3 +242,9 @@ These findings are not automatically authorized fixes. Reverify before acting.
 Update this file in the same commit whenever production hosting, branch, project ID, routes, data ownership, storage path, authentication behavior, release commands, required UI behavior, or known-risk status changes. Do not hardcode a “latest commit”; query the production marker and Git instead.
 
 Historical planning documents under `deploy/guyu-edgeone/docs/` remain useful evidence, but their pre-production instructions are not current operations. Their status banners and this file take precedence.
+
+## 七国设定集与地图 — 2026-09-08
+
+新增公开新说册 `hanhai-realms-artbook` / 《七国 · 地理与风物设定集》，52 页1536×2352完整 WebP。沿用既有硬页翻书，手机竖屏单页，实际单双页模式由引擎报告；目录、地图链接使用引擎当前页。书页聚合 SHA-256 `7af57eeca746e81dbe1f9784ed95338ee4ce62148fad5e497a46435fab1ac984`，封面 SHA-256 `a538ceab803fad6d1403e82a79b72ebaf019f22daae155a809ec591fcfc463a3`。已有五册与53页私有册不改变。
+
+`/atlas-v6` 是七国战略图志的 React 同源地图壳，嵌入 `/atlas/v6/index.html?embed=duomei`，保留全局音乐；`entry` 查询参数定位已有国家、城市或要地。仅 `/atlas/v6/*` 与既有 `/yunyou/*` 使用 SAMEORIGIN，其他页面继续 DENY。设定集与地图互链。52书页、独立封面、书册元数据、阅读器、React地图壳、完整静态地图目录、样式、测试与生产探针构成同一发布单元。详细导入事实见 `docs/atlas-artbook-import.md`。

@@ -183,7 +183,7 @@ test("uses Skill naming and a three-column desktop directory", () => {
 });
 
 test("keeps the full NetEase playlist native, movable, bounded, and autoplay-off", () => {
-  assert.match(appSource, /!isAdmin \? <DuomeiMusicPlayer compactContext=\{isGuyuReader \|\| isZaobao \|\| isYunyouMap\} \/> : null/);
+  assert.match(appSource, /!isAdmin \? <DuomeiMusicPlayer compactContext=\{isGuyuReader \|\| isZaobao \|\| isYunyouMap \|\| isAtlasMap\} \/> : null/);
   assert.match(musicPlayerSource, /NETEASE_PLAYLIST_ID = "316500315"/);
   assert.match(musicPlayerSource, /<audio[\s\S]*preload="metadata"/);
   assert.doesNotMatch(musicPlayerSource, /<iframe|autoPlay/);

@@ -2278,3 +2278,12 @@ body {
     animation: none;
   }
 }
+
+/* Companion atlas controls apply only to the new setting book. */
+.guyu-atlas-tools{position:fixed;top:calc(env(safe-area-inset-top,0px) + 14px);right:calc(env(safe-area-inset-right,0px) + 14px);z-index:calc(var(--z-page-controls) + 4);display:flex;gap:8px;font-size:14px}
+.guyu-atlas-tools>a,.guyu-atlas-tools>button,.guyu-atlas-contents button{min-height:44px;padding:10px 16px;background:#f8f3e9f0;color:#263c44;border:1px solid #b9ad9770;border-radius:6px;cursor:pointer;font:inherit;text-decoration:none}
+.guyu-atlas-contents{position:absolute;right:0;top:54px;width:min(340px,calc(100vw - 28px));max-height:70svh;overflow-y:auto;padding:10px;background:#f8f3e9;box-shadow:0 14px 44px #08182045;border-radius:10px;display:grid;gap:4px}
+.guyu-atlas-contents button{display:flex;align-items:center;justify-content:space-between;text-align:left;border:0;border-bottom:1px solid #b9ad9735}.guyu-atlas-contents button:hover{background:#e7e0d3}.guyu-atlas-contents button:disabled{opacity:.45}.guyu-atlas-contents span{margin-left:14px;color:#776b59}
+.guyu-flipbook.is-portrait-layout .guyu-pageflip-shell{inline-size:min(calc(100vw - 24px),calc((100svh - 150px) * 1100 / 1684),550px);aspect-ratio:1100 / 1684}
+.guyu-flipbook.is-single-page .guyu-pageflip-shell .guyu-pageflip{transform:none}
+@media(max-width:480px){.guyu-atlas-tools{top:calc(env(safe-area-inset-top,0px) + 10px);right:12px;left:12px;justify-content:space-between}.guyu-atlas-tools>a,.guyu-atlas-tools>button{padding:10px 13px}}

@@ -1,0 +1,2 @@
+.duomei-atlas-page{position:fixed;inset:0;background:#07111d;overflow:hidden;z-index:var(--z-base)}
+.duomei-atlas-page>iframe{display:block;border:0;width:100%;height:100%;height:100dvh}
