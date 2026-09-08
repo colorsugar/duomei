@@ -35,13 +35,47 @@
     box-shadow 420ms var(--ease-out);
 }
 
-.duomei-motion-root > .duomei-music-player {
-  position: fixed;
-  z-index: var(--z-sticky);
-}
-
 .duomei-music-player.is-placed {
   inset: auto;
+}
+
+/* Docked: the resting orb sits in the global header beside the brand; opening slides the bar out from
+ * under the header to just below it. The orb outranks the header only while it rests there, so the
+ * opened bar and panel can never cover the header or an open menu. */
+.duomei-music-player.is-docked {
+  inset: auto;
+  transition:
+    inline-size 620ms cubic-bezier(0.22, 1, 0.36, 1),
+    block-size 620ms cubic-bezier(0.22, 1, 0.36, 1),
+    border-radius 620ms cubic-bezier(0.22, 1, 0.36, 1),
+    inset-block-start 620ms cubic-bezier(0.22, 1, 0.36, 1),
+    inset-inline-start 620ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 480ms cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 360ms var(--ease-out),
+    box-shadow 420ms var(--ease-out),
+    z-index 0s linear 0s;
+}
+
+.duomei-music-player.is-docked.is-minimized {
+  z-index: 5201;
+  transition:
+    inline-size 620ms cubic-bezier(0.22, 1, 0.36, 1),
+    block-size 620ms cubic-bezier(0.22, 1, 0.36, 1),
+    border-radius 620ms cubic-bezier(0.22, 1, 0.36, 1),
+    inset-block-start 620ms cubic-bezier(0.22, 1, 0.36, 1),
+    inset-inline-start 620ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 480ms cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 360ms var(--ease-out),
+    box-shadow 420ms var(--ease-out),
+    z-index 0s linear 620ms;
+}
+
+/* Follow the desktop header when it slides away on downward scroll and comes back on hover or upward scroll. */
+body:has(.duomei-header.is-scrolled.is-scroll-hidden:not(.is-hover-revealed):not(.is-menu-open):not(:focus-within))
+  .duomei-music-player.is-docked.is-minimized {
+  opacity: 0;
+  pointer-events: none;
+  transform: translate3d(0, calc(-100% - 1.5rem), 0);
 }
 
 .duomei-music-player.is-dragging {
@@ -692,10 +726,6 @@
     inset-inline-start: var(--space-xs);
     inline-size: calc(100% - (var(--space-xs) * 2));
   }
-}
-
-.duomei-motion-root > .duomei-music-player.is-minimized {
-  inline-size: var(--music-orb-size);
 }
 
 body.front-editing .duomei-music-player,
