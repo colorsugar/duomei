@@ -99,6 +99,7 @@ test("keeps iOS header touch activation synchronous and deterministic", () => {
   assert.match(headerSource, /lastTouchActivationRef = useRef\(Number\.NEGATIVE_INFINITY\)/);
   assert.match(headerSource, /window\.location\.assign\(\(target as HTMLAnchorElement\)\.href\)/);
   assert.match(headerSource, /href="\/#guyu"/);
+  assert.match(headerSource, /href="\/#dalu"/);
   assert.match(headerSource, /href="\/#yunyou"/);
   assert.doesNotMatch(headerSource, /href="\/guyu"/);
   assert.doesNotMatch(headerSource, /pendingTouchActivationRef/);
