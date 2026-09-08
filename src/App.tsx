@@ -64,7 +64,9 @@ function AppRoutes() {
         <Route path="/" element={<DuomeiHomePage />} />
         <Route path="/zaobao" element={<DuomeiZaobaoPage />} />
         <Route path="/zaobao/archive" element={<DuomeiZaobaoArchivePage />} />
+        <Route path="/zaobao/i/:storyId" element={<DuomeiZaobaoPage />} />
         <Route path="/zaobao/:date" element={<DuomeiZaobaoPage />} />
+        <Route path="/zaobao/:date/i/:storyId" element={<DuomeiZaobaoPage />} />
         <Route path="/time" element={<DuomeiTimePage />} />
         <Route path="/note/:slug" element={<DuomeiNoteDetailPage />} />
         <Route path="/guyu" element={<DuomeiGuyuPage />} />

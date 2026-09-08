@@ -8,6 +8,8 @@ export const ZAOBAO_SOURCE = "https://zaobao-six.vercel.app";
 const DEFAULT_DESCRIPTION = "记录旅途中的风景、生活片段、旅行照片和心情文字。";
 const ZAOBAO_DESCRIPTION = "国际、国内、日本、科技、AI、新品、兴趣、日常，八个栏目的每日早报。";
 const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
+// Story ids come from the source's `data-id` slugs; anything else is not a story route.
+const STORY_ID_PATTERN = /^[\w-]{1,120}$/;
 // WeChat's link crawler and in-app browser both identify as MicroMessenger; both
 // need the edition headline because the share card is built from whatever they load.
 const CRAWLER_PATTERN =
@@ -61,18 +63,50 @@ export function extractEditionSummary(html) {
   };
 }
 
+// One `<article data-id="…">` of the edition: its own title, first paragraph and figure.
+export function extractStorySummary(html, storyId) {
+  const open = html.match(new RegExp(`<article\\s[^>]*data-id="${storyId}"[^>]*>`, "i"));
+  if (!open) return null;
+  const start = open.index + open[0].length;
+  const end = html.indexOf("</article>", start);
+  const body = html.slice(start, end === -1 ? undefined : end);
+  const title = open[0].match(/data-title="([^"]*)"/i)?.[1] ?? body.match(/<h2[^>]*>([\s\S]*?)<\/h2>/i)?.[1];
+  const lede = body.match(/<p(?![^>]*class=")[^>]*>([\s\S]*?)<\/p>/i)?.[1];
+  return {
+    headline: title ? decodeText(title) : "",
+    lede: lede ? decodeText(lede) : "",
+    image: firstShareImage(body),
+  };
+}
+
 function withTimeout(promise, ms) {
   return Promise.race([promise, new Promise((_, reject) => setTimeout(() => reject(new Error("timeout")), ms))]);
+}
+
+// Some source CDNs answer share crawlers with 403 or an HTML page; only a
+// definitive non-image answer rejects the cover, a slow or failed probe keeps it.
+async function imageIsServed(url, fetchImpl, timeoutMs) {
+  try {
+    const response = await withTimeout(fetchImpl(url, { headers: { accept: "image/*" } }), timeoutMs);
+    response.body?.cancel?.().catch?.(() => {});
+    return response.ok && /^image\//i.test(response.headers.get("content-type") ?? "");
+  } catch {
+    return true;
+  }
 }
 
 // Static per-route copy. `sourceUrl` is only set for routes with a live edition.
 function routeCopy(segments) {
   if (segments[0] === "zaobao") {
-    if (segments.length === 1) return { title: "今日早报", description: ZAOBAO_DESCRIPTION, sourceUrl: `${ZAOBAO_SOURCE}/` };
     if (segments[1] === "archive" && segments.length === 2) return { title: "往期早报", description: "翻看过去每一天的早报。" };
-    if (segments.length === 2 && DATE_PATTERN.test(segments[1])) {
-      return { title: `${segments[1]} 早报`, description: ZAOBAO_DESCRIPTION, sourceUrl: `${ZAOBAO_SOURCE}/${segments[1]}/` };
-    }
+    // `/zaobao[/:date]` is the edition; `/zaobao[/:date]/i/:story` shares one article of it.
+    const date = DATE_PATTERN.test(segments[1] ?? "") ? segments[1] : undefined;
+    const rest = segments.slice(date ? 2 : 1);
+    const edition = date
+      ? { title: `${date} 早报`, description: ZAOBAO_DESCRIPTION, sourceUrl: `${ZAOBAO_SOURCE}/${date}/` }
+      : { title: "今日早报", description: ZAOBAO_DESCRIPTION, sourceUrl: `${ZAOBAO_SOURCE}/` };
+    if (rest.length === 0) return edition;
+    if (rest.length === 2 && rest[0] === "i" && STORY_ID_PATTERN.test(rest[1])) return { ...edition, storyId: rest[1] };
     return { title: "早报", description: ZAOBAO_DESCRIPTION };
   }
   if (segments[0] === "guyu" && segments.length === 1) {
@@ -94,16 +128,19 @@ export function staticShareMeta(pathname) {
 export async function resolveShareMeta(pathname, { crawler = false, fetchImpl = fetch, timeoutMs = 1500 } = {}) {
   const meta = staticShareMeta(pathname);
   if (!meta) return null;
-  const { sourceUrl, ...rest } = meta;
+  const { sourceUrl, storyId, ...rest } = meta;
   if (!crawler || !sourceUrl) return rest;
   try {
     const response = await withTimeout(fetchImpl(sourceUrl, { headers: { accept: "text/html" } }), timeoutMs);
     if (!response.ok) return rest;
-    const { headline, lede, image } = extractEditionSummary(await response.text());
+    const html = await response.text();
+    // A story link whose id is gone from the edition degrades to the edition card.
+    const { headline, lede, image } = (storyId && extractStorySummary(html, storyId)) || extractEditionSummary(html);
+    const cover = image && (await imageIsServed(image, fetchImpl, timeoutMs)) ? image : rest.image;
     return {
       title: headline ? `${headline} · ${rest.title}` : rest.title,
       description: lede || rest.description,
-      image: image || rest.image,
+      image: cover,
     };
   } catch {
     return rest;

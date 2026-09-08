@@ -3,6 +3,7 @@ import { readFile } from "node:fs/promises";
 import test from "node:test";
 import {
   extractEditionSummary,
+  extractStorySummary,
   handleShellRequest,
   injectShareMeta,
   isCrawler,
@@ -17,7 +18,18 @@ const sourceHtml = `<!doctype html><html><body><div class="page"><h1>小米今�
 <img src="/brand.svg" alt=""><img src="http://insecure.example/a.png" alt=""><img src="https://cdn.example/a.webp" alt="">
 <img class="hero" src="https://img.example/2026/9/first.png?w=1200&amp;h=630" alt="hero"><img src="https://img.example/second.jpg" alt=""></div></body></html>`;
 const FIRST_IMAGE = "https://img.example/2026/9/first.png?w=1200&h=630";
-const fetchSource = async () => new Response(sourceHtml, { status: 200, headers: { "content-type": "text/html" } });
+const STORY_IMAGE = "https://img.ithome.example/2026/9/astra.jpg";
+const storyHtml = `<!doctype html><html><body><div class="page"><h1>18 Fold开售，塞尔达今晚直面会</h1>
+<p class="date">2026年9月8日 星期二</p><p class="lede">今天重点：折叠屏 &amp; 直面会。</p>
+<section id="guoji"><h2 class="sec">国际</h2><article data-id="iran-hormuz-0907" data-title="伊朗拟划限制区"><h2>伊朗拟划限制区</h2><p>伊朗段落。</p></article></section>
+<section id="ai"><h2 class="sec">AI</h2><article data-id="gpt6-astra-portal-clear-0907" data-title="OpenAI GPT-6 Astra 自主通关《传送门》：约 24 小时、成本 571 美元"><figure><img src="${STORY_IMAGE}" alt="x" loading="lazy"><figcaption>IT之家</figcaption></figure><h2>OpenAI GPT-6 Astra 自主通关《传送门》</h2><p>爱好者用 MCP 让 GPT-6 Astra 控制《传送门》，耗时约 24 小时。</p><p>第二段。</p><p class="source"><a href="https://x.example">来源：IT之家</a></p></article>
+<article data-id="no-figure-0907"><h2>没有图的一条</h2><p class="source"><a href="https://x.example">来源</a></p><p>只有来源后的正文。</p></article></section></div></body></html>`;
+const htmlResponse = (html) => new Response(html, { status: 200, headers: { "content-type": "text/html" } });
+const imageResponse = () => new Response("", { status: 200, headers: { "content-type": "image/jpeg" } });
+const urlOf = (input) => (typeof input === "string" ? input : input.url);
+// Edition HTML for the source, a real image for every image URL.
+const fetchSource = async (input) => (/\.(?:png|jpe?g)(?:[?#]|$)/i.test(urlOf(input)) ? imageResponse() : htmlResponse(sourceHtml));
+const fetchStorySource = async (input) => (/\.(?:png|jpe?g)(?:[?#]|$)/i.test(urlOf(input)) ? imageResponse() : htmlResponse(storyHtml));
 
 function metaContent(html, attribute, name) {
   return html.match(new RegExp(`<meta\\s+${attribute}="${name}"\\s+content="([^"]*)"`))?.[1];
@@ -66,7 +78,53 @@ test("crawlers get the edition headline, browsers get the static title without f
   const human = await resolveShareMeta("/zaobao", { crawler: false, fetchImpl: counting });
   assert.equal(human.title, "今日早报");
   assert.equal(human.image, "/og-zaobao.png");
-  assert.equal(fetched, 1);
+  // One fetch for the edition, one probe for its cover; the browser path fetches nothing.
+  assert.equal(fetched, 2);
+});
+
+test("story routes resolve to the article's own title, first paragraph and figure", async () => {
+  assert.equal(staticShareMeta("/zaobao/i/gpt6-astra-portal-clear-0907").storyId, "gpt6-astra-portal-clear-0907");
+  assert.equal(staticShareMeta("/zaobao/i/gpt6-astra-portal-clear-0907").sourceUrl, "https://zaobao-six.vercel.app/");
+  assert.equal(staticShareMeta("/zaobao/2026-09-08/i/gpt6-astra-portal-clear-0907").sourceUrl, "https://zaobao-six.vercel.app/2026-09-08/");
+  assert.equal(staticShareMeta("/zaobao/2026-09-08/i/gpt6-astra-portal-clear-0907").title, "2026-09-08 早报");
+  assert.equal(staticShareMeta("/zaobao/i/").title, "早报");
+  assert.equal(staticShareMeta("/zaobao/i/bad id").storyId, undefined);
+  assert.equal(staticShareMeta("/zaobao/2026-09-08/i/a/b").storyId, undefined);
+
+  const story = await resolveShareMeta("/zaobao/2026-09-08/i/gpt6-astra-portal-clear-0907", { crawler: true, fetchImpl: fetchStorySource });
+  assert.equal(story.title, "OpenAI GPT-6 Astra 自主通关《传送门》：约 24 小时、成本 571 美元 · 2026-09-08 早报");
+  assert.equal(story.description, "爱好者用 MCP 让 GPT-6 Astra 控制《传送门》，耗时约 24 小时。");
+  assert.equal(story.image, STORY_IMAGE);
+
+  const human = await resolveShareMeta("/zaobao/2026-09-08/i/gpt6-astra-portal-clear-0907", { crawler: false, fetchImpl: fetchStorySource });
+  assert.deepEqual(human, { title: "2026-09-08 早报", description: "国际、国内、日本、科技、AI、新品、兴趣、日常，八个栏目的每日早报。", image: "/og-zaobao.png" });
+
+  // No data-title and no figure: h2 fills the title, `.source` is skipped for the lede, the site cover stays.
+  const bare = await resolveShareMeta("/zaobao/i/no-figure-0907", { crawler: true, fetchImpl: fetchStorySource });
+  assert.equal(bare.title, "没有图的一条 · 今日早报");
+  assert.equal(bare.description, "只有来源后的正文。");
+  assert.equal(bare.image, "/og-zaobao.png");
+
+  // An id the edition no longer contains degrades to the edition card instead of a blank one.
+  const gone = await resolveShareMeta("/zaobao/i/vanished-0901", { crawler: true, fetchImpl: fetchStorySource });
+  assert.equal(gone.title, "18 Fold开售，塞尔达今晚直面会 · 今日早报");
+  assert.equal(gone.image, STORY_IMAGE);
+  assert.equal(extractStorySummary(storyHtml, "vanished-0901"), null);
+});
+
+test("a cover the CDN refuses to serve falls back to the fixed zaobao PNG", async () => {
+  const forbidden = async (input) =>
+    /\.jpg$/.test(urlOf(input)) ? new Response("denied", { status: 403, headers: { "content-type": "text/html" } }) : htmlResponse(storyHtml);
+  const meta = await resolveShareMeta("/zaobao/i/gpt6-astra-portal-clear-0907", { crawler: true, fetchImpl: forbidden });
+  assert.equal(meta.title, "OpenAI GPT-6 Astra 自主通关《传送门》：约 24 小时、成本 571 美元 · 今日早报");
+  assert.equal(meta.image, "/og-zaobao.png");
+
+  const htmlInstead = async (input) => (/\.jpg$/.test(urlOf(input)) ? htmlResponse("<p>login</p>") : htmlResponse(storyHtml));
+  assert.equal((await resolveShareMeta("/zaobao/i/gpt6-astra-portal-clear-0907", { crawler: true, fetchImpl: htmlInstead })).image, "/og-zaobao.png");
+
+  // A slow or unreachable probe is not evidence against the cover.
+  const slowImage = (input) => (/\.jpg$/.test(urlOf(input)) ? new Promise(() => {}) : htmlResponse(storyHtml));
+  assert.equal((await resolveShareMeta("/zaobao/i/gpt6-astra-portal-clear-0907", { crawler: true, fetchImpl: slowImage, timeoutMs: 20 })).image, STORY_IMAGE);
 });
 
 test("editions without a usable image keep the fixed zaobao cover", async () => {
@@ -141,7 +199,7 @@ test("handleShellRequest fetches the site's own shell and tags the response", as
     if (url.pathname === "/index.html") {
       return new Response(shell, { status: 200, headers: { "content-type": "text/html", "content-length": "9" } });
     }
-    return fetchSource();
+    return fetchSource(input);
   };
   const bot = await handleShellRequest(new Request("https://duomei.site/zaobao", { headers: { "user-agent": "Twitterbot/1.0" } }), { fetchImpl });
   assert.equal(seen[0], "https://duomei.site/index.html");

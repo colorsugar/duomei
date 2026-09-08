@@ -564,13 +564,15 @@ button.zaobao-page-open {
 }
 
 .zaobao-edition-index a:focus-visible,
-.zaobao-story-body > a:focus-visible {
+.zaobao-story-actions a:focus-visible,
+.zaobao-story-share:focus-visible {
   outline: var(--rule-focus) solid var(--color-focus);
   outline-offset: var(--space-2xs);
 }
 
 .zaobao-edition-index a:active,
-.zaobao-story-body > a:active {
+.zaobao-story-actions a:active,
+.zaobao-story-share:active {
   color: var(--color-ink);
 }
 
@@ -618,6 +620,12 @@ button.zaobao-page-open {
   min-inline-size: 0;
   padding-block-start: var(--space-lg);
   border-block-start: var(--rule-hairline) solid var(--color-rule);
+  scroll-margin-block-start: calc(var(--zaobao-reader-bar-height) + var(--space-lg));
+}
+
+/* The card a shared story link landed on: a single warm rule, nothing louder. */
+.zaobao-story.is-shared {
+  border-block-start: var(--rule-focus) solid var(--color-accent);
 }
 
 .zaobao-story figure {
@@ -667,17 +675,35 @@ button.zaobao-page-open {
   line-height: 1.65;
 }
 
-.zaobao-story-body > a {
+.zaobao-story-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0 var(--space-lg);
+  margin-block-start: var(--space-xs);
+}
+
+.zaobao-story-actions a,
+.zaobao-story-share {
   display: inline-flex;
   inline-size: fit-content;
   min-block-size: var(--size-hit);
   align-items: center;
-  margin-block-start: var(--space-xs);
   color: var(--color-accent);
   font-size: var(--text-sm);
   font-weight: 600;
   text-decoration: none;
   white-space: nowrap;
+}
+
+.zaobao-story-share {
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  cursor: pointer;
 }
 
 .zaobao-archive {
@@ -814,7 +840,8 @@ button.zaobao-page-open {
 
 @media (hover: hover) and (pointer: fine) {
   .zaobao-edition-index a:hover,
-  .zaobao-story-body > a:hover {
+  .zaobao-story-actions a:hover,
+  .zaobao-story-share:hover {
     color: var(--color-ink);
   }
 
