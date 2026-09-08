@@ -14,7 +14,9 @@ export function installBlenderModels({scene,camera,landmarks,models,detail,picka
  let enabled=true,night=0,far=null,farPending=false,nextFarAttempt=0,lastVisibility='';const group=new THREE.Group();scene.add(group);
  const find=id=>landmarks.find(l=>l.id===id);
  const key=lm=>EXISTING.includes(lm?.id)?lm.id:lm?.region&&PARKS[lm.region]?lm.region:null;
- const tint=root=>{root.traverse(o=>{if(!o.isMesh||o.userData.sharedTree)return;for(const mat of [].concat(o.material)){
+ const tint=root=>{
+  if(root.userData.setNativeNight){const on=night>.18;if(root.userData.nativeNight!==on){root.userData.setNativeNight(root,on);root.userData.nativeNight=on;}root.traverse(o=>{if(o.isLight){o.userData.fullIntensity??=o.intensity;o.intensity=o.userData.fullIntensity*night;}});return;}
+  root.traverse(o=>{if(!o.isMesh||o.userData.sharedTree)return;for(const mat of [].concat(o.material)){
   const role=mat.userData.role||'',name=mat.name;let strength=mat.userData.nightStrength??(role==='wood'?.06:role==='roof'?.025:role==='paint'?.04:0);
   if(/bark|leaf|叶|树|岩|草/.test(name))strength=0;
   if(!mat.userData.originalEmission)mat.userData.originalEmission=mat.emissive.clone();
@@ -22,6 +24,14 @@ export function installBlenderModels({scene,camera,landmarks,models,detail,picka
   if(mat.userData.nightStrength==null&&(role==='wood'||role==='roof'))mat.emissiveMap=mat.map;
  }});};
  async function load(id){
+  if(id==='xiaoyaolou'){
+   const {loadXiaoyaolou,setXiaoyaolouNight}=await import('./xiaoyaolou-model.js');
+   const root=await loadXiaoyaolou(),lm=find(id);let frozen=0;
+   root.traverse(o=>{frozen++;if(o.isMesh){o.userData.lm=lm;o.receiveShadow=true;pickables.push(o);}});
+   root.userData.parts=new Map([[id,root]]);root.userData.replaces=[id];root.userData.key=id;
+   root.userData.setNativeNight=setXiaoyaolouNight;root.userData.compaction={removed:0,frozen};
+   root.visible=false;group.add(root);tint(root);invalidate(true);return root;
+  }
   const gltf=await loader.loadAsync(new URL('../assets/blender/'+id+'.glb',import.meta.url).href),root=gltf.scene;
   // Share decoded pixels across distance levels while keeping independent UV transforms.
   root.traverse(o=>{if(o.isMesh)for(const m of [].concat(o.material))for(const value of Object.values(m))if(value?.isTexture){
