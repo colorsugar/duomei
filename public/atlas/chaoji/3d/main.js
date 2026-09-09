@@ -9,7 +9,7 @@ const HEIGHT_SCALE = 36;
 const KM_PER_UNIT = 20.3;
 const EURASIA_AREA_WAN_KM2 = 5470;
 const SVG_W = 1100;
-const HOME = { radius: 1500, polar: 0.88, azimuth: -0.42 };
+const HOME = { radius: 820, polar: 0.96, azimuth: -0.42 };
 const TILT = { oblique: 0.88, top: 0.14 };
 const KIND_DOT = {
   "王都": "#e9d29a", "帝都": "#c4b0d8", "战略通道": "#ffb089", "山口要塞": "#c4c6bf",
@@ -87,13 +87,13 @@ const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x050c16);
 scene.fog = new THREE.FogExp2(0x07111d, 0.0003);
 
-const camera = new THREE.PerspectiveCamera(44, 1, 1, 16000);
+const camera = new THREE.PerspectiveCamera(44, 1, 1, 24000);
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = !reducedMotion;
 controls.dampingFactor = coarse ? 0.1 : 0.075;
 controls.screenSpacePanning = false;
 controls.minDistance = 12;
-controls.maxDistance = 4200;
+controls.maxDistance = 5600;
 controls.minPolarAngle = 0.04;
 controls.maxPolarAngle = 1.25;
 controls.rotateSpeed = coarse ? 0.42 : 0.52;
@@ -171,7 +171,7 @@ const water = new Water(new THREE.PlaneGeometry(11000, 7800), {
   waterNormals,
   sunDirection: sun.position.clone().normalize(),
   sunColor: 0xffe2b8,
-  waterColor: 0x071e33,
+  waterColor: 0x08233d,
   distortionScale: 2.2,
   fog: true,
 });
@@ -1569,7 +1569,7 @@ function buildAtmosphereLayers() {
   for (let y = 0; y < 512; y += 1) {
     for (let x = 0; x < 512; x += 1) {
       const n = fractalNoiseGrid(noiseGrid, gridSize, x / 512, y / 512, 4);
-      const alpha = Math.round(noiseSmoothstep(0.48, 0.62, n) * 255);
+      const alpha = Math.round(noiseSmoothstep(0.78, 0.93, n) * 255);
       const o = (y * 512 + x) * 4;
       cloudImg.data[o] = 255; cloudImg.data[o + 1] = 255; cloudImg.data[o + 2] = 255;
       cloudImg.data[o + 3] = alpha;
@@ -1578,12 +1578,12 @@ function buildAtmosphereLayers() {
   cloudCtx.putImageData(cloudImg, 0, 0);
   const cloudTex = new THREE.CanvasTexture(cloudCanvas);
   cloudTex.wrapS = cloudTex.wrapT = THREE.RepeatWrapping;
-  cloudTex.repeat.set(3, 2);
+  cloudTex.repeat.set(1.4, 1.1);
   cloudLayer = new THREE.Mesh(
-    new THREE.PlaneGeometry(MAP_W * 2.4, MAP_H * 2.4).rotateX(-Math.PI / 2),
-    new THREE.MeshBasicMaterial({ map: cloudTex, transparent: true, opacity: 0.62, depthWrite: false }),
+    new THREE.PlaneGeometry(MAP_W * 1.55, MAP_H * 1.55).rotateX(-Math.PI / 2),
+    new THREE.MeshBasicMaterial({ map: cloudTex, transparent: true, opacity: 0.38, depthWrite: false }),
   );
-  cloudLayer.position.y = 64;
+  cloudLayer.position.y = 48;
   scene.add(cloudLayer);
 
   const gridSpacing = 98.5;
@@ -1602,41 +1602,25 @@ function buildAtmosphereLayers() {
   );
   scene.add(graticule);
 
-  function makeIceCapTexture(w, h) {
-    const c = document.createElement("canvas");
-    c.width = w; c.height = h;
-    const ctx = c.getContext("2d");
-    const img = ctx.createImageData(w, h);
-    for (let y = 0; y < h; y += 1) {
-      for (let x = 0; x < w; x += 1) {
-        const n = fractalNoiseGrid(noiseGrid, gridSize, x / w, y / h + 0.17, 4);
-        const fadeY = 0.55 + n * 0.35;
-        const t = y / h;
-        const alpha = t < fadeY ? 1 : 1 - noiseSmoothstep(fadeY, Math.min(1, fadeY + 0.12), t);
-        const o = (y * w + x) * 4;
-        img.data[o] = 234; img.data[o + 1] = 244; img.data[o + 2] = 255;
-        img.data[o + 3] = Math.round(alpha * 255);
-      }
-    }
-    ctx.putImageData(img, 0, 0);
-    return new THREE.CanvasTexture(c);
-  }
-
   iceCap = new THREE.Group();
-  const northTex = makeIceCapTexture(1024, 256);
-  const northCap = new THREE.Mesh(
-    new THREE.PlaneGeometry(MAP_W * 3.2, 520).rotateX(-Math.PI / 2),
-    new THREE.MeshBasicMaterial({ map: northTex, transparent: true, depthWrite: false, opacity: 0.92 }),
-  );
-  northCap.position.set(0, -0.8, -MAP_H / 2 - 200);
-  iceCap.add(northCap);
-  const southTex = makeIceCapTexture(1024, 256);
-  const southCap = new THREE.Mesh(
-    new THREE.PlaneGeometry(MAP_W * 3.2, 260).rotateX(-Math.PI / 2),
-    new THREE.MeshBasicMaterial({ map: southTex, transparent: true, depthWrite: false, opacity: 0.45 }),
-  );
-  southCap.position.set(0, -0.8, MAP_H / 2 + 260);
-  iceCap.add(southCap);
+  const iceMat = new THREE.MeshStandardMaterial({
+    color: 0xe8f2fa, roughness: 0.42, metalness: 0.08, transparent: true, opacity: 0.88,
+  });
+  const floeRng = mulberry32(0x51ce);
+  for (let i = 0; i < 28; i += 1) {
+    const r = 18 + floeRng() * 46;
+    const floe = new THREE.Mesh(new THREE.CircleGeometry(r, 11), iceMat);
+    floe.rotation.x = -Math.PI / 2;
+    floe.position.set((floeRng() - 0.5) * MAP_W * 1.15, -0.7, -MAP_H / 2 - 30 - floeRng() * 340);
+    iceCap.add(floe);
+  }
+  for (let i = 0; i < 8; i += 1) {
+    const r = 12 + floeRng() * 22;
+    const floe = new THREE.Mesh(new THREE.CircleGeometry(r, 9), iceMat);
+    floe.rotation.x = -Math.PI / 2;
+    floe.position.set((floeRng() - 0.5) * MAP_W * 0.7, -0.7, MAP_H / 2 + 40 + floeRng() * 160);
+    iceCap.add(floe);
+  }
   scene.add(iceCap);
 
   const eurasiaVerts = [
@@ -1668,7 +1652,7 @@ function buildAtmosphereLayers() {
   const eurasiaFill = new THREE.Mesh(
     new THREE.ShapeGeometry(shape),
     new THREE.MeshBasicMaterial({
-      color: 0xf2d27a, transparent: true, opacity: 0.18, depthTest: false, side: THREE.DoubleSide,
+      color: 0xf2d27a, transparent: true, opacity: 0.34, depthTest: false, side: THREE.DoubleSide,
     }),
   );
   eurasiaOverlay.add(eurasiaFill);
@@ -1736,7 +1720,17 @@ async function boot() {
   bump.colorSpace = THREE.NoColorSpace;
   bump.anisotropy = texture.anisotropy;
 
-  continentMesh = new THREE.Mesh(geometry, new THREE.MeshStandardMaterial({ map: texture, bumpMap: bump, bumpScale: 9, roughness: 0.86, metalness: 0.04 }));
+  const landMat = new THREE.MeshStandardMaterial({ map: texture, bumpMap: bump, bumpScale: 9, roughness: 0.86, metalness: 0.04 });
+  landMat.onBeforeCompile = (shader) => {
+    shader.fragmentShader = shader.fragmentShader.replace(
+      "#include <map_fragment>",
+      `#include <map_fragment>
+       float cjLum = dot(diffuseColor.rgb, vec3(0.2126, 0.7152, 0.0722));
+       if (diffuseColor.b > diffuseColor.r + 0.05 && cjLum < 0.45) discard;
+      `,
+    );
+  };
+  continentMesh = new THREE.Mesh(geometry, landMat);
   scene.add(continentMesh);
 
   for (const site of world.sites) sitesById.set(site.id, site);
@@ -1796,37 +1790,20 @@ async function boot() {
         scaleBarEl.hidden = true;
       } else {
         scaleBarEl.hidden = false;
-        scaleTarget.copy(controls.target);
-        cameraRight.set(1, 0, 0).applyQuaternion(camera.quaternion);
-        cameraRight.y = 0;
-        if (cameraRight.lengthSq() > 1e-6) cameraRight.normalize();
-        else cameraRight.set(1, 0, 0);
-        scaleOffset.copy(cameraRight).multiplyScalar(10);
-        scaleProjectA.copy(scaleTarget).project(camera);
-        scaleProjectB.copy(scaleTarget).add(scaleOffset).project(camera);
-        const sw = stage.clientWidth || innerWidth;
         const sh = stage.clientHeight || innerHeight;
-        const pxA = (scaleProjectA.x * 0.5 + 0.5) * sw;
-        const pyA = (-scaleProjectA.y * 0.5 + 0.5) * sh;
-        const pxB = (scaleProjectB.x * 0.5 + 0.5) * sw;
-        const pyB = (-scaleProjectB.y * 0.5 + 0.5) * sh;
-        const pxPerUnit = Math.hypot(pxB - pxA, pyB - pyA) / 10;
-        let chosen = 200;
+        const dist = camera.position.distanceTo(controls.target);
+        const worldPerPx = (2 * dist * Math.tan((camera.fov * Math.PI) / 360)) / Math.max(1, sh);
+        const pxPerUnit = 1 / Math.max(1e-6, worldPerPx);
+        let chosen = KM_STEPS[0];
         for (const km of KM_STEPS) {
-          const w = (km / KM_PER_UNIT) * pxPerUnit;
-          if (w <= 180) chosen = km;
+          if ((km / KM_PER_UNIT) * pxPerUnit <= 180) chosen = km;
           else break;
         }
-        let barPx = (chosen / KM_PER_UNIT) * pxPerUnit;
-        if (barPx < 60) { chosen = 200; barPx = (200 / KM_PER_UNIT) * pxPerUnit; }
+        const barPx = Math.max(48, (chosen / KM_PER_UNIT) * pxPerUnit);
         const bar = scaleBarEl.querySelector("i");
         const span = scaleBarEl.querySelector("span");
         if (bar) bar.style.width = `${barPx}px`;
-        if (span) {
-          span.textContent = chosen >= 1000
-            ? `${(chosen / 1000).toLocaleString("en-US")},000 km`
-            : `${chosen} km`;
-        }
+        if (span) span.textContent = `${chosen.toLocaleString("en-US")} km`;
       }
     }
     for (const sys of creatureSystems) {
