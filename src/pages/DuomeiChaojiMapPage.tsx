@@ -11,7 +11,7 @@ export function DuomeiChaojiMapPage() {
   }, []);
   return <main className="duomei-atlas-page" aria-label="超级大陆骨架地图">
     <nav className="dalu-map-nav" aria-label="超级大陆导航">
-      <Link to="/chaoji">← 返回超级大陆</Link>
+      <Link to="/">← 返回多美</Link>
     </nav>
     <iframe ref={frame} src="/atlas/chaoji/index.html" title="超级大陆 · 骨架地图" />
   </main>;
