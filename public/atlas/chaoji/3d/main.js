@@ -9,7 +9,8 @@ const HEIGHT_SCALE = 36;
 const KM_PER_UNIT = 20.3;
 const EURASIA_AREA_WAN_KM2 = 5470;
 const SVG_W = 1100;
-const HOME = { radius: 820, polar: 0.96, azimuth: -0.42 };
+const HOME = { radius: 390, polar: 1.02, azimuth: -0.55 };
+const HOME_TARGET = new THREE.Vector3(-220, 16, -18);
 const TILT = { oblique: 0.88, top: 0.14 };
 const KIND_DOT = {
   "王都": "#e9d29a", "帝都": "#c4b0d8", "战略通道": "#ffb089", "山口要塞": "#c4c6bf",
@@ -1439,7 +1440,7 @@ async function enterRegion(region, { fly = true } = {}) {
 }
 async function exitToOverview() {
   clearCity(); clearRegionOverlay(); activeRegion = null; syncUi();
-  await flyTo({ target: new THREE.Vector3(0, 20, 0), ...HOME }, 850);
+  await flyTo({ target: HOME_TARGET, ...HOME }, 850);
 }
 async function enterCity(site) {
   const region = siteRegion.get(site.id);
@@ -1766,7 +1767,7 @@ async function boot() {
   }
 
   buildAtmosphereLayers();
-  applyView({ target: new THREE.Vector3(0, 20, 0), ...HOME });
+  applyView({ target: HOME_TARGET, ...HOME });
   syncUi(); resize();
   loading.classList.add("is-done");
   setTimeout(() => { loading.hidden = true; }, 320);
