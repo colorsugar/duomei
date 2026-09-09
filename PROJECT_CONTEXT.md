@@ -262,3 +262,7 @@ Historical planning documents under `deploy/guyu-edgeone/docs/` remain useful ev
 `public/downloads/fantasy-continent-artbook.pdf` 在构建前从 `artifacts/dalu/` 的公开分片逐个校验并重组（`scripts/prepare-dalu-artbook.mjs`）；为81页、74幅图版、11章的扩充艺术图集，包含原60幅及14幅新增宫堡庄园图。纸面目录有逐幅内部跳转、章节书签，每幅有返回目录与带 entry 的地图定位外链。`src/content/daluArtbook.json` 固定 PDF 哈希、大小和章节页码。既有64页故语原册继续保留，页面明确标为原册。
 
 `/dalu` 末尾新增“生成总提示词”：二十八节卫星地图生成总提示词以 `src/content/daluMasterPrompt.md` 单一来源（Vite `?raw` 导入）提供复制全文、Markdown 下载（data URL）与 `<details>` 折叠阅读，不涉及新路由、页头或 PDF。
+
+## 超级大陆卫星骨架 — 2026-09-09
+
+`/chaoji` 跳转 `/chaoji/map`，嵌入 `public/atlas/chaoji/` 静态卫星骨架 V1。与奇幻大陆 V6（`/dalu/map`、`public/atlas/v6/`）不是同一套世界，禁止互相覆盖。七国色带、赤脊入侵走廊（只留通道）、十二战略点可点；拖动/滚轮缩放/图层开关。总提示词暂与 `src/content/daluMasterPrompt.md` 共用。详情见 `docs/chaoji/README.md`。
