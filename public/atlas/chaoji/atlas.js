@@ -1,35 +1,277 @@
-const places=[
-{id:'aivernor',name:'艾维诺尔 · 金穗王都',type:'王都',x:435,y:405,country:'艾维诺尔',desc:'河谷粮原与海港相连的王都。王宫、粮仓、河港、骑士团和国家魔法师协会形成同一城市系统。',reason:'肥沃冲积平原、可通航河流与近海港口共同形成大陆人口核心。'},
-{id:'inved',name:'因维德帝国 · 黑曜帝都',type:'帝都',x:650,y:335,country:'因维德帝国',desc:'控制东部海岸与天然入侵走廊的军事帝都。',reason:'低地走廊是两国之间少数能让重装军团持续推进的陆路。'},
-{id:'corridor',name:'赤脊战争走廊',type:'战略要地',x:550,y:365,country:'争议地带',desc:'两条山系之间的宽阔低地，串起边境堡垒、军道、战场与桥头堡。东西轴向为试验裁定，尚未永久锁定。',reason:'天然低地把因维德的军力投送到艾维诺尔腹地。'},
-{id:'forge',name:'机械之心 · 炉环城',type:'矿业都城',x:385,y:255,country:'机械之心公国',desc:'山谷矿城，拥有铁、铜、煤、贵金属与魔晶矿脉，机械塔和地下运输网密集。',reason:'断层与古老岩浆活动造成金属和魔晶资源富集。'},
-{id:'beastsea',name:'海兽之国 · 潮汐王港',type:'海港',x:770,y:515,country:'海兽之国',desc:'控制外海、海峡与船坞体系的海权中心。',reason:'半岛与深水湾提供避风港，同时揽守南北海运。'},
-{id:'hanhai',name:'瀚海古城 · 陆上王城',type:'古城/王都',x:825,y:385,country:'瀚海古城与水下公国',desc:'城主就是国王。陆上古城墙、宫殿、灯塔与水下王宫共同组成双层城市。',reason:'古海湾与深水航道让它成为陆海文明交汇点。'},
-{id:'undersea',name:'瀚海水下王宫',type:'水下城市',x:860,y:420,country:'瀚海古城与水下公国',desc:'魔法穹顶覆盖的水下道路、神殿、档案库和古文明遗迹。',reason:'大陆架边缘的古沉降盆地提供天然深水城市空间。'},
-{id:'forest',name:'森冠王庭 · 世界树',type:'森林王都',x:270,y:505,country:'半兽人与精灵王国',desc:'巨树、石门、月光湖和林间宫苑构成的古老王庭。',reason:'湿润山地与河网孕育大陆最大的连续古森林。'},
-{id:'academy',name:'神山 · 大陆学院',type:'中立中心',x:495,y:510,country:'中立',desc:'神山脚下的王都、学院与大陆魔法师协会总会，七国学者均可进入。',reason:'位于多条陆路和魔力地脉交汇处，便于外交与知识交换。'},
-{id:'north',name:'北方荒原之国 · 寒汀',type:'北境王城',x:410,y:110,country:'北方荒原之国',desc:'寒冷草原、针叶林、冻土和冰川湖之间的边疆王城。',reason:'高纬大陆性气候与冰封遗产共同塑造游牧、牧业与边防文明。'},
-{id:'frozen',name:'失落超级帝国 · 冰封帝都遗址',type:'远古遗迹',x:425,y:55,country:'极北禁区',desc:'曾经远超七国疆域的超级帝国首都，如今被永恒寒冰封在冰层下。',reason:'永恒寒冰核心引发的禁忌魔法灾难冻结整套文明系统。'},
-{id:'core',name:'永恒寒冰核心',type:'禁忌魔法核心',x:465,y:25,country:'极北禁区',desc:'远古气候控制魔法的失控核心，持续影响极地冷源、洋流与大陆气候。',reason:'魔法能源与地脉交汇造成长期异常，而非自然冰期。'},
-{id:'trench',name:'马里亚纳级 · 深渊海沟',type:'超级深海沟',x:920,y:610,country:'公海禁区',desc:'板块俯冲形成的超级深海沟，位于东南、近海兽之国。方位为试验裁定，尚未永久锁定。',reason:'海洋板块俯冲至大陆板块下方形成极深海沟。'},
-{id:'strait',name:'双岸锁潮海峡',type:'战略海峡',x:735,y:470,country:'海兽之国/因维德',desc:'两岸均有海堡、灯塔、海军基地和潮汐魔法塔。',reason:'狭窄深水航道把外海与内海贸易锁在同一瓶颈。'},
-{id:'dragon',name:'魔焰龙渊',type:'龙族禁区',x:350,y:185,country:'中立禁区',desc:'高山火山链、地热洞穴与魔晶矿脉构成的巨龙栖地。',reason:'地热与魔晶持续提供高能环境。'},
-{id:'swamp',name:'灰烬大湿地',type:'战争湿地',x:585,y:560,country:'争议地带',desc:'河流低地长期积水，旧战争道路被泥炭和沼泽吞没。',reason:'平原河网与低坡度造成排水困难。'}
-];
-const svgNS='http://www.w3.org/2000/svg';
-const app=document.querySelector('#app');
-app.innerHTML=`<div class="shell"><aside class="side"><div class="eyebrow">SUPER CONTINENT · CHAOJI</div><h1>超级大陆</h1><div class="sub">试验线。与奇幻大陆 V6 不是同一套世界。海沟方位（东南）与走廊轴向（东西赤脊）为试验裁定，尚未永久锁定。</div><div class="stat"><div><b>7</b><span>主要国家</span></div><div><b>12+</b><span>战略节点</span></div><div><b>1</b><span>超级深海沟</span></div><div><b>1</b><span>冰封超级帝国</span></div></div><div class="controls"><button id="reset">重置视图</button><button id="labels">标签</button></div><div class="layers"><button class="layer" data-layer="countries">国家地理 <span>●</span></button><button class="layer" data-layer="terrain">山脉/森林 <span>●</span></button><button class="layer" data-layer="hydro">河流/海沟 <span>●</span></button><button class="layer" data-layer="routes">贸易/战争路线 <span>●</span></button></div><div class="legend">地图逻辑：板块 → 地形 → 气候 → 水文 → 生态 → 资源 → 魔法 → 城市 → 贸易 → 战争 → 国家。<br><br>点击城市、堡垒、海沟、遗迹与禁区查看设定。</div></aside><main class="map"><div class="hud">拖动地图 · 滚轮缩放 · 点击地标</div><div class="zoom"><button id="zin">＋</button><button id="zout">－</button></div><svg id="svg" viewBox="0 0 1100 720" aria-label="超级大陆"></svg><section class="info hidden" id="info"><button class="close" id="close">×</button><div class="tag" id="tag"></div><h2 id="title"></h2><div class="country" id="country"></div><p id="desc"></p><p id="reason"></p></section></main></div>`;
-const svg=document.querySelector('#svg');
-svg.innerHTML=`<defs><linearGradient id="sea" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#1c5660"/><stop offset="1" stop-color="#071f2b"/></linearGradient><linearGradient id="land" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#6d7a62"/><stop offset=".55" stop-color="#9a966e"/><stop offset="1" stop-color="#455c4d"/></linearGradient><filter id="shadow"><feDropShadow dx="0" dy="5" stdDeviation="7" flood-opacity=".45"/></filter><pattern id="grain" width="28" height="28" patternUnits="userSpaceOnUse"><path d="M0 20L12 8M12 28L28 12M20 28L28 20" stroke="#d6c28a" stroke-opacity=".08"/></pattern></defs><rect width="1100" height="720" fill="url(#sea)"/><path d="M0 90C120 30 205 70 280 35C355 2 425 72 510 55C620 33 670 80 760 58C860 34 960 75 1100 40V0H0Z" fill="#2e7180" opacity=".18"/><g id="world"><path id="continent" d="M135 175C180 118 258 98 338 118C405 75 477 93 535 128C590 105 653 128 690 170C747 170 784 215 804 258C874 263 932 311 949 369C992 412 966 474 921 501C934 563 879 600 817 585C757 630 681 613 625 585C568 636 495 630 443 596C390 627 323 601 296 560C225 569 181 523 190 469C132 437 121 381 157 339C121 292 105 224 135 175Z" fill="url(#land)" filter="url(#shadow)"/><path d="M140 180C220 130 270 155 330 126C390 105 450 140 520 132C600 120 650 170 704 185C760 195 790 245 812 281C850 310 901 337 930 381C950 424 919 471 881 493C850 525 814 558 770 558C700 580 650 560 605 548C530 590 475 574 420 548C350 585 300 542 274 505C214 510 181 470 205 427C161 390 170 345 195 314C160 275 125 225 140 180Z" fill="url(#grain)" opacity=".9"/><path class="ice" d="M250 30C340 0 430 5 520 22C580 8 640 30 680 70C600 95 500 78 430 88C350 78 280 95 250 30Z"/><g id="countries"><path class="country-fill" fill="#b98a57" d="M215 240L340 140L430 170L470 275L415 350L290 345L205 305Z"/><path class="country-fill" fill="#826d91" d="M430 170L535 135L650 170L665 300L570 350L470 275Z"/><path class="country-fill" fill="#6e8f7c" d="M205 305L290 345L415 350L460 440L390 530L275 505L205 427Z"/><path class="country-fill" fill="#a58d62" d="M650 170L704 185L812 281L770 355L665 300Z"/><path class="country-fill" fill="#588091" d="M770 355L881 493L817 558L720 515L680 430Z"/><path class="country-fill" fill="#9b6c59" d="M420 548L530 465L625 585L443 596Z"/><path class="country-fill" fill="#9eb0a0" d="M274 160L338 118L430 170L390 220L310 210Z"/></g><g id="terrain"><path class="mountain" d="M265 170l45-52 30 42 42-55 34 63 43-42 25 59 48-42 32 50 35-36 35 59-57 31-58-20-49 30-52-20-46 26-55-35Z"/><path class="mountain" d="M340 235l35-45 35 40 32-63 34 57 37-40 32 61 42-51 35 57-51 29-58-19-50 25-46-19-47 23-39-27Z"/><path class="forest" d="M225 390q35-70 86-42t70 65q-40 76-104 63t-52-86ZM290 475q54-58 103-20t20 71q-55 39-100 6t-23-57Z"/><path class="forest" d="M650 350q60-55 116 8t40 101q-65 41-117-7t-39-102Z"/><path class="forest" d="M390 535q35-42 84-20t49 58q-57 38-101 4t-32-42Z"/></g><g id="hydro"><path class="river" d="M315 165C340 230 320 290 350 340C370 380 410 410 435 475C452 515 480 548 530 572"/><path class="river" d="M510 150C500 215 530 260 520 315C510 370 550 410 575 455C600 500 620 540 650 570"/><path class="river" d="M680 220C650 275 650 320 675 360C700 400 720 430 735 470"/><path class="trench" d="M850 545C895 510 960 535 1015 590C985 625 927 650 855 638C824 612 825 576 850 545Z"/></g><g id="routes"><path class="danger" d="M430 300C490 330 550 345 640 320C600 360 520 370 460 340Z"/><path class="route" d="M310 370C390 350 465 350 550 365C620 370 680 350 720 335"/><path class="route" d="M435 405C510 430 585 430 665 405C730 380 790 385 825 385"/><path class="route" d="M770 515C750 485 745 460 735 470"/><path class="route" d="M410 255C430 315 465 390 495 510"/></g><g id="labelsLayer"></g></g>`;
-let labelsOn=true; let visible={countries:true,terrain:true,hydro:true,routes:true};
-function marker(p){const g=document.createElementNS(svgNS,'g');g.classList.add('marker');g.dataset.id=p.id;g.setAttribute('transform',`translate(${p.x} ${p.y})`);let cls=p.type.includes('海港')?'port':p.type.includes('堡')?'fort':'city';g.innerHTML=`<circle r="${p.type.includes('禁')||p.type.includes('海沟')?8:6}" class="${cls}"/><text x="10" y="4">${p.name}</text>`;g.addEventListener('click',e=>{e.stopPropagation();show(p)});return g}
-places.forEach(p=>document.querySelector('#labelsLayer').appendChild(marker(p)));
-function show(p){document.querySelector('#tag').textContent=p.type.toUpperCase();document.querySelector('#title').textContent=p.name;document.querySelector('#country').textContent=p.country;document.querySelector('#desc').textContent=p.desc;document.querySelector('#reason').textContent='地理/战略原因：'+p.reason;document.querySelector('#info').classList.remove('hidden')}
-document.querySelector('#close').onclick=()=>document.querySelector('#info').classList.add('hidden');
-document.querySelector('#labels').onclick=()=>{labelsOn=!labelsOn;document.querySelector('#labelsLayer').style.display=labelsOn?'':'none'};
-document.querySelectorAll('.layer').forEach(b=>b.onclick=()=>{const k=b.dataset.layer;visible[k]=!visible[k];b.classList.toggle('off',!visible[k]);const el=document.querySelector('#'+k);if(el)el.style.display=visible[k]?'':'none'});
-let scale=1,tx=0,ty=0;function apply(){document.querySelector('#world').setAttribute('transform',`translate(${tx} ${ty}) scale(${scale})`)}
-function zoom(f,cx=550,cy=360){const ns=Math.max(.75,Math.min(3.2,scale*f));tx=cx-(cx-tx)*(ns/scale);ty=cy-(cy-ty)*(ns/scale);scale=ns;apply()}
-document.querySelector('#zin').onclick=()=>zoom(1.25);document.querySelector('#zout').onclick=()=>zoom(.8);document.querySelector('#reset').onclick=()=>{scale=1;tx=0;ty=0;apply()};
-svg.addEventListener('wheel',e=>{e.preventDefault();const r=svg.getBoundingClientRect();zoom(e.deltaY<0?1.12:.89,(e.clientX-r.left)/r.width*1100,(e.clientY-r.top)/r.height*720)},{passive:false});
-let drag=false,sx=0,sy=0,ox=0,oy=0;svg.addEventListener('pointerdown',e=>{drag=true;sx=e.clientX;sy=e.clientY;ox=tx;oy=ty;svg.classList.add('dragging');svg.setPointerCapture(e.pointerId)});svg.addEventListener('pointermove',e=>{if(!drag)return;const r=svg.getBoundingClientRect();tx=ox+(e.clientX-sx)/r.width*1100;ty=oy+(e.clientY-sy)/r.height*720;apply()});svg.addEventListener('pointerup',()=>{drag=false;svg.classList.remove('dragging')});
+const svgNS = "http://www.w3.org/2000/svg";
+const app = document.querySelector("#app");
+
+app.innerHTML = `
+<div class="shell">
+  <aside class="side">
+    <div class="eyebrow">SUPER CONTINENT · SATELLITE V1</div>
+    <h1>超级大陆</h1>
+    <p class="sub">卫星骨架第一版：大陆轮廓、七国色带、十二战略点可点。与奇幻大陆 V6 不是同一套世界。赤脊入侵走廊只留通道。</p>
+    <div class="stat">
+      <div><b>7</b><span>主要国家</span></div>
+      <div><b>12</b><span>战略节点</span></div>
+      <div><b>1</b><span>入侵走廊</span></div>
+      <div><b>1</b><span>深渊海沟</span></div>
+    </div>
+    <div class="controls">
+      <button type="button" id="reset">重置视图</button>
+      <button type="button" id="toggle-labels">标签</button>
+    </div>
+    <div class="layers">
+      <button type="button" class="layer" data-layer="countries">七国色带 <span>●</span></button>
+      <button type="button" class="layer" data-layer="terrain">山脉 / 森林 <span>●</span></button>
+      <button type="button" class="layer" data-layer="hydro">河流 / 海沟 <span>●</span></button>
+      <button type="button" class="layer" data-layer="routes">贸易 / 军道 <span>●</span></button>
+    </div>
+    <div class="site-list" id="site-list"></div>
+    <div class="legend">逻辑：板块 → 地形 → 气候 → 水文 → 生态 → 资源 → 魔法 → 城市 → 贸易 → 战争 → 国界。<br><br>拖动平移，滚轮缩放，点击地标或左侧名单。</div>
+  </aside>
+  <main class="map">
+    <div class="hud">远景卫星骨架 · 拖动 / 滚轮 · 点战略点</div>
+    <div class="zoom">
+      <button type="button" id="zin" aria-label="放大">＋</button>
+      <button type="button" id="zout" aria-label="缩小">－</button>
+    </div>
+    <svg id="svg" viewBox="0 0 1100 720" role="img" aria-label="超级大陆卫星骨架地图"></svg>
+    <section class="info hidden" id="info" aria-live="polite">
+      <button type="button" class="close" id="close" aria-label="关闭">×</button>
+      <div class="tag" id="tag"></div>
+      <h2 id="title"></h2>
+      <div class="country" id="country"></div>
+      <p id="desc"></p>
+      <p id="reason"></p>
+      <dl class="meta" id="meta"></dl>
+    </section>
+  </main>
+</div>`;
+
+const world = await fetch("./world.json").then((response) => response.json());
+const svg = document.querySelector("#svg");
+const info = document.querySelector("#info");
+const siteList = document.querySelector("#site-list");
+
+svg.innerHTML = `
+<defs>
+  <radialGradient id="ocean" cx="55%" cy="45%" r="75%">
+    <stop offset="0%" stop-color="#1a5c6a"/>
+    <stop offset="55%" stop-color="#0d3342"/>
+    <stop offset="100%" stop-color="#061820"/>
+  </radialGradient>
+  <linearGradient id="land" x1="0" y1="0" x2="1" y2="1">
+    <stop stop-color="#5f7358"/>
+    <stop offset=".45" stop-color="#8f8a62"/>
+    <stop offset="1" stop-color="#3f5548"/>
+  </linearGradient>
+  <filter id="soft"><feDropShadow dx="0" dy="4" stdDeviation="6" flood-opacity=".4"/></filter>
+  <pattern id="grain" width="24" height="24" patternUnits="userSpaceOnUse">
+    <path d="M0 18L10 8M10 24L24 10M16 24L24 16" stroke="#d8c792" stroke-opacity=".07"/>
+  </pattern>
+</defs>
+<rect width="1100" height="720" fill="url(#ocean)"/>
+<path d="M0 70C140 20 230 80 320 40C420 0 500 70 600 45C720 12 820 70 1100 30V0H0Z" fill="#2a6b7a" opacity=".16"/>
+<g id="world">
+  <path d="M150 190C200 120 290 95 380 115C450 70 530 90 590 130C650 105 720 130 760 175C830 175 880 230 905 280C980 290 1030 350 1040 420C1065 480 1020 545 950 565C970 640 890 680 810 655C740 710 650 690 585 650C515 710 425 700 360 655C295 695 220 660 195 600C120 600 80 530 110 470C55 420 55 340 110 295C70 245 100 200 150 190Z" fill="url(#land)" filter="url(#soft)"/>
+  <path d="M165 200C250 140 320 160 390 125C470 95 540 140 610 135C700 125 760 185 820 210C880 250 950 310 980 380C990 440 945 505 885 525C850 575 790 610 725 590C650 630 575 600 515 575C440 630 360 590 320 545C250 555 190 500 220 445C160 400 175 340 210 310C165 270 130 225 165 200Z" fill="url(#grain)"/>
+  <path class="ice" d="M260 40C360 5 470 10 560 35C630 15 700 45 740 90C640 120 520 95 440 110C350 95 280 115 260 40Z"/>
+  <g id="countries"></g>
+  <path id="corridor" class="danger" d="${world.corridor.path}"></path>
+  <g id="terrain">
+    <path class="mountain" d="M290 150l40-48 28 38 40-52 30 58 40-40 24 54 44-40 30 48 32-34 32 54-52 28-54-18-46 28-48-18-42 24-50-32Z"/>
+    <path class="mountain" d="M560 200l30-40 30 36 28-56 30 52 34-36 28 56 38-46 32 52-46 26-52-16-46 22-42-16-42 20-36-24Z"/>
+    <path class="forest" d="M190 430q40-75 95-40t75 70q-45 80-115 65t-55-95ZM270 510q58-60 110-18t18 76q-58 42-108 4t-20-62Z"/>
+    <path class="forest" d="M700 360q65-58 125 10t42 108q-70 44-126-8t-41-110Z"/>
+  </g>
+  <g id="hydro">
+    <path class="river" d="M330 155C360 230 340 295 375 350C400 395 445 430 475 500C495 545 525 580 580 605"/>
+    <path class="river" d="M530 140C520 215 555 265 545 325C535 385 580 430 610 480C640 530 665 575 700 605"/>
+    <path class="river" d="M720 210C685 275 685 325 715 370C745 415 770 450 790 495"/>
+    <path class="trench" d="M900 545C955 505 1030 540 1080 605C1045 650 975 680 900 665C860 635 865 580 900 545Z"/>
+  </g>
+  <g id="routes">
+    <path class="route" d="M360 340C430 320 500 325 560 310C620 295 680 290 720 290"/>
+    <path class="route" d="M360 340C400 390 450 430 520 520"/>
+    <path class="route" d="M720 290C760 330 800 360 850 370"/>
+    <path class="route" d="M780 470C800 430 830 400 850 370"/>
+    <path class="route" d="M390 185C420 240 450 300 480 340"/>
+  </g>
+  <g id="labels"></g>
+</g>`;
+
+const worldGroup = svg.querySelector("#world");
+const countriesLayer = svg.querySelector("#countries");
+const labelsLayer = svg.querySelector("#labels");
+
+for (const state of world.states) {
+  const path = document.createElementNS(svgNS, "path");
+  path.setAttribute("d", state.path);
+  path.setAttribute("fill", state.color);
+  path.setAttribute("class", "country-fill");
+  path.addEventListener("click", (event) => {
+    event.stopPropagation();
+    showState(state);
+  });
+  countriesLayer.appendChild(path);
+}
+
+for (const site of world.sites) {
+  labelsLayer.appendChild(makeMarker(site));
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "site-btn";
+  button.textContent = site.name;
+  button.addEventListener("click", () => {
+    showSite(site);
+    focusSite(site);
+  });
+  siteList.appendChild(button);
+}
+
+function makeMarker(site) {
+  const group = document.createElementNS(svgNS, "g");
+  group.classList.add("marker");
+  group.dataset.id = site.id;
+  group.setAttribute("transform", `translate(${site.x} ${site.y})`);
+  const kind = site.kind;
+  const cls = /海|港|海峡/.test(kind)
+    ? "port"
+    : /要塞|渡口|通道|山口/.test(kind)
+      ? "fort"
+      : /核心|海沟|遗迹/.test(kind)
+        ? "core"
+        : "city";
+  const radius = /核心|海沟|走廊/.test(kind) ? 8 : 6;
+  group.innerHTML = `<circle r="${radius}" class="${cls}"/><text x="11" y="4">${site.name}</text>`;
+  group.addEventListener("click", (event) => {
+    event.stopPropagation();
+    showSite(site);
+  });
+  return group;
+}
+
+function showState(state) {
+  document.querySelector("#tag").textContent = "国家色带";
+  document.querySelector("#title").textContent = state.name;
+  document.querySelector("#country").textContent = state.coastal ? "拥有海岸线" : "内陆政体";
+  document.querySelector("#desc").textContent = `核心地貌：${state.core}`;
+  document.querySelector("#reason").textContent = "边界优先贴合山脉、河流、森林与海岸；战争与条约可造成飞地与走廊。";
+  document.querySelector("#meta").innerHTML = "";
+  info.classList.remove("hidden");
+}
+
+function showSite(site) {
+  document.querySelector("#tag").textContent = site.kind;
+  document.querySelector("#title").textContent = site.name;
+  document.querySelector("#country").textContent = site.country;
+  document.querySelector("#desc").textContent = site.function;
+  document.querySelector("#reason").textContent = site.history;
+  document.querySelector("#meta").innerHTML = [
+    ["年代", site.age],
+    ["风格", site.style],
+    ["战争", site.wars],
+    ["现状", site.currentState],
+    ["人物", site.characters],
+    ["传说", site.legend],
+  ].map(([key, value]) => `<div><dt>${key}</dt><dd>${value}</dd></div>`).join("");
+  info.classList.remove("hidden");
+  for (const node of labelsLayer.querySelectorAll(".marker")) {
+    node.classList.toggle("is-active", node.dataset.id === site.id);
+  }
+}
+
+function focusSite(site) {
+  const targetScale = Math.max(scale, 1.45);
+  tx = 550 - site.x * targetScale;
+  ty = 360 - site.y * targetScale;
+  scale = targetScale;
+  apply();
+}
+
+document.querySelector("#close").addEventListener("click", () => info.classList.add("hidden"));
+svg.addEventListener("click", () => info.classList.add("hidden"));
+
+let labelsOn = true;
+const visible = { countries: true, terrain: true, hydro: true, routes: true };
+document.querySelector("#toggle-labels").addEventListener("click", () => {
+  labelsOn = !labelsOn;
+  labelsLayer.style.display = labelsOn ? "" : "none";
+});
+for (const button of document.querySelectorAll(".layer")) {
+  button.addEventListener("click", () => {
+    const key = button.dataset.layer;
+    visible[key] = !visible[key];
+    button.classList.toggle("off", !visible[key]);
+    const layer = svg.querySelector(`#${key}`);
+    if (layer) layer.style.display = visible[key] ? "" : "none";
+    if (key === "countries") {
+      const corridor = svg.querySelector("#corridor");
+      if (corridor) corridor.style.display = visible.countries ? "" : "none";
+    }
+  });
+}
+
+let scale = 1;
+let tx = 0;
+let ty = 0;
+function apply() {
+  worldGroup.setAttribute("transform", `translate(${tx} ${ty}) scale(${scale})`);
+}
+function zoomAt(factor, cx = 550, cy = 360) {
+  const next = Math.max(0.75, Math.min(3.4, scale * factor));
+  tx = cx - (cx - tx) * (next / scale);
+  ty = cy - (cy - ty) * (next / scale);
+  scale = next;
+  apply();
+}
+document.querySelector("#zin").addEventListener("click", () => zoomAt(1.25));
+document.querySelector("#zout").addEventListener("click", () => zoomAt(0.8));
+document.querySelector("#reset").addEventListener("click", () => {
+  scale = 1;
+  tx = 0;
+  ty = 0;
+  apply();
+});
+svg.addEventListener("wheel", (event) => {
+  event.preventDefault();
+  const rect = svg.getBoundingClientRect();
+  zoomAt(
+    event.deltaY < 0 ? 1.12 : 0.89,
+    ((event.clientX - rect.left) / rect.width) * 1100,
+    ((event.clientY - rect.top) / rect.height) * 720,
+  );
+}, { passive: false });
+
+let dragging = false;
+let startX = 0;
+let startY = 0;
+let originX = 0;
+let originY = 0;
+svg.addEventListener("pointerdown", (event) => {
+  if (event.target.closest(".marker")) return;
+  dragging = true;
+  startX = event.clientX;
+  startY = event.clientY;
+  originX = tx;
+  originY = ty;
+  svg.classList.add("dragging");
+  svg.setPointerCapture(event.pointerId);
+});
+svg.addEventListener("pointermove", (event) => {
+  if (!dragging) return;
+  const rect = svg.getBoundingClientRect();
+  tx = originX + ((event.clientX - startX) / rect.width) * 1100;
+  ty = originY + ((event.clientY - startY) / rect.height) * 720;
+  apply();
+});
+svg.addEventListener("pointerup", () => {
+  dragging = false;
+  svg.classList.remove("dragging");
+});
+
+const boot = new URLSearchParams(location.search).get("entry");
+if (boot) {
+  const site = world.sites.find((item) => item.id === boot);
+  if (site) {
+    showSite(site);
+    focusSite(site);
+  }
+}
