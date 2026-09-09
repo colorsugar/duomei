@@ -170,6 +170,30 @@ button { font: inherit; color: inherit; }
   background: var(--cj-gold); color: #1b1608; border-color: var(--cj-gold);
 }
 .cj3d-district.is-dim { opacity: 0.35; }
+.cj3d-estate {
+  border-color: rgba(200, 170, 255, 0.55);
+  background: rgba(18, 10, 32, 0.92);
+  color: #e8d6ff;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 160px;
+}
+.cj3d-estate-role {
+  display: inline-block;
+  padding: 1px 5px;
+  border-radius: 999px;
+  font-size: 9px;
+  letter-spacing: 0.04em;
+  background: rgba(139, 107, 176, 0.45);
+  color: #f2e9ff;
+  flex: 0 0 auto;
+}
+.cj3d-estate[title*="王室"] .cj3d-estate-role,
+.cj3d-estate .cj3d-estate-role:first-child {
+  background: rgba(230, 200, 134, 0.35);
+  color: #ffe9b0;
+}
 .cj3d-label.is-dim { opacity: 0.22; filter: grayscale(0.4); pointer-events: none; }
 .cj3d-label.is-hidden { display: none !important; }
 
