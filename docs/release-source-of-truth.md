@@ -191,7 +191,7 @@ If any bundle file is still modified, staged, or untracked after the commit, the
 
 `/atlas-v6` 是七国战略图志的 React 同源地图壳，嵌入 `/atlas/v6/index.html?embed=duomei`，保留全局音乐；`entry` 查询参数定位已有国家、城市、要地或传说栖地。仅 `/atlas/v6/*`、`/atlas/chaoji/*` 与既有 `/yunyou/*` 使用 SAMEORIGIN，其他页面继续 DENY。设定集与地图互链。64书页、独立封面、书册元数据、阅读器、React地图壳、完整静态地图目录、样式、测试与生产探针构成同一发布单元。详细导入事实见 `docs/atlas-artbook-import.md`。
 
-`/chaoji/map` 是超级大陆卫星骨架壳，嵌入 `/atlas/chaoji/index.html`；必须保留 `/atlas/chaoji/*` 的 SAMEORIGIN 覆盖，否则 iframe 会被全局 DENY 拒连。
+`/chaoji/map` 是超级大陆立体卫星图壳，嵌入 `/atlas/chaoji/3d.html`（`index.html` 会跳到 3d）；必须保留 `/atlas/chaoji/*` 的 SAMEORIGIN 覆盖，否则 iframe 会被全局 DENY 拒连。
 
 扩展版新增“山河相接”（第52页）与“烬月·传说栖地”（第58页）；原48张场景图保留；封面与纸面两页目录已更新为60幅、10章，所有印刷页脚总数统一为64。底部既有翻页栏增加章节下拉，直达52/58页；阅读器页码与纸页一致。六处栖地为魔焰龙渊、无月狼鞍、回声内海、雷羽天峡、梦角雨庭、负岳盐泉。其形成、兽族古约、能力边界、冲突与海陆接驳写入地图说明；栖地光墙不代表国家主权。地图保留长按防误选、锁定、复位、灵敏度与既有故语阅读器。
 
