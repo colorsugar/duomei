@@ -17,7 +17,6 @@ import { DuomeiEditProvider } from "./components/DuomeiEditProvider";
 import { RouteScrollManager } from "./components/RouteScrollManager";
 import { useSmoothScroll } from "./hooks/useSmoothScroll";
 import { MotionProvider } from "./motion";
-import { DuomeiCompanion } from "./components/companion";
 import { DuomeiMusicPlayer } from "./components/DuomeiMusicPlayer";
 import { DuomeiYunyouPage } from "./pages/DuomeiYunyouPage";
 import { DuomeiDaluPage } from "./pages/DuomeiDaluPage";
@@ -88,7 +87,6 @@ function AppRoutes() {
       <PublicRoutePaperVeil pathname={location.pathname} disabled={isAdmin || isGuyuReader} />
       {!bareChrome ? <DuomeiFooter /> : null}
       {!isAdmin ? <DuomeiMusicPlayer compactContext={isGuyuReader || isZaobao || isYunyouMap || isAtlasMap} /> : null}
-      {!bareChrome ? <DuomeiCompanion /> : null}
       {!bareChrome ? <BackToTopButton /> : null}
     </DuomeiEditProvider>
   );
