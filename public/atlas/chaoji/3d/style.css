@@ -157,13 +157,39 @@ button { font: inherit; color: inherit; }
   pointer-events: none; white-space: nowrap;
 }
 .cj3d-district {
-  padding: 2px 8px; border-radius: 6px;
-  border: 1px solid rgba(255,255,255,0.18);
-  background: rgba(7,17,29,0.72); color: #c5d4ce;
-  font-size: 10px; white-space: nowrap; pointer-events: none;
+  padding: 4px 10px; border-radius: 8px;
+  border: 1px solid rgba(230,200,134,0.35);
+  background: rgba(7,17,29,0.88); color: #e6c886;
+  font-size: 11px; white-space: nowrap;
+  pointer-events: auto; cursor: pointer;
   transform: translate(-50%, -50%);
+  min-height: 28px;
+  touch-action: manipulation;
 }
-.cj3d-label.is-dim { opacity: 0.28; filter: grayscale(0.35); }
+.cj3d-district.is-active {
+  background: var(--cj-gold); color: #1b1608; border-color: var(--cj-gold);
+}
+.cj3d-district.is-dim { opacity: 0.35; }
+.cj3d-label.is-dim { opacity: 0.22; filter: grayscale(0.4); pointer-events: none; }
+.cj3d-label.is-hidden { display: none !important; }
+
+.cj3d-back-float {
+  position: absolute;
+  left: 50%;
+  bottom: max(58px, calc(var(--safe-b) + 52px));
+  z-index: 5;
+  transform: translateX(-50%);
+  min-height: var(--cj-hit);
+  padding: 0 18px;
+  border: 1px solid rgba(230, 200, 134, 0.5);
+  border-radius: 999px;
+  background: rgba(7, 17, 29, 0.9);
+  color: var(--cj-gold);
+  backdrop-filter: blur(10px);
+  cursor: pointer;
+  box-shadow: 0 10px 28px #0008;
+}
+.cj3d.is-immersive .cj3d-back-float { opacity: 0; pointer-events: none; }
 
 .cj3d-zoom {
   position: absolute; right: max(12px, var(--safe-r)); top: max(12px, var(--safe-t));
@@ -216,7 +242,8 @@ button { font: inherit; color: inherit; }
 .cj3d.is-immersive .cj3d-panel,
 .cj3d.is-immersive .cj3d-hint,
 .cj3d.is-immersive .cj3d-chip,
-.cj3d.is-immersive .cj3d-zoom { opacity: 0; pointer-events: none; }
+.cj3d.is-immersive .cj3d-zoom,
+.cj3d.is-immersive .cj3d-back-float { opacity: 0; pointer-events: none; }
 
 @media (min-width: 901px) {
   .cj3d.is-panel-open .cj3d-menu { display: none; }
@@ -232,4 +259,6 @@ button { font: inherit; color: inherit; }
 }
 
 .cj3d.is-region .cj3d-hint { opacity: 0.35; }
-.cj3d.is-city .cj3d-hint { opacity: 0; }
+.cj3d.is-city .cj3d-hint { opacity: 0.45; }
+.cj3d.is-district .cj3d-hint { opacity: 0.55; }
+.cj3d.is-district .cj3d-chip { border-color: rgba(230,200,134,0.55); }

@@ -1,114 +1,186 @@
 {
-  "version": "chaoji-cities-v1",
-  "note": "城邦最大放大层：高清顶视贴图 + 挤出建筑 + 环境生物。十二点均可进入街区尺度。",
+  "version": "chaoji-cities-v2",
+  "note": "四级 LOD：大陆→八区→城邦→街区最大细节。districts 带角度/半径/地标，可点进街区放大。",
   "cities": [
     {
       "id": "aivernor-capital",
       "regionId": "aivernor",
       "scale": 78,
-      "buildingCount": 160,
-      "palette": { "wall": "#d9c7a0", "roof": "#c4a050", "accent": "#f0e2b0" },
-      "creatures": ["birds", "carts"],
-      "districts": ["王宫区", "粮仓码头", "骑士校场", "金穗市集"]
+      "buildingCount": 220,
+      "palette": { "wall": "#d9c7a0", "roof": "#c4a050", "accent": "#f0e2b0", "road": "#6a5a42", "green": "#6f8a4a" },
+      "creatures": ["birds", "carts", "lanterns"],
+      "mood": { "fog": 0.0011, "light": "#ffe2a8" },
+      "districts": [
+        { "id": "palace", "name": "王宫区", "angle": 0.15, "r": 0.1, "kind": "palace", "blurb": "金穗王座与仪仗庭院" },
+        { "id": "granary", "name": "粮仓码头", "angle": 1.9, "r": 0.34, "kind": "harbor", "blurb": "粮船泊位与仓储吊机" },
+        { "id": "drill", "name": "骑士校场", "angle": 3.6, "r": 0.26, "kind": "barracks", "blurb": "骑兵操练与旗阵" },
+        { "id": "market", "name": "金穗市集", "angle": 5.1, "r": 0.3, "kind": "market", "blurb": "粮贸摊位与客栈街" }
+      ]
     },
     {
       "id": "inved-capital",
       "regionId": "inved",
-      "scale": 82,
-      "buildingCount": 180,
-      "palette": { "wall": "#2a2433", "roof": "#5a4570", "accent": "#8b6bb0" },
-      "creatures": ["birds", "banners"],
-      "districts": ["黑曜宫", "军港", "法师塔群", "征召营"]
+      "scale": 84,
+      "buildingCount": 260,
+      "palette": { "wall": "#2a2433", "roof": "#5a4570", "accent": "#8b6bb0", "road": "#1a1520", "green": "#3a4050" },
+      "creatures": ["birds", "banners", "patrols"],
+      "mood": { "fog": 0.00125, "light": "#b08cff" },
+      "districts": [
+        { "id": "obsidian", "name": "黑曜宫", "angle": 0.05, "r": 0.08, "kind": "palace", "blurb": "黑石尖塔与王座厅" },
+        { "id": "navy", "name": "军港", "angle": 1.55, "r": 0.38, "kind": "harbor", "blurb": "黑帆舰列与干船坞" },
+        { "id": "mage", "name": "法师塔群", "angle": 3.4, "r": 0.24, "kind": "towers", "blurb": "紫辉法塔与符文环" },
+        { "id": "levy", "name": "征召营", "angle": 4.9, "r": 0.32, "kind": "barracks", "blurb": "营帐、矛架与征途门" }
+      ]
     },
     {
       "id": "corridor",
       "regionId": "corridor",
       "scale": 70,
-      "buildingCount": 70,
-      "palette": { "wall": "#8a6a55", "roof": "#6b4a3a", "accent": "#ffb089" },
-      "creatures": ["smoke", "patrols"],
-      "districts": ["西哨", "中军道", "东堡", "补给营"]
+      "buildingCount": 110,
+      "palette": { "wall": "#8a6a55", "roof": "#6b4a3a", "accent": "#ffb089", "road": "#4a3a2e", "green": "#5a6048" },
+      "creatures": ["smoke", "patrols", "carts"],
+      "mood": { "fog": 0.00105, "light": "#ffb089" },
+      "districts": [
+        { "id": "west", "name": "西哨", "angle": 0.2, "r": 0.36, "kind": "fort", "blurb": "西端烽火台" },
+        { "id": "mid", "name": "中军道", "angle": 1.7, "r": 0.12, "kind": "road", "blurb": "补给主轴与车辙" },
+        { "id": "east", "name": "东堡", "angle": 3.5, "r": 0.36, "kind": "fort", "blurb": "东端石堡" },
+        { "id": "supply", "name": "补给营", "angle": 5.0, "r": 0.28, "kind": "barracks", "blurb": "辎重与伤兵帐" }
+      ]
     },
     {
       "id": "mechanica-pass",
       "regionId": "mechanica",
-      "scale": 72,
-      "buildingCount": 140,
-      "palette": { "wall": "#6d7168", "roof": "#b87333", "accent": "#ff9a4a" },
-      "creatures": ["sparks", "rails"],
-      "districts": ["炉心", "矿轨", "魔晶仓", "工匠街"]
+      "scale": 74,
+      "buildingCount": 200,
+      "palette": { "wall": "#6d7168", "roof": "#b87333", "accent": "#ff9a4a", "road": "#3a3c38", "green": "#4a5540" },
+      "creatures": ["sparks", "rails", "smoke"],
+      "mood": { "fog": 0.00115, "light": "#ff9a4a" },
+      "districts": [
+        { "id": "furnace", "name": "炉心", "angle": 0.1, "r": 0.1, "kind": "factory", "blurb": "主熔炉与烟囱簇" },
+        { "id": "rail", "name": "矿轨", "angle": 1.8, "r": 0.34, "kind": "rail", "blurb": "矿车轨道与吊臂" },
+        { "id": "crystal", "name": "魔晶仓", "angle": 3.5, "r": 0.26, "kind": "warehouse", "blurb": "晶矿堆与护栏" },
+        { "id": "craft", "name": "工匠街", "angle": 5.0, "r": 0.3, "kind": "market", "blurb": "锻铺与机件摊" }
+      ]
     },
     {
       "id": "strait",
       "regionId": "seabeast",
-      "scale": 76,
-      "buildingCount": 120,
-      "palette": { "wall": "#4d6d72", "roof": "#2f8f9a", "accent": "#7ad4e0" },
-      "creatures": ["ships", "birds"],
-      "districts": ["北锁潮塔", "南港", "海兽栏", "潮汐市"]
+      "scale": 78,
+      "buildingCount": 170,
+      "palette": { "wall": "#4d6d72", "roof": "#2f8f9a", "accent": "#7ad4e0", "road": "#2a3a40", "green": "#3a6058" },
+      "creatures": ["ships", "birds", "glowfish"],
+      "mood": { "fog": 0.001, "light": "#7ad4e0" },
+      "districts": [
+        { "id": "north-tower", "name": "北锁潮塔", "angle": 0.3, "r": 0.34, "kind": "towers", "blurb": "锁潮符文灯塔" },
+        { "id": "south-port", "name": "南港", "angle": 2.0, "r": 0.36, "kind": "harbor", "blurb": "渔猎与军舰泊位" },
+        { "id": "pens", "name": "海兽栏", "angle": 3.7, "r": 0.28, "kind": "pens", "blurb": "驯养池与铁闸" },
+        { "id": "tide-market", "name": "潮汐市", "angle": 5.1, "r": 0.24, "kind": "market", "blurb": "潮货街与盐摊" }
+      ]
     },
     {
       "id": "hanhai",
       "regionId": "hanhai",
-      "scale": 80,
-      "buildingCount": 150,
-      "palette": { "wall": "#8a6b5c", "roof": "#3d8f9a", "accent": "#7ee0ff" },
-      "creatures": ["ships", "glowfish"],
-      "districts": ["陆上王城", "水下穹顶", "古港", "潮研院"]
+      "scale": 82,
+      "buildingCount": 210,
+      "palette": { "wall": "#8a6b5c", "roof": "#3d8f9a", "accent": "#7ee0ff", "road": "#4a3a34", "green": "#4a6a58" },
+      "creatures": ["ships", "glowfish", "lanterns"],
+      "mood": { "fog": 0.00105, "light": "#7ee0ff" },
+      "districts": [
+        { "id": "land-city", "name": "陆上王城", "angle": 0.2, "r": 0.14, "kind": "palace", "blurb": "双层王城上城" },
+        { "id": "dome", "name": "水下穹顶", "angle": 2.1, "r": 0.36, "kind": "dome", "blurb": "半透明水下厅廊" },
+        { "id": "old-port", "name": "古港", "angle": 3.8, "r": 0.34, "kind": "harbor", "blurb": "旧石码头与沉锚" },
+        { "id": "tide-lab", "name": "潮研院", "angle": 5.2, "r": 0.26, "kind": "towers", "blurb": "潮汐观测塔" }
+      ]
     },
     {
       "id": "trench",
       "regionId": "seabeast",
-      "scale": 88,
-      "buildingCount": 40,
-      "palette": { "wall": "#1a3040", "roof": "#0d6b7a", "accent": "#5ef0ff" },
-      "creatures": ["glowfish", "mist"],
-      "districts": ["禁航环", "裂隙观测", "沉船带", "深渊口"]
+      "scale": 90,
+      "buildingCount": 60,
+      "palette": { "wall": "#1a3040", "roof": "#0d6b7a", "accent": "#5ef0ff", "road": "#0e1a22", "green": "#1a3040" },
+      "creatures": ["glowfish", "mist", "sparks"],
+      "mood": { "fog": 0.0014, "light": "#5ef0ff" },
+      "districts": [
+        { "id": "ring", "name": "禁航环", "angle": 0.4, "r": 0.3, "kind": "ring", "blurb": "浮标与禁航链" },
+        { "id": "rift", "name": "裂隙观测", "angle": 1.9, "r": 0.22, "kind": "towers", "blurb": "裂隙边缘观测台" },
+        { "id": "wrecks", "name": "沉船带", "angle": 3.5, "r": 0.36, "kind": "wrecks", "blurb": "残骸与幽灵桅" },
+        { "id": "abyss", "name": "深渊口", "angle": 5.0, "r": 0.08, "kind": "abyss", "blurb": "马里亚纳级入口" }
+      ]
     },
     {
       "id": "academy",
       "regionId": "aivernor",
-      "scale": 68,
-      "buildingCount": 110,
-      "palette": { "wall": "#e8e2d4", "roof": "#cfc3a4", "accent": "#efe2b0" },
-      "creatures": ["birds", "lanterns"],
-      "districts": ["大图书馆", "观星台", "骑士院", "中立塔"]
+      "scale": 70,
+      "buildingCount": 160,
+      "palette": { "wall": "#e8e2d4", "roof": "#cfc3a4", "accent": "#efe2b0", "road": "#9a9078", "green": "#7a8f5a" },
+      "creatures": ["birds", "lanterns", "fireflies"],
+      "mood": { "fog": 0.00095, "light": "#efe2b0" },
+      "districts": [
+        { "id": "library", "name": "大图书馆", "angle": 0.15, "r": 0.12, "kind": "palace", "blurb": "穹顶书厅与阶梯" },
+        { "id": "observatory", "name": "观星台", "angle": 1.8, "r": 0.3, "kind": "towers", "blurb": "星盘与夜灯" },
+        { "id": "knight-hall", "name": "骑士院", "angle": 3.6, "r": 0.28, "kind": "barracks", "blurb": "中立骑士操场" },
+        { "id": "neutral", "name": "中立塔", "angle": 5.1, "r": 0.22, "kind": "towers", "blurb": "条约石与白旗" }
+      ]
     },
     {
       "id": "worldtree",
       "regionId": "forest",
-      "scale": 74,
-      "buildingCount": 100,
-      "palette": { "wall": "#5a6b48", "roof": "#3f6b52", "accent": "#9dce7a" },
-      "creatures": ["birds", "fireflies"],
-      "districts": ["树门", "林心道", "月光湖栈", "巡林营"]
+      "scale": 76,
+      "buildingCount": 140,
+      "palette": { "wall": "#5a6b48", "roof": "#3f6b52", "accent": "#9dce7a", "road": "#3a4030", "green": "#4f7a42" },
+      "creatures": ["birds", "fireflies", "mist"],
+      "mood": { "fog": 0.0011, "light": "#9dce7a" },
+      "districts": [
+        { "id": "gate", "name": "树门", "angle": 0.25, "r": 0.34, "kind": "gate", "blurb": "树根拱门关隘" },
+        { "id": "heart", "name": "林心道", "angle": 1.7, "r": 0.12, "kind": "road", "blurb": "通往世界树心的步道" },
+        { "id": "lake", "name": "月光湖栈", "angle": 3.5, "r": 0.3, "kind": "lake", "blurb": "栈道与萤火" },
+        { "id": "patrol", "name": "巡林营", "angle": 5.0, "r": 0.28, "kind": "barracks", "blurb": "精灵巡林营地" }
+      ]
     },
     {
       "id": "frozen-capital",
       "regionId": "north",
-      "scale": 76,
-      "buildingCount": 90,
-      "palette": { "wall": "#9eb4c0", "roof": "#d7e8f0", "accent": "#9ad7e8" },
-      "creatures": ["snow", "mist"],
-      "districts": ["冰宫残垣", "冻结大道", "探掘营地", "极光台"]
+      "scale": 78,
+      "buildingCount": 130,
+      "palette": { "wall": "#9eb4c0", "roof": "#d7e8f0", "accent": "#9ad7e8", "road": "#6a7880", "green": "#6a8088" },
+      "creatures": ["snow", "mist", "banners"],
+      "mood": { "fog": 0.0013, "light": "#9ad7e8" },
+      "districts": [
+        { "id": "ice-palace", "name": "冰宫残垣", "angle": 0.1, "r": 0.1, "kind": "palace", "blurb": "崩裂冰宫主厅" },
+        { "id": "avenue", "name": "冻结大道", "angle": 1.85, "r": 0.22, "kind": "road", "blurb": "结霜石道" },
+        { "id": "camp", "name": "探掘营地", "angle": 3.6, "r": 0.32, "kind": "barracks", "blurb": "极地探掘帐" },
+        { "id": "aurora", "name": "极光台", "angle": 5.05, "r": 0.3, "kind": "towers", "blurb": "极光观测穹" }
+      ]
     },
     {
       "id": "ice-core",
       "regionId": "north",
-      "scale": 64,
-      "buildingCount": 35,
-      "palette": { "wall": "#7ec8d9", "roof": "#e8fbff", "accent": "#6ee0ff" },
-      "creatures": ["snow", "sparks"],
-      "districts": ["核心裂口", "寒雾环", "禁忌围栏", "观测穹"]
+      "scale": 66,
+      "buildingCount": 55,
+      "palette": { "wall": "#7ec8d9", "roof": "#e8fbff", "accent": "#6ee0ff", "road": "#4a7080", "green": "#5a7888" },
+      "creatures": ["snow", "sparks", "mist"],
+      "mood": { "fog": 0.0015, "light": "#6ee0ff" },
+      "districts": [
+        { "id": "core", "name": "核心裂口", "angle": 0.2, "r": 0.08, "kind": "abyss", "blurb": "寒冰核心裂口" },
+        { "id": "mist-ring", "name": "寒雾环", "angle": 1.9, "r": 0.28, "kind": "ring", "blurb": "寒雾护环" },
+        { "id": "fence", "name": "禁忌围栏", "angle": 3.6, "r": 0.36, "kind": "fort", "blurb": "禁忌区围栏" },
+        { "id": "dome-obs", "name": "观测穹", "angle": 5.1, "r": 0.24, "kind": "towers", "blurb": "密封观测穹顶" }
+      ]
     },
     {
       "id": "bridgehead",
       "regionId": "aivernor",
-      "scale": 60,
-      "buildingCount": 90,
-      "palette": { "wall": "#c4b08a", "roof": "#8a6b3a", "accent": "#e3c27a" },
-      "creatures": ["carts", "patrols"],
-      "districts": ["双塔桥", "西堡", "东望楼", "粮渡仓"]
+      "scale": 62,
+      "buildingCount": 130,
+      "palette": { "wall": "#c4b08a", "roof": "#8a6b3a", "accent": "#e3c27a", "road": "#6a5a40", "green": "#6a7a48" },
+      "creatures": ["carts", "patrols", "birds"],
+      "mood": { "fog": 0.001, "light": "#e3c27a" },
+      "districts": [
+        { "id": "bridge", "name": "双塔桥", "angle": 0.15, "r": 0.1, "kind": "bridge", "blurb": "双塔夹桥渡口" },
+        { "id": "west-keep", "name": "西堡", "angle": 2.0, "r": 0.32, "kind": "fort", "blurb": "西岸堡垒" },
+        { "id": "east-watch", "name": "东望楼", "angle": 3.7, "r": 0.32, "kind": "towers", "blurb": "东岸望楼" },
+        { "id": "grain", "name": "粮渡仓", "angle": 5.2, "r": 0.28, "kind": "warehouse", "blurb": "渡口粮仓" }
+      ]
     }
   ]
 }
