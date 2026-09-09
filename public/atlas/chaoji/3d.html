@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#07111d">
   <title>超级大陆 · 立体卫星图</title>
-  <meta name="description" content="超级大陆立体卫星地图：自由缩放、旋转、俯仰，点选战略点。与奇幻大陆 V6 不是同一套世界。">
+  <meta name="description" content="超级大陆立体卫星地图：大陆→地区→城邦三级放大，建模·环境·生物·贴图同屏。与奇幻大陆 V6 不是同一套世界。">
   <link rel="stylesheet" href="./3d/style.css">
   <link rel="preload" as="image" href="./assets/basemap.webp" crossorigin="anonymous">
   <script type="importmap">
@@ -25,37 +25,42 @@
     <aside class="cj3d-panel" id="panel" aria-label="超级大陆目录">
       <div class="cj3d-panel-head">
         <div>
-          <p class="cj3d-kicker">SUPER CONTINENT · 3D SATELLITE</p>
+          <p class="cj3d-kicker">SUPER CONTINENT · FULL LOD</p>
           <h1>超级大陆</h1>
         </div>
         <button type="button" class="cj3d-panel-close" id="menu-close" aria-label="关闭目录">×</button>
       </div>
-      <p class="cj3d-sub">按七国立体图志同款交互：单指拖动、双指缩放旋转、点标记看介绍。与奇幻大陆 V6 不是同一套世界。</p>
+      <p class="cj3d-sub">大陆 → 八区 → 十二城邦街区。点国/点即飞入到底。分区底图、城邦建模、环境与生物本版齐装。与奇幻大陆 V6 不是同一套世界。</p>
       <div class="cj3d-stats">
-        <div><b>7</b><span>主要国家</span></div>
-        <div><b>12</b><span>战略节点</span></div>
+        <div><b>8</b><span>地区</span></div>
+        <div><b>12</b><span>城邦细层</span></div>
+        <div><b>3</b><span>放大层级</span></div>
         <div><b>1</b><span>入侵走廊</span></div>
-        <div><b>1</b><span>深渊海沟</span></div>
       </div>
       <div class="cj3d-tools">
         <button type="button" id="tilt" aria-pressed="true">斜看</button>
         <button type="button" id="reset">复位</button>
         <button type="button" id="immersive" class="is-accent">清屏</button>
       </div>
+      <button type="button" class="cj3d-back" id="back-level" hidden>← 返回上一级</button>
+      <p class="cj3d-section">地区</p>
+      <div class="cj3d-list" id="region-list"></div>
+      <p class="cj3d-section" id="site-section-title">战略点 / 城邦</p>
       <div class="cj3d-list" id="site-list"></div>
-      <p class="cj3d-help">手机：单指平移，双指张合缩放，双指拖动旋转/俯仰。<br>电脑：左键平移，滚轮缩放，右键旋转俯仰。</p>
+      <p class="cj3d-help">手机：单指平移，双指缩放旋转。<br>点标记飞入地区并进入城邦最大细节。</p>
     </aside>
     <div class="cj3d-zoom" aria-label="缩放">
       <button type="button" id="zoom-in" aria-label="放大">+</button>
       <button type="button" id="zoom-out" aria-label="缩小">−</button>
     </div>
-    <p class="cj3d-hint" id="hint">单指拖动 · 双指缩放旋转 · 点标记看介绍</p>
+    <p class="cj3d-chip" id="lod-chip">总览 · 大陆</p>
+    <p class="cj3d-hint" id="hint">点标记飞入城邦细节 · 单指平移 · 双指缩放旋转</p>
     <button type="button" class="cj3d-exit" id="exit-immersive" hidden>退出清屏</button>
     <aside class="cj3d-card" id="card" hidden aria-live="polite">
       <button type="button" class="cj3d-card-close" id="card-close" aria-label="收起介绍">×</button>
       <div class="cj3d-card-body" id="card-body"></div>
     </aside>
-    <div class="cj3d-loading" id="loading">正在合成卫星地形…</div>
+    <div class="cj3d-loading" id="loading">正在合成卫星地形、分区与城邦细层…</div>
   </div>
   <script type="module" src="./3d/main.js"></script>
 </body>

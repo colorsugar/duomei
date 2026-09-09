@@ -128,13 +128,42 @@ button { font: inherit; color: inherit; }
 }
 .cj3d-tools button.is-accent { border-color: rgba(230,200,134,0.45); color: var(--cj-gold); }
 .cj3d-tools button[aria-pressed="false"] { opacity: 0.55; }
+.cj3d-back {
+  min-height: 40px; padding: 0 12px; border: 1px solid rgba(230,200,134,0.35);
+  border-radius: 10px; background: rgba(230,200,134,0.08); color: var(--cj-gold);
+  text-align: left; cursor: pointer;
+}
+.cj3d-section {
+  margin: 4px 0 0; font-size: 11px; letter-spacing: 0.08em; color: var(--cj-muted);
+}
 .cj3d-list { display: grid; gap: 6px; }
 .cj3d-list button {
   min-height: 40px; padding: 8px 10px; border: 1px solid rgba(255,255,255,0.12);
   border-radius: 10px; background: rgba(255,255,255,0.04); text-align: left; cursor: pointer;
+  display: flex; flex-direction: column; gap: 2px; align-items: flex-start;
 }
 .cj3d-list button.is-active { border-color: var(--cj-gold); color: var(--cj-gold); }
+.cj3d-list-meta {
+  display: block; font-size: 10px; line-height: 1.45; color: var(--cj-muted); font-weight: 400;
+}
 .cj3d-help { margin: 0; font-size: 11px; line-height: 1.7; color: var(--cj-muted); }
+
+.cj3d-chip {
+  position: absolute; left: 50%; top: max(12px, var(--safe-t));
+  z-index: 3; transform: translateX(-50%);
+  margin: 0; padding: 6px 12px; border-radius: 999px;
+  border: 1px solid rgba(230,200,134,0.28);
+  background: rgba(7,17,29,0.78); color: var(--cj-gold); font-size: 11px;
+  pointer-events: none; white-space: nowrap;
+}
+.cj3d-district {
+  padding: 2px 8px; border-radius: 6px;
+  border: 1px solid rgba(255,255,255,0.18);
+  background: rgba(7,17,29,0.72); color: #c5d4ce;
+  font-size: 10px; white-space: nowrap; pointer-events: none;
+  transform: translate(-50%, -50%);
+}
+.cj3d-label.is-dim { opacity: 0.28; filter: grayscale(0.35); }
 
 .cj3d-zoom {
   position: absolute; right: max(12px, var(--safe-r)); top: max(12px, var(--safe-t));
@@ -186,6 +215,7 @@ button { font: inherit; color: inherit; }
 .cj3d.is-immersive .cj3d-menu,
 .cj3d.is-immersive .cj3d-panel,
 .cj3d.is-immersive .cj3d-hint,
+.cj3d.is-immersive .cj3d-chip,
 .cj3d.is-immersive .cj3d-zoom { opacity: 0; pointer-events: none; }
 
 @media (min-width: 901px) {
@@ -200,3 +230,6 @@ button { font: inherit; color: inherit; }
 @media (prefers-reduced-motion: reduce) {
   .cj3d-panel, .cj3d-loading { transition: none; }
 }
+
+.cj3d.is-region .cj3d-hint { opacity: 0.35; }
+.cj3d.is-city .cj3d-hint { opacity: 0; }

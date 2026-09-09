@@ -265,4 +265,4 @@ Historical planning documents under `deploy/guyu-edgeone/docs/` remain useful ev
 
 ## 超级大陆立体卫星图 — 2026-09-09
 
-`/chaoji` 跳转 `/chaoji/map`，嵌入 `public/atlas/chaoji/3d.html`（Three.js 立体卫星图：1920 卫星底图抬升地形、ACES 色调、可自由平移缩放旋转俯仰、战略点可点）。与奇幻大陆 V6（`/dalu/map`、`public/atlas/v6/`）不是同一套世界，禁止互相覆盖。手机侧栏默认可关（目录 / × / 遮罩 / Esc / 点地图）。`edgeone.json` 在全局 `X-Frame-Options: DENY` 之外，对 `/atlas/chaoji/*` 与 `/atlas/v6/*`、`/yunyou/*` 同样放开为 `SAMEORIGIN` + `frame-ancestors 'self'`，否则同源 iframe 会被浏览器拒连。总提示词暂与 `src/content/daluMasterPrompt.md` 共用。详情见 `docs/chaoji/README.md`。
+`/chaoji` 跳转 `/chaoji/map`，嵌入 `public/atlas/chaoji/3d.html`。Three.js 三级 LOD：大陆总览 → 八区（`regions.json` + `assets/regions/*.webp`）→ 十二城邦细层（`cities.json` + `assets/cities/*.webp`，实例建筑 / 街区标签 / 生物群 / 水面）。点战略点飞入进入城邦最大细节；返回上一级按城邦→地区→总览回退。与奇幻大陆 V6（`/dalu/map`、`public/atlas/v6/`）不是同一套世界，禁止互相覆盖。手机侧栏默认可关。`edgeone.json` 对 `/atlas/chaoji/*` 与 `/atlas/v6/*`、`/yunyou/*` 放开为 `SAMEORIGIN` + `frame-ancestors 'self'`。总提示词暂与 `src/content/daluMasterPrompt.md` 共用。详情见 `docs/chaoji/README.md`。
