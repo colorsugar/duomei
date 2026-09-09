@@ -196,7 +196,7 @@ function loadTex(url) {
 }
 
 function luminanceField(image) {
-  const cols = 384;
+  const cols = 512;
   const rows = Math.round((cols * MAP_H) / MAP_W);
   const c = document.createElement("canvas");
   c.width = cols; c.height = rows;
@@ -364,6 +364,7 @@ let graticule = null;
 let iceCap = null;
 let eurasiaOverlay = null;
 let eurasiaLabel = null;
+let closeupDecals = [];
 
 function currentView() {
   offset.copy(camera.position).sub(controls.target);
@@ -1082,9 +1083,45 @@ function applyAerialMap(mat, tex) {
 function cityAerialUrl(siteId) {
   return new URL(`../assets/cities/${siteId}.webp`, import.meta.url).href;
 }
+function closeupUrl(siteId) {
+  return new URL(`../assets/closeups/${siteId}.webp`, import.meta.url).href;
+}
 
 function districtAerialUrl(siteId, districtId) {
   return new URL(`../assets/cities/districts/${siteId}--${districtId}.webp`, import.meta.url).href;
+}
+
+function mountCloseups(sites, hf) {
+  for (const site of sites) {
+    const p = fromSvg(site.x, site.y);
+    const origin = toWorld(p.x, p.y);
+    origin.y = heightAt(p.x, p.y, hf) + 0.42;
+    const mat = new THREE.MeshBasicMaterial({
+      color: 0xffffff, transparent: true, opacity: 1, depthWrite: false,
+      polygonOffset: true, polygonOffsetFactor: -6,
+    });
+    const mesh = new THREE.Mesh(new THREE.CircleGeometry(54, 72).rotateX(-Math.PI / 2), mat);
+    mesh.position.copy(origin);
+    mesh.visible = false;
+    scene.add(mesh);
+    loadTex(closeupUrl(site.id)).then((tex) => applyAerialMap(mat, tex)).catch(() => {});
+    closeupDecals.push(mesh);
+  }
+}
+
+function syncCloseups() {
+  const far = controls.getDistance() > 840;
+  const hide = Boolean(activeCity || activeDistrict || far);
+  if (hide) {
+    for (const m of closeupDecals) m.visible = false;
+    return;
+  }
+  const t = controls.target;
+  const ranked = closeupDecals
+    .map((m) => ({ m, d: m.position.distanceToSquared(t) }))
+    .sort((a, b) => a.d - b.d);
+  for (const m of closeupDecals) m.visible = false;
+  for (const row of ranked.slice(0, 3)) row.m.visible = true;
 }
 
 function buildCityDetail(site, conf) {
@@ -1410,6 +1447,7 @@ function syncUi() {
     }
   }
   if (regionOverlay) regionOverlay.visible = !inCity && !inDistrict;
+  syncCloseups();
 }
 
 function showSiteCard(site, district) {
@@ -1772,6 +1810,7 @@ async function boot() {
     markers.set(site.id, label);
     const obj = new CSS2DObject(label); obj.position.copy(anchor); scene.add(obj);
   }
+  mountCloseups(world.sites, hf);
 
   buildAtmosphereLayers();
   applyView({ target: HOME_TARGET, ...HOME });
@@ -1792,6 +1831,7 @@ async function boot() {
       cloudLayer.material.map.offset.x = now * 0.0000045;
       cloudLayer.material.map.offset.y = now * 0.0000018;
     }
+    if (now - scaleClock > 120) syncCloseups();
     if (scaleBarEl && now - scaleClock > 120) {
       scaleClock = now;
       if (activeCity || activeDistrict) {
