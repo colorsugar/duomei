@@ -251,6 +251,85 @@ function mulberry32(a) {
 }
 function hexColor(c) { return new THREE.Color(c); }
 
+const styleTexCache = new Map();
+const ESTATE_TEX_MAP = {
+  palladio: { wall: "palladio-wall", roof: "roof-terracotta", window: "win-classical" },
+  baroque: { wall: "baroque-wall", roof: "roof-copper", window: "win-classical" },
+  rococo: { wall: "rococo-wall", roof: "roof-slate", window: "win-classical" },
+  gothic: { wall: "gothic-wall", roof: "roof-slate", window: "win-gothic" },
+};
+
+function estateTexUrl(name) {
+  return new URL(`../assets/tex/${name}.webp`, import.meta.url).href;
+}
+
+function estateMaterials(style, palette) {
+  const styleKey = style || "palladio";
+  const key = `${styleKey}|${palette.accent}|${palette.roof}`;
+  if (styleTexCache.has(key)) return styleTexCache.get(key);
+
+  const names = ESTATE_TEX_MAP[styleKey] || ESTATE_TEX_MAP.palladio;
+  const wall = hexColor(palette.wall);
+  const roof = hexColor(palette.roof);
+  const accent = hexColor(palette.accent);
+
+  const roofRough = names.roof === "roof-copper" ? 0.35 : names.roof === "roof-slate" ? 0.75 : 0.8;
+  const roofMetal = names.roof === "roof-copper" ? 0.6 : names.roof === "roof-slate" ? 0.1 : 0.02;
+
+  const wallMat = new THREE.MeshStandardMaterial({ color: wall.clone(), roughness: 0.6, metalness: 0.05 });
+  const roofMat = new THREE.MeshStandardMaterial({ color: roof.clone(), roughness: roofRough, metalness: roofMetal });
+  const accentMat = new THREE.MeshStandardMaterial({
+    color: accent.clone(), emissive: accent.clone(), emissiveIntensity: 0.18,
+    roughness: 0.3, metalness: 0.85,
+  });
+  const windowMat = new THREE.MeshStandardMaterial({
+    color: 0xffffff, emissive: accent.clone(), emissiveIntensity: 0.6, roughness: 0.3, metalness: 0.05,
+  });
+
+  const mats = { wallMat, roofMat, accentMat, windowMat };
+  styleTexCache.set(key, mats);
+
+  loadTex(estateTexUrl(names.wall)).then((tex) => {
+    const clone = tex.clone();
+    clone.wrapS = clone.wrapT = THREE.RepeatWrapping;
+    clone.repeat.set(2, 2);
+    clone.needsUpdate = true;
+    wallMat.map = clone;
+    wallMat.color.set(0xffffff);
+    wallMat.needsUpdate = true;
+  }).catch(() => {});
+  loadTex(estateTexUrl(names.roof)).then((tex) => {
+    const clone = tex.clone();
+    clone.wrapS = clone.wrapT = THREE.RepeatWrapping;
+    clone.repeat.set(3, 3);
+    clone.needsUpdate = true;
+    roofMat.map = clone;
+    roofMat.color.set(0xffffff);
+    roofMat.needsUpdate = true;
+  }).catch(() => {});
+  loadTex(estateTexUrl("trim-gold")).then((tex) => {
+    const clone = tex.clone();
+    clone.wrapS = clone.wrapT = THREE.RepeatWrapping;
+    clone.repeat.set(4, 4);
+    clone.needsUpdate = true;
+    accentMat.map = clone;
+    accentMat.color.set(0xffffff);
+    accentMat.needsUpdate = true;
+  }).catch(() => {});
+  loadTex(estateTexUrl(names.window)).then((tex) => {
+    const clone = tex.clone();
+    clone.wrapS = clone.wrapT = THREE.RepeatWrapping;
+    clone.repeat.set(2, 3);
+    clone.needsUpdate = true;
+    windowMat.map = clone;
+    windowMat.emissiveMap = clone;
+    windowMat.color.set(0xffffff);
+    windowMat.needsUpdate = true;
+  }).catch(() => {});
+
+  return mats;
+}
+
 const spherical = new THREE.Spherical();
 const offset = new THREE.Vector3();
 let flight = null;
@@ -529,12 +608,24 @@ function addPediment(g, mat, width, depth, y) {
   g.add(ped);
 }
 
-function buildPalladioPalace(g, wallMat, roofMat, accentMat, rng) {
+function buildPalladioPalace(g, wallMat, roofMat, accentMat, rng, windowMat) {
   // Palladio Book II: temple front, piano nobile, wings, optional rotunda
   const plinth = new THREE.Mesh(new THREE.BoxGeometry(16, 1.2, 12), wallMat);
   plinth.position.y = 0.6; g.add(plinth);
   const piano = new THREE.Mesh(new THREE.BoxGeometry(12, 6.5, 9), wallMat);
   piano.position.y = 4.5; g.add(piano);
+  if (windowMat) {
+    const pw = 12, ph = 6.5, pd = 9, py = 4.5, bandH = ph * 0.24, off = 0.05, wd = 0.08;
+    for (const [x, y, z, rw, rh, rd] of [
+      [0, py, pd / 2 + off, pw, bandH, wd], [0, py, -pd / 2 - off, pw, bandH, wd],
+      [pw / 2 + off, py, 0, wd, bandH, pd], [-pw / 2 - off, py, 0, wd, bandH, pd],
+    ]) {
+      const win = new THREE.Mesh(new THREE.BoxGeometry(rw, rh, rd), windowMat);
+      win.position.set(x, y, z); g.add(win);
+    }
+    const cornice = new THREE.Mesh(new THREE.BoxGeometry(pw + 0.5, 0.28, pd + 0.5), accentMat);
+    cornice.position.set(0, py + ph / 2 + 0.14, 0); g.add(cornice);
+  }
   // portico columns (temple front)
   for (let i = 0; i < 6; i += 1) {
     const col = new THREE.Mesh(new THREE.CylinderGeometry(0.32, 0.38, 6.2, 10), wallMat);
@@ -562,12 +653,24 @@ function buildPalladioPalace(g, wallMat, roofMat, accentMat, rng) {
   finial.position.y = 14.2; g.add(finial);
 }
 
-function buildBaroquePalace(g, wallMat, roofMat, accentMat, rng) {
+function buildBaroquePalace(g, wallMat, roofMat, accentMat, rng, windowMat) {
   // Baroque: dramatic dome, twin towers, curved volutes, deep cornice
   const base = new THREE.Mesh(new THREE.BoxGeometry(14, 2, 11), wallMat);
   base.position.y = 1; g.add(base);
   const body = new THREE.Mesh(new THREE.BoxGeometry(11, 8, 8.5), wallMat);
   body.position.y = 6; g.add(body);
+  if (windowMat) {
+    const bw = 11, bh = 8, bd = 8.5, by = 6, bandH = bh * 0.22, off = 0.05, wd = 0.08;
+    for (const [x, y, z, rw, rh, rd] of [
+      [0, by, bd / 2 + off, bw, bandH, wd], [0, by, -bd / 2 - off, bw, bandH, wd],
+      [bw / 2 + off, by, 0, wd, bandH, bd], [-bw / 2 - off, by, 0, wd, bandH, bd],
+    ]) {
+      const win = new THREE.Mesh(new THREE.BoxGeometry(rw, rh, rd), windowMat);
+      win.position.set(x, y, z); g.add(win);
+    }
+    const cornice = new THREE.Mesh(new THREE.BoxGeometry(bw + 0.6, 0.32, bd + 0.6), accentMat);
+    cornice.position.set(0, by + bh / 2 + 0.16, 0); g.add(cornice);
+  }
   // curved facade bulge (simplified as half-cylinder)
   const bulge = new THREE.Mesh(new THREE.CylinderGeometry(4.2, 4.2, 8, 16, 1, false, 0, Math.PI), wallMat);
   bulge.rotation.y = Math.PI / 2; bulge.position.set(0, 6, 4.2); g.add(bulge);
@@ -594,12 +697,24 @@ function buildBaroquePalace(g, wallMat, roofMat, accentMat, rng) {
   }
 }
 
-function buildRococoPalace(g, wallMat, roofMat, accentMat, rng) {
+function buildRococoPalace(g, wallMat, roofMat, accentMat, rng, windowMat) {
   // Rococo: lighter pavilion, shell curves, soft dome, ornamental urns
   const terrace = new THREE.Mesh(new THREE.CylinderGeometry(8.5, 9, 0.8, 20), wallMat);
   terrace.position.y = 0.4; g.add(terrace);
   const pavilion = new THREE.Mesh(new THREE.BoxGeometry(9, 5.5, 7), wallMat);
   pavilion.position.y = 3.5; g.add(pavilion);
+  if (windowMat) {
+    const pw = 9, ph = 5.5, pd = 7, py = 3.5, bandH = ph * 0.26, off = 0.05, wd = 0.08;
+    for (const [x, y, z, rw, rh, rd] of [
+      [0, py, pd / 2 + off, pw, bandH, wd], [0, py, -pd / 2 - off, pw, bandH, wd],
+      [pw / 2 + off, py, 0, wd, bandH, pd], [-pw / 2 - off, py, 0, wd, bandH, pd],
+    ]) {
+      const win = new THREE.Mesh(new THREE.BoxGeometry(rw, rh, rd), windowMat);
+      win.position.set(x, y, z); g.add(win);
+    }
+    const cornice = new THREE.Mesh(new THREE.BoxGeometry(pw + 0.5, 0.26, pd + 0.5), accentMat);
+    cornice.position.set(0, py + ph / 2 + 0.13, 0); g.add(cornice);
+  }
   // bay windows / bowed fronts
   for (const sx of [-3.2, 3.2]) {
     const bay = new THREE.Mesh(new THREE.CylinderGeometry(1.8, 1.8, 5.2, 12, 1, false, 0, Math.PI), wallMat);
@@ -628,10 +743,28 @@ function buildRococoPalace(g, wallMat, roofMat, accentMat, rng) {
   }
 }
 
-function buildGothicPalace(g, wallMat, roofMat, accentMat, rng) {
+function buildGothicPalace(g, wallMat, roofMat, accentMat, rng, windowMat) {
   // Gothic: nave, pointed spires, flying-buttress struts, rose window
   const nave = new THREE.Mesh(new THREE.BoxGeometry(8, 14, 18), wallMat);
   nave.position.y = 7; g.add(nave);
+  if (windowMat) {
+    const nw = 8, nh = 14, nd = 18, ny = 7, bandH = nh * 0.82, bandW = nw * 0.22, off = 0.05, wd = 0.08;
+    for (const [x, y, z, rw, rh, rd] of [
+      [0, ny, nd / 2 + off, nw * 0.75, bandH, wd],
+      [0, ny, -nd / 2 - off, nw * 0.75, bandH, wd],
+      [nw / 2 + off, ny, 0, wd, bandH, nd * 0.55],
+      [-nw / 2 - off, ny, 0, wd, bandH, nd * 0.55],
+    ]) {
+      const win = new THREE.Mesh(new THREE.BoxGeometry(rw, rh, rd), windowMat);
+      win.position.set(x, y, z); g.add(win);
+    }
+    for (const sx of [-2.8, 2.8]) {
+      const slit = new THREE.Mesh(new THREE.BoxGeometry(bandW, bandH, wd), windowMat);
+      slit.position.set(sx, ny, nd / 2 + off); g.add(slit);
+    }
+    const cornice = new THREE.Mesh(new THREE.BoxGeometry(nw + 0.6, 0.3, nd + 0.6), accentMat);
+    cornice.position.set(0, ny + nh / 2 + 0.15, 0); g.add(cornice);
+  }
   const clerestory = new THREE.Mesh(new THREE.BoxGeometry(6.5, 4, 16), wallMat);
   clerestory.position.y = 15; g.add(clerestory);
   // rose window disc
@@ -674,18 +807,20 @@ function addLandmark(kind, palette, rng, style = "palladio") {
   const roof = hexColor(palette.roof);
   const accent = hexColor(palette.accent);
   const g = new THREE.Group();
-  const wallMat = new THREE.MeshStandardMaterial({ color: wall, roughness: 0.55, metalness: 0.12 });
-  const roofMat = new THREE.MeshStandardMaterial({ color: roof, roughness: 0.48, metalness: 0.18 });
-  const accentMat = new THREE.MeshStandardMaterial({
+  const arch = style || "palladio";
+  let wallMat = new THREE.MeshStandardMaterial({ color: wall, roughness: 0.55, metalness: 0.12 });
+  let roofMat = new THREE.MeshStandardMaterial({ color: roof, roughness: 0.48, metalness: 0.18 });
+  let accentMat = new THREE.MeshStandardMaterial({
     color: accent, emissive: accent, emissiveIntensity: 0.45, roughness: 0.35, metalness: 0.35,
   });
-  const arch = style || "palladio";
+  let windowMat = null;
 
   if (kind === "palace" || kind === "fort") {
-    if (arch === "gothic") buildGothicPalace(g, wallMat, roofMat, accentMat, rng);
-    else if (arch === "baroque") buildBaroquePalace(g, wallMat, roofMat, accentMat, rng);
-    else if (arch === "rococo") buildRococoPalace(g, wallMat, roofMat, accentMat, rng);
-    else buildPalladioPalace(g, wallMat, roofMat, accentMat, rng);
+    ({ wallMat, roofMat, accentMat, windowMat } = estateMaterials(arch, palette));
+    if (arch === "gothic") buildGothicPalace(g, wallMat, roofMat, accentMat, rng, windowMat);
+    else if (arch === "baroque") buildBaroquePalace(g, wallMat, roofMat, accentMat, rng, windowMat);
+    else if (arch === "rococo") buildRococoPalace(g, wallMat, roofMat, accentMat, rng, windowMat);
+    else buildPalladioPalace(g, wallMat, roofMat, accentMat, rng, windowMat);
     if (kind === "fort") {
       // fortification skirt
       for (let i = 0; i < 4; i += 1) {
@@ -774,10 +909,11 @@ function addLandmark(kind, palette, rng, style = "palladio") {
     }
   } else {
     // default: small pavilion in city style
-    if (arch === "gothic") buildGothicPalace(g, wallMat, roofMat, accentMat, rng);
-    else if (arch === "baroque") buildBaroquePalace(g, wallMat, roofMat, accentMat, rng);
-    else if (arch === "rococo") buildRococoPalace(g, wallMat, roofMat, accentMat, rng);
-    else buildPalladioPalace(g, wallMat, roofMat, accentMat, rng);
+    ({ wallMat, roofMat, accentMat, windowMat } = estateMaterials(arch, palette));
+    if (arch === "gothic") buildGothicPalace(g, wallMat, roofMat, accentMat, rng, windowMat);
+    else if (arch === "baroque") buildBaroquePalace(g, wallMat, roofMat, accentMat, rng, windowMat);
+    else if (arch === "rococo") buildRococoPalace(g, wallMat, roofMat, accentMat, rng, windowMat);
+    else buildPalladioPalace(g, wallMat, roofMat, accentMat, rng, windowMat);
     g.scale.setScalar(0.55);
   }
   return g;
@@ -1010,6 +1146,17 @@ function buildCityDetail(site, conf) {
     const landmark = addLandmark(e.kind, conf.palette, rng, e.style || conf.archStyle || "palladio");
     landmark.position.copy(local); landmark.position.y = 1.4;
     landmark.scale.setScalar(e.role === "王室" ? 0.72 : 0.58); group.add(landmark);
+    const plazaMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.9 });
+    const plaza = new THREE.Mesh(new THREE.CircleGeometry(4.5, 36), plazaMat);
+    plaza.rotation.x = -Math.PI / 2; plaza.position.set(local.x, 1.24, local.z); group.add(plaza);
+    loadTex(estateTexUrl("plaza")).then((tex) => {
+      const clone = tex.clone();
+      clone.wrapS = clone.wrapT = THREE.RepeatWrapping;
+      clone.repeat.set(2, 2);
+      clone.needsUpdate = true;
+      plazaMat.map = clone;
+      plazaMat.needsUpdate = true;
+    });
     const pad = new THREE.Mesh(
       new THREE.RingGeometry(2.2, 3.1, 28),
       new THREE.MeshBasicMaterial({
@@ -1100,6 +1247,18 @@ function buildDistrictDetail(site, conf, district) {
   // one landmark only — don't rebuild a purple Lego district over the painting
   const landmark = addLandmark(district.kind, conf.palette, rng, conf.archStyle || "palladio");
   landmark.position.set(0, 0.2, 0); landmark.scale.setScalar(0.9); group.add(landmark);
+
+  const plazaMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.9 });
+  const plaza = new THREE.Mesh(new THREE.CircleGeometry(span * 0.32, 36), plazaMat);
+  plaza.rotation.x = -Math.PI / 2; plaza.position.y = 0.09; group.add(plaza);
+  loadTex(estateTexUrl("plaza")).then((tex) => {
+    const clone = tex.clone();
+    clone.wrapS = clone.wrapT = THREE.RepeatWrapping;
+    clone.repeat.set(2, 2);
+    clone.needsUpdate = true;
+    plazaMat.map = clone;
+    plazaMat.needsUpdate = true;
+  }).catch(() => {});
 
   // a few street lamps for depth, still sparse
   for (let i = 0; i < 8; i += 1) {
