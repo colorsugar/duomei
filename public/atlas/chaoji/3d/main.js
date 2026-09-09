@@ -314,6 +314,12 @@ function estateMaterials(style, palette) {
     clone.needsUpdate = true;
     accentMat.map = clone;
     accentMat.color.set(0xffffff);
+    // no envMap in scene: high metalness reads as black slab — let the gold leaf self-light instead
+    accentMat.metalness = 0.45;
+    accentMat.roughness = 0.4;
+    accentMat.emissive.set(0xffffff);
+    accentMat.emissiveMap = clone;
+    accentMat.emissiveIntensity = 0.32;
     accentMat.needsUpdate = true;
   }).catch(() => {});
   loadTex(estateTexUrl(names.window)).then((tex) => {
