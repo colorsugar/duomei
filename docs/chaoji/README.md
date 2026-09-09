@@ -9,29 +9,33 @@
 
 ## 路由与目录
 
-- `/chaoji` → 跳转地图
-- `/chaoji/map` 交互卫星骨架
+- `/chaoji` → `/chaoji/map`
+- `/chaoji/map`：React 壳 + iframe
 - 静态包：`public/atlas/chaoji/`
-- 总提示词：`src/content/daluMasterPrompt.md`（当前与超级大陆共用同一份生成总提示词）
+  - `3d.html` + `3d/main.js` + `3d/style.css`：Three.js 立体卫星图（交互对齐七国立体图志）
+  - `assets/basemap.webp`：卫星底图（亮度抬升地形）
+  - `world.json`：十二战略点
+  - `index.html`：重定向到 `3d.html`
+- 总提示词：`src/content/daluMasterPrompt.md`（暂与超级大陆共用）
 
 ## 政体
 
-艾维诺尔、因维德帝国、机械之心公国、海兽之国、北方荒原之国、瀚海古城与水下公国（主权，城主就是国王）、半兽人与精灵王国。
+艾维诺尔、因维德帝国、机械之心公国、海兽之国、北方荒原之国、瀚海古城与水下公国（主权，城主即国王）、半兽人与精灵王国。
 
 另含极北冰封超级帝国、永恒寒冰核心、马里亚纳级海沟、赤脊入侵走廊（只留通道）、神山学院。
 
-## 卫星骨架 V1
+## 立体卫星图
 
 已落地：
 
-- 大陆轮廓 + 海洋深浅底
-- 七国半透明色带
-- 赤脊入侵走廊（低地通道，不堆复杂战场）
-- 十二战略点可点，侧栏名单跳转
-- 拖动 / 滚轮缩放 / 图层开关
+- 卫星底图 + 亮度场抬升地形（WebGL）
+- OrbitControls：单指/左键平移、双指/滚轮缩放、双指/右键旋转俯仰
+- 十二战略点 CSS2D 标记可点，侧栏名单跳转
+- 手机默认收起侧栏；「目录」打开，× / 遮罩 / Esc 关闭
+- 清屏模式隐藏 UI
 
-嵌入边界：`/chaoji/map` 同源 iframe 加载 `/atlas/chaoji/index.html`。`edgeone.json` 必须给 `/atlas/chaoji/*` 配 `X-Frame-Options: SAMEORIGIN` 与 `Content-Security-Policy: frame-ancestors 'self'`；若只剩全局 `DENY`，浏览器会在壳子里显示“拒绝了连接请求”。
+嵌入边界：`/chaoji/map` 同源 iframe 加载 `/atlas/chaoji/3d.html`。`edgeone.json` 必须给 `/atlas/chaoji/*` 配 `X-Frame-Options: SAMEORIGIN` 与 `Content-Security-Policy: frame-ancestors 'self'`。
 
-未做：真实遥感贴图、建筑级特写、完整气候模拟层。
+未做：建筑级特写、完整气候模拟层、独立高模资产管线。
 
-不继承奇幻大陆的 65 个点位与图册。
+不继承奇幻大陆的点位与图册。

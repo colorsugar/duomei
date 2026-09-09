@@ -263,6 +263,6 @@ Historical planning documents under `deploy/guyu-edgeone/docs/` remain useful ev
 
 `/dalu` 末尾新增“生成总提示词”：二十八节卫星地图生成总提示词以 `src/content/daluMasterPrompt.md` 单一来源（Vite `?raw` 导入）提供复制全文、Markdown 下载（data URL）与 `<details>` 折叠阅读，不涉及新路由、页头或 PDF。
 
-## 超级大陆卫星骨架 — 2026-09-09
+## 超级大陆立体卫星图 — 2026-09-09
 
-`/chaoji` 跳转 `/chaoji/map`，嵌入 `public/atlas/chaoji/` 静态卫星骨架 V1。与奇幻大陆 V6（`/dalu/map`、`public/atlas/v6/`）不是同一套世界，禁止互相覆盖。七国色带、赤脊入侵走廊（只留通道）、十二战略点可点；拖动/滚轮缩放/图层开关。`edgeone.json` 在全局 `X-Frame-Options: DENY` 之外，对 `/atlas/chaoji/*` 与 `/atlas/v6/*`、`/yunyou/*` 同样放开为 `SAMEORIGIN` + `frame-ancestors 'self'`，否则同源 iframe 会被浏览器拒连。总提示词暂与 `src/content/daluMasterPrompt.md` 共用。详情见 `docs/chaoji/README.md`。
+`/chaoji` 跳转 `/chaoji/map`，嵌入 `public/atlas/chaoji/3d.html`（Three.js 立体卫星图，交互对齐七国立体图志：平移/缩放/旋转俯仰、战略点可点）。与奇幻大陆 V6（`/dalu/map`、`public/atlas/v6/`）不是同一套世界，禁止互相覆盖。手机侧栏默认可关（目录 / × / 遮罩 / Esc）。`edgeone.json` 在全局 `X-Frame-Options: DENY` 之外，对 `/atlas/chaoji/*` 与 `/atlas/v6/*`、`/yunyou/*` 同样放开为 `SAMEORIGIN` + `frame-ancestors 'self'`，否则同源 iframe 会被浏览器拒连。总提示词暂与 `src/content/daluMasterPrompt.md` 共用。详情见 `docs/chaoji/README.md`。

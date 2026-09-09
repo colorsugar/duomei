@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#07111d">
+  <title>超级大陆 · 立体卫星图</title>
+  <meta name="description" content="超级大陆立体卫星地图：自由缩放、旋转、俯仰，点选战略点。与奇幻大陆 V6 不是同一套世界。">
+  <link rel="stylesheet" href="./3d/style.css">
+  <link rel="preload" as="image" href="./assets/basemap.webp">
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "/yunyou/vendor/three/three.module.js",
+      "three/addons/": "/yunyou/vendor/three/addons/"
+    }
+  }
+  </script>
+</head>
+<body>
+  <div class="cj3d" id="app">
+    <div class="cj3d-stage" id="stage" aria-label="立体地图画布"></div>
+    <button type="button" class="cj3d-scrim" id="panel-scrim" aria-label="关闭目录" tabindex="-1"></button>
+    <button type="button" class="cj3d-menu" id="menu-open" aria-controls="panel" aria-expanded="false">目录</button>
+    <aside class="cj3d-panel" id="panel" aria-label="超级大陆目录">
+      <div class="cj3d-panel-head">
+        <div>
+          <p class="cj3d-kicker">SUPER CONTINENT · 3D SATELLITE</p>
+          <h1>超级大陆</h1>
+        </div>
+        <button type="button" class="cj3d-panel-close" id="menu-close" aria-label="关闭目录">×</button>
+      </div>
+      <p class="cj3d-sub">按七国立体图志同款交互：单指拖动、双指缩放旋转、点标记看介绍。与奇幻大陆 V6 不是同一套世界。</p>
+      <div class="cj3d-stats">
+        <div><b>7</b><span>主要国家</span></div>
+        <div><b>12</b><span>战略节点</span></div>
+        <div><b>1</b><span>入侵走廊</span></div>
+        <div><b>1</b><span>深渊海沟</span></div>
+      </div>
+      <div class="cj3d-tools">
+        <button type="button" id="tilt" aria-pressed="true">斜看</button>
+        <button type="button" id="reset">复位</button>
+        <button type="button" id="immersive" class="is-accent">清屏</button>
+      </div>
+      <div class="cj3d-list" id="site-list"></div>
+      <p class="cj3d-help">手机：单指平移，双指张合缩放，双指拖动旋转/俯仰。<br>电脑：左键平移，滚轮缩放，右键旋转俯仰。</p>
+    </aside>
+    <div class="cj3d-zoom" aria-label="缩放">
+      <button type="button" id="zoom-in" aria-label="放大">+</button>
+      <button type="button" id="zoom-out" aria-label="缩小">−</button>
+    </div>
+    <p class="cj3d-hint" id="hint">单指拖动 · 双指缩放旋转 · 点标记看介绍</p>
+    <button type="button" class="cj3d-exit" id="exit-immersive" hidden>退出清屏</button>
+    <aside class="cj3d-card" id="card" hidden aria-live="polite">
+      <button type="button" class="cj3d-card-close" id="card-close" aria-label="收起介绍">×</button>
+      <div class="cj3d-card-body" id="card-body"></div>
+    </aside>
+    <div class="cj3d-loading" id="loading">正在抬升大陆地形…</div>
+  </div>
+  <script type="module" src="./3d/main.js"></script>
+</body>
+</html>

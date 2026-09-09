@@ -6,13 +6,13 @@ export function DuomeiChaojiMapPage() {
   const frame = useRef<HTMLIFrameElement>(null);
   useEffect(() => {
     const previousTitle = document.title;
-    document.title = "超级大陆 · 卫星骨架 V1 | 多美小记";
+    document.title = "超级大陆 · 立体卫星图 | 多美小记";
     return () => { document.title = previousTitle; };
   }, []);
-  return <main className="duomei-atlas-page" aria-label="超级大陆卫星骨架地图">
+  return <main className="duomei-atlas-page" aria-label="超级大陆立体卫星地图">
     <nav className="dalu-map-nav" aria-label="超级大陆导航">
       <Link to="/">← 返回多美</Link>
     </nav>
-    <iframe ref={frame} src="/atlas/chaoji/index.html" title="超级大陆 · 卫星骨架 V1" />
+    <iframe ref={frame} src="/atlas/chaoji/3d.html" title="超级大陆 · 立体卫星图" />
   </main>;
 }
