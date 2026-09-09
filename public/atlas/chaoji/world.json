@@ -1,0 +1,25 @@
+{
+  "version": "chaoji-alpha",
+  "world": "超级大陆",
+  "separateFrom": "奇幻大陆",
+  "principle": "plate_tectonics -> terrain -> climate -> hydrology -> ecology -> resources -> magic -> population -> cities -> trade -> war -> borders -> history",
+  "states": [
+    {"id":"aivernor","name":"艾维诺尔","coastal":true,"core":"river grain plain + west coast"},
+    {"id":"inved","name":"因维德帝国","coastal":true,"core":"eastern coast + invasion corridor"},
+    {"id":"mechanica","name":"机械之心公国","coastal":false,"core":"mineral mountains + deep valleys"},
+    {"id":"seabeast","name":"海兽之国","coastal":true,"core":"peninsula + strategic strait + outer sea"},
+    {"id":"northwaste","name":"北方荒原之国","coastal":false,"core":"cold steppe + taiga + permafrost"},
+    {"id":"hanhai","name":"瀚海古城与水下公国","coastal":true,"core":"ancient harbor + underwater city"},
+    {"id":"forest","name":"半兽人与精灵王国","coastal":false,"core":"ancient forest + sacred river valley"}
+  ],
+  "neutralZones": [
+    {"id":"polar","name":"极北禁区","cause":"永恒寒冰核心引发的禁忌魔法灾难"},
+    {"id":"trench","name":"马里亚纳级深渊海沟","cause":"海洋板块俯冲"},
+    {"id":"dragon","name":"魔焰龙渊","cause":"火山、地热、魔晶"},
+    {"id":"swamp","name":"灰烬大湿地","cause":"低坡度河网与长期积水"}
+  ],
+  "strategicSites": [
+    "赤脊战争走廊","边境连续防线","大河桥头堡","机械之心山口","巨型魔晶矿","双岸锁潮海峡","瀚海古城","马里亚纳级深渊海沟","神山与大陆学院","世界树森林入口","冰封帝都遗址","永恒寒冰核心"
+  ],
+  "interactionContract": {"zoomLevels":["continent","regional","city","architecture"],"clickable":"major buildings and strategic landmarks","detailFields":["name","country","age","function","style","history","wars","currentState","characters","legend"]}
+}
