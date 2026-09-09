@@ -260,3 +260,5 @@ Historical planning documents under `deploy/guyu-edgeone/docs/` remain useful ev
 首页在故语之后、云游之前增加 `#dalu` 大陆专题，沿用 HomeSectionHold 与全局分段进度。`/dalu` 收纳地图模块、完整艺术图集 PDF 与既有地理风物原册；更新地图的正式专题路径为 `/dalu/map`，`/atlas-v6` 继续兼容已有深链接。两条地图路径均保留全局音乐，同源 iframe 上方提供返回大陆与 PDF 入口。冻结的全局页头不改动。
 
 `public/downloads/fantasy-continent-artbook.pdf` 在构建前从 `artifacts/dalu/` 的公开分片逐个校验并重组（`scripts/prepare-dalu-artbook.mjs`）；为81页、74幅图版、11章的扩充艺术图集，包含原60幅及14幅新增宫堡庄园图。纸面目录有逐幅内部跳转、章节书签，每幅有返回目录与带 entry 的地图定位外链。`src/content/daluArtbook.json` 固定 PDF 哈希、大小和章节页码。既有64页故语原册继续保留，页面明确标为原册。
+
+`/dalu` 末尾新增“生成总提示词”：二十八节卫星地图生成总提示词以 `src/content/daluMasterPrompt.md` 单一来源（Vite `?raw` 导入）提供复制全文、Markdown 下载（data URL）与 `<details>` 折叠阅读，不涉及新路由、页头或 PDF。

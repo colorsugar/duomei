@@ -1,9 +1,18 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import artbook from "../content/daluArtbook.json";
+import masterPrompt from "../content/daluMasterPrompt.md?raw";
 import "../dalu.css";
 
+const masterPromptHref = `data:text/markdown;charset=utf-8,${encodeURIComponent(masterPrompt)}`;
+
 export function DuomeiDaluPage() {
+  const [copyState, setCopyState] = useState<"idle" | "copied" | "failed">("idle");
+  const copyPrompt = () => {
+    navigator.clipboard.writeText(masterPrompt).then(() => setCopyState("copied"), () => setCopyState("failed"));
+    window.setTimeout(() => setCopyState("idle"), 2400);
+  };
+  const copyLabel = { idle: "复制全文", copied: "已复制全文 ✓", failed: "复制失败，请下载" }[copyState];
   useEffect(() => {
     const previous = document.title;
     document.title = "大陆 · 奇幻大陆 | 多美小记";
@@ -25,5 +34,11 @@ export function DuomeiDaluPage() {
       <div><span className="dalu-eyebrow">艺术图集 / 扩充版</span><h2 id="dalu-book-title">把这片大陆，带在身边</h2><p>{artbook.pageCount} 页，{artbook.plateCount} 幅图版，{artbook.chapterCount} 个章节。原有地理风物与新增宫堡庄园合为一册，图片和地点说明同页相伴。</p><p>PDF 目录可直接跳转图版，每页可返回目录，也可点击链接在地图中定位。</p><div className="dalu-actions"><a className="dalu-button" href={artbook.pdf} download="奇幻大陆-艺术图集.pdf">下载完整 PDF ↓</a><a href={artbook.pdf} target="_blank" rel="noopener noreferrer">在线打开 PDF ↗</a><Link to="/guyu/hanhai-realms-artbook">翻阅地理风物原册 →</Link></div><span className="dalu-note">PDF · {(artbook.bytes / 1024 / 1024).toFixed(1)} MB · 含 14 幅新增建筑图版</span></div>
     </section>
     <section className="dalu-chapters" aria-labelledby="dalu-chapters-title"><div className="dalu-section-heading"><h2 id="dalu-chapters-title">循章而行</h2><span>点击章节，打开 PDF 对应位置</span></div><div className="dalu-chapter-grid">{artbook.chapters.map((chapter, index) => <a key={chapter.title} href={`${artbook.pdf}#page=${chapter.page}`} target="_blank" rel="noopener noreferrer"><span>{String(index + 1).padStart(2, "0")}</span><strong>{chapter.title}</strong><span>{chapter.page} 页 ↗</span></a>)}</div></section>
+    <section className="dalu-prompt-section" aria-labelledby="dalu-prompt-title">
+      <div className="dalu-section-heading"><h2 id="dalu-prompt-title">生成总提示词</h2><span>整合版 · 世界地理逻辑 × 七国格局 × 魔法生态 × 战争地理 × 建筑与交互</span></div>
+      <p className="dalu-prompt-lead">这片大陆的卫星地图不是随手摆放的：先板块、山脉与洋流，再气候、河流与生态，最后才有城市、国家与战争。二十八节总提示词把这条因果链完整写下，可直接复制去生成或续写。</p>
+      <div className="dalu-actions"><button type="button" className="dalu-button" onClick={copyPrompt}>{copyLabel}</button><a href={masterPromptHref} download="奇幻大陆-卫星地图总提示词.md">下载 Markdown ↓</a></div>
+      <details className="dalu-prompt"><summary>展开阅读全文</summary><pre>{masterPrompt}</pre></details>
+    </section>
   </main>;
 }
