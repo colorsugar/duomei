@@ -1091,16 +1091,31 @@ function districtAerialUrl(siteId, districtId) {
   return new URL(`../assets/cities/districts/${siteId}--${districtId}.webp`, import.meta.url).href;
 }
 
+function closeupAlphaMap() {
+  const c = document.createElement("canvas");
+  c.width = c.height = 256;
+  const ctx = c.getContext("2d");
+  const grd = ctx.createRadialGradient(128, 128, 78, 128, 128, 128);
+  grd.addColorStop(0, "rgba(255,255,255,1)");
+  grd.addColorStop(1, "rgba(255,255,255,0)");
+  ctx.fillStyle = grd;
+  ctx.fillRect(0, 0, 256, 256);
+  const tex = new THREE.CanvasTexture(c);
+  tex.colorSpace = THREE.NoColorSpace;
+  return tex;
+}
+
 function mountCloseups(sites, hf) {
+  const fade = closeupAlphaMap();
   for (const site of sites) {
     const p = fromSvg(site.x, site.y);
     const origin = toWorld(p.x, p.y);
     origin.y = heightAt(p.x, p.y, hf) + 0.42;
     const mat = new THREE.MeshBasicMaterial({
       color: 0xffffff, transparent: true, opacity: 1, depthWrite: false,
-      polygonOffset: true, polygonOffsetFactor: -6,
+      alphaMap: fade, polygonOffset: true, polygonOffsetFactor: -6,
     });
-    const mesh = new THREE.Mesh(new THREE.CircleGeometry(54, 72).rotateX(-Math.PI / 2), mat);
+    const mesh = new THREE.Mesh(new THREE.CircleGeometry(92, 80).rotateX(-Math.PI / 2), mat);
     mesh.position.copy(origin);
     mesh.visible = false;
     scene.add(mesh);
@@ -1110,7 +1125,7 @@ function mountCloseups(sites, hf) {
 }
 
 function syncCloseups() {
-  const far = controls.getDistance() > 840;
+  const far = controls.getDistance() > 920;
   const hide = Boolean(activeCity || activeDistrict || far);
   if (hide) {
     for (const m of closeupDecals) m.visible = false;
@@ -1121,7 +1136,7 @@ function syncCloseups() {
     .map((m) => ({ m, d: m.position.distanceToSquared(t) }))
     .sort((a, b) => a.d - b.d);
   for (const m of closeupDecals) m.visible = false;
-  for (const row of ranked.slice(0, 3)) row.m.visible = true;
+  for (const row of ranked.slice(0, 6)) row.m.visible = true;
 }
 
 function buildCityDetail(site, conf) {
