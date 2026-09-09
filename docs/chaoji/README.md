@@ -28,10 +28,11 @@
 
 已落地：
 
-- 卫星底图 + 亮度场抬升地形（WebGL）
+- 高清卫星底图（1920×1080）+ 亮度场抬升地形 + bump 光影
+- ACES 色调映射、双光源、指数雾、更密网格
 - OrbitControls：单指/左键平移、双指/滚轮缩放、双指/右键旋转俯仰
 - 十二战略点 CSS2D 标记可点，侧栏名单跳转
-- 手机默认收起侧栏；「目录」打开，× / 遮罩 / Esc 关闭
+- 手机默认收起侧栏；「目录」打开，× / 遮罩 / Esc / 点地图空白关闭
 - 清屏模式隐藏 UI
 
 嵌入边界：`/chaoji/map` 同源 iframe 加载 `/atlas/chaoji/3d.html`。`edgeone.json` 必须给 `/atlas/chaoji/*` 配 `X-Frame-Options: SAMEORIGIN` 与 `Content-Security-Policy: frame-ancestors 'self'`。

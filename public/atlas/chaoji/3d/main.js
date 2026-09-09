@@ -4,10 +4,10 @@ import { CSS2DObject, CSS2DRenderer } from "three/addons/renderers/CSS2DRenderer
 
 const MAP_W = 1280;
 const MAP_H = 720;
-const HEIGHT_SCALE = 88;
+const HEIGHT_SCALE = 118;
 const SVG_W = 1100;
-const HOME = { radius: 1180, polar: 0.92, azimuth: -0.35 };
-const TILT = { oblique: 0.92, top: 0.16 };
+const HOME = { radius: 1080, polar: 0.88, azimuth: -0.42 };
+const TILT = { oblique: 0.88, top: 0.14 };
 const KIND_DOT = {
   王都: "#e9d29a",
   帝都: "#c4b0d8",
@@ -88,6 +88,8 @@ try {
 }
 renderer.setPixelRatio(Math.min(devicePixelRatio || 1, coarse ? 1.5 : 2));
 renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.12;
 stage.appendChild(renderer.domElement);
 
 const labelRenderer = new CSS2DRenderer();
@@ -95,42 +97,51 @@ labelRenderer.domElement.className = "cj3d-labels";
 stage.appendChild(labelRenderer.domElement);
 
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x07111d);
-scene.fog = new THREE.Fog(0x07111d, 2200, 4600);
+scene.background = new THREE.Color(0x050c16);
+scene.fog = new THREE.FogExp2(0x07111d, 0.00038);
 
-const camera = new THREE.PerspectiveCamera(46, 1, 2, 12000);
+const camera = new THREE.PerspectiveCamera(44, 1, 2, 14000);
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = !reducedMotion;
-controls.dampingFactor = 0.085;
+controls.dampingFactor = 0.08;
 controls.screenSpacePanning = false;
-controls.minDistance = 280;
-controls.maxDistance = 2800;
-controls.minPolarAngle = 0.05;
-controls.maxPolarAngle = 1.22;
+controls.minDistance = 240;
+controls.maxDistance = 3000;
+controls.minPolarAngle = 0.04;
+controls.maxPolarAngle = 1.2;
 controls.rotateSpeed = 0.55;
-controls.zoomSpeed = 0.85;
-controls.panSpeed = 0.9;
+controls.zoomSpeed = 0.9;
+controls.panSpeed = 0.95;
 controls.mouseButtons = { LEFT: THREE.MOUSE.PAN, MIDDLE: THREE.MOUSE.DOLLY, RIGHT: THREE.MOUSE.ROTATE };
 controls.touches = { ONE: THREE.TOUCH.PAN, TWO: THREE.TOUCH.DOLLY_ROTATE };
 controls.listenToKeyEvents(window);
 
-scene.add(new THREE.HemisphereLight(0xdfe9ff, 0x1a2733, 1.2));
-const sun = new THREE.DirectionalLight(0xffe6c4, 1.4);
-sun.position.set(-900, 1400, 650);
+scene.add(new THREE.AmbientLight(0x1a2838, 0.35));
+scene.add(new THREE.HemisphereLight(0xe8f2ff, 0x0c1824, 0.95));
+const sun = new THREE.DirectionalLight(0xffe2b8, 1.75);
+sun.position.set(-1100, 1600, 780);
 scene.add(sun);
+const fill = new THREE.DirectionalLight(0x7eb0ff, 0.35);
+fill.position.set(900, 600, -500);
+scene.add(fill);
 
 const sea = new THREE.Mesh(
-  new THREE.PlaneGeometry(9000, 6200).rotateX(-Math.PI / 2),
-  new THREE.MeshStandardMaterial({ color: 0x0a1c30, roughness: 0.55, metalness: 0.04 }),
+  new THREE.PlaneGeometry(11000, 7800).rotateX(-Math.PI / 2),
+  new THREE.MeshStandardMaterial({
+    color: 0x071828,
+    roughness: 0.42,
+    metalness: 0.18,
+    envMapIntensity: 0.6,
+  }),
 );
-sea.position.y = -2;
+sea.position.y = -3;
 scene.add(sea);
 
 const toWorld = (x, y) => new THREE.Vector3(x - MAP_W / 2, 0, y - MAP_H / 2);
 const fromSvg = (x, y) => ({ x: (x / SVG_W) * MAP_W, y: (y / 720) * MAP_H });
 
 function luminanceField(image) {
-  const cols = 256;
+  const cols = 384;
   const rows = Math.round((cols * MAP_H) / MAP_W);
   const canvas = document.createElement("canvas");
   canvas.width = cols;
@@ -317,21 +328,52 @@ async function boot() {
   });
   const texture = await new THREE.TextureLoader().loadAsync(basemapUrl.href);
   texture.colorSpace = THREE.SRGBColorSpace;
-  texture.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy());
+  texture.anisotropy = Math.min(16, renderer.capabilities.getMaxAnisotropy());
+  texture.wrapS = texture.wrapT = THREE.ClampToEdgeWrapping;
 
   const hf = luminanceField(texture.image);
-  const geometry = new THREE.PlaneGeometry(MAP_W, MAP_H, 220, 124).rotateX(-Math.PI / 2);
+  // Denser mesh so satellite grain and ridgelines read when zoomed.
+  const segsX = coarse ? 260 : 420;
+  const segsY = coarse ? 146 : 236;
+  const geometry = new THREE.PlaneGeometry(MAP_W, MAP_H, segsX, segsY).rotateX(-Math.PI / 2);
   const pos = geometry.attributes.position;
   for (let i = 0; i < pos.count; i += 1) {
     const u = (pos.getX(i) + MAP_W / 2) / MAP_W;
     const v = (pos.getZ(i) + MAP_H / 2) / MAP_H;
     const edge = Math.min(u, 1 - u, v, 1 - v);
-    pos.setY(i, sampleField(hf, u, v) * Math.min(1, edge * 36) - 0.8);
+    pos.setY(i, sampleField(hf, u, v) * Math.min(1, edge * 40) - 1.2);
   }
   geometry.computeVertexNormals();
+
+  // Bump from the same luminance field so mountains catch light like orbital relief.
+  const bumpCanvas = document.createElement("canvas");
+  bumpCanvas.width = hf.cols;
+  bumpCanvas.height = hf.rows;
+  const bumpCtx = bumpCanvas.getContext("2d");
+  const bumpImg = bumpCtx.createImageData(hf.cols, hf.rows);
+  for (let i = 0; i < hf.field.length; i += 1) {
+    const g = Math.round(hf.field[i] * 255);
+    const o = i * 4;
+    bumpImg.data[o] = g;
+    bumpImg.data[o + 1] = g;
+    bumpImg.data[o + 2] = g;
+    bumpImg.data[o + 3] = 255;
+  }
+  bumpCtx.putImageData(bumpImg, 0, 0);
+  const bump = new THREE.CanvasTexture(bumpCanvas);
+  bump.wrapS = bump.wrapT = THREE.ClampToEdgeWrapping;
+  bump.colorSpace = THREE.NoColorSpace;
+  bump.anisotropy = texture.anisotropy;
+
   scene.add(new THREE.Mesh(
     geometry,
-    new THREE.MeshStandardMaterial({ map: texture, roughness: 0.9, metalness: 0.02 }),
+    new THREE.MeshStandardMaterial({
+      map: texture,
+      bumpMap: bump,
+      bumpScale: 18,
+      roughness: 0.86,
+      metalness: 0.04,
+    }),
   ));
 
   for (const site of world.sites) {
