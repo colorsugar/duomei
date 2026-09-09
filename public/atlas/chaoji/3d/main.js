@@ -1065,10 +1065,16 @@ function buildRoads(group, scale, palette) {
 }
 
 function applyAerialMap(mat, tex) {
-  tex.colorSpace = THREE.SRGBColorSpace;
-  tex.anisotropy = Math.min(16, renderer.capabilities.getMaxAnisotropy());
-  tex.wrapS = tex.wrapT = THREE.ClampToEdgeWrapping;
-  mat.map = tex;
+  const t = tex.clone();
+  t.colorSpace = THREE.SRGBColorSpace;
+  t.anisotropy = Math.min(16, renderer.capabilities.getMaxAnisotropy());
+  t.wrapS = t.wrapT = THREE.ClampToEdgeWrapping;
+  // keep native texels — mipmaps turn the city painting into continent-mud on phones
+  t.generateMipmaps = false;
+  t.minFilter = THREE.LinearFilter;
+  t.magFilter = THREE.LinearFilter;
+  t.needsUpdate = true;
+  mat.map = t;
   mat.color.set(0xffffff);
   mat.needsUpdate = true;
 }
@@ -1099,7 +1105,7 @@ function buildCityDetail(site, conf) {
   voidPad.rotation.x = -Math.PI / 2; voidPad.position.y = 0.2; group.add(voidPad);
 
   // HERO: atlas city aerial — this IS the town, not a lego forest on top of it
-  const plateR = scale * 0.72;
+  const plateR = scale * 1.08;
   const ground = new THREE.Mesh(
     new THREE.CircleGeometry(plateR, 128),
     new THREE.MeshBasicMaterial({ color: 0x0a0c14 }),
@@ -1185,7 +1191,7 @@ function buildCityDetail(site, conf) {
       ev.stopPropagation();
       // fly closer to the estate within city view
       const world = local.clone().add(origin);
-      flyTo({ target: world.clone().add(new THREE.Vector3(0, 6, 0)), radius: Math.max(22, scale * 0.38), polar: 0.72 }, 700);
+      flyTo({ target: world.clone().add(new THREE.Vector3(0, 6, 0)), radius: Math.max(34, scale * 0.52), polar: 0.42 }, 700);
       hint.textContent = `${e.role} · ${e.name} — ${e.blurb || e.style}`;
     });
     const lab = new CSS2DObject(el); lab.position.set(local.x, 11, local.z); group.add(lab);
@@ -1202,7 +1208,7 @@ function buildCityDetail(site, conf) {
   cityLight.color.set(conf.mood?.light || conf.palette.accent);
   scene.add(group); cityRoot = group; activeCity = site.id;
   // more top-down so the atlas painting reads as the town
-  lastCityView = { target: origin.clone().add(new THREE.Vector3(0, 4, 0)), radius: Math.max(48, scale * 1.05), polar: 0.58 };
+  lastCityView = { target: origin.clone().add(new THREE.Vector3(0, 4, 0)), radius: Math.max(52, scale * 0.95), polar: 0.28 };
   return lastCityView;
 }
 
@@ -1403,6 +1409,7 @@ function syncUi() {
       continentMesh.material.opacity = inRegion ? 0.72 : 1;
     }
   }
+  if (regionOverlay) regionOverlay.visible = !inCity && !inDistrict;
 }
 
 function showSiteCard(site, district) {
