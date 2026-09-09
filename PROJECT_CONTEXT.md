@@ -247,7 +247,7 @@ Historical planning documents under `deploy/guyu-edgeone/docs/` remain useful ev
 
 新增公开新说册 `hanhai-realms-artbook` / 《七国 · 地理与风物设定集》，64 页1536×2352完整 WebP。完全沿用其他新说册的既有双页硬页翻书、封面展开、触摸与缩放设置；不再为设定集添加独立单页布局或顶部悬浮目录。地图链接融入既有底部翻页栏，并定位当前书页。书页聚合 SHA-256 `c3256ca14ae6ec3e2fee5d58fb6b0a6a9799bedd875ce5f1037bdeca78dba37f`，封面 SHA-256 `dbff9ed94b8e7b27fe999e349aeb324d17ae5ca018b752c47a7b108ef3816c82`。已有五册与53页私有册不改变。
 
-`/atlas-v6` 是七国战略图志的 React 同源地图壳，嵌入 `/atlas/v6/index.html?embed=duomei`，保留全局音乐；`entry` 查询参数定位已有国家、城市、要地或传说栖地。仅 `/atlas/v6/*` 与既有 `/yunyou/*` 使用 SAMEORIGIN，其他页面继续 DENY。设定集与地图互链。64书页、独立封面、书册元数据、阅读器、React地图壳、完整静态地图目录、样式、测试与生产探针构成同一发布单元。详细导入事实见 `docs/atlas-artbook-import.md`。
+`/atlas-v6` 是七国战略图志的 React 同源地图壳，嵌入 `/atlas/v6/index.html?embed=duomei`，保留全局音乐；`entry` 查询参数定位已有国家、城市、要地或传说栖地。仅 `/atlas/v6/*`、`/atlas/chaoji/*` 与既有 `/yunyou/*` 使用 SAMEORIGIN，其他页面继续 DENY。设定集与地图互链。64书页、独立封面、书册元数据、阅读器、React地图壳、完整静态地图目录、样式、测试与生产探针构成同一发布单元。详细导入事实见 `docs/atlas-artbook-import.md`。
 
 扩展版新增“山河相接”（第52页）与“烬月·传说栖地”（第58页）；原48张场景图保留；封面与纸面两页目录已更新为60幅、10章，所有印刷页脚总数统一为64。底部既有翻页栏增加章节下拉，直达52/58页；阅读器页码与纸页一致。六处栖地为魔焰龙渊、无月狼鞍、回声内海、雷羽天峡、梦角雨庭、负岳盐泉。其形成、兽族古约、能力边界、冲突与海陆接驳写入地图说明；栖地光墙不代表国家主权。地图保留长按防误选、锁定、复位、灵敏度与既有故语阅读器。
 
@@ -265,4 +265,4 @@ Historical planning documents under `deploy/guyu-edgeone/docs/` remain useful ev
 
 ## 超级大陆卫星骨架 — 2026-09-09
 
-`/chaoji` 跳转 `/chaoji/map`，嵌入 `public/atlas/chaoji/` 静态卫星骨架 V1。与奇幻大陆 V6（`/dalu/map`、`public/atlas/v6/`）不是同一套世界，禁止互相覆盖。七国色带、赤脊入侵走廊（只留通道）、十二战略点可点；拖动/滚轮缩放/图层开关。总提示词暂与 `src/content/daluMasterPrompt.md` 共用。详情见 `docs/chaoji/README.md`。
+`/chaoji` 跳转 `/chaoji/map`，嵌入 `public/atlas/chaoji/` 静态卫星骨架 V1。与奇幻大陆 V6（`/dalu/map`、`public/atlas/v6/`）不是同一套世界，禁止互相覆盖。七国色带、赤脊入侵走廊（只留通道）、十二战略点可点；拖动/滚轮缩放/图层开关。`edgeone.json` 在全局 `X-Frame-Options: DENY` 之外，对 `/atlas/chaoji/*` 与 `/atlas/v6/*`、`/yunyou/*` 同样放开为 `SAMEORIGIN` + `frame-ancestors 'self'`，否则同源 iframe 会被浏览器拒连。总提示词暂与 `src/content/daluMasterPrompt.md` 共用。详情见 `docs/chaoji/README.md`。

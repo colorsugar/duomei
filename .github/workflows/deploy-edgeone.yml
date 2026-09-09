@@ -135,7 +135,7 @@ jobs:
           for (let attempt = 1; attempt <= 18; attempt += 1) {
             try {
               const nonce = `${Date.now()}-${attempt}`;
-              const [marker, home, auth, protectedOldPage, publicFeiyanPage, publicXinshuoOnePage, publicXinshuoTwoPage, publicGuiXiangPage, yunyouShell, yunyouIndex, yunyouMain, musicPlaylist, publicRealmsCover, publicRealmsLast, realmsMapShell, realmsMapIndex, realmsMapScript, realmsMapImage, realmsEasternImage] = await Promise.all([
+              const [marker, home, auth, protectedOldPage, publicFeiyanPage, publicXinshuoOnePage, publicXinshuoTwoPage, publicGuiXiangPage, yunyouShell, yunyouIndex, yunyouMain, musicPlaylist, publicRealmsCover, publicRealmsLast, realmsMapShell, realmsMapIndex, realmsMapScript, realmsMapImage, realmsEasternImage, chaojiShell, chaojiIndex] = await Promise.all([
                 fetch(`https://duomei.site/.well-known/duomei-build.json?ci=${nonce}`, { cache: "no-store" }),
                 fetch(`https://duomei.site/?ci=${nonce}`, { cache: "no-store" }),
                 fetch(`https://duomei.site/api/guyu-auth?ci=${nonce}`, { cache: "no-store" }),
@@ -155,6 +155,8 @@ jobs:
                 fetch(`https://duomei.site/atlas/v6/assets/atlas.js?ci=${nonce}`, { cache: "no-store" }),
                 fetch(`https://duomei.site/atlas/v6/assets/seven-kingdoms-basemap.webp?ci=${nonce}`, { cache: "no-store" }),
                 fetch(`https://duomei.site/atlas/v6/assets/eastern-continent.webp?ci=${nonce}`, { cache: "no-store" }),
+                fetch(`https://duomei.site/chaoji/map?ci=${nonce}`, { cache: "no-store" }),
+                fetch(`https://duomei.site/atlas/chaoji/index.html?ci=${nonce}`, { cache: "no-store" }),
               ]);
               const markerBody = marker.ok ? await marker.json() : null;
               const authBody = auth.ok ? await auth.json() : null;
@@ -164,6 +166,8 @@ jobs:
               const homeFrameOptions = home.headers.get("x-frame-options") ?? "";
               const yunyouFrameOptions = yunyouIndex.headers.get("x-frame-options") ?? "";
               const yunyouFrameAncestors = yunyouIndex.headers.get("content-security-policy") ?? "";
+              const chaojiFrameOptions = chaojiIndex.headers.get("x-frame-options") ?? "";
+              const chaojiFrameAncestors = chaojiIndex.headers.get("content-security-policy") ?? "";
               const musicBody = musicPlaylist.ok ? await musicPlaylist.json() : null;
               const playableTrack = musicBody?.tracks?.find((track) => track.playable === true);
               const musicStream = playableTrack
@@ -208,6 +212,10 @@ jobs:
                 yunyouFrameOptions.toUpperCase() === "SAMEORIGIN" &&
                 yunyouFrameAncestors.includes("frame-ancestors 'self'") &&
                 yunyouMain.status === 200 &&
+                chaojiShell.status === 200 &&
+                chaojiIndex.status === 200 &&
+                chaojiFrameOptions.toUpperCase() === "SAMEORIGIN" &&
+                chaojiFrameAncestors.includes("frame-ancestors 'self'") &&
                 musicPlaylist.status === 200 &&
                 musicBody?.playlistId === 316500315 &&
                 musicBody?.total > 6 &&
@@ -223,7 +231,7 @@ jobs:
                 process.exit(0);
               }
 
-              lastError = `realms=${publicRealmsCover.status}/${publicRealmsLast.status}/${realmsMapShell.status}/${realmsMapIndex.status}/${realmsMapScript.status}/${realmsMapImage.status}/${realmsEasternImage.status} marker=${marker.status}/${markerBody?.commit ?? "missing"} home=${home.status}/${homeFrameOptions} auth=${auth.status}/${authBody?.authorized} protected-old=${protectedOldPage.status} public-feiyan=${publicFeiyanPage.status} public-xinshuo-01=${publicXinshuoOnePage.status} public-xinshuo-02=${publicXinshuoTwoPage.status} public-gui-xiang=${publicGuiXiangPage.status} yunyou-shell=${yunyouShell.status} yunyou=${yunyouIndex.status}/${yunyouBody.includes("云游桂林 · 多美小记")}/${yunyouBody.includes('window.location.replace("/yunyou-map")')}/${yunyouFrameOptions}/${yunyouFrameAncestors} yunyou-main=${yunyouMain.status} music=${musicPlaylist.status}/${musicBody?.total ?? "missing"}/${musicBody?.tracks?.length ?? "missing"} music-stream=${musicStream?.status ?? "missing"}/${musicLocation} music-lyric=${musicLyric?.status ?? "missing"}/${musicLyricBody?.id ?? "missing"}`;
+              lastError = `realms=${publicRealmsCover.status}/${publicRealmsLast.status}/${realmsMapShell.status}/${realmsMapIndex.status}/${realmsMapScript.status}/${realmsMapImage.status}/${realmsEasternImage.status} marker=${marker.status}/${markerBody?.commit ?? "missing"} home=${home.status}/${homeFrameOptions} auth=${auth.status}/${authBody?.authorized} protected-old=${protectedOldPage.status} public-feiyan=${publicFeiyanPage.status} public-xinshuo-01=${publicXinshuoOnePage.status} public-xinshuo-02=${publicXinshuoTwoPage.status} public-gui-xiang=${publicGuiXiangPage.status} yunyou-shell=${yunyouShell.status} yunyou=${yunyouIndex.status}/${yunyouBody.includes("云游桂林 · 多美小记")}/${yunyouBody.includes('window.location.replace("/yunyou-map")')}/${yunyouFrameOptions}/${yunyouFrameAncestors} yunyou-main=${yunyouMain.status} chaoji=${chaojiShell.status}/${chaojiIndex.status}/${chaojiFrameOptions}/${chaojiFrameAncestors} music=${musicPlaylist.status}/${musicBody?.total ?? "missing"}/${musicBody?.tracks?.length ?? "missing"} music-stream=${musicStream?.status ?? "missing"}/${musicLocation} music-lyric=${musicLyric?.status ?? "missing"}/${musicLyricBody?.id ?? "missing"}`;
             } catch (error) {
               lastError = error instanceof Error ? error.message : String(error);
             }

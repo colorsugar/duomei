@@ -30,6 +30,8 @@
 - 十二战略点可点，侧栏名单跳转
 - 拖动 / 滚轮缩放 / 图层开关
 
+嵌入边界：`/chaoji/map` 同源 iframe 加载 `/atlas/chaoji/index.html`。`edgeone.json` 必须给 `/atlas/chaoji/*` 配 `X-Frame-Options: SAMEORIGIN` 与 `Content-Security-Policy: frame-ancestors 'self'`；若只剩全局 `DENY`，浏览器会在壳子里显示“拒绝了连接请求”。
+
 未做：真实遥感贴图、建筑级特写、完整气候模拟层。
 
 不继承奇幻大陆的 65 个点位与图册。
