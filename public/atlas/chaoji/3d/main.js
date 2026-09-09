@@ -56,6 +56,13 @@ panelScrim.addEventListener("click", () => setPanel(false));
 document.getElementById("immersive").addEventListener("click", () => setImmersive(true));
 exitImmersive.addEventListener("click", () => setImmersive(false));
 
+// Phone: tap empty map to dismiss the catalog (scrim strip is easy to miss).
+stage.addEventListener("pointerdown", (event) => {
+  if (!narrow() || !app.classList.contains("is-panel-open")) return;
+  if (event.target.closest(".cj3d-label")) return;
+  setPanel(false);
+});
+
 addEventListener("keydown", (event) => {
   if (event.key !== "Escape") return;
   if (!card.hidden) {
