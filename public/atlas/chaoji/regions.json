@@ -1,0 +1,79 @@
+{
+  "version": "chaoji-regions-v1",
+  "world": "超级大陆",
+  "note": "L1 八区全开：分区底图已装入 assets/regions/。点战略点飞入并进入城邦细层。",
+  "regions": [
+    {
+      "id": "aivernor",
+      "name": "艾维诺尔",
+      "blurb": "西部粮河平原与海港。金穗王都、粮河桥头堡；神山学院在南缘保持中立。",
+      "color": "#c4a46a",
+      "bounds": { "minX": 200, "minY": 250, "maxX": 560, "maxY": 560 },
+      "siteIds": ["aivernor-capital", "bridgehead", "academy"],
+      "basemap": "./assets/regions/aivernor.webp"
+    },
+    {
+      "id": "inved",
+      "name": "因维德帝国",
+      "blurb": "东岸军港与黑曜帝都。走廊东口的陆海军复合体。",
+      "color": "#7a6b8f",
+      "bounds": { "minX": 560, "minY": 170, "maxX": 820, "maxY": 400 },
+      "siteIds": ["inved-capital"],
+      "basemap": "./assets/regions/inved.webp"
+    },
+    {
+      "id": "corridor",
+      "name": "赤脊入侵走廊",
+      "blurb": "两山夹峙的低地通道，只留军团推进空间，不永久归属。",
+      "color": "#ffb089",
+      "bounds": { "minX": 470, "minY": 270, "maxX": 620, "maxY": 400 },
+      "siteIds": ["corridor"],
+      "basemap": "./assets/regions/corridor.webp"
+    },
+    {
+      "id": "mechanica",
+      "name": "机械之心公国",
+      "blurb": "矿脉山脉与深谷工坊。炉环山口卡住魔晶与矿运。",
+      "color": "#7f8f7a",
+      "bounds": { "minX": 290, "minY": 100, "maxX": 490, "maxY": 250 },
+      "siteIds": ["mechanica-pass"],
+      "basemap": "./assets/regions/mechanica.webp"
+    },
+    {
+      "id": "hanhai",
+      "name": "瀚海古城与水下公国",
+      "blurb": "陆上巨墙与水下穹顶共戴一王。海贸与水魔研究中心。",
+      "color": "#8a6b5c",
+      "bounds": { "minX": 780, "minY": 290, "maxX": 960, "maxY": 460 },
+      "siteIds": ["hanhai"],
+      "basemap": "./assets/regions/hanhai.webp"
+    },
+    {
+      "id": "seabeast",
+      "name": "海兽之国",
+      "blurb": "半岛群岛与锁潮海峡；东南公海禁区连着深渊海沟。",
+      "color": "#4f7f8f",
+      "bounds": { "minX": 700, "minY": 390, "maxX": 1020, "maxY": 680 },
+      "siteIds": ["strait", "trench"],
+      "basemap": "./assets/regions/seabeast.webp"
+    },
+    {
+      "id": "forest",
+      "name": "半兽人与精灵王国",
+      "blurb": "古森林、月光湖与世界树入口。外族需树印方能深入。",
+      "color": "#3f6b52",
+      "bounds": { "minX": 150, "minY": 380, "maxX": 400, "maxY": 590 },
+      "siteIds": ["worldtree"],
+      "basemap": "./assets/regions/forest.webp"
+    },
+    {
+      "id": "north",
+      "name": "北方荒原与极北",
+      "blurb": "寒原冻土之上，冰封帝都遗址与永恒寒冰核心仍在渗漏。",
+      "color": "#9eb0a8",
+      "bounds": { "minX": 230, "minY": 10, "maxX": 560, "maxY": 190 },
+      "siteIds": ["frozen-capital", "ice-core"],
+      "basemap": "./assets/regions/north.webp"
+    }
+  ]
+}

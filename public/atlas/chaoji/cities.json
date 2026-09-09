@@ -1,0 +1,114 @@
+{
+  "version": "chaoji-cities-v1",
+  "note": "城邦最大放大层：高清顶视贴图 + 挤出建筑 + 环境生物。十二点均可进入街区尺度。",
+  "cities": [
+    {
+      "id": "aivernor-capital",
+      "regionId": "aivernor",
+      "scale": 78,
+      "buildingCount": 160,
+      "palette": { "wall": "#d9c7a0", "roof": "#c4a050", "accent": "#f0e2b0" },
+      "creatures": ["birds", "carts"],
+      "districts": ["王宫区", "粮仓码头", "骑士校场", "金穗市集"]
+    },
+    {
+      "id": "inved-capital",
+      "regionId": "inved",
+      "scale": 82,
+      "buildingCount": 180,
+      "palette": { "wall": "#2a2433", "roof": "#5a4570", "accent": "#8b6bb0" },
+      "creatures": ["birds", "banners"],
+      "districts": ["黑曜宫", "军港", "法师塔群", "征召营"]
+    },
+    {
+      "id": "corridor",
+      "regionId": "corridor",
+      "scale": 70,
+      "buildingCount": 70,
+      "palette": { "wall": "#8a6a55", "roof": "#6b4a3a", "accent": "#ffb089" },
+      "creatures": ["smoke", "patrols"],
+      "districts": ["西哨", "中军道", "东堡", "补给营"]
+    },
+    {
+      "id": "mechanica-pass",
+      "regionId": "mechanica",
+      "scale": 72,
+      "buildingCount": 140,
+      "palette": { "wall": "#6d7168", "roof": "#b87333", "accent": "#ff9a4a" },
+      "creatures": ["sparks", "rails"],
+      "districts": ["炉心", "矿轨", "魔晶仓", "工匠街"]
+    },
+    {
+      "id": "strait",
+      "regionId": "seabeast",
+      "scale": 76,
+      "buildingCount": 120,
+      "palette": { "wall": "#4d6d72", "roof": "#2f8f9a", "accent": "#7ad4e0" },
+      "creatures": ["ships", "birds"],
+      "districts": ["北锁潮塔", "南港", "海兽栏", "潮汐市"]
+    },
+    {
+      "id": "hanhai",
+      "regionId": "hanhai",
+      "scale": 80,
+      "buildingCount": 150,
+      "palette": { "wall": "#8a6b5c", "roof": "#3d8f9a", "accent": "#7ee0ff" },
+      "creatures": ["ships", "glowfish"],
+      "districts": ["陆上王城", "水下穹顶", "古港", "潮研院"]
+    },
+    {
+      "id": "trench",
+      "regionId": "seabeast",
+      "scale": 88,
+      "buildingCount": 40,
+      "palette": { "wall": "#1a3040", "roof": "#0d6b7a", "accent": "#5ef0ff" },
+      "creatures": ["glowfish", "mist"],
+      "districts": ["禁航环", "裂隙观测", "沉船带", "深渊口"]
+    },
+    {
+      "id": "academy",
+      "regionId": "aivernor",
+      "scale": 68,
+      "buildingCount": 110,
+      "palette": { "wall": "#e8e2d4", "roof": "#cfc3a4", "accent": "#efe2b0" },
+      "creatures": ["birds", "lanterns"],
+      "districts": ["大图书馆", "观星台", "骑士院", "中立塔"]
+    },
+    {
+      "id": "worldtree",
+      "regionId": "forest",
+      "scale": 74,
+      "buildingCount": 100,
+      "palette": { "wall": "#5a6b48", "roof": "#3f6b52", "accent": "#9dce7a" },
+      "creatures": ["birds", "fireflies"],
+      "districts": ["树门", "林心道", "月光湖栈", "巡林营"]
+    },
+    {
+      "id": "frozen-capital",
+      "regionId": "north",
+      "scale": 76,
+      "buildingCount": 90,
+      "palette": { "wall": "#9eb4c0", "roof": "#d7e8f0", "accent": "#9ad7e8" },
+      "creatures": ["snow", "mist"],
+      "districts": ["冰宫残垣", "冻结大道", "探掘营地", "极光台"]
+    },
+    {
+      "id": "ice-core",
+      "regionId": "north",
+      "scale": 64,
+      "buildingCount": 35,
+      "palette": { "wall": "#7ec8d9", "roof": "#e8fbff", "accent": "#6ee0ff" },
+      "creatures": ["snow", "sparks"],
+      "districts": ["核心裂口", "寒雾环", "禁忌围栏", "观测穹"]
+    },
+    {
+      "id": "bridgehead",
+      "regionId": "aivernor",
+      "scale": 60,
+      "buildingCount": 90,
+      "palette": { "wall": "#c4b08a", "roof": "#8a6b3a", "accent": "#e3c27a" },
+      "creatures": ["carts", "patrols"],
+      "districts": ["双塔桥", "西堡", "东望楼", "粮渡仓"]
+    }
+  ]
+}
