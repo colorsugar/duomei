@@ -21,6 +21,8 @@ import { DuomeiMusicPlayer } from "./components/DuomeiMusicPlayer";
 import { DuomeiYunyouPage } from "./pages/DuomeiYunyouPage";
 import { DuomeiDaluPage } from "./pages/DuomeiDaluPage";
 import { DuomeiAtlasPage } from "./pages/DuomeiAtlasPage";
+import { DuomeiChaojiPage } from "./pages/DuomeiChaojiPage";
+import { DuomeiChaojiMapPage } from "./pages/DuomeiChaojiMapPage";
 
 function PublicRoutePaperVeil({ pathname, disabled }: { pathname: string; disabled: boolean }) {
   const previousPathRef = useRef(pathname);
@@ -54,7 +56,7 @@ function AppRoutes() {
   const isGuyuReader = location.pathname.startsWith("/guyu/");
   const isZaobao = location.pathname === "/zaobao" || location.pathname.startsWith("/zaobao/");
   const isYunyouMap = location.pathname === "/yunyou-map";
-  const isAtlasMap = location.pathname === "/atlas-v6" || location.pathname === "/dalu/map";
+  const isAtlasMap = location.pathname === "/atlas-v6" || location.pathname === "/dalu/map" || location.pathname === "/chaoji/map";
   const bareChrome = isAdmin || isGuyuReader || isZaobao || isYunyouMap || isAtlasMap;
   useSmoothScroll(bareChrome || isTimePage);
 
@@ -78,6 +80,8 @@ function AppRoutes() {
         <Route path="/dalu" element={<DuomeiDaluPage />} />
         <Route path="/dalu/map" element={<DuomeiAtlasPage />} />
         <Route path="/atlas-v6" element={<DuomeiAtlasPage />} />
+        <Route path="/chaoji" element={<DuomeiChaojiPage />} />
+        <Route path="/chaoji/map" element={<DuomeiChaojiMapPage />} />
         <Route path="/about" element={<Navigate to="/#kuaihuo" replace />} />
         <Route path="/admin/login" element={<DuomeiAdmin mode="login" />} />
         <Route path="/admin" element={<DuomeiAdmin mode="notes" />} />
