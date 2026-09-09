@@ -41,6 +41,7 @@
 - OrbitControls：单指/左键平移、双指/滚轮缩放、双指/右键旋转俯仰
 - 手机默认收起侧栏；「目录」打开，× / 遮罩 / Esc / 点地图空白关闭
 - 清屏模式隐藏 UI
+- 行星尺度：1 单位 ≈ 20.3 km，陆地约 1.86 亿 km²（亚欧大陆 3.4 倍）；山高比例压平为卫星视角；云层、经纬网、南北极冰盖、动态比例尺；「对比亚欧」把同比例亚欧大陆轮廓叠在大陆上
 
 嵌入边界：`/chaoji/map` 同源 iframe 加载 `/atlas/chaoji/3d.html`。`edgeone.json` 必须给 `/atlas/chaoji/*` 配 `X-Frame-Options: SAMEORIGIN` 与 `Content-Security-Policy: frame-ancestors 'self'`。
 

@@ -121,7 +121,7 @@ button { font: inherit; color: inherit; }
 .cj3d-stats div { padding: 10px; border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; background: rgba(255,255,255,0.04); }
 .cj3d-stats b { display: block; font-size: 18px; }
 .cj3d-stats span { font-size: 10px; color: var(--cj-muted); }
-.cj3d-tools { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.cj3d-tools { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
 .cj3d-tools button {
   min-height: 40px; border: 1px solid rgba(255,255,255,0.14); border-radius: 10px;
   background: rgba(255,255,255,0.05); cursor: pointer;
@@ -230,6 +230,42 @@ button { font: inherit; color: inherit; }
   background: rgba(7,17,29,0.72); color: var(--cj-muted); font-size: 11px;
   pointer-events: none; white-space: nowrap;
 }
+.cj3d-scale {
+  position: absolute;
+  left: max(14px, var(--safe-l));
+  bottom: max(14px, var(--safe-b));
+  z-index: 3;
+  display: grid;
+  gap: 4px;
+  justify-items: start;
+  pointer-events: none;
+  color: var(--cj-muted);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+.cj3d-scale i {
+  display: block;
+  height: 4px;
+  width: 120px;
+  border: 1px solid rgba(255,255,255,0.7);
+  border-top: none;
+  box-sizing: border-box;
+  background: linear-gradient(90deg, rgba(255,255,255,0.75) 0 50%, transparent 50%);
+}
+.cj3d-scale[hidden] { display: none; }
+.cj3d.is-immersive .cj3d-scale { opacity: 0.6; }
+.cj3d-compare-label {
+  display: inline-block;
+  padding: 5px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(242,210,122,0.7);
+  background: rgba(7,17,29,0.78);
+  color: #f2d27a;
+  font-size: 11px;
+  white-space: nowrap;
+  letter-spacing: 0.02em;
+  pointer-events: none;
+}
 .cj3d-exit {
   position: absolute; left: 50%; bottom: max(14px, var(--safe-b));
   z-index: 5; transform: translateX(-50%);
@@ -275,6 +311,7 @@ button { font: inherit; color: inherit; }
 @media (max-width: 900px) {
   /* Leave a visible scrim strip so outside-tap can close the catalog. */
   .cj3d-panel { width: min(300px, calc(100% - 72px)); max-height: calc(100% - 20px); }
+  .cj3d-tools { grid-template-columns: repeat(2, 1fr); }
   .cj3d-card { left: max(12px, var(--safe-l)); right: max(12px, var(--safe-r)); width: auto; }
   .cj3d-hint { max-width: calc(100% - 24px); white-space: normal; text-align: center; }
 }
