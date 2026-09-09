@@ -300,11 +300,15 @@ function resize() {
 }
 
 async function boot() {
-  const world = await fetch("../world.json", { cache: "no-store" }).then((r) => {
+  // fetch()/TextureLoader resolve against the HTML document URL, not this module —
+  // pin assets to import.meta.url so /atlas/chaoji/3d.html keeps working.
+  const worldUrl = new URL("../world.json", import.meta.url);
+  const basemapUrl = new URL("../assets/basemap.webp", import.meta.url);
+  const world = await fetch(worldUrl, { cache: "no-store" }).then((r) => {
     if (!r.ok) throw new Error(`world.json ${r.status}`);
     return r.json();
   });
-  const texture = await new THREE.TextureLoader().loadAsync("../assets/basemap.webp");
+  const texture = await new THREE.TextureLoader().loadAsync(basemapUrl.href);
   texture.colorSpace = THREE.SRGBColorSpace;
   texture.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy());
 
