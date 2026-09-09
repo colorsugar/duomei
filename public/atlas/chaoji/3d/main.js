@@ -338,6 +338,20 @@ function clearCity() {
   scene.remove(cityRoot); disposeObj(cityRoot); cityRoot = null; activeCity = null;
 }
 
+function normalizeEstates(conf) {
+  const raw = conf.estates || [];
+  return raw.map((e, i) => ({
+    id: e.id || `estate-${i}`,
+    name: e.name || `宅邸${i + 1}`,
+    role: e.role || "领主",
+    style: e.style || conf.archStyle || "palladio",
+    kind: e.kind || "palace",
+    angle: e.angle ?? ((i / Math.max(1, raw.length)) * Math.PI * 2),
+    r: e.r ?? 0.3,
+    blurb: e.blurb || "",
+  }));
+}
+
 function normalizeDistricts(conf) {
   const raw = conf.districts || [];
   return raw.map((d, i) => (typeof d === "string"
@@ -499,45 +513,207 @@ function makeFacadeTexture(wallHex, accentHex, seed) {
   return tex;
 }
 
-function addLandmark(kind, palette, rng) {
+function addColumns(g, mat, count, radius, height, y0 = 0) {
+  for (let i = 0; i < count; i += 1) {
+    const a = (i / count) * Math.PI * 2;
+    const col = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.28, height, 8), mat);
+    col.position.set(Math.cos(a) * radius, y0 + height / 2, Math.sin(a) * radius);
+    g.add(col);
+  }
+}
+
+function addPediment(g, mat, width, depth, y) {
+  const ped = new THREE.Mesh(new THREE.ConeGeometry(width * 0.55, 2.2, 3), mat);
+  ped.rotation.y = Math.PI / 6;
+  ped.position.set(0, y, depth * 0.35);
+  g.add(ped);
+}
+
+function buildPalladioPalace(g, wallMat, roofMat, accentMat, rng) {
+  // Palladio Book II: temple front, piano nobile, wings, optional rotunda
+  const plinth = new THREE.Mesh(new THREE.BoxGeometry(16, 1.2, 12), wallMat);
+  plinth.position.y = 0.6; g.add(plinth);
+  const piano = new THREE.Mesh(new THREE.BoxGeometry(12, 6.5, 9), wallMat);
+  piano.position.y = 4.5; g.add(piano);
+  // portico columns (temple front)
+  for (let i = 0; i < 6; i += 1) {
+    const col = new THREE.Mesh(new THREE.CylinderGeometry(0.32, 0.38, 6.2, 10), wallMat);
+    col.position.set(-5 + i * 2, 4.3, 5.2); g.add(col);
+  }
+  const entablature = new THREE.Mesh(new THREE.BoxGeometry(13, 0.7, 2.2), roofMat);
+  entablature.position.set(0, 7.7, 5.0); g.add(entablature);
+  addPediment(g, roofMat, 12, 8, 9.2);
+  // side wings
+  for (const sx of [-9.5, 9.5]) {
+    const wing = new THREE.Mesh(new THREE.BoxGeometry(5, 4.2, 7), wallMat);
+    wing.position.set(sx, 3.3, 0); g.add(wing);
+    const wr = new THREE.Mesh(new THREE.BoxGeometry(5.4, 0.45, 7.4), roofMat);
+    wr.position.set(sx, 5.6, 0); g.add(wr);
+  }
+  // Villa Rotonda-style central dome
+  const drum = new THREE.Mesh(new THREE.CylinderGeometry(2.4, 2.6, 2.2, 16), wallMat);
+  drum.position.y = 8.8; g.add(drum);
+  const dome = new THREE.Mesh(new THREE.SphereGeometry(2.8, 20, 12, 0, Math.PI * 2, 0, Math.PI * 0.55), roofMat);
+  dome.position.y = 10.6; g.add(dome);
+  const lantern = new THREE.Mesh(new THREE.SphereGeometry(0.55, 10, 10), accentMat);
+  lantern.position.y = 13.2; g.add(lantern);
+  // statue / finial
+  const finial = new THREE.Mesh(new THREE.ConeGeometry(0.35, 1.2, 5), accentMat);
+  finial.position.y = 14.2; g.add(finial);
+}
+
+function buildBaroquePalace(g, wallMat, roofMat, accentMat, rng) {
+  // Baroque: dramatic dome, twin towers, curved volutes, deep cornice
+  const base = new THREE.Mesh(new THREE.BoxGeometry(14, 2, 11), wallMat);
+  base.position.y = 1; g.add(base);
+  const body = new THREE.Mesh(new THREE.BoxGeometry(11, 8, 8.5), wallMat);
+  body.position.y = 6; g.add(body);
+  // curved facade bulge (simplified as half-cylinder)
+  const bulge = new THREE.Mesh(new THREE.CylinderGeometry(4.2, 4.2, 8, 16, 1, false, 0, Math.PI), wallMat);
+  bulge.rotation.y = Math.PI / 2; bulge.position.set(0, 6, 4.2); g.add(bulge);
+  // twin towers
+  for (const sx of [-6.5, 6.5]) {
+    const tower = new THREE.Mesh(new THREE.BoxGeometry(2.6, 14, 2.6), wallMat);
+    tower.position.set(sx, 8, -2); g.add(tower);
+    const cupola = new THREE.Mesh(new THREE.SphereGeometry(1.5, 14, 10, 0, Math.PI * 2, 0, Math.PI * 0.6), roofMat);
+    cupola.position.set(sx, 16, -2); g.add(cupola);
+    const tip = new THREE.Mesh(new THREE.ConeGeometry(0.4, 1.6, 6), accentMat);
+    tip.position.set(sx, 17.6, -2); g.add(tip);
+  }
+  // central dome on drum
+  const drum = new THREE.Mesh(new THREE.CylinderGeometry(3.2, 3.5, 3, 18), wallMat);
+  drum.position.y = 11.5; g.add(drum);
+  const dome = new THREE.Mesh(new THREE.SphereGeometry(4.0, 22, 14, 0, Math.PI * 2, 0, Math.PI * 0.58), roofMat);
+  dome.position.y = 14.2; g.add(dome);
+  const lantern = new THREE.Mesh(new THREE.CylinderGeometry(0.7, 0.9, 2.2, 10), accentMat);
+  lantern.position.y = 17.8; g.add(lantern);
+  // volute scrolls (torus quarters as ornament)
+  for (const sx of [-4, 4]) {
+    const volute = new THREE.Mesh(new THREE.TorusGeometry(1.4, 0.28, 8, 16, Math.PI), accentMat);
+    volute.position.set(sx, 10.5, 5.2); volute.rotation.z = sx > 0 ? -0.4 : 0.4; g.add(volute);
+  }
+}
+
+function buildRococoPalace(g, wallMat, roofMat, accentMat, rng) {
+  // Rococo: lighter pavilion, shell curves, soft dome, ornamental urns
+  const terrace = new THREE.Mesh(new THREE.CylinderGeometry(8.5, 9, 0.8, 20), wallMat);
+  terrace.position.y = 0.4; g.add(terrace);
+  const pavilion = new THREE.Mesh(new THREE.BoxGeometry(9, 5.5, 7), wallMat);
+  pavilion.position.y = 3.5; g.add(pavilion);
+  // bay windows / bowed fronts
+  for (const sx of [-3.2, 3.2]) {
+    const bay = new THREE.Mesh(new THREE.CylinderGeometry(1.8, 1.8, 5.2, 12, 1, false, 0, Math.PI), wallMat);
+    bay.position.set(sx, 3.4, 3.4); bay.rotation.y = sx > 0 ? -0.3 : 0.3; g.add(bay);
+  }
+  const cornice = new THREE.Mesh(new THREE.BoxGeometry(10, 0.4, 7.8), roofMat);
+  cornice.position.y = 6.4; g.add(cornice);
+  const dome = new THREE.Mesh(
+    new THREE.SphereGeometry(3.2, 18, 12, 0, Math.PI * 2, 0, Math.PI * 0.5),
+    new THREE.MeshStandardMaterial({ color: roofMat.color, roughness: 0.35, metalness: 0.25, emissive: accentMat.color, emissiveIntensity: 0.15 }),
+  );
+  dome.position.y = 8.2; g.add(dome);
+  // shell ornaments
+  for (let i = 0; i < 5; i += 1) {
+    const a = (i / 5) * Math.PI * 2;
+    const shell = new THREE.Mesh(new THREE.SphereGeometry(0.55, 10, 8, 0, Math.PI * 2, 0, Math.PI * 0.5), accentMat);
+    shell.position.set(Math.cos(a) * 4.5, 6.8, Math.sin(a) * 3.2);
+    shell.rotation.x = -Math.PI / 2; g.add(shell);
+  }
+  // urn finials
+  for (const sx of [-4.5, 4.5]) {
+    const urn = new THREE.Mesh(new THREE.SphereGeometry(0.45, 10, 10), accentMat);
+    urn.position.set(sx, 7.2, -3); g.add(urn);
+    const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.2, 0.8, 8), roofMat);
+    neck.position.set(sx, 7.9, -3); g.add(neck);
+  }
+}
+
+function buildGothicPalace(g, wallMat, roofMat, accentMat, rng) {
+  // Gothic: nave, pointed spires, flying-buttress struts, rose window
+  const nave = new THREE.Mesh(new THREE.BoxGeometry(8, 14, 18), wallMat);
+  nave.position.y = 7; g.add(nave);
+  const clerestory = new THREE.Mesh(new THREE.BoxGeometry(6.5, 4, 16), wallMat);
+  clerestory.position.y = 15; g.add(clerestory);
+  // rose window disc
+  const rose = new THREE.Mesh(new THREE.CircleGeometry(2.4, 24), accentMat);
+  rose.position.set(0, 11, 9.2); g.add(rose);
+  const roseRim = new THREE.Mesh(new THREE.TorusGeometry(2.5, 0.15, 8, 28), roofMat);
+  roseRim.position.copy(rose.position); g.add(roseRim);
+  // twin west towers + central spire
+  for (const sx of [-5.5, 5.5]) {
+    const tower = new THREE.Mesh(new THREE.BoxGeometry(3.2, 20, 3.2), wallMat);
+    tower.position.set(sx, 10, 7); g.add(tower);
+    const spire = new THREE.Mesh(new THREE.ConeGeometry(2.0, 10, 5), roofMat);
+    spire.position.set(sx, 25, 7); g.add(spire);
+    const tip = new THREE.Mesh(new THREE.ConeGeometry(0.35, 2.2, 4), accentMat);
+    tip.position.set(sx, 31, 7); g.add(tip);
+  }
+  const crossing = new THREE.Mesh(new THREE.ConeGeometry(3.5, 16, 6), roofMat);
+  crossing.position.set(0, 24, 0); g.add(crossing);
+  // flying buttress struts
+  for (let i = 0; i < 6; i += 1) {
+    const z = -7 + i * 2.8;
+    for (const sx of [-1, 1]) {
+      const pier = new THREE.Mesh(new THREE.BoxGeometry(1.1, 8, 1.1), wallMat);
+      pier.position.set(sx * 7.5, 4, z); g.add(pier);
+      const strut = new THREE.Mesh(new THREE.BoxGeometry(3.5, 0.55, 0.55), roofMat);
+      strut.position.set(sx * 5.5, 9, z);
+      strut.rotation.z = sx * -0.55; g.add(strut);
+    }
+  }
+  // pinnacles
+  for (let i = 0; i < 8; i += 1) {
+    const a = (i / 8) * Math.PI * 2;
+    const pin = new THREE.Mesh(new THREE.ConeGeometry(0.45, 3.2, 4), accentMat);
+    pin.position.set(Math.cos(a) * 5, 17.5, Math.sin(a) * 8); g.add(pin);
+  }
+}
+
+function addLandmark(kind, palette, rng, style = "palladio") {
   const wall = hexColor(palette.wall);
   const roof = hexColor(palette.roof);
   const accent = hexColor(palette.accent);
   const g = new THREE.Group();
   const wallMat = new THREE.MeshStandardMaterial({ color: wall, roughness: 0.55, metalness: 0.12 });
   const roofMat = new THREE.MeshStandardMaterial({ color: roof, roughness: 0.48, metalness: 0.18 });
-  const accentMat = new THREE.MeshStandardMaterial({ color: accent, emissive: accent, emissiveIntensity: 0.45, roughness: 0.35, metalness: 0.35 });
+  const accentMat = new THREE.MeshStandardMaterial({
+    color: accent, emissive: accent, emissiveIntensity: 0.45, roughness: 0.35, metalness: 0.35,
+  });
+  const arch = style || "palladio";
 
   if (kind === "palace" || kind === "fort") {
-    const podium = new THREE.Mesh(new THREE.CylinderGeometry(7.5, 8.5, 1.6, 10), wallMat);
-    podium.position.y = 0.8; g.add(podium);
-    const keep = new THREE.Mesh(new THREE.BoxGeometry(7.2, 12, 7.2), wallMat);
-    keep.position.y = 7.2; g.add(keep);
-    const crown = new THREE.Mesh(new THREE.ConeGeometry(5.2, 4.5, 4), roofMat);
-    crown.position.y = 15.4; g.add(crown);
-    for (let i = 0; i < 6; i += 1) {
-      const h = 16 + rng() * 12;
-      const spire = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.95, h, 6), accentMat);
-      const ang = (i / 6) * Math.PI * 2;
-      spire.position.set(Math.cos(ang) * 4.6, h / 2 + 1.2, Math.sin(ang) * 4.6);
-      g.add(spire);
-      const tip = new THREE.Mesh(new THREE.ConeGeometry(0.55, 1.8, 5), roofMat);
-      tip.position.set(Math.cos(ang) * 4.6, h + 2.0, Math.sin(ang) * 4.6);
-      g.add(tip);
+    if (arch === "gothic") buildGothicPalace(g, wallMat, roofMat, accentMat, rng);
+    else if (arch === "baroque") buildBaroquePalace(g, wallMat, roofMat, accentMat, rng);
+    else if (arch === "rococo") buildRococoPalace(g, wallMat, roofMat, accentMat, rng);
+    else buildPalladioPalace(g, wallMat, roofMat, accentMat, rng);
+    if (kind === "fort") {
+      // fortification skirt
+      for (let i = 0; i < 4; i += 1) {
+        const a = (i / 4) * Math.PI * 2 + Math.PI / 4;
+        const bastion = new THREE.Mesh(new THREE.CylinderGeometry(1.6, 2.2, 5, 6), wallMat);
+        bastion.position.set(Math.cos(a) * 10, 2.5, Math.sin(a) * 10); g.add(bastion);
+      }
     }
-    const glow = new THREE.Mesh(new THREE.SphereGeometry(1.4, 12, 12), new THREE.MeshBasicMaterial({ color: accent, transparent: true, opacity: 0.55 }));
-    glow.position.y = 18; g.add(glow);
   } else if (kind === "towers" || kind === "gate") {
-    for (let i = 0; i < 7; i += 1) {
-      const h = 14 + rng() * 22;
-      const r0 = 0.7 + rng() * 0.55;
-      const t = new THREE.Mesh(new THREE.CylinderGeometry(r0 * 0.55, r0, h, 8), i % 2 ? accentMat : wallMat);
-      t.position.set((rng() - 0.5) * 10, h / 2, (rng() - 0.5) * 10);
-      g.add(t);
-      const ring = new THREE.Mesh(new THREE.TorusGeometry(r0 * 1.15, 0.12, 6, 16), accentMat);
-      ring.rotation.x = Math.PI / 2; ring.position.copy(t.position); ring.position.y = h * 0.72; g.add(ring);
-      const tip = new THREE.Mesh(new THREE.ConeGeometry(r0 * 0.9, 2.4, 6), roofMat);
-      tip.position.copy(t.position); tip.position.y = h + 1.1; g.add(tip);
+    if (arch === "gothic") {
+      for (let i = 0; i < 5; i += 1) {
+        const h = 16 + rng() * 14;
+        const t = new THREE.Mesh(new THREE.BoxGeometry(2.2, h, 2.2), i % 2 ? accentMat : wallMat);
+        t.position.set((rng() - 0.5) * 10, h / 2, (rng() - 0.5) * 10); g.add(t);
+        const tip = new THREE.Mesh(new THREE.ConeGeometry(1.4, 5, 4), roofMat);
+        tip.position.copy(t.position); tip.position.y = h + 2.2; g.add(tip);
+      }
+    } else {
+      for (let i = 0; i < 7; i += 1) {
+        const h = 14 + rng() * 22;
+        const r0 = 0.7 + rng() * 0.55;
+        const t = new THREE.Mesh(new THREE.CylinderGeometry(r0 * 0.55, r0, h, 8), i % 2 ? accentMat : wallMat);
+        t.position.set((rng() - 0.5) * 10, h / 2, (rng() - 0.5) * 10); g.add(t);
+        const ring = new THREE.Mesh(new THREE.TorusGeometry(r0 * 1.15, 0.12, 6, 16), accentMat);
+        ring.rotation.x = Math.PI / 2; ring.position.copy(t.position); ring.position.y = h * 0.72; g.add(ring);
+        const tip = new THREE.Mesh(new THREE.ConeGeometry(r0 * 0.9, 2.4, 6), roofMat);
+        tip.position.copy(t.position); tip.position.y = h + 1.1; g.add(tip);
+      }
     }
   } else if (kind === "harbor" || kind === "pens" || kind === "wrecks") {
     const quay = new THREE.Mesh(new THREE.BoxGeometry(16, 0.7, 10), new THREE.MeshStandardMaterial({ color: roof, roughness: 0.82 }));
@@ -597,10 +773,12 @@ function addLandmark(kind, palette, rng) {
       tower.position.set(sx, 5.5, 0); g.add(tower);
     }
   } else {
-    const block = new THREE.Mesh(new THREE.BoxGeometry(6, 9, 6), wallMat);
-    block.position.y = 4.5; g.add(block);
-    const top = new THREE.Mesh(new THREE.ConeGeometry(4.2, 3.2, 4), roofMat);
-    top.position.y = 10.5; g.add(top);
+    // default: small pavilion in city style
+    if (arch === "gothic") buildGothicPalace(g, wallMat, roofMat, accentMat, rng);
+    else if (arch === "baroque") buildBaroquePalace(g, wallMat, roofMat, accentMat, rng);
+    else if (arch === "rococo") buildRococoPalace(g, wallMat, roofMat, accentMat, rng);
+    else buildPalladioPalace(g, wallMat, roofMat, accentMat, rng);
+    g.scale.setScalar(0.55);
   }
   return g;
 }
@@ -810,8 +988,8 @@ function buildCityDetail(site, conf) {
   districtLabels = [];
   for (const d of districts) {
     const local = districtLocal(conf, d);
-    const landmark = addLandmark(d.kind, conf.palette, rng);
-    landmark.position.copy(local); landmark.position.y = 1.35; landmark.scale.setScalar(0.55); group.add(landmark);
+    const landmark = addLandmark(d.kind, conf.palette, rng, conf.archStyle || "palladio");
+    landmark.position.copy(local); landmark.position.y = 1.35; landmark.scale.setScalar(0.42); group.add(landmark);
     const pad = new THREE.Mesh(
       new THREE.CircleGeometry(2.6, 24),
       new THREE.MeshBasicMaterial({
@@ -824,6 +1002,34 @@ function buildCityDetail(site, conf) {
     el.addEventListener("click", (e) => { e.stopPropagation(); enterDistrict(d); });
     const lab = new CSS2DObject(el); lab.position.set(local.x, 9, local.z); group.add(lab);
     districtLabels.push({ el, id: d.id, lab });
+  }
+
+  // royal / lord estates — named houses with period architecture
+  for (const e of normalizeEstates(conf)) {
+    const local = districtLocal(conf, e);
+    const landmark = addLandmark(e.kind, conf.palette, rng, e.style || conf.archStyle || "palladio");
+    landmark.position.copy(local); landmark.position.y = 1.4;
+    landmark.scale.setScalar(e.role === "王室" ? 0.72 : 0.58); group.add(landmark);
+    const pad = new THREE.Mesh(
+      new THREE.RingGeometry(2.2, 3.1, 28),
+      new THREE.MeshBasicMaterial({
+        color: hexColor(conf.palette.accent), transparent: true, opacity: 0.45, depthWrite: false, side: THREE.DoubleSide,
+      }),
+    );
+    pad.rotation.x = -Math.PI / 2; pad.position.set(local.x, 1.22, local.z); group.add(pad);
+    const el = document.createElement("button");
+    el.type = "button"; el.className = `cj3d-district cj3d-estate${e.role === "王室" ? " is-royal" : ""}`;
+    el.innerHTML = `<span class="cj3d-estate-role">${e.role}</span>${e.name}`;
+    el.title = e.blurb || e.name;
+    el.addEventListener("click", (ev) => {
+      ev.stopPropagation();
+      // fly closer to the estate within city view
+      const world = local.clone().add(origin);
+      flyTo({ target: world.clone().add(new THREE.Vector3(0, 6, 0)), radius: Math.max(22, scale * 0.38), polar: 0.72 }, 700);
+      hint.textContent = `${e.role} · ${e.name} — ${e.blurb || e.style}`;
+    });
+    const lab = new CSS2DObject(el); lab.position.set(local.x, 11, local.z); group.add(lab);
+    districtLabels.push({ el, id: e.id, lab });
   }
 
   for (const kind of (conf.creatures || ["birds"]).slice(0, 2)) {
@@ -892,8 +1098,8 @@ function buildDistrictDetail(site, conf, district) {
   rim.rotation.x = -Math.PI / 2; rim.position.y = 0.1; group.add(rim);
 
   // one landmark only — don't rebuild a purple Lego district over the painting
-  const landmark = addLandmark(district.kind, conf.palette, rng);
-  landmark.position.set(0, 0.2, 0); landmark.scale.setScalar(0.85); group.add(landmark);
+  const landmark = addLandmark(district.kind, conf.palette, rng, conf.archStyle || "palladio");
+  landmark.position.set(0, 0.2, 0); landmark.scale.setScalar(0.9); group.add(landmark);
 
   // a few street lamps for depth, still sparse
   for (let i = 0; i < 8; i += 1) {
@@ -960,7 +1166,7 @@ function syncUi() {
     siteSectionTitle.textContent = `${site?.name || "城邦"} · 地点`;
     const backText = activeRegion ? `← 返回${activeRegion.name}` : "← 返回总览";
     backLevel.textContent = backText; backMap.textContent = backText;
-    hint.textContent = "城邦航拍图 · 点地点进街区特写";
+    hint.textContent = "城邦航拍图 · 点地点进街区 · 点王室/领主宅邸近观";
   } else if (inRegion) {
     lodChip.textContent = `地区 · ${activeRegion.name}`;
     siteSectionTitle.textContent = `${activeRegion.name} · 战略点`;
