@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#07111d">
   <title>超级大陆 · 立体卫星图</title>
-  <meta name="description" content="超级大陆立体卫星地图：大陆→地区→城邦→街区四级放大，建模·环境·生物·贴图同屏。与奇幻大陆 V6 不是同一套世界。">
+  <meta name="description" content="超级大陆立体卫星地图：陆地约亚欧大陆 3.4 倍，大陆→地区→城邦→街区四级放大，建模·环境·生物·贴图同屏。与奇幻大陆 V6 不是同一套世界。">
   <link rel="stylesheet" href="./3d/style.css">
   <link rel="preload" as="image" href="./assets/basemap.webp" crossorigin="anonymous">
   <script type="importmap">
@@ -30,17 +30,18 @@
         </div>
         <button type="button" class="cj3d-panel-close" id="menu-close" aria-label="关闭目录">×</button>
       </div>
-      <p class="cj3d-sub">大陆 → 八区 → 十二城邦 → 街区最大细节。点国/点飞入城邦，再点地点放大到街区。分区底图、城邦建模、环境与生物本版齐装。与奇幻大陆 V6 不是同一套世界。</p>
+      <p class="cj3d-sub">一块约 1.86 亿 km²、亚欧大陆 3.4 倍的超级大陆。大陆 → 八区 → 十二城邦 → 街区四级放大。点国/点飞入城邦，再点地点放大到街区。与奇幻大陆 V6 不是同一套世界。</p>
       <div class="cj3d-stats">
         <div><b>8</b><span>地区</span></div>
         <div><b>12</b><span>城邦细层</span></div>
-        <div><b>4</b><span>放大层级</span></div>
+        <div><b>3.4×</b><span>亚欧大陆面积</span></div>
         <div><b>1</b><span>入侵走廊</span></div>
       </div>
       <div class="cj3d-tools">
         <button type="button" id="tilt" aria-pressed="true">斜看</button>
         <button type="button" id="reset">复位</button>
         <button type="button" id="immersive" class="is-accent">清屏</button>
+        <button type="button" id="compare-eurasia" aria-pressed="false">对比亚欧</button>
       </div>
       <button type="button" class="cj3d-back" id="back-level" hidden>← 返回上一级</button>
       <p class="cj3d-section">地区</p>
@@ -55,6 +56,7 @@
     </div>
     <button type="button" class="cj3d-back-float" id="back-map" hidden>← 返回上一级</button>
     <p class="cj3d-chip" id="lod-chip">总览 · 大陆</p>
+    <div class="cj3d-scale" id="scale-bar" aria-label="比例尺"><i></i><span>2,000 km</span></div>
     <p class="cj3d-hint" id="hint">点标记飞入城邦 · 缩小或点返回可回到大地图</p>
     <button type="button" class="cj3d-exit" id="exit-immersive" hidden>退出清屏</button>
     <aside class="cj3d-card" id="card" hidden aria-live="polite">

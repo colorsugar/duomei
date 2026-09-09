@@ -5,9 +5,11 @@ import { Water } from "three/addons/objects/Water.js";
 
 const MAP_W = 1280;
 const MAP_H = 720;
-const HEIGHT_SCALE = 118;
+const HEIGHT_SCALE = 36;
+const KM_PER_UNIT = 20.3;
+const EURASIA_AREA_WAN_KM2 = 5470;
 const SVG_W = 1100;
-const HOME = { radius: 1080, polar: 0.88, azimuth: -0.42 };
+const HOME = { radius: 1500, polar: 0.88, azimuth: -0.42 };
 const TILT = { oblique: 0.88, top: 0.14 };
 const KIND_DOT = {
   "王都": "#e9d29a", "帝都": "#c4b0d8", "战略通道": "#ffb089", "山口要塞": "#c4c6bf",
@@ -83,7 +85,7 @@ stage.appendChild(labelRenderer.domElement);
 
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x050c16);
-scene.fog = new THREE.FogExp2(0x07111d, 0.00038);
+scene.fog = new THREE.FogExp2(0x07111d, 0.0003);
 
 const camera = new THREE.PerspectiveCamera(44, 1, 1, 16000);
 const controls = new OrbitControls(camera, renderer.domElement);
@@ -91,7 +93,7 @@ controls.enableDamping = !reducedMotion;
 controls.dampingFactor = coarse ? 0.1 : 0.075;
 controls.screenSpacePanning = false;
 controls.minDistance = 12;
-controls.maxDistance = 3200;
+controls.maxDistance = 4200;
 controls.minPolarAngle = 0.04;
 controls.maxPolarAngle = 1.25;
 controls.rotateSpeed = coarse ? 0.42 : 0.52;
@@ -332,6 +334,11 @@ function estateMaterials(style, palette) {
 
 const spherical = new THREE.Spherical();
 const offset = new THREE.Vector3();
+const scaleTarget = new THREE.Vector3();
+const scaleOffset = new THREE.Vector3();
+const scaleProjectA = new THREE.Vector3();
+const scaleProjectB = new THREE.Vector3();
+const cameraRight = new THREE.Vector3();
 let flight = null;
 let lodGuardUntil = 0;
 const markers = new Map();
@@ -351,6 +358,11 @@ let creatureSystems = [];
 let districtLabels = [];
 let lastCityView = null;
 let siteButtonsBuilt = false;
+let cloudLayer = null;
+let graticule = null;
+let iceCap = null;
+let eurasiaOverlay = null;
+let eurasiaLabel = null;
 
 function currentView() {
   offset.copy(camera.position).sub(controls.target);
@@ -1367,7 +1379,17 @@ function syncUi() {
     }
   }
 
-  scene.fog.density = inDistrict ? 0.0022 : inCity ? 0.00135 : inRegion ? 0.00055 : 0.00038;
+  const overview = !inRegion && !inCity && !inDistrict;
+  scene.fog.density = inDistrict ? 0.0022 : inCity ? 0.00135 : inRegion ? 0.00055 : 0.0003;
+  if (cloudLayer) cloudLayer.visible = overview;
+  if (graticule) graticule.visible = !inCity && !inDistrict;
+  if (iceCap) iceCap.visible = graticule ? graticule.visible : false;
+  if (!overview) {
+    if (eurasiaOverlay) eurasiaOverlay.visible = false;
+    if (eurasiaLabel) eurasiaLabel.visible = false;
+    const compareBtn = document.getElementById("compare-eurasia");
+    if (compareBtn) compareBtn.setAttribute("aria-pressed", "false");
+  }
   if (continentMesh) {
     // city/district: hide continent completely — brown blur was the "电子垃圾" skybox
     if (inCity || inDistrict) {
@@ -1507,6 +1529,178 @@ function resize() {
   labelRenderer.setSize(w, h);
 }
 
+function noiseSmoothstep(edge0, edge1, x) {
+  const t = Math.min(1, Math.max(0, (x - edge0) / (edge1 - edge0)));
+  return t * t * (3 - 2 * t);
+}
+
+function bilinearGrid(grid, size, u, v) {
+  const x = u * (size - 1);
+  const y = v * (size - 1);
+  const x0 = Math.floor(x), y0 = Math.floor(y);
+  const x1 = Math.min(size - 1, x0 + 1), y1 = Math.min(size - 1, y0 + 1);
+  const tx = x - x0, ty = y - y0;
+  const a = grid[y0 * size + x0] * (1 - tx) + grid[y0 * size + x1] * tx;
+  const b = grid[y1 * size + x0] * (1 - tx) + grid[y1 * size + x1] * tx;
+  return a * (1 - ty) + b * ty;
+}
+
+function fractalNoiseGrid(grid, size, u, v, octaves) {
+  let amp = 1, freq = 1, sum = 0, norm = 0;
+  for (let o = 0; o < octaves; o += 1) {
+    sum += bilinearGrid(grid, size, (u * freq) % 1, (v * freq) % 1) * amp;
+    norm += amp;
+    amp *= 0.5;
+    freq *= 2;
+  }
+  return sum / norm;
+}
+
+function buildAtmosphereLayers() {
+  const noiseRng = mulberry32(0xa7c31e9);
+  const gridSize = 128;
+  const noiseGrid = new Float32Array(gridSize * gridSize);
+  for (let i = 0; i < noiseGrid.length; i += 1) noiseGrid[i] = noiseRng();
+
+  const cloudCanvas = document.createElement("canvas");
+  cloudCanvas.width = cloudCanvas.height = 512;
+  const cloudCtx = cloudCanvas.getContext("2d");
+  const cloudImg = cloudCtx.createImageData(512, 512);
+  for (let y = 0; y < 512; y += 1) {
+    for (let x = 0; x < 512; x += 1) {
+      const n = fractalNoiseGrid(noiseGrid, gridSize, x / 512, y / 512, 4);
+      const alpha = Math.round(noiseSmoothstep(0.48, 0.62, n) * 255);
+      const o = (y * 512 + x) * 4;
+      cloudImg.data[o] = 255; cloudImg.data[o + 1] = 255; cloudImg.data[o + 2] = 255;
+      cloudImg.data[o + 3] = alpha;
+    }
+  }
+  cloudCtx.putImageData(cloudImg, 0, 0);
+  const cloudTex = new THREE.CanvasTexture(cloudCanvas);
+  cloudTex.wrapS = cloudTex.wrapT = THREE.RepeatWrapping;
+  cloudTex.repeat.set(3, 2);
+  cloudLayer = new THREE.Mesh(
+    new THREE.PlaneGeometry(MAP_W * 2.4, MAP_H * 2.4).rotateX(-Math.PI / 2),
+    new THREE.MeshBasicMaterial({ map: cloudTex, transparent: true, opacity: 0.62, depthWrite: false }),
+  );
+  cloudLayer.position.y = 64;
+  scene.add(cloudLayer);
+
+  const gridSpacing = 98.5;
+  const gridVerts = [];
+  const xMin = -MAP_W * 1.5, xMax = MAP_W * 1.5;
+  const zMin = -MAP_H * 1.9, zMax = MAP_H * 1.9;
+  for (let x = xMin; x <= xMax; x += gridSpacing) {
+    gridVerts.push(x, -0.9, zMin, x, -0.9, zMax);
+  }
+  for (let z = zMin; z <= zMax; z += gridSpacing) {
+    gridVerts.push(xMin, -0.9, z, xMax, -0.9, z);
+  }
+  graticule = new THREE.LineSegments(
+    new THREE.BufferGeometry().setAttribute("position", new THREE.Float32BufferAttribute(gridVerts, 3)),
+    new THREE.LineBasicMaterial({ color: 0x7cc4e6, transparent: true, opacity: 0.13 }),
+  );
+  scene.add(graticule);
+
+  function makeIceCapTexture(w, h) {
+    const c = document.createElement("canvas");
+    c.width = w; c.height = h;
+    const ctx = c.getContext("2d");
+    const img = ctx.createImageData(w, h);
+    for (let y = 0; y < h; y += 1) {
+      for (let x = 0; x < w; x += 1) {
+        const n = fractalNoiseGrid(noiseGrid, gridSize, x / w, y / h + 0.17, 4);
+        const fadeY = 0.55 + n * 0.35;
+        const t = y / h;
+        const alpha = t < fadeY ? 1 : 1 - noiseSmoothstep(fadeY, Math.min(1, fadeY + 0.12), t);
+        const o = (y * w + x) * 4;
+        img.data[o] = 234; img.data[o + 1] = 244; img.data[o + 2] = 255;
+        img.data[o + 3] = Math.round(alpha * 255);
+      }
+    }
+    ctx.putImageData(img, 0, 0);
+    return new THREE.CanvasTexture(c);
+  }
+
+  iceCap = new THREE.Group();
+  const northTex = makeIceCapTexture(1024, 256);
+  const northCap = new THREE.Mesh(
+    new THREE.PlaneGeometry(MAP_W * 3.2, 520).rotateX(-Math.PI / 2),
+    new THREE.MeshBasicMaterial({ map: northTex, transparent: true, depthWrite: false, opacity: 0.92 }),
+  );
+  northCap.position.set(0, -0.8, -MAP_H / 2 - 200);
+  iceCap.add(northCap);
+  const southTex = makeIceCapTexture(1024, 256);
+  const southCap = new THREE.Mesh(
+    new THREE.PlaneGeometry(MAP_W * 3.2, 260).rotateX(-Math.PI / 2),
+    new THREE.MeshBasicMaterial({ map: southTex, transparent: true, depthWrite: false, opacity: 0.45 }),
+  );
+  southCap.position.set(0, -0.8, MAP_H / 2 + 260);
+  iceCap.add(southCap);
+  scene.add(iceCap);
+
+  const eurasiaVerts = [
+    [-9, 39], [-8, 43], [-2, 47], [-4, 48], [1, 51], [8, 57], [6, 58], [5, 62], [14, 68], [26, 71],
+    [40, 68], [55, 69], [70, 73], [90, 76], [105, 77], [128, 73], [150, 70], [170, 69], [190, 66],
+    [180, 62], [163, 60], [160, 52], [156, 51], [142, 54], [140, 48], [132, 43], [129, 35], [126, 34],
+    [121, 31], [117, 25], [114, 22], [109, 12], [105, 9], [103, 1], [100, 6], [98, 8], [94, 16],
+    [90, 22], [86, 20], [80, 15], [77, 8], [73, 20], [70, 22], [67, 25], [59, 22], [57, 18], [52, 17],
+    [45, 13], [43, 12], [39, 21], [35, 28], [32, 30], [36, 36], [30, 36], [26, 38], [22, 37], [18, 40],
+    [16, 38], [12, 42], [10, 44], [5, 43], [0, 40], [-2, 37], [-5, 36], [-9, 37],
+  ];
+  const projectEurasia = (lon, lat) => {
+    const xKm = (lon - 90) * 111.32 * Math.cos(lat * Math.PI / 180);
+    const zKm = -(lat - 50) * 111.32;
+    return { x: xKm / KM_PER_UNIT, z: zKm / KM_PER_UNIT };
+  };
+  const shape = new THREE.Shape();
+  eurasiaVerts.forEach(([lon, lat], i) => {
+    const p = projectEurasia(lon, lat);
+    if (i === 0) shape.moveTo(p.x, p.z);
+    else shape.lineTo(p.x, p.z);
+  });
+  shape.closePath();
+  eurasiaOverlay = new THREE.Group();
+  eurasiaOverlay.rotation.x = -Math.PI / 2;
+  eurasiaOverlay.position.y = HEIGHT_SCALE + 6;
+  eurasiaOverlay.renderOrder = 6;
+  eurasiaOverlay.visible = false;
+  const eurasiaFill = new THREE.Mesh(
+    new THREE.ShapeGeometry(shape),
+    new THREE.MeshBasicMaterial({
+      color: 0xf2d27a, transparent: true, opacity: 0.18, depthTest: false, side: THREE.DoubleSide,
+    }),
+  );
+  eurasiaOverlay.add(eurasiaFill);
+  const outlinePts = eurasiaVerts.map(([lon, lat]) => {
+    const p = projectEurasia(lon, lat);
+    return new THREE.Vector3(p.x, p.z, 0);
+  });
+  const outline = new THREE.LineLoop(
+    new THREE.BufferGeometry().setFromPoints(outlinePts),
+    new THREE.LineBasicMaterial({ color: 0xf2d27a, transparent: true, opacity: 0.95, depthTest: false }),
+  );
+  eurasiaOverlay.add(outline);
+  const labelEl = document.createElement("span");
+  labelEl.className = "cj3d-compare-label";
+  labelEl.textContent = `亚欧大陆 · 同比例 · ${EURASIA_AREA_WAN_KM2.toLocaleString("en-US")} 万 km²`;
+  eurasiaLabel = new CSS2DObject(labelEl);
+  eurasiaLabel.position.set(0, 4, 0);
+  eurasiaLabel.visible = false;
+  eurasiaOverlay.add(eurasiaLabel);
+  scene.add(eurasiaOverlay);
+
+  const compareBtn = document.getElementById("compare-eurasia");
+  if (compareBtn) {
+    compareBtn.addEventListener("click", () => {
+      const on = !eurasiaOverlay.visible;
+      eurasiaOverlay.visible = on;
+      eurasiaLabel.visible = on;
+      compareBtn.setAttribute("aria-pressed", on ? "true" : "false");
+    });
+  }
+}
+
 async function boot() {
   const [world, regionsData, citiesData] = await Promise.all([
     fetch(new URL("../world.json", import.meta.url), { cache: "no-store" }).then((r) => { if (!r.ok) throw new Error(`world ${r.status}`); return r.json(); }),
@@ -1542,7 +1736,7 @@ async function boot() {
   bump.colorSpace = THREE.NoColorSpace;
   bump.anisotropy = texture.anisotropy;
 
-  continentMesh = new THREE.Mesh(geometry, new THREE.MeshStandardMaterial({ map: texture, bumpMap: bump, bumpScale: 18, roughness: 0.86, metalness: 0.04 }));
+  continentMesh = new THREE.Mesh(geometry, new THREE.MeshStandardMaterial({ map: texture, bumpMap: bump, bumpScale: 9, roughness: 0.86, metalness: 0.04 }));
   scene.add(continentMesh);
 
   for (const site of world.sites) sitesById.set(site.id, site);
@@ -1577,6 +1771,7 @@ async function boot() {
     const obj = new CSS2DObject(label); obj.position.copy(anchor); scene.add(obj);
   }
 
+  buildAtmosphereLayers();
   applyView({ target: new THREE.Vector3(0, 20, 0), ...HOME });
   syncUi(); resize();
   loading.classList.add("is-done");
@@ -1585,9 +1780,55 @@ async function boot() {
 
   const dummy = new THREE.Object3D();
   let popClock = 0;
+  let scaleClock = 0;
+  const scaleBarEl = document.getElementById("scale-bar");
+  const KM_STEPS = [200, 500, 1000, 2000, 5000, 10000];
   function frame(now) {
     stepFlight(now);
     if (water.material?.uniforms?.time) water.material.uniforms.time.value = now * 0.001;
+    if (cloudLayer?.material?.map) {
+      cloudLayer.material.map.offset.x = now * 0.0000045;
+      cloudLayer.material.map.offset.y = now * 0.0000018;
+    }
+    if (scaleBarEl && now - scaleClock > 120) {
+      scaleClock = now;
+      if (activeCity || activeDistrict) {
+        scaleBarEl.hidden = true;
+      } else {
+        scaleBarEl.hidden = false;
+        scaleTarget.copy(controls.target);
+        cameraRight.set(1, 0, 0).applyQuaternion(camera.quaternion);
+        cameraRight.y = 0;
+        if (cameraRight.lengthSq() > 1e-6) cameraRight.normalize();
+        else cameraRight.set(1, 0, 0);
+        scaleOffset.copy(cameraRight).multiplyScalar(10);
+        scaleProjectA.copy(scaleTarget).project(camera);
+        scaleProjectB.copy(scaleTarget).add(scaleOffset).project(camera);
+        const sw = stage.clientWidth || innerWidth;
+        const sh = stage.clientHeight || innerHeight;
+        const pxA = (scaleProjectA.x * 0.5 + 0.5) * sw;
+        const pyA = (-scaleProjectA.y * 0.5 + 0.5) * sh;
+        const pxB = (scaleProjectB.x * 0.5 + 0.5) * sw;
+        const pyB = (-scaleProjectB.y * 0.5 + 0.5) * sh;
+        const pxPerUnit = Math.hypot(pxB - pxA, pyB - pyA) / 10;
+        let chosen = 200;
+        for (const km of KM_STEPS) {
+          const w = (km / KM_PER_UNIT) * pxPerUnit;
+          if (w <= 180) chosen = km;
+          else break;
+        }
+        let barPx = (chosen / KM_PER_UNIT) * pxPerUnit;
+        if (barPx < 60) { chosen = 200; barPx = (200 / KM_PER_UNIT) * pxPerUnit; }
+        const bar = scaleBarEl.querySelector("i");
+        const span = scaleBarEl.querySelector("span");
+        if (bar) bar.style.width = `${barPx}px`;
+        if (span) {
+          span.textContent = chosen >= 1000
+            ? `${(chosen / 1000).toLocaleString("en-US")},000 km`
+            : `${chosen} km`;
+        }
+      }
+    }
     for (const sys of creatureSystems) {
       for (let i = 0; i < sys.seeds.length; i += 1) {
         const s = sys.seeds[i];
