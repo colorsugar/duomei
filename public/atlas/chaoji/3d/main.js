@@ -737,6 +737,23 @@ function buildRoads(group, scale, palette) {
   }
 }
 
+function applyAerialMap(mat, tex) {
+  tex.colorSpace = THREE.SRGBColorSpace;
+  tex.anisotropy = Math.min(16, renderer.capabilities.getMaxAnisotropy());
+  tex.wrapS = tex.wrapT = THREE.ClampToEdgeWrapping;
+  mat.map = tex;
+  mat.color.set(0xffffff);
+  mat.needsUpdate = true;
+}
+
+function cityAerialUrl(siteId) {
+  return new URL(`../assets/cities/${siteId}.webp`, import.meta.url).href;
+}
+
+function districtAerialUrl(siteId, districtId) {
+  return new URL(`../assets/cities/districts/${siteId}--${districtId}.webp`, import.meta.url).href;
+}
+
 function buildCityDetail(site, conf) {
   clearCity();
   const p = fromSvg(site.x, site.y);
@@ -745,94 +762,81 @@ function buildCityDetail(site, conf) {
   const group = new THREE.Group(); group.position.copy(origin);
   const scale = conf.scale || 64;
   const rng = mulberry32(hashStr(site.id));
-  const count = Math.round((conf.buildingCount || 120) * (coarse ? 0.7 : 1.15));
   const districts = normalizeDistricts(conf);
 
-  // dark void under city so continent blur doesn't show through
+  // void so continent mud never frames the plate
   const voidPad = new THREE.Mesh(
-    new THREE.CircleGeometry(scale * 1.15, 64),
-    new THREE.MeshBasicMaterial({ color: 0x05080f }),
+    new THREE.CircleGeometry(scale * 1.35, 72),
+    new THREE.MeshBasicMaterial({ color: 0x03050a }),
   );
-  voidPad.rotation.x = -Math.PI / 2; voidPad.position.y = 0.35; group.add(voidPad);
+  voidPad.rotation.x = -Math.PI / 2; voidPad.position.y = 0.2; group.add(voidPad);
 
-  // circular aerial plate — MeshBasic so gothic art stays full-bright (Standard + wall tint was mud)
+  // HERO: atlas city aerial — this IS the town, not a lego forest on top of it
+  const plateR = scale * 0.72;
   const ground = new THREE.Mesh(
-    new THREE.CircleGeometry(scale * 0.58, 96),
+    new THREE.CircleGeometry(plateR, 128),
     new THREE.MeshBasicMaterial({ color: 0x0a0c14 }),
   );
-  ground.rotation.x = -Math.PI / 2; ground.position.y = 1.05; group.add(ground);
-  loadTex(new URL(`../assets/cities/${site.id}.webp`, import.meta.url).href)
-    .then((tex) => {
-      tex.colorSpace = THREE.SRGBColorSpace;
-      tex.anisotropy = Math.min(16, renderer.capabilities.getMaxAnisotropy());
-      ground.material.map = tex;
-      ground.material.color.set(0xffffff);
-      ground.material.needsUpdate = true;
-    }).catch(() => {});
+  ground.rotation.x = -Math.PI / 2; ground.position.y = 1.08; group.add(ground);
+  loadTex(cityAerialUrl(site.id))
+    .then((tex) => applyAerialMap(ground.material, tex))
+    .catch(() => {});
 
-  // soft vignette rim
+  // soft pedestal shadow + rim (read as finished art plate)
+  const shade = new THREE.Mesh(
+    new THREE.CircleGeometry(plateR * 1.06, 72),
+    new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.35, depthWrite: false }),
+  );
+  shade.rotation.x = -Math.PI / 2; shade.position.y = 0.95; group.add(shade);
   const rim = new THREE.Mesh(
-    new THREE.RingGeometry(scale * 0.52, scale * 0.78, 64),
-    new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.55, side: THREE.DoubleSide, depthWrite: false }),
+    new THREE.RingGeometry(plateR * 0.97, plateR * 1.08, 96),
+    new THREE.MeshBasicMaterial({
+      color: hexColor(conf.palette.accent), transparent: true, opacity: 0.35,
+      side: THREE.DoubleSide, depthWrite: false,
+    }),
   );
   rim.rotation.x = -Math.PI / 2; rim.position.y = 1.12; group.add(rim);
 
-  buildRoads(group, scale, conf.palette);
-
-  const wall = new THREE.Mesh(
-    new THREE.TorusGeometry(scale * 0.46, 1.1, 10, 72),
-    new THREE.MeshStandardMaterial({ color: hexColor(conf.palette.wall), roughness: 0.62, metalness: 0.14 }),
-  );
-  wall.rotation.x = Math.PI / 2; wall.position.y = 2.6; group.add(wall);
-  const battlement = new THREE.Mesh(
-    new THREE.TorusGeometry(scale * 0.46, 0.42, 8, 72),
-    new THREE.MeshStandardMaterial({ color: hexColor(conf.palette.roof), roughness: 0.55, metalness: 0.16 }),
-  );
-  battlement.rotation.x = Math.PI / 2; battlement.position.y = 3.7; group.add(battlement);
-  // gate towers on wall
-  for (let i = 0; i < 8; i += 1) {
-    const a = (i / 8) * Math.PI * 2;
-    const gt = new THREE.Mesh(
-      new THREE.CylinderGeometry(1.1, 1.4, 7.5, 8),
-      new THREE.MeshStandardMaterial({ color: hexColor(conf.palette.wall), roughness: 0.6, metalness: 0.12 }),
-    );
-    gt.position.set(Math.cos(a) * scale * 0.46, 4.2, Math.sin(a) * scale * 0.46);
-    group.add(gt);
+  // sparse accent veins only — never bury the painting
+  const veinMat = new THREE.MeshBasicMaterial({
+    color: hexColor(conf.palette.accent), transparent: true, opacity: 0.16, depthWrite: false,
+  });
+  for (let ring = 1; ring <= 2; ring += 1) {
+    const vein = new THREE.Mesh(new THREE.TorusGeometry(plateR * (0.28 * ring), 0.16, 6, 72), veinMat);
+    vein.rotation.x = Math.PI / 2; vein.position.y = 1.14; group.add(vein);
   }
 
-  buildDenseBlock(group, conf, new THREE.Vector3(0, 0, 0), scale * 0.4, count, `${site.id}-city`);
-
+  // district pins: tiny landmark + label (click → district art)
   districtLabels = [];
   for (const d of districts) {
     const local = districtLocal(conf, d);
     const landmark = addLandmark(d.kind, conf.palette, rng);
-    landmark.position.copy(local); landmark.position.y = 1.25; landmark.scale.setScalar(1.15); group.add(landmark);
+    landmark.position.copy(local); landmark.position.y = 1.35; landmark.scale.setScalar(0.55); group.add(landmark);
     const pad = new THREE.Mesh(
-      new THREE.CircleGeometry(4.4, 28),
-      new THREE.MeshStandardMaterial({
-        color: hexColor(conf.palette.accent), emissive: hexColor(conf.palette.accent),
-        emissiveIntensity: 0.45, transparent: true, opacity: 0.4, roughness: 0.35,
+      new THREE.CircleGeometry(2.6, 24),
+      new THREE.MeshBasicMaterial({
+        color: hexColor(conf.palette.accent), transparent: true, opacity: 0.35, depthWrite: false,
       }),
     );
-    pad.rotation.x = -Math.PI / 2; pad.position.set(local.x, 1.22, local.z); group.add(pad);
+    pad.rotation.x = -Math.PI / 2; pad.position.set(local.x, 1.2, local.z); group.add(pad);
     const el = document.createElement("button");
     el.type = "button"; el.className = "cj3d-district"; el.textContent = d.name;
     el.addEventListener("click", (e) => { e.stopPropagation(); enterDistrict(d); });
-    const lab = new CSS2DObject(el); lab.position.set(local.x, 12, local.z); group.add(lab);
+    const lab = new CSS2DObject(el); lab.position.set(local.x, 9, local.z); group.add(lab);
     districtLabels.push({ el, id: d.id, lab });
   }
 
-  for (const kind of conf.creatures || ["birds"]) {
-    const n = ["ships", "carts", "patrols", "rails", "banners"].includes(kind) ? 16
-      : ["snow", "mist", "smoke"].includes(kind) ? 48 : 32;
-    addCreatureFlock(group, kind, coarse ? Math.ceil(n * 0.7) : n, scale * 0.48);
+  for (const kind of (conf.creatures || ["birds"]).slice(0, 2)) {
+    const n = ["ships", "carts", "patrols", "rails", "banners"].includes(kind) ? 10 : 18;
+    addCreatureFlock(group, kind, coarse ? Math.ceil(n * 0.7) : n, scale * 0.4);
   }
 
-  cityLight.position.copy(origin); cityLight.position.y += 34; cityLight.intensity = 2.35;
-  cityLight.distance = Math.max(220, scale * 3.2);
+  cityLight.position.copy(origin); cityLight.position.y += 40; cityLight.intensity = 1.6;
+  cityLight.distance = Math.max(260, scale * 3.6);
   cityLight.color.set(conf.mood?.light || conf.palette.accent);
   scene.add(group); cityRoot = group; activeCity = site.id;
-  lastCityView = { target: origin.clone().add(new THREE.Vector3(0, 6, 0)), radius: Math.max(52, scale * 1.12), polar: 0.88 };
+  // more top-down so the atlas painting reads as the town
+  lastCityView = { target: origin.clone().add(new THREE.Vector3(0, 4, 0)), radius: Math.max(48, scale * 1.05), polar: 0.58 };
   return lastCityView;
 }
 
@@ -842,97 +846,81 @@ function buildDistrictDetail(site, conf, district) {
   const baseY = heightAt(p.x, p.y, heightField);
   const origin = toWorld(p.x, p.y); origin.y = baseY;
   const local = districtLocal(conf, district);
-  const center = origin.clone().add(local); center.y = baseY + 1.5;
+  const center = origin.clone().add(local); center.y = baseY + 1.2;
   const group = new THREE.Group(); group.position.copy(center);
-  const span = Math.max(22, (conf.scale || 64) * 0.28);
+  const span = Math.max(26, (conf.scale || 64) * 0.34);
   const rng = mulberry32(hashStr(`${site.id}-${district.id}`));
 
-  const voidPad = new THREE.Mesh(new THREE.CircleGeometry(span * 1.35, 48), new THREE.MeshBasicMaterial({ color: 0x05080f }));
-  voidPad.rotation.x = -Math.PI / 2; voidPad.position.y = -0.2; group.add(voidPad);
+  const voidPad = new THREE.Mesh(
+    new THREE.CircleGeometry(span * 1.55, 64),
+    new THREE.MeshBasicMaterial({ color: 0x03050a }),
+  );
+  voidPad.rotation.x = -Math.PI / 2; voidPad.position.y = -0.25; group.add(voidPad);
 
+  // HERO: district aerial art (generated plate) or UV-crop of city atlas art
   const ground = new THREE.Mesh(
-    new THREE.PlaneGeometry(span * 2.1, span * 2.1),
+    new THREE.CircleGeometry(span * 1.05, 96),
     new THREE.MeshBasicMaterial({ color: 0x0a0c14 }),
   );
-  ground.rotation.x = -Math.PI / 2; group.add(ground);
-  // zoom into district portion of city aerial — Basic keeps crop full-bright
-  loadTex(new URL(`../assets/cities/${site.id}.webp`, import.meta.url).href)
-    .then((base) => {
-      const tex = base.clone();
-      tex.colorSpace = THREE.SRGBColorSpace;
-      tex.needsUpdate = true;
-      const u = 0.5 + Math.cos(district.angle || 0) * (district.r || 0.25) * 0.42;
-      const v = 0.5 + Math.sin(district.angle || 0) * (district.r || 0.25) * 0.42;
-      const zoom = 0.28;
-      tex.offset.set(Math.min(0.72, Math.max(0, u - zoom / 2)), Math.min(0.72, Math.max(0, v - zoom / 2)));
-      tex.repeat.set(zoom, zoom);
-      ground.material.map = tex;
-      ground.material.color.set(0xffffff);
-      ground.material.needsUpdate = true;
-    }).catch(() => {});
+  ground.rotation.x = -Math.PI / 2; ground.position.y = 0.05; group.add(ground);
 
-  const plaza = new THREE.Mesh(
-    new THREE.CircleGeometry(span * 0.32, 36),
-    new THREE.MeshStandardMaterial({
-      color: hexColor(conf.palette.accent), emissive: hexColor(conf.palette.accent),
-      emissiveIntensity: 0.22, roughness: 0.48, metalness: 0.16,
+  const applyCrop = (base) => {
+    const tex = base.clone();
+    tex.colorSpace = THREE.SRGBColorSpace;
+    tex.needsUpdate = true;
+    const u = 0.5 + Math.cos(district.angle || 0) * (district.r || 0.25) * 0.42;
+    const v = 0.5 + Math.sin(district.angle || 0) * (district.r || 0.25) * 0.42;
+    const zoom = 0.32;
+    tex.offset.set(Math.min(0.68, Math.max(0, u - zoom / 2)), Math.min(0.68, Math.max(0, v - zoom / 2)));
+    tex.repeat.set(zoom, zoom);
+    applyAerialMap(ground.material, tex);
+  };
+
+  loadTex(districtAerialUrl(site.id, district.id))
+    .then((tex) => applyAerialMap(ground.material, tex))
+    .catch(() => {
+      loadTex(cityAerialUrl(site.id)).then(applyCrop).catch(() => {});
+    });
+
+  const rim = new THREE.Mesh(
+    new THREE.RingGeometry(span * 0.98, span * 1.12, 72),
+    new THREE.MeshBasicMaterial({
+      color: hexColor(conf.palette.accent), transparent: true, opacity: 0.4,
+      side: THREE.DoubleSide, depthWrite: false,
     }),
   );
-  plaza.rotation.x = -Math.PI / 2; plaza.position.y = 0.08; group.add(plaza);
+  rim.rotation.x = -Math.PI / 2; rim.position.y = 0.1; group.add(rim);
 
+  // one landmark only — don't rebuild a purple Lego district over the painting
   const landmark = addLandmark(district.kind, conf.palette, rng);
-  landmark.position.set(0, 0.15, 0); landmark.scale.setScalar(1.75); group.add(landmark);
+  landmark.position.set(0, 0.2, 0); landmark.scale.setScalar(0.85); group.add(landmark);
 
-  buildDenseBlock(group, conf, new THREE.Vector3(0, 0, 0), span * 0.92, coarse ? 110 : 180, `${site.id}-${district.id}-max`, true);
-
-  // street grid
-  const streetMat = new THREE.MeshStandardMaterial({ color: hexColor(conf.palette.road || "#222228"), roughness: 0.9 });
-  for (let i = 0; i < 6; i += 1) {
-    const a = (i / 6) * Math.PI * 2;
-    const street = new THREE.Mesh(new THREE.BoxGeometry(span * 1.6, 0.14, 2.0), streetMat);
-    street.position.set(Math.cos(a) * span * 0.18, 0.1, Math.sin(a) * span * 0.18);
-    street.rotation.y = -a; group.add(street);
-  }
-  for (let ring = 1; ring <= 2; ring += 1) {
-    const ringRoad = new THREE.Mesh(new THREE.TorusGeometry(span * (0.28 * ring), 0.55, 6, 48), streetMat);
-    ringRoad.rotation.x = Math.PI / 2; ringRoad.position.y = 0.12; group.add(ringRoad);
-  }
-
-  // props: crates, banners, market stalls near plaza
-  for (let i = 0; i < 18; i += 1) {
-    const a = rng() * Math.PI * 2;
-    const r = span * (0.18 + rng() * 0.55);
-    const prop = new THREE.Mesh(
-      new THREE.BoxGeometry(0.7 + rng(), 0.6 + rng() * 1.4, 0.7 + rng()),
-      new THREE.MeshStandardMaterial({ color: i % 2 ? hexColor(conf.palette.roof) : hexColor(conf.palette.wall), roughness: 0.75 }),
-    );
-    prop.position.set(Math.cos(a) * r, 0.5, Math.sin(a) * r);
-    group.add(prop);
-  }
-  for (let i = 0; i < 10; i += 1) {
-    const a = (i / 10) * Math.PI * 2;
+  // a few street lamps for depth, still sparse
+  for (let i = 0; i < 8; i += 1) {
+    const a = (i / 8) * Math.PI * 2;
     const lamp = new THREE.Mesh(
-      new THREE.SphereGeometry(0.35, 10, 10),
-      new THREE.MeshStandardMaterial({ color: hexColor(conf.palette.accent), emissive: hexColor(conf.palette.accent), emissiveIntensity: 0.85, roughness: 0.25 }),
+      new THREE.SphereGeometry(0.32, 10, 10),
+      new THREE.MeshStandardMaterial({
+        color: hexColor(conf.palette.accent), emissive: hexColor(conf.palette.accent),
+        emissiveIntensity: 0.9, roughness: 0.25,
+      }),
     );
-    lamp.position.set(Math.cos(a) * span * 0.42, 3.6, Math.sin(a) * span * 0.42);
+    lamp.position.set(Math.cos(a) * span * 0.62, 2.8, Math.sin(a) * span * 0.62);
     group.add(lamp);
-    const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.12, 3.4, 6), new THREE.MeshStandardMaterial({ color: hexColor(conf.palette.wall) }));
-    pole.position.set(lamp.position.x, 1.8, lamp.position.z); group.add(pole);
   }
 
-  for (const kind of (conf.creatures || ["birds"]).slice(0, 3)) {
-    addCreatureFlock(group, kind, coarse ? 16 : 28, span * 0.85, 0.6);
+  for (const kind of (conf.creatures || ["birds"]).slice(0, 2)) {
+    addCreatureFlock(group, kind, coarse ? 12 : 20, span * 0.7, 0.5);
   }
 
-  districtLight.position.copy(center); districtLight.position.y += 16; districtLight.intensity = 2.8;
+  districtLight.position.copy(center); districtLight.position.y += 18; districtLight.intensity = 2.0;
   districtLight.distance = span * 5; districtLight.color.set(conf.palette.accent);
   scene.add(group); districtRoot = group; activeDistrict = district.id;
   for (const item of districtLabels) {
     item.el.classList.toggle("is-active", item.id === district.id);
     item.el.classList.toggle("is-dim", item.id !== district.id);
   }
-  return { target: center.clone().add(new THREE.Vector3(0, 4, 0)), radius: Math.max(18, span * 1.05), polar: 0.72 };
+  return { target: center.clone().add(new THREE.Vector3(0, 3, 0)), radius: Math.max(20, span * 1.15), polar: 0.52 };
 }
 
 function rebuildSiteButtons() {
@@ -965,14 +953,14 @@ function syncUi() {
     siteSectionTitle.textContent = `${site?.name || "城邦"} · 地点`;
     const backText = `← 返回${site?.name || "城邦"}`;
     backLevel.textContent = backText; backMap.textContent = backText;
-    hint.textContent = "已放到最大细节 · 缩小或点返回回到城邦";
+    hint.textContent = "街区航拍特写 · 缩小或点返回回到城邦";
   } else if (inCity) {
     const site = sitesById.get(activeCity);
     lodChip.textContent = `城邦 · ${site?.name || activeCity}`;
     siteSectionTitle.textContent = `${site?.name || "城邦"} · 地点`;
     const backText = activeRegion ? `← 返回${activeRegion.name}` : "← 返回总览";
     backLevel.textContent = backText; backMap.textContent = backText;
-    hint.textContent = "点地点标记放大到街区最大细节";
+    hint.textContent = "城邦航拍图 · 点地点进街区特写";
   } else if (inRegion) {
     lodChip.textContent = `地区 · ${activeRegion.name}`;
     siteSectionTitle.textContent = `${activeRegion.name} · 战略点`;
