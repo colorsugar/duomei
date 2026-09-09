@@ -337,8 +337,10 @@ test("ships Yunyou as a same-origin, vendored, accessible 3D map", () => {
   assert.match(yunyouPageCss, /@media \(max-width: 40rem\)/);
   assert.match(edgeOneConfig, /"source": "\/\*"[\s\S]*"X-Frame-Options", "value": "DENY"/);
   assert.match(edgeOneConfig, /"source": "\/yunyou\/\*"[\s\S]*"X-Frame-Options", "value": "SAMEORIGIN"[\s\S]*"Content-Security-Policy", "value": "frame-ancestors 'self'"/);
+  assert.match(edgeOneConfig, /"source": "\/atlas\/chaoji\/\*"[\s\S]*"X-Frame-Options", "value": "SAMEORIGIN"[\s\S]*"Content-Security-Policy", "value": "frame-ancestors 'self'"/);
   assert.match(edgeOneDeployWorkflow, /homeFrameOptions\.toUpperCase\(\) === "DENY"/);
   assert.match(edgeOneDeployWorkflow, /yunyouFrameOptions\.toUpperCase\(\) === "SAMEORIGIN"/);
+  assert.match(edgeOneDeployWorkflow, /chaojiFrameOptions\.toUpperCase\(\) === "SAMEORIGIN"/);
   assert.match(yunyouMain, /prefers-reduced-motion: reduce/);
   assert.equal(
     existsSync(join(dirname(fileURLToPath(import.meta.url)), "../../public/yunyou/vendor/three/LICENSE.txt")),
