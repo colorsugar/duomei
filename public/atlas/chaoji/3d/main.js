@@ -10,9 +10,9 @@ const SVG_W = 1100;
 const HOME = { radius: 1080, polar: 0.88, azimuth: -0.42 };
 const TILT = { oblique: 0.88, top: 0.14 };
 const KIND_DOT = {
-  王都: "#e9d29a", 帝都: "#c4b0d8", 战略通道: "#ffb089", 山口要塞: "#c4c6bf",
-  战略海峡: "#82b9c4", 双层王城: "#d2b09a", 禁航海沟: "#6ee0ff", 中立学术中心: "#efe2b0",
-  森林关隘: "#7dba8f", 远古遗迹: "#b9d8e0", 禁忌核心: "#9ad7e8", 渡口要塞: "#e3c27a",
+  "王都": "#e9d29a", "帝都": "#c4b0d8", "战略通道": "#ffb089", "山口要塞": "#c4c6bf",
+  "战略海峡": "#82b9c4", "双层王城": "#d2b09a", "禁航海沟": "#6ee0ff", "中立学术中心": "#efe2b0",
+  "森林关隘": "#7dba8f", "远古遗迹": "#b9d8e0", "禁忌核心": "#9ad7e8", "渡口要塞": "#e3c27a",
 };
 
 const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -24,6 +24,7 @@ const stage = document.getElementById("stage");
 const siteList = document.getElementById("site-list");
 const regionList = document.getElementById("region-list");
 const backLevel = document.getElementById("back-level");
+const backMap = document.getElementById("back-map");
 const lodChip = document.getElementById("lod-chip");
 const siteSectionTitle = document.getElementById("site-section-title");
 const card = document.getElementById("card");
@@ -58,6 +59,7 @@ addEventListener("keydown", (e) => {
   if (e.key !== "Escape") return;
   if (!card.hidden) { card.hidden = true; return; }
   if (app.classList.contains("is-immersive")) { setImmersive(false); return; }
+  if (activeDistrict || activeCity || activeRegion) { stepBack(); return; }
   if (app.classList.contains("is-panel-open")) setPanel(false);
 });
 setPanel(!narrow() && !coarse);
@@ -88,7 +90,7 @@ const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = !reducedMotion;
 controls.dampingFactor = coarse ? 0.1 : 0.075;
 controls.screenSpacePanning = false;
-controls.minDistance = 28;
+controls.minDistance = 12;
 controls.maxDistance = 3200;
 controls.minPolarAngle = 0.04;
 controls.maxPolarAngle = 1.25;
@@ -139,6 +141,8 @@ fill.position.set(900, 600, -500);
 scene.add(fill);
 const cityLight = new THREE.PointLight(0xffd9a0, 0, 260, 2);
 scene.add(cityLight);
+const districtLight = new THREE.PointLight(0xffe8c0, 0, 90, 2);
+scene.add(districtLight);
 
 scene.add(new THREE.Mesh(
   new THREE.SphereGeometry(8200, 32, 16),
@@ -245,10 +249,12 @@ function mulberry32(a) {
     return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
   };
 }
+function hexColor(c) { return new THREE.Color(c); }
 
 const spherical = new THREE.Spherical();
 const offset = new THREE.Vector3();
 let flight = null;
+let lodGuardUntil = 0;
 const markers = new Map();
 const sitesById = new Map();
 const siteRegion = new Map();
@@ -256,11 +262,16 @@ const citiesById = new Map();
 let regions = [];
 let activeRegion = null;
 let activeCity = null;
+let activeDistrict = null;
 let heightField = null;
 let continentMesh = null;
 let regionOverlay = null;
 let cityRoot = null;
+let districtRoot = null;
 let creatureSystems = [];
+let districtLabels = [];
+let lastCityView = null;
+let siteButtonsBuilt = false;
 
 function currentView() {
   offset.copy(camera.position).sub(controls.target);
@@ -282,6 +293,7 @@ function flyTo(partial, duration = 700) {
     polar: Math.min(controls.maxPolarAngle, Math.max(controls.minPolarAngle, partial.polar ?? from.polar)),
     azimuth: partial.azimuth ?? from.azimuth,
   };
+  lodGuardUntil = performance.now() + (reducedMotion ? 80 : duration + 200);
   if (reducedMotion || duration === 0) { applyView(to); flight = null; return Promise.resolve(); }
   return new Promise((resolve) => { flight = { from, to, start: performance.now(), duration, resolve }; });
 }
@@ -301,6 +313,7 @@ function stepFlight(now) {
 
 function disposeObj(root) {
   root.traverse((o) => {
+    if (o.isCSS2DObject && o.element?.parentNode) o.element.remove();
     o.geometry?.dispose?.();
     for (const m of [].concat(o.material || [])) m?.dispose?.();
   });
@@ -309,11 +322,39 @@ function clearRegionOverlay() {
   if (!regionOverlay) return;
   scene.remove(regionOverlay); disposeObj(regionOverlay); regionOverlay = null;
 }
+function clearDistrict() {
+  districtLight.intensity = 0;
+  activeDistrict = null;
+  if (!districtRoot) return;
+  scene.remove(districtRoot); disposeObj(districtRoot); districtRoot = null;
+}
 function clearCity() {
+  clearDistrict();
   creatureSystems = [];
+  districtLabels = [];
   cityLight.intensity = 0;
+  lastCityView = null;
   if (!cityRoot) return;
   scene.remove(cityRoot); disposeObj(cityRoot); cityRoot = null; activeCity = null;
+}
+
+function normalizeDistricts(conf) {
+  const raw = conf.districts || [];
+  return raw.map((d, i) => (typeof d === "string"
+    ? { id: `d${i}`, name: d, angle: (i / Math.max(1, raw.length)) * Math.PI * 2 + 0.2, r: 0.12 + (i % 3) * 0.08, kind: "block", blurb: d }
+    : {
+      id: d.id || `d${i}`,
+      name: d.name || d.id || `地点${i + 1}`,
+      angle: d.angle ?? ((i / Math.max(1, raw.length)) * Math.PI * 2),
+      r: d.r ?? 0.25,
+      kind: d.kind || "block",
+      blurb: d.blurb || "",
+    }));
+}
+function districtLocal(conf, district) {
+  const a = district.angle ?? 0;
+  const r = (conf.scale || 64) * (district.r ?? 0.25);
+  return new THREE.Vector3(Math.cos(a) * r, 0, Math.sin(a) * r);
 }
 
 function regionFrame(region) {
@@ -361,10 +402,13 @@ async function showRegionOverlay(region) {
   scene.add(regionOverlay);
 }
 
-function addCreatureFlock(group, kind, count, span) {
+function addCreatureFlock(group, kind, count, span, yBias = 0) {
   const geo = kind === "ships" ? new THREE.ConeGeometry(0.45, 2.1, 4)
-    : kind === "glowfish" ? new THREE.SphereGeometry(0.32, 8, 8)
-      : new THREE.SphereGeometry(0.22, 6, 6);
+    : kind === "carts" ? new THREE.BoxGeometry(0.9, 0.45, 0.55)
+      : kind === "patrols" ? new THREE.CapsuleGeometry(0.18, 0.55, 3, 6)
+        : kind === "banners" ? new THREE.PlaneGeometry(0.55, 1.1)
+          : kind === "glowfish" ? new THREE.SphereGeometry(0.32, 8, 8)
+            : new THREE.SphereGeometry(0.22, 6, 6);
   const palette = {
     birds: 0xe8f0ff, ships: 0xc4a46a, glowfish: 0x5ef0ff, carts: 0xb08950,
     patrols: 0xd0d4c8, sparks: 0xff9a4a, fireflies: 0xb8ff7a, snow: 0xe8fbff,
@@ -373,18 +417,25 @@ function addCreatureFlock(group, kind, count, span) {
   const color = palette[kind] || 0xffffff;
   const glow = ["glowfish", "sparks", "fireflies", "lanterns"].includes(kind);
   const mat = new THREE.MeshStandardMaterial({
-    color, emissive: glow ? color : 0x000000, emissiveIntensity: glow ? 0.9 : 0, roughness: 0.45, metalness: 0.12,
+    color, emissive: glow ? color : 0x000000, emissiveIntensity: glow ? 0.9 : 0,
+    roughness: 0.45, metalness: 0.12, side: kind === "banners" ? THREE.DoubleSide : THREE.FrontSide,
   });
   const mesh = new THREE.InstancedMesh(geo, mat, count);
   const dummy = new THREE.Object3D();
   const seeds = [];
   for (let i = 0; i < count; i += 1) {
     const a = (i / count) * Math.PI * 2;
-    const r = span * (0.18 + 0.4 * Math.random());
-    const seed = { a, r, h: 3 + Math.random() * 16, speed: 0.25 + Math.random() * 0.7, phase: Math.random() * Math.PI * 2 };
+    const r = span * (0.12 + 0.48 * Math.random());
+    const ground = ["ships", "carts", "patrols", "rails"].includes(kind);
+    const seed = {
+      a, r,
+      h: yBias + (ground ? 1.4 + Math.random() * 1.2 : 3 + Math.random() * 16),
+      speed: 0.25 + Math.random() * 0.7,
+      phase: Math.random() * Math.PI * 2,
+    };
     seeds.push(seed);
     dummy.position.set(Math.cos(a) * r, seed.h, Math.sin(a) * r);
-    dummy.scale.setScalar(kind === "ships" ? 1.35 : 0.9);
+    dummy.scale.setScalar(kind === "ships" ? 1.35 : kind === "patrols" ? 1.1 : 0.9);
     dummy.updateMatrix();
     mesh.setMatrixAt(i, dummy.matrix);
   }
@@ -393,146 +444,315 @@ function addCreatureFlock(group, kind, count, span) {
   creatureSystems.push({ mesh, seeds, kind });
 }
 
+function addLandmark(kind, palette, rng) {
+  const wall = hexColor(palette.wall);
+  const roof = hexColor(palette.roof);
+  const accent = hexColor(palette.accent);
+  const g = new THREE.Group();
+  if (kind === "palace" || kind === "fort") {
+    const keep = new THREE.Mesh(new THREE.BoxGeometry(6.5, 10, 6.5), new THREE.MeshStandardMaterial({ color: wall, roughness: 0.62, metalness: 0.08 }));
+    keep.position.y = 5; g.add(keep);
+    for (let i = 0; i < 4; i += 1) {
+      const spire = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.45, 0.85, 14 + rng() * 8, 6),
+        new THREE.MeshStandardMaterial({ color: accent, emissive: accent, emissiveIntensity: 0.22, roughness: 0.4, metalness: 0.25 }),
+      );
+      const ang = (i / 4) * Math.PI * 2;
+      spire.position.set(Math.cos(ang) * 3.2, 8, Math.sin(ang) * 3.2);
+      g.add(spire);
+    }
+  } else if (kind === "towers" || kind === "gate") {
+    for (let i = 0; i < 5; i += 1) {
+      const h = 10 + rng() * 16;
+      const t = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.55 + rng() * 0.4, 0.9, h, 7),
+        new THREE.MeshStandardMaterial({ color: i % 2 ? accent : wall, emissive: accent, emissiveIntensity: 0.18, roughness: 0.45, metalness: 0.2 }),
+      );
+      t.position.set((rng() - 0.5) * 8, h / 2, (rng() - 0.5) * 8);
+      g.add(t);
+    }
+  } else if (kind === "harbor" || kind === "pens" || kind === "wrecks") {
+    for (let i = 0; i < 4; i += 1) {
+      const pier = new THREE.Mesh(new THREE.BoxGeometry(10, 0.5, 1.4), new THREE.MeshStandardMaterial({ color: roof, roughness: 0.8 }));
+      pier.position.set((rng() - 0.5) * 6, 0.8, -4 + i * 2.2); g.add(pier);
+      const ship = new THREE.Mesh(new THREE.ConeGeometry(0.7, 3.2, 4), new THREE.MeshStandardMaterial({ color: 0xc4a46a, roughness: 0.55 }));
+      ship.rotation.z = Math.PI / 2; ship.position.set((rng() - 0.5) * 4, 1.4, -4 + i * 2.2); g.add(ship);
+    }
+  } else if (kind === "barracks") {
+    for (let i = 0; i < 6; i += 1) {
+      const tent = new THREE.Mesh(new THREE.ConeGeometry(1.4, 2.2, 4), new THREE.MeshStandardMaterial({ color: roof, roughness: 0.7 }));
+      tent.position.set((i % 3) * 3.2 - 3.2, 1.1, Math.floor(i / 3) * 3.4 - 1.7); g.add(tent);
+    }
+  } else if (kind === "market" || kind === "warehouse") {
+    for (let i = 0; i < 8; i += 1) {
+      const stall = new THREE.Mesh(new THREE.BoxGeometry(1.6 + rng(), 1.2 + rng(), 1.4 + rng()), new THREE.MeshStandardMaterial({ color: i % 2 ? wall : roof, roughness: 0.75 }));
+      stall.position.set((i % 4) * 2.4 - 3.6, 0.9, Math.floor(i / 4) * 2.8 - 1.4); g.add(stall);
+    }
+  } else if (kind === "factory" || kind === "rail") {
+    const stack = new THREE.Mesh(new THREE.CylinderGeometry(1.2, 1.6, 18, 8), new THREE.MeshStandardMaterial({ color: wall, emissive: accent, emissiveIntensity: 0.3, roughness: 0.5, metalness: 0.35 }));
+    stack.position.y = 9; g.add(stack);
+    for (let i = 0; i < 3; i += 1) {
+      const hall = new THREE.Mesh(new THREE.BoxGeometry(8, 3.5, 4), new THREE.MeshStandardMaterial({ color: roof, metalness: 0.4, roughness: 0.45 }));
+      hall.position.set((i - 1) * 5, 1.8, 4); g.add(hall);
+    }
+  } else if (kind === "dome" || kind === "lake" || kind === "abyss" || kind === "ring") {
+    const dome = new THREE.Mesh(
+      new THREE.SphereGeometry(5.5, 24, 16, 0, Math.PI * 2, 0, Math.PI * 0.55),
+      new THREE.MeshStandardMaterial({ color: accent, emissive: accent, emissiveIntensity: 0.35, transparent: true, opacity: 0.55, roughness: 0.2, metalness: 0.4 }),
+    );
+    dome.position.y = 1.2; g.add(dome);
+  } else if (kind === "bridge" || kind === "road") {
+    const deck = new THREE.Mesh(new THREE.BoxGeometry(16, 0.7, 3.2), new THREE.MeshStandardMaterial({ color: wall, roughness: 0.7 }));
+    deck.position.y = 2; g.add(deck);
+    for (const sx of [-6, 6]) {
+      const tower = new THREE.Mesh(new THREE.BoxGeometry(2.4, 9, 2.4), new THREE.MeshStandardMaterial({ color: roof, roughness: 0.6 }));
+      tower.position.set(sx, 4.5, 0); g.add(tower);
+    }
+  } else {
+    const block = new THREE.Mesh(new THREE.BoxGeometry(5, 7, 5), new THREE.MeshStandardMaterial({ color: wall, roughness: 0.65 }));
+    block.position.y = 3.5; g.add(block);
+  }
+  return g;
+}
+
+function buildDenseBlock(group, conf, center, radius, count, seedKey, tall = false) {
+  const rng = mulberry32(hashStr(seedKey));
+  const wallMat = new THREE.MeshStandardMaterial({ color: hexColor(conf.palette.wall), roughness: 0.68, metalness: 0.06 });
+  const roofMat = new THREE.MeshStandardMaterial({ color: hexColor(conf.palette.roof), roughness: 0.55, metalness: 0.1 });
+  const accentMat = new THREE.MeshStandardMaterial({ color: hexColor(conf.palette.accent), emissive: hexColor(conf.palette.accent), emissiveIntensity: 0.2, roughness: 0.4, metalness: 0.22 });
+  const buildings = new THREE.InstancedMesh(new THREE.BoxGeometry(1, 1, 1), wallMat, count);
+  const roofs = new THREE.InstancedMesh(new THREE.ConeGeometry(0.78, 0.75, 4), roofMat, count);
+  const lamps = new THREE.InstancedMesh(new THREE.SphereGeometry(0.22, 6, 6), accentMat, Math.ceil(count * 0.35));
+  const dummy = new THREE.Object3D();
+  let lampI = 0;
+  for (let i = 0; i < count; i += 1) {
+    const a = rng() * Math.PI * 2;
+    const r = radius * (0.12 + rng() * 0.82);
+    const bw = 1.1 + rng() * 2.8, bd = 1.1 + rng() * 2.6, bh = 2.2 + rng() * (tall ? 14 : 9);
+    const x = center.x + Math.cos(a) * r, z = center.z + Math.sin(a) * r;
+    dummy.position.set(x, 1.15 + bh / 2, z); dummy.scale.set(bw, bh, bd); dummy.rotation.set(0, rng() * Math.PI, 0); dummy.updateMatrix();
+    buildings.setMatrixAt(i, dummy.matrix);
+    dummy.position.y = 1.15 + bh + 0.28; dummy.scale.set(bw * 0.78, 1.05, bd * 0.78); dummy.updateMatrix();
+    roofs.setMatrixAt(i, dummy.matrix);
+    if (lampI < lamps.count && rng() > 0.55) {
+      dummy.position.set(x + (rng() - 0.5) * 1.2, 2.2 + rng() * 3, z + (rng() - 0.5) * 1.2);
+      dummy.scale.setScalar(1); dummy.rotation.set(0, 0, 0); dummy.updateMatrix();
+      lamps.setMatrixAt(lampI, dummy.matrix); lampI += 1;
+    }
+  }
+  buildings.instanceMatrix.needsUpdate = true; roofs.instanceMatrix.needsUpdate = true;
+  lamps.count = lampI; lamps.instanceMatrix.needsUpdate = true;
+  group.add(buildings, roofs, lamps);
+  const trees = new THREE.InstancedMesh(new THREE.ConeGeometry(0.7, 2.2, 5), new THREE.MeshStandardMaterial({ color: hexColor(conf.palette.green || "#5a7a48"), roughness: 0.85 }), Math.ceil(count * 0.2));
+  for (let i = 0; i < trees.count; i += 1) {
+    const a = rng() * Math.PI * 2, r = radius * (0.55 + rng() * 0.4);
+    dummy.position.set(center.x + Math.cos(a) * r, 2.1, center.z + Math.sin(a) * r);
+    dummy.scale.setScalar(0.8 + rng() * 1.1); dummy.rotation.set(0, 0, 0); dummy.updateMatrix();
+    trees.setMatrixAt(i, dummy.matrix);
+  }
+  trees.instanceMatrix.needsUpdate = true; group.add(trees);
+}
+
+function buildRoads(group, scale, palette) {
+  const roadMat = new THREE.MeshStandardMaterial({ color: hexColor(palette.road || "#3a3a3a"), roughness: 0.95, metalness: 0.02 });
+  for (let ring = 1; ring <= 3; ring += 1) {
+    const road = new THREE.Mesh(new THREE.TorusGeometry(scale * 0.12 * ring, 0.55, 5, 64), roadMat);
+    road.rotation.x = Math.PI / 2; road.position.y = 1.25; group.add(road);
+  }
+  for (let i = 0; i < 8; i += 1) {
+    const a = (i / 8) * Math.PI * 2;
+    const strip = new THREE.Mesh(new THREE.BoxGeometry(scale * 0.42, 0.2, 1.1), roadMat);
+    strip.position.set(Math.cos(a) * scale * 0.22, 1.22, Math.sin(a) * scale * 0.22);
+    strip.rotation.y = -a; group.add(strip);
+  }
+}
+
 function buildCityDetail(site, conf) {
   clearCity();
   const p = fromSvg(site.x, site.y);
   const baseY = heightAt(p.x, p.y, heightField);
   const origin = toWorld(p.x, p.y); origin.y = baseY;
-  const group = new THREE.Group();
-  group.position.copy(origin);
-  const scale = conf.scale;
+  const group = new THREE.Group(); group.position.copy(origin);
+  const scale = conf.scale || 64;
   const rng = mulberry32(hashStr(site.id));
-  const count = Math.round(conf.buildingCount * (coarse ? 0.55 : 1));
+  const count = Math.round((conf.buildingCount || 120) * (coarse ? 0.6 : 1));
+  const districts = normalizeDistricts(conf);
 
-  const ground = new THREE.Mesh(
-    new THREE.CircleGeometry(scale * 0.52, 64),
-    new THREE.MeshStandardMaterial({ color: 0xb7a78a, roughness: 0.92, metalness: 0.02 }),
-  );
-  ground.rotation.x = -Math.PI / 2;
-  ground.position.y = 1.15;
-  group.add(ground);
+  const ground = new THREE.Mesh(new THREE.CircleGeometry(scale * 0.56, 72), new THREE.MeshStandardMaterial({ color: hexColor(conf.palette.wall), roughness: 0.92, metalness: 0.02 }));
+  ground.rotation.x = -Math.PI / 2; ground.position.y = 1.05; group.add(ground);
   loadTex(new URL(`../assets/cities/${site.id}.webp`, import.meta.url).href)
-    .then((tex) => { ground.material.map = tex; ground.material.needsUpdate = true; })
-    .catch(() => {});
+    .then((tex) => { ground.material.map = tex; ground.material.needsUpdate = true; }).catch(() => {});
 
-  const wall = new THREE.Mesh(
-    new THREE.TorusGeometry(scale * 0.42, 0.55, 6, 48),
-    new THREE.MeshStandardMaterial({ color: conf.palette.wall, roughness: 0.75, metalness: 0.08 }),
-  );
-  wall.rotation.x = Math.PI / 2;
-  wall.position.y = 2.1;
-  group.add(wall);
+  const shade = new THREE.Mesh(new THREE.CircleGeometry(scale * 0.56, 64), new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.16, depthWrite: false }));
+  shade.rotation.x = -Math.PI / 2; shade.position.y = 1.08; group.add(shade);
+  buildRoads(group, scale, conf.palette);
 
-  const buildings = new THREE.InstancedMesh(
-    new THREE.BoxGeometry(1, 1, 1),
-    new THREE.MeshStandardMaterial({ color: conf.palette.wall, roughness: 0.7, metalness: 0.05 }),
-    count,
-  );
-  const roofs = new THREE.InstancedMesh(
-    new THREE.ConeGeometry(0.75, 0.7, 4),
-    new THREE.MeshStandardMaterial({ color: conf.palette.roof, roughness: 0.62, metalness: 0.08 }),
-    count,
-  );
-  const dummy = new THREE.Object3D();
-  for (let i = 0; i < count; i += 1) {
-    const a = rng() * Math.PI * 2;
-    const r = scale * (0.08 + rng() * 0.34);
-    const bw = 1.2 + rng() * 2.4, bd = 1.2 + rng() * 2.2, bh = 2 + rng() * 10;
-    dummy.position.set(Math.cos(a) * r, 1.2 + bh / 2, Math.sin(a) * r);
-    dummy.scale.set(bw, bh, bd);
-    dummy.rotation.set(0, rng() * Math.PI, 0);
-    dummy.updateMatrix();
-    buildings.setMatrixAt(i, dummy.matrix);
-    dummy.position.y = 1.2 + bh + 0.25;
-    dummy.scale.set(bw * 0.75, 1, bd * 0.75);
-    dummy.updateMatrix();
-    roofs.setMatrixAt(i, dummy.matrix);
-  }
-  buildings.instanceMatrix.needsUpdate = true;
-  roofs.instanceMatrix.needsUpdate = true;
-  group.add(buildings, roofs);
+  const wall = new THREE.Mesh(new THREE.TorusGeometry(scale * 0.44, 0.85, 8, 64), new THREE.MeshStandardMaterial({ color: hexColor(conf.palette.wall), roughness: 0.72, metalness: 0.1 }));
+  wall.rotation.x = Math.PI / 2; wall.position.y = 2.4; group.add(wall);
+  const battlement = new THREE.Mesh(new THREE.TorusGeometry(scale * 0.44, 0.35, 6, 64), new THREE.MeshStandardMaterial({ color: hexColor(conf.palette.roof), roughness: 0.65, metalness: 0.12 }));
+  battlement.rotation.x = Math.PI / 2; battlement.position.y = 3.3; group.add(battlement);
 
-  const tower = new THREE.Mesh(
-    new THREE.CylinderGeometry(1.1, 1.6, 22, 8),
-    new THREE.MeshStandardMaterial({
-      color: conf.palette.accent, emissive: conf.palette.accent, emissiveIntensity: 0.28, roughness: 0.45, metalness: 0.22,
-    }),
-  );
-  tower.position.y = 12;
-  group.add(tower);
+  buildDenseBlock(group, conf, new THREE.Vector3(0, 0, 0), scale * 0.4, count, `${site.id}-city`);
 
-  conf.districts.forEach((name, i) => {
-    const a = (i / conf.districts.length) * Math.PI * 2 + 0.35;
-    const r = scale * 0.28;
-    const el = document.createElement("div");
-    el.className = "cj3d-district";
-    el.textContent = name;
-    const lab = new CSS2DObject(el);
-    lab.position.set(Math.cos(a) * r, 8 + (i % 2) * 3, Math.sin(a) * r);
-    group.add(lab);
-  });
-
-  for (const kind of conf.creatures) {
-    const n = ["ships", "carts", "patrols", "rails", "banners"].includes(kind) ? 10
-      : ["snow", "mist", "smoke"].includes(kind) ? 36 : 22;
-    addCreatureFlock(group, kind, coarse ? Math.ceil(n * 0.6) : n, scale * 0.45);
+  districtLabels = [];
+  for (const d of districts) {
+    const local = districtLocal(conf, d);
+    const landmark = addLandmark(d.kind, conf.palette, rng);
+    landmark.position.copy(local); landmark.position.y = 1.2; group.add(landmark);
+    const pad = new THREE.Mesh(new THREE.CircleGeometry(3.8, 24), new THREE.MeshStandardMaterial({ color: hexColor(conf.palette.accent), emissive: hexColor(conf.palette.accent), emissiveIntensity: 0.35, transparent: true, opacity: 0.35, roughness: 0.4 }));
+    pad.rotation.x = -Math.PI / 2; pad.position.set(local.x, 1.2, local.z); group.add(pad);
+    const el = document.createElement("button");
+    el.type = "button"; el.className = "cj3d-district"; el.textContent = d.name;
+    el.addEventListener("click", (e) => { e.stopPropagation(); enterDistrict(d); });
+    const lab = new CSS2DObject(el); lab.position.set(local.x, 10, local.z); group.add(lab);
+    districtLabels.push({ el, id: d.id, lab });
   }
 
-  cityLight.position.copy(origin);
-  cityLight.position.y += 28;
-  cityLight.intensity = 1.7;
-  cityLight.color.set(conf.palette.accent);
+  for (const kind of conf.creatures || ["birds"]) {
+    const n = ["ships", "carts", "patrols", "rails", "banners"].includes(kind) ? 12 : ["snow", "mist", "smoke"].includes(kind) ? 40 : 26;
+    addCreatureFlock(group, kind, coarse ? Math.ceil(n * 0.65) : n, scale * 0.45);
+  }
 
-  scene.add(group);
-  cityRoot = group;
-  activeCity = site.id;
-  return { target: origin.clone().add(new THREE.Vector3(0, 6, 0)), radius: Math.max(42, scale * 0.95), polar: 0.95 };
+  cityLight.position.copy(origin); cityLight.position.y += 30; cityLight.intensity = 1.85;
+  cityLight.color.set(conf.mood?.light || conf.palette.accent);
+  scene.add(group); cityRoot = group; activeCity = site.id;
+  lastCityView = { target: origin.clone().add(new THREE.Vector3(0, 5, 0)), radius: Math.max(48, scale * 1.05), polar: 0.92 };
+  return lastCityView;
+}
+
+function buildDistrictDetail(site, conf, district) {
+  clearDistrict();
+  const p = fromSvg(site.x, site.y);
+  const baseY = heightAt(p.x, p.y, heightField);
+  const origin = toWorld(p.x, p.y); origin.y = baseY;
+  const local = districtLocal(conf, district);
+  const center = origin.clone().add(local); center.y = baseY + 1.4;
+  const group = new THREE.Group(); group.position.copy(center);
+  const span = Math.max(18, (conf.scale || 64) * 0.22);
+
+  const ground = new THREE.Mesh(new THREE.CircleGeometry(span, 48), new THREE.MeshStandardMaterial({ color: hexColor(conf.palette.road || "#3a3a3a"), roughness: 0.9, metalness: 0.04 }));
+  ground.rotation.x = -Math.PI / 2; group.add(ground);
+  const plaza = new THREE.Mesh(new THREE.CircleGeometry(span * 0.35, 32), new THREE.MeshStandardMaterial({ color: hexColor(conf.palette.accent), emissive: hexColor(conf.palette.accent), emissiveIntensity: 0.15, roughness: 0.55, metalness: 0.12 }));
+  plaza.rotation.x = -Math.PI / 2; plaza.position.y = 0.05; group.add(plaza);
+  const landmark = addLandmark(district.kind, conf.palette, mulberry32(hashStr(district.id)));
+  landmark.position.set(0, 0.1, 0); landmark.scale.setScalar(1.35); group.add(landmark);
+  buildDenseBlock(group, conf, new THREE.Vector3(0, 0, 0), span * 0.85, coarse ? 70 : 120, `${site.id}-${district.id}`, true);
+  for (let i = 0; i < 4; i += 1) {
+    const a = (i / 4) * Math.PI * 2;
+    const street = new THREE.Mesh(new THREE.BoxGeometry(span * 0.9, 0.12, 1.6), new THREE.MeshStandardMaterial({ color: hexColor(conf.palette.wall), roughness: 0.88 }));
+    street.position.set(Math.cos(a) * span * 0.2, 0.08, Math.sin(a) * span * 0.2); street.rotation.y = -a; group.add(street);
+  }
+  for (const kind of (conf.creatures || ["birds"]).slice(0, 2)) addCreatureFlock(group, kind, coarse ? 10 : 18, span * 0.7, 0.5);
+
+  districtLight.position.copy(center); districtLight.position.y += 14; districtLight.intensity = 2.2; districtLight.color.set(conf.palette.accent);
+  scene.add(group); districtRoot = group; activeDistrict = district.id;
+  for (const item of districtLabels) {
+    item.el.classList.toggle("is-active", item.id === district.id);
+    item.el.classList.toggle("is-dim", item.id !== district.id);
+  }
+  return { target: center.clone().add(new THREE.Vector3(0, 3, 0)), radius: Math.max(16, span * 1.15), polar: 0.78 };
+}
+
+function rebuildSiteButtons() {
+  siteList.innerHTML = "";
+  for (const site of sitesById.values()) {
+    const btn = document.createElement("button");
+    btn.type = "button"; btn.dataset.id = site.id; btn.textContent = site.name;
+    btn.addEventListener("click", () => enterCity(site));
+    siteList.appendChild(btn);
+  }
+  siteButtonsBuilt = true;
 }
 
 function syncUi() {
+  const inDistrict = Boolean(activeDistrict);
   const inCity = Boolean(activeCity);
   const inRegion = Boolean(activeRegion);
-  app.classList.toggle("is-region", inRegion);
-  app.classList.toggle("is-city", inCity);
-  backLevel.hidden = !(inRegion || inCity);
-  if (inCity) {
+  app.classList.toggle("is-region", inRegion && !inCity);
+  app.classList.toggle("is-city", inCity && !inDistrict);
+  app.classList.toggle("is-district", inDistrict);
+  const showBack = inRegion || inCity || inDistrict;
+  backLevel.hidden = !showBack;
+  backMap.hidden = !showBack;
+
+  if (inDistrict) {
+    const site = sitesById.get(activeCity);
+    const conf = citiesById.get(activeCity);
+    const d = normalizeDistricts(conf || {}).find((x) => x.id === activeDistrict);
+    lodChip.textContent = `街区 · ${d?.name || activeDistrict}`;
+    siteSectionTitle.textContent = `${site?.name || "城邦"} · 地点`;
+    const backText = `← 返回${site?.name || "城邦"}`;
+    backLevel.textContent = backText; backMap.textContent = backText;
+    hint.textContent = "已放到最大细节 · 缩小或点返回回到城邦";
+  } else if (inCity) {
     const site = sitesById.get(activeCity);
     lodChip.textContent = `城邦 · ${site?.name || activeCity}`;
-    siteSectionTitle.textContent = `${site?.name || "城邦"} · 街区`;
-    backLevel.textContent = activeRegion ? `← 返回${activeRegion.name}` : "← 返回总览";
+    siteSectionTitle.textContent = `${site?.name || "城邦"} · 地点`;
+    const backText = activeRegion ? `← 返回${activeRegion.name}` : "← 返回总览";
+    backLevel.textContent = backText; backMap.textContent = backText;
+    hint.textContent = "点地点标记放大到街区最大细节";
   } else if (inRegion) {
     lodChip.textContent = `地区 · ${activeRegion.name}`;
     siteSectionTitle.textContent = `${activeRegion.name} · 战略点`;
-    backLevel.textContent = "← 返回总览";
+    backLevel.textContent = "← 返回总览"; backMap.textContent = "← 返回总览";
+    hint.textContent = "点标记飞入城邦 · 缩小可回到总览";
   } else {
     lodChip.textContent = "总览 · 大陆";
     siteSectionTitle.textContent = "战略点 / 城邦";
+    hint.textContent = "点标记飞入城邦 · 缩小或点返回可回到大地图";
   }
+
   for (const btn of regionList.querySelectorAll("button")) {
-    btn.classList.toggle("is-active", inRegion && btn.dataset.id === activeRegion.id);
+    btn.classList.toggle("is-active", inRegion && btn.dataset.id === activeRegion?.id);
   }
-  const allow = inRegion ? new Set(activeRegion.siteIds) : null;
+  const allow = inRegion || inCity ? new Set(activeRegion?.siteIds || []) : null;
   for (const [id, node] of markers) {
-    node.classList.toggle("is-dim", Boolean(allow) && !allow.has(id));
+    const hide = inCity || inDistrict || (Boolean(allow) && !allow.has(id));
+    node.classList.toggle("is-hidden", hide);
+    node.classList.toggle("is-dim", false);
     node.classList.toggle("is-active", id === activeCity);
   }
-  for (const btn of siteList.querySelectorAll("button")) {
-    btn.hidden = Boolean(allow) && !allow.has(btn.dataset.id);
-    btn.classList.toggle("is-active", btn.dataset.id === activeCity);
+
+  const conf = inCity ? citiesById.get(activeCity) : null;
+  if (inCity && conf) {
+    siteList.innerHTML = ""; siteButtonsBuilt = false;
+    for (const d of normalizeDistricts(conf)) {
+      const btn = document.createElement("button");
+      btn.type = "button"; btn.dataset.districtId = d.id;
+      btn.innerHTML = `${d.name}<span class="cj3d-list-meta">${d.blurb || d.kind}</span>`;
+      btn.classList.toggle("is-active", d.id === activeDistrict);
+      btn.addEventListener("click", () => enterDistrict(d));
+      siteList.appendChild(btn);
+    }
+  } else {
+    if (!siteButtonsBuilt) rebuildSiteButtons();
+    for (const btn of siteList.querySelectorAll("button")) {
+      btn.hidden = Boolean(allow) && !allow.has(btn.dataset.id);
+      btn.classList.toggle("is-active", btn.dataset.id === activeCity);
+    }
   }
-  scene.fog.density = inCity ? 0.00105 : inRegion ? 0.00055 : 0.00038;
+
+  scene.fog.density = inDistrict ? 0.0016 : inCity ? 0.00105 : inRegion ? 0.00055 : 0.00038;
   if (continentMesh) {
     continentMesh.material.transparent = inRegion || inCity;
-    continentMesh.material.opacity = inCity ? 0.38 : inRegion ? 0.72 : 1;
+    continentMesh.material.opacity = inDistrict ? 0.22 : inCity ? 0.38 : inRegion ? 0.72 : 1;
   }
 }
 
-function showSiteCard(site) {
+function showSiteCard(site, district) {
   const region = siteRegion.get(site.id);
+  const conf = citiesById.get(site.id);
+  const districts = conf ? normalizeDistricts(conf) : [];
+  const districtBlock = district
+    ? `<p class="country">地点 · ${district.name}</p><p>${district.blurb || ""}</p>`
+    : districts.length
+      ? `<p class="country">可放大地点</p><p>${districts.map((d) => d.name).join(" · ")}</p>`
+      : "";
   cardBody.innerHTML = `
-    <p class="tag">${site.kind}${region ? ` · ${region.name}` : ""}</p>
-    <h2>${site.name}</h2>
+    <p class="tag">${site.kind}${region ? ` · ${region.name}` : ""}${district ? " · 街区最大" : ""}</p>
+    <h2>${district ? district.name : site.name}</h2>
     <p class="country">${site.country}</p>
+    ${districtBlock}
     <p>${site.function}</p>
     <p>${site.history}</p>
     <dl>
@@ -547,38 +767,70 @@ function showSiteCard(site) {
 }
 
 async function enterRegion(region, { fly = true } = {}) {
-  activeRegion = region;
-  clearCity();
-  await showRegionOverlay(region);
-  syncUi();
+  activeRegion = region; clearCity();
+  await showRegionOverlay(region); syncUi();
   if (fly) await flyTo(regionFrame(region), 900);
   if (narrow()) setPanel(false);
 }
-
 async function exitToOverview() {
-  clearCity();
-  clearRegionOverlay();
-  activeRegion = null;
-  syncUi();
+  clearCity(); clearRegionOverlay(); activeRegion = null; syncUi();
   await flyTo({ target: new THREE.Vector3(0, 20, 0), ...HOME }, 850);
 }
-
 async function enterCity(site) {
   const region = siteRegion.get(site.id);
-  if (region && activeRegion?.id !== region.id) {
-    activeRegion = region;
-    await showRegionOverlay(region);
-  }
+  if (region && activeRegion?.id !== region.id) { activeRegion = region; await showRegionOverlay(region); }
   const conf = citiesById.get(site.id) || {
-    scale: 64, buildingCount: 80,
-    palette: { wall: "#c4b08a", roof: "#8a6b3a", accent: "#e6c886" },
-    creatures: ["birds"], districts: ["核心区", "外城", "市集", "码头"],
+    scale: 64, buildingCount: 100,
+    palette: { wall: "#c4b08a", roof: "#8a6b3a", accent: "#e6c886", road: "#4a4030", green: "#5a7a48" },
+    creatures: ["birds"],
+    districts: [
+      { id: "core", name: "核心区", angle: 0.2, r: 0.12, kind: "palace", blurb: "城邦核心" },
+      { id: "outer", name: "外城", angle: 1.8, r: 0.3, kind: "market", blurb: "外城街区" },
+      { id: "market", name: "市集", angle: 3.5, r: 0.28, kind: "market", blurb: "市集" },
+      { id: "gate", name: "城门", angle: 5.0, r: 0.34, kind: "gate", blurb: "城门要塞" },
+    ],
   };
+  clearDistrict();
   const view = buildCityDetail(site, conf);
-  syncUi();
-  showSiteCard(site);
+  syncUi(); showSiteCard(site);
   await flyTo(view, 980);
   if (narrow()) setPanel(false);
+}
+async function enterDistrict(district) {
+  if (!activeCity) return;
+  const site = sitesById.get(activeCity);
+  const conf = citiesById.get(activeCity);
+  if (!site || !conf) return;
+  const view = buildDistrictDetail(site, conf, district);
+  syncUi(); showSiteCard(site, district);
+  await flyTo(view, 720);
+  if (narrow()) setPanel(false);
+}
+async function stepBack() {
+  card.hidden = true;
+  if (activeDistrict) {
+    clearDistrict();
+    for (const item of districtLabels) item.el.classList.remove("is-active", "is-dim");
+    syncUi();
+    if (lastCityView) await flyTo(lastCityView, 650);
+    return;
+  }
+  if (activeCity) {
+    clearCity(); syncUi();
+    if (activeRegion) await flyTo(regionFrame(activeRegion), 700);
+    return;
+  }
+  if (activeRegion) {
+    await exitToOverview();
+    if (narrow()) setPanel(false);
+  }
+}
+function maybeAutoPopLod() {
+  if (flight || performance.now() < lodGuardUntil) return;
+  const dist = controls.getDistance();
+  if (activeDistrict && dist > 55) { stepBack(); return; }
+  if (activeCity && !activeDistrict && dist > Math.max(160, (citiesById.get(activeCity)?.scale || 70) * 2.4)) { stepBack(); return; }
+  if (activeRegion && !activeCity && dist > 1400) stepBack();
 }
 
 document.getElementById("card-close").addEventListener("click", () => {
@@ -586,17 +838,8 @@ document.getElementById("card-close").addEventListener("click", () => {
   for (const n of markers.values()) n.classList.remove("is-active");
   for (const b of siteList.querySelectorAll("button")) b.classList.remove("is-active");
 });
-backLevel.addEventListener("click", async () => {
-  card.hidden = true;
-  if (activeCity) {
-    clearCity();
-    syncUi();
-    if (activeRegion) await flyTo(regionFrame(activeRegion), 700);
-    return;
-  }
-  await exitToOverview();
-  if (narrow()) setPanel(false);
-});
+backLevel.addEventListener("click", () => stepBack());
+backMap.addEventListener("click", () => stepBack());
 document.getElementById("reset").addEventListener("click", () => { card.hidden = true; exitToOverview(); });
 const tiltBtn = document.getElementById("tilt");
 tiltBtn.addEventListener("click", () => {
@@ -606,7 +849,11 @@ tiltBtn.addEventListener("click", () => {
   flyTo({ polar: pressed ? TILT.top : TILT.oblique }, 500);
 });
 document.getElementById("zoom-in").addEventListener("click", () => flyTo({ radius: controls.getDistance() * 0.78 }, 260));
-document.getElementById("zoom-out").addEventListener("click", () => flyTo({ radius: controls.getDistance() * 1.25 }, 260));
+document.getElementById("zoom-out").addEventListener("click", async () => {
+  await flyTo({ radius: controls.getDistance() * 1.25 }, 260);
+  maybeAutoPopLod();
+});
+controls.addEventListener("end", () => maybeAutoPopLod());
 
 function resize() {
   const w = stage.clientWidth || innerWidth;
@@ -618,22 +865,16 @@ function resize() {
 }
 
 async function boot() {
-  const worldUrl = new URL("../world.json", import.meta.url);
-  const regionsUrl = new URL("../regions.json", import.meta.url);
-  const citiesUrl = new URL("../cities.json", import.meta.url);
-  const basemapUrl = new URL("../assets/basemap.webp", import.meta.url);
-
   const [world, regionsData, citiesData] = await Promise.all([
-    fetch(worldUrl, { cache: "no-store" }).then((r) => { if (!r.ok) throw new Error(`world ${r.status}`); return r.json(); }),
-    fetch(regionsUrl, { cache: "no-store" }).then((r) => { if (!r.ok) throw new Error(`regions ${r.status}`); return r.json(); }),
-    fetch(citiesUrl, { cache: "no-store" }).then((r) => { if (!r.ok) throw new Error(`cities ${r.status}`); return r.json(); }),
+    fetch(new URL("../world.json", import.meta.url), { cache: "no-store" }).then((r) => { if (!r.ok) throw new Error(`world ${r.status}`); return r.json(); }),
+    fetch(new URL("../regions.json", import.meta.url), { cache: "no-store" }).then((r) => { if (!r.ok) throw new Error(`regions ${r.status}`); return r.json(); }),
+    fetch(new URL("../cities.json", import.meta.url), { cache: "no-store" }).then((r) => { if (!r.ok) throw new Error(`cities ${r.status}`); return r.json(); }),
   ]);
-  const texture = await loadTex(basemapUrl.href);
+  const texture = await loadTex(new URL("../assets/basemap.webp", import.meta.url).href);
   heightField = luminanceField(texture.image);
   const hf = heightField;
 
-  const segsX = coarse ? 260 : 420;
-  const segsY = coarse ? 146 : 236;
+  const segsX = coarse ? 260 : 420, segsY = coarse ? 146 : 236;
   const geometry = new THREE.PlaneGeometry(MAP_W, MAP_H, segsX, segsY).rotateX(-Math.PI / 2);
   const pos = geometry.attributes.position;
   for (let i = 0; i < pos.count; i += 1) {
@@ -649,7 +890,7 @@ async function boot() {
   const bumpCtx = bumpCanvas.getContext("2d");
   const bumpImg = bumpCtx.createImageData(hf.cols, hf.rows);
   for (let i = 0; i < hf.field.length; i += 1) {
-    const g = Math.round(hf.field[i] * 255); const o = i * 4;
+    const g = Math.round(hf.field[i] * 255), o = i * 4;
     bumpImg.data[o] = g; bumpImg.data[o + 1] = g; bumpImg.data[o + 2] = g; bumpImg.data[o + 3] = 255;
   }
   bumpCtx.putImageData(bumpImg, 0, 0);
@@ -658,54 +899,49 @@ async function boot() {
   bump.colorSpace = THREE.NoColorSpace;
   bump.anisotropy = texture.anisotropy;
 
-  continentMesh = new THREE.Mesh(geometry, new THREE.MeshStandardMaterial({
-    map: texture, bumpMap: bump, bumpScale: 18, roughness: 0.86, metalness: 0.04,
-  }));
+  continentMesh = new THREE.Mesh(geometry, new THREE.MeshStandardMaterial({ map: texture, bumpMap: bump, bumpScale: 18, roughness: 0.86, metalness: 0.04 }));
   scene.add(continentMesh);
 
   for (const site of world.sites) sitesById.set(site.id, site);
   for (const c of citiesData.cities || []) citiesById.set(c.id, c);
-  regions = regionsData.regions || [];
+  regions = (regionsData.regions || []).map((r) => {
+    const b = r.bounds || {};
+    return {
+      id: r.id, name: r.name, blurb: r.blurb || "", color: r.color,
+      siteIds: r.siteIds || [], basemap: r.basemap,
+      bounds: { minX: b.minX ?? 0, minY: b.minY ?? 0, maxX: b.maxX ?? SVG_W, maxY: b.maxY ?? 720 },
+    };
+  });
   for (const region of regions) {
     for (const id of region.siteIds) siteRegion.set(id, region);
     const btn = document.createElement("button");
-    btn.type = "button";
-    btn.dataset.id = region.id;
+    btn.type = "button"; btn.dataset.id = region.id;
     btn.innerHTML = `${region.name}<span class="cj3d-list-meta">${region.blurb}</span>`;
     btn.addEventListener("click", () => enterRegion(region, { fly: true }));
     regionList.appendChild(btn);
   }
 
+  rebuildSiteButtons();
   for (const site of world.sites) {
     const p = fromSvg(site.x, site.y);
     const y = heightAt(p.x, p.y, hf);
     const anchor = toWorld(p.x, p.y); anchor.y = y + 6;
     const label = document.createElement("button");
-    label.type = "button";
-    label.className = "cj3d-label";
+    label.type = "button"; label.className = "cj3d-label";
     label.innerHTML = `<i style="--dot:${KIND_DOT[site.kind] || "#e6c886"}"></i><span>${site.name}</span>`;
     label.addEventListener("click", (e) => { e.stopPropagation(); enterCity(site); });
     markers.set(site.id, label);
-    const obj = new CSS2DObject(label);
-    obj.position.copy(anchor);
-    scene.add(obj);
-
-    const btn = document.createElement("button");
-    btn.type = "button";
-    btn.dataset.id = site.id;
-    btn.textContent = site.name;
-    btn.addEventListener("click", () => enterCity(site));
-    siteList.appendChild(btn);
+    const obj = new CSS2DObject(label); obj.position.copy(anchor); scene.add(obj);
   }
 
   applyView({ target: new THREE.Vector3(0, 20, 0), ...HOME });
-  syncUi();
-  resize();
+  syncUi(); resize();
   loading.classList.add("is-done");
   setTimeout(() => { loading.hidden = true; }, 320);
   addEventListener("resize", resize);
 
   const dummy = new THREE.Object3D();
+  let popClock = 0;
   function frame(now) {
     stepFlight(now);
     if (water.material?.uniforms?.time) water.material.uniforms.time.value = now * 0.001;
@@ -713,22 +949,22 @@ async function boot() {
       for (let i = 0; i < sys.seeds.length; i += 1) {
         const s = sys.seeds[i];
         const a = s.a + now * 0.0004 * s.speed + s.phase * 0.01;
-        const bob = Math.sin(now * 0.002 * s.speed + s.phase) * (sys.kind === "ships" ? 0.25 : 1.1);
+        const bob = Math.sin(now * 0.002 * s.speed + s.phase) * (["ships", "carts", "patrols"].includes(sys.kind) ? 0.2 : 1.1);
         dummy.position.set(Math.cos(a) * s.r, s.h + bob, Math.sin(a) * s.r);
         dummy.rotation.set(0, -a + Math.PI / 2, sys.kind === "birds" ? Math.sin(now * 0.01 + s.phase) * 0.4 : 0);
-        dummy.scale.setScalar(sys.kind === "ships" ? 1.35 : 0.9);
-        dummy.updateMatrix();
-        sys.mesh.setMatrixAt(i, dummy.matrix);
+        dummy.scale.setScalar(sys.kind === "ships" ? 1.35 : sys.kind === "patrols" ? 1.1 : 0.9);
+        dummy.updateMatrix(); sys.mesh.setMatrixAt(i, dummy.matrix);
       }
       sys.mesh.instanceMatrix.needsUpdate = true;
     }
+    if (now - popClock > 320) { popClock = now; maybeAutoPopLod(); }
     controls.update();
     renderer.render(scene, camera);
     labelRenderer.render(scene, camera);
     requestAnimationFrame(frame);
   }
   requestAnimationFrame(frame);
-  if (!reducedMotion) setTimeout(() => { hint.style.opacity = "0.35"; }, 5000);
+  if (!reducedMotion) setTimeout(() => { hint.style.opacity = "0.55"; }, 5000);
 }
 
 boot().catch((err) => {
