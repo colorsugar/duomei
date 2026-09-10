@@ -111,7 +111,7 @@ function collectParagraphs(root: ParentNode) {
 
 function parseSheetBodies(doc: Document) {
   const bodies = new Map<string, string[]>();
-  doc.querySelectorAll("template[id^='tpl-']").forEach((tpl) => {
+  doc.querySelectorAll<HTMLTemplateElement>("template[id^='tpl-']").forEach((tpl) => {
     const id = tpl.id.slice(4);
     if (!id) return;
     const paragraphs = collectParagraphs(tpl.content);
@@ -417,7 +417,7 @@ export function DuomeiZaobaoPage() {
         </nav>
       ) : null}
 
-      {openStory ? createPortal((
+      {openStory && edition ? createPortal((
         <div className="zaobao-sheet">
           <button type="button" className="zaobao-sheet-backdrop" aria-label="关闭长文" onClick={closeSheet} />
           <div className="zaobao-sheet-panel" role="dialog" aria-modal="true" aria-labelledby="zaobao-sheet-title">

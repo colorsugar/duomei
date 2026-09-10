@@ -5,6 +5,7 @@ import {
   handleMusicPlaylistRequest,
   handleMusicStreamRequest,
 } from "./server/neteaseMusic.mjs";
+import { handleZaobaoProxyRequest } from "./server/zaobaoProxy.mjs";
 
 function neteaseMusicDevApi() {
   return {
@@ -16,13 +17,16 @@ function neteaseMusicDevApi() {
     ) => void) => void } }) {
       server.middlewares.use(async (request, response, next) => {
         const requestUrl = request.url ? new URL(request.url, "http://localhost") : undefined;
-        const handler = requestUrl?.pathname === "/api/music-playlist"
+        const pathname = requestUrl?.pathname ?? "";
+        const handler = pathname === "/api/music-playlist"
           ? handleMusicPlaylistRequest
-          : requestUrl?.pathname === "/api/music-lyric"
+          : pathname === "/api/music-lyric"
             ? handleMusicLyricRequest
-            : requestUrl?.pathname === "/api/music-stream"
+            : pathname === "/api/music-stream"
               ? handleMusicStreamRequest
-              : undefined;
+              : pathname === "/zaobao-src" || pathname.startsWith("/zaobao-src/")
+                ? handleZaobaoProxyRequest
+                : undefined;
         if (!handler || !requestUrl) {
           next();
           return;
