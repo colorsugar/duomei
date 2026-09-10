@@ -1119,7 +1119,10 @@ function mountCloseups(sites, hf) {
     mesh.position.copy(origin);
     mesh.visible = false;
     scene.add(mesh);
-    loadTex(closeupUrl(site.id)).then((tex) => applyAerialMap(mat, tex)).catch(() => {});
+    loadTex(closeupUrl(site.id)).then((tex) => {
+      applyAerialMap(mat, tex);
+      mesh.userData.ready = true;
+    }).catch(() => {});
     closeupDecals.push(mesh);
   }
 }
@@ -1136,7 +1139,7 @@ function syncCloseups() {
     .map((m) => ({ m, d: m.position.distanceToSquared(t) }))
     .sort((a, b) => a.d - b.d);
   for (const m of closeupDecals) m.visible = false;
-  for (const row of ranked.slice(0, 6)) row.m.visible = true;
+  for (const row of ranked.slice(0, 6)) row.m.visible = Boolean(row.m.userData.ready);
 }
 
 function buildCityDetail(site, conf) {
