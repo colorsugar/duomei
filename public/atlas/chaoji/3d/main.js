@@ -1093,6 +1093,12 @@ function closeupUrl(siteId) {
 function districtAerialUrl(siteId, districtId) {
   return new URL(`../assets/cities/districts/${siteId}--${districtId}.webp`, import.meta.url).href;
 }
+function estateAerialUrl(siteId, estateId) {
+  return new URL(`../assets/cities/estates/${siteId}--${estateId}.webp`, import.meta.url).href;
+}
+function palaceDistrictId(conf) {
+  return normalizeDistricts(conf).find((d) => d.kind === "palace" || /宫|王座|王厅|王廷/.test(d.name))?.id;
+}
 
 function closeupAlphaMap() {
   const c = document.createElement("canvas");
@@ -1278,15 +1284,66 @@ function buildDistrictDetail(site, conf, district) {
   return { target: center.clone().add(new THREE.Vector3(0, 3, 0)), radius: Math.max(20, span * 1.15), polar: 0.52 };
 }
 
-function estateView(site, conf, estate) {
+function buildEstateDetail(site, conf, estate) {
+  clearDistrict();
   const p = fromSvg(site.x, site.y);
   const baseY = heightAt(p.x, p.y, heightField);
   const origin = toWorld(p.x, p.y); origin.y = baseY;
-  const local = districtLocal(conf, estate);
-  const target = origin.clone().add(local);
-  target.y = baseY + 4;
-  const scale = conf.scale || 64;
-  return { target, radius: Math.max(16, scale * 0.26), polar: 0.12 };
+  const group = new THREE.Group(); group.position.copy(origin);
+  const span = Math.max(32, (conf.scale || 64) * 0.42);
+
+  const voidPad = new THREE.Mesh(
+    new THREE.CircleGeometry(span * 1.55, 64),
+    new THREE.MeshBasicMaterial({ color: 0x03050a }),
+  );
+  voidPad.rotation.x = -Math.PI / 2; voidPad.position.y = -0.25; group.add(voidPad);
+
+  const ground = new THREE.Mesh(
+    new THREE.CircleGeometry(span * 1.05, 96),
+    new THREE.MeshBasicMaterial({ color: 0x0a0c14 }),
+  );
+  ground.rotation.x = -Math.PI / 2; ground.position.y = 0.05; group.add(ground);
+
+  const applyWideCrop = (base) => {
+    const tex = base.clone();
+    tex.colorSpace = THREE.SRGBColorSpace;
+    tex.needsUpdate = true;
+    const zoom = 0.52;
+    const u = 0.5 + Math.cos(estate.angle || 0) * (estate.r || 0.2) * 0.28;
+    const v = 0.5 + Math.sin(estate.angle || 0) * (estate.r || 0.2) * 0.28;
+    tex.offset.set(Math.min(0.48, Math.max(0, u - zoom / 2)), Math.min(0.48, Math.max(0, v - zoom / 2)));
+    tex.repeat.set(zoom, zoom);
+    applyAerialMap(ground.material, tex);
+  };
+
+  const palaceId = palaceDistrictId(conf);
+  loadTex(estateAerialUrl(site.id, estate.id))
+    .then((tex) => applyAerialMap(ground.material, tex))
+    .catch(() => {
+      if (!palaceId) return loadTex(cityAerialUrl(site.id)).then(applyWideCrop);
+      return loadTex(districtAerialUrl(site.id, palaceId))
+        .then((tex) => applyAerialMap(ground.material, tex))
+        .catch(() => loadTex(cityAerialUrl(site.id)).then(applyWideCrop));
+    });
+
+  const rim = new THREE.Mesh(
+    new THREE.RingGeometry(span * 0.98, span * 1.12, 72),
+    new THREE.MeshBasicMaterial({
+      color: hexColor(conf.palette.accent), transparent: true, opacity: 0.4,
+      side: THREE.DoubleSide, depthWrite: false,
+    }),
+  );
+  rim.rotation.x = -Math.PI / 2; rim.position.y = 0.1; group.add(rim);
+
+  if (cityRoot) cityRoot.visible = false;
+  scene.add(group); districtRoot = group;
+  activeDistrict = estate.id;
+  activeEstate = estate.id;
+  for (const item of districtLabels) {
+    item.el.classList.toggle("is-active", item.id === estate.id);
+    item.el.classList.toggle("is-dim", item.id !== estate.id);
+  }
+  return { target: origin.clone().add(new THREE.Vector3(0, 3, 0)), radius: Math.max(22, span * 1.05), polar: 0.12 };
 }
 
 function rebuildSiteButtons() {
@@ -1312,7 +1369,7 @@ function syncUi() {
   const showBack = inRegion || inCity || inClose;
   backLevel.hidden = !showBack;
   backMap.hidden = !showBack;
-  if (cityRoot) cityRoot.visible = true;
+  if (cityRoot) cityRoot.visible = !inEstate;
 
   if (inEstate) {
     const site = sitesById.get(activeCity);
@@ -1322,7 +1379,7 @@ function syncUi() {
     siteSectionTitle.textContent = `${site?.name || "城邦"} · 地点`;
     const backText = `← 返回${site?.name || "城邦"}`;
     backLevel.textContent = backText; backMap.textContent = backText;
-    hint.textContent = "航拍放大看王宫 · 点返回看全城";
+    hint.textContent = "王宫建筑群航拍 · 点返回看全城";
   } else if (inDistrict) {
     const site = sitesById.get(activeCity);
     const conf = citiesById.get(activeCity);
@@ -1338,7 +1395,7 @@ function syncUi() {
     siteSectionTitle.textContent = `${site?.name || "城邦"} · 地点`;
     const backText = activeRegion ? `← 返回${activeRegion.name}` : "← 返回总览";
     backLevel.textContent = backText; backMap.textContent = backText;
-    hint.textContent = "城邦航拍 + 点标签 · 点王宫直接放大，不再另飞一栋假模型";
+    hint.textContent = "城邦航拍 + 点标签 · 点王宫看整座宫殿群";
   } else if (inRegion) {
     lodChip.textContent = `地区 · ${activeRegion.name}`;
     siteSectionTitle.textContent = `${activeRegion.name} · 战略点`;
@@ -1497,15 +1554,9 @@ async function enterEstate(estate) {
   const site = sitesById.get(activeCity);
   const conf = citiesById.get(activeCity);
   if (!site || !conf) return;
-  clearDistrict();
-  if (cityRoot) cityRoot.visible = true;
-  activeEstate = estate.id;
-  for (const item of districtLabels) {
-    item.el.classList.toggle("is-active", item.id === estate.id);
-    item.el.classList.toggle("is-dim", item.id !== estate.id);
-  }
+  const view = buildEstateDetail(site, conf, estate);
   syncUi(); showSiteCard(site, null, estate);
-  await flyTo(estateView(site, conf, estate), 620);
+  await flyTo(view, 620);
   if (narrow()) setPanel(false);
 }
 async function stepBack() {
