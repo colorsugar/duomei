@@ -1278,64 +1278,15 @@ function buildDistrictDetail(site, conf, district) {
   return { target: center.clone().add(new THREE.Vector3(0, 3, 0)), radius: Math.max(20, span * 1.15), polar: 0.52 };
 }
 
-function buildEstateDetail(site, conf, estate) {
-  clearDistrict();
+function estateView(site, conf, estate) {
   const p = fromSvg(site.x, site.y);
   const baseY = heightAt(p.x, p.y, heightField);
   const origin = toWorld(p.x, p.y); origin.y = baseY;
-  const group = new THREE.Group(); group.position.copy(origin);
-
-  const voidPad = new THREE.Mesh(
-    new THREE.CircleGeometry(52, 64),
-    new THREE.MeshBasicMaterial({ color: 0x03050a }),
-  );
-  voidPad.rotation.x = -Math.PI / 2; voidPad.position.y = -0.22; group.add(voidPad);
-
-  const ground = new THREE.Mesh(
-    new THREE.CircleGeometry(18, 72),
-    new THREE.MeshStandardMaterial({ color: 0xc8b896, roughness: 0.72, metalness: 0.04 }),
-  );
-  ground.rotation.x = -Math.PI / 2; ground.position.y = 0.04;
-  group.add(ground);
-  loadTex(estateTexUrl("plaza")).then((tex) => {
-    const clone = tex.clone();
-    clone.wrapS = clone.wrapT = THREE.RepeatWrapping;
-    clone.repeat.set(3, 3);
-    clone.needsUpdate = true;
-    ground.material.map = clone;
-    ground.material.color.set(0xffffff);
-    ground.material.needsUpdate = true;
-  }).catch(() => {});
-
-  const rng = mulberry32(hashStr(`${site.id}-${estate.id}`));
-  const palace = addLandmark(estate.kind || "palace", conf.palette, rng, estate.style || conf.archStyle || "palladio");
-  group.add(palace);
-
-  const nameEl = document.createElement("div");
-  nameEl.className = "cj3d-estate-title";
-  nameEl.textContent = estate.name;
-  const lab = new CSS2DObject(nameEl);
-  lab.position.set(0, 8.4, 0);
-  palace.add(lab);
-
-  const key = new THREE.DirectionalLight(0xfff1d2, 1.35);
-  key.position.set(12, 22, 10);
-  group.add(key);
-  const rimL = new THREE.DirectionalLight(0x88aacc, 0.5);
-  rimL.position.set(-10, 12, -8);
-  group.add(rimL);
-
-  districtLight.position.copy(origin); districtLight.position.y += 22; districtLight.intensity = 1.85;
-  districtLight.distance = 90; districtLight.color.set(conf.mood?.light || conf.palette.accent);
-  if (cityRoot) cityRoot.visible = false;
-  scene.add(group); districtRoot = group;
-  activeDistrict = estate.id;
-  activeEstate = estate.id;
-  for (const item of districtLabels) {
-    item.el.classList.toggle("is-active", item.id === estate.id);
-    item.el.classList.toggle("is-dim", item.id !== estate.id);
-  }
-  return { target: origin.clone().add(new THREE.Vector3(0, 3.2, 0)), radius: 26, polar: 0.92, azimuth: 0.35 };
+  const local = districtLocal(conf, estate);
+  const target = origin.clone().add(local);
+  target.y = baseY + 4;
+  const scale = conf.scale || 64;
+  return { target, radius: Math.max(16, scale * 0.26), polar: 0.12 };
 }
 
 function rebuildSiteButtons() {
@@ -1361,17 +1312,17 @@ function syncUi() {
   const showBack = inRegion || inCity || inClose;
   backLevel.hidden = !showBack;
   backMap.hidden = !showBack;
-  if (cityRoot) cityRoot.visible = !inEstate;
+  if (cityRoot) cityRoot.visible = true;
 
   if (inEstate) {
     const site = sitesById.get(activeCity);
     const conf = citiesById.get(activeCity);
     const e = normalizeEstates(conf || {}).find((x) => x.id === activeEstate);
-    lodChip.textContent = `宅邸 · ${e?.name || activeEstate}`;
+    lodChip.textContent = `王宫 · ${e?.name || activeEstate}`;
     siteSectionTitle.textContent = `${site?.name || "城邦"} · 地点`;
     const backText = `← 返回${site?.name || "城邦"}`;
     backLevel.textContent = backText; backMap.textContent = backText;
-    hint.textContent = "宅邸近观是单独广场+3D，不叠在城邦俯视图上 · 点返回看航拍";
+    hint.textContent = "航拍放大看王宫 · 点返回看全城";
   } else if (inDistrict) {
     const site = sitesById.get(activeCity);
     const conf = citiesById.get(activeCity);
@@ -1387,7 +1338,7 @@ function syncUi() {
     siteSectionTitle.textContent = `${site?.name || "城邦"} · 地点`;
     const backText = activeRegion ? `← 返回${activeRegion.name}` : "← 返回总览";
     backLevel.textContent = backText; backMap.textContent = backText;
-    hint.textContent = "城邦航拍 + 点标签 · 点王室/领主才进 3D 宅邸";
+    hint.textContent = "城邦航拍 + 点标签 · 点王宫直接放大，不再另飞一栋假模型";
   } else if (inRegion) {
     lodChip.textContent = `地区 · ${activeRegion.name}`;
     siteSectionTitle.textContent = `${activeRegion.name} · 战略点`;
@@ -1546,13 +1497,26 @@ async function enterEstate(estate) {
   const site = sitesById.get(activeCity);
   const conf = citiesById.get(activeCity);
   if (!site || !conf) return;
-  const view = buildEstateDetail(site, conf, estate);
+  clearDistrict();
+  if (cityRoot) cityRoot.visible = true;
+  activeEstate = estate.id;
+  for (const item of districtLabels) {
+    item.el.classList.toggle("is-active", item.id === estate.id);
+    item.el.classList.toggle("is-dim", item.id !== estate.id);
+  }
   syncUi(); showSiteCard(site, null, estate);
-  await flyTo(view, 720);
+  await flyTo(estateView(site, conf, estate), 620);
   if (narrow()) setPanel(false);
 }
 async function stepBack() {
   card.hidden = true;
+  if (activeEstate && !activeDistrict) {
+    activeEstate = null;
+    for (const item of districtLabels) item.el.classList.remove("is-active", "is-dim");
+    syncUi();
+    if (lastCityView) await flyTo(lastCityView, 520);
+    return;
+  }
   if (activeDistrict) {
     clearDistrict();
     for (const item of districtLabels) item.el.classList.remove("is-active", "is-dim");
@@ -1574,7 +1538,8 @@ function maybeAutoPopLod() {
   if (flight || performance.now() < lodGuardUntil) return;
   const dist = controls.getDistance();
   if (activeDistrict && dist > 55) { stepBack(); return; }
-  if (activeCity && !activeDistrict && dist > Math.max(160, (citiesById.get(activeCity)?.scale || 70) * 2.4)) { stepBack(); return; }
+  if (activeEstate && !activeDistrict && dist > 48) { stepBack(); return; }
+  if (activeCity && !activeDistrict && !activeEstate && dist > Math.max(160, (citiesById.get(activeCity)?.scale || 70) * 2.4)) { stepBack(); return; }
   if (activeRegion && !activeCity && dist > 1400) stepBack();
 }
 
