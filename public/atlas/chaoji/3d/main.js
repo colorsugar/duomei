@@ -350,6 +350,7 @@ let regions = [];
 let activeRegion = null;
 let activeCity = null;
 let activeDistrict = null;
+let activeEstate = null;
 let heightField = null;
 let continentMesh = null;
 let regionOverlay = null;
@@ -418,6 +419,8 @@ function clearRegionOverlay() {
 function clearDistrict() {
   districtLight.intensity = 0;
   activeDistrict = null;
+  activeEstate = null;
+  if (cityRoot) cityRoot.visible = true;
   if (!districtRoot) return;
   scene.remove(districtRoot); disposeObj(districtRoot); districtRoot = null;
 }
@@ -1149,7 +1152,6 @@ function buildCityDetail(site, conf) {
   const origin = toWorld(p.x, p.y); origin.y = baseY;
   const group = new THREE.Group(); group.position.copy(origin);
   const scale = conf.scale || 64;
-  const rng = mulberry32(hashStr(site.id));
   const districts = normalizeDistricts(conf);
 
   // void so continent mud never frames the plate
@@ -1185,77 +1187,26 @@ function buildCityDetail(site, conf) {
   );
   rim.rotation.x = -Math.PI / 2; rim.position.y = 1.12; group.add(rim);
 
-  // sparse accent veins only — never bury the painting
-  const veinMat = new THREE.MeshBasicMaterial({
-    color: hexColor(conf.palette.accent), transparent: true, opacity: 0.16, depthWrite: false,
-  });
-  for (let ring = 1; ring <= 2; ring += 1) {
-    const vein = new THREE.Mesh(new THREE.TorusGeometry(plateR * (0.28 * ring), 0.16, 6, 72), veinMat);
-    vein.rotation.x = Math.PI / 2; vein.position.y = 1.14; group.add(vein);
-  }
-
-  // district pins: tiny landmark + label (click → district art)
+  // labels only — never plant 3D boxes on a nadir aerial
   districtLabels = [];
   for (const d of districts) {
     const local = districtLocal(conf, d);
-    const landmark = addLandmark(d.kind, conf.palette, rng, conf.archStyle || "palladio");
-    landmark.position.copy(local); landmark.position.y = 1.35; landmark.scale.setScalar(0.42); group.add(landmark);
-    const pad = new THREE.Mesh(
-      new THREE.CircleGeometry(2.6, 24),
-      new THREE.MeshBasicMaterial({
-        color: hexColor(conf.palette.accent), transparent: true, opacity: 0.35, depthWrite: false,
-      }),
-    );
-    pad.rotation.x = -Math.PI / 2; pad.position.set(local.x, 1.2, local.z); group.add(pad);
     const el = document.createElement("button");
     el.type = "button"; el.className = "cj3d-district"; el.textContent = d.name;
     el.addEventListener("click", (e) => { e.stopPropagation(); enterDistrict(d); });
-    const lab = new CSS2DObject(el); lab.position.set(local.x, 9, local.z); group.add(lab);
+    const lab = new CSS2DObject(el); lab.position.set(local.x, 4.2, local.z); group.add(lab);
     districtLabels.push({ el, id: d.id, lab });
   }
 
-  // royal / lord estates — named houses with period architecture
   for (const e of normalizeEstates(conf)) {
     const local = districtLocal(conf, e);
-    const landmark = addLandmark(e.kind, conf.palette, rng, e.style || conf.archStyle || "palladio");
-    landmark.position.copy(local); landmark.position.y = 1.4;
-    landmark.scale.setScalar(e.role === "王室" ? 0.72 : 0.58); group.add(landmark);
-    const plazaMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.9 });
-    const plaza = new THREE.Mesh(new THREE.CircleGeometry(4.5, 36), plazaMat);
-    plaza.rotation.x = -Math.PI / 2; plaza.position.set(local.x, 1.24, local.z); group.add(plaza);
-    loadTex(estateTexUrl("plaza")).then((tex) => {
-      const clone = tex.clone();
-      clone.wrapS = clone.wrapT = THREE.RepeatWrapping;
-      clone.repeat.set(2, 2);
-      clone.needsUpdate = true;
-      plazaMat.map = clone;
-      plazaMat.needsUpdate = true;
-    });
-    const pad = new THREE.Mesh(
-      new THREE.RingGeometry(2.2, 3.1, 28),
-      new THREE.MeshBasicMaterial({
-        color: hexColor(conf.palette.accent), transparent: true, opacity: 0.45, depthWrite: false, side: THREE.DoubleSide,
-      }),
-    );
-    pad.rotation.x = -Math.PI / 2; pad.position.set(local.x, 1.22, local.z); group.add(pad);
     const el = document.createElement("button");
     el.type = "button"; el.className = `cj3d-district cj3d-estate${e.role === "王室" ? " is-royal" : ""}`;
     el.innerHTML = `<span class="cj3d-estate-role">${e.role}</span>${e.name}`;
     el.title = e.blurb || e.name;
-    el.addEventListener("click", (ev) => {
-      ev.stopPropagation();
-      // fly closer to the estate within city view
-      const world = local.clone().add(origin);
-      flyTo({ target: world.clone().add(new THREE.Vector3(0, 6, 0)), radius: Math.max(34, scale * 0.52), polar: 0.42 }, 700);
-      hint.textContent = `${e.role} · ${e.name} — ${e.blurb || e.style}`;
-    });
-    const lab = new CSS2DObject(el); lab.position.set(local.x, 11, local.z); group.add(lab);
+    el.addEventListener("click", (ev) => { ev.stopPropagation(); enterEstate(e); });
+    const lab = new CSS2DObject(el); lab.position.set(local.x, 4.8, local.z); group.add(lab);
     districtLabels.push({ el, id: e.id, lab });
-  }
-
-  for (const kind of (conf.creatures || ["birds"]).slice(0, 2)) {
-    const n = ["ships", "carts", "patrols", "rails", "banners"].includes(kind) ? 10 : 18;
-    addCreatureFlock(group, kind, coarse ? Math.ceil(n * 0.7) : n, scale * 0.4);
   }
 
   cityLight.position.copy(origin); cityLight.position.y += 40; cityLight.intensity = 1.6;
@@ -1263,7 +1214,7 @@ function buildCityDetail(site, conf) {
   cityLight.color.set(conf.mood?.light || conf.palette.accent);
   scene.add(group); cityRoot = group; activeCity = site.id;
   // more top-down so the atlas painting reads as the town
-  lastCityView = { target: origin.clone().add(new THREE.Vector3(0, 4, 0)), radius: Math.max(52, scale * 0.95), polar: 0.28 };
+  lastCityView = { target: origin.clone().add(new THREE.Vector3(0, 4, 0)), radius: Math.max(52, scale * 0.95), polar: 0.16 };
   return lastCityView;
 }
 
@@ -1276,7 +1227,6 @@ function buildDistrictDetail(site, conf, district) {
   const center = origin.clone().add(local); center.y = baseY + 1.2;
   const group = new THREE.Group(); group.position.copy(center);
   const span = Math.max(26, (conf.scale || 64) * 0.34);
-  const rng = mulberry32(hashStr(`${site.id}-${district.id}`));
 
   const voidPad = new THREE.Mesh(
     new THREE.CircleGeometry(span * 1.55, 64),
@@ -1318,41 +1268,7 @@ function buildDistrictDetail(site, conf, district) {
   );
   rim.rotation.x = -Math.PI / 2; rim.position.y = 0.1; group.add(rim);
 
-  // one landmark only — don't rebuild a purple Lego district over the painting
-  const landmark = addLandmark(district.kind, conf.palette, rng, conf.archStyle || "palladio");
-  landmark.position.set(0, 0.2, 0); landmark.scale.setScalar(0.9); group.add(landmark);
-
-  const plazaMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.9 });
-  const plaza = new THREE.Mesh(new THREE.CircleGeometry(span * 0.32, 36), plazaMat);
-  plaza.rotation.x = -Math.PI / 2; plaza.position.y = 0.09; group.add(plaza);
-  loadTex(estateTexUrl("plaza")).then((tex) => {
-    const clone = tex.clone();
-    clone.wrapS = clone.wrapT = THREE.RepeatWrapping;
-    clone.repeat.set(2, 2);
-    clone.needsUpdate = true;
-    plazaMat.map = clone;
-    plazaMat.needsUpdate = true;
-  }).catch(() => {});
-
-  // a few street lamps for depth, still sparse
-  for (let i = 0; i < 8; i += 1) {
-    const a = (i / 8) * Math.PI * 2;
-    const lamp = new THREE.Mesh(
-      new THREE.SphereGeometry(0.32, 10, 10),
-      new THREE.MeshStandardMaterial({
-        color: hexColor(conf.palette.accent), emissive: hexColor(conf.palette.accent),
-        emissiveIntensity: 0.9, roughness: 0.25,
-      }),
-    );
-    lamp.position.set(Math.cos(a) * span * 0.62, 2.8, Math.sin(a) * span * 0.62);
-    group.add(lamp);
-  }
-
-  for (const kind of (conf.creatures || ["birds"]).slice(0, 2)) {
-    addCreatureFlock(group, kind, coarse ? 12 : 20, span * 0.7, 0.5);
-  }
-
-  districtLight.position.copy(center); districtLight.position.y += 18; districtLight.intensity = 2.0;
+  districtLight.position.copy(center); districtLight.position.y += 18; districtLight.intensity = 1.4;
   districtLight.distance = span * 5; districtLight.color.set(conf.palette.accent);
   scene.add(group); districtRoot = group; activeDistrict = district.id;
   for (const item of districtLabels) {
@@ -1360,6 +1276,66 @@ function buildDistrictDetail(site, conf, district) {
     item.el.classList.toggle("is-dim", item.id !== district.id);
   }
   return { target: center.clone().add(new THREE.Vector3(0, 3, 0)), radius: Math.max(20, span * 1.15), polar: 0.52 };
+}
+
+function buildEstateDetail(site, conf, estate) {
+  clearDistrict();
+  const p = fromSvg(site.x, site.y);
+  const baseY = heightAt(p.x, p.y, heightField);
+  const origin = toWorld(p.x, p.y); origin.y = baseY;
+  const group = new THREE.Group(); group.position.copy(origin);
+
+  const voidPad = new THREE.Mesh(
+    new THREE.CircleGeometry(52, 64),
+    new THREE.MeshBasicMaterial({ color: 0x03050a }),
+  );
+  voidPad.rotation.x = -Math.PI / 2; voidPad.position.y = -0.22; group.add(voidPad);
+
+  const ground = new THREE.Mesh(
+    new THREE.CircleGeometry(18, 72),
+    new THREE.MeshStandardMaterial({ color: 0xc8b896, roughness: 0.72, metalness: 0.04 }),
+  );
+  ground.rotation.x = -Math.PI / 2; ground.position.y = 0.04;
+  group.add(ground);
+  loadTex(estateTexUrl("plaza")).then((tex) => {
+    const clone = tex.clone();
+    clone.wrapS = clone.wrapT = THREE.RepeatWrapping;
+    clone.repeat.set(3, 3);
+    clone.needsUpdate = true;
+    ground.material.map = clone;
+    ground.material.color.set(0xffffff);
+    ground.material.needsUpdate = true;
+  }).catch(() => {});
+
+  const rng = mulberry32(hashStr(`${site.id}-${estate.id}`));
+  const palace = addLandmark(estate.kind || "palace", conf.palette, rng, estate.style || conf.archStyle || "palladio");
+  group.add(palace);
+
+  const nameEl = document.createElement("div");
+  nameEl.className = "cj3d-estate-title";
+  nameEl.textContent = estate.name;
+  const lab = new CSS2DObject(nameEl);
+  lab.position.set(0, 8.4, 0);
+  palace.add(lab);
+
+  const key = new THREE.DirectionalLight(0xfff1d2, 1.35);
+  key.position.set(12, 22, 10);
+  group.add(key);
+  const rimL = new THREE.DirectionalLight(0x88aacc, 0.5);
+  rimL.position.set(-10, 12, -8);
+  group.add(rimL);
+
+  districtLight.position.copy(origin); districtLight.position.y += 22; districtLight.intensity = 1.85;
+  districtLight.distance = 90; districtLight.color.set(conf.mood?.light || conf.palette.accent);
+  if (cityRoot) cityRoot.visible = false;
+  scene.add(group); districtRoot = group;
+  activeDistrict = estate.id;
+  activeEstate = estate.id;
+  for (const item of districtLabels) {
+    item.el.classList.toggle("is-active", item.id === estate.id);
+    item.el.classList.toggle("is-dim", item.id !== estate.id);
+  }
+  return { target: origin.clone().add(new THREE.Vector3(0, 3.2, 0)), radius: 26, polar: 0.92, azimuth: 0.35 };
 }
 
 function rebuildSiteButtons() {
@@ -1374,17 +1350,29 @@ function rebuildSiteButtons() {
 }
 
 function syncUi() {
-  const inDistrict = Boolean(activeDistrict);
+  const inEstate = Boolean(activeEstate);
+  const inDistrict = Boolean(activeDistrict) && !inEstate;
+  const inClose = Boolean(activeDistrict);
   const inCity = Boolean(activeCity);
   const inRegion = Boolean(activeRegion);
   app.classList.toggle("is-region", inRegion && !inCity);
-  app.classList.toggle("is-city", inCity && !inDistrict);
-  app.classList.toggle("is-district", inDistrict);
-  const showBack = inRegion || inCity || inDistrict;
+  app.classList.toggle("is-city", inCity && !inClose);
+  app.classList.toggle("is-district", inClose);
+  const showBack = inRegion || inCity || inClose;
   backLevel.hidden = !showBack;
   backMap.hidden = !showBack;
+  if (cityRoot) cityRoot.visible = !inEstate;
 
-  if (inDistrict) {
+  if (inEstate) {
+    const site = sitesById.get(activeCity);
+    const conf = citiesById.get(activeCity);
+    const e = normalizeEstates(conf || {}).find((x) => x.id === activeEstate);
+    lodChip.textContent = `宅邸 · ${e?.name || activeEstate}`;
+    siteSectionTitle.textContent = `${site?.name || "城邦"} · 地点`;
+    const backText = `← 返回${site?.name || "城邦"}`;
+    backLevel.textContent = backText; backMap.textContent = backText;
+    hint.textContent = "宅邸近观是单独广场+3D，不叠在城邦俯视图上 · 点返回看航拍";
+  } else if (inDistrict) {
     const site = sitesById.get(activeCity);
     const conf = citiesById.get(activeCity);
     const d = normalizeDistricts(conf || {}).find((x) => x.id === activeDistrict);
@@ -1399,7 +1387,7 @@ function syncUi() {
     siteSectionTitle.textContent = `${site?.name || "城邦"} · 地点`;
     const backText = activeRegion ? `← 返回${activeRegion.name}` : "← 返回总览";
     backLevel.textContent = backText; backMap.textContent = backText;
-    hint.textContent = "城邦航拍图 · 点地点进街区 · 点王室/领主宅邸近观";
+    hint.textContent = "城邦航拍 + 点标签 · 点王室/领主才进 3D 宅邸";
   } else if (inRegion) {
     lodChip.textContent = `地区 · ${activeRegion.name}`;
     siteSectionTitle.textContent = `${activeRegion.name} · 战略点`;
@@ -1416,7 +1404,7 @@ function syncUi() {
   }
   const allow = inRegion || inCity ? new Set(activeRegion?.siteIds || []) : null;
   for (const [id, node] of markers) {
-    const hide = inCity || inDistrict || (Boolean(allow) && !allow.has(id));
+    const hide = inCity || inClose || (Boolean(allow) && !allow.has(id));
     node.classList.toggle("is-hidden", hide);
     node.classList.toggle("is-dim", false);
     node.classList.toggle("is-active", id === activeCity);
@@ -1429,8 +1417,16 @@ function syncUi() {
       const btn = document.createElement("button");
       btn.type = "button"; btn.dataset.districtId = d.id;
       btn.innerHTML = `${d.name}<span class="cj3d-list-meta">${d.blurb || d.kind}</span>`;
-      btn.classList.toggle("is-active", d.id === activeDistrict);
+      btn.classList.toggle("is-active", d.id === activeDistrict && !activeEstate);
       btn.addEventListener("click", () => enterDistrict(d));
+      siteList.appendChild(btn);
+    }
+    for (const e of normalizeEstates(conf)) {
+      const btn = document.createElement("button");
+      btn.type = "button"; btn.dataset.districtId = e.id;
+      btn.innerHTML = `${e.name}<span class="cj3d-list-meta">${e.role} · ${e.style}</span>`;
+      btn.classList.toggle("is-active", e.id === activeEstate);
+      btn.addEventListener("click", () => enterEstate(e));
       siteList.appendChild(btn);
     }
   } else {
@@ -1441,10 +1437,10 @@ function syncUi() {
     }
   }
 
-  const overview = !inRegion && !inCity && !inDistrict;
-  scene.fog.density = inDistrict ? 0.0022 : inCity ? 0.00135 : inRegion ? 0.00055 : 0.0003;
+  const overview = !inRegion && !inCity && !inClose;
+  scene.fog.density = inEstate ? 0.003 : inDistrict ? 0.0022 : inCity ? 0.00135 : inRegion ? 0.00055 : 0.0003;
   if (cloudLayer) cloudLayer.visible = overview;
-  if (graticule) graticule.visible = !inCity && !inDistrict;
+  if (graticule) graticule.visible = !inCity && !inClose;
   if (iceCap) iceCap.visible = graticule ? graticule.visible : false;
   if (!overview) {
     if (eurasiaOverlay) eurasiaOverlay.visible = false;
@@ -1454,7 +1450,7 @@ function syncUi() {
   }
   if (continentMesh) {
     // city/district: hide continent completely — brown blur was the "电子垃圾" skybox
-    if (inCity || inDistrict) {
+    if (inCity || inClose) {
       continentMesh.material.transparent = true;
       continentMesh.material.opacity = 0;
       continentMesh.visible = false;
@@ -1464,12 +1460,22 @@ function syncUi() {
       continentMesh.material.opacity = inRegion ? 0.72 : 1;
     }
   }
-  if (regionOverlay) regionOverlay.visible = !inCity && !inDistrict;
+  if (regionOverlay) regionOverlay.visible = !inCity && !inClose;
   syncCloseups();
 }
 
-function showSiteCard(site, district) {
+function showSiteCard(site, district, estate) {
   const region = siteRegion.get(site.id);
+  if (estate) {
+    cardBody.innerHTML = `
+      <p class="tag">${estate.role}宅邸${region ? ` · ${region.name}` : ""}</p>
+      <h2>${estate.name}</h2>
+      <p class="country">${site.name} · ${estate.style}</p>
+      <p>${estate.blurb || ""}</p>
+      <p>${site.function}</p>`;
+    card.hidden = false;
+    return;
+  }
   const conf = citiesById.get(site.id);
   const districts = conf ? normalizeDistricts(conf) : [];
   const districtBlock = district
@@ -1532,6 +1538,16 @@ async function enterDistrict(district) {
   if (!site || !conf) return;
   const view = buildDistrictDetail(site, conf, district);
   syncUi(); showSiteCard(site, district);
+  await flyTo(view, 720);
+  if (narrow()) setPanel(false);
+}
+async function enterEstate(estate) {
+  if (!activeCity) return;
+  const site = sitesById.get(activeCity);
+  const conf = citiesById.get(activeCity);
+  if (!site || !conf) return;
+  const view = buildEstateDetail(site, conf, estate);
+  syncUi(); showSiteCard(site, null, estate);
   await flyTo(view, 720);
   if (narrow()) setPanel(false);
 }

@@ -194,6 +194,17 @@ button { font: inherit; color: inherit; }
   background: rgba(230, 200, 134, 0.35);
   color: #ffe9b0;
 }
+.cj3d-estate-title {
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: rgba(7, 17, 29, 0.92);
+  color: #e6c886;
+  font-size: 12px;
+  white-space: nowrap;
+  border: 1px solid rgba(230, 200, 134, 0.4);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
 .cj3d-label.is-dim { opacity: 0.22; filter: grayscale(0.4); pointer-events: none; }
 .cj3d-label.is-hidden { display: none !important; }
 
