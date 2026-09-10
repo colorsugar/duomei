@@ -149,7 +149,7 @@ export function parseEdition(html, base = ZAOBAO_SOURCE) {
       let pMatch;
       while ((pMatch = pRe.exec(article))) {
         const pAttrs = pMatch[1] || "";
-        if (/\bclass=["'][^"']*\b(source|fb)\b/i.test(pAttrs)) continue;
+        if (/\bclass=["'][^"']*\b(source|fb|kicker|date|orig-link)\b/i.test(pAttrs)) continue;
         const text = stripTags(pMatch[2]);
         if (text) paragraphs.push(text);
       }
@@ -172,6 +172,27 @@ export function parseEdition(html, base = ZAOBAO_SOURCE) {
   }
 
   if (!groups.length) return null;
+
+  const bodies = new Map();
+  const tplRe = /<template\b[^>]*\bid=["']tpl-([^"']+)["'][^>]*>([\s\S]*?)<\/template>/gi;
+  let tplMatch;
+  while ((tplMatch = tplRe.exec(html))) {
+    const paragraphs = [];
+    const pRe = /<p\b([^>]*)>([\s\S]*?)<\/p>/gi;
+    let pMatch;
+    while ((pMatch = pRe.exec(tplMatch[2]))) {
+      if (/\bclass=["'][^"']*\b(source|fb|kicker|date|orig-link)\b/i.test(pMatch[1] || "")) continue;
+      const text = stripTags(pMatch[2]);
+      if (text) paragraphs.push(text);
+    }
+    if (tplMatch[1] && paragraphs.length) bodies.set(tplMatch[1], paragraphs);
+  }
+  for (const group of groups) {
+    for (const story of group.stories) {
+      story.body = bodies.get(story.id) ?? story.paragraphs;
+    }
+  }
+
   return { headline, date, lede, groups };
 }
 
@@ -214,7 +235,7 @@ export function buildWechatArticle(edition, { dateIso, imageMap = new Map() } = 
       if (story.image && imageMap.has(story.image)) {
         parts.push(`<p><img src="${escapeHtml(imageMap.get(story.image))}" alt="${escapeHtml(story.imageAlt)}"/></p>`);
       }
-      for (const para of story.paragraphs) parts.push(`<p>${escapeHtml(para)}</p>`);
+      for (const para of story.body ?? story.paragraphs) parts.push(`<p>${escapeHtml(para)}</p>`);
       if (story.sourceUrl) {
         const label = story.sourceLabel || "来源";
         parts.push(`<p><a href="${escapeHtml(story.sourceUrl)}">${escapeHtml(label)}</a></p>`);
@@ -340,6 +361,7 @@ const FIXTURE = `<!DOCTYPE html><html><body><div class="page">
 <p>科技正文。</p>
 </article>
 </div>
+<template id="tpl-story-a"><div class="sheet-article"><p class="kicker">国际</p><p>长文一段。</p><p class="source">来源</p></div></template>
 </div></body></html>`;
 
 export function selfCheck() {
@@ -352,6 +374,8 @@ export function selfCheck() {
   }
   if (edition.groups[0].stories[0].id !== "story-a") throw new Error("story id");
   if (edition.groups[0].stories[0].paragraphs.join("|") !== "正文一段。") throw new Error("paragraphs leaked source/fb");
+  if (edition.groups[0].stories[0].body.join("|") !== "长文一段。") throw new Error("body should come from template");
+  if (edition.groups[1].stories[0].body.join("|") !== "科技正文。") throw new Error("body should fall back to card text");
   const article = buildWechatArticle(edition, { dateIso: "2026-09-08" });
   if (article.title.length > MAX_TITLE) throw new Error("title too long");
   if (!article.content.includes("第一条新闻") || !article.content.includes("DUOMEI")) throw new Error("content missing");

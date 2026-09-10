@@ -123,13 +123,20 @@ test("keeps Zaobao immersive while safely falling back to the original edition",
   assert.match(appSource, /bareChrome = isAdmin \|\| isGuyuReader \|\| isZaobao \|\| isYunyouMap/);
   assert.match(zaobaoPageSource, /function parseEdition\(html: string, base: string = ZAOBAO_URL\)/);
   assert.match(zaobaoPageSource, /\.page > section\[id\]/);
+  assert.match(zaobaoPageSource, /template\[id\^='tpl-'\]/);
   assert.match(zaobaoPageSource, /className="zaobao-story-grid"/);
+  assert.match(zaobaoPageSource, /className="zaobao-story-open"/);
+  assert.match(zaobaoPageSource, /className="zaobao-sheet"/);
+  assert.match(zaobaoPageSource, />关闭</);
   assert.match(zaobaoPageSource, /className="zaobao-reader-loading zaobao-reader-failed"/);
   assert.match(zaobaoPageSource, /再试一次/);
   assert.doesNotMatch(zaobaoPageSource, /dangerouslySetInnerHTML|srcDoc|<iframe/);
   assert.match(zaobaoCss, /main\.zaobao-page \{[\s\S]*position:\s*fixed;[\s\S]*overflow-y:\s*auto/);
   assert.match(zaobaoCss, /\.zaobao-story-grid \{[\s\S]*repeat\(2, minmax\(0, 1fr\)\)/);
   assert.match(zaobaoCss, /@media \(max-width: 64rem\)[\s\S]*\.zaobao-story-grid \{[\s\S]*minmax\(0, 1fr\)/);
+  assert.match(zaobaoCss, /\.zaobao-sheet-panel \{/);
+  assert.match(zaobaoCss, /\.zaobao-sheet-close \{/);
+  assert.match(zaobaoCss, /\.zaobao-edition-group\.is-headline/);
 });
 
 test("keeps the Zaobao archive inside duomei.site and reuses the same reader", () => {
