@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import { Link, Navigate, useParams } from "react-router-dom";
+import { createPortal } from "react-dom";
+import { Link, Navigate, useNavigate, useParams } from "react-router-dom";
 import { ZAOBAO_ARCHIVE_ROUTE, ZAOBAO_PROXY_ROUTE, ZAOBAO_URL } from "../components/ZaobaoSection";
 
 // Source archive URLs are /YYYY-MM-DD/; anything else falls back to the archive list.
@@ -63,10 +64,14 @@ function ZaobaoStoryShare({ title, text, path }: { title: string; text: string; 
   );
 }
 
+const SKIP_STORY_P = /\b(source|fb|kicker|date|orig-link|lede|brand|hist-bar)\b/;
+
 type ZaobaoStory = {
   id: string;
   title: string;
   paragraphs: string[];
+  body: string[];
+  groupName: string;
   image: string | null;
   imageAlt: string;
   imageSource: string | null;
@@ -97,10 +102,29 @@ function safeHttpsUrl(value: string | null, base: string) {
   }
 }
 
+function collectParagraphs(root: ParentNode) {
+  return Array.from(root.querySelectorAll("p"))
+    .filter((node) => !SKIP_STORY_P.test(node.className))
+    .map((node) => node.textContent?.trim() ?? "")
+    .filter(Boolean);
+}
+
+function parseSheetBodies(doc: Document) {
+  const bodies = new Map<string, string[]>();
+  doc.querySelectorAll<HTMLTemplateElement>("template[id^='tpl-']").forEach((tpl) => {
+    const id = tpl.id.slice(4);
+    if (!id) return;
+    const paragraphs = collectParagraphs(tpl.content);
+    if (paragraphs.length) bodies.set(id, paragraphs);
+  });
+  return bodies;
+}
+
 function parseEdition(html: string, base: string = ZAOBAO_URL): ZaobaoEdition | null {
   const doc = new DOMParser().parseFromString(html, "text/html");
   const headline = doc.querySelector(".page > h1, h1")?.textContent?.trim();
   if (!headline) return null;
+  const sheetBodies = parseSheetBodies(doc);
 
   // Editions before 2026-09-02 wrap each column in `<div class="group" id>` instead of `<section id>`.
   const groups = Array.from(doc.querySelectorAll<HTMLElement>(".page > section[id], .page > .group[id]"))
@@ -112,19 +136,19 @@ function parseEdition(html: string, base: string = ZAOBAO_URL): ZaobaoEdition | 
           const title = article.querySelector("h2")?.textContent?.trim();
           if (!title) return null;
           const image = article.querySelector<HTMLImageElement>("figure img");
-          const source = article.querySelector<HTMLAnchorElement>(".source a");
-          const paragraphs = Array.from(article.children)
-            .filter((child) => child.tagName === "P" && !child.classList.contains("source") && !child.classList.contains("fb"))
-            .map((child) => child.textContent?.trim() ?? "")
-            .filter(Boolean);
+          const source = article.querySelector<HTMLAnchorElement>(".source a, .orig-link a");
+          const paragraphs = collectParagraphs(article);
+          const id = article.dataset.id || `${groupIndex + 1}-${storyIndex + 1}`;
           return {
-            id: article.dataset.id || `${groupIndex + 1}-${storyIndex + 1}`,
+            id,
             title,
             paragraphs,
+            body: sheetBodies.get(id) ?? paragraphs,
+            groupName: name,
             image: safeHttpsUrl(image?.getAttribute("src") ?? null, base),
             imageAlt: image?.getAttribute("alt")?.trim() || title,
             imageSource: article.querySelector("figcaption")?.textContent?.trim() ?? null,
-            sourceLabel: source?.textContent?.trim().replace(/^来源[：:]\s*/, "") ?? null,
+            sourceLabel: source?.textContent?.trim().replace(/^来源[：:]\s*/, "").replace(/^查看原文.*/, "") || null,
             sourceUrl: safeHttpsUrl(source?.getAttribute("href") ?? null, base),
           };
         })
@@ -161,10 +185,12 @@ export function ZaobaoReaderBar({ originalUrl, children }: { originalUrl: string
 
 export function DuomeiZaobaoPage() {
   const { date: dateParam, storyId } = useParams<{ date: string; storyId: string }>();
+  const navigate = useNavigate();
   const date = isZaobaoDate(dateParam) ? dateParam : undefined;
   const invalidDate = dateParam !== undefined && !date;
   const editionUrl = zaobaoEditionUrl(date);
   const editionLabel = date ? `${date} 早报` : "今日早报";
+  const editionPath = date ? `/zaobao/${date}` : "/zaobao";
   const [edition, setEdition] = useState<ZaobaoEdition | null>(null);
   const [failed, setFailed] = useState(false);
   const [attempt, setAttempt] = useState(0);
@@ -172,6 +198,8 @@ export function DuomeiZaobaoPage() {
   const [brokenImages, setBrokenImages] = useState<ReadonlySet<string>>(() => new Set());
   const pageRef = useRef<HTMLElement>(null);
   const tabsRef = useRef<HTMLElement>(null);
+  const closeRef = useRef<HTMLButtonElement>(null);
+  const lastOpenRef = useRef<HTMLButtonElement | null>(null);
   const [activeGroupId, setActiveGroupId] = useState<string | null>(null);
 
   // `main.zaobao-page` is the scroll container, so the observer must root there rather than on the viewport.
@@ -197,16 +225,40 @@ export function DuomeiZaobaoPage() {
     tabs.scrollTo({ left: chip.offsetLeft - (tabs.clientWidth - chip.offsetWidth) / 2, behavior: "smooth" });
   }, [activeGroupId]);
 
-  // A story link lands on that card: figures reserve their 16:9 box, so one scroll after render is stable.
-  const sharedStory = storyId ? edition?.groups.flatMap((group) => group.stories).find((story) => story.id === storyId) : undefined;
+  // A story link opens the same bottom sheet as /zaobao-src (`#a=` there; here `/i/:id`).
+  const openStory = storyId ? edition?.groups.flatMap((group) => group.stories).find((story) => story.id === storyId) : undefined;
+  const openStoryPath = (story: ZaobaoStory) => {
+    const path = zaobaoStoryPath(story.id, date);
+    if (window.location.pathname !== path) navigate(path);
+  };
+  const closeSheet = () => {
+    if (window.location.pathname !== editionPath) navigate(editionPath);
+  };
+
   useEffect(() => {
-    if (!sharedStory) return;
-    document.title = `${sharedStory.title} | DUOMEI`;
-    const frame = requestAnimationFrame(() => {
-      pageRef.current?.querySelector(`#${CSS.escape(zaobaoStoryDomId(sharedStory.id))}`)?.scrollIntoView({ block: "start" });
-    });
+    if (!openStory) {
+      document.title = `${editionLabel} | DUOMEI`;
+      return;
+    }
+    document.title = `${openStory.title} | DUOMEI`;
+    const frame = requestAnimationFrame(() => closeRef.current?.focus());
     return () => cancelAnimationFrame(frame);
-  }, [sharedStory]);
+  }, [editionLabel, openStory]);
+
+  useEffect(() => {
+    if (!openStory) return;
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") closeSheet();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [openStory, editionPath]);
+
+  useEffect(() => {
+    if (openStory) return;
+    lastOpenRef.current?.focus();
+    lastOpenRef.current = null;
+  }, [openStory]);
 
   useEffect(() => {
     if (invalidDate) return;
@@ -237,7 +289,7 @@ export function DuomeiZaobaoPage() {
   }
 
   return (
-    <main className="zaobao-page" ref={pageRef}>
+    <main className={`zaobao-page${openStory ? " is-sheet-open" : ""}`} ref={pageRef}>
       <ZaobaoReaderBar originalUrl={editionUrl}>
         <Link className="zaobao-page-archive" to={ZAOBAO_ARCHIVE_ROUTE}>
           往期
@@ -283,49 +335,65 @@ export function DuomeiZaobaoPage() {
 
           <div className="zaobao-edition-groups">
             {edition.groups.map((group, groupIndex) => (
-              <section className="zaobao-edition-group" id={group.id} key={group.id}>
+              <section className={`zaobao-edition-group${groupIndex === 0 ? " is-headline" : ""}`} id={group.id} key={group.id}>
                 <header>
                   <h2>{group.name}</h2>
                   <span>{String(group.stories.length).padStart(2, "0")}</span>
                 </header>
                 <div className="zaobao-story-grid">
-                  {group.stories.map((story, storyIndex) => (
+                  {group.stories.map((story, storyIndex) => {
+                    const featured = groupIndex === 0 && storyIndex === 0;
+                    const teaser = story.paragraphs.length ? story.paragraphs : story.body.slice(0, 2);
+                    return (
                     <article
-                      className={`zaobao-story${groupIndex === 0 && storyIndex === 0 ? " is-featured" : ""}${story.id === storyId ? " is-shared" : ""}`}
+                      className={`zaobao-story${featured ? " is-featured" : ""}${story.id === storyId ? " is-shared" : ""}`}
                       id={zaobaoStoryDomId(story.id)}
                       key={`${group.id}-${story.id}`}
                     >
-                      {story.image && !brokenImages.has(story.image) ? (
-                        <figure>
-                          <img
-                            src={story.image}
-                            alt={story.imageAlt}
-                            loading={groupIndex === 0 && storyIndex === 0 ? "eager" : "lazy"}
-                            decoding="async"
-                            referrerPolicy="no-referrer"
-                            onError={() => setBrokenImages((current) => new Set(current).add(story.image as string))}
-                          />
-                          {story.imageSource ? <figcaption>{story.imageSource}</figcaption> : null}
-                        </figure>
-                      ) : null}
-                      <div className="zaobao-story-body">
-                        <h3>{story.title}</h3>
-                        {story.paragraphs.map((paragraph, index) => <p key={index}>{paragraph}</p>)}
-                        <div className="zaobao-story-actions">
-                          {story.sourceUrl ? (
-                            <a href={story.sourceUrl} target="_blank" rel="noreferrer">
-                              来源 · {story.sourceLabel || "原文"} ↗
-                            </a>
-                          ) : null}
-                          <ZaobaoStoryShare
-                            title={story.title}
-                            text={story.paragraphs[0] ?? edition.headline}
-                            path={zaobaoStoryPath(story.id, date ?? isoDateFromLabel(edition.date))}
-                          />
+                      <button
+                        type="button"
+                        className="zaobao-story-open"
+                        aria-haspopup="dialog"
+                        aria-expanded={story.id === storyId}
+                        onClick={(event) => {
+                          lastOpenRef.current = event.currentTarget;
+                          openStoryPath(story);
+                        }}
+                      >
+                        {story.image && !brokenImages.has(story.image) ? (
+                          <figure>
+                            <img
+                              src={story.image}
+                              alt={story.imageAlt}
+                              loading={featured ? "eager" : "lazy"}
+                              decoding="async"
+                              referrerPolicy="no-referrer"
+                              onError={() => setBrokenImages((current) => new Set(current).add(story.image as string))}
+                            />
+                            {story.imageSource ? <figcaption>{story.imageSource}</figcaption> : null}
+                          </figure>
+                        ) : null}
+                        <div className="zaobao-story-body">
+                          <h3>{story.title}</h3>
+                          {teaser.map((paragraph, index) => <p key={index}>{paragraph}</p>)}
+                          <span className="zaobao-story-more">阅读全文</span>
                         </div>
+                      </button>
+                      <div className="zaobao-story-actions">
+                        {story.sourceUrl ? (
+                          <a href={story.sourceUrl} target="_blank" rel="noreferrer">
+                            来源 · {story.sourceLabel || "原文"} ↗
+                          </a>
+                        ) : null}
+                        <ZaobaoStoryShare
+                          title={story.title}
+                          text={story.paragraphs[0] ?? story.body[0] ?? edition.headline}
+                          path={zaobaoStoryPath(story.id, date ?? isoDateFromLabel(edition.date))}
+                        />
                       </div>
                     </article>
-                  ))}
+                    );
+                  })}
                 </div>
               </section>
             ))}
@@ -334,7 +402,7 @@ export function DuomeiZaobaoPage() {
       ) : null}
 
       {edition ? (
-        <nav className="zaobao-edition-tabs" aria-label="早报栏目" ref={tabsRef}>
+        <nav className="zaobao-edition-tabs" aria-label="早报栏目" ref={tabsRef} hidden={Boolean(openStory)}>
           <div className="zaobao-edition-tabs-row">
             {edition.groups.map((group) => (
               <a
@@ -348,6 +416,49 @@ export function DuomeiZaobaoPage() {
           </div>
         </nav>
       ) : null}
+
+      {openStory && edition ? createPortal((
+        <div className="zaobao-sheet">
+          <button type="button" className="zaobao-sheet-backdrop" aria-label="关闭长文" onClick={closeSheet} />
+          <div className="zaobao-sheet-panel" role="dialog" aria-modal="true" aria-labelledby="zaobao-sheet-title">
+            <div className="zaobao-sheet-scroll">
+              <article className="zaobao-sheet-article">
+                {openStory.groupName ? <p className="zaobao-sheet-kicker">{openStory.groupName}</p> : null}
+                {openStory.image && !brokenImages.has(openStory.image) ? (
+                  <figure>
+                    <img
+                      src={openStory.image}
+                      alt={openStory.imageAlt}
+                      decoding="async"
+                      referrerPolicy="no-referrer"
+                      onError={() => setBrokenImages((current) => new Set(current).add(openStory.image as string))}
+                    />
+                    {openStory.imageSource ? <figcaption>{openStory.imageSource}</figcaption> : null}
+                  </figure>
+                ) : null}
+                <h2 id="zaobao-sheet-title">{openStory.title}</h2>
+                {edition.date ? <p className="zaobao-sheet-date">{edition.date}</p> : null}
+                {openStory.body.map((paragraph, index) => <p key={index}>{paragraph}</p>)}
+                <div className="zaobao-story-actions">
+                  {openStory.sourceUrl ? (
+                    <a href={openStory.sourceUrl} target="_blank" rel="noreferrer">
+                      查看原文（完整来源页）
+                    </a>
+                  ) : null}
+                  <ZaobaoStoryShare
+                    title={openStory.title}
+                    text={openStory.body[0] ?? openStory.paragraphs[0] ?? edition.headline}
+                    path={zaobaoStoryPath(openStory.id, date ?? isoDateFromLabel(edition.date))}
+                  />
+                </div>
+              </article>
+            </div>
+            <div className="zaobao-sheet-footer">
+              <button type="button" className="zaobao-sheet-close" ref={closeRef} onClick={closeSheet} aria-label="关闭">关闭</button>
+            </div>
+          </div>
+        </div>
+      ), document.body) : null}
     </main>
   );
 }

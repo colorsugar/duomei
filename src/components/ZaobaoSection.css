@@ -611,9 +611,40 @@ button.zaobao-page-open {
 
 .zaobao-story {
   min-inline-size: 0;
-  padding-block-start: var(--space-lg);
-  border-block-start: var(--rule-hairline) solid var(--color-rule);
+  padding: var(--space-lg);
+  border: var(--rule-hairline) solid var(--color-rule);
+  border-radius: var(--radius-card);
+  background: var(--color-paper-2);
   scroll-margin-block-start: calc(var(--zaobao-reader-bar-height) + var(--space-lg));
+}
+
+.zaobao-edition-group.is-headline .zaobao-story.is-featured {
+  border-color: color-mix(in oklch, var(--color-accent) 35%, var(--color-rule));
+  box-shadow: 0 0.5rem 1.5rem color-mix(in oklch, var(--color-ink) 8%, transparent);
+}
+
+button.zaobao-story-open {
+  display: grid;
+  gap: var(--space-sm);
+  inline-size: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.zaobao-story-more {
+  display: inline-flex;
+  min-block-size: var(--size-hit);
+  align-items: center;
+  color: var(--color-accent);
+  font-size: var(--text-sm);
+  font-weight: 600;
 }
 
 /* The card a shared story link landed on: a single warm rule, nothing louder. */
@@ -697,6 +728,157 @@ button.zaobao-page-open {
   font-size: var(--text-sm);
   font-weight: 600;
   cursor: pointer;
+}
+
+.zaobao-page.is-sheet-open {
+  overflow: hidden;
+}
+
+.zaobao-sheet {
+  position: fixed;
+  inset: 0;
+  z-index: 4000;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.zaobao-sheet-backdrop {
+  position: absolute;
+  inset: 0;
+  padding: 0;
+  border: 0;
+  background: color-mix(in oklch, var(--color-ink) 42%, transparent);
+  cursor: pointer;
+}
+
+.zaobao-sheet-panel {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  inline-size: min(100%, 42rem);
+  block-size: min(92dvh, 57.5rem);
+  max-block-size: min(92dvh, 57.5rem);
+  overflow: hidden;
+  background: var(--color-paper-2);
+  border: var(--rule-hairline) solid var(--color-rule);
+  border-block-end: 0;
+  border-radius: 1.125rem 1.125rem 0 0;
+  box-shadow: 0 -0.5rem 1.75rem color-mix(in oklch, var(--color-ink) 16%, transparent);
+  animation: zaobao-sheet-up 0.28s var(--ease-out);
+}
+
+@keyframes zaobao-sheet-up {
+  from { transform: translateY(18%); opacity: 0.6; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.zaobao-sheet-scroll {
+  flex: 1 1 auto;
+  min-block-size: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  padding-block-end: var(--space-lg);
+}
+
+.zaobao-sheet-article {
+  display: grid;
+  gap: var(--space-sm);
+}
+
+.zaobao-sheet-kicker,
+.zaobao-sheet-date {
+  margin: 0;
+  padding: var(--space-md) var(--space-lg) 0;
+  color: var(--color-accent);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  letter-spacing: 0.14em;
+}
+
+.zaobao-sheet-date {
+  color: var(--color-muted-strong);
+  font-weight: 500;
+  letter-spacing: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.zaobao-sheet-article figure {
+  margin: 0;
+}
+
+.zaobao-sheet-article figure img {
+  display: block;
+  inline-size: 100%;
+  height: auto;
+  background: var(--color-paper-3);
+}
+
+.zaobao-sheet-article figcaption {
+  margin: 0;
+  padding: var(--space-xs) var(--space-lg) 0;
+  color: var(--color-muted);
+  font-size: var(--text-xs);
+}
+
+.zaobao-sheet-article h2 {
+  margin: 0;
+  padding: var(--space-sm) var(--space-lg) 0;
+  color: var(--color-ink);
+  font-family: var(--font-display);
+  font-size: clamp(var(--text-xl), 4vw, var(--text-2xl));
+  font-style: normal;
+  font-weight: 700;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
+.zaobao-sheet-article > p {
+  margin: 0;
+  padding: var(--space-xs) var(--space-lg) 0;
+  color: var(--color-ink);
+  font-size: var(--text-base);
+  line-height: 1.75;
+}
+
+.zaobao-sheet-article .zaobao-story-actions {
+  padding: var(--space-sm) var(--space-lg) 0;
+}
+
+.zaobao-sheet-footer {
+  flex: 0 0 auto;
+  padding: var(--space-md) var(--space-lg) calc(var(--space-md) + env(safe-area-inset-bottom, 0px));
+  border-block-start: var(--rule-hairline) solid var(--color-rule);
+  background: color-mix(in oklch, var(--color-paper-2) 96%, transparent);
+  backdrop-filter: blur(0.5rem);
+  -webkit-backdrop-filter: blur(0.5rem);
+}
+
+.zaobao-sheet-close {
+  display: block;
+  inline-size: 100%;
+  min-block-size: var(--size-hit);
+  padding: var(--space-md);
+  border: var(--rule-hairline) solid var(--color-accent-ink);
+  border-radius: 0.75rem;
+  color: var(--color-paper);
+  font: inherit;
+  font-size: var(--text-base);
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  line-height: 1.2;
+  background: var(--color-accent);
+  cursor: pointer;
+}
+
+.zaobao-sheet-close:focus-visible,
+.zaobao-sheet-backdrop:focus-visible,
+.zaobao-story-open:focus-visible {
+  outline: var(--rule-focus) solid var(--color-focus);
+  outline-offset: var(--space-2xs);
 }
 
 .zaobao-archive {
@@ -815,7 +997,9 @@ button.zaobao-page-open {
 @media (min-width: 64rem) {
   .zaobao-story.is-featured {
     grid-column: 1 / -1;
-    display: grid;
+  }
+
+  .zaobao-story.is-featured .zaobao-story-open {
     grid-template-columns: minmax(0, 1.35fr) minmax(18rem, 0.65fr);
     gap: var(--space-2xl);
   }
@@ -834,8 +1018,15 @@ button.zaobao-page-open {
 @media (hover: hover) and (pointer: fine) {
   .zaobao-edition-index a:hover,
   .zaobao-story-actions a:hover,
-  .zaobao-story-share:hover {
+  .zaobao-story-share:hover,
+  .zaobao-story-open:hover h3,
+  .zaobao-story-open:hover .zaobao-story-more {
     color: var(--color-ink);
+  }
+
+  .zaobao-sheet-close:hover,
+  .zaobao-sheet-close:active {
+    background: var(--color-accent-ink);
   }
 
   .zaobao-edition-tabs a:not([aria-current]):hover {
@@ -1006,6 +1197,10 @@ button.zaobao-page-open {
 @media (prefers-reduced-motion: reduce) {
   .zaobao-card {
     transition: none;
+  }
+
+  .zaobao-sheet-panel {
+    animation: none;
   }
 }
 
