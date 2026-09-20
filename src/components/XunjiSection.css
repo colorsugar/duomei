@@ -122,3 +122,21 @@
     gap: 0.65rem;
   }
 }
+
+.zaobao-page .xunji-story-source {
+  margin: 0 0 var(--space-2xs);
+  font-size: var(--text-sm);
+  line-height: 1.6;
+}
+
+.zaobao-page .xunji-story-source a {
+  color: var(--color-accent);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 0.18em;
+}
+
+.zaobao-page .xunji-story-source a:focus-visible {
+  outline: var(--rule-focus) solid var(--color-focus);
+  outline-offset: var(--space-2xs);
+}
