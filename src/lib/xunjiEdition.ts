@@ -3,6 +3,7 @@ export type XunjiStory = {
   title: string;
   paragraphs: string[];
   sourceUrl: string | null;
+  sourceLabel: string | null;
 };
 
 export type XunjiGroup = {
@@ -26,6 +27,14 @@ const TEASER_SKIP = /^(https?:\/\/|来源[：:])/i;
 
 export function xunjiStoryTeaser(paragraphs: string[], limit = 2): string[] {
   return paragraphs.filter((text) => text && !TEASER_SKIP.test(text)).slice(0, limit);
+}
+
+export function xunjiSourceLabel(paragraphs: string[]): string | null {
+  for (const text of paragraphs) {
+    const match = text.match(/^来源[：:]\s*(.+)$/);
+    if (match?.[1]?.trim()) return match[1].trim();
+  }
+  return null;
 }
 
 export function xunjiSafeHttpUrl(value: string | null | undefined): string | null {
@@ -135,11 +144,13 @@ function parseArticles(html: string, groupIndex: number): XunjiStory[] {
   return blocks(html, "article").flatMap((article, storyIndex) => {
     const title = firstHeading(article.inner, ["h2", "h3"]);
     if (!title) return [];
+    const paragraphs = collectParagraphs(article.inner);
     return [{
       id: attr(article.attrs, "data-id") || `${groupIndex + 1}-${storyIndex + 1}`,
       title,
-      paragraphs: collectParagraphs(article.inner),
+      paragraphs,
       sourceUrl: firstHttpHref(article.inner),
+      sourceLabel: xunjiSourceLabel(paragraphs),
     }];
   });
 }
@@ -204,7 +215,7 @@ export function parseXunjiEdition(html: string): XunjiEdition | null {
     groups: [{
       id: "xunji-group-today",
       name: date || "今日",
-      stories: [{ id: "today", title: headline, paragraphs: lede ? [lede] : [], sourceUrl: null }],
+      stories: [{ id: "today", title: headline, paragraphs: lede ? [lede] : [], sourceUrl: null, sourceLabel: null }],
     }],
   };
 }
