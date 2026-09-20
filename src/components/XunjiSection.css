@@ -102,6 +102,8 @@
   font-weight: 600;
   overflow-wrap: anywhere;
   word-break: break-all;
+  text-decoration: underline;
+  text-underline-offset: 0.16em;
 }
 
 .zaobao-page .zaobao-story-body h3 a:focus-visible {
