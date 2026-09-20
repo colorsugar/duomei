@@ -25,6 +25,7 @@ const zaobaoCss = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "..
 const zaobaoPageSource = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../pages/DuomeiZaobaoPage.tsx"), "utf8");
 const zaobaoArchivePageSource = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../pages/DuomeiZaobaoArchivePage.tsx"), "utf8");
 const xunjiSource = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../components/XunjiSection.tsx"), "utf8");
+const xunjiCss = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../components/XunjiSection.css"), "utf8");
 const xunjiPageSource = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../pages/DuomeiXunjiPage.tsx"), "utf8");
 const xunjiEditionSource = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "./xunjiEdition.ts"), "utf8");
 const xunjiArchivePageSource = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../pages/DuomeiXunjiArchivePage.tsx"), "utf8");
@@ -205,7 +206,12 @@ test("mounts 寻迹 the same way as 早报: same-origin proxy, reader, archive, 
   assert.match(xunjiPageSource, /parseXunjiEdition\(await response\.text\(\)\)/);
   assert.match(xunjiPageSource, /打开原帖/);
   assert.match(xunjiPageSource, /rel="noopener noreferrer"/);
+  assert.match(xunjiPageSource, /zaobao-edition-hero xunji-edition-hero/);
   assert.match(xunjiPageSource, /xunjiStoryBody\(story\.paragraphs\)/);
+  assert.match(xunjiCss, /\.xunji-page \.zaobao-story-grid \{\s*grid-template-columns: minmax\(0, 1fr\);/);
+  assert.match(xunjiCss, /\.xunji-page \.xunji-edition-hero \{/);
+  assert.match(xunjiCss, /overflow: visible;/);
+  assert.doesNotMatch(xunjiCss, /min-width:\s*80rem/);
   assert.match(xunjiPageSource, /xunjiTextParts/);
   assert.match(xunjiPageSource, /来源 · /);
   assert.match(xunjiPageSource, /target="_blank" rel="noopener noreferrer"/);

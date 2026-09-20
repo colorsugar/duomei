@@ -131,7 +131,7 @@ export function DuomeiXunjiPage() {
 
       {edition ? (
         <div className="zaobao-edition">
-          <header className="zaobao-edition-hero">
+          <header className="zaobao-edition-hero xunji-edition-hero">
             <div>
               <p className="zaobao-edition-kicker">{date ? "寻迹 · 往期" : "寻迹 · XUNJI"}</p>
               <h1>{edition.headline}</h1>
