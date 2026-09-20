@@ -3,6 +3,12 @@ export type XunjiStory = {
   title: string;
   paragraphs: string[];
   sourceUrl: string | null;
+  sourceLabel: string | null;
+};
+
+export type XunjiTextPart = {
+  text: string;
+  href?: string;
 };
 
 export type XunjiGroup = {
@@ -19,19 +25,66 @@ export type XunjiEdition = {
 };
 
 const KNOWN_SECTION_NAMES: Record<string, string> = {
-  "x-anecdotes": "寻迹",
+  "x-anecdotes": "X琐事",
+  "f-anecdotes": "影视日常",
+  "film-daily": "影视日常",
+  "tv-daily": "影视日常",
+  "s-anecdotes": "学院校园",
+  "school-campus": "学院校园",
+  "academy-campus": "学院校园",
 };
 
-const TEASER_SKIP = /^来源[：:]/i;
+const SOURCE_LINE = /^来源[：:]/i;
 const BARE_HTTP_URL = /^https?:\/\/\S+$/i;
+const INLINE_HTTP = /https?:\/\/\S+/gi;
 
 export function xunjiBareHttpUrl(text: string): string | null {
   const trimmed = text.trim();
   return BARE_HTTP_URL.test(trimmed) ? xunjiSafeHttpUrl(trimmed) : null;
 }
 
-export function xunjiStoryTeaser(paragraphs: string[], limit = 2): string[] {
-  return paragraphs.filter((text) => text && !TEASER_SKIP.test(text)).slice(0, limit);
+export function xunjiStoryBody(paragraphs: string[]): string[] {
+  return paragraphs.filter((text) => text && !SOURCE_LINE.test(text));
+}
+
+export function xunjiSourceLabel(paragraphs: string[], sourceUrl?: string | null): string | null {
+  for (const text of paragraphs) {
+    const match = text.match(/^来源[：:]\s*(.+)$/);
+    if (match?.[1]?.trim()) return match[1].trim();
+  }
+  if (!sourceUrl) return null;
+  try {
+    const url = new URL(sourceUrl);
+    if (!/(^|\.)(x|twitter)\.com$/i.test(url.hostname)) return null;
+    const handle = url.pathname.split("/").filter(Boolean)[0];
+    return handle && !/^(i|intent|search)$/i.test(handle) ? `@${handle}` : null;
+  } catch {
+    return null;
+  }
+}
+
+export function xunjiParagraphClass(text: string): string {
+  if (SOURCE_LINE.test(text)) return "xunji-p is-source";
+  if (xunjiBareHttpUrl(text)) return "xunji-p is-url";
+  if (/^西幻骨架[：:]?/.test(text)) return "xunji-p is-skeleton";
+  if (/^[·•]\s*/.test(text)) return "xunji-p is-item";
+  if (/^(背景|原帖要点)[：:]/.test(text)) return "xunji-p is-label";
+  return "xunji-p";
+}
+
+export function xunjiTextParts(text: string): XunjiTextPart[] {
+  const parts: XunjiTextPart[] = [];
+  const re = new RegExp(INLINE_HTTP.source, INLINE_HTTP.flags);
+  let last = 0;
+  let match: RegExpExecArray | null;
+  while ((match = re.exec(text))) {
+    if (match.index > last) parts.push({ text: text.slice(last, match.index) });
+    const href = xunjiSafeHttpUrl(match[0]);
+    parts.push(href ? { text: match[0], href } : { text: match[0] });
+    last = match.index + match[0].length;
+  }
+  if (last < text.length) parts.push({ text: text.slice(last) });
+  return parts.length ? parts : [{ text }];
 }
 
 export function xunjiSafeHttpUrl(value: string | null | undefined): string | null {
@@ -98,9 +151,14 @@ function firstHeading(html: string, tags: string[]) {
 }
 
 function collectParagraphs(html: string) {
-  return blocks(html, "p")
+  const fromP = blocks(html, "p")
     .map((node) => textOf(node.inner))
     .filter((text) => text && !/往期/.test(text));
+  const seen = new Set(fromP);
+  const fromLi = blocks(html, "li")
+    .map((node) => textOf(node.inner))
+    .filter((text) => text && !seen.has(text) && !/往期/.test(text));
+  return fromP.concat(fromLi);
 }
 
 function firstHttpHref(html: string) {
@@ -141,11 +199,14 @@ function parseArticles(html: string, groupIndex: number): XunjiStory[] {
   return blocks(html, "article").flatMap((article, storyIndex) => {
     const title = firstHeading(article.inner, ["h2", "h3"]);
     if (!title) return [];
+    const paragraphs = collectParagraphs(article.inner);
+    const sourceUrl = firstHttpHref(article.inner);
     return [{
       id: attr(article.attrs, "data-id") || `${groupIndex + 1}-${storyIndex + 1}`,
       title,
-      paragraphs: collectParagraphs(article.inner),
-      sourceUrl: firstHttpHref(article.inner),
+      paragraphs,
+      sourceUrl,
+      sourceLabel: xunjiSourceLabel(paragraphs, sourceUrl),
     }];
   });
 }

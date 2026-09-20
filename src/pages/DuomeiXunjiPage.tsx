@@ -1,7 +1,13 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { Link, Navigate, useParams } from "react-router-dom";
 import { XUNJI_ARCHIVE_ROUTE, XUNJI_PROXY_ROUTE, XUNJI_URL } from "../components/XunjiSection";
-import { parseXunjiEdition, xunjiBareHttpUrl, xunjiStoryTeaser, type XunjiEdition } from "../lib/xunjiEdition";
+import {
+  parseXunjiEdition,
+  xunjiParagraphClass,
+  xunjiStoryBody,
+  xunjiTextParts,
+  type XunjiEdition,
+} from "../lib/xunjiEdition";
 import "../components/ZaobaoSection.css";
 import "../components/XunjiSection.css";
 
@@ -27,6 +33,18 @@ export function isoDateFromXunjiLabel(label: string) {
   if (iso && isXunjiDate(iso[1])) return iso[1];
   const match = label.match(/(\d{4})年(\d{1,2})月(\d{1,2})日/);
   return match ? `${match[1]}-${match[2].padStart(2, "0")}-${match[3].padStart(2, "0")}` : undefined;
+}
+
+function XunjiLinkedText({ text }: { text: string }) {
+  const parts = xunjiTextParts(text);
+  if (parts.length === 1 && !parts[0].href) return parts[0].text;
+  return parts.map((part, index) => (
+    part.href ? (
+      <a key={index} href={part.href} target="_blank" rel="noopener noreferrer">
+        {part.text}
+      </a>
+    ) : part.text
+  ));
 }
 
 export function XunjiReaderBar({ originalUrl, children }: { originalUrl: string; children?: ReactNode }) {
@@ -84,7 +102,7 @@ export function DuomeiXunjiPage() {
   }
 
   return (
-    <main className="zaobao-page">
+    <main className="zaobao-page xunji-page">
       <XunjiReaderBar originalUrl={editionUrl}>
         <Link className="zaobao-page-archive" to={XUNJI_ARCHIVE_ROUTE}>
           往期
@@ -133,27 +151,31 @@ export function DuomeiXunjiPage() {
                 </header>
                 <div className="zaobao-story-grid">
                   {group.stories.map((story) => (
-                    <article className="zaobao-story" key={`${group.id}-${story.id}`}>
+                    <article className="zaobao-story xunji-story" key={`${group.id}-${story.id}`}>
                       <div className="zaobao-story-body">
                         <h3>
                           {story.sourceUrl ? (
                             <a href={story.sourceUrl} target="_blank" rel="noopener noreferrer">
                               {story.title}
                             </a>
-                          ) : story.title}
+                          ) : (
+                            story.title
+                          )}
                         </h3>
-                        {xunjiStoryTeaser(story.paragraphs).map((paragraph, index) => {
-                          const href = xunjiBareHttpUrl(paragraph);
-                          return (
-                            <p key={index}>
-                              {href ? (
-                                <a href={href} target="_blank" rel="noopener noreferrer">
-                                  {paragraph.trim()}
-                                </a>
-                              ) : paragraph}
-                            </p>
-                          );
-                        })}
+                        {story.sourceUrl ? (
+                          <p className="xunji-story-source">
+                            <a href={story.sourceUrl} target="_blank" rel="noopener noreferrer">
+                              来源 · {story.sourceLabel || "原帖"}
+                            </a>
+                          </p>
+                        ) : story.sourceLabel ? (
+                          <p className="xunji-story-source">来源 · {story.sourceLabel}</p>
+                        ) : null}
+                        {xunjiStoryBody(story.paragraphs).map((paragraph, index) => (
+                          <p className={xunjiParagraphClass(paragraph)} key={index}>
+                            <XunjiLinkedText text={paragraph} />
+                          </p>
+                        ))}
                       </div>
                       {story.sourceUrl ? (
                         <div className="zaobao-story-actions">

@@ -131,3 +131,53 @@
     gap: 0.65rem;
   }
 }
+
+.xunji-page .zaobao-story-grid {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.xunji-page .xunji-story {
+  padding: var(--space-xl);
+}
+
+.xunji-page .xunji-story-source {
+  margin: 0;
+  font-size: var(--text-sm);
+  line-height: 1.6;
+}
+
+.xunji-page .xunji-story-source a {
+  color: var(--color-accent);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 0.18em;
+}
+
+.xunji-page .xunji-story-source a:focus-visible {
+  outline: var(--rule-focus) solid var(--color-focus);
+  outline-offset: var(--space-2xs);
+}
+
+.xunji-page .xunji-p {
+  max-inline-size: none;
+}
+
+.xunji-page .xunji-p.is-label,
+.xunji-page .xunji-p.is-skeleton {
+  color: var(--color-ink);
+}
+
+.xunji-page .xunji-p.is-skeleton {
+  margin-block-start: var(--space-xs);
+  font-weight: 700;
+}
+
+.xunji-page .xunji-p.is-item {
+  padding-inline-start: 0.85em;
+}
+
+@media (min-width: 80rem) {
+  .xunji-page .zaobao-story-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
