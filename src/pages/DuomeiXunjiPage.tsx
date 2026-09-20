@@ -1,6 +1,7 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { Link, Navigate, useParams } from "react-router-dom";
 import { XUNJI_ARCHIVE_ROUTE, XUNJI_PROXY_ROUTE, XUNJI_URL } from "../components/XunjiSection";
+import { parseXunjiEdition, type XunjiEdition } from "../lib/xunjiEdition";
 import "../components/ZaobaoSection.css";
 
 // Source edition URLs are /YYYY-MM-DD/; anything else falls back to the archive list.
@@ -25,74 +26,6 @@ export function isoDateFromXunjiLabel(label: string) {
   if (iso && isXunjiDate(iso[1])) return iso[1];
   const match = label.match(/(\d{4})年(\d{1,2})月(\d{1,2})日/);
   return match ? `${match[1]}-${match[2].padStart(2, "0")}-${match[3].padStart(2, "0")}` : undefined;
-}
-
-type XunjiStory = {
-  id: string;
-  title: string;
-  paragraphs: string[];
-};
-
-type XunjiGroup = {
-  id: string;
-  name: string;
-  stories: XunjiStory[];
-};
-
-type XunjiEdition = {
-  headline: string;
-  date: string;
-  lede: string;
-  groups: XunjiGroup[];
-};
-
-function collectParagraphs(root: ParentNode) {
-  return Array.from(root.querySelectorAll("p"))
-    .map((node) => node.textContent?.trim() ?? "")
-    .filter((text) => text && !/往期/.test(text));
-}
-
-function parseXunjiGroups(doc: Document): XunjiGroup[] {
-  return Array.from(doc.querySelectorAll<HTMLElement>("main > section[id], .page > section[id], .page > .group[id]"))
-    .map((section, groupIndex): XunjiGroup | null => {
-      const name = section.querySelector(".sec, .group-name, h2")?.textContent?.trim();
-      if (!name) return null;
-      const stories = Array.from(section.querySelectorAll<HTMLElement>("article"))
-        .map((article, storyIndex): XunjiStory | null => {
-          const title = article.querySelector("h2, h3")?.textContent?.trim();
-          if (!title) return null;
-          const paragraphs = collectParagraphs(article);
-          return {
-            id: article.dataset.id || `${groupIndex + 1}-${storyIndex + 1}`,
-            title,
-            paragraphs,
-          };
-        })
-        .filter((story): story is XunjiStory => story !== null);
-      return stories.length ? { id: `xunji-group-${section.id || groupIndex + 1}`, name, stories } : null;
-    })
-    .filter((group): group is XunjiGroup => group !== null);
-}
-
-function parseEdition(html: string): XunjiEdition | null {
-  const doc = new DOMParser().parseFromString(html, "text/html");
-  const headline = doc.querySelector("h1")?.textContent?.trim();
-  if (!headline) return null;
-  const groups = parseXunjiGroups(doc);
-  const date = doc.querySelector("main h2, h2, .date")?.textContent?.trim() ?? "";
-  const lede = collectParagraphs(doc.querySelector("main") ?? doc).find((text) => text !== headline) ?? "";
-  if (groups.length) return { headline, date, lede, groups };
-  if (!lede && !date) return null;
-  return {
-    headline,
-    date,
-    lede,
-    groups: [{
-      id: "xunji-group-today",
-      name: date || "今日",
-      stories: [{ id: "today", title: headline, paragraphs: lede ? [lede] : [] }],
-    }],
-  };
 }
 
 export function XunjiReaderBar({ originalUrl, children }: { originalUrl: string; children?: ReactNode }) {
@@ -132,7 +65,7 @@ export function DuomeiXunjiPage() {
     fetch(xunjiProxyUrl(date), { signal: controller.signal })
       .then(async (response) => {
         if (!response.ok) throw new Error(`Xunji returned ${response.status}`);
-        const next = parseEdition(await response.text());
+        const next = parseXunjiEdition(await response.text());
         if (!next) throw new Error("Xunji document did not match the expected structure");
         setEdition(next);
       })
@@ -204,6 +137,13 @@ export function DuomeiXunjiPage() {
                         <h3>{story.title}</h3>
                         {story.paragraphs.map((paragraph, index) => <p key={index}>{paragraph}</p>)}
                       </div>
+                      {story.sourceUrl ? (
+                        <div className="zaobao-story-actions">
+                          <a href={story.sourceUrl} target="_blank" rel="noopener noreferrer">
+                            打开原帖
+                          </a>
+                        </div>
+                      ) : null}
                     </article>
                   ))}
                 </div>

@@ -26,6 +26,7 @@ const zaobaoPageSource = readFileSync(join(dirname(fileURLToPath(import.meta.url
 const zaobaoArchivePageSource = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../pages/DuomeiZaobaoArchivePage.tsx"), "utf8");
 const xunjiSource = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../components/XunjiSection.tsx"), "utf8");
 const xunjiPageSource = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../pages/DuomeiXunjiPage.tsx"), "utf8");
+const xunjiEditionSource = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "./xunjiEdition.ts"), "utf8");
 const xunjiArchivePageSource = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../pages/DuomeiXunjiArchivePage.tsx"), "utf8");
 const homeIntroSource = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../components/HomeIntroSection.tsx"), "utf8");
 const skillsSource = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../components/SkillsDirectory.tsx"), "utf8");
@@ -201,7 +202,12 @@ test("mounts 寻迹 the same way as 早报: same-origin proxy, reader, archive, 
   assert.match(xunjiPageSource, /XUNJI_DATE_PATTERN = \/\^\\d\{4\}-\\d\{2\}-\\d\{2\}\$\//);
   assert.match(xunjiPageSource, /return date \? `\$\{XUNJI_PROXY_ROUTE\}\/\$\{date\}\/` : XUNJI_PROXY_ROUTE/);
   assert.match(xunjiPageSource, /fetch\(xunjiProxyUrl\(date\), \{ signal: controller\.signal \}\)/);
-  assert.match(xunjiPageSource, /function parseEdition\(html: string\)/);
+  assert.match(xunjiPageSource, /parseXunjiEdition\(await response\.text\(\)\)/);
+  assert.match(xunjiPageSource, /打开原帖/);
+  assert.match(xunjiPageSource, /rel="noopener noreferrer"/);
+  assert.match(xunjiEditionSource, /a\[href\^=http\]/);
+  assert.match(xunjiEditionSource, /sourceUrl: firstHttpHref\(article\.inner\)/);
+  assert.match(xunjiEditionSource, /id="x-anecdotes"|x-anecdotes/);
   assert.match(xunjiPageSource, /DUOMEI · 寻迹/);
   assert.match(xunjiPageSource, /if \(invalidDate\) \{\s*return <Navigate to=\{XUNJI_ARCHIVE_ROUTE\} replace \/>/);
   assert.doesNotMatch(xunjiPageSource, /dangerouslySetInnerHTML|srcDoc|<iframe/);
