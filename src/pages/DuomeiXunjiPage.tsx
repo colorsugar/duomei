@@ -140,8 +140,17 @@ export function DuomeiXunjiPage() {
                             <a href={story.sourceUrl} target="_blank" rel="noopener noreferrer">
                               {story.title}
                             </a>
-                          ) : story.title}
+                          ) : (
+                            story.title
+                          )}
                         </h3>
+                        {story.sourceUrl ? (
+                          <p className="xunji-story-source">
+                            <a href={story.sourceUrl} target="_blank" rel="noopener noreferrer">
+                              来源 · {story.sourceLabel || "原帖"}
+                            </a>
+                          </p>
+                        ) : null}
                         {xunjiStoryTeaser(story.paragraphs).map((paragraph, index) => (
                           <p key={index}>{paragraph}</p>
                         ))}
