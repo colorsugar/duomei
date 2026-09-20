@@ -4,9 +4,11 @@
 
 export const SITE_NAME = "DUOMEI 多美小记";
 export const ZAOBAO_SOURCE = "https://zaobao-six.vercel.app";
+export const XUNJI_SOURCE = "https://xihuan.vercel.app";
 
 const DEFAULT_DESCRIPTION = "记录旅途中的风景、生活片段、旅行照片和心情文字。";
 const ZAOBAO_DESCRIPTION = "国际、国内、日本、科技、AI、新品、兴趣、日常，八个栏目的每日早报。";
+const XUNJI_DESCRIPTION = "西幻写作素材 · 多美小记。每天从琐事里摘出可直接开写的故事骨架。";
 const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 // Story ids come from the source's `data-id` slugs; anything else is not a story route.
 const STORY_ID_PATTERN = /^[\w-]{1,120}$/;
@@ -18,6 +20,7 @@ const CRAWLER_PATTERN =
 const SHARE_IMAGE_PATTERN = /^https:\/\/[^?#\s]+\.(?:png|jpe?g)(?:[?#]|$)/i;
 const DEFAULT_IMAGE = "/og-image.png";
 const ZAOBAO_IMAGE = "/og-zaobao.png";
+const XUNJI_IMAGE = "/og-image.png";
 
 export function isCrawler(userAgent) {
   return CRAWLER_PATTERN.test(userAgent ?? "");
@@ -109,6 +112,15 @@ function routeCopy(segments) {
     if (rest.length === 2 && rest[0] === "i" && STORY_ID_PATTERN.test(rest[1])) return { ...edition, storyId: rest[1] };
     return { title: "早报", description: ZAOBAO_DESCRIPTION };
   }
+  if (segments[0] === "xunji") {
+    if (segments[1] === "archive" && segments.length === 2) return { title: "往期寻迹", description: "翻看过去每一天的寻迹素材。" };
+    const date = DATE_PATTERN.test(segments[1] ?? "") ? segments[1] : undefined;
+    if (date && segments.length === 2) {
+      return { title: `${date} 寻迹`, description: XUNJI_DESCRIPTION, sourceUrl: `${XUNJI_SOURCE}/${date}/` };
+    }
+    if (segments.length === 1) return { title: "今日寻迹", description: XUNJI_DESCRIPTION, sourceUrl: `${XUNJI_SOURCE}/` };
+    return { title: "寻迹", description: XUNJI_DESCRIPTION };
+  }
   if (segments[0] === "guyu" && segments.length === 1) {
     return { title: "故语", description: "一架旧书与新说：纸上飞檐、想象画本、月亮下的童梦、桂巷还香。" };
   }
@@ -122,7 +134,8 @@ function routeCopy(segments) {
 export function staticShareMeta(pathname) {
   const segments = pathname.split("/").filter(Boolean);
   const copy = routeCopy(segments);
-  return copy && { image: segments[0] === "zaobao" ? ZAOBAO_IMAGE : DEFAULT_IMAGE, ...copy };
+  const fallbackImage = segments[0] === "zaobao" ? ZAOBAO_IMAGE : segments[0] === "xunji" ? XUNJI_IMAGE : DEFAULT_IMAGE;
+  return copy && { image: fallbackImage, ...copy };
 }
 
 export async function resolveShareMeta(pathname, { crawler = false, fetchImpl = fetch, timeoutMs = 1500 } = {}) {

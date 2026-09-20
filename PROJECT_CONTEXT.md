@@ -86,7 +86,7 @@ Only the 53-page class book uses the protected EdgeOne Blob path and the origina
 | Retained `纸上飞檐` Blob copy | EdgeOne Pages Blob `guyu-private` | 30 objects retained only as an unused rollback copy; not a live read path |
 | Retained Guyu fallback | Cloudflare R2 `duomei-private` | 53 objects, 11.4 MB; not the current EdgeOne read path |
 
-External runtime hosts intentionally referenced by the site are `duomei.site`, `zaobao-six.vercel.app`, `music.163.com`, NetEase audio/image CDN hosts under `music.126.net`, `bokvqndvwqgugkcrizwj.supabase.co`, `duomei-media-storage.colorsugar.workers.dev`, `github.com/colorsugar/agent-skills`, and WeChat short links under `w.url.cn`. No third-party analytics script was verified.
+External runtime hosts intentionally referenced by the site are `duomei.site`, `zaobao-six.vercel.app`, `xihuan.vercel.app`, `music.163.com`, NetEase audio/image CDN hosts under `music.126.net`, `bokvqndvwqgugkcrizwj.supabase.co`, `duomei-media-storage.colorsugar.workers.dev`, `github.com/colorsugar/agent-skills`, and WeChat short links under `w.url.cn`. Visitors never fetch the Vercel hosts directly; `/zaobao-src` and `/xunji-src` are same-origin edge relays. No third-party analytics script was verified.
 
 ## Routes
 
@@ -94,6 +94,7 @@ External runtime hosts intentionally referenced by the site are `duomei.site`, `
 |---|---|---|
 | `/` | Full homepage | Yes |
 | `/zaobao` | Immersive daily-edition reader sourced from `zaobao-six.vercel.app`; headline cards open a slide-out long article with a bottom close | No |
+| `/xunji` | Immersive 寻迹 reader sourced from `xihuan.vercel.app`; `/xunji-src` is the same-origin HTML relay | No |
 | `/time` | Time/poetry page | Header/footer remain, smooth-scroll exception |
 | `/note/:slug` | Note detail | Yes |
 | `/guyu` | Public Guyu shelf | Yes |
@@ -112,7 +113,7 @@ External runtime hosts intentionally referenced by the site are `duomei.site`, `
 ## Product Behavior That Must Not Regress
 
 - Preserve the quiet warm-paper DUOMEI design, existing content, typography, mascot, and information architecture. Do not replace it with a generic template or redesign a scoped bug fix.
-- Homepage order stays: hero / 早报 / 小记 / 快活 / 故语 / 大陆 / 云游 / 颜色 / 微言 / Skill / copyright footer.
+- Homepage order stays: hero / 早报 / 小记 / 快活 / 故语 / 寻迹 / 大陆 / 云游 / 颜色 / 微言 / Skill / copyright footer.
 - 小记、快活、故语、颜色、微言、Skill share the `230svh` track and `100svh` sticky-stage rhythm. A section releases only after its bottom progress reaches 100%.
 - 小记 keeps its horizontal carousel but does not vertically transform the carousel content; this avoids mobile scroll jank.
 - The fixed header hides while scrolling down and returns while scrolling up. Mobile navigation must work from the homepage and from secondary pages, especially `/guyu`.
@@ -127,6 +128,7 @@ External runtime hosts intentionally referenced by the site are `duomei.site`, `
 - The header and footer item `云游` targets `/#yunyou`; the homepage card uses a React Router link to `/yunyou-map`, which keeps the existing global player alive around the isolated same-origin map iframe. Production must never link this card to a Vercel Preview.
 - `/yunyou-map` keeps a visible `← 返回多美` target and embeds `/yunyou/index.html?embed=1`; the embedded static map hides its duplicate return link but retains loading, WebGL/module failure fallback, mobile DPR limits, touch rotation/zoom, user-controlled auto-rotate, and reduced-motion mode. Direct top-level `/yunyou/` visits redirect to the shell; `?standalone=1` remains the explicit diagnostic escape hatch. Global pages retain `X-Frame-Options: DENY`; only `/yunyou/*` is narrowed to `SAMEORIGIN` plus `Content-Security-Policy: frame-ancestors 'self'` so the map cannot be framed off-site.
 - `/zaobao` removes the global site chrome, extracts only inert text/image/source fields from the CORS-enabled daily HTML (including `template#tpl-*` long-form bodies), and renders a two-column editorial list whose cards open a slide-out article panel with a sticky bottom `关闭`. `/zaobao-src` remains the same-origin HTML relay, not the public reader. Remote scripts are never executed.
+- `/xunji` is the same mount as `/zaobao` for the 寻迹 fantasy-material library: bare-chrome reader, `/xunji` plus `/xunji/archive` plus `/xunji/YYYY-MM-DD`, same-origin `/xunji-src` relay to `xihuan.vercel.app` (`/`, `/YYYY-MM-DD/`, `/archive/`, optional `/archive/manifest.json`). The homepage `寻迹` card sits immediately before `大陆`; the header menu item `寻迹` targets `/xunji`. Remote scripts are never executed.
 - The optional NetEase player uses playlist `316500315` through same-origin `/api/music-playlist`, `/api/music-stream`, and `/api/music-lyric` handlers backed only by NetEase's anonymous official web endpoints. The service validates the complete source order, while the UI removes tracks whose current anonymous privilege is not `pl > 0` and drops any row that fails during real playback; no player action navigates away to NetEase. It never stores a NetEase password, QR session, or cookie. New sessions select playable track `28568227`, 《花枝春野》 by 蔡明希（不才）, and default to shuffle after it unless the visitor previously chose another playback mode. The controls use the site's Warm Archive skin, keep the slim timeline inside the single bar, and include synchronized original/translated lyrics plus sequence/shuffle/single-repeat modes. The bar folds into a small record orb that is fixed at the top of every scene and cannot be dragged: beside the global header brand on header pages (measured from `.duomei-brand`, never by editing the frozen header files), beside the top-left back control on the Zaobao reader and the Dalu map, and in the top-left corner of Guyu readers and the Yunyou shell. It opens by click to a bar just below that top bar, follows the desktop header's hide/reveal, and never outranks the header or an open menu while expanded; the player is portaled to `<body>` because the motion root isolates its stacking context. There is no stored position and no long-press move. Home, notes, time, Guyu shelf/readers, Skill, Zaobao, Dalu, and the Yunyou shell share one mounted audio element so SPA navigation keeps the current track, progress, and play state. Playback does not start on its own for now; the visitor presses play, and Safari still requires that user gesture before the first audible play in a fresh document; never claim this system policy is bypassed. Admin routes hide the player.
 - Public pathname changes use one 1.3-second paper-fog reveal for Zaobao, note detail, shelves, Skill, and the time page. Hash-only homepage scrolling does not replay it; admin is excluded, and Guyu readers retain their own decode-gated paper reveal and 1.4-second page turn.
 - WeChat sticker actions copy the official short link and explain that it must be pasted into WeChat. Do not navigate the browser directly to the WeChat short link.
@@ -257,7 +259,7 @@ Historical planning documents under `deploy/guyu-edgeone/docs/` remain useful ev
 
 ## 大陆专题与艺术图集 PDF — 2026-09-08
 
-首页在故语之后、云游之前增加 `#dalu` 大陆专题，沿用 HomeSectionHold 与全局分段进度。`/dalu` 收纳地图模块、完整艺术图集 PDF 与既有地理风物原册；更新地图的正式专题路径为 `/dalu/map`，`/atlas-v6` 继续兼容已有深链接。两条地图路径均保留全局音乐，同源 iframe 上方提供返回大陆与 PDF 入口。冻结的全局页头不改动。
+首页在故语之后、云游之前先是 `#xunji` 寻迹，再是 `#dalu` 大陆专题，沿用 HomeSectionHold 与全局分段进度。`/dalu` 收纳地图模块、完整艺术图集 PDF 与既有地理风物原册；更新地图的正式专题路径为 `/dalu/map`，`/atlas-v6` 继续兼容已有深链接。两条地图路径均保留全局音乐，同源 iframe 上方提供返回大陆与 PDF 入口。全局页头仅按授权增加「寻迹」→ `/xunji`，其余冻结合同不改。
 
 `public/downloads/fantasy-continent-artbook.pdf` 在构建前从 `artifacts/dalu/` 的公开分片逐个校验并重组（`scripts/prepare-dalu-artbook.mjs`）；为81页、74幅图版、11章的扩充艺术图集，包含原60幅及14幅新增宫堡庄园图。纸面目录有逐幅内部跳转、章节书签，每幅有返回目录与带 entry 的地图定位外链。`src/content/daluArtbook.json` 固定 PDF 哈希、大小和章节页码。既有64页故语原册继续保留，页面明确标为原册。
 

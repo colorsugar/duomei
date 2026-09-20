@@ -252,6 +252,9 @@ export function DuomeiHeader() {
         <a href="/#guyu" onClick={closeAfterNativeNavigation}>
           故语
         </a>
+        <a href="/xunji" onClick={closeAfterNativeNavigation}>
+          寻迹
+        </a>
         <a href="/#dalu" onClick={closeAfterNativeNavigation}>
           大陆
         </a>

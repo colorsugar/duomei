@@ -6,6 +6,7 @@ import {
   handleMusicStreamRequest,
 } from "./server/neteaseMusic.mjs";
 import { handleZaobaoProxyRequest } from "./server/zaobaoProxy.mjs";
+import { handleXunjiProxyRequest } from "./server/xunjiProxy.mjs";
 
 function neteaseMusicDevApi() {
   return {
@@ -26,7 +27,9 @@ function neteaseMusicDevApi() {
               ? handleMusicStreamRequest
               : pathname === "/zaobao-src" || pathname.startsWith("/zaobao-src/")
                 ? handleZaobaoProxyRequest
-                : undefined;
+                : pathname === "/xunji-src" || pathname.startsWith("/xunji-src/")
+                  ? handleXunjiProxyRequest
+                  : undefined;
         if (!handler || !requestUrl) {
           next();
           return;

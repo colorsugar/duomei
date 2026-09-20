@@ -14,6 +14,7 @@ const homeProgressSections = [
   { id: "notes", label: "小记" },
   { id: "kuaihuo", label: "快活" },
   { id: "guyu", label: "故语" },
+  { id: "xunji", label: "寻迹" },
   { id: "dalu", label: "大陆" },
   { id: "yunyou", label: "云游" },
   { id: "color", label: "颜色" },

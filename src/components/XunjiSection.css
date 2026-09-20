@@ -1,0 +1,108 @@
+.xunji-home {
+  width: 100%;
+  min-width: 0;
+  min-height: 100svh;
+  padding: var(--space-3xl) clamp(1rem, 6vw, 5rem);
+  display: grid;
+  align-content: center;
+  gap: 2rem;
+  background: #efe7d8;
+  color: var(--color-ink);
+}
+
+.xunji-heading,
+.xunji-home-card {
+  width: min(100%, var(--layout-wide));
+  margin-inline: auto;
+}
+
+.xunji-eyebrow,
+.xunji-home-kicker small {
+  font-size: 0.75rem;
+  letter-spacing: 0.16em;
+  color: #7a6a4c;
+  line-height: 1.7;
+}
+
+.xunji-heading h2 {
+  font: 700 var(--text-display-s) / 1.1 var(--font-display);
+  margin: 0.3em 0;
+  letter-spacing: -0.035em;
+}
+
+.xunji-heading p {
+  font-size: var(--text-base);
+  line-height: 1.8;
+  color: var(--color-muted-strong);
+  margin: 0;
+}
+
+.xunji-heading-archive {
+  display: inline-flex;
+  align-items: center;
+  min-block-size: var(--size-hit);
+  margin-top: var(--space-2xs);
+  color: #6a4f2a;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-decoration: none;
+  border-block-end: var(--rule-hairline) solid currentColor;
+  white-space: nowrap;
+}
+
+.xunji-heading-archive:focus-visible {
+  outline: var(--rule-focus) solid var(--color-focus);
+  outline-offset: var(--space-2xs);
+}
+
+.xunji-home-card {
+  display: grid;
+  gap: 1.1rem;
+  padding: clamp(1.4rem, 4vw, 3rem);
+  color: inherit;
+  text-decoration: none;
+  border-block: 1px solid #c9b89a;
+  background: var(--color-paper);
+}
+
+.xunji-home-kicker {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.6rem 1.2rem;
+}
+
+.xunji-home-title {
+  font: 600 clamp(1.5rem, 2.7vw, 2.5rem) / 1.45 var(--font-display);
+  text-wrap: balance;
+}
+
+.xunji-home-copy {
+  max-width: 36rem;
+  line-height: 1.8;
+  color: var(--color-muted-strong);
+}
+
+.xunji-cta {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  font-weight: 600;
+  color: #6a4f2a;
+}
+
+.xunji-home-card:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 5px;
+}
+
+@media (max-width: 48rem) {
+  .xunji-home {
+    padding-block: 3rem;
+  }
+
+  .xunji-home-card {
+    gap: 0.65rem;
+  }
+}

@@ -10,6 +10,8 @@ import { DuomeiGuyuReaderPage } from "./pages/DuomeiGuyuReaderPage";
 import { DuomeiSkillsPage } from "./pages/DuomeiSkillsPage";
 import { DuomeiZaobaoPage } from "./pages/DuomeiZaobaoPage";
 import { DuomeiZaobaoArchivePage } from "./pages/DuomeiZaobaoArchivePage";
+import { DuomeiXunjiPage } from "./pages/DuomeiXunjiPage";
+import { DuomeiXunjiArchivePage } from "./pages/DuomeiXunjiArchivePage";
 import { DuomeiHeader } from "./components/DuomeiHeader";
 import { DuomeiFooter } from "./components/DuomeiFooter";
 import { BackToTopButton } from "./components/BackToTopButton";
@@ -55,9 +57,10 @@ function AppRoutes() {
   const isTimePage = location.pathname === "/time";
   const isGuyuReader = location.pathname.startsWith("/guyu/");
   const isZaobao = location.pathname === "/zaobao" || location.pathname.startsWith("/zaobao/");
+  const isXunji = location.pathname === "/xunji" || location.pathname.startsWith("/xunji/");
   const isYunyouMap = location.pathname === "/yunyou-map";
   const isAtlasMap = location.pathname === "/atlas-v6" || location.pathname === "/dalu/map" || location.pathname === "/chaoji/map";
-  const bareChrome = isAdmin || isGuyuReader || isZaobao || isYunyouMap || isAtlasMap;
+  const bareChrome = isAdmin || isGuyuReader || isZaobao || isXunji || isYunyouMap || isAtlasMap;
   useSmoothScroll(bareChrome || isTimePage);
 
   return (
@@ -71,6 +74,9 @@ function AppRoutes() {
         <Route path="/zaobao/i/:storyId" element={<DuomeiZaobaoPage />} />
         <Route path="/zaobao/:date" element={<DuomeiZaobaoPage />} />
         <Route path="/zaobao/:date/i/:storyId" element={<DuomeiZaobaoPage />} />
+        <Route path="/xunji" element={<DuomeiXunjiPage />} />
+        <Route path="/xunji/archive" element={<DuomeiXunjiArchivePage />} />
+        <Route path="/xunji/:date" element={<DuomeiXunjiPage />} />
         <Route path="/time" element={<DuomeiTimePage />} />
         <Route path="/note/:slug" element={<DuomeiNoteDetailPage />} />
         <Route path="/guyu" element={<DuomeiGuyuPage />} />
@@ -90,7 +96,7 @@ function AppRoutes() {
       </Routes>
       <PublicRoutePaperVeil pathname={location.pathname} disabled={isAdmin || isGuyuReader} />
       {!bareChrome ? <DuomeiFooter /> : null}
-      {!isAdmin ? <DuomeiMusicPlayer compactContext={isGuyuReader || isZaobao || isYunyouMap || isAtlasMap} /> : null}
+      {!isAdmin ? <DuomeiMusicPlayer compactContext={isGuyuReader || isZaobao || isXunji || isYunyouMap || isAtlasMap} /> : null}
       {!bareChrome ? <BackToTopButton /> : null}
     </DuomeiEditProvider>
   );
