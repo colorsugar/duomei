@@ -1,15 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 // @ts-expect-error Node's strip-types test runner needs the explicit source extension.
-import {
-  parseXunjiEdition,
-  xunjiBareHttpUrl,
-  xunjiParagraphClass,
-  xunjiSafeHttpUrl,
-  xunjiSourceLabel,
-  xunjiStoryBody,
-  xunjiTextParts,
-} from "./xunjiEdition.ts";
+import { parseXunjiEdition, xunjiBareHttpUrl, xunjiParagraphClass, xunjiSafeHttpUrl, xunjiSourceLabel, xunjiStoryBody, xunjiTextParts } from "./xunjiEdition.ts";
 
 test("keeps only http(s) source hrefs", () => {
   assert.equal(xunjiSafeHttpUrl("https://x.com/foo/status/1"), "https://x.com/foo/status/1");
