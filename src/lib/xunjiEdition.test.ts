@@ -47,6 +47,7 @@ test("reads articles from main > section#x-anecdotes without requiring a section
     title: "雨夜里的驿站",
     paragraphs: ["一位信使把湿透的斗篷挂在门钩上。", "原帖"],
     sourceUrl: "https://x.com/someone/status/123",
+    sourceLabel: null,
   });
   assert.equal(edition.groups[0].stories[1].sourceUrl, null);
 });
@@ -93,6 +94,7 @@ test("reads packed one-line xihuan articles and teases without the raw URL", () 
   assert.equal(edition?.groups[0].name, "X琐事");
   assert.equal(edition?.groups[0].stories[0].id, "x-001");
   assert.equal(edition?.groups[0].stories[0].sourceUrl, "https://x.com/lb1800/status/2093852864561242426");
+  assert.equal(edition?.groups[0].stories[0].sourceLabel, "X @lb1800");
   assert.equal(edition?.groups[0].stories[1].sourceUrl, "https://x.com/lourou7292/status/2097684069756895486");
   assert.deepEqual(xunjiStoryTeaser(edition?.groups[0].stories[0].paragraphs ?? []), [
     "背景：医院同事 38 岁仍单身。",
