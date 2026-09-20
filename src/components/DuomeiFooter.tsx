@@ -14,7 +14,6 @@ const quickLinks = [
   { label: "小记", to: "/#notes" },
   { label: "故语", to: "/#guyu" },
   { label: "寻迹", to: "/xunji" },
-  { label: "大陆", to: "/#dalu" },
   { label: "云游", to: "/#yunyou" },
   { label: "颜色", to: "/#color" },
   { label: "微言", to: "/#weiyan" },
