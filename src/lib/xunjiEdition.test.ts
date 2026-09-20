@@ -53,6 +53,32 @@ test("reads articles from main > section#x-anecdotes without requiring a section
   assert.equal(edition.groups[0].stories[1].sourceLabel, null);
 });
 
+test("falls back to 情感瞬间 for section#e-moments without a heading", () => {
+  const edition = parseXunjiEdition(`
+    <main>
+      <h1>寻迹</h1>
+      <section id="e-moments">
+        <article>
+          <h3>雨停那一瞬</h3>
+          <p>她把伞往他那边偏了一寸。</p>
+          <p><a href="https://x.com/someone/status/456">原帖</a></p>
+        </article>
+      </section>
+      <section id="emotion-moments">
+        <article>
+          <h3>别名栏</h3>
+          <p>同一兜底名。</p>
+        </article>
+      </section>
+    </main>
+  `);
+  assert.equal(edition?.groups.length, 2);
+  assert.equal(edition?.groups[0].id, "xunji-group-e-moments");
+  assert.equal(edition?.groups[0].name, "情感瞬间");
+  assert.equal(edition?.groups[1].id, "xunji-group-emotion-moments");
+  assert.equal(edition?.groups[1].name, "情感瞬间");
+});
+
 test("still reads loose articles when the page has no section wrapper", () => {
   const edition = parseXunjiEdition(`
     <main>

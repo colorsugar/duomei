@@ -222,6 +222,7 @@ test("mounts 寻迹 the same way as 早报: same-origin proxy, reader, archive, 
   assert.match(xunjiEditionSource, /id="x-anecdotes"|x-anecdotes/);
   assert.match(xunjiEditionSource, /"f-anecdotes": "影视日常"/);
   assert.match(xunjiEditionSource, /"s-anecdotes": "学院校园"/);
+  assert.match(xunjiEditionSource, /"e-moments": "情感瞬间"/);
   assert.match(xunjiEditionSource, /export function xunjiStoryBody/);
   assert.doesNotMatch(xunjiEditionSource, /id: "today"/);
   assert.match(xunjiPageSource, /DUOMEI · 寻迹/);
