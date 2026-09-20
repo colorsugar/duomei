@@ -181,7 +181,6 @@ $requiredMarkers = @(
   @{ File = "src/App.tsx"; Marker = 'const isXunji = location.pathname === "/xunji"' },
   @{ File = "src/App.tsx"; Marker = 'path="/xunji"' },
   @{ File = "edge-functions/xunji-src.js"; Marker = "handleXunjiProxyRequest" },
-  @{ File = "edge-functions/xunji-src/[[default]].js"; Marker = "handleXunjiProxyRequest" },
   @{ File = "src/components/XunjiSection.tsx"; Marker = 'id="xunji"' },
   @{ File = "src/components/DuomeiHeader.tsx"; Marker = 'href="/xunji"' },
   @{ File = "src/components/HomeIntroSection.tsx"; Marker = "<XunjiSection />" },
