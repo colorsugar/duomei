@@ -49,11 +49,16 @@ export async function handleXunjiProxyRequest(request, { fetchImpl = fetch, time
       });
     }
     // fetch() hands back a decoded body, so only the content type is worth carrying over.
-    return new Response(upstream.body, {
+    // Empty upstream shells (__LOAD__) must not sit in CDN cache for a day.
+    const body = await upstream.text();
+    const cacheable = body.trim().length > 0 && !/^\s*__LOAD__\s*$/.test(body);
+    return new Response(request.method === "HEAD" ? null : body, {
       status: 200,
       headers: {
         "content-type": upstream.headers.get("content-type") ?? "text/html; charset=utf-8",
-        "cache-control": `public, max-age=${target.maxAge}, stale-while-revalidate=86400`,
+        "cache-control": cacheable
+          ? `public, max-age=${target.maxAge}, stale-while-revalidate=86400`
+          : "no-store",
         "x-duomei-xunji": `proxy ${target.path}`,
       },
     });

@@ -1,8 +1,9 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { Link, Navigate, useParams } from "react-router-dom";
 import { XUNJI_ARCHIVE_ROUTE, XUNJI_PROXY_ROUTE, XUNJI_URL } from "../components/XunjiSection";
-import { parseXunjiEdition, type XunjiEdition } from "../lib/xunjiEdition";
+import { parseXunjiEdition, xunjiStoryTeaser, type XunjiEdition } from "../lib/xunjiEdition";
 import "../components/ZaobaoSection.css";
+import "../components/XunjiSection.css";
 
 // Source edition URLs are /YYYY-MM-DD/; anything else falls back to the archive list.
 export const XUNJI_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
@@ -125,17 +126,25 @@ export function DuomeiXunjiPage() {
 
           <div className="zaobao-edition-groups">
             {edition.groups.map((group) => (
-              <section className="zaobao-edition-group is-headline" id={group.id} key={group.id}>
+              <section className="zaobao-edition-group" id={group.id} key={group.id}>
                 <header>
                   <h2>{group.name}</h2>
                   <span>{String(group.stories.length).padStart(2, "0")}</span>
                 </header>
                 <div className="zaobao-story-grid">
                   {group.stories.map((story) => (
-                    <article className="zaobao-story is-featured" key={`${group.id}-${story.id}`}>
+                    <article className="zaobao-story" key={`${group.id}-${story.id}`}>
                       <div className="zaobao-story-body">
-                        <h3>{story.title}</h3>
-                        {story.paragraphs.map((paragraph, index) => <p key={index}>{paragraph}</p>)}
+                        <h3>
+                          {story.sourceUrl ? (
+                            <a href={story.sourceUrl} target="_blank" rel="noopener noreferrer">
+                              {story.title}
+                            </a>
+                          ) : story.title}
+                        </h3>
+                        {xunjiStoryTeaser(story.paragraphs).map((paragraph, index) => (
+                          <p key={index}>{paragraph}</p>
+                        ))}
                       </div>
                       {story.sourceUrl ? (
                         <div className="zaobao-story-actions">

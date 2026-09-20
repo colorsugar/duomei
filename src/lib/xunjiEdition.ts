@@ -22,6 +22,12 @@ const KNOWN_SECTION_NAMES: Record<string, string> = {
   "x-anecdotes": "寻迹",
 };
 
+const TEASER_SKIP = /^(https?:\/\/|来源[：:])/i;
+
+export function xunjiStoryTeaser(paragraphs: string[], limit = 2): string[] {
+  return paragraphs.filter((text) => text && !TEASER_SKIP.test(text)).slice(0, limit);
+}
+
 export function xunjiSafeHttpUrl(value: string | null | undefined): string | null {
   if (!value) return null;
   const trimmed = value.trim();
