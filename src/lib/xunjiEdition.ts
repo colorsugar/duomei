@@ -32,6 +32,8 @@ const KNOWN_SECTION_NAMES: Record<string, string> = {
   "s-anecdotes": "学院校园",
   "school-campus": "学院校园",
   "academy-campus": "学院校园",
+  "e-moments": "情感瞬间",
+  "emotion-moments": "情感瞬间",
 };
 
 const SOURCE_LINE = /^来源[：:]/i;
