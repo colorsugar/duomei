@@ -135,7 +135,7 @@ EdgeOne production has a precise client-IP rate-limit rule for `/api/guyu-auth` 
 - Text and images retain selectable entrance effects.
 - Mobile poetry editing remains page-by-page; the public 微言 reader uses the manual horizontal overlapping deck instead of the former vertical sticky stack.
 - “微言” points to `/#weiyan` and opens the homepage's manual, non-looping overlapping poetry deck.
-- The homepage order remains 主视觉 / 早报 / 小记 / 快活 / 故语 / 大陆 / 云游 / 颜色 / 微言 / Skill / 版权脚注.
+- The homepage order remains 主视觉 / 早报 / 小记 / 快活 / 故语 / 寻迹 / 大陆 / 云游 / 颜色 / 微言 / Skill / 版权脚注.
 - 小记、故语、颜色、微言、Skill 与既有快活板块统一使用 `230svh / 100svh` sticky 停留节奏；底部进度到 100% 后才释放到下一板块，小记不平移轮播层，减少动态效果模式恢复普通文档流。
 - On short mobile viewports, the static notes stage uses its natural content height inside the unchanged `230svh` track so the complete card clears before the next section; never shrink or clip the card text or alter the tilt pipeline.
 - “故语” sits between “快活” and “颜色”; its event-driven 16-fragment transition now scatters and reassembles through a soft paper mist, crossfades the two copy layers, waits for the incoming base cover decode, and completes a 1.6-second settle before starting a separate five-second dwell. The settled text uses a clear five-second breathing cycle. The whole card opens `/guyu/{book.id}`; the 44px “查看所有” link opens `/guyu`, with swipe, Arrow/Home/End keys, pause, progress dots, first/last looping, and reduced-motion fallbacks preserved.
@@ -159,6 +159,7 @@ EdgeOne production has a precise client-IP rate-limit rule for `/api/guyu-auth` 
 - `/skills` remains the standalone full Skill index, while the homepage also renders the shared Skill directory before the copyright footer.
 - Both Skill surfaces link to the public `colorsugar/agent-skills` repository and preserve the site-wide header, footer, and mobile menu-close behavior.
 - `/zaobao` is a bare-chrome immersive reader: it fetches the CORS-enabled daily HTML, renders only parsed text/images/source links in the local React layout, opens each story in a slide-out long-form panel with a bottom close control, and offers “打开原版” if parsing fails.
+- `/xunji` is the same-origin 寻迹 mount of `xihuan.vercel.app`: `/xunji-src` relays `/`, `/YYYY-MM-DD/`, `/archive/` and optional `/archive/manifest.json`; the React reader is `/xunji`, `/xunji/archive`, `/xunji/YYYY-MM-DD`. Homepage `寻迹` sits immediately before `大陆`; the header item `寻迹` targets `/xunji`.
 - The NetEase player uses playlist `316500315` through same-origin EdgeOne playlist, stream, and lyric handlers that call only NetEase's anonymous official web endpoints. The service validates source order, derives in-site playability strictly from `privilege.pl > 0`, redirects playable audio to HTTPS NetEase CDN URLs, and returns bounded original/translated lyric text. The UI removes non-playable rows and real playback failures, and no player action navigates away. No NetEase login, cookie, password, or QR session is accepted or stored. New sessions default to playable track `28568227`, 《花枝春野》 by 蔡明希（不才）, with shuffle as the default subsequent mode unless the visitor stored another choice. The single Warm Archive bar exposes mode, lyrics, volume, queue, and direct seeking. It auto-minimizes into a fixed, non-draggable record orb at the top of every scene: beside the global header brand, beside the Zaobao/Dalu-map back control, or top-left in Guyu readers and the Yunyou shell; it opens below that bar without covering it or an open menu. Playback is not started automatically for now. All public React routes, including Guyu readers and the iframe-backed Yunyou shell, keep one audio element mounted so track, progress, and play state survive navigation; a fresh audible play still obeys Safari's user-gesture policy. Admin hides the player.
 - Public pathname changes share a 1.3-second paper-fog reveal. Hash-only homepage movement does not replay it, admin is excluded, and Guyu readers keep their separate decode-gated reveal plus 1.4-second native page turn.
 
@@ -201,6 +202,6 @@ If any bundle file is still modified, staged, or untracked after the commit, the
 
 ## 大陆专题与艺术图集 PDF — 2026-09-08
 
-首页在故语之后、云游之前增加 `#dalu` 大陆专题，沿用 HomeSectionHold 与全局分段进度。`/dalu` 收纳地图模块、完整艺术图集 PDF 与既有地理风物原册；更新地图的正式专题路径为 `/dalu/map`，`/atlas-v6` 继续兼容已有深链接。两条地图路径均保留全局音乐，同源 iframe 上方提供返回大陆与 PDF 入口。冻结的全局页头不改动。
+首页在故语之后、云游之前先是 `#xunji` 寻迹，再是 `#dalu` 大陆专题，沿用 HomeSectionHold 与全局分段进度。`/dalu` 收纳地图模块、完整艺术图集 PDF 与既有地理风物原册；更新地图的正式专题路径为 `/dalu/map`，`/atlas-v6` 继续兼容已有深链接。两条地图路径均保留全局音乐，同源 iframe 上方提供返回大陆与 PDF 入口。全局页头仅按授权增加「寻迹」→ `/xunji`，其余冻结合同不改。
 
 `public/downloads/fantasy-continent-artbook.pdf` 在构建前从 `artifacts/dalu/` 的公开分片逐个校验并重组（`scripts/prepare-dalu-artbook.mjs`）；为81页、74幅图版、11章的扩充艺术图集，包含原60幅及14幅新增宫堡庄园图。纸面目录有逐幅内部跳转、章节书签，每幅有返回目录与带 entry 的地图定位外链。`src/content/daluArtbook.json` 固定 PDF 哈希、大小和章节页码。既有64页故语原册继续保留，页面明确标为原册。

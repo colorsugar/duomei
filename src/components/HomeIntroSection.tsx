@@ -12,6 +12,7 @@ import { HomeSkillsSection } from "./SkillsDirectory";
 import { HomeSectionHold } from "./HomeSectionHold";
 import { StickerPackSection } from "./StickerPackSection";
 import { DaluSection } from "./DaluSection";
+import { XunjiSection } from "./XunjiSection";
 import { YunyouSection } from "./YunyouSection";
 import "./YunyouSection.css";
 import { PoetryCanvasEditor } from "./PoetryCanvasEditor";
@@ -931,6 +932,7 @@ export function HomeIntroSection({ canCreate }: HomeIntroSectionProps) {
       </section>
 
       <GuyuShelfPreview />
+      <XunjiSection />
       <DaluSection />
       <YunyouSection />
       <StickerPackSection />

@@ -24,6 +24,10 @@ const zaobaoSource = readFileSync(join(dirname(fileURLToPath(import.meta.url)), 
 const zaobaoCss = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../components/ZaobaoSection.css"), "utf8");
 const zaobaoPageSource = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../pages/DuomeiZaobaoPage.tsx"), "utf8");
 const zaobaoArchivePageSource = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../pages/DuomeiZaobaoArchivePage.tsx"), "utf8");
+const xunjiSource = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../components/XunjiSection.tsx"), "utf8");
+const xunjiPageSource = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../pages/DuomeiXunjiPage.tsx"), "utf8");
+const xunjiArchivePageSource = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../pages/DuomeiXunjiArchivePage.tsx"), "utf8");
+const homeIntroSource = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../components/HomeIntroSection.tsx"), "utf8");
 const skillsSource = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../components/SkillsDirectory.tsx"), "utf8");
 const skillsPageSource = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../pages/DuomeiSkillsPage.tsx"), "utf8");
 const skillsCss = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../skills.css"), "utf8");
@@ -99,8 +103,10 @@ test("keeps iOS header touch activation synchronous and deterministic", () => {
   assert.match(headerSource, /lastTouchActivationRef = useRef\(Number\.NEGATIVE_INFINITY\)/);
   assert.match(headerSource, /window\.location\.assign\(\(target as HTMLAnchorElement\)\.href\)/);
   assert.match(headerSource, /href="\/#guyu"/);
+  assert.match(headerSource, /href="\/xunji"/);
   assert.match(headerSource, /href="\/#dalu"/);
   assert.match(headerSource, /href="\/#yunyou"/);
+  assert.ok(headerSource.indexOf('href="/xunji"') < headerSource.indexOf('href="/#dalu"'));
   assert.doesNotMatch(headerSource, /href="\/guyu"/);
   assert.doesNotMatch(headerSource, /pendingTouchActivationRef/);
   assert.match(headerSource, /currentScrollY - lastScrollYRef\.current > 6\)[\s\S]*setMenuOpen\(false\)/);
@@ -120,7 +126,7 @@ test("uses a real local morning illustration for the Zaobao magazine cover", () 
 
 test("keeps Zaobao immersive while safely falling back to the original edition", () => {
   assert.match(appSource, /const isZaobao = location\.pathname === "\/zaobao"/);
-  assert.match(appSource, /bareChrome = isAdmin \|\| isGuyuReader \|\| isZaobao \|\| isYunyouMap/);
+  assert.match(appSource, /bareChrome = isAdmin \|\| isGuyuReader \|\| isZaobao \|\| isXunji \|\| isYunyouMap/);
   assert.match(zaobaoPageSource, /function parseEdition\(html: string, base: string = ZAOBAO_URL\)/);
   assert.match(zaobaoPageSource, /\.page > section\[id\]/);
   assert.match(zaobaoPageSource, /template\[id\^='tpl-'\]/);
@@ -179,6 +185,47 @@ test("fetches Zaobao content through the same-origin edge relay, never from verc
   }
 });
 
+test("mounts 寻迹 the same way as 早报: same-origin proxy, reader, archive, and homepage before 大陆", () => {
+  assert.match(appSource, /const isXunji = location\.pathname === "\/xunji"/);
+  assert.match(appSource, /location\.pathname\.startsWith\("\/xunji\/"\)/);
+  assert.match(appSource, /<Route path="\/xunji" element=\{<DuomeiXunjiPage \/>\} \/>/);
+  assert.match(appSource, /<Route path="\/xunji\/archive" element=\{<DuomeiXunjiArchivePage \/>\} \/>/);
+  assert.match(appSource, /<Route path="\/xunji\/:date" element=\{<DuomeiXunjiPage \/>\} \/>/);
+  assert.match(xunjiSource, /XUNJI_ROUTE = "\/xunji"/);
+  assert.match(xunjiSource, /XUNJI_ARCHIVE_ROUTE = "\/xunji\/archive"/);
+  assert.match(xunjiSource, /XUNJI_PROXY_ROUTE = "\/xunji-src"/);
+  assert.match(xunjiSource, /fetch\(XUNJI_PROXY_ROUTE, \{ signal \}\)/);
+  assert.match(xunjiSource, /id="xunji"/);
+  assert.match(xunjiSource, />寻迹</);
+  assert.match(xunjiSource, /<Link className="xunji-home-card" to=\{XUNJI_ROUTE\}/);
+  assert.match(xunjiPageSource, /XUNJI_DATE_PATTERN = \/\^\\d\{4\}-\\d\{2\}-\\d\{2\}\$\//);
+  assert.match(xunjiPageSource, /return date \? `\$\{XUNJI_PROXY_ROUTE\}\/\$\{date\}\/` : XUNJI_PROXY_ROUTE/);
+  assert.match(xunjiPageSource, /fetch\(xunjiProxyUrl\(date\), \{ signal: controller\.signal \}\)/);
+  assert.match(xunjiPageSource, /function parseEdition\(html: string\)/);
+  assert.match(xunjiPageSource, /DUOMEI · 寻迹/);
+  assert.match(xunjiPageSource, /if \(invalidDate\) \{\s*return <Navigate to=\{XUNJI_ARCHIVE_ROUTE\} replace \/>/);
+  assert.doesNotMatch(xunjiPageSource, /dangerouslySetInnerHTML|srcDoc|<iframe/);
+  assert.match(xunjiArchivePageSource, /`\$\{XUNJI_PROXY_ROUTE\}\/archive\/manifest\.json`/);
+  assert.match(xunjiArchivePageSource, /`\$\{XUNJI_PROXY_ROUTE\}\/archive\/`/);
+  assert.match(xunjiArchivePageSource, /<Link to=\{`\$\{XUNJI_ROUTE\}\/\$\{entry\.date\}`\}>/);
+  assert.doesNotMatch(xunjiArchivePageSource, /dangerouslySetInnerHTML|srcDoc|<iframe/);
+  for (const source of [xunjiSource, xunjiPageSource, xunjiArchivePageSource]) {
+    assert.doesNotMatch(source, /fetch\((?:XUNJI_URL|editionUrl|XUNJI_ARCHIVE_URL)\b/);
+    assert.doesNotMatch(source, /mode: "cors"/);
+  }
+  const xunjiProxySource = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../../server/xunjiProxy.mjs"), "utf8");
+  assert.match(xunjiProxySource, /XUNJI_PROXY_PREFIX = "\/xunji-src"/);
+  assert.match(xunjiProxySource, /xihuan\.vercel\.app/);
+  for (const entry of ["xunji-src.js", "xunji-src/[[default]].js"]) {
+    const edge = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../../edge-functions", entry), "utf8");
+    assert.match(edge, /handleXunjiProxyRequest\(context\.request\)/);
+  }
+  assert.match(homeIntroSource, /<XunjiSection \/>\s*<DaluSection \/>/);
+  assert.match(homePageSource, /\{ id: "xunji", label: "寻迹" \}/);
+  assert.ok(homePageSource.indexOf('{ id: "xunji", label: "寻迹" }') < homePageSource.indexOf('{ id: "dalu", label: "大陆" }'));
+  assert.match(headerSource, />\s*寻迹\s*</);
+});
+
 test("uses Skill naming and a three-column desktop directory", () => {
   assert.match(headerSource, /href="\/skills"[\s\S]*>\s*Skill\s*</);
   assert.match(footerSource, /\{ label: "Skill", to: "\/#skills" \}/);
@@ -191,7 +238,7 @@ test("uses Skill naming and a three-column desktop directory", () => {
 });
 
 test("keeps the full NetEase playlist native, fixed at the top of every scene, and autoplay-off", () => {
-  assert.match(appSource, /!isAdmin \? <DuomeiMusicPlayer compactContext=\{isGuyuReader \|\| isZaobao \|\| isYunyouMap \|\| isAtlasMap\} \/> : null/);
+  assert.match(appSource, /!isAdmin \? <DuomeiMusicPlayer compactContext=\{isGuyuReader \|\| isZaobao \|\| isXunji \|\| isYunyouMap \|\| isAtlasMap\} \/> : null/);
   assert.match(musicPlayerSource, /NETEASE_PLAYLIST_ID = "316500315"/);
   assert.match(musicPlayerSource, /<audio[\s\S]*preload="metadata"/);
   assert.doesNotMatch(musicPlayerSource, /<iframe|autoPlay/);

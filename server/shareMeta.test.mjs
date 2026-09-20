@@ -52,6 +52,11 @@ test("static route copy", () => {
   assert.equal(staticShareMeta("/zaobao").image, "/og-zaobao.png");
   assert.equal(staticShareMeta("/zaobao/archive").image, "/og-zaobao.png");
   assert.equal(staticShareMeta("/zaobao/2026-09-05").image, "/og-zaobao.png");
+  assert.equal(staticShareMeta("/xunji").title, "今日寻迹");
+  assert.equal(staticShareMeta("/xunji/archive").title, "往期寻迹");
+  assert.equal(staticShareMeta("/xunji/2026-09-20").title, "2026-09-20 寻迹");
+  assert.equal(staticShareMeta("/xunji/2026-09-20").sourceUrl, "https://xihuan.vercel.app/2026-09-20/");
+  assert.equal(staticShareMeta("/xunji").image, "/og-image.png");
   assert.equal(staticShareMeta("/guyu").image, "/og-image.png");
   assert.equal(staticShareMeta("/guyu").title, "故语");
   assert.equal(staticShareMeta("/skills").title, "Skill");
