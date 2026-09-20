@@ -91,8 +91,14 @@ jobs:
             exit 1
           fi
 
+          # Official global install from a clean directory. `npx --yes edgeone@…`
+          # from the repo root crashes npm arborist with
+          # "Cannot read properties of null (reading 'edgesOut')".
+          ( cd "${RUNNER_TEMP}" && npm install -g "edgeone@${EDGEONE_CLI_VERSION}" )
+          edgeone -v
+
           deploy_log="$(mktemp)"
-          npx --yes "edgeone@${EDGEONE_CLI_VERSION}" makers deploy \
+          edgeone makers deploy \
             -n "$EDGEONE_PROJECT_NAME" \
             -t "$EDGEONE_API_TOKEN" \
             -e production \
