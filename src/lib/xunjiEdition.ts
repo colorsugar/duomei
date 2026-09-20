@@ -22,7 +22,13 @@ const KNOWN_SECTION_NAMES: Record<string, string> = {
   "x-anecdotes": "寻迹",
 };
 
-const TEASER_SKIP = /^(https?:\/\/|来源[：:])/i;
+const TEASER_SKIP = /^来源[：:]/i;
+const BARE_HTTP_URL = /^https?:\/\/\S+$/i;
+
+export function xunjiBareHttpUrl(text: string): string | null {
+  const trimmed = text.trim();
+  return BARE_HTTP_URL.test(trimmed) ? xunjiSafeHttpUrl(trimmed) : null;
+}
 
 export function xunjiStoryTeaser(paragraphs: string[], limit = 2): string[] {
   return paragraphs.filter((text) => text && !TEASER_SKIP.test(text)).slice(0, limit);
@@ -195,16 +201,5 @@ export function parseXunjiEdition(html: string): XunjiEdition | null {
     }
   }
 
-  if (groups.length) return { headline, date, lede, groups };
-  if (!lede && !date) return null;
-  return {
-    headline,
-    date,
-    lede,
-    groups: [{
-      id: "xunji-group-today",
-      name: date || "今日",
-      stories: [{ id: "today", title: headline, paragraphs: lede ? [lede] : [], sourceUrl: null }],
-    }],
-  };
+  return groups.length ? { headline, date, lede, groups } : null;
 }

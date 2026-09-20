@@ -1,7 +1,7 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { Link, Navigate, useParams } from "react-router-dom";
 import { XUNJI_ARCHIVE_ROUTE, XUNJI_PROXY_ROUTE, XUNJI_URL } from "../components/XunjiSection";
-import { parseXunjiEdition, xunjiStoryTeaser, type XunjiEdition } from "../lib/xunjiEdition";
+import { parseXunjiEdition, xunjiBareHttpUrl, xunjiStoryTeaser, type XunjiEdition } from "../lib/xunjiEdition";
 import "../components/ZaobaoSection.css";
 import "../components/XunjiSection.css";
 
@@ -142,9 +142,18 @@ export function DuomeiXunjiPage() {
                             </a>
                           ) : story.title}
                         </h3>
-                        {xunjiStoryTeaser(story.paragraphs).map((paragraph, index) => (
-                          <p key={index}>{paragraph}</p>
-                        ))}
+                        {xunjiStoryTeaser(story.paragraphs).map((paragraph, index) => {
+                          const href = xunjiBareHttpUrl(paragraph);
+                          return (
+                            <p key={index}>
+                              {href ? (
+                                <a href={href} target="_blank" rel="noopener noreferrer">
+                                  {paragraph.trim()}
+                                </a>
+                              ) : paragraph}
+                            </p>
+                          );
+                        })}
                       </div>
                       {story.sourceUrl ? (
                         <div className="zaobao-story-actions">

@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 // @ts-expect-error Node's strip-types test runner needs the explicit source extension.
-import { parseXunjiEdition, xunjiSafeHttpUrl, xunjiStoryTeaser } from "./xunjiEdition.ts";
+import { parseXunjiEdition, xunjiBareHttpUrl, xunjiSafeHttpUrl, xunjiStoryTeaser } from "./xunjiEdition.ts";
 
 test("keeps only http(s) source hrefs", () => {
   assert.equal(xunjiSafeHttpUrl("https://x.com/foo/status/1"), "https://x.com/foo/status/1");
@@ -87,23 +87,44 @@ test("keeps the old section[id] + h2 column name and ignores javascript hrefs", 
   assert.equal(edition?.groups[0].stories[0].sourceUrl, "https://example.com/ok");
 });
 
-test("reads packed one-line xihuan articles and teases without the raw URL", () => {
-  const edition = parseXunjiEdition(`<!doctype html><html lang="zh-CN"><body><header><h1>寻迹</h1></header><main class="wrap page"><h2>今日 · 2026-09-20</h2><p>从 X 琐事里，摘出骨架。</p><section id="x-anecdotes"><h2 class="sec">X琐事</h2><article data-id="x-001" id="x-001"><h3>表白换手机（职场/约会）</h3><p>来源：<a href="https://x.com/lb1800/status/2093852864561242426" target="_blank" rel="noreferrer noopener">X @lb1800</a></p><p>https://x.com/lb1800/status/2093852864561242426</p><p>背景：医院同事 38 岁仍单身。</p><p>西幻骨架：</p></article><article data-id="x-002" id="x-002"><h3>想当姐夫（校园兄弟线）</h3><p>来源：<a href="https://x.com/lourou7292/status/2097684069756895486">X @lourou7292</a></p><p>背景：同学喜欢兄弟的姐姐。</p></article></section></main></body></html>`);
+test("keeps a lone http(s) paragraph as a safe href for the reader", () => {
+  assert.equal(xunjiBareHttpUrl("https://x.com/lb1800/status/2093852864561242426"), "https://x.com/lb1800/status/2093852864561242426");
+  assert.equal(xunjiBareHttpUrl("  http://example.com/post  "), "http://example.com/post");
+  assert.equal(xunjiBareHttpUrl("背景：https://x.com/foo"), null);
+  assert.equal(xunjiBareHttpUrl("javascript:alert(1)"), null);
+});
+
+test("reads packed one-line xihuan articles and keeps the body URL in the teaser", () => {
+  const edition = parseXunjiEdition(`<!doctype html><html lang="zh-CN"><body><header><h1>寻迹</h1></header><main class="wrap page"><h2>今日 · 2026-09-20</h2><p>从 X 琐事里，摘出骨架。</p><section id="x-anecdotes"><h2 class="sec">X琐事</h2><article data-id="x-001" id="x-001"><h3>表白换手机（职场/约会）</h3><p>来源：<a href="https://x.com/lb1800/status/2093852864561242426" target="_blank" rel="noreferrer noopener">X @lb1800</a></p><p><a href="https://x.com/lb1800/status/2093852864561242426">https://x.com/lb1800/status/2093852864561242426</a></p><p>背景：医院同事 38 岁仍单身。</p><p>西幻骨架：</p></article><article data-id="x-002" id="x-002"><h3>想当姐夫（校园兄弟线）</h3><p>来源：<a href="https://x.com/lourou7292/status/2097684069756895486">X @lourou7292</a></p><p>背景：同学喜欢兄弟的姐姐。</p></article></section></main></body></html>`);
   assert.equal(edition?.groups[0].stories.length, 2);
   assert.equal(edition?.groups[0].name, "X琐事");
   assert.equal(edition?.groups[0].stories[0].id, "x-001");
   assert.equal(edition?.groups[0].stories[0].sourceUrl, "https://x.com/lb1800/status/2093852864561242426");
   assert.equal(edition?.groups[0].stories[1].sourceUrl, "https://x.com/lourou7292/status/2097684069756895486");
   assert.deepEqual(xunjiStoryTeaser(edition?.groups[0].stories[0].paragraphs ?? []), [
+    "https://x.com/lb1800/status/2093852864561242426",
     "背景：医院同事 38 岁仍单身。",
-    "西幻骨架：",
   ]);
+  assert.equal(
+    xunjiBareHttpUrl(xunjiStoryTeaser(edition?.groups[0].stories[0].paragraphs ?? [])[0] ?? ""),
+    "https://x.com/lb1800/status/2093852864561242426",
+  );
 });
 
-test("falls back to a single lede card when the source is still a shell with no articles", () => {
-  const edition = parseXunjiEdition(`<main><h1>寻迹</h1><h2>2026年9月20日</h2><p>每天一束西幻素材。</p></main>`);
-  assert.equal(edition?.groups[0].stories[0].title, "寻迹");
-  assert.deepEqual(edition?.groups[0].stories[0].paragraphs, ["每天一束西幻素材。"]);
-  assert.equal(edition?.groups[0].stories[0].sourceUrl, null);
+test("reads 16 xihuan-like articles with source links and refuses an empty shell", () => {
+  const articles = Array.from({ length: 16 }, (_, index) => {
+    const id = String(index + 1).padStart(3, "0");
+    const url = `https://x.com/someone/status/${2093852864561242426n + BigInt(index)}`;
+    return `<article data-id="x-${id}" id="x-${id}"><h3>条目${id}</h3><p>来源：<a href="${url}">X @someone</a></p><p><a href="${url}">${url}</a></p><p>背景：第${id}则。</p></article>`;
+  }).join("");
+  const edition = parseXunjiEdition(`<!doctype html><html lang="zh-CN"><body><header><h1>寻迹</h1></header><main class="wrap page"><h2>今日 · 2026-09-20</h2><p>从 X 琐事里，摘出骨架。</p><section id="x-anecdotes"><h2 class="sec">X琐事</h2>${articles}</section></main></body></html>`);
+  assert.equal(edition?.groups[0].stories.length, 16);
+  for (const [index, story] of (edition?.groups[0].stories ?? []).entries()) {
+    const url = `https://x.com/someone/status/${2093852864561242426n + BigInt(index)}`;
+    assert.equal(story.sourceUrl, url);
+    assert.equal(xunjiStoryTeaser(story.paragraphs)[0], url);
+    assert.equal(xunjiBareHttpUrl(story.paragraphs.find((text) => xunjiBareHttpUrl(text)) ?? ""), url);
+  }
+  assert.equal(parseXunjiEdition(`<main><h1>寻迹</h1><h2>2026年9月20日</h2><p>每天一束西幻素材。</p></main>`), null);
   assert.equal(parseXunjiEdition("__LOAD__"), null);
 });
