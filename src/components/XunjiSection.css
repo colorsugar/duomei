@@ -92,6 +92,22 @@
   color: #6a4f2a;
 }
 
+.zaobao-page .zaobao-story-body h3 a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.zaobao-page .zaobao-story-body h3 a:focus-visible {
+  outline: var(--rule-focus) solid var(--color-focus);
+  outline-offset: var(--space-2xs);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .zaobao-page .zaobao-story-body h3 a:hover {
+    color: var(--color-accent);
+  }
+}
+
 .xunji-home-card:focus-visible {
   outline: 2px solid var(--color-focus);
   outline-offset: 5px;

@@ -87,3 +87,12 @@ test("upstream failures become uncached errors", async () => {
   assert.equal(slow.status, 502);
   assert.equal(slow.headers.get("x-duomei-xunji"), "error timeout");
 });
+
+test("does not cache empty upstream shells", async () => {
+  const empty = await handleXunjiProxyRequest(new Request("https://duomei.site/xunji-src"), {
+    fetchImpl: async () => new Response("__LOAD__", { headers: { "content-type": "text/html; charset=utf-8" } }),
+  });
+  assert.equal(empty.status, 200);
+  assert.equal(await empty.text(), "__LOAD__");
+  assert.equal(empty.headers.get("cache-control"), "no-store");
+});
