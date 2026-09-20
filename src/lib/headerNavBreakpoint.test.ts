@@ -205,7 +205,9 @@ test("mounts 寻迹 the same way as 早报: same-origin proxy, reader, archive, 
   assert.match(xunjiPageSource, /parseXunjiEdition\(await response\.text\(\)\)/);
   assert.match(xunjiPageSource, /打开原帖/);
   assert.match(xunjiPageSource, /rel="noopener noreferrer"/);
-  assert.match(xunjiPageSource, /xunjiStoryTeaser\(story\.paragraphs\)/);
+  assert.match(xunjiPageSource, /xunjiStoryCardParagraphs\(story\.paragraphs\)/);
+  assert.match(xunjiPageSource, /xunjiSafeHttpUrl\(text\)/);
+  assert.match(xunjiPageSource, /<a href=\{href\} target="_blank" rel="noopener noreferrer">\{text\.trim\(\)\}<\/a>/);
   assert.doesNotMatch(xunjiPageSource, /zaobao-story is-featured/);
   assert.match(xunjiEditionSource, /a\[href\^=http\]/);
   assert.match(xunjiEditionSource, /sourceUrl: firstHttpHref\(article\.inner\)/);

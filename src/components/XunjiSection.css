@@ -97,6 +97,13 @@
   text-decoration: none;
 }
 
+.zaobao-page .zaobao-story-body p a {
+  color: var(--color-accent);
+  text-decoration: underline;
+  text-underline-offset: 0.18em;
+  overflow-wrap: anywhere;
+}
+
 .zaobao-page .zaobao-story-body h3 a:focus-visible {
   outline: var(--rule-focus) solid var(--color-focus);
   outline-offset: var(--space-2xs);

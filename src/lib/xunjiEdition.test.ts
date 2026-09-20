@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 // @ts-expect-error Node's strip-types test runner needs the explicit source extension.
-import { parseXunjiEdition, xunjiSafeHttpUrl, xunjiStoryTeaser } from "./xunjiEdition.ts";
+import { parseXunjiEdition, xunjiSafeHttpUrl, xunjiStoryCardParagraphs, xunjiStoryTeaser } from "./xunjiEdition.ts";
 
 test("keeps only http(s) source hrefs", () => {
   assert.equal(xunjiSafeHttpUrl("https://x.com/foo/status/1"), "https://x.com/foo/status/1");
@@ -98,6 +98,15 @@ test("reads packed one-line xihuan articles and teases without the raw URL", () 
     "背景：医院同事 38 岁仍单身。",
     "西幻骨架：",
   ]);
+  assert.deepEqual(xunjiStoryCardParagraphs(edition?.groups[0].stories[0].paragraphs ?? []), [
+    "背景：医院同事 38 岁仍单身。",
+    "西幻骨架：",
+    "https://x.com/lb1800/status/2093852864561242426",
+  ]);
+  assert.equal(
+    xunjiSafeHttpUrl(xunjiStoryCardParagraphs(edition?.groups[0].stories[0].paragraphs ?? []).at(-1)),
+    "https://x.com/lb1800/status/2093852864561242426",
+  );
 });
 
 test("falls back to a single lede card when the source is still a shell with no articles", () => {

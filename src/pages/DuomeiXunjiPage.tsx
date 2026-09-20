@@ -1,7 +1,7 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { Link, Navigate, useParams } from "react-router-dom";
 import { XUNJI_ARCHIVE_ROUTE, XUNJI_PROXY_ROUTE, XUNJI_URL } from "../components/XunjiSection";
-import { parseXunjiEdition, xunjiStoryTeaser, type XunjiEdition } from "../lib/xunjiEdition";
+import { parseXunjiEdition, xunjiSafeHttpUrl, xunjiStoryCardParagraphs, type XunjiEdition } from "../lib/xunjiEdition";
 import "../components/ZaobaoSection.css";
 import "../components/XunjiSection.css";
 
@@ -20,6 +20,17 @@ export function xunjiEditionUrl(date?: string) {
 
 export function xunjiProxyUrl(date?: string) {
   return date ? `${XUNJI_PROXY_ROUTE}/${date}/` : XUNJI_PROXY_ROUTE;
+}
+
+function XunjiStoryParagraph({ text }: { text: string }) {
+  const href = xunjiSafeHttpUrl(text);
+  return (
+    <p>
+      {href ? (
+        <a href={href} target="_blank" rel="noopener noreferrer">{text.trim()}</a>
+      ) : text}
+    </p>
+  );
 }
 
 export function isoDateFromXunjiLabel(label: string) {
@@ -142,8 +153,8 @@ export function DuomeiXunjiPage() {
                             </a>
                           ) : story.title}
                         </h3>
-                        {xunjiStoryTeaser(story.paragraphs).map((paragraph, index) => (
-                          <p key={index}>{paragraph}</p>
+                        {xunjiStoryCardParagraphs(story.paragraphs).map((paragraph, index) => (
+                          <XunjiStoryParagraph key={index} text={paragraph} />
                         ))}
                       </div>
                       {story.sourceUrl ? (

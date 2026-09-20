@@ -28,6 +28,15 @@ export function xunjiStoryTeaser(paragraphs: string[], limit = 2): string[] {
   return paragraphs.filter((text) => text && !TEASER_SKIP.test(text)).slice(0, limit);
 }
 
+// Short cards still skip the raw URL line; put it back so the body can render a real <a>.
+export function xunjiStoryCardParagraphs(paragraphs: string[], limit = 2): string[] {
+  const teaser = xunjiStoryTeaser(paragraphs, limit);
+  return [
+    ...teaser,
+    ...paragraphs.filter((text) => Boolean(xunjiSafeHttpUrl(text)) && !teaser.includes(text)),
+  ];
+}
+
 export function xunjiSafeHttpUrl(value: string | null | undefined): string | null {
   if (!value) return null;
   const trimmed = value.trim();
