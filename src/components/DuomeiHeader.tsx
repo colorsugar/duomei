@@ -65,6 +65,30 @@ export function DuomeiHeader() {
   }, []);
 
   useEffect(() => {
+    if (!menuOpen) return;
+    const header = headerRef.current;
+    const close = () => {
+      setMenuOpen(false);
+      setHoverRevealed(false);
+    };
+    const closeIfOutside = (event: PointerEvent) => {
+      if (header && event.target instanceof Node && header.contains(event.target)) return;
+      close();
+    };
+    // 页面在开菜单时可能还在 smooth-scroll 收尾，小幅位移不算用户滑动
+    const openScrollY = window.scrollY;
+    const closeIfScrolled = () => {
+      if (Math.abs(window.scrollY - openScrollY) > 40) close();
+    };
+    document.addEventListener("pointerdown", closeIfOutside, true);
+    window.addEventListener("scroll", closeIfScrolled, { passive: true });
+    return () => {
+      document.removeEventListener("pointerdown", closeIfOutside, true);
+      window.removeEventListener("scroll", closeIfScrolled);
+    };
+  }, [menuOpen]);
+
+  useEffect(() => {
     const header = headerRef.current;
     if (!header) return;
     header.dataset.menuTouchListener = "ready";
