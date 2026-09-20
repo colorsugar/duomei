@@ -44,6 +44,14 @@ export const ADMIN_SITE_SECTIONS: readonly AdminSiteSection[] = [
     blurb: "公开新说随 Git；班级册走 EdgeOne Blob",
   },
   {
+    id: "xunji",
+    label: "寻迹",
+    href: "/xunji",
+    channel: "git-edgeone",
+    editableInAdmin: false,
+    blurb: "首页板块与 /xunji，同源代理 xihuan.vercel.app",
+  },
+  {
     id: "yunyou",
     label: "云游",
     href: "/#yunyou",

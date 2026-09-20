@@ -257,6 +257,7 @@ export function DuomeiAdmin({ mode }: { mode: "login" | "notes" }) {
         <a href="/#zaobao">早报</a>
         <a href="/#notes">小记</a>
         <a href="/#guyu">故语</a>
+        <a href="/xunji">寻迹</a>
         <a href="/#yunyou">云游</a>
         <a href="/#weiyan">微言</a>
         <a href="#note-management">小记管理</a>
@@ -325,7 +326,7 @@ export function DuomeiAdmin({ mode }: { mode: "login" | "notes" }) {
             <AnimatedParagraph>内容归属</AnimatedParagraph>
             <AnimatedTitle>只有小记在这个后台即时发布</AnimatedTitle>
             <span>
-              小记走 {ADMIN_DEPLOYMENT.notesBackend} + {ADMIN_DEPLOYMENT.mediaBackend}。早报、快活、故语、云游、颜色、微言、技能随{" "}
+              小记走 {ADMIN_DEPLOYMENT.notesBackend} + {ADMIN_DEPLOYMENT.mediaBackend}。早报、快活、故语、寻迹、云游、颜色、微言、技能随{" "}
               {ADMIN_DEPLOYMENT.releasePath} 上线，不在这里改正文。
             </span>
           </div>
@@ -355,6 +356,9 @@ export function DuomeiAdmin({ mode }: { mode: "login" | "notes" }) {
             </AnimatedButton>
             <AnimatedButton as="a" href="/guyu">
               故语书架
+            </AnimatedButton>
+            <AnimatedButton as="a" href="/xunji">
+              打开寻迹
             </AnimatedButton>
             <AnimatedButton as="a" href="/yunyou/">
               打开云游
@@ -395,7 +399,7 @@ export function DuomeiAdmin({ mode }: { mode: "login" | "notes" }) {
             <AnimatedParagraph>发布同步</AnimatedParagraph>
             <AnimatedTitle>小记上云，站点上 EdgeOne</AnimatedTitle>
             <span>
-              上传图片、写小记、点击发布后，{ADMIN_DEPLOYMENT.productionHost} 立刻读 Supabase。早报 / 故语 / 云游等静态内容要等 GitHub
+              上传图片、写小记、点击发布后，{ADMIN_DEPLOYMENT.productionHost} 立刻读 Supabase。早报 / 故语 / 寻迹 / 云游等静态内容要等 GitHub
               合进 main，由 EdgeOne 工作流发布后才会变。
             </span>
           </div>

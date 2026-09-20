@@ -224,6 +224,8 @@ test("mounts 寻迹 the same way as 早报: same-origin proxy, reader, archive, 
   assert.match(homePageSource, /\{ id: "xunji", label: "寻迹" \}/);
   assert.ok(homePageSource.indexOf('{ id: "xunji", label: "寻迹" }') < homePageSource.indexOf('{ id: "dalu", label: "大陆" }'));
   assert.match(headerSource, />\s*寻迹\s*</);
+  assert.match(footerSource, /\{ label: "寻迹", to: "\/xunji" \}/);
+  assert.ok(footerSource.indexOf('{ label: "寻迹", to: "/xunji" }') < footerSource.indexOf('{ label: "云游", to: "/#yunyou" }'));
 });
 
 test("uses Skill naming and a three-column desktop directory", () => {
@@ -356,11 +358,13 @@ test("keeps the note-detail back target visible outside the fixed header", () =>
   assert.doesNotMatch(siteCss, /\.duomei-detail:not\(\.detail-edit-page\)\s*\{[^}]*padding-top:\s*clamp\((?:32|36)px/);
 });
 
-test("keeps the mobile footer compact with all eight shortcuts on one row", () => {
+test("keeps the mobile footer compact with all nine shortcuts on one row", () => {
   assert.match(siteCss, /\.duomei-quick-nav ul \{[\s\S]*flex-wrap:\s*nowrap/);
   assert.match(siteCss, /\.duomei-quick-nav li \{[\s\S]*flex:\s*1 1 0/);
-  assert.equal(footerSource.match(/\{ label:/g)?.length, 8);
+  assert.equal(footerSource.match(/\{ label:/g)?.length, 9);
+  assert.match(footerSource, /\{ label: "寻迹", to: "\/xunji" \}/);
   assert.match(footerSource, /\{ label: "云游", to: "\/#yunyou" \}/);
+  assert.ok(footerSource.indexOf('{ label: "寻迹", to: "/xunji" }') < footerSource.indexOf('{ label: "云游", to: "/#yunyou" }'));
   assert.match(backToTopSource, /document\.querySelector\("\.duomei-footer"\)/);
   assert.match(backToTopSource, /document\.querySelector\("\.yunyou-card"\)/);
   assert.match(backToTopSource, /visible && !footerVisible && !yunyouVisible/);
@@ -463,11 +467,12 @@ test("keeps short mobile poetry pages clear of clipping and the tiny progress hi
 });
 
 test("admin inventory matches the live homepage section set", () => {
-  assert.equal(ADMIN_SITE_SECTIONS.length, 8);
+  assert.equal(ADMIN_SITE_SECTIONS.length, 9);
   assert.deepEqual(
     ADMIN_SITE_SECTIONS.map((section) => section.id),
-    ["zaobao", "notes", "kuaihuo", "guyu", "yunyou", "color", "weiyan", "skills"],
+    ["zaobao", "notes", "kuaihuo", "guyu", "xunji", "yunyou", "color", "weiyan", "skills"],
   );
+  assert.equal(ADMIN_SITE_SECTIONS.find((section) => section.id === "xunji")?.href, "/xunji");
   assert.equal(ADMIN_SITE_SECTIONS.filter((section) => section.editableInAdmin).length, 1);
   assert.equal(ADMIN_SITE_SECTIONS.find((section) => section.id === "notes")?.channel, "supabase");
   assert.equal(ADMIN_SITE_SECTIONS.find((section) => section.id === "weiyan")?.href, "/#weiyan");
@@ -507,6 +512,7 @@ test("DuomeiAdmin source no longer advertises Vercel or the old three-entry map"
   assert.doesNotMatch(adminSource, /3 个内容入口/);
   assert.match(adminSource, /EdgeOne/);
   assert.match(adminSource, /\/#weiyan/);
+  assert.match(adminSource, /href="\/xunji"/);
   assert.match(adminSource, /adminSiteInventory/);
   assert.match(adminSource, /ADMIN_DEPLOYMENT/);
   assert.match(adminSource, /buildMarkerPath/);
