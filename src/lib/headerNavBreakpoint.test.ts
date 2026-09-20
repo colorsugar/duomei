@@ -206,10 +206,14 @@ test("mounts 寻迹 the same way as 早报: same-origin proxy, reader, archive, 
   assert.match(xunjiPageSource, /打开原帖/);
   assert.match(xunjiPageSource, /rel="noopener noreferrer"/);
   assert.match(xunjiPageSource, /xunjiStoryTeaser\(story\.paragraphs\)/);
+  assert.match(xunjiPageSource, /xunjiBareHttpUrl\(paragraph\)/);
+  assert.match(xunjiPageSource, /target="_blank" rel="noopener noreferrer"/);
   assert.doesNotMatch(xunjiPageSource, /zaobao-story is-featured/);
   assert.match(xunjiEditionSource, /a\[href\^=http\]/);
   assert.match(xunjiEditionSource, /sourceUrl: firstHttpHref\(article\.inner\)/);
   assert.match(xunjiEditionSource, /id="x-anecdotes"|x-anecdotes/);
+  assert.match(xunjiEditionSource, /const TEASER_SKIP = \/\^来源\[：:\]\/i/);
+  assert.doesNotMatch(xunjiEditionSource, /id: "today"/);
   assert.match(xunjiPageSource, /DUOMEI · 寻迹/);
   assert.match(xunjiPageSource, /if \(invalidDate\) \{\s*return <Navigate to=\{XUNJI_ARCHIVE_ROUTE\} replace \/>/);
   assert.doesNotMatch(xunjiPageSource, /dangerouslySetInnerHTML|srcDoc|<iframe/);
