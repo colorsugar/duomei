@@ -1,1 +1,1 @@
-PLACEHOLDER_TEST_FILE
+@LOAD:/tmp/push-b2-payload.json:files.1.content
