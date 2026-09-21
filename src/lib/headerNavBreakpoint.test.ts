@@ -1,1 +1,1 @@
-@LOAD:/tmp/push-b2-payload.json:files.1.content
+@LOAD_FROM_DISK_PLACEHOLDER
