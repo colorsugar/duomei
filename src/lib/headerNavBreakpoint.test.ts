@@ -1,1 +1,1 @@
-PLACEHOLDER_WILL_REPLACE
+@LOAD:/tmp/push-b2-args-only.json:files.1.content
