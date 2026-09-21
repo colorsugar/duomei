@@ -1,1 +1,1 @@
-@LOAD:/tmp/push-both-fresh.json:1
+PLACEHOLDER_TEST_FILE
