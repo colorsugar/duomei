@@ -1,1 +1,1 @@
-@readFile:/tmp/final-cou.json#content
+import assert from "node:assert/strict";
