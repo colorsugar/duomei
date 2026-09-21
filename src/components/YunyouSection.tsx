@@ -17,7 +17,7 @@ export function YunyouSection() {
         </span>
         <span className="yunyou-card-kicker" aria-hidden="true">桂林 · 两江四湖</span>
         <strong className="yunyou-card-title">沿着水岸，慢慢看桂林</strong>
-        <span className="yunyou-card-copy">从象鼻山到日月双塔，把熟悉的山水与旧城放进一张可以转动的地图。天色暗下来，城里的灯也会一盏盏亮起。</span>
+        <span className="yunyou-card-copy">从逍遥楼的飞檐看起，左右一滑，楼就转过来。山水和旧城都是事先渲好的，手机打开不用再等画面现算。天色暗下来，城里的灯也会一盏盏亮起。</span>
         <span className="yunyou-card-cta">开始云游 →</span>
       </Link>
     </HomeSectionHold>

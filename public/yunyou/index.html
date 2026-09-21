@@ -196,6 +196,28 @@
   #panel footer { flex-shrink: 0; }
   @media (max-width: 720px) { #panel { height: calc(100dvh - 110px); } }
 
+  html.plates-on #loading,
+  html.plates-on #panel,
+  html.plates-on #tour,
+  html.plates-on #compass,
+  html.plates-on #coords,
+  html.plates-on #walk-toggle,
+  html.plates-on #walk-pad,
+  html.plates-on #walk-hint,
+  html.plates-on #card,
+  html.plates-on #labels { display: none; }
+  html:not(.plates-on) #plates { display: none; }
+  #plates { position: fixed; inset: 0; z-index: 30; background: #d5e3ea; touch-action: none; overflow: hidden; }
+  #plate-frame { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transform-origin: center center; user-select: none; -webkit-user-drag: none; }
+  #plate-bar { position: absolute; left: 12px; right: 12px; bottom: max(12px, env(safe-area-inset-bottom)); display: grid; gap: 8px; }
+  #plate-note { margin: 0; justify-self: start; max-width: 100%; padding: 6px 10px; border-radius: 999px; background: #faf7f0; color: #6f6b63; font-size: 12px; line-height: 1.4; }
+  #plate-chips { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; touch-action: pan-x; }
+  #plate-chips button, #plate-night, #plate-live { min-height: 44px; border: 1px solid rgba(32, 32, 29, 0.16); border-radius: 999px; background: #faf7f0; color: #20201d; padding: 0 14px; cursor: pointer; white-space: nowrap; font: inherit; font-size: 14px; }
+  #plate-chips button[aria-pressed="true"], #plate-night[aria-pressed="true"] { background: #6f7d63; color: #faf7f0; border-color: transparent; }
+  #plate-tools { display: flex; gap: 6px; }
+  @media (max-width: 720px) { .is-embedded #plate-bar { right: 132px; } }
+  @media (prefers-reduced-motion: reduce) { #plate-frame { transition: none; } }
+
 </style>
 <script type="importmap">
 { "imports": {
@@ -204,13 +226,26 @@
 } }
 </script>
 <script>
+  const plateParams = new URLSearchParams(window.location.search);
   const isEmbedded = window.self !== window.top;
-  const isStandalone = new URLSearchParams(window.location.search).get("standalone") === "1";
+  const isStandalone = plateParams.get("standalone") === "1";
   if (!isEmbedded && !isStandalone) window.location.replace("/yunyou-map");
   if (isEmbedded) document.documentElement.classList.add("is-embedded");
+  if (plateParams.get("live") !== "1") document.documentElement.classList.add("plates-on");
 </script>
 </head>
 <body>
+<div id="plates">
+  <img id="plate-frame" alt="" width="1280" height="1280" draggable="false">
+  <div id="plate-bar">
+    <p id="plate-note">左右滑动转动 · 画面已预先渲染</p>
+    <div id="plate-chips" role="tablist" aria-label="景点模型"></div>
+    <div id="plate-tools">
+      <button type="button" id="plate-night" aria-pressed="false">夜景</button>
+      <button type="button" id="plate-live">实时漫游</button>
+    </div>
+  </div>
+</div>
 <div id="app"></div>
 <div id="labels"></div>
 <button id="walk-toggle" type="button" aria-pressed="false">街面漫游</button>
@@ -278,10 +313,15 @@
     document.body.classList.add("map-failed");
   };
 
+  const live = new URLSearchParams(location.search).get("live") === "1";
   try {
-    const probe = document.createElement("canvas");
-    if (!probe.getContext("webgl2") && !probe.getContext("webgl")) throw new Error("WebGL unavailable");
-    await import("./src/main.js");
+    if (live) {
+      const probe = document.createElement("canvas");
+      if (!probe.getContext("webgl2") && !probe.getContext("webgl")) throw new Error("WebGL unavailable");
+      await import("./src/main.js");
+    } else {
+      await import("./src/plates.js");
+    }
   } catch (error) {
     console.error("Yunyou failed to start", error);
     showFallback();
