@@ -1,1 +1,1 @@
-PLACEHOLDER
+@LOAD_FROM:/tmp/final-push-args.json
