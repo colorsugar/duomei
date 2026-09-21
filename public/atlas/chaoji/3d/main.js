@@ -1114,6 +1114,20 @@ function closeupAlphaMap() {
   return tex;
 }
 
+function closeupAlphaMap() {
+  const c = document.createElement("canvas");
+  c.width = c.height = 256;
+  const ctx = c.getContext("2d");
+  const grd = ctx.createRadialGradient(128, 128, 78, 128, 128, 128);
+  grd.addColorStop(0, "rgba(255,255,255,1)");
+  grd.addColorStop(1, "rgba(255,255,255,0)");
+  ctx.fillStyle = grd;
+  ctx.fillRect(0, 0, 256, 256);
+  const tex = new THREE.CanvasTexture(c);
+  tex.colorSpace = THREE.NoColorSpace;
+  return tex;
+}
+
 function mountCloseups(sites, hf) {
   const fade = closeupAlphaMap();
   for (const site of sites) {
