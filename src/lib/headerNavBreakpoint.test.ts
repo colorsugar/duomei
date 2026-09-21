@@ -1,1 +1,1 @@
-PLACEHOLDER
+file:///tmp/push-test-only.json
