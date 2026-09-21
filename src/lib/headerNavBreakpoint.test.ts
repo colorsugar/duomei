@@ -1,1 +1,1 @@
-PLACEHOLDER_WILL_REPLACE
+import assert from "node:assert/strict";
