@@ -1,1 +1,1 @@
-PLACEHOLDER_WILL_REPLACE
+@file:/tmp/mcp-push-test-args.json
