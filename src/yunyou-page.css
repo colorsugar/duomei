@@ -83,3 +83,16 @@ body:has(.duomei-music-player:not(.is-minimized)) .yunyou-map-back {
     transition: none;
   }
 }
+
+/* Yunyou shell: a smaller resting record orb. Phones/tablets pin it in the top gap between the map
+   panel and the compass; wide screens keep the top-left corner above the map panel. */
+body:has(.yunyou-map-page) .duomei-music-player.is-minimized {
+  --music-orb-size: 2.25rem;
+}
+
+@media (max-width: 1180px) {
+  body:has(.yunyou-map-page) .duomei-music-player.is-minimized {
+    inset-inline-start: calc(100% - 7.5rem);
+    inset-block-start: max(1.25rem, calc(env(safe-area-inset-top, 0px) + 0.5rem));
+  }
+}

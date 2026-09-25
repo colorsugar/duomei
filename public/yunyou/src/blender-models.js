@@ -6,6 +6,7 @@ import {mergeStatic} from './mesh-utils.js';
 import {createUrbanTrees} from './urban-trees.js';
 import {compactStaticModel} from './static-model.js';
 const PARKS={qixing:['qixing','putuoshan','yueyashan','luotuoshan','qixiasi'],chuanshan:['chuanshan','tashan'],xishan:['xishan','yinshan'],yushan:['yushan']};
+const REBUILT=['xiangbishan','jiefangqiao']; // landmarks re-modelled 2026-09-26, see scripts/xiangbishan and scripts/jiefangqiao
 const EXISTING=['xiangbishan','xiaoyaolou','rita','yueta','wangcheng','fuboshan','diecaishan','gunanmen','mulongta','jiefangqiao','shelita','huaqiao'];
 export function installBlenderModels({scene,camera,landmarks,models,detail,pickables,invalidate,paused,mobile,onRegions=()=>{}}){
  const loader=new GLTFLoader(),draco=new DRACOLoader();draco.setDecoderPath(new URL('../vendor/three/addons/libs/draco/gltf/',import.meta.url).href);draco.setWorkerLimit(1);loader.setDRACOLoader(draco);
@@ -33,6 +34,13 @@ export function installBlenderModels({scene,camera,landmarks,models,detail,picka
    root.visible=false;group.add(root);tint(root);invalidate(true);return root;
   }
   const gltf=await loader.loadAsync(new URL('../assets/blender/'+id+'.glb',import.meta.url).href),root=gltf.scene;
+  if(id==='city-far'){
+   // The overview keeps its baked city but swaps in the rebuilt landmarks (far LOD).
+   const stale=[];root.traverse(o=>{if(o.isMesh){let t=o.userData.lmId;for(let p=o.parent;!t&&p;p=p.parent)t=p.userData.lmId;if(REBUILT.includes(t))stale.push(o);}});
+   for(const o of stale){o.removeFromParent();o.geometry.dispose();}
+   for(const rid of REBUILT){const part=(await loader.loadAsync(new URL('../assets/blender/'+rid+'-far.glb',import.meta.url).href)).scene;
+    part.traverse(o=>{if(o.isMesh)o.userData.lmId=rid;});root.add(part);}
+  }
   // Share decoded pixels across distance levels while keeping independent UV transforms.
   root.traverse(o=>{if(o.isMesh)for(const m of [].concat(o.material))for(const value of Object.values(m))if(value?.isTexture){
    const index=gltf.parser.associations.get(value)?.textures;const definition=gltf.parser.json.textures?.[index];const uri=gltf.parser.json.images?.[definition?.source]?.uri;

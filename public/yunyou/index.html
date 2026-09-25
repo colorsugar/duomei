@@ -197,6 +197,107 @@
   @media (max-width: 720px) { #panel { height: calc(100dvh - 110px); } }
 
 </style>
+<style id="ui-2026-09">
+  /* 2026-09 visual pass: glass surfaces, landmark pills, highlight route, richer card and loading. */
+  :root { --glass: rgba(250, 247, 240, 0.78); --glass-strong: rgba(250, 247, 240, 0.92); --shadow-soft: 0 10px 30px rgba(20, 24, 22, 0.16), 0 1px 0 rgba(255,255,255,.5) inset; --font-display: "Songti SC", "Noto Serif SC", "Source Han Serif SC", Georgia, serif; }
+  body.night { --glass: rgba(16, 23, 30, 0.72); --glass-strong: rgba(16, 23, 30, 0.9); --shadow-soft: 0 10px 30px rgba(0,0,0,.4), 0 1px 0 rgba(255,255,255,.06) inset; }
+  #panel, #card, #compass, #tour, #quick-night, #highlights { background: var(--glass); backdrop-filter: blur(18px) saturate(1.3); -webkit-backdrop-filter: blur(18px) saturate(1.3); box-shadow: var(--shadow-soft); border-color: rgba(255,255,255,.35); }
+  body.night #panel, body.night #card, body.night #compass, body.night #tour, body.night #quick-night, body.night #highlights { border-color: var(--night-line); }
+  #panel-toggle strong { letter-spacing: .02em; }
+
+  /* Landmark labels: small glass pills with a pin; highlight-route names stand out. */
+  .lbl.main { display: flex; flex-direction: column; align-items: center; text-shadow: none; font-weight: 600; font-size: 12px; }
+  .lbl.main > span { padding: 3px 9px 3px 7px; border-radius: 999px; background: var(--glass-strong); color: var(--ink); box-shadow: 0 2px 8px rgba(0,0,0,.14); display: inline-flex; align-items: center; gap: 5px; }
+  .lbl.main > span::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); flex: none; }
+  .lbl.main::after { width: 1.5px; height: 16px; margin-top: 0; opacity: .55; background: var(--glass-strong); box-shadow: 0 0 2px rgba(0,0,0,.35); }
+  .lbl.main.core > span { font-size: 13px; padding: 4px 11px 4px 8px; background: #203a33e6; color: #fbf4e4; }
+  .lbl.main.core > span::before { background: #e9b85e; box-shadow: 0 0 0 3px rgba(233,184,94,.25); }
+  body.night .lbl.main.core > span { background: #e9b85ee6; color: #1b1b18; }
+  body.night .lbl.main.core > span::before { background: #1b1b18; box-shadow: none; }
+  .lbl.hit:hover > span { transform: translateY(-1px); }
+  .lbl.lake { font-style: normal; letter-spacing: .3em; opacity: .85; }
+
+  /* Highlight route: the Elephant Hill – twin pagodas – Jiefang Bridge – Xiaoyao Tower stretch. */
+  #highlights { position: fixed; top: 16px; left: 50%; transform: translateX(-50%); z-index: 3; display: flex; align-items: center; gap: 2px; padding: 4px; border: 1px solid; border-radius: 999px; max-width: calc(100% - 640px); overflow-x: auto; scrollbar-width: none; }
+  #highlights::-webkit-scrollbar { display: none; }
+  #highlights .hl-title { padding: 0 10px 0 12px; font-size: 11px; letter-spacing: .18em; color: var(--muted); white-space: nowrap; }
+  #highlights button { flex: none; min-height: 36px; padding: 0 13px; border: 0; border-radius: 999px; background: transparent; color: var(--ink); font-size: 13px; cursor: pointer; white-space: nowrap; transition: background var(--dur-short) var(--ease-out), color var(--dur-short) var(--ease-out); }
+  #highlights button:hover { background: rgba(32,32,29,.08); }
+  #highlights button[aria-current="true"] { background: #203a33; color: #fbf4e4; }
+  body.night #highlights button:hover { background: rgba(255,255,255,.08); }
+  body.night #highlights button[aria-current="true"] { background: #e9b85e; color: #1b1b18; }
+
+  #quick-night { position: fixed; top: 80px; right: 16px; width: 56px; height: 56px; border-radius: 50%; border: 1px solid; display: grid; place-items: center; color: var(--ink); cursor: pointer; padding: 0; }
+  #quick-night svg { width: 22px; height: 22px; }
+  #quick-night .ico-moon { display: none; } body.night #quick-night .ico-moon { display: block; } body.night #quick-night .ico-sun { display: none; }
+  #walk-toggle { top: 144px; right: 16px; background: #203a33e6; border-color: rgba(255,255,255,.35); box-shadow: var(--shadow-soft); }
+
+  /* Card: full-bleed photo, larger title, calmer body copy. */
+  #card { width: 360px; padding: 0 0 16px; overflow: auto; }
+  #card h2 { margin: 16px 48px 2px 18px; font-size: 21px; font-weight: 600; letter-spacing: .02em; }
+  #card .meta { margin: 0 18px 10px; }
+  #card p { margin: 0 18px; line-height: 1.75; color: color-mix(in srgb, var(--ink) 86%, transparent); }
+  #card-photo { margin: 0 0 4px; border: 0; border-radius: var(--radius-card) var(--radius-card) 0 0; order: -1; }
+  #card-photo img { height: clamp(170px, 26svh, 230px); object-fit: cover; }
+  #card-photo figcaption { background: transparent; padding: 6px 18px 0; }
+  #card button#card-close { z-index: 2; top: 8px; right: 8px; width: 36px; height: 36px; border-radius: 50%; background: var(--glass-strong); box-shadow: 0 2px 8px rgba(0,0,0,.15); }
+  #card:has(#card-photo:not([hidden])) h2 { margin-top: 12px; }
+  #card { display: flex; flex-direction: column; }
+  #card[hidden] { display: none; }
+
+  #tour { border-radius: 999px; padding: 4px; }
+  #tour button { border-radius: 999px; }
+  #tour-play { min-width: 128px; font-weight: 600; white-space: nowrap; }
+
+  /* Loading: cover image, title, indeterminate progress. */
+  #loading { background: #11181b url("../images/yunyou-guilin-cover.webp") center / cover no-repeat; }
+  #loading::before { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(10,16,18,.25), rgba(10,16,18,.72)); }
+  .loading-card { position: relative; color: #fbf4e4; }
+  .loading-card strong { font-size: 34px; letter-spacing: .12em; }
+  .loading-card span { color: rgba(251,244,228,.78); }
+  .loading-card i { display: block; width: 180px; height: 2px; margin: 10px auto 0; overflow: hidden; border-radius: 2px; background: rgba(251,244,228,.2); }
+  .loading-card i::after { content: ""; display: block; width: 40%; height: 100%; background: #e9b85e; animation: yy-load 1.4s var(--ease-out) infinite; }
+  @keyframes yy-load { from { transform: translateX(-100%); } to { transform: translateX(250%); } }
+
+  @media (max-width: 1180px) { #highlights { top: auto; bottom: calc(max(20px, env(safe-area-inset-bottom)) + 62px); max-width: calc(100% - 24px); } #highlights .hl-title { display: none; } }
+  @media (max-width: 720px) {
+    #highlights { bottom: calc(max(12px, env(safe-area-inset-bottom)) + 58px); }
+    #highlights button { min-height: 34px; padding: 0 11px; font-size: 12px; }
+    body.card-open #highlights { display: none; }
+    #quick-night { top: 72px; right: 12px; width: 48px; height: 48px; }
+    #walk-toggle { top: 128px; right: 12px; }
+    #card { width: calc(100% - 24px); }
+    #card-photo img { height: 120px; }
+    #card h2 { font-size: 18px; }
+    .lbl.main { font-size: 11px; } .lbl.main.core > span { font-size: 12px; }
+  }
+  .is-embedded #highlights { bottom: calc(68px + env(safe-area-inset-bottom) + 58px); }
+  @media (min-width: 1181px) { .is-embedded #highlights { top: 16px; bottom: auto; } }
+  .walking #highlights, .map-failed #highlights, .map-failed #quick-night { display: none; }
+  #card-photo { flex-shrink: 0; }
+  /* Photo cards: the photograph fills the card, copy sits on a dark gradient at the bottom. */
+  #card.has-photo { height: clamp(340px, 56svh, 480px); max-height: none; padding: 0; overflow: hidden; justify-content: flex-end; color: #fbf6ea; background: #0f1513; border-color: rgba(255,255,255,.18); }
+  #card.has-photo #card-photo { position: absolute; inset: 0; margin: 0; border-radius: inherit; background: #0f1513; }
+  #card.has-photo #card-photo img { width: 100%; height: 100%; object-fit: cover; }
+  #card.has-photo #card-photo::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(to top, rgba(8,12,11,.94) 0%, rgba(8,12,11,.78) 38%, rgba(8,12,11,.18) 70%, rgba(8,12,11,0) 85%), linear-gradient(to bottom, rgba(8,12,11,.45), rgba(8,12,11,0) 22%); }
+  #card.has-photo #card-photo figcaption { position: absolute; top: 12px; left: 14px; right: 60px; z-index: 1; padding: 0; color: rgba(251,246,234,.78); font-size: 10px; line-height: 1.5; text-shadow: 0 1px 3px rgba(0,0,0,.6); }
+  #card.has-photo #card-photo figcaption a { color: inherit; }
+  #card .card-body { position: relative; z-index: 1; min-height: 0; }
+  #card.has-photo .card-body { max-height: 62%; overflow-y: auto; overscroll-behavior: contain; padding-top: 18px; scrollbar-width: thin; -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 16px); mask-image: linear-gradient(to bottom, transparent 0, #000 16px); }
+  #card.has-photo h2 { margin-top: 0; font-size: 24px; color: #fff; text-shadow: 0 2px 10px rgba(0,0,0,.5); }
+  #card.has-photo .meta { color: rgba(251,246,234,.7); }
+  #card.has-photo p { color: rgba(251,246,234,.92); }
+  #card.has-photo #card-close { background: rgba(15,21,19,.55); color: #fff; box-shadow: none; }
+  #card:has(#card-photo:not([hidden])) h2 { margin-top: 0; }
+  @media (max-width: 720px) {
+    #card.has-photo { height: clamp(280px, 46svh, 380px); }
+    #card.has-photo h2 { font-size: 20px; }
+    #card.has-photo .card-body { max-height: 60%; }
+  }
+  @media (max-width: 720px) { .is-embedded #card.has-photo { height: clamp(260px, 40svh, 340px); } }
+  /* Keep the top gap before the compass free for the shell's record orb. */
+  @media (max-width: 1180px) { .is-embedded #panel.collapsed { max-width: calc(100% - 140px); } }
+</style>
 <script type="importmap">
 { "imports": {
   "three": "./vendor/three/three.module.js",
@@ -216,6 +317,8 @@
 <button id="walk-toggle" type="button" aria-pressed="false">街面漫游</button>
 <div id="walk-pad" aria-label="街面移动方向" hidden><button data-move="KeyW" aria-label="前进">↑</button><button data-move="KeyA" aria-label="向左移动">←</button><button data-move="KeyS" aria-label="后退">↓</button><button data-move="KeyD" aria-label="向右移动">→</button></div>
 <div id="walk-hint">拖动转头 · 方向键 / WASD 行走 · Esc 返回</div>
+<nav id="highlights" aria-label="精华一线：象山到逍遥楼"><span class="hl-title">精华一线</span><button type="button" data-id="xiangbishan">象鼻山</button><button type="button" data-id="rita">日月双塔</button><button type="button" data-id="binjianglu">滨江路</button><button type="button" data-id="jiefangqiao">解放桥</button><button type="button" data-id="xiaoyaolou">逍遥楼</button><button type="button" data-id="dongxixiang">东西巷</button></nav>
+<button type="button" id="quick-night" aria-label="切换日夜"><svg class="ico-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4" fill="currentColor"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><svg class="ico-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 14.5A7.5 7.5 0 0 1 9.5 6 7 7 0 1 0 18 14.5Z" fill="currentColor"/></svg></button>
 <nav id="tour" aria-label="桂林地标导览"><button id="tour-prev" aria-label="上一个地标">‹</button><button id="tour-play" aria-pressed="false">城中导览</button><button id="tour-next" aria-label="下一个地标">›</button></nav>
 
 <aside id="panel" aria-label="桂林景点控制面板">
@@ -263,9 +366,9 @@
 
 <button type="button" id="compass" aria-label="回到北向"><svg viewBox="0 0 40 40" aria-hidden="true"><circle class="compass-ring" cx="20" cy="20" r="18"/><path class="compass-north" d="M20 4 L25 20 L20 17 L15 20 Z"/><path class="compass-south" d="M20 36 L25 20 L20 23 L15 20 Z"/><text class="compass-label" x="20" y="13" font-size="7" text-anchor="middle">N</text></svg></button>
 <div id="coords" aria-hidden="true">—</div>
-<section id="card" hidden aria-live="polite"><button type="button" id="card-close" aria-label="关闭景点简介">×</button><h2></h2><div class="meta"></div><figure id="card-photo" hidden><img alt="" loading="lazy" decoding="async"><figcaption></figcaption></figure><p></p></section>
+<section id="card" hidden aria-live="polite"><button type="button" id="card-close" aria-label="关闭景点简介">×</button><figure id="card-photo" hidden><img alt="" loading="lazy" decoding="async"><figcaption></figcaption></figure><div class="card-body"><h2></h2><div class="meta"></div><p></p></div></section>
 
-<div id="loading" role="status" aria-live="polite"><div class="loading-card"><strong>正在展开桂林</strong><span>湖面、山色与城中灯火正在就位。</span></div></div>
+<div id="loading" role="status" aria-live="polite"><div class="loading-card"><strong>正在展开桂林</strong><span>湖面、山色与城中灯火正在就位。</span><i aria-hidden="true"></i></div></div>
 <section id="map-fallback" hidden role="alert"><div class="fallback-card"><h1>此设备暂时无法打开 3D 地图</h1><p>浏览器未能启用 WebGL，或地图模块加载失败。你仍可返回多美，稍后换一个支持 WebGL 的浏览器再来。</p><a href="/#yunyou">← 返回多美</a></div></section>
 <noscript><p class="noscript">需要启用 JavaScript 才能打开桂林 3D 地图。<br><a href="/#yunyou">返回多美</a></p></noscript>
 
