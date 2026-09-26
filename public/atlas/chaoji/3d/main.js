@@ -2068,7 +2068,8 @@ const SURFACE_FRAGMENT_BODY = `
     vec3 snowCol = mix(uSnowColor, uSnowColor * vec3(0.78, 0.88, 1.04), cold * 0.6);
     snowMask *= mix(1.0, 0.85, 1.0 - detail);
     surface = mix(surface, snowCol, snowMask);
-    surface = mix(surface, snowCol, volSnow * 0.32 * detail);
+    // Thin rim snow keeps rock albedo — mix stays low so it never reads as fog.
+    surface = mix(surface, mix(rockCol, snowCol, 0.55), volSnow * 0.55 * detail);
 
     diffuseColor.rgb = surface;
 
@@ -2428,6 +2429,17 @@ async function boot() {
   }
   requestAnimationFrame(frame);
   if (!reducedMotion) setTimeout(() => { hint.style.opacity = "0.55"; }, 5000);
+
+  // Debug: ?debugCam=1 enables Playwright fly-to for acceptance shots.
+  if (new URLSearchParams(location.search).has("debugCam")) {
+    window.__cjFlyToMap = (mx, my, radius = 240, polar = 1.0, azimuth = -0.9) => {
+      const y = heightAt(mx, my, heightField) + 6;
+      return flyTo(
+        { target: new THREE.Vector3(mx - MAP_W / 2, y, my - MAP_H / 2), radius, polar, azimuth },
+        900,
+      );
+    };
+  }
 }
 
 boot().catch((err) => {
