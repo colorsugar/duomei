@@ -86,8 +86,8 @@ npm run test:guyu
 
 分支 `cursor/yunyou-mobile-perf`。针对 iPhone 13 模拟 + 4× CPU + Fast 4G 下首屏过慢、拖动卡顿。
 
-- 首屏：loading 不再等待 `city-far.glb`；当前机位精华地标（默认象鼻山）Blender 精模**就绪后再关 loading**（手机优先 `*-far.glb`），其余精华一线后台预载；SDF 仅在 GLB 失败时保留。桌面仍等 `city-far` 就绪再关 loading。峰林、行道树点生成、城区补建改到首帧后空闲执行；补建按步长分帧 `yield`；手机补建 step 略疏、峰林数量减半。
+- 首屏：loading 不再等待 `city-far.glb`；当前机位精华地标（默认象鼻山）Blender 精模**就绪后再关 loading**（手机优先 `*-far.glb`），其余精华一线后台预载；SDF 仅在 GLB 失败时保留。桌面仍等 `city-far`，且峰林/行道树/城区补建启动时同步。手机峰林、行道树、城区补建仍延到首帧后空闲执行；补建按步长分帧 `yield`；手机补建 step 略疏、峰林数量减半。
 - 水面：桌面开倒影时轻量水面网格保留到 Water 首次反射就绪，避免首屏/截图出现无水的土色地面。
 - 渲染：手机跳过 HDR/泛光/MSAA（直接 `renderer.render`）；均衡档 DPR 上限 1.15；阴影图 1024 且默认关；波纹默认关（避免每帧强制 dirty）；标签按距离裁剪；树 LOD 距离更近；补建网格按包围球距离隐藏。
 - 桌面「高清」路径（后期、倒影、2048 阴影、DPR 2）保持不变。逍遥楼 / 象鼻山 / 解放桥精模与照片卡逻辑未删。
-- 测量（Playwright iPhone 13，CDP 4× CPU + Fast 4G）：首屏可交互约 159s → 51s（−68%）；拖动/自转帧时间 p95 约 300ms → 33ms；桌面对照截图见 `tmp-perf/`。
+- 测量（Playwright iPhone 13，CDP 4× CPU + Fast 4G）：首屏可交互约 159s → 67s（−58%）；拖动/自转帧时间 p95 约 300ms → 33ms；桌面对照截图见 `tmp-perf/`。
