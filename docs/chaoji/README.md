@@ -48,3 +48,19 @@
 未做：完整气候模拟层、独立高模资产管线。
 
 不继承奇幻大陆的点位与图册。
+
+## 立体地图真实地形（2026-09-26）
+
+`/chaoji/map` 立体版不再用底图亮度单独抬高度。`scripts/atlas-terrain/build_chaoji_heightmap.py`（numpy/scipy/scikit-image，复用七国管线中的侵蚀与法线导出）从 `public/atlas/chaoji/assets/basemap.webp` 生成 `public/atlas/chaoji/assets/terrain/basemap.{height.bin,normal.png,mask.png}`：海 = 与图边连通的水域；陆地基础高度随离岸距离上升；中央山系与西北岛群用 shape-from-shading + 软掩膜增益；巨型/小型火山为凹锥、熔岩坡与放射冲沟；西部三角洲单独压平；1024×576 上粒子水力侵蚀。高程为 Uint16 小端，行 0 = 图片顶部，`h = v/65535×60 − 12`（世界单位，海平面 0）。这是依据画面与设定区域推算的**示意地形**，不是设定文本中的测量数据。
+
+`3d/main.js` 读取上述数据做 CPU 位移网格（`heightAt` 与标签/拾取一致，海面返回 0），法线贴图增强细节；片元按 mask 区分陆海（不再用底图颜色 discard）；独立水面按水深从浅滩绿松石到深海（深海不透明）、雾中淡出；陆地按坡度露岩、约 28 起积雪；天空穹顶与雾同色。`fetch` 失败时自动回退旧的亮度高度场（仍乘 `HEIGHT_SCALE`）。
+
+**重新生成**（需 Python 3 与 venv）：
+
+```bash
+python3 -m venv tmp/atlas-terrain/.pyvenv
+tmp/atlas-terrain/.pyvenv/bin/pip install numpy scipy pillow scikit-image
+tmp/atlas-terrain/.pyvenv/bin/python scripts/atlas-terrain/build_chaoji_heightmap.py
+```
+
+产物写入 `public/atlas/chaoji/assets/terrain/`；预览图 `tmp/atlas-terrain/preview-chaoji.png` 仅本地验收用，不随站点部署。
