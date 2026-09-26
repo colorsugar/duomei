@@ -1,9 +1,10 @@
 export function bindUI({ onNight, onTeleport }) {
+  const pitch = -0.12;
   const teleports = [
     { id: 'plaza', label: '广场', pos: [0, 0, 22], yaw: 0, pitch: -0.12 },
-    { id: 'floor1', label: '一层', pos: [0, 3.05, 2], yaw: 0, pitch: -0.02 },
-    { id: 'south', label: '二层·南', pos: [0, 7.35, 9.2], yaw: Math.PI, pitch: -0.05 },
-    { id: 'east', label: '二层·东', pos: [9.2, 7.35, 0], yaw: -Math.PI / 2, pitch: -0.04 },
+    { id: 'floor1', label: '一层', pos: [-0.5, 3.05, 0.8], yaw: 1.35, pitch: -0.06 },
+    { id: 'south', label: '二层·南', pos: [0, 6.9, 8.9], yaw: Math.PI, pitch },
+    { id: 'east', label: '二层·东', pos: [8.9, 6.9, 0], yaw: -Math.PI / 2, pitch },
   ];
 
   const bar = document.getElementById('teleport-bar');

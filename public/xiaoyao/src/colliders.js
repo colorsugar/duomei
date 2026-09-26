@@ -39,8 +39,8 @@ export function buildWalkColliders() {
     plat(stairX0, stairX1, z0, z0 + 0.4, 3.05 + i * (4.3 / 15));
   }
 
-  // 二层回廊地面（中空：只铺外圈，避免盖住一层大厅）
-  const gy = 6.92;
+  // 二层回廊地面（中空：只铺外圈；标高与精模瓦面下沿对齐，见 world.measureGallery）
+  const gy = 6.9;
   plat(-11, 11, -11, -8.2, gy);
   plat(-11, 11, 8.2, 11, gy);
   plat(-11, -8.2, -8.2, 8.2, gy);

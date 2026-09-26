@@ -71,17 +71,15 @@ export function createInterior(root) {
     group.add(model);
   }
 
-  const poemTex = calligraphyTexture('逍遥楼', [
+  const poemTex = calligraphyTexture('登逍遥楼', [
     '逍遥楼上望乡关，',
     '绿水泓澄云雾间。',
     '北去衡阳二千里，',
     '无因雁足系书还。',
-    '—— 宋之问《登逍遥楼》',
+    '—— 宋之问',
   ]);
-  const frame = new THREE.Mesh(
-    new THREE.BoxGeometry(0.08, 2.2, 3.2),
-    wood
-  );
+  const titleTex = calligraphyTexture('逍遥楼', ['']);
+  const frame = new THREE.Mesh(new THREE.BoxGeometry(0.08, 2.2, 3.2), wood);
   frame.position.set(-10.15, floorY + 2.1, 0);
   group.add(frame);
   const scroll = new THREE.Mesh(
@@ -91,6 +89,15 @@ export function createInterior(root) {
   scroll.position.set(-10.05, floorY + 2.1, 0);
   scroll.rotation.y = Math.PI / 2;
   group.add(scroll);
+  const titleFrame = new THREE.Mesh(new THREE.BoxGeometry(2.4, 1.1, 0.08), wood);
+  titleFrame.position.set(0, floorY + 3.4, -10.05);
+  group.add(titleFrame);
+  const titleScroll = new THREE.Mesh(
+    new THREE.PlaneGeometry(2.1, 0.9),
+    new THREE.MeshStandardMaterial({ map: titleTex, roughness: 0.9 })
+  );
+  titleScroll.position.set(0, floorY + 3.4, -9.95);
+  group.add(titleScroll);
 
   const lamp = new THREE.PointLight(0xffc870, 0.9, 14);
   lamp.position.set(0, floorY + 5.2, 0);

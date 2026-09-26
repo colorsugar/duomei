@@ -164,12 +164,17 @@ export async function createLocalCity({ mobile = false } = {}) {
     greenGeos.forEach((g) => g.dispose());
   }
 
-  const plazaMat = new THREE.MeshStandardMaterial({ color: 0x8a8580, roughness: 0.92 });
+  const plazaMat = new THREE.MeshStandardMaterial({ color: 0xa8a29a, roughness: 0.9 });
   const plaza = new THREE.Mesh(new THREE.PlaneGeometry(56, 64), plazaMat);
   plaza.rotation.x = -Math.PI / 2;
   plaza.position.set(0, 0.02, 18);
   plaza.receiveShadow = true;
   group.add(plaza);
+  // 台基前城墙垛口示意（避免广场前景像黑水）
+  const battlementMat = new THREE.MeshStandardMaterial({ color: 0x6e6860, roughness: 0.94 });
+  const battlement = new THREE.Mesh(new THREE.BoxGeometry(28, 1.35, 1.1), battlementMat);
+  battlement.position.set(0, 0.7, 12.2);
+  group.add(battlement);
 
   const wallMat = new THREE.MeshStandardMaterial({ color: 0x9a9590, roughness: 0.95 });
   const wall = new THREE.Mesh(new THREE.BoxGeometry(52, 2.8, 3.5), wallMat);

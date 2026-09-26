@@ -15,19 +15,25 @@ import { createInterior } from './interior.js';
 
 const mat = (c, o = {}) => new THREE.MeshStandardMaterial({ color: c, roughness: 0.88, ...o });
 
+/** 回廊地面：以灰瓦 mesh 下沿为参考，保证眼高 1.6m 时低于檐口且不钻进瓦面。 */
 function measureGalleryFromTower(tower, platforms) {
   tower.updateMatrixWorld(true);
-  const box = new THREE.Box3();
+  let tileMinY = Infinity;
   tower.traverse((o) => {
     if (!o.isMesh) return;
+    const n = `${o.name || ''} ${o.parent?.name || ''}`;
+    if (!/tile|clay|grey_clay/i.test(n)) return;
     const b = new THREE.Box3().setFromObject(o);
-    if (b.max.y > 5.5 && b.max.y < 10.5 && b.min.x < 12 && b.max.x > -12) box.union(b);
+    if (b.min.y > 5 && b.min.y < 9) tileMinY = Math.min(tileMinY, b.min.y);
   });
-  if (box.isEmpty()) return;
-  const gy = THREE.MathUtils.clamp(box.min.y + 0.08, 6.55, 7.05);
+  // 实测：瓦面下沿约 6.59；地面取 6.9 → 眼高 8.5，射线南望不撞瓦
+  const gy = Number.isFinite(tileMinY)
+    ? THREE.MathUtils.clamp(tileMinY + 0.3, 6.85, 7.05)
+    : 6.9;
   for (const p of platforms) {
     if (p.y > 6 && p.y < 8.5) p.y = gy;
   }
+  return gy;
 }
 
 export async function buildWorld({ scene, mobile }) {
@@ -130,9 +136,9 @@ export async function buildWorld({ scene, mobile }) {
 
   const decoLights = [];
   const eave = new THREE.PointLight(0xffc870, 0, 18);
-  eave.position.set(0, 8.5, 0);
+  eave.position.set(0, 9.8, 0);
   root.add(eave);
-  decoLights.push({ light: eave, night: 1.2, day: 0 });
+  decoLights.push({ light: eave, night: 0.55, day: 0 });
   const battlement = new THREE.PointLight(0xd8ecff, 0, 14);
   battlement.position.set(0, 3.2, 12);
   root.add(battlement);
@@ -174,7 +180,7 @@ export async function buildWorld({ scene, mobile }) {
       for (const m of [].concat(o.material)) {
         if (!m?.isMaterial) continue;
         const ns = m.userData?.nightStrength;
-        if (ns != null) m.emissiveIntensity = on ? ns : 0;
+        if (ns != null) m.emissiveIntensity = on ? Math.max(ns, 1.8) : 0;
       }
     });
   }
