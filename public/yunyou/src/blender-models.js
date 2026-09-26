@@ -6,13 +6,21 @@ import {mergeStatic} from './mesh-utils.js';
 import {createUrbanTrees} from './urban-trees.js';
 import {compactStaticModel} from './static-model.js';
 const PARKS={qixing:['qixing','putuoshan','yueyashan','luotuoshan','qixiasi'],chuanshan:['chuanshan','tashan'],xishan:['xishan','yinshan'],yushan:['yushan']};
+const REBUILT=['xiangbishan','jiefangqiao']; // landmarks re-modelled 2026-09-26, see scripts/xiangbishan and scripts/jiefangqiao
 const EXISTING=['xiangbishan','xiaoyaolou','rita','yueta','wangcheng','fuboshan','diecaishan','gunanmen','mulongta','jiefangqiao','shelita','huaqiao'];
-export function installBlenderModels({scene,camera,landmarks,models,detail,pickables,invalidate,paused,mobile,onRegions=()=>{}}){
+export function installBlenderModels({droppedFootprints=[],scene,camera,landmarks,models,detail,pickables,invalidate,paused,mobile,onRegions=()=>{}}){
  const loader=new GLTFLoader(),draco=new DRACOLoader();draco.setDecoderPath(new URL('../vendor/three/addons/libs/draco/gltf/',import.meta.url).href);draco.setWorkerLimit(1);loader.setDRACOLoader(draco);
  const sharedSources=new Map();
  const addons=[];let addonIndex=0,addonPending=false;const addonIds=['city-night','park-furnishings','city-ground'];
  let enabled=true,night=0,far=null,farPending=false,nextFarAttempt=0,lastVisibility='';const group=new THREE.Group();scene.add(group);
  const find=id=>landmarks.find(l=>l.id===id);
+ // Baked plinths under buildings the map no longer draws (e.g. against the palace wall) are cut out triangle by triangle.
+ const inRing=(x,z,ring)=>{let c=false;for(let i=0,j=ring.length-1;i<ring.length;j=i++){const [xi,zi]=ring[i],[xj,zj]=ring[j];if((zi>z)!==(zj>z)&&x<(xj-xi)*(z-zi)/(zj-zi)+xi)c=!c;}return c;};
+ const ringDist=(x,z,ring)=>{let best=Infinity;for(let i=0;i<ring.length;i++){const [ax,az]=ring[i],[bx,bz]=ring[(i+1)%ring.length],dx=bx-ax,dz=bz-az,l=dx*dx+dz*dz||1,t=Math.max(0,Math.min(1,((x-ax)*dx+(z-az)*dz)/l));best=Math.min(best,Math.hypot(x-ax-dx*t,z-az-dz*t));}return best;};
+ const cullFootprints=o=>{o.updateWorldMatrix(true,false);const g=o.geometry,idx=g.index.array,pos=g.attributes.position,v=new THREE.Vector3(),keep=[];
+  for(let t=0;t<idx.length;t+=3){let x=0,z=0;for(let k=0;k<3;k++){v.fromBufferAttribute(pos,idx[t+k]).applyMatrix4(o.matrixWorld);x+=v.x/3;z+=v.z/3;}
+   if(!droppedFootprints.some(r=>inRing(x,z,r)||ringDist(x,z,r)<12))keep.push(idx[t],idx[t+1],idx[t+2]);}
+  if(keep.length!==idx.length)g.setIndex(keep);};
  const key=lm=>EXISTING.includes(lm?.id)?lm.id:lm?.region&&PARKS[lm.region]?lm.region:null;
  const tint=root=>{
   if(root.userData.setNativeNight){const on=night>.18;if(root.userData.nativeNight!==on){root.userData.setNativeNight(root,on);root.userData.nativeNight=on;}root.traverse(o=>{if(o.isLight){o.userData.fullIntensity??=o.intensity;o.intensity=o.userData.fullIntensity*night;}});return;}
@@ -33,6 +41,13 @@ export function installBlenderModels({scene,camera,landmarks,models,detail,picka
    root.visible=false;group.add(root);tint(root);invalidate(true);return root;
   }
   const gltf=await loader.loadAsync(new URL('../assets/blender/'+id+'.glb',import.meta.url).href),root=gltf.scene;
+  if(id==='city-far'){
+   // The overview keeps its baked city but swaps in the rebuilt landmarks (far LOD).
+   const stale=[];root.traverse(o=>{if(o.isMesh){let t=o.userData.lmId;for(let p=o.parent;!t&&p;p=p.parent)t=p.userData.lmId;if(REBUILT.includes(t))stale.push(o);}});
+   for(const o of stale){o.removeFromParent();o.geometry.dispose();}
+   for(const rid of REBUILT){const part=(await loader.loadAsync(new URL('../assets/blender/'+rid+'-far.glb',import.meta.url).href)).scene;
+    part.traverse(o=>{if(o.isMesh)o.userData.lmId=rid;});root.add(part);}
+  }
   // Share decoded pixels across distance levels while keeping independent UV transforms.
   root.traverse(o=>{if(o.isMesh)for(const m of [].concat(o.material))for(const value of Object.values(m))if(value?.isTexture){
    const index=gltf.parser.associations.get(value)?.textures;const definition=gltf.parser.json.textures?.[index];const uri=gltf.parser.json.images?.[definition?.source]?.uri;
@@ -42,6 +57,7 @@ export function installBlenderModels({scene,camera,landmarks,models,detail,picka
   for(const o of meshes){
    let tag=o.userData.lmId;for(let p=o.parent;!tag&&p;p=p.parent)tag=p.userData.lmId;
    const lm=find(tag)||find(id);if(!lm&&!addonIds.includes(id))continue;
+   if(id==='city-ground'&&droppedFootprints.length&&o.geometry.index)cullFootprints(o);
    if(id==='city-night'||id==='city-ground'){o.castShadow=false;o.receiveShadow=id==='city-ground';continue;}
    const names=[].concat(o.material).map(m=>m.name);
    if(names.some(n=>n.includes('乔木叶簇'))){const p=new THREE.Vector3(),q=new THREE.Quaternion(),s=new THREE.Vector3();o.matrixWorld.decompose(p,q,s);treePoints.push([p.x,p.z,p.y-s.y*.25,s.y*.85,treePoints.length%4?'camphor':'banyan']);o.removeFromParent();continue;}

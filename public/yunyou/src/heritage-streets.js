@@ -9,6 +9,7 @@ import { kitMats, polyRoof, plaque } from './detail/kit.js';
 const V=(x,y,z)=>new THREE.Vector3(x,y,z);
 export const CLOCK=[1,529]; // OSM circular plaza, Zhengyang / Yiren intersection.
 export const ALLEYS=[[[62,128],[228,152]],[[55,169],[175,184],[176,176],[221,182],[232,131]],[[118,177],[111,225],[48,211]],[[111,225],[230,261]],[[311,148],[279,141],[275,157],[290,163],[274,217],[263,222],[242,223],[225,278]],[[352,157],[311,148]],[[359,159],[349,188],[354,208],[353,216],[327,223],[311,202],[282,193]],[[124,137],[118,177]],[[46,227],[66,105]]];
+export const HERITAGE_ROWS=[[[72,141],[220,163]],[[65,155],[112,162]],[[140,166],[211,175]],[[146,204],[211,217]],[[295,166],[331,178]],[[289,213],[312,219]]];
 export const ZHENGYANG=[[44,237],[2,521],[-2,539],[-127,874]];
 export function createHeritageStreets(TEX){
  const group=new THREE.Group(),K=kitMats(TEX),night=[],leafPoints=[];
@@ -25,7 +26,7 @@ export function createHeritageStreets(TEX){
  for(let t=0;t<40;t+=3.5)box(7,.025,1.55,white,a.x+d.x*t,1.0,a.z+d.z*t,.12);
  const shops=new THREE.Group();group.add(shops);
  // Tile-roofed courtyard rows, kept clear of every mapped lane junction.
- const rows=[[[72,141],[220,163]],[[65,155],[112,162]],[[140,166],[211,175]],[[146,204],[211,217]],[[295,166],[331,178]],[[289,213],[312,219]]];
+ const rows=HERITAGE_ROWS;
  const laneDistance=(x,z)=>Math.min(...ALLEYS.flatMap(p=>p.slice(1).map((b,i)=>{const a=p[i],dx=b[0]-a[0],dz=b[1]-a[1],t=Math.max(0,Math.min(1,((x-a[0])*dx+(z-a[1])*dz)/(dx*dx+dz*dz)));return Math.hypot(x-a[0]-dx*t,z-a[1]-dz*t);}))); 
  let shopIndex=0;
  for(const [a,b] of rows){const len=Math.hypot(b[0]-a[0],b[1]-a[1]),dx=(b[0]-a[0])/len,dz=(b[1]-a[1])/len,angle=Math.atan2(-dz,dx);
@@ -52,7 +53,7 @@ export function createHeritageStreets(TEX){
    for(let j=0;j<2;j++)beam(V(x+j*.3,y-1,z),V(x+j*.3,2+hash(seed+i+j)*3,z+.3),.035,bark,g);
   }
  };
- banyan(40,123,11);banyan(90,132,29);
+ // 正阳门前两棵古榕改由 main.js 的 Blender 树库实例绘制（冠幅约 30 m）
  // Zhengyang street: paving seams, shop awnings, planters and pedestrian lamps.
  for(let i=0;i<31;i++){const s=17+i*19;const seg=s<286?[ZHENGYANG[0],ZHENGYANG[1],s]:[ZHENGYANG[2],ZHENGYANG[3],s-286],a=seg[0],b=seg[1],L=Math.hypot(b[0]-a[0],b[1]-a[1]),t=seg[2]/L;if(t>1)continue;const x=a[0]+(b[0]-a[0])*t,z=a[1]+(b[1]-a[1])*t;
   for(const side of [-1,1]){box(.12,4.2,.12,wood,x+side*5.5,2.4,z);box(.6,.7,.6,warm,x+side*5.5,4.5,z);box(2.5,.6,1.4,trim,x+side*7,.3,z+5);leafPoints.push([x+side*7,z+5,.1,1.25]);}

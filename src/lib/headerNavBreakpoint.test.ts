@@ -444,9 +444,9 @@ test("shows optional local Yunyou photos without exposing camera metadata", () =
   assert.match(yunyouIndex, /#card\s*\{[^}]*max-height:[^}]*overflow:\s*auto/);
   assert.match(yunyouIndex, /bottom:\s*max\(12px, env\(safe-area-inset-bottom\)\)/);
   assert.match(yunyouMain, /function updateCardPhoto\(lm\)/);
-  assert.match(yunyouMain, /cardPhoto\.hidden = !photo/);
+  assert.match(yunyouMain, /cardPhoto\.hidden = !gallery\.length/);
   assert.match(yunyouMain, /cardPhotoImage\.onerror/);
-  assert.match(yunyouMain, /photo\.alt \|\| `\$\{lm\.name\}实拍`/);
+  assert.match(yunyouMain, /photo\.alt \|\| `\$\{cardName\}实拍`/);
 
   const photoPaths = [...yunyouLandmarks.matchAll(/src: '\.\/assets\/photos\/([^']+\.webp)'/g)].map((match) => match[1]);
   assert.equal(photoPaths.length, 4);

@@ -15,6 +15,13 @@ export function DuomeiHeader() {
   const scrollFrameRef = useRef(0);
   const menuTouchStartRef = useRef<{ x: number; y: number } | null>(null);
   const lastTouchActivationRef = useRef(Number.NEGATIVE_INFINITY);
+  // Mouse hover on the menu button opens the dropdown; leaving the header closes it after a short grace
+  // period so the pointer can cross the gap between the button and the dropdown. Touch is unaffected.
+  const hoverCloseTimerRef = useRef(0);
+  const cancelHoverClose = () => {
+    window.clearTimeout(hoverCloseTimerRef.current);
+    hoverCloseTimerRef.current = 0;
+  };
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -123,6 +130,8 @@ export function DuomeiHeader() {
     setHoverRevealed(false);
   };
 
+  useEffect(() => () => window.clearTimeout(hoverCloseTimerRef.current), []);
+
   useEffect(() => {
     if (!menuOpen) return;
 
@@ -207,8 +216,20 @@ export function DuomeiHeader() {
       ref={headerRef}
       className={`duomei-header${menuOpen ? " is-menu-open" : ""}${scrolled ? " is-scrolled" : ""}${scrollRevealed ? " is-scroll-visible" : " is-scroll-hidden"}${hoverRevealed ? " is-hover-revealed" : ""}`}
       onClickCapture={blockDuplicateTouchClick}
-      onPointerEnter={() => setHoverRevealed(true)}
-      onPointerLeave={() => {
+      onPointerEnter={(event) => {
+        setHoverRevealed(true);
+        if (event.pointerType === "mouse") cancelHoverClose();
+      }}
+      onPointerLeave={(event) => {
+        if (event.pointerType === "mouse" && menuOpen && headerRef.current?.dataset.menuHoverOpened === "true") {
+          cancelHoverClose();
+          hoverCloseTimerRef.current = window.setTimeout(() => {
+            hoverCloseTimerRef.current = 0;
+            if (headerRef.current) delete headerRef.current.dataset.menuHoverOpened;
+            closeMenu();
+          }, 400);
+          return;
+        }
         if (scrolled && !menuOpen) setHoverRevealed(false);
       }}
     >
@@ -229,7 +250,20 @@ export function DuomeiHeader() {
         type="button"
         aria-expanded={menuOpen}
         aria-label={menuOpen ? "关闭导航" : "打开导航"}
-        onClick={() => setMenuOpen((value) => !value)}
+        onPointerEnter={(event) => {
+          if (event.pointerType !== "mouse" || menuOpen) return;
+          cancelHoverClose();
+          if (headerRef.current) headerRef.current.dataset.menuHoverOpened = "true";
+          setMenuOpen(true);
+        }}
+        onClick={(event) => {
+          // A mouse that already opened the menu by hovering keeps it open on click instead of toggling it shut.
+          if (event.nativeEvent instanceof PointerEvent && event.nativeEvent.pointerType === "mouse" && headerRef.current?.dataset.menuHoverOpened === "true") {
+            delete headerRef.current.dataset.menuHoverOpened;
+            return;
+          }
+          setMenuOpen((value) => !value);
+        }}
       >
         <span />
         <span />

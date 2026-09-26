@@ -53,9 +53,13 @@ export function makeTextures() {
   }, [1 / 40, 1 / 40]);
   // 地面：暖灰土 + 细噪点，去掉 SketchUp 白板感
   TEX.ground = canvasTex(256, 256, (g, w, h) => {
-    g.fillStyle = '#d8d0c2'; g.fillRect(0, 0, w, h);
+    g.fillStyle = '#c6c5bf'; g.fillRect(0, 0, w, h);
+    for (let k = 0; k < 90; k++) { // 大块深浅：铺装、硬化地面和旧水泥的斑驳
+      const r = 10 + Math.random() * 40; g.fillStyle = `rgba(${120 + Math.random() * 60|0},${122 + Math.random() * 55|0},${112 + Math.random() * 50|0},0.10)`;
+      g.beginPath(); g.arc(Math.random() * w, Math.random() * h, r, 0, 7); g.fill();
+    }
     for (let k = 0; k < 4000; k++) {
-      g.fillStyle = `rgba(${160 + Math.random() * 60|0},${150 + Math.random() * 50|0},${120 + Math.random() * 40|0},${0.04 + Math.random() * 0.08})`;
+      g.fillStyle = `rgba(${150 + Math.random() * 60|0},${150 + Math.random() * 55|0},${140 + Math.random() * 45|0},${0.04 + Math.random() * 0.08})`;
       g.fillRect(Math.random() * w, Math.random() * h, 1 + Math.random() * 3, 1 + Math.random() * 3);
     }
   }, [1 / 80, 1 / 80]);
