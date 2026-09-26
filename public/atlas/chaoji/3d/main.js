@@ -33,6 +33,16 @@ const FOG_FAR = 6800;
 // Closeup discs stay off the overview and region layers; they ease in only inside this distance.
 const CLOSEUP_DIST = 180;
 const KM_PER_UNIT = 20.3;
+// Volcano footprints @ FULL 2048×1152 — world xz for discard/snow (see VOLCANO_CHAOJI in build script).
+function chaojiPxToWorld(cx, cy) {
+  return {
+    x: (cx / 2048) * MAP_W - MAP_W / 2,
+    z: (cy / 1152) * MAP_H - MAP_H / 2,
+    r: null,
+  };
+}
+const CJ_VOLCANO_MAIN = { ...chaojiPxToWorld(1520, 710), r: (230 / 2048) * MAP_W * 1.72 };
+const CJ_VOLCANO_MINOR = { ...chaojiPxToWorld(1300, 540), r: (70 / 2048) * MAP_W * 1.72 };
 const EURASIA_AREA_WAN_KM2 = 5470;
 const SVG_W = 1100;
 const HOME = { radius: 390, polar: 1.02, azimuth: -0.55 };
@@ -2030,14 +2040,35 @@ const SURFACE_FRAGMENT_BODY = `
 
     vec3 surface = mix(land, rockCol, rock);
 
-    // Snow line ~28, dithered, held back on cliffs. Peaks top out near 48.
-    float snowNoise = (gv - 0.5) * 4.5 + (fine - 0.5) * 1.5;
-    float snowBand = smoothstep(22.0, 34.0, h + snowNoise);
-    float snowMask = snowBand * (1.0 - smoothstep(0.55, 0.80, slope));
+    // Snow line ~30+, narrower band; cliffs stay rock. Volcano: thin crater rim only.
+    float snowNoise = (gv - 0.5) * 3.0 + (fine - 0.5) * 1.2;
+    float snowBand = smoothstep(26.0, 36.0, h + snowNoise);
+    float snowMask = snowBand * (1.0 - smoothstep(0.50, 0.78, slope));
+    snowMask *= 0.72;
+
+    vec2 vMain = vp - vec2(${CJ_VOLCANO_MAIN.x.toFixed(2)}, ${CJ_VOLCANO_MAIN.z.toFixed(2)});
+    vec2 vMin = vp - vec2(${CJ_VOLCANO_MINOR.x.toFixed(2)}, ${CJ_VOLCANO_MINOR.z.toFixed(2)});
+    float vFootMain = 1.0 - smoothstep(${ (CJ_VOLCANO_MAIN.r * 0.92).toFixed(2) }, ${CJ_VOLCANO_MAIN.r.toFixed(2)}, length(vMain));
+    float vFootMin = 1.0 - smoothstep(${(CJ_VOLCANO_MINOR.r * 0.92).toFixed(2)}, ${CJ_VOLCANO_MINOR.r.toFixed(2)}, length(vMin));
+    float onVolcano = clamp(vFootMain + vFootMin, 0.0, 1.0);
+    snowMask *= (1.0 - onVolcano * 0.98);
+
+    float dMain = length(vMain);
+    float dMin = length(vMin);
+    float rimMain = smoothstep(6.0, 11.0, dMain) * (1.0 - smoothstep(17.0, 26.0, dMain));
+    float rimMin = smoothstep(3.0, 6.0, dMin) * (1.0 - smoothstep(11.0, 18.0, dMin));
+    float volRim = clamp(rimMain * vFootMain + rimMin * vFootMin, 0.0, 1.0);
+    float volSnow = volRim * smoothstep(36.0, 46.0, h + snowNoise * 0.25);
+    volSnow *= (1.0 - smoothstep(0.40, 0.68, slope));
+    float volRock = onVolcano * smoothstep(24.0, 42.0, h) * (1.0 - volSnow * 0.85);
+    rock = clamp(rock + volRock * 0.55, 0.0, 1.0);
+    surface = mix(land, rockCol, rock);
+
     float cold = clamp(0.55 * slope + (fine - 0.5) * 0.8, 0.0, 1.0);
     vec3 snowCol = mix(uSnowColor, uSnowColor * vec3(0.78, 0.88, 1.04), cold * 0.6);
     snowMask *= mix(1.0, 0.85, 1.0 - detail);
     surface = mix(surface, snowCol, snowMask);
+    surface = mix(surface, snowCol, volSnow * 0.32 * detail);
 
     diffuseColor.rgb = surface;
 
@@ -2153,8 +2184,18 @@ function attachHeightLandShader(material, maskTex) {
       .replace(
         "#include <map_fragment>",
         `#include <map_fragment>
+         vec2 cjVp = vAtlasWorld.xz;
+         float cjVmain = length(cjVp - vec2(${CJ_VOLCANO_MAIN.x.toFixed(2)}, ${CJ_VOLCANO_MAIN.z.toFixed(2)}));
+         float cjVmin = length(cjVp - vec2(${CJ_VOLCANO_MINOR.x.toFixed(2)}, ${CJ_VOLCANO_MINOR.z.toFixed(2)}));
+         float cjVolcano = clamp(
+           (1.0 - smoothstep(${ (CJ_VOLCANO_MAIN.r * 0.95).toFixed(2) }, ${ (CJ_VOLCANO_MAIN.r * 1.08).toFixed(2) }, cjVmain))
+           + (1.0 - smoothstep(${(CJ_VOLCANO_MINOR.r * 0.95).toFixed(2)}, ${(CJ_VOLCANO_MINOR.r * 1.08).toFixed(2)}, cjVmin)),
+           0.0, 1.0);
+         float cjMaskLand = texture2D(cjMask, vMapUv).r;
          float cjSea = vAtlasWorld.y < 0.0 ? 1.0 : 0.0;
-         if (cjHasMask > 0.5 && texture2D(cjMask, vMapUv).r < 0.75) cjSea = 1.0;
+         if (cjHasMask > 0.5 && cjMaskLand < 0.75) cjSea = 1.0;
+         if (cjHasMask > 0.5 && cjMaskLand > 0.75) cjSea = 0.0;
+         if (cjVolcano > 0.12) cjSea = 0.0;
          if (cjSea > 0.5) discard;
         `,
       )

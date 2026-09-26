@@ -313,7 +313,7 @@ def apply_volcano_chaoji(
             dist / (R + 1e-6), 0.0, 1.0
         )
 
-        outer = cone + gullies
+        outer = np.maximum(cone + gullies, 0.35)
 
         # Break perfect concentric colormap rings with low-amp SFS on flanks only
         if flank_detail is not None and flank_detail.shape == h.shape:
@@ -360,6 +360,46 @@ def apply_volcano_chaoji(
             h = h * (1.0 - fw * 0.65) + hs * (fw * 0.65)
 
     return h
+
+
+MTN_DETAIL_SIGMA = 2.0
+MTN_PEAK_SOFT_H = 40.0
+
+
+def soften_mountain_detail(
+    h_detail: np.ndarray, M: np.ndarray, land: np.ndarray
+) -> np.ndarray:
+    """σ=2 smooth + tanh peak softening inside the mountain envelope."""
+    pos = np.maximum(h_detail, 0.0)
+    env = land & (M > 0.08)
+    if not np.any(env):
+        return h_detail
+    sm = ndimage.gaussian_filter(pos, MTN_DETAIL_SIGMA)
+    pos = np.where(env, sm, pos)
+    soft = MTN_PEAK_SOFT_H * np.tanh(pos / MTN_PEAK_SOFT_H)
+    pos = np.where(env, soft, pos)
+    return np.where(h_detail < 0.0, h_detail, pos)
+
+
+def volcano_land_disk(
+    shape: tuple[int, int], yy: np.ndarray, xx: np.ndarray
+) -> np.ndarray:
+    """Footprint for mask/land stamp — matches apply_volcano outer edge (FULL px coords)."""
+    zone = np.zeros(shape, dtype=bool)
+    for cx, cy, R, _H, _cr, _dep in VOLCANO_CHAOJI:
+        zone |= np.hypot(xx - cx, yy - cy) < R * 1.72
+    return zone
+
+
+def stamp_volcano_land(
+    land: np.ndarray, h: np.ndarray, yy: np.ndarray, xx: np.ndarray
+) -> tuple[np.ndarray, np.ndarray]:
+    zone = volcano_land_disk(h.shape, yy, xx)
+    land_out = land.copy()
+    land_out[zone] = True
+    h_out = h.copy()
+    h_out[zone] = np.maximum(h_out[zone], 0.35)
+    return land_out, h_out
 
 
 def build_erosion_freeze_chaoji(
@@ -570,6 +610,7 @@ def build_height_chaoji(
 
     h_detail = sfs_ridge_field(L, land)
     M = soft_mountain_envelope(L, land, rgb, rock, snow, dark_rock, basin_auto)
+    h_detail = soften_mountain_detail(h_detail, M, land)
 
     mtn = M > 0.2
     if np.any(mtn):
@@ -585,6 +626,12 @@ def build_height_chaoji(
     h_land[~land] = 0.0
 
     h[land] = h_land[land]
+    mtn_env = land & (M > 0.12)
+    if np.any(mtn_env):
+        h_smooth = ndimage.gaussian_filter(h, MTN_DETAIL_SIGMA)
+        h = np.where(mtn_env, h * 0.55 + h_smooth * 0.45, h)
+        lift = np.maximum(h - 6.0, 0.0)
+        h = np.where(mtn_env, 6.0 + MTN_PEAK_SOFT_H * np.tanh(lift / MTN_PEAK_SOFT_H), h)
 
     interior = land & (d_in > 20)
     h[interior] += 2.0 + 3.5 * bh.smoothstep(20.0, 85.0, d_in[interior])
@@ -893,14 +940,22 @@ def main() -> int:
         h_full = clamp_delta_p90(h_full, land)
         h_full = np.clip(h_full, H_MIN, H_MAX)
         h_full[~land] = np.minimum(h_full[~land], 0.0)
+        land, h_full = stamp_volcano_land(land, h_full, yy, xx)
 
         h_bin = downsample_height(h_full)
         h_bin = clamp_delta_p90(h_bin, land_bin)
         h_bin = np.clip(h_bin, H_MIN, H_MAX)
         h_bin[land_bin] = np.maximum(h_bin[land_bin], 0.35)
         h_bin[~land_bin] = np.minimum(h_bin[~land_bin], 0.0)
+        yy_b, xx_b = np.mgrid[0:BIN_H, 0:BIN_W]
+        xx_on_full = xx_b.astype(np.float64) * (FULL_W / BIN_W)
+        yy_on_full = yy_b.astype(np.float64) * (FULL_H / BIN_H)
+        land_bin, h_bin = stamp_volcano_land(land_bin, h_bin, yy_on_full, xx_on_full)
 
-        mask = bh.build_mask_uint8(deep, shallow, land, inland)
+        vzone = volcano_land_disk(land.shape, yy, xx)
+        land_for_mask = land.copy()
+        land_for_mask[vzone] = True
+        mask = bh.build_mask_uint8(deep, shallow, land_for_mask, inland)
         normal = bh.height_to_normal(h_full, pixel_size=1.0)
 
         OUT_DIR.mkdir(parents=True, exist_ok=True)
