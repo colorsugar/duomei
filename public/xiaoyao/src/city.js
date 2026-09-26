@@ -98,12 +98,12 @@ export async function createLocalCity({ mobile = false } = {}) {
     });
 
   const roadSpec = {
-    trunk: [14, 0x5b6265],
-    primary: [11, 0x555c5e],
-    secondary: [8, 0x656b6b],
-    tertiary: [6, 0x6b706c],
-    minor: [4.5, 0x777970],
-    pedestrian: [3, 0xe6dfd0],
+    trunk: [14, 0x5a6062],
+    primary: [11, 0x555b5c],
+    secondary: [8, 0x606666],
+    tertiary: [6, 0x666b66],
+    minor: [4.5, 0x6e736e],
+    pedestrian: [3, 0x8a8780],
   };
   for (const [cls, [w, color]] of Object.entries(roadSpec)) {
     const localRoads = ROADS[cls].map((pts) => pts.map(([x, z]) => worldToLocal(x, z)));
@@ -118,9 +118,9 @@ export async function createLocalCity({ mobile = false } = {}) {
   }
 
   const modelled = ['xiaoyaolou', 'chengyundian', 'chengyunmen', 'zhengyangmen'].map((k) => FOOT[k]?.c).filter(Boolean);
-  const palette = [0xe2d8c8, 0xd5cfc0, 0xd0d2cc, 0xddd4c4, 0xc8ccd2, 0xe0d6c6].map((c) => new THREE.Color(c));
-  const cityRoof = new THREE.Color(0x7a7e7c);
-  const campusWall = new THREE.Color(0xe4c46c);
+  const palette = [0xc8c2b6, 0xbbb6aa, 0xb8bbb4, 0xc4bcb0, 0xb0b4b8, 0xc2bab0].map((c) => new THREE.Color(c));
+  const cityRoof = new THREE.Color(0x6a6e6c);
+  const campusWall = new THREE.Color(0xd4b45c);
   const campusRoof = new THREE.Color(0x4a5056);
   const bGeos = [];
   const cityMat = createCityMaterial();
@@ -155,7 +155,7 @@ export async function createLocalCity({ mobile = false } = {}) {
     bGeos.forEach((g) => g.dispose());
   }
 
-  const greenMat = new THREE.MeshStandardMaterial({ color: 0x7fa85e, roughness: 0.92 });
+  const greenMat = new THREE.MeshStandardMaterial({ color: 0x5f8a48, roughness: 0.94 });
   const greenGeos = GREEN.filter((p) => ringInRadius(p.o)).map((p) => flatRing(localRing(p.o), p.h.map(localRing), 0.22));
   if (greenGeos.length) {
     const green = new THREE.Mesh(mergeGeometries(greenGeos), greenMat);
@@ -164,19 +164,32 @@ export async function createLocalCity({ mobile = false } = {}) {
     greenGeos.forEach((g) => g.dispose());
   }
 
-  const plazaMat = new THREE.MeshStandardMaterial({ color: 0xa8a29a, roughness: 0.9 });
+  // 广场：城市铺装灰（非大白）+ 两侧绿地条
+  const plazaMat = new THREE.MeshStandardMaterial({ color: 0x7a7872, roughness: 0.95 });
   const plaza = new THREE.Mesh(new THREE.PlaneGeometry(56, 64), plazaMat);
   plaza.rotation.x = -Math.PI / 2;
   plaza.position.set(0, 0.02, 18);
   plaza.receiveShadow = true;
   group.add(plaza);
+  const lawnMat = new THREE.MeshStandardMaterial({ color: 0x4f7a3e, roughness: 0.96 });
+  for (const [lx, lz, w, d] of [
+    [-22, 18, 10, 40],
+    [22, 18, 10, 40],
+    [0, 36, 40, 8],
+  ]) {
+    const lawn = new THREE.Mesh(new THREE.PlaneGeometry(w, d), lawnMat);
+    lawn.rotation.x = -Math.PI / 2;
+    lawn.position.set(lx, 0.03, lz);
+    lawn.receiveShadow = true;
+    group.add(lawn);
+  }
   // 台基前城墙垛口示意（避免广场前景像黑水）
   const battlementMat = new THREE.MeshStandardMaterial({ color: 0x6e6860, roughness: 0.94 });
   const battlement = new THREE.Mesh(new THREE.BoxGeometry(28, 1.35, 1.1), battlementMat);
   battlement.position.set(0, 0.7, 12.2);
   group.add(battlement);
 
-  const wallMat = new THREE.MeshStandardMaterial({ color: 0x9a9590, roughness: 0.95 });
+  const wallMat = new THREE.MeshStandardMaterial({ color: 0x7e7a74, roughness: 0.95 });
   const wall = new THREE.Mesh(new THREE.BoxGeometry(52, 2.8, 3.5), wallMat);
   wall.position.set(0, 1.4, 28);
   wall.receiveShadow = true;

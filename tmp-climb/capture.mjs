@@ -1,5 +1,5 @@
 /**
- * Climb MVP acceptance capture.
+ * Climb MVP acceptance capture (REVIEW-climb-2).
  * Usage: node tmp-climb/capture.mjs http://127.0.0.1:5191
  */
 import { createRequire } from 'module';
@@ -61,6 +61,74 @@ await shot('08-river-tower-night', () => {
   window.__xiaoyao.teleport('riverNight');
 });
 
+await shot('09-plaza-day-up', () => {
+  window.__xiaoyao.setNight(false);
+  window.__xiaoyao.teleport('plazaDayUp');
+});
+
+/** 瓦面像素占比（下半屏偏暗瓦色近似）+ 解放桥包围框 */
+const metrics = await page.evaluate(async () => {
+  const x = window.__xiaoyao;
+  x.setNight(true);
+  x.teleport('gallerySouth');
+  // wait one frame
+  await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+  const canvas = document.getElementById('c');
+  const gl = canvas.getContext('webgl2') || canvas.getContext('webgl');
+  const w = canvas.width;
+  const h = canvas.height;
+  const pixels = new Uint8Array(w * h * 4);
+  gl.readPixels(0, 0, w, h, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
+  // WebGL origin bottom-left；统计下 35% 里偏瓦色（暖褐/深灰）像素，以及全屏瓦色
+  let tile = 0;
+  let bottomTile = 0;
+  let bottomN = 0;
+  const yCut = Math.floor(h * 0.35);
+  for (let y = 0; y < h; y++) {
+    for (let x0 = 0; x0 < w; x0++) {
+      const i = (y * w + x0) * 4;
+      const r = pixels[i];
+      const g = pixels[i + 1];
+      const b = pixels[i + 2];
+      // 瓦/木檐：偏暖、偏暗、非天空非灯
+      const dark = (r + g + b) / 3 < 95;
+      const warm = r > g + 8 && r > b + 15;
+      const greyTile = Math.abs(r - g) < 18 && Math.abs(g - b) < 18 && (r + g + b) / 3 < 110 && (r + g + b) / 3 > 35;
+      const isTile = (dark && warm) || greyTile;
+      if (isTile) tile++;
+      if (y < yCut) {
+        bottomN++;
+        if (isTile) bottomTile++;
+      }
+    }
+  }
+  const bridgeBox = x.bridgeScreenBox();
+  const bridge = x.world.root.userData.bridge;
+  const THREE = x.THREE;
+  bridge.updateMatrixWorld(true);
+  const box = new THREE.Box3().setFromObject(bridge);
+  const c = box.getCenter(new THREE.Vector3());
+  const dist = Math.hypot(c.x, c.z);
+  const bearing = ((Math.atan2(c.x, -c.z) * 180) / Math.PI + 360) % 360;
+  return {
+    tilePct: +((tile / (w * h)) * 100).toFixed(2),
+    bottom35TilePct: +((bottomTile / bottomN) * 100).toFixed(2),
+    bridgeBox,
+    bridgeCenter: [+c.x.toFixed(1), +c.y.toFixed(1), +c.z.toFixed(1)],
+    bridgeDist: +dist.toFixed(1),
+    bridgeBearing: +bearing.toFixed(1),
+    cam: {
+      x: +x.camera.position.x.toFixed(2),
+      y: +x.camera.position.y.toFixed(2),
+      z: +x.camera.position.z.toFixed(2),
+      pitch: +x.player.pitch.toFixed(4),
+      feetY: +x.player.pos.y.toFixed(2),
+    },
+  };
+});
+writeFileSync(join(OUT, 'metrics.json'), JSON.stringify(metrics, null, 2));
+console.log('metrics', JSON.stringify(metrics, null, 2));
+
 const climbLog = await page.evaluate(async () => {
   const x = window.__xiaoyao;
   x.setNight(true);
@@ -76,20 +144,15 @@ const climbLog = await page.evaluate(async () => {
     });
 
   push('plaza');
-  // Face the tower (−z): yaw 0
   x.player.yaw = 0;
   for (let i = 0; i < 10; i++) {
     x.simulateWASD({ w: 1, steps: 25 });
     push(`walk-${i}`);
   }
-  // Approach stairs from floor1
   x.teleport('floor1');
   push('floor1');
   x.teleport('stairs');
   push('stairs');
-  // Climb north along stair (+z? stairs run from z=-3.2 upward in z with rising y)
-  // Stair platforms: z increases with height; walk +z (yaw=π) up the flight… actually
-  // platforms: z0 = -3.2 + i*0.36 rising y — so walk +z (yaw = Math.PI) to climb.
   x.player.yaw = Math.PI;
   for (let i = 0; i < 20; i++) {
     x.simulateWASD({ w: 1, steps: 12 });
@@ -106,7 +169,7 @@ const climbLog = await page.evaluate(async () => {
   };
 });
 writeFileSync(join(OUT, 'climb-log.json'), JSON.stringify(climbLog, null, 2));
-console.log('climbLog', JSON.stringify(climbLog, null, 2));
+console.log('climbLog', JSON.stringify({ ok: climbLog.ok, walkedIn: climbLog.walkedIn, deltaCam: climbLog.deltaCam }, null, 2));
 
 const phone = await browser.newContext({ ...devices['iPhone 13'] });
 const pp = await phone.newPage();
@@ -122,4 +185,10 @@ await phone.close();
 console.log('desktop errors', errs.length ? errs : 'none');
 writeFileSync(join(OUT, 'errors.json'), JSON.stringify({ desktop: errs, phone: phoneErrs }, null, 2));
 await browser.close();
-process.exit(errs.length || phoneErrs.length ? 1 : 0);
+
+const fail =
+  errs.length ||
+  phoneErrs.length ||
+  !metrics.bridgeBox?.inView ||
+  metrics.tilePct > 20;
+process.exit(fail ? 1 : 0);

@@ -1,50 +1,50 @@
-# 登逍遥楼 climb MVP — 截图验收（REVIEW-climb-1）
+# 登逍遥楼 climb MVP — 截图验收（REVIEW-climb-2）
 
-日期：2026-09-26  
+日期：2026-09-27  
 分支：`cursor/xiaoyao-climb`  
+PR：#102（保持 draft）  
 本地：`npm run dev -- --port 5191 --strictPort` → `node tmp-climb/capture.mjs http://127.0.0.1:5191`
 
 ## Research checkpoint
 
-- **Current:** 初版可玩但画面不合格；Luna 首轮后回廊钻瓦、江面机位落水。
-- **Choice:** 复用 yunyou geo/city/waterfront/karst/远峰 GLB；夜景穹顶；回廊脚高固定≈6.9（瓦面下沿+0.3），站位缩进檐下 z/x≈8.9。
+- **Current:** 回廊钻瓦；解放桥/远峰 GLB 是云游世界坐标却又叠了 `footLocal`，桥飞到屏外；日景江浅地白。
+- **Choice:** 世界 GLB 只 bake/`−ORIGIN`；回廊挑出灰瓦 maxZ≈16 外沿，站栏杆边 pitch=−3°；江水深绿松石；铺装灰+绿地。
 
 ## 构建 / 捕获
 
 | 检查 | 结果 |
 | --- | --- |
-| `npm run build` | 见本次 push 前跑 |
 | capture pageerror | 0（desktop + iPhone13） |
 | climb-log `ok` | true |
-| gallerySouth feet/cam | ≈6.89 / 8.49 |
+| gallerySouth cam | z≈16.15，pitch≈−0.052（−3°），feetY≈6.89，camY≈8.49 |
+| 瓦面像素占比 | **1.04%**（≤20%） |
+| 解放桥 | bearing **149.7°**、dist **215.5 m**；`bridgeBox.inView=true` |
 
 ## 截图
 
 | 文件 | 说明 |
 | --- | --- |
-| `01-plaza-night.png` | 广场夜景（铺地+城墙，非黑水） |
-| `02-floor1.png` | 一层铜地图展台 |
+| `01-plaza-night.png` | 广场夜景 |
+| `02-floor1.png` | 一层 |
 | `03-stairs.png` | 楼梯 |
-| `04-gallery-south-night.png` | 二层南望夜：星空+城市+江，檐口压下缘 |
-| `05-gallery-south-day.png` | 二层南望日：Sky 蓝灰天 + 峰林/江 |
-| `06-gallery-east-caustics.png` | 二层东望：江面方向 + 七星/普陀名牌 |
+| `04-gallery-south-night.png` | 二层南望夜：解放桥蓝紫拱灯在视野内 |
+| `05-gallery-south-day.png` | 二层南望日：桥+峰林绿岩色+江 |
+| `06-gallery-east-caustics.png` | 二层东望 |
 | `07-iphone13.png` | 手机视口 |
-| `08-river-tower-night.png` | 江面方向看逍遥楼夜景 |
+| `08-river-tower-night.png` | 江面望楼 |
+| `09-plaza-day-up.png` | **新增**广场日景仰望 |
+| `metrics.json` | 瓦面占比 + 桥包围框 |
 
-## 审查逐条（1–9）
+## 审查逐条（REVIEW-climb-2）
 
-1. **回廊视线** — 完成（日景檐下构图 OK；夜景近瓦仍偏抢眼但已非钻进精模）
-2. **天空** — 完成（日 Sky.js；夜 night-dome；无黑顶/棕条纹）
-3. **远山** — 完成（karst 顶点色 + far GLB + qixing）
-4. **城市** — 完成（1.8km geo + waterfront + trees）
-5. **解放桥** — 完成（FOOT 位 + nightStrength 加强；名牌可见，桥体夜景仍可再亮）
-6. **一层陈设** — 完成（铜地图/展台/书法/吊灯/碑亭；截图像机对准铜地图）
-7. **广场黑面** — 完成（过滤水面 + 铺地/垛口）
-8. **水面** — 完成（WATER 轮廓 + 日焦散 + 夜高光）
-9. **截图与 PR** — 本 REPORT + draft #102 push
+1. **回廊视角** — 完成：站外沿栏杆边（z≈16.15），俯角 −3°；瓦面占比 1.04%
+2. **解放桥** — 完成：世界坐标 GLB −ORIGIN，≈150°/220m；夜景拱灯；包围框 inView
+3. **远山** — 完成：karst 顶点色；象鼻山 `xiangbishan-far` 按 205°/1.4km
+4. **江面日景** — 完成：深绿松石 + 岸线 + 近焦散/远天反
+5. **日景地面** — 完成：铺装灰 + 绿地条，步行道不再大白
+6. **截图 / REPORT / push** — 本文件；PR 保持 draft
 
 ## 仍可再磨
 
-- 夜景南望近瓦反光仍偏抢；解放桥蓝紫拱灯在南望里还不够「占画面」。
-- 东望前景仍有精模曲面，焦散条纹在夜景里弱。
-- WASD 爬梯脚本在楼梯中段会掉回一层（示意碰撞），传送二层仍可用。
+- 广场仰望时下檐底面仍会占画面上沿一条（实景如此）；桥 approach 很长导致 screen box 很宽。
+- 东望精模曲面与焦散仍可再压。

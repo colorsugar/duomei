@@ -1,0 +1,27 @@
+{
+  "tilePct": 1.04,
+  "bottom35TilePct": 0,
+  "bridgeBox": {
+    "inView": true,
+    "minX": -2733.8,
+    "minY": 293.4,
+    "maxX": 1903.7,
+    "maxY": 512,
+    "w": 4637.5,
+    "h": 218.6
+  },
+  "bridgeCenter": [
+    108.8,
+    9,
+    186
+  ],
+  "bridgeDist": 215.5,
+  "bridgeBearing": 149.7,
+  "cam": {
+    "x": 0,
+    "y": 8.49,
+    "z": 16.15,
+    "pitch": -0.0524,
+    "feetY": 6.89
+  }
+}

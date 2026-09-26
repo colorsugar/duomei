@@ -30,13 +30,13 @@ npm run dev -- --port 5191 --strictPort
 | 七星 / 普陀 | `qixing.glb` + 远峰 GLB | 按 landmarks 经纬 |
 | 城市 / 道路 / 绿地 | `city.js` ← `geo.js` BUILDINGS/ROADS | ~1.8 km 半径 |
 | 滨江路 / 尖拱灯柱 | `createWaterfront` 整组平移 | `waterfront.js` |
-| 可走平台、楼梯、栏杆 | `colliders.js` | 示意；二层传送 pitch≈−4° |
+| 可走平台、楼梯、栏杆 | `colliders.js` | 示意；二层回廊挑出下檐外，传送 pitch=−3°、离栏杆 0.4m |
 | 一层陈设 / 碑亭 | `interior.js` | canvas 书法贴图 |
 | 峰林 | `karst-horizon.js` | 顶点色立体远景 |
-| 漓江水面 | `water-lijiang.js` | WATER 轮廓 + 焦散 / 夜景高光 |
+| 漓江水面 | `water-lijiang.js` | WATER 轮廓 + 深绿松石焦散 / 夜景高光 |
 | 天空 | 日 `Sky.js`；夜 `night-dome.js` | 雾色 `atmosphere.js` 地平线 |
 
-场景原点：逍遥楼 FOOT 中心（`geo.js` `FOOT.xiaoyaolou.c`）。
+场景原点：逍遥楼 FOOT 中心（`geo.js` `FOOT.xiaoyaolou.c`）。Blender 资产为云游世界坐标，加载时只平移 `−ORIGIN`（勿再叠 footLocal）。
 
 ## 碰撞
 

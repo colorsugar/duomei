@@ -4,6 +4,12 @@ export const STEP = 0.38;
 export const EYE = 1.6;
 export const RADIUS = 0.34;
 
+/** 二层回廊挑出下檐外（精模灰瓦 maxZ≈16），栏杆紧贴檐外 */
+export const GALLERY_RAIL = 16.55;
+export const GALLERY_STAND = GALLERY_RAIL - 0.4; // 离栏杆 0.4m → 约 16.15，俯望下檐底窄条
+/** 传送默认俯角 −3° */
+export const GALLERY_PITCH = (-3 * Math.PI) / 180;
+
 /** @typedef {{ x0:number,x1:number,z0:number,z1:number, top:number, bottom?:number }} Collider */
 /** @typedef {{ x0:number,x1:number,z0:number,z1:number, y:number }} Platform */
 
@@ -39,22 +45,25 @@ export function buildWalkColliders() {
     plat(stairX0, stairX1, z0, z0 + 0.4, 3.05 + i * (4.3 / 15));
   }
 
-  // 二层回廊地面（中空：只铺外圈；标高与精模瓦面下沿对齐，见 world.measureGallery）
+  // 二层回廊：外圈挑出下檐（灰瓦≈16m）之外，站栏杆边能看见下檐只占画面底窄条
   const gy = 6.9;
-  plat(-11, 11, -11, -8.2, gy);
-  plat(-11, 11, 8.2, 11, gy);
-  plat(-11, -8.2, -8.2, 8.2, gy);
-  plat(8.2, 11, -8.2, 8.2, gy);
+  const outer = GALLERY_RAIL;
+  const inner = 8.2;
+  plat(-outer, outer, -outer, -inner, gy);
+  plat(-outer, outer, inner, outer, gy);
+  plat(-outer, -inner, -inner, inner, gy);
+  plat(inner, outer, -inner, inner, gy);
 
   // 回廊栏杆（高 1.05 m）
   const railY = gy + 1.05;
-  wall(-11, 11, -11.35, -11, railY, gy);
-  wall(-11, 11, 11, 11.35, railY, gy);
-  wall(-11.35, -11, -11, 11, railY, gy);
-  wall(11, 11.35, -11, 11, railY, gy);
+  const rw = 0.35;
+  wall(-outer, outer, -outer - rw, -outer, railY, gy);
+  wall(-outer, outer, outer, outer + rw, railY, gy);
+  wall(-outer - rw, -outer, -outer, outer, railY, gy);
+  wall(outer, outer + rw, -outer, outer, railY, gy);
 
-  // 楼壳薄墙：南面留正门洞，西面留楼梯洞
-  const shellTop = 12;
+  // 楼壳薄墙：顶到回廊地面，二层可走到挑出回廊；南面留正门洞，西面留楼梯洞
+  const shellTop = gy;
   // 北
   wall(-11.5, 11.5, -11.5, -11.15, shellTop, 0);
   // 南：门洞约 |x|<3.4
@@ -62,7 +71,7 @@ export function buildWalkColliders() {
   wall(3.4, 11.5, 11.15, 11.5, shellTop, 0);
   // 东
   wall(11.15, 11.5, -11.5, 11.5, shellTop, 0);
-  // 西：楼梯洞约 z -3.5..3.5 且靠楼梯 x 带
+  // 西：楼梯洞约 z -3.5..3.5
   wall(-11.5, -11.15, -11.5, -3.6, shellTop, 0);
   wall(-11.5, -11.15, 3.6, 11.5, shellTop, 0);
 

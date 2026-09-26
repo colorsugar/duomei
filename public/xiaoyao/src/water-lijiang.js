@@ -45,17 +45,20 @@ void main() {
   vec3 V = normalize(vView);
   float fres = pow(1.0 - max(dot(N, V), 0.0), 3.0);
   float dist = length(vWorldXZ) * 0.0025;
-  float shore = smoothstep(0.0, 0.35, dist);
+  // 岸线清晰：近处浅、远处深
+  float shore = smoothstep(0.0, 0.22, dist);
   float c = caustic(vWorldXZ + N.xz * 2.0);
   vec3 water = mix(uShallow, uDeep, shore);
-  water += vec3(0.35, 0.55, 0.45) * c * (1.0 - uNight) * (1.0 - dist * 0.4);
-  vec3 refl = mix(uSky, uDeep, 0.35);
+  // 近处焦散，远处减弱
+  water += vec3(0.18, 0.42, 0.38) * c * (1.0 - uNight) * (1.0 - smoothstep(0.05, 0.55, dist));
+  // 远处反射天空（日景仍压在深绿上，避免洗白）
+  vec3 refl = mix(uDeep * 1.15, uSky, 0.35 + dist * 0.25);
   float streak = exp(-abs(vWorldXZ.x * 0.015 + vWorldXZ.y * 0.008 - uTime * 0.2) * 2.5);
   refl += vec3(0.45, 0.55, 0.95) * streak * uNight * 0.35;
   refl += vec3(0.75, 0.65, 1.0) * uNight * 0.12 * sin(vWorldXZ.x * 0.04 + uTime * 0.5);
-  water = mix(water, refl, fres * (0.45 + dist * 0.5 + uNight * 0.25));
+  water = mix(water, refl, fres * (0.28 + dist * 0.45 + uNight * 0.3));
   water *= mix(1.0, 0.42, uNight);
-  gl_FragColor = vec4(water, 0.92);
+  gl_FragColor = vec4(water, 0.94);
 }`;
 
 function makeNoiseTexture() {
@@ -92,9 +95,9 @@ export function createLijiangWater({ mobile = false, waterPolys = [] } = {}) {
     uniforms: {
       uTime: { value: 0 },
       uSunDir: { value: new THREE.Vector3(0.4, 0.65, 0.2).normalize() },
-      uDeep: { value: new THREE.Color(0x1a3a42) },
-      uShallow: { value: new THREE.Color(0x2d6b6a) },
-      uSky: { value: new THREE.Color(0x7eb8d8) },
+      uDeep: { value: new THREE.Color(0x0a3f45) },
+      uShallow: { value: new THREE.Color(0x1a6e6a) },
+      uSky: { value: new THREE.Color(0x6aa8c8) },
       uNight: { value: 1 },
       uCausticScale: { value: mobile ? 0.045 : 0.09 },
       uNoise: { value: makeNoiseTexture() },

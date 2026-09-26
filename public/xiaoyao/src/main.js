@@ -4,7 +4,7 @@ import { buildWorld } from './world.js';
 import { Player } from './player.js';
 import { createLabelUI } from './labels.js';
 import { bindUI } from './ui.js';
-import { heightAt } from './colliders.js';
+import { heightAt, GALLERY_STAND, GALLERY_PITCH } from './colliders.js';
 
 const mobile = matchMedia('(max-width: 768px), (pointer: coarse)').matches;
 
@@ -14,7 +14,7 @@ renderer.setPixelRatio(Math.min(devicePixelRatio, mobile ? 1.5 : 1.5));
 renderer.setSize(innerWidth, innerHeight, false);
 renderer.shadowMap.enabled = !mobile;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = mobile ? 0.95 : 1.05;
+renderer.toneMappingExposure = mobile ? 1.0 : 1.15;
 
 const scene = new THREE.Scene();
 scene.fog = new THREE.FogExp2(HORIZON_NIGHT.clone(), mobile ? 0.0028 : 0.0022);
@@ -69,17 +69,18 @@ addEventListener('resize', () => {
   renderer.setSize(innerWidth, innerHeight, false);
 });
 
-const GALLERY_PITCH = -0.12;
 const TELEPORTS = {
   plaza: { pos: [0, 0, 22], yaw: 0, pitch: -0.12 },
+  // 广场仰望：站在城墙北侧（墙在 z≈28），勿站到墙南被墙挡住
+  plazaDayUp: { pos: [0, 0, 20], yaw: 0, pitch: 0.18 },
   // 铜地图 + 西墙书法同框
   floor1: { pos: [-0.5, 3.05, 0.8], yaw: 1.35, pitch: -0.06 },
   stairs: { pos: [-8.8, 4.5, -1.5], yaw: 0, pitch: -0.08 },
-  // 缩进檐下：z/x≈8.9，眼高≈8.5，俯望江面，瓦面压到下缘
-  south: { pos: [0, 6.9, 8.9], yaw: Math.PI, pitch: GALLERY_PITCH },
-  gallerySouth: { pos: [0, 6.9, 8.9], yaw: Math.PI, pitch: GALLERY_PITCH },
-  east: { pos: [8.9, 6.9, 0], yaw: -Math.PI / 2, pitch: GALLERY_PITCH },
-  galleryEast: { pos: [8.9, 6.9, 0], yaw: -Math.PI / 2, pitch: GALLERY_PITCH },
+  // 回廊外沿栏杆边（离栏杆 0.4m），俯角 −3°
+  south: { pos: [0, 6.9, GALLERY_STAND], yaw: Math.PI, pitch: GALLERY_PITCH },
+  gallerySouth: { pos: [0, 6.9, GALLERY_STAND], yaw: Math.PI, pitch: GALLERY_PITCH },
+  east: { pos: [GALLERY_STAND, 6.9, 0], yaw: -Math.PI / 2, pitch: GALLERY_PITCH },
+  galleryEast: { pos: [GALLERY_STAND, 6.9, 0], yaw: -Math.PI / 2, pitch: GALLERY_PITCH },
   riverNight: { pos: [38, 6.2, 78], yaw: Math.atan2(38, 78), pitch: -0.03 },
 };
 
@@ -102,4 +103,5 @@ window.__xiaoyao = {
   setNight: (n) => world.setNight(!!n),
   simulateWASD: (opts) => player.simulateInput(opts),
   getCameraHeight: () => camera.position.y,
+  bridgeScreenBox: () => world.bridgeScreenBox(camera, innerWidth, innerHeight),
 };
