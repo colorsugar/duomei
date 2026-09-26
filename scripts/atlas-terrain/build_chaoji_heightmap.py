@@ -369,16 +369,29 @@ MTN_PEAK_SOFT_H = 40.0
 def soften_mountain_detail(
     h_detail: np.ndarray, M: np.ndarray, land: np.ndarray
 ) -> np.ndarray:
-    """σ=2 smooth + tanh peak softening inside the mountain envelope."""
+    """σ=2 smooth of SFS detail inside the mountain envelope (pre-scale)."""
     pos = np.maximum(h_detail, 0.0)
     env = land & (M > 0.08)
     if not np.any(env):
         return h_detail
     sm = ndimage.gaussian_filter(pos, MTN_DETAIL_SIGMA)
     pos = np.where(env, sm, pos)
-    soft = MTN_PEAK_SOFT_H * np.tanh(pos / MTN_PEAK_SOFT_H)
-    pos = np.where(env, soft, pos)
     return np.where(h_detail < 0.0, h_detail, pos)
+
+
+def soften_mountain_heights(
+    h: np.ndarray, M: np.ndarray, land: np.ndarray
+) -> np.ndarray:
+    """σ=2 blend + H·tanh(h/H) peak soft-compress inside mountain envelope."""
+    mtn_env = land & (M > 0.12)
+    if not np.any(mtn_env):
+        return h
+    out = h.copy()
+    h_smooth = ndimage.gaussian_filter(out, MTN_DETAIL_SIGMA)
+    out = np.where(mtn_env, out * 0.40 + h_smooth * 0.60, out)
+    lift = np.maximum(out - 6.0, 0.0)
+    out = np.where(mtn_env, 6.0 + MTN_PEAK_SOFT_H * np.tanh(lift / MTN_PEAK_SOFT_H), out)
+    return out
 
 
 def volcano_land_disk(
@@ -394,11 +407,23 @@ def volcano_land_disk(
 def stamp_volcano_land(
     land: np.ndarray, h: np.ndarray, yy: np.ndarray, xx: np.ndarray
 ) -> tuple[np.ndarray, np.ndarray]:
-    zone = volcano_land_disk(h.shape, yy, xx)
+    """Keep volcano footprint as land in the mask; floor height only on the cone."""
     land_out = land.copy()
-    land_out[zone] = True
     h_out = h.copy()
-    h_out[zone] = np.maximum(h_out[zone], 0.35)
+    for cx, cy, R, _H, _cr, _dep in VOLCANO_CHAOJI:
+        dist = np.hypot(xx - cx, yy - cy)
+        # Wide disk → mask land (stops sea-discard holes on dark lava).
+        land_out[dist < R * 1.72] = True
+        # Height floor only on the cone proper — not the ocean skirt.
+        core = dist < R * 1.15
+        h_out[core] = np.maximum(h_out[core], 0.35)
+        # Soft blend cone skirt so we don't stamp a hard lip into the sea.
+        skirt = (dist >= R * 1.05) & (dist < R * 1.55)
+        if np.any(skirt):
+            w = bh.smoothstep(R * 1.05, R * 1.55, dist)
+            hb = ndimage.gaussian_filter(h_out, max(R * 0.05, 4.0))
+            blend = (1.0 - w) * 0.65
+            h_out = np.where(skirt & land_out, h_out * (1.0 - blend) + hb * blend, h_out)
     return land_out, h_out
 
 
@@ -626,17 +651,13 @@ def build_height_chaoji(
     h_land[~land] = 0.0
 
     h[land] = h_land[land]
-    mtn_env = land & (M > 0.12)
-    if np.any(mtn_env):
-        h_smooth = ndimage.gaussian_filter(h, MTN_DETAIL_SIGMA)
-        h = np.where(mtn_env, h * 0.55 + h_smooth * 0.45, h)
-        lift = np.maximum(h - 6.0, 0.0)
-        h = np.where(mtn_env, 6.0 + MTN_PEAK_SOFT_H * np.tanh(lift / MTN_PEAK_SOFT_H), h)
 
     interior = land & (d_in > 20)
     h[interior] += 2.0 + 3.5 * bh.smoothstep(20.0, 85.0, d_in[interior])
 
     h = apply_sfs_highlands(h, land, rgb, L, M)
+    # Soften peaks after highland SFS so ridges stay coherent (σ=2 + tanh).
+    h = soften_mountain_heights(h, M, land)
     h = apply_arid_plateau(h, land, rgb)
     h = apply_delta_heights(h, land, rgb)
 
@@ -941,6 +962,11 @@ def main() -> int:
         h_full = np.clip(h_full, H_MIN, H_MAX)
         h_full[~land] = np.minimum(h_full[~land], 0.0)
         land, h_full = stamp_volcano_land(land, h_full, yy, xx)
+        # Feather again after stamp so audit-rect lips stay soft.
+        h_full = soften_legacy_rect_edges(h_full)
+        h_full = np.clip(h_full, H_MIN, H_MAX)
+        h_full[land] = np.maximum(h_full[land], 0.35)
+        h_full[~land] = np.minimum(h_full[~land], 0.0)
 
         h_bin = downsample_height(h_full)
         h_bin = clamp_delta_p90(h_bin, land_bin)
