@@ -1,12 +1,48 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { CSS2DObject, CSS2DRenderer } from "three/addons/renderers/CSS2DRenderer.js";
-import { Water } from "three/addons/objects/Water.js";
 
 const MAP_W = 1280;
 const MAP_H = 720;
+// Fallback luminance relief only. height.bin is already in world units and is not scaled.
 const HEIGHT_SCALE = 36;
+const SEA_LEVEL = 0;
+// basemap.height.bin: Uint16 LE 1024×576, row 0 = image top, h = v/65535*60 - 12.
+const TERRAIN_COLS = 1024;
+const TERRAIN_ROWS = 576;
+const TERRAIN_MIN = -12;
+const TERRAIN_SPAN = 60;
+const TERRAIN_MAX = TERRAIN_MIN + TERRAIN_SPAN;
+const TERRAIN_BASE = "/atlas/chaoji/assets/terrain/basemap";
+// Clear-day aerial, same dome as the seven-kingdoms chart. Fog is the horizon colour.
+const SKY_ZENITH = new THREE.Color(0x0a2248);
+const SKY_MID = new THREE.Color(0x2f6b93);
+const SKY_HORIZON = new THREE.Color(0xa9c3d6);
+const FOG_COLOR = SKY_HORIZON.clone().multiplyScalar(0.92);
+const SKY_LOW = FOG_COLOR;
+const SUN_COLOR = new THREE.Color(0xffe2b8);
+const SUN_DIR = new THREE.Vector3(-1100, 1600, 780).normalize();
+// Shallows are turquoise; open water stays the chart's deep navy. Depth comes from the height field.
+const SEA_SHALLOW = new THREE.Color(0x2f9f92);
+const SEA_DEEP = new THREE.Color(0x061e36);
+const SEA_FOAM = new THREE.Color(0xeef4f2);
+const WATER_SPAN = 20000;
+const WATER_DEPTH_RANGE = 32;
+const FOG_NEAR = 2000;
+const FOG_FAR = 6800;
+// Closeup discs stay off the overview and region layers; they ease in only inside this distance.
+const CLOSEUP_DIST = 180;
 const KM_PER_UNIT = 20.3;
+// Volcano footprints @ FULL 2048×1152 — world xz for discard/snow (see VOLCANO_CHAOJI in build script).
+function chaojiPxToWorld(cx, cy) {
+  return {
+    x: (cx / 2048) * MAP_W - MAP_W / 2,
+    z: (cy / 1152) * MAP_H - MAP_H / 2,
+    r: null,
+  };
+}
+const CJ_VOLCANO_MAIN = { ...chaojiPxToWorld(1520, 710), r: (230 / 2048) * MAP_W * 1.72 };
+const CJ_VOLCANO_MINOR = { ...chaojiPxToWorld(1300, 540), r: (70 / 2048) * MAP_W * 1.72 };
 const EURASIA_AREA_WAN_KM2 = 5470;
 const SVG_W = 1100;
 const HOME = { radius: 390, polar: 1.02, azimuth: -0.55 };
@@ -85,8 +121,8 @@ labelRenderer.domElement.className = "cj3d-labels";
 stage.appendChild(labelRenderer.domElement);
 
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x050c16);
-scene.fog = new THREE.FogExp2(0x07111d, 0.0003);
+scene.background = SKY_LOW.clone();
+scene.fog = new THREE.Fog(FOG_COLOR, FOG_NEAR, FOG_FAR);
 
 const camera = new THREE.PerspectiveCamera(44, 1, 1, 24000);
 const controls = new OrbitControls(camera, renderer.domElement);
@@ -147,38 +183,171 @@ scene.add(cityLight);
 const districtLight = new THREE.PointLight(0xffe8c0, 0, 90, 2);
 scene.add(districtLight);
 
-scene.add(new THREE.Mesh(
-  new THREE.SphereGeometry(8200, 32, 16),
+// One dome shader, reused by the water reflection so the horizon line never breaks.
+const SKY_GLSL = `
+uniform vec3 uZenith;
+uniform vec3 uMid;
+uniform vec3 uHorizon;
+uniform vec3 uLow;
+uniform vec3 uSunColor;
+uniform vec3 uSunDir;
+vec3 skyColor(vec3 dir) {
+  float h = clamp(dir.y, -1.0, 1.0);
+  vec3 c = mix(uHorizon, uMid, smoothstep(0.0, 0.07, h));
+  c = mix(c, uZenith, smoothstep(0.05, 0.45, h));
+  c = mix(uLow, c, smoothstep(-0.02, 0.01, h));
+  float s = max(dot(dir, uSunDir), 0.0);
+  c += uSunColor * (pow(s, 220.0) * 0.9 + pow(s, 26.0) * 0.10);
+  return c;
+}
+`;
+
+function skyUniforms() {
+  return {
+    uZenith: { value: SKY_ZENITH },
+    uMid: { value: SKY_MID },
+    uHorizon: { value: SKY_HORIZON },
+    uLow: { value: SKY_LOW },
+    uSunColor: { value: SUN_COLOR },
+    uSunDir: { value: SUN_DIR },
+  };
+}
+
+const sky = new THREE.Mesh(
+  new THREE.SphereGeometry(9000, 48, 24),
   new THREE.ShaderMaterial({
+    uniforms: skyUniforms(),
     side: THREE.BackSide,
     depthWrite: false,
-    uniforms: {
-      topColor: { value: new THREE.Color(0x0b1c30) },
-      midColor: { value: new THREE.Color(0x143148) },
-      botColor: { value: new THREE.Color(0x07111d) },
-    },
-    vertexShader: "varying vec3 v; void main(){v=normalize(position); gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);}",
-    fragmentShader: `varying vec3 v; uniform vec3 topColor; uniform vec3 midColor; uniform vec3 botColor;
-      void main(){ float h=v.y*0.5+0.5; vec3 c=mix(botColor,midColor,smoothstep(0.,.55,h)); c=mix(c,topColor,smoothstep(.45,1.,h)); gl_FragColor=vec4(c,1.); }`,
+    vertexShader: `
+      varying vec3 vDir;
+      void main() {
+        vDir = position;
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+      }
+    `,
+    fragmentShader: `${SKY_GLSL}
+      varying vec3 vDir;
+      void main() {
+        gl_FragColor = vec4(skyColor(normalize(vDir)), 1.0);
+        #include <tonemapping_fragment>
+        #include <colorspace_fragment>
+      }
+    `,
   }),
-));
+);
+scene.add(sky);
 
 const texLoader = new THREE.TextureLoader();
-const waterNormals = texLoader.load("/yunyou/assets/tex/waternormals.jpg");
-waterNormals.wrapS = waterNormals.wrapT = THREE.RepeatWrapping;
-const water = new Water(new THREE.PlaneGeometry(11000, 7800), {
-  textureWidth: coarse ? 256 : 512,
-  textureHeight: coarse ? 256 : 512,
-  waterNormals,
-  sunDirection: sun.position.clone().normalize(),
-  sunColor: 0xffe2b8,
-  waterColor: 0x08233d,
-  distortionScale: 2.2,
-  fog: true,
+const waterUniforms = Object.assign(skyUniforms(), {
+  uDepthMap: { value: new THREE.DataTexture(new Uint8Array([255]), 1, 1, THREE.RedFormat, THREE.UnsignedByteType) },
+  uFieldOrigin: { value: new THREE.Vector2(-MAP_W / 2, -MAP_H / 2) },
+  uFieldSize: { value: new THREE.Vector2(MAP_W, MAP_H) },
+  uDepthRange: { value: WATER_DEPTH_RANGE },
+  uTime: { value: 0 },
+  uShallow: { value: SEA_SHALLOW },
+  uDeep: { value: SEA_DEEP },
+  uFoam: { value: SEA_FOAM },
+  uFogColor: { value: FOG_COLOR },
+  uFogNear: { value: FOG_NEAR },
+  uFogFar: { value: FOG_FAR },
+  uPixelScale: { value: 0.0006 },
 });
-water.rotation.x = -Math.PI / 2;
-water.position.y = -2.4;
+waterUniforms.uDepthMap.value.colorSpace = THREE.NoColorSpace;
+waterUniforms.uDepthMap.value.needsUpdate = true;
+
+const water = new THREE.Mesh(
+  new THREE.PlaneGeometry(WATER_SPAN, WATER_SPAN).rotateX(-Math.PI / 2),
+  new THREE.ShaderMaterial({
+    uniforms: waterUniforms,
+    transparent: true,
+    depthWrite: false,
+    vertexShader: `
+      varying vec3 vWorld;
+      void main() {
+        vec4 world = modelMatrix * vec4(position, 1.0);
+        vWorld = world.xyz;
+        gl_Position = projectionMatrix * viewMatrix * world;
+      }
+    `,
+    fragmentShader: `${SKY_GLSL}
+      uniform sampler2D uDepthMap;
+      uniform vec2 uFieldOrigin;
+      uniform vec2 uFieldSize;
+      uniform float uDepthRange;
+      uniform float uTime;
+      uniform vec3 uShallow;
+      uniform vec3 uDeep;
+      uniform vec3 uFoam;
+      uniform vec3 uFogColor;
+      uniform float uFogNear;
+      uniform float uFogFar;
+      uniform float uPixelScale;
+      varying vec3 vWorld;
+
+      float rippleFade(float k, float footprint, float distFade) {
+        float cyclesPerPixel = k * footprint * 0.15915494;
+        return distFade * (1.0 - smoothstep(0.05, 0.3, cyclesPerPixel));
+      }
+
+      void main() {
+        vec2 uv = (vWorld.xz - uFieldOrigin) / uFieldSize;
+        float depth = uDepthRange;
+        if (uv.x >= 0.0 && uv.y >= 0.0 && uv.x <= 1.0 && uv.y <= 1.0) {
+          depth = texture2D(uDepthMap, uv).r * uDepthRange;
+        }
+        // Depth 0 is land (the terrain mesh). Outside the chart the sheet stays deep ocean.
+        if (depth < 0.02) discard;
+
+        vec3 toEye = cameraPosition - vWorld;
+        float dist = length(toEye);
+        vec3 view = toEye / dist;
+        float distFade = 1.0 / (1.0 + dist * 0.004);
+        float footprint = dist * uPixelScale / max(abs(view.y), 0.06);
+
+        vec2 p = vWorld.xz;
+        float t = uTime;
+        vec2 grad = vec2(0.0);
+        grad.x += 0.055 * rippleFade(0.055, footprint, distFade) * cos(p.x * 0.055 + t * 0.85);
+        grad.y += 0.050 * rippleFade(0.061, footprint, distFade) * cos(p.y * 0.061 - t * 0.72);
+        float cross1 = 0.032 * rippleFade(0.037, footprint, distFade) * cos((p.x + p.y) * 0.037 + t * 1.15);
+        grad += vec2(cross1, cross1);
+        float cross2 = 0.024 * rippleFade(0.085, footprint, distFade) * cos((p.x - p.y) * 0.085 - t * 1.45);
+        grad += vec2(cross2, -cross2);
+        vec3 n = normalize(vec3(-grad.x * 0.6, 1.0, -grad.y * 0.6));
+
+        vec3 body = mix(uShallow, uDeep, smoothstep(0.0, 10.0, depth));
+        float fresnel = clamp(pow(1.0 - clamp(dot(n, view), 0.0, 1.0), 4.0), 0.0, 0.85);
+        vec3 col = mix(body, skyColor(reflect(-view, n)), fresnel);
+        vec3 hDir = normalize(uSunDir + view);
+        col += uSunColor * pow(max(dot(n, hDir), 0.0), mix(260.0, 28.0, 1.0 - distFade))
+             * mix(1.5, 0.20, 1.0 - distFade);
+
+        float band = 1.0 - smoothstep(0.2, 3.0, depth);
+        float pulse = mix(0.62, sin(depth * 3.0 - t * 1.4), distFade);
+        float foam = clamp(band * (0.55 + 0.45 * pulse), 0.0, 1.0);
+        col = mix(col, uFoam, foam * 0.5);
+        float fogMix = smoothstep(uFogNear, uFogFar, length(cameraPosition - vWorld));
+        // Chart bathymetry bottoms near -12, so deep water is opaque by depth 10 and matches
+        // the open ocean outside the map. Fog tints toward the horizon and closes the alpha.
+        float alpha = max(mix(0.2, 1.0, smoothstep(0.0, 10.0, depth)), foam * 0.6);
+        alpha = max(alpha, fogMix);
+        gl_FragColor = vec4(mix(col, uFogColor, fogMix), alpha);
+        #include <tonemapping_fragment>
+        #include <colorspace_fragment>
+      }
+    `,
+  }),
+);
+water.position.y = SEA_LEVEL;
 scene.add(water);
+
+function applyFog(near, far) {
+  scene.fog.near = near;
+  scene.fog.far = far;
+  waterUniforms.uFogNear.value = near;
+  waterUniforms.uFogFar.value = far;
+}
 
 const toWorld = (x, y) => new THREE.Vector3(x - MAP_W / 2, 0, y - MAP_H / 2);
 const fromSvg = (x, y) => ({ x: (x / SVG_W) * MAP_W, y: (y / 720) * MAP_H });
@@ -195,6 +364,74 @@ function loadTex(url) {
   });
 }
 
+function isSeaColor(r, g, b, lum) {
+  return b > r + 0.05 && lum < 0.45;
+}
+
+function dilateBits(bits, cols, rows, radius) {
+  const out = bits.slice();
+  for (let y = 0; y < rows; y += 1) {
+    for (let x = 0; x < cols; x += 1) {
+      if (!bits[y * cols + x]) continue;
+      for (let dy = -radius; dy <= radius; dy += 1) {
+        const yy = y + dy;
+        if (yy < 0 || yy >= rows) continue;
+        for (let dx = -radius; dx <= radius; dx += 1) {
+          const xx = x + dx;
+          if (xx < 0 || xx >= cols) continue;
+          out[yy * cols + xx] = 1;
+        }
+      }
+    }
+  }
+  return out;
+}
+
+function shoreDistance(sea, cols, rows) {
+  const inf = 1e6;
+  const dist = new Float32Array(cols * rows);
+  const diag = Math.SQRT2;
+  for (let i = 0; i < dist.length; i += 1) dist[i] = sea[i] ? inf : 0;
+  for (let y = 0; y < rows; y += 1) {
+    for (let x = 0; x < cols; x += 1) {
+      const i = y * cols + x;
+      if (!sea[i]) continue;
+      let d = dist[i];
+      if (x > 0) d = Math.min(d, dist[i - 1] + 1);
+      if (y > 0) d = Math.min(d, dist[i - cols] + 1);
+      if (x > 0 && y > 0) d = Math.min(d, dist[i - cols - 1] + diag);
+      if (x + 1 < cols && y > 0) d = Math.min(d, dist[i - cols + 1] + diag);
+      dist[i] = d;
+    }
+  }
+  for (let y = rows - 1; y >= 0; y -= 1) {
+    for (let x = cols - 1; x >= 0; x -= 1) {
+      const i = y * cols + x;
+      if (!sea[i]) { dist[i] = 0; continue; }
+      let d = dist[i];
+      if (x + 1 < cols) d = Math.min(d, dist[i + 1] + 1);
+      if (y + 1 < rows) d = Math.min(d, dist[i + cols] + 1);
+      if (x + 1 < cols && y + 1 < rows) d = Math.min(d, dist[i + cols + 1] + diag);
+      if (x > 0 && y + 1 < rows) d = Math.min(d, dist[i + cols - 1] + diag);
+      dist[i] = d;
+    }
+  }
+  return dist;
+}
+
+function byteTexture(bytes, cols, rows, flipY, linear) {
+  const tex = new THREE.DataTexture(bytes, cols, rows, THREE.RedFormat, THREE.UnsignedByteType);
+  tex.colorSpace = THREE.NoColorSpace;
+  tex.flipY = flipY;
+  tex.wrapS = tex.wrapT = THREE.ClampToEdgeWrapping;
+  tex.minFilter = linear ? THREE.LinearFilter : THREE.NearestFilter;
+  tex.magFilter = linear ? THREE.LinearFilter : THREE.NearestFilter;
+  tex.generateMipmaps = false;
+  tex.unpackAlignment = 1;
+  tex.needsUpdate = true;
+  return tex;
+}
+
 function luminanceField(image) {
   const cols = 512;
   const rows = Math.round((cols * MAP_H) / MAP_W);
@@ -203,12 +440,15 @@ function luminanceField(image) {
   const ctx = c.getContext("2d", { willReadFrequently: true });
   ctx.drawImage(image, 0, 0, cols, rows);
   const px = ctx.getImageData(0, 0, cols, rows).data;
+  const sea = new Uint8Array(cols * rows);
   let field = new Float32Array(cols * rows);
   for (let i = 0; i < cols * rows; i += 1) {
     const r = px[i * 4] / 255, g = px[i * 4 + 1] / 255, b = px[i * 4 + 2] / 255;
     const lum = 0.2126 * r + 0.7152 * g + 0.0722 * b;
-    field[i] = (b > r + 0.05 && lum < 0.45) ? 0 : Math.pow(Math.min(1, Math.max(0, (lum - 0.2) / 0.65)), 1.3);
+    if (isSeaColor(r, g, b, lum)) sea[i] = 1;
+    field[i] = Math.pow(Math.min(1, Math.max(0, (lum - 0.2) / 0.65)), 1.3);
   }
+  for (let i = 0; i < sea.length; i += 1) if (sea[i]) field[i] = 0;
   for (let p = 0; p < 3; p += 1) {
     const next = new Float32Array(cols * rows);
     for (let y = 0; y < rows; y += 1) {
@@ -226,7 +466,41 @@ function luminanceField(image) {
     }
     field = next;
   }
-  return { cols, rows, field };
+  return { cols, rows, field, sea, scale: HEIGHT_SCALE, fallback: true };
+}
+
+async function loadHeightField() {
+  const response = await fetch(`${TERRAIN_BASE}.height.bin`);
+  if (!response.ok) throw new Error(`${response.status} for ${TERRAIN_BASE}.height.bin`);
+  const buffer = await response.arrayBuffer();
+  const count = TERRAIN_COLS * TERRAIN_ROWS;
+  if (buffer.byteLength !== count * 2) throw new Error(`unexpected size for ${TERRAIN_BASE}.height.bin`);
+  const raw = new Uint16Array(buffer);
+  const field = new Float32Array(count);
+  for (let i = 0; i < count; i += 1) field[i] = (raw[i] / 65535) * TERRAIN_SPAN + TERRAIN_MIN;
+  return { cols: TERRAIN_COLS, rows: TERRAIN_ROWS, field, scale: 1, fallback: false };
+}
+
+function buildDepthTexture(sea, cols, rows) {
+  const dist = shoreDistance(sea, cols, rows);
+  const cover = dilateBits(sea, cols, rows, 2);
+  const data = new Uint8Array(cols * rows);
+  const pixel = MAP_W / cols;
+  for (let i = 0; i < data.length; i += 1) {
+    let depth = 0;
+    if (sea[i]) depth = Math.min(WATER_DEPTH_RANGE, dist[i] * pixel);
+    else if (cover[i]) depth = 0.45;
+    data[i] = Math.round((depth / WATER_DEPTH_RANGE) * 255);
+  }
+  return byteTexture(data, cols, rows, false, true);
+}
+
+function buildSeaMaskTexture(sea, cols, rows) {
+  const cover = dilateBits(sea, cols, rows, 1);
+  const data = new Uint8Array(cols * rows);
+  for (let i = 0; i < data.length; i += 1) data[i] = cover[i] ? 255 : 0;
+  // Mesh UV v=1 is the image top; DataTexture row 0 is the image top, so flipY.
+  return byteTexture(data, cols, rows, true, false);
 }
 function sampleField(hf, u, v) {
   const fx = Math.min(hf.cols - 1, Math.max(0, u * (hf.cols - 1)));
@@ -236,9 +510,30 @@ function sampleField(hf, u, v) {
   const tx = fx - x0, ty = fy - y0;
   const a = hf.field[y0 * hf.cols + x0] * (1 - tx) + hf.field[y0 * hf.cols + x1] * tx;
   const b = hf.field[y1 * hf.cols + x0] * (1 - tx) + hf.field[y1 * hf.cols + x1] * tx;
-  return (a * (1 - ty) + b * ty) * HEIGHT_SCALE;
+  return (a * (1 - ty) + b * ty) * hf.scale;
 }
-function heightAt(x, y, hf) { return sampleField(hf, x / MAP_W, y / MAP_H); }
+// Raw surface, sea floor included. Labels, flights and picking use heightAt (never below the water plane).
+function terrainHeightAt(x, y, hf) {
+  const field = hf || heightField;
+  if (!field) return 0;
+  return sampleField(field, x / MAP_W, y / MAP_H);
+}
+function heightAt(x, y, hf) { return Math.max(0, terrainHeightAt(x, y, hf)); }
+
+function buildHeightDepthTexture() {
+  const width = Math.max(2, Math.round(MAP_W / 2));
+  const height = Math.max(2, Math.round(MAP_H / 2));
+  const data = new Uint8Array(width * height);
+  for (let row = 0; row < height; row += 1) {
+    const y = ((row + 0.5) / height) * MAP_H;
+    for (let col = 0; col < width; col += 1) {
+      const h = terrainHeightAt(((col + 0.5) / width) * MAP_W, y, heightField);
+      const depth = h < 0 ? Math.min(WATER_DEPTH_RANGE, -h) : 0;
+      data[row * width + col] = Math.round((depth / WATER_DEPTH_RANGE) * 255);
+    }
+  }
+  return byteTexture(data, width, height, false, true);
+}
 function hashStr(s) {
   let h = 2166136261;
   for (let i = 0; i < s.length; i += 1) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); }
@@ -360,9 +655,6 @@ let creatureSystems = [];
 let districtLabels = [];
 let lastCityView = null;
 let siteButtonsBuilt = false;
-let cloudLayer = null;
-let graticule = null;
-let iceCap = null;
 let eurasiaOverlay = null;
 let eurasiaLabel = null;
 let closeupDecals = [];
@@ -1101,16 +1393,31 @@ function palaceDistrictId(conf) {
 }
 
 function closeupAlphaMap() {
+  const size = 256;
   const c = document.createElement("canvas");
-  c.width = c.height = 256;
+  c.width = c.height = size;
   const ctx = c.getContext("2d");
-  const grd = ctx.createRadialGradient(128, 128, 78, 128, 128, 128);
-  grd.addColorStop(0, "rgba(255,255,255,1)");
-  grd.addColorStop(1, "rgba(255,255,255,0)");
-  ctx.fillStyle = grd;
-  ctx.fillRect(0, 0, 256, 256);
+  const img = ctx.createImageData(size, size);
+  const cx = (size - 1) / 2;
+  for (let y = 0; y < size; y += 1) {
+    for (let x = 0; x < size; x += 1) {
+      const r = Math.hypot(x - cx, y - cx) / cx;
+      let t = Math.min(1, Math.max(0, (r - 0.6) / 0.4));
+      t = t * t * (3 - 2 * t);
+      const g = Math.round((1 - t) * 255);
+      const o = (y * size + x) * 4;
+      // alphaMap is sampled from the green channel.
+      img.data[o] = g; img.data[o + 1] = g; img.data[o + 2] = g; img.data[o + 3] = 255;
+    }
+  }
+  ctx.putImageData(img, 0, 0);
   const tex = new THREE.CanvasTexture(c);
   tex.colorSpace = THREE.NoColorSpace;
+  tex.wrapS = tex.wrapT = THREE.ClampToEdgeWrapping;
+  tex.generateMipmaps = false;
+  tex.minFilter = THREE.LinearFilter;
+  tex.magFilter = THREE.LinearFilter;
+  tex.needsUpdate = true;
   return tex;
 }
 
@@ -1121,12 +1428,14 @@ function mountCloseups(sites, hf) {
     const origin = toWorld(p.x, p.y);
     origin.y = heightAt(p.x, p.y, hf) + 0.42;
     const mat = new THREE.MeshBasicMaterial({
-      color: 0xffffff, transparent: true, opacity: 1, depthWrite: false,
+      color: 0xffffff, transparent: true, opacity: 0, depthWrite: false,
       alphaMap: fade, polygonOffset: true, polygonOffsetFactor: -6,
     });
     const mesh = new THREE.Mesh(new THREE.CircleGeometry(92, 80).rotateX(-Math.PI / 2), mat);
     mesh.position.copy(origin);
     mesh.visible = false;
+    mesh.userData.siteId = site.id;
+    mesh.renderOrder = 2;
     scene.add(mesh);
     loadTex(closeupUrl(site.id)).then((tex) => {
       applyAerialMap(mat, tex);
@@ -1136,19 +1445,21 @@ function mountCloseups(sites, hf) {
   }
 }
 
-function syncCloseups() {
-  const far = controls.getDistance() > 920;
-  const hide = Boolean(activeCity || activeDistrict || far);
-  if (hide) {
-    for (const m of closeupDecals) m.visible = false;
-    return;
+function updateCloseups() {
+  const dist = controls.getDistance();
+  const overview = !activeRegion && !activeCity;
+  const regionLayer = Boolean(activeRegion) && !activeCity;
+  const blocked = overview || regionLayer || Boolean(activeDistrict);
+  for (const m of closeupDecals) {
+    let target = 0;
+    if (!blocked && m.userData.ready && m.userData.siteId === activeCity && dist < CLOSEUP_DIST) {
+      const t = Math.min(1, Math.max(0, (CLOSEUP_DIST - dist) / 48));
+      target = t * t * (3 - 2 * t);
+    }
+    const next = reducedMotion ? target : m.material.opacity + (target - m.material.opacity) * 0.18;
+    m.material.opacity = Math.abs(next - target) < 0.012 ? target : next;
+    m.visible = m.material.opacity > 0.02;
   }
-  const t = controls.target;
-  const ranked = closeupDecals
-    .map((m) => ({ m, d: m.position.distanceToSquared(t) }))
-    .sort((a, b) => a.d - b.d);
-  for (const m of closeupDecals) m.visible = false;
-  for (const row of ranked.slice(0, 6)) row.m.visible = Boolean(row.m.userData.ready);
 }
 
 function buildCityDetail(site, conf) {
@@ -1446,10 +1757,11 @@ function syncUi() {
   }
 
   const overview = !inRegion && !inCity && !inClose;
-  scene.fog.density = inEstate ? 0.003 : inDistrict ? 0.0022 : inCity ? 0.00135 : inRegion ? 0.00055 : 0.0003;
-  if (cloudLayer) cloudLayer.visible = overview;
-  if (graticule) graticule.visible = !inCity && !inClose;
-  if (iceCap) iceCap.visible = graticule ? graticule.visible : false;
+  if (inEstate) applyFog(60, 420);
+  else if (inDistrict) applyFog(80, 640);
+  else if (inCity) applyFog(220, 1400);
+  else if (inRegion) applyFog(1400, 5000);
+  else applyFog(FOG_NEAR, FOG_FAR);
   if (!overview) {
     if (eurasiaOverlay) eurasiaOverlay.visible = false;
     if (eurasiaLabel) eurasiaLabel.visible = false;
@@ -1457,19 +1769,19 @@ function syncUi() {
     if (compareBtn) compareBtn.setAttribute("aria-pressed", "false");
   }
   if (continentMesh) {
-    // city/district: hide continent completely — brown blur was the "电子垃圾" skybox
+    // city/district: hide continent completely — brown blur was the "电子垃圾" skybox.
+    // Region dims with color, not opacity: a transparent land sheet would blend with the light horizon.
     if (inCity || inClose) {
-      continentMesh.material.transparent = true;
-      continentMesh.material.opacity = 0;
       continentMesh.visible = false;
     } else {
       continentMesh.visible = true;
-      continentMesh.material.transparent = inRegion;
-      continentMesh.material.opacity = inRegion ? 0.72 : 1;
+      continentMesh.material.transparent = false;
+      continentMesh.material.opacity = 1;
+      continentMesh.material.color.setScalar(inRegion ? 0.72 : 1);
     }
   }
   if (regionOverlay) regionOverlay.visible = !inCity && !inClose;
-  syncCloseups();
+  updateCloseups();
 }
 
 function showSiteCard(site, district, estate) {
@@ -1623,102 +1935,275 @@ function resize() {
   camera.updateProjectionMatrix();
   renderer.setSize(w, h, false);
   labelRenderer.setSize(w, h);
+  waterUniforms.uPixelScale.value =
+    (2 * Math.tan((camera.fov * Math.PI) / 360)) / Math.max(1, renderer.domElement.height);
 }
 
-function noiseSmoothstep(edge0, edge1, x) {
-  const t = Math.min(1, Math.max(0, (x - edge0) / (edge1 - edge0)));
-  return t * t * (3 - 2 * t);
-}
+// --- Surface shader ------------------------------------------------------
+// Rock on steep slopes, snow from about 28 up (peaks near 48). The luminance fallback does not get this.
+const surfaceSandColor = new THREE.Color(0xc9b58a);
+const surfaceSnowColor = new THREE.Color(0xf2f4f7);
+const surfaceRockTone = new THREE.Color(0x8d8577);
+const surfaceUniforms = {
+  uKarst: { value: null },
+  uStone: { value: null },
+  uSandColor: { value: surfaceSandColor },
+  uSnowColor: { value: surfaceSnowColor },
+  uRockTone: { value: surfaceRockTone },
+  uKarstScale: { value: 0.022 },
+  uStoneScale: { value: 0.013 },
+  uHasDetail: { value: 0 },
+  uTriplanar: { value: coarse ? 0 : 1 },
+};
 
-function bilinearGrid(grid, size, u, v) {
-  const x = u * (size - 1);
-  const y = v * (size - 1);
-  const x0 = Math.floor(x), y0 = Math.floor(y);
-  const x1 = Math.min(size - 1, x0 + 1), y1 = Math.min(size - 1, y0 + 1);
-  const tx = x - x0, ty = y - y0;
-  const a = grid[y0 * size + x0] * (1 - tx) + grid[y0 * size + x1] * tx;
-  const b = grid[y1 * size + x0] * (1 - tx) + grid[y1 * size + x1] * tx;
-  return a * (1 - ty) + b * ty;
-}
+const SURFACE_VERTEX_PROLOGUE = `
+  varying vec3 vAtlasWorld;
+  varying vec3 vAtlasNormal;
+`;
+const SURFACE_VERTEX_WORLDPOS = `
+  vAtlasWorld = (modelMatrix * vec4(transformed, 1.0)).xyz;
+  vAtlasNormal = normalize(mat3(modelMatrix) * objectNormal);
+`;
+const SURFACE_FRAGMENT_PROLOGUE = `
+  varying vec3 vAtlasWorld;
+  varying vec3 vAtlasNormal;
+  uniform sampler2D uKarst;
+  uniform sampler2D uStone;
+  uniform vec3 uSandColor;
+  uniform vec3 uSnowColor;
+  uniform vec3 uRockTone;
+  uniform float uKarstScale;
+  uniform float uStoneScale;
+  uniform float uHasDetail;
+  uniform float uTriplanar;
 
-function fractalNoiseGrid(grid, size, u, v, octaves) {
-  let amp = 1, freq = 1, sum = 0, norm = 0;
-  for (let o = 0; o < octaves; o += 1) {
-    sum += bilinearGrid(grid, size, (u * freq) % 1, (v * freq) % 1) * amp;
-    norm += amp;
-    amp *= 0.5;
-    freq *= 2;
+  float aHash(vec2 p) {
+    p = fract(p * vec2(127.1, 311.7));
+    p += dot(p, p + 19.19);
+    return fract(p.x * p.y);
   }
-  return sum / norm;
+  float aVNoise(vec2 p) {
+    vec2 i = floor(p);
+    vec2 f = fract(p);
+    vec2 u = f * f * (3.0 - 2.0 * f);
+    return mix(mix(aHash(i), aHash(i + vec2(1.0, 0.0)), u.x),
+               mix(aHash(i + vec2(0.0, 1.0)), aHash(i + vec2(1.0, 1.0)), u.x), u.y);
+  }
+  float aFbm(vec2 p) {
+    return aVNoise(p) * 0.58 + aVNoise(p * 2.07 + 11.3) * 0.28 + aVNoise(p * 4.13 + 27.7) * 0.14;
+  }
+`;
+const SURFACE_FRAGMENT_BODY = `
+  {
+    float slope = clamp(1.0 - vAtlasNormal.y, 0.0, 1.0);
+    float h = vAtlasWorld.y;
+    vec3 base = diffuseColor.rgb;
+
+    float coast = smoothstep(-0.1, 0.25, h) * (1.0 - smoothstep(0.6, 1.6, h));
+    base = mix(base, uSandColor, coast * 0.4);
+
+    float dist = length(cameraPosition - vAtlasWorld);
+    float detail = 1.0 - smoothstep(1200.0, 2400.0, dist);
+
+    vec2 vp = vAtlasWorld.xz;
+    float gv = aFbm(vp * 0.018 + 7.3);
+    float fine = aVNoise(vp * 0.32 + 19.1);
+
+    vec3 veg = base * (0.88 + 0.24 * gv);
+    veg *= mix(vec3(0.94, 1.06, 0.90), vec3(1.08, 1.02, 0.86), fine);
+    vec3 land = mix(base, veg, detail);
+
+    // Extra rock weight on the high band; snow (below) covers the gentle summits.
+    float rock = smoothstep(0.35, 0.60, slope);
+    rock += smoothstep(18.0, 32.0, h) * 0.45 * (1.0 - smoothstep(0.55, 0.85, slope));
+    rock = clamp(rock + (aVNoise(vp * 0.05 + 3.0) - 0.5) * 0.22, 0.0, 1.0);
+
+    vec3 rockCol = uRockTone;
+    if (rock > 0.002 && detail > 0.002 && uHasDetail > 0.5) {
+      vec3 karst;
+      if (uTriplanar > 0.5) {
+        vec3 w = pow(abs(vAtlasNormal), vec3(4.0));
+        w /= max(w.x + w.y + w.z, 1e-4);
+        karst  = texture2D(uKarst, vAtlasWorld.zy * uKarstScale).rgb * w.x;
+        karst += texture2D(uKarst, vAtlasWorld.xz * uKarstScale).rgb * w.y;
+        karst += texture2D(uKarst, vAtlasWorld.xy * uKarstScale).rgb * w.z;
+      } else {
+        karst = texture2D(uKarst, vp * uKarstScale).rgb;
+      }
+      vec3 stone = texture2D(uStone, vp * uStoneScale).rgb;
+      float mixK = clamp(0.35 + 0.55 * gv, 0.0, 1.0);
+      vec3 rockTex = mix(stone, karst, mixK);
+      rockTex *= 0.85 + 0.3 * aVNoise(vp * 0.45);
+      rockCol = mix(uRockTone, rockTex, detail);
+    }
+    rockCol = mix(rockCol, base, 0.4);
+
+    vec3 surface = mix(land, rockCol, rock);
+
+    // Snow line ~30+, narrower band; cliffs stay rock. Volcano: thin crater rim only.
+    float snowNoise = (gv - 0.5) * 3.0 + (fine - 0.5) * 1.2;
+    float snowBand = smoothstep(26.0, 36.0, h + snowNoise);
+    float snowMask = snowBand * (1.0 - smoothstep(0.50, 0.78, slope));
+    snowMask *= 0.72;
+
+    vec2 vMain = vp - vec2(${CJ_VOLCANO_MAIN.x.toFixed(2)}, ${CJ_VOLCANO_MAIN.z.toFixed(2)});
+    vec2 vMin = vp - vec2(${CJ_VOLCANO_MINOR.x.toFixed(2)}, ${CJ_VOLCANO_MINOR.z.toFixed(2)});
+    float vFootMain = 1.0 - smoothstep(${ (CJ_VOLCANO_MAIN.r * 0.92).toFixed(2) }, ${CJ_VOLCANO_MAIN.r.toFixed(2)}, length(vMain));
+    float vFootMin = 1.0 - smoothstep(${(CJ_VOLCANO_MINOR.r * 0.92).toFixed(2)}, ${CJ_VOLCANO_MINOR.r.toFixed(2)}, length(vMin));
+    float onVolcano = clamp(vFootMain + vFootMin, 0.0, 1.0);
+    snowMask *= (1.0 - onVolcano * 0.98);
+
+    float dMain = length(vMain);
+    float dMin = length(vMin);
+    float rimMain = smoothstep(6.0, 11.0, dMain) * (1.0 - smoothstep(17.0, 26.0, dMain));
+    float rimMin = smoothstep(3.0, 6.0, dMin) * (1.0 - smoothstep(11.0, 18.0, dMin));
+    float volRim = clamp(rimMain * vFootMain + rimMin * vFootMin, 0.0, 1.0);
+    float volSnow = volRim * smoothstep(36.0, 46.0, h + snowNoise * 0.25);
+    volSnow *= (1.0 - smoothstep(0.40, 0.68, slope));
+    float volRock = onVolcano * smoothstep(24.0, 42.0, h) * (1.0 - volSnow * 0.85);
+    rock = clamp(rock + volRock * 0.55, 0.0, 1.0);
+    surface = mix(land, rockCol, rock);
+
+    float cold = clamp(0.55 * slope + (fine - 0.5) * 0.8, 0.0, 1.0);
+    vec3 snowCol = mix(uSnowColor, uSnowColor * vec3(0.78, 0.88, 1.04), cold * 0.6);
+    snowMask *= mix(1.0, 0.85, 1.0 - detail);
+    surface = mix(surface, snowCol, snowMask);
+    surface = mix(surface, snowCol, volSnow * 0.32 * detail);
+
+    diffuseColor.rgb = surface;
+
+    float rough = mix(0.95, 0.85, clamp(rock, 0.0, 1.0));
+    rough = mix(rough, 0.6, clamp(snowMask, 0.0, 1.0));
+    roughnessFactor = rough;
+  }
+`;
+
+async function loadSurfaceTextures() {
+  const aniso = Math.min(8, renderer.capabilities.getMaxAnisotropy());
+  const setup = (tex) => {
+    tex.colorSpace = THREE.SRGBColorSpace;
+    tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+    tex.anisotropy = aniso;
+  };
+  let karst = null;
+  let stone = null;
+  try {
+    karst = await texLoader.loadAsync("/yunyou/assets/tex/karst.jpg");
+    setup(karst);
+  } catch (error) {
+    console.warn("立体地图：karst 贴图缺失，地形只用程序化岩石色调。", error);
+  }
+  try {
+    stone = await texLoader.loadAsync("/yunyou/assets/tex/stone.jpg");
+    setup(stone);
+  } catch (error) {
+    console.warn("立体地图：stone 贴图缺失，地形只用 karst。", error);
+  }
+  if (!karst && !stone) return false;
+  if (!karst) karst = stone;
+  if (!stone) stone = karst;
+  surfaceUniforms.uKarst.value = karst;
+  surfaceUniforms.uStone.value = stone;
+  surfaceUniforms.uHasDetail.value = 1;
+  return true;
+}
+
+async function loadLinearMap(url) {
+  const tex = await texLoader.loadAsync(url);
+  tex.colorSpace = THREE.NoColorSpace;
+  tex.wrapS = tex.wrapT = THREE.ClampToEdgeWrapping;
+  tex.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy());
+  return tex;
+}
+
+function bumpTexture(hf, anisotropy) {
+  const bumpCanvas = document.createElement("canvas");
+  bumpCanvas.width = hf.cols;
+  bumpCanvas.height = hf.rows;
+  const bumpCtx = bumpCanvas.getContext("2d");
+  const bumpImg = bumpCtx.createImageData(hf.cols, hf.rows);
+  for (let i = 0; i < hf.field.length; i += 1) {
+    const g = Math.round(hf.field[i] * 255);
+    const o = i * 4;
+    bumpImg.data[o] = g;
+    bumpImg.data[o + 1] = g;
+    bumpImg.data[o + 2] = g;
+    bumpImg.data[o + 3] = 255;
+  }
+  bumpCtx.putImageData(bumpImg, 0, 0);
+  const bump = new THREE.CanvasTexture(bumpCanvas);
+  bump.wrapS = bump.wrapT = THREE.ClampToEdgeWrapping;
+  bump.colorSpace = THREE.NoColorSpace;
+  bump.anisotropy = anisotropy;
+  return bump;
+}
+
+function attachFallbackSeaShader(material, seaMaskTex) {
+  material.customProgramCacheKey = () => "chaoji-sea-mask";
+  material.onBeforeCompile = (shader) => {
+    shader.uniforms.cjSeaMask = { value: seaMaskTex };
+    shader.fragmentShader = shader.fragmentShader
+      .replace(
+        "#include <common>",
+        `#include <common>
+         uniform sampler2D cjSeaMask;
+        `,
+      )
+      .replace(
+        "#include <map_fragment>",
+        `#include <map_fragment>
+         vec3 cjEnc = mix(diffuseColor.rgb * 12.92, 1.055 * pow(max(diffuseColor.rgb, vec3(0.0)), vec3(1.0 / 2.4)) - 0.055, step(vec3(0.0031308), diffuseColor.rgb));
+         float cjLum = dot(cjEnc, vec3(0.2126, 0.7152, 0.0722));
+         if (cjEnc.b > cjEnc.r + 0.05 && cjLum < 0.45 && texture2D(cjSeaMask, vMapUv).r > 0.5) discard;
+        `,
+      );
+  };
+}
+
+// Sea fragments leave the basemap: mask 0 / 128, or a vertex below sea level. Land (255), snow and cloud stay.
+function attachHeightLandShader(material, maskTex) {
+  const hasMask = maskTex ? 1 : 0;
+  const mask = maskTex || byteTexture(new Uint8Array([255]), 1, 1, false, false);
+  material.customProgramCacheKey = () => "chaoji-terrain-height";
+  material.onBeforeCompile = (shader) => {
+    Object.assign(shader.uniforms, surfaceUniforms);
+    shader.uniforms.cjMask = { value: mask };
+    shader.uniforms.cjHasMask = { value: hasMask };
+    shader.vertexShader = shader.vertexShader
+      .replace("#include <common>", `#include <common>\n${SURFACE_VERTEX_PROLOGUE}`)
+      .replace("#include <project_vertex>", `#include <project_vertex>\n${SURFACE_VERTEX_WORLDPOS}`);
+    shader.fragmentShader = shader.fragmentShader
+      .replace(
+        "#include <common>",
+        `#include <common>
+         ${SURFACE_FRAGMENT_PROLOGUE}
+         uniform sampler2D cjMask;
+         uniform float cjHasMask;
+        `,
+      )
+      .replace(
+        "#include <map_fragment>",
+        `#include <map_fragment>
+         vec2 cjVp = vAtlasWorld.xz;
+         float cjVmain = length(cjVp - vec2(${CJ_VOLCANO_MAIN.x.toFixed(2)}, ${CJ_VOLCANO_MAIN.z.toFixed(2)}));
+         float cjVmin = length(cjVp - vec2(${CJ_VOLCANO_MINOR.x.toFixed(2)}, ${CJ_VOLCANO_MINOR.z.toFixed(2)}));
+         float cjVolcano = clamp(
+           (1.0 - smoothstep(${ (CJ_VOLCANO_MAIN.r * 0.95).toFixed(2) }, ${ (CJ_VOLCANO_MAIN.r * 1.08).toFixed(2) }, cjVmain))
+           + (1.0 - smoothstep(${(CJ_VOLCANO_MINOR.r * 0.95).toFixed(2)}, ${(CJ_VOLCANO_MINOR.r * 1.08).toFixed(2)}, cjVmin)),
+           0.0, 1.0);
+         float cjMaskLand = texture2D(cjMask, vMapUv).r;
+         float cjSea = vAtlasWorld.y < 0.0 ? 1.0 : 0.0;
+         if (cjHasMask > 0.5 && cjMaskLand < 0.75) cjSea = 1.0;
+         if (cjHasMask > 0.5 && cjMaskLand > 0.75) cjSea = 0.0;
+         if (cjVolcano > 0.12) cjSea = 0.0;
+         if (cjSea > 0.5) discard;
+        `,
+      )
+      .replace("#include <roughnessmap_fragment>", `#include <roughnessmap_fragment>\n${SURFACE_FRAGMENT_BODY}`);
+  };
 }
 
 function buildAtmosphereLayers() {
-  const noiseRng = mulberry32(0xa7c31e9);
-  const gridSize = 128;
-  const noiseGrid = new Float32Array(gridSize * gridSize);
-  for (let i = 0; i < noiseGrid.length; i += 1) noiseGrid[i] = noiseRng();
-
-  const cloudCanvas = document.createElement("canvas");
-  cloudCanvas.width = cloudCanvas.height = 512;
-  const cloudCtx = cloudCanvas.getContext("2d");
-  const cloudImg = cloudCtx.createImageData(512, 512);
-  for (let y = 0; y < 512; y += 1) {
-    for (let x = 0; x < 512; x += 1) {
-      const n = fractalNoiseGrid(noiseGrid, gridSize, x / 512, y / 512, 4);
-      const alpha = Math.round(noiseSmoothstep(0.78, 0.93, n) * 255);
-      const o = (y * 512 + x) * 4;
-      cloudImg.data[o] = 255; cloudImg.data[o + 1] = 255; cloudImg.data[o + 2] = 255;
-      cloudImg.data[o + 3] = alpha;
-    }
-  }
-  cloudCtx.putImageData(cloudImg, 0, 0);
-  const cloudTex = new THREE.CanvasTexture(cloudCanvas);
-  cloudTex.wrapS = cloudTex.wrapT = THREE.RepeatWrapping;
-  cloudTex.repeat.set(1.4, 1.1);
-  cloudLayer = new THREE.Mesh(
-    new THREE.PlaneGeometry(MAP_W * 1.55, MAP_H * 1.55).rotateX(-Math.PI / 2),
-    new THREE.MeshBasicMaterial({ map: cloudTex, transparent: true, opacity: 0.38, depthWrite: false }),
-  );
-  cloudLayer.position.y = 48;
-  scene.add(cloudLayer);
-
-  const gridSpacing = 98.5;
-  const gridVerts = [];
-  const xMin = -MAP_W * 1.5, xMax = MAP_W * 1.5;
-  const zMin = -MAP_H * 1.9, zMax = MAP_H * 1.9;
-  for (let x = xMin; x <= xMax; x += gridSpacing) {
-    gridVerts.push(x, -0.9, zMin, x, -0.9, zMax);
-  }
-  for (let z = zMin; z <= zMax; z += gridSpacing) {
-    gridVerts.push(xMin, -0.9, z, xMax, -0.9, z);
-  }
-  graticule = new THREE.LineSegments(
-    new THREE.BufferGeometry().setAttribute("position", new THREE.Float32BufferAttribute(gridVerts, 3)),
-    new THREE.LineBasicMaterial({ color: 0x7cc4e6, transparent: true, opacity: 0.13 }),
-  );
-  scene.add(graticule);
-
-  iceCap = new THREE.Group();
-  const iceMat = new THREE.MeshStandardMaterial({
-    color: 0xe8f2fa, roughness: 0.42, metalness: 0.08, transparent: true, opacity: 0.88,
-  });
-  const floeRng = mulberry32(0x51ce);
-  for (let i = 0; i < 28; i += 1) {
-    const r = 18 + floeRng() * 46;
-    const floe = new THREE.Mesh(new THREE.CircleGeometry(r, 11), iceMat);
-    floe.rotation.x = -Math.PI / 2;
-    floe.position.set((floeRng() - 0.5) * MAP_W * 1.15, -0.7, -MAP_H / 2 - 30 - floeRng() * 340);
-    iceCap.add(floe);
-  }
-  for (let i = 0; i < 8; i += 1) {
-    const r = 12 + floeRng() * 22;
-    const floe = new THREE.Mesh(new THREE.CircleGeometry(r, 9), iceMat);
-    floe.rotation.x = -Math.PI / 2;
-    floe.position.set((floeRng() - 0.5) * MAP_W * 0.7, -0.7, MAP_H / 2 + 40 + floeRng() * 160);
-    iceCap.add(floe);
-  }
-  scene.add(iceCap);
-
   const eurasiaVerts = [
     [-9, 39], [-8, 43], [-2, 47], [-4, 48], [1, 51], [8, 57], [6, 58], [5, 62], [14, 68], [26, 71],
     [40, 68], [55, 69], [70, 73], [90, 76], [105, 77], [128, 73], [150, 70], [170, 69], [190, 66],
@@ -1742,7 +2227,7 @@ function buildAtmosphereLayers() {
   shape.closePath();
   eurasiaOverlay = new THREE.Group();
   eurasiaOverlay.rotation.x = -Math.PI / 2;
-  eurasiaOverlay.position.y = HEIGHT_SCALE + 6;
+  eurasiaOverlay.position.y = TERRAIN_MAX + 6;
   eurasiaOverlay.renderOrder = 6;
   eurasiaOverlay.visible = false;
   const eurasiaFill = new THREE.Mesh(
@@ -1788,44 +2273,66 @@ async function boot() {
     fetch(new URL("../cities.json", import.meta.url), { cache: "no-store" }).then((r) => { if (!r.ok) throw new Error(`cities ${r.status}`); return r.json(); }),
   ]);
   const texture = await loadTex(new URL("../assets/basemap.webp", import.meta.url).href);
-  heightField = luminanceField(texture.image);
-  const hf = heightField;
+  const [hfLoaded, normalMap, maskMap] = await Promise.all([
+    loadHeightField().catch((error) => {
+      console.warn("立体地图：高程贴图不可用，回退到底图亮度推高度。", error);
+      return null;
+    }),
+    loadLinearMap(`${TERRAIN_BASE}.normal.png`).catch((error) => {
+      console.warn("立体地图：法线贴图不可用，只用顶点法线。", error);
+      return null;
+    }),
+    loadLinearMap(`${TERRAIN_BASE}.mask.png`).catch((error) => {
+      console.warn("立体地图：海陆遮罩不可用，海面按高程丢弃。", error);
+      return null;
+    }),
+    loadSurfaceTextures(),
+  ]);
+  const hf = hfLoaded || luminanceField(texture.image);
+  heightField = hf;
+  if (maskMap) {
+    maskMap.generateMipmaps = false;
+    maskMap.minFilter = THREE.LinearFilter;
+    maskMap.magFilter = THREE.LinearFilter;
+  }
+  waterUniforms.uDepthMap.value.dispose();
+  waterUniforms.uDepthMap.value = hf.fallback
+    ? buildDepthTexture(hf.sea, hf.cols, hf.rows)
+    : buildHeightDepthTexture();
 
-  const segsX = coarse ? 260 : 420, segsY = coarse ? 146 : 236;
+  const segsX = coarse ? 320 : 512;
+  const segsY = coarse ? 180 : 288;
   const geometry = new THREE.PlaneGeometry(MAP_W, MAP_H, segsX, segsY).rotateX(-Math.PI / 2);
   const pos = geometry.attributes.position;
   for (let i = 0; i < pos.count; i += 1) {
     const u = (pos.getX(i) + MAP_W / 2) / MAP_W;
     const v = (pos.getZ(i) + MAP_H / 2) / MAP_H;
-    const edge = Math.min(u, 1 - u, v, 1 - v);
-    pos.setY(i, sampleField(hf, u, v) * Math.min(1, edge * 40) - 1.2);
+    let y = sampleField(hf, u, v);
+    if (hf.fallback) {
+      const edge = Math.min(u, 1 - u, v, 1 - v);
+      y *= Math.min(1, edge * 40);
+    }
+    pos.setY(i, y);
   }
   geometry.computeVertexNormals();
 
-  const bumpCanvas = document.createElement("canvas");
-  bumpCanvas.width = hf.cols; bumpCanvas.height = hf.rows;
-  const bumpCtx = bumpCanvas.getContext("2d");
-  const bumpImg = bumpCtx.createImageData(hf.cols, hf.rows);
-  for (let i = 0; i < hf.field.length; i += 1) {
-    const g = Math.round(hf.field[i] * 255), o = i * 4;
-    bumpImg.data[o] = g; bumpImg.data[o + 1] = g; bumpImg.data[o + 2] = g; bumpImg.data[o + 3] = 255;
+  const landMat = new THREE.MeshStandardMaterial({
+    map: texture,
+    roughness: hf.fallback ? 0.86 : 0.9,
+    metalness: hf.fallback ? 0.04 : 0,
+  });
+  if (hf.fallback) {
+    landMat.bumpMap = bumpTexture(hf, texture.anisotropy);
+    landMat.bumpScale = 9;
+    attachFallbackSeaShader(landMat, buildSeaMaskTexture(hf.sea, hf.cols, hf.rows));
+  } else {
+    if (normalMap) {
+      normalMap.anisotropy = texture.anisotropy;
+      landMat.normalMap = normalMap;
+      landMat.normalScale = new THREE.Vector2(1.2, 1.2);
+    }
+    attachHeightLandShader(landMat, maskMap);
   }
-  bumpCtx.putImageData(bumpImg, 0, 0);
-  const bump = new THREE.CanvasTexture(bumpCanvas);
-  bump.wrapS = bump.wrapT = THREE.ClampToEdgeWrapping;
-  bump.colorSpace = THREE.NoColorSpace;
-  bump.anisotropy = texture.anisotropy;
-
-  const landMat = new THREE.MeshStandardMaterial({ map: texture, bumpMap: bump, bumpScale: 9, roughness: 0.86, metalness: 0.04 });
-  landMat.onBeforeCompile = (shader) => {
-    shader.fragmentShader = shader.fragmentShader.replace(
-      "#include <map_fragment>",
-      `#include <map_fragment>
-       float cjLum = dot(diffuseColor.rgb, vec3(0.2126, 0.7152, 0.0722));
-       if (diffuseColor.b > diffuseColor.r + 0.05 && cjLum < 0.45) discard;
-      `,
-    );
-  };
   continentMesh = new THREE.Mesh(geometry, landMat);
   scene.add(continentMesh);
 
@@ -1876,12 +2383,9 @@ async function boot() {
   const KM_STEPS = [200, 500, 1000, 2000, 5000, 10000];
   function frame(now) {
     stepFlight(now);
-    if (water.material?.uniforms?.time) water.material.uniforms.time.value = now * 0.001;
-    if (cloudLayer?.material?.map) {
-      cloudLayer.material.map.offset.x = now * 0.0000045;
-      cloudLayer.material.map.offset.y = now * 0.0000018;
-    }
-    if (now - scaleClock > 120) syncCloseups();
+    if (!reducedMotion) waterUniforms.uTime.value = now * 0.001;
+    sky.position.copy(camera.position);
+    updateCloseups();
     if (scaleBarEl && now - scaleClock > 120) {
       scaleClock = now;
       if (activeCity || activeDistrict) {
