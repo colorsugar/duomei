@@ -517,8 +517,8 @@ function requestNearbyDetails(now=performance.now()) {
   nextStreamCheck=now+350;
   sectors.update(camera,activeLandmark);
   landmarkLighting.focus(activeLandmark);
-  // city-far / 二级 GLB 等首帧后再拉，别和首屏可交互抢带宽
-  if(firstFramePainted)blenderModels.update(activeLandmark);
+  // 精华一线精模首帧即拉；city-far / 补建 GLB 延到首帧后
+  blenderModels.update(activeLandmark,{deferHeavy:!firstFramePainted});
   stream.limit=isMobile?3:6;
   const candidates=LANDMARKS.filter(l=>DETAIL[l.id]&&(!blenderModels.enabled||!blenderModels.supports(l.id))).map(l=>({l,d:camera.position.distanceTo(new THREE.Vector3(l.x,(l.h||0)*.3,l.z))}));
   const wanted=candidates.filter(({l,d})=>d<Math.min(isMobile?850:1250,Math.max(260,(l.span||400)*1.35)))
@@ -771,7 +771,8 @@ else { // 手机默认关阴影/波纹，少一档持续重绘与 shadow pass
   document.getElementById('t-shadows').checked = false;
   document.getElementById('t-ripples').checked = false;
 }
-bind('t-reflection',v=>{effects.reflection=v;riverReflection.setQuality(v?'balanced':'flow');water.visible=!v;});
+const syncWaterFallback=()=>{water.visible=!effects.reflection||!riverReflection.reflectedOnce;};
+bind('t-reflection',v=>{effects.reflection=v;riverReflection.setQuality(v?'balanced':'flow');if(v&&!riverReflection.reflectedOnce){water.visible=true;riverReflection.onFirstReflect=()=>{syncWaterFallback();invalidate(true);};}else syncWaterFallback();});
 bind('t-shadows',v=>{effects.shadows=v;applyMode(modeCur);});
 bind('t-ripples',v=>{effects.ripples=v&&!reduceMotion;});
 bind('t-leaves',v=>setTreeDetail(v));

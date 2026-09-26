@@ -8,6 +8,7 @@ import {compactStaticModel} from './static-model.js';
 const PARKS={qixing:['qixing','putuoshan','yueyashan','luotuoshan','qixiasi'],chuanshan:['chuanshan','tashan'],xishan:['xishan','yinshan'],yushan:['yushan']};
 const REBUILT=['xiangbishan','jiefangqiao']; // landmarks re-modelled 2026-09-26, see scripts/xiangbishan and scripts/jiefangqiao
 const EXISTING=['xiangbishan','xiaoyaolou','rita','yueta','wangcheng','fuboshan','diecaishan','gunanmen','mulongta','jiefangqiao','shelita','huaqiao'];
+const HERO=['xiangbishan','jiefangqiao','xiaoyaolou','rita','yueta']; // 首屏精华一线：不等 city-far
 export function installBlenderModels({droppedFootprints=[],scene,camera,landmarks,models,detail,pickables,invalidate,paused,mobile,onRegions=()=>{}}){
  const loader=new GLTFLoader(),draco=new DRACOLoader();draco.setDecoderPath(new URL('../vendor/three/addons/libs/draco/gltf/',import.meta.url).href);draco.setWorkerLimit(1);loader.setDRACOLoader(draco);
  const sharedSources=new Map();
@@ -32,7 +33,9 @@ export function installBlenderModels({droppedFootprints=[],scene,camera,landmark
   if(mat.userData.nightStrength==null&&(role==='wood'||role==='roof'))mat.emissiveMap=mat.map;
  }});};
  async function load(id){
-  if(id==='xiaoyaolou'){
+  let lmId=id,glbName=id;
+  if(mobile()&&HERO.includes(id))glbName=id+'-far';
+  if(id==='xiaoyaolou'&&!mobile()){
    const {loadXiaoyaolou,setXiaoyaolouNight}=await import('./xiaoyaolou-model.js');
    const root=await loadXiaoyaolou(),lm=find(id);let frozen=0;
    root.traverse(o=>{frozen++;if(o.isMesh){o.userData.lm=lm;o.receiveShadow=true;pickables.push(o);}});
@@ -40,8 +43,10 @@ export function installBlenderModels({droppedFootprints=[],scene,camera,landmark
    root.userData.setNativeNight=setXiaoyaolouNight;root.userData.compaction={removed:0,frozen};
    root.visible=false;group.add(root);tint(root);invalidate(true);return root;
   }
-  const gltf=await loader.loadAsync(new URL('../assets/blender/'+id+'.glb',import.meta.url).href),root=gltf.scene;
-  if(id==='city-far'){
+  let gltf,root;
+  try{gltf=await loader.loadAsync(new URL('../assets/blender/'+glbName+'.glb',import.meta.url).href);}catch(e){if(glbName!==lmId){gltf=await loader.loadAsync(new URL('../assets/blender/'+lmId+'.glb',import.meta.url).href);glbName=lmId;}else throw e;}
+  root=gltf.scene;
+  if(lmId==='city-far'){
    // The overview keeps its baked city but swaps in the rebuilt landmarks (far LOD).
    const stale=[];root.traverse(o=>{if(o.isMesh){let t=o.userData.lmId;for(let p=o.parent;!t&&p;p=p.parent)t=p.userData.lmId;if(REBUILT.includes(t))stale.push(o);}});
    for(const o of stale){o.removeFromParent();o.geometry.dispose();}
@@ -56,9 +61,10 @@ export function installBlenderModels({droppedFootprints=[],scene,camera,landmark
   root.updateMatrixWorld(true);const subgroups=new Map(),meshes=[],treePoints=[];root.traverse(o=>{if(o.isMesh)meshes.push(o);});
   for(const o of meshes){
    let tag=o.userData.lmId;for(let p=o.parent;!tag&&p;p=p.parent)tag=p.userData.lmId;
-   const lm=find(tag)||find(id);if(!lm&&!addonIds.includes(id))continue;
-   if(id==='city-ground'&&droppedFootprints.length&&o.geometry.index)cullFootprints(o);
-   if(id==='city-night'||id==='city-ground'){o.castShadow=false;o.receiveShadow=id==='city-ground';continue;}
+   if(!tag&&HERO.includes(lmId))tag=lmId;
+   const lm=find(tag)||find(lmId);if(!lm&&!addonIds.includes(lmId))continue;
+   if(lmId==='city-ground'&&droppedFootprints.length&&o.geometry.index)cullFootprints(o);
+   if(lmId==='city-night'||lmId==='city-ground'){o.castShadow=false;o.receiveShadow=lmId==='city-ground';continue;}
    const names=[].concat(o.material).map(m=>m.name);
    if(names.some(n=>n.includes('乔木叶簇'))){const p=new THREE.Vector3(),q=new THREE.Quaternion(),s=new THREE.Vector3();o.matrixWorld.decompose(p,q,s);treePoints.push([p.x,p.z,p.y-s.y*.25,s.y*.85,treePoints.length%4?'camphor':'banyan']);o.removeFromParent();continue;}
    if(names.includes('树皮')){o.removeFromParent();continue;}
@@ -67,7 +73,7 @@ export function installBlenderModels({droppedFootprints=[],scene,camera,landmark
   }
   for(const [tag,sub] of subgroups){mergeStatic(sub);sub.traverse(o=>{if(o.isMesh){o.userData.lm=find(tag);o.castShadow=!/bark|leaf|叶|树/.test(String(o.material?.name));o.receiveShadow=true;pickables.push(o);}});}
   if(treePoints.length){const trees=await createUrbanTrees(treePoints);root.add(trees);root.userData.trees=trees;}
-  root.userData.parts=subgroups;root.userData.replaces=PARKS[id]||[id];root.userData.key=id;root.visible=false;group.add(root);root.userData.compaction=compactStaticModel(root);tint(root);invalidate(true);return root;
+  root.userData.parts=subgroups;root.userData.replaces=PARKS[lmId]||[lmId];root.userData.key=lmId;root.visible=false;group.add(root);root.userData.compaction=compactStaticModel(root);tint(root);invalidate(true);return root;
  }
  const release=(_id,root)=>{
   const removed=new Set();root.traverse(o=>removed.add(o));root.removeFromParent();for(let i=pickables.length-1;i>=0;i--)if(removed.has(pickables[i]))pickables.splice(i,1);
@@ -79,14 +85,15 @@ export function installBlenderModels({droppedFootprints=[],scene,camera,landmark
  return {stream,supports:id=>EXISTING.includes(id)||Object.values(PARKS).some(ids=>ids.includes(id)),get enabled(){return enabled;},get ready(){return !!far||nextFarAttempt>0;},
  setNight(value){if(Math.abs(night-value)<.001)return;night=value;if(far)tint(far);for(const root of addons)tint(root);for(const e of stream.cache.values())tint(e.value);},
  setEnabled(value){enabled=value;group.visible=value;if(!value){onRegions(new Set());stream.update([]);for(const model of Object.values(models))model.visible=true;}invalidate(true);},
- update(active){
-  if(enabled&&far&&!farPending&&!addonPending&&!paused()&&addonIndex<addonIds.length){
+ update(active,{deferHeavy=false}={}){
+  if(!deferHeavy&&enabled&&far&&!farPending&&!addonPending&&!paused()&&addonIndex<addonIds.length){
    addonPending=true;const id=addonIds[addonIndex++];
    load(id).then(root=>{root.visible=true;addons.push(root);invalidate();}).catch(e=>console.warn('Landscape fixtures',e)).finally(()=>{addonPending=false;});
   }
-  if(enabled&&!far&&!farPending&&!paused()&&performance.now()>nextFarAttempt){farPending=true;load('city-far').then(root=>{far=root;invalidate(true);}).catch(e=>{nextFarAttempt=performance.now()+15000;console.warn('City model overview',e);}).finally(()=>farPending=false);}
+  if(!deferHeavy&&enabled&&!far&&!farPending&&!paused()&&performance.now()>nextFarAttempt){farPending=true;load('city-far').then(root=>{far=root;invalidate(true);}).catch(e=>{nextFarAttempt=performance.now()+15000;console.warn('City model overview',e);}).finally(()=>farPending=false);}
   const wanted=[];
-  if(enabled){const k=key(active);if(k&&(!EXISTING.includes(k)||camera.position.distanceTo(new THREE.Vector3(active.x,active.h||0,active.z))<550))wanted.push(k);
+  if(enabled){for(const id of HERO)wanted.push(id);
+   const k=key(active);if(k&&(!EXISTING.includes(k)||camera.position.distanceTo(new THREE.Vector3(active.x,active.h||0,active.z))<550))wanted.push(k);
    const nearest=landmarks.filter(l=>EXISTING.includes(l.id)).map(l=>[l,Math.hypot(camera.position.x-l.x,camera.position.z-l.z,camera.position.y-(l.h||0))]).sort((a,b)=>a[1]-b[1]);
    for(const [lm,d] of nearest)if(d<270)wanted.push(lm.id);
    for(const id of Object.keys(PARKS)){const lm=find(id);if(lm&&Math.hypot(camera.position.x-lm.x,camera.position.z-lm.z)<1200&&camera.position.y<1100)wanted.push(id);}}

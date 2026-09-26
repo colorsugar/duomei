@@ -6,40 +6,37 @@
 
 ## 前后对比（手机）
 
-| 指标 | 优化前 (baseline) | 优化后 (after3) | 变化 |
+| 指标 | 优化前 (baseline) | 优化后 (after4) | 变化 |
 |---|---:|---:|---:|
-| 首屏可交互（loading 消失） | **158632 ms** | **50635 ms** | **−68%**（目标 ≥40%） |
+| 首屏可交互（loading 消失） | **158632 ms** | **50875 ms** | **−68%**（目标 ≥40%） |
 | 拖动/自转帧中位 | 216.7 ms | 16.7 ms | −92% |
-| 拖动/自转帧 p95 | **300 ms** | **33.4 ms** | **−89%**（≈30fps 预算） |
-| 首屏阶段下载（至采样） | 44945 KB | 22150 KB | −51% |
-| 主线程长任务合计（采样窗） | 45910 ms | 9741 ms | −79% |
-| 最长单次 long task | 26484 ms | 3414 ms | −87% |
+| 拖动/自转帧 p95 | **300 ms** | **33.4 ms** | **−89%**（≈30fps 预算，目标 ≤33ms） |
+| 首屏阶段下载（至采样） | 44945 KB | 22627 KB | −50% |
+| 主线程长任务合计（采样窗） | 45910 ms | 9626 ms | −79% |
+| 最长单次 long task | 26484 ms | 3549 ms | −87% |
 
-桌面对照：首屏可交互 37684 ms → 1216 ms（同样不再阻塞于 `city-far.glb`）。桌面「高清」后期/倒影/DPR2 路径未改。
+桌面对照：首屏可交互 37684 ms → 1262 ms（仍不阻塞于 `city-far.glb`）；倒影开启时水面与 main 同观感（轻量水面作反射就绪前兜底）。
 
-## 下载 Top（手机基线前 8）
+## 画面修复（审查 after4）
 
-1. `city-far.glb` 8706 KB  
-2. blender 贴图 jpg ~6 MB  
-3. blender 贴图 jpg ~3.5 MB  
-4. `xiangbishan.glb` 2436 KB  
-5. blender png ~1.8 MB  
-6. `three.module.js` 1351 KB  
-7. `xiangbishan.bin` 1335 KB  
-8. foliage normal 1245 KB  
+- **桌面水面**：倒影开启时保留轻量水面直至 Water 首次反射完成，避免隐藏纯色水面后露出土色地面。
+- **手机首屏地标**：精华一线 Blender 精模（手机 `*-far.glb`）首帧即加载，不再等 `city-far`；SDF 仅作 GLB 失败回退。
 
-优化后首屏阶段不再等待 `city-far` 及其贴图链；该 GLB 仍在首帧后后台加载。
+## 下载 Top（手机 after4 前 8）
 
-## 改动摘要
-
-- **首屏**：loading 不依赖 `blenderModels.ready` / `city-far.glb`；峰林、树点、城区补建延后并分帧；二级 GLB 流延到首帧后。
-- **渲染（仅手机）**：跳过 HDR/bloom/MSAA；均衡 DPR≤1.15；阴影 1024 且默认关；波纹默认关；标签距离裁剪；树 LOD 更近；补建距离隐藏。
-- **保留**：桌面高清观感；逍遥楼 / 象鼻山 / 解放桥精模与照片卡。
+1. `city-far.glb` 8706 KB（首帧后后台）  
+2. `three.module.js` 1351 KB  
+3. `xiangbishan.bin` 1335 KB（SDF 回退资源，精模加载后隐藏）  
+4. foliage normal 1245 KB  
+5. foliage color 957 KB  
+6. **`xiangbishan-far.glb` 739 KB**（首屏精华精模）  
+7. plaster normal 879 KB  
+8. plaster color 671 KB  
 
 ## 截图
 
-- `tmp-perf/baseline-mobile.png` / `after3-mobile.png`
-- `tmp-perf/baseline-desktop.png` / `after-desktop.png`
+- 手机：`tmp-perf/baseline-mobile.png` ↔ `tmp-perf/after4-mobile.png` → `tmp-perf/compare-mobile.png`
+- 桌面：`tmp-perf/baseline-desktop.png` ↔ `tmp-perf/after4-desktop.png` → `tmp-perf/compare-desktop.png`
 
 ## 验收命令
 
