@@ -69,7 +69,29 @@ function neteaseMusicDevApi() {
   };
 }
 
+function staticDirIndex() {
+  return {
+    name: "duomei-static-dir-index",
+    configureServer(server: { middlewares: { use: (handler: (
+      request: import("node:http").IncomingMessage,
+      response: import("node:http").ServerResponse,
+      next: () => void,
+    ) => void) => void } }) {
+      server.middlewares.use((request, _response, next) => {
+        const path = request.url ? new URL(request.url, "http://localhost").pathname : "";
+        // Vite SPA fallback would otherwise swallow public/*/ directory URLs.
+        if (path === "/xiaoyao" || path === "/xiaoyao/") {
+          request.url = "/xiaoyao/index.html";
+        } else if (path === "/yunyou" || path === "/yunyou/") {
+          request.url = "/yunyou/index.html";
+        }
+        next();
+      });
+    },
+  };
+}
+
 export default defineConfig({
   base: process.env.GITHUB_PAGES ? "/duomei/" : "/",
-  plugins: [react(), neteaseMusicDevApi()],
+  plugins: [staticDirIndex(), react(), neteaseMusicDevApi()],
 });

@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="night">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0a1420">
+  <link rel="icon" href="data:,">
+  <title>登逍遥楼 · 多美小记</title>
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "/yunyou/vendor/three/three.module.js",
+      "three/addons/": "/yunyou/vendor/three/addons/"
+    }
+  }
+  </script>
+  <style>
+    :root {
+      --ink: #f2ead6;
+      --muted: rgba(242, 234, 214, 0.65);
+      --panel: rgba(12, 20, 32, 0.82);
+      --line: rgba(245, 240, 225, 0.16);
+      --accent: #a8dadc;
+    }
+    [data-theme="day"] {
+      --ink: #20201d;
+      --muted: #6f6b63;
+      --panel: rgba(250, 247, 240, 0.9);
+      --line: rgba(32, 32, 29, 0.16);
+      --accent: #52664c;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; height: 100%; overflow: hidden; font-family: "Noto Sans SC", system-ui, sans-serif; color: var(--ink); background: #0a1420; }
+    #c { display: block; width: 100%; height: 100%; touch-action: none; cursor: crosshair; }
+    a { color: var(--muted); text-decoration: none; }
+    a:hover { color: var(--ink); }
+    .top-bar {
+      position: fixed; inset: 0 0 auto 0; display: flex; justify-content: space-between; align-items: flex-start;
+      padding: calc(10px + env(safe-area-inset-top)) 12px 0; pointer-events: none; z-index: 5;
+    }
+    .top-bar > * { pointer-events: auto; }
+    .back {
+      padding: 8px 12px; border-radius: 999px; background: var(--panel); border: 1px solid var(--line);
+      backdrop-filter: blur(10px); font-size: 13px;
+    }
+    #night-toggle {
+      min-width: 64px; min-height: 40px; padding: 8px 14px; border-radius: 999px; border: 1px solid var(--line);
+      background: var(--panel); color: var(--ink); cursor: pointer; backdrop-filter: blur(10px);
+    }
+    #teleport-bar {
+      position: fixed; left: 50%; bottom: calc(12px + env(safe-area-inset-bottom)); transform: translateX(-50%);
+      display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; max-width: min(100% - 24px, 520px); z-index: 5;
+    }
+    #teleport-bar button {
+      min-height: 40px; padding: 6px 12px; border-radius: 999px; border: 1px solid var(--line);
+      background: var(--panel); color: var(--ink); cursor: pointer; font-size: 12px; backdrop-filter: blur(10px);
+    }
+    #hud { position: fixed; inset: 0; pointer-events: none; z-index: 4; }
+    #labels { position: absolute; inset: 0; pointer-events: none; }
+    .lbl {
+      position: absolute; transform: translate(-50%, -100%); pointer-events: auto; cursor: pointer;
+      font-size: 12px; font-weight: 600; padding: 4px 8px; border-radius: 6px;
+      background: var(--panel); border: 1px solid var(--line); color: var(--ink);
+    }
+    #photo-card {
+      position: fixed; right: 12px; bottom: calc(64px + env(safe-area-inset-bottom)); width: min(320px, calc(100% - 24px));
+      padding: 10px; border-radius: 12px; background: var(--panel); border: 1px solid var(--line);
+      backdrop-filter: blur(12px); z-index: 6; pointer-events: auto;
+    }
+    #photo-card img { width: 100%; border-radius: 8px; display: block; }
+    #photo-card .cap { margin: 8px 0 0; font-size: 12px; color: var(--muted); }
+    #photo-card .card-close {
+      position: absolute; top: 6px; right: 8px; border: 0; background: transparent; color: var(--ink);
+      font-size: 22px; cursor: pointer; line-height: 1;
+    }
+    #joystick, #look-pad {
+      position: fixed; bottom: calc(72px + env(safe-area-inset-bottom)); width: 120px; height: 120px;
+      border-radius: 50%; border: 1px solid var(--line); background: rgba(0,0,0,0.15); z-index: 3;
+      display: none;
+    }
+    #joystick { left: 16px; }
+    #look-pad { right: 16px; }
+    @media (pointer: coarse) {
+      #joystick, #look-pad { display: block; }
+      #c { cursor: default; }
+    }
+    #hint {
+      position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%);
+      font-size: 13px; color: var(--muted); pointer-events: none; transition: opacity 0.6s;
+    }
+    body.started #hint { opacity: 0; }
+  </style>
+</head>
+<body>
+  <canvas id="c"></canvas>
+  <div id="hint">点击画面开始 · WASD 移动</div>
+  <div class="top-bar">
+    <a class="back" href="/yunyou-map">← 返回云游</a>
+    <button type="button" id="night-toggle" aria-pressed="true">夜景</button>
+  </div>
+  <div id="teleport-bar"></div>
+  <div id="hud"></div>
+  <div id="joystick" aria-hidden="true"></div>
+  <div id="look-pad" aria-hidden="true"></div>
+  <script type="module">
+    import './src/main.js';
+    document.getElementById('c').addEventListener('click', () => document.body.classList.add('started'), { once: true });
+  </script>
+</body>
+</html>
