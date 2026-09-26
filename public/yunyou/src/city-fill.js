@@ -7,7 +7,7 @@ import {ROADS, BUILDINGS, WATER, GREEN, FOOT} from '../data/geo.js';
 import {pointInRing, ringBBox, hash} from './lib.js';
 import {cityUV} from './city-material.js';
 const BUCKET=60;
-export function createCityFill({material,blocked=()=>false,oldTown=()=>false,taken=[],area={x0:-1150,x1:900,z0:-900,z1:1900},step=21}={}){
+export async function createCityFill({material,blocked=()=>false,oldTown=()=>false,taken=[],area={x0:-1150,x1:900,z0:-900,z1:1900},step=21,yieldEvery=0}={}){
  const segs=new Map(),put=(k,v)=>{if(!segs.has(k))segs.set(k,[]);segs.get(k).push(v);};
  for(const [kind,w] of [['trunk',16],['primary',12],['secondary',9],['tertiary',7],['minor',5],['pedestrian',3.5],['rail',4]])for(const p of ROADS[kind]||[])for(let i=1;i<p.length;i++){
   const a=p[i-1],b=p[i],s={a,b,w};const x0=Math.floor((Math.min(a[0],b[0])-150)/BUCKET),x1=Math.floor((Math.max(a[0],b[0])+150)/BUCKET),z0=Math.floor((Math.min(a[1],b[1])-150)/BUCKET),z1=Math.floor((Math.max(a[1],b[1])+150)/BUCKET);
@@ -23,7 +23,7 @@ export function createCityFill({material,blocked=()=>false,oldTown=()=>false,tak
  const addBox=bb=>{for(let x=Math.floor(bb.x0/BUCKET);x<=Math.floor(bb.x1/BUCKET);x++)for(let z=Math.floor(bb.z0/BUCKET);z<=Math.floor(bb.z1/BUCKET);z++){const k=x+':'+z;if(!grid.has(k))grid.set(k,[]);grid.get(k).push(bb);}};
  const inPoly=(list,x,z)=>list.some(p=>pointInRing(x,z,p.o)&&!p.h.some(h=>pointInRing(x,z,h)));
  const wet=(x,z)=>inPoly(WATER,x,z),park=(x,z)=>inPoly(GREEN,x,z);
- const cells=new Map();let count=0;
+ const cells=new Map();let count=0,visited=0;
  const push=(g,cx,cz)=>{const k=Math.floor(cx/250)+':'+Math.floor(cz/250);if(!cells.has(k))cells.set(k,[]);cells.get(k).push(g);};
  const col=new THREE.Color();
  // Wall palettes seen across central Guilin: white/cream tile, pale grey render, weathered beige, the odd pink or pale yellow.
@@ -39,7 +39,9 @@ export function createCityFill({material,blocked=()=>false,oldTown=()=>false,tak
   g.setAttribute('color',new THREE.BufferAttribute(c,3));g.setAttribute('facade',new THREE.BufferAttribute(f,4));cityUV(g);return g;};
  const gable=(w,d,h)=>{const s=new THREE.Shape([new THREE.Vector2(-d/2-.6,0),new THREE.Vector2(d/2+.6,0),new THREE.Vector2(0,h)]);const g=new THREE.ExtrudeGeometry(s,{depth:w+1.0,bevelEnabled:false});g.translate(0,0,-(w+1)/2);g.rotateY(Math.PI/2);return g.toNonIndexed();};
  const box=(w,h,d)=>new THREE.BoxGeometry(w,h,d).toNonIndexed();
+ const pause=()=>new Promise(r=>'requestIdleCallback' in window?requestIdleCallback(r,{timeout:48}):setTimeout(r,0));
  for(let z=area.z0;z<area.z1;z+=step)for(let x=area.x0;x<area.x1;x+=step){
+  if(yieldEvery&&++visited%yieldEvery===0)await pause();
   const seed=`${x}:${z}`,px=x+(hash(seed+'x')-.5)*step*.5,pz=z+(hash(seed+'z')-.5)*step*.5;
   const heritage=oldTown(px,pz),road=nearest(px,pz);if(road.d<5||(road.d>140&&!heritage))continue; // street-facing blocks only; stay off the carriageway
   if(wet(px,pz)||park(px,pz)||blocked(px,pz))continue;
@@ -78,7 +80,16 @@ export function createCityFill({material,blocked=()=>false,oldTown=()=>false,tak
   count++;
  }
  const group=new THREE.Group();group.name='city-infill';
- for(const geos of cells.values()){const mesh=new THREE.Mesh(mergeGeometries(geos),material);mesh.castShadow=mesh.receiveShadow=true;group.add(mesh);geos.forEach(g=>g.dispose());}
- group.userData.count=count; 
+ for(const geos of cells.values()){const mesh=new THREE.Mesh(mergeGeometries(geos),material);mesh.castShadow=mesh.receiveShadow=true;mesh.geometry.computeBoundingSphere();group.add(mesh);geos.forEach(g=>g.dispose());}
+ group.userData.count=count;
+ // ponytail: distance cull by cell bounding sphere; rebuild cells if footprints move
+ group.userData.update=(camera,maxDist=4000)=>{
+  const origin=camera.position;
+  for(const mesh of group.children){
+   const sphere=mesh.geometry.boundingSphere;if(!sphere)continue;
+   const show=origin.distanceTo(sphere.center)<maxDist;
+   if(mesh.visible!==show)mesh.visible=show;
+  }
+ };
  return group;
 }

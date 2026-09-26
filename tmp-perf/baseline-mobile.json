@@ -1,0 +1,128 @@
+{
+  "label": "baseline",
+  "mode": "mobile",
+  "url": "http://127.0.0.1:5190/yunyou/index.html?standalone=1",
+  "wallMs": 196381,
+  "interactiveMs": 158632,
+  "totalDownloadKB": 44945,
+  "top15": [
+    {
+      "url": "/yunyou/assets/blender/city-far.glb",
+      "kb": 8706
+    },
+    {
+      "url": "/yunyou/assets/blender/textures/440310f05af089f2c9335316.jpg",
+      "kb": 6036
+    },
+    {
+      "url": "/yunyou/assets/blender/textures/e0ffd8ebe2c93de8299a3efb.jpg",
+      "kb": 3568
+    },
+    {
+      "url": "/yunyou/assets/blender/xiangbishan.glb",
+      "kb": 2436
+    },
+    {
+      "url": "/yunyou/assets/blender/textures/7c02d7ba3df7ea61c5e5777c.png",
+      "kb": 1861
+    },
+    {
+      "url": "/yunyou/assets/blender/textures/d171f45ef01bc6e239b00dfa.jpg",
+      "kb": 1642
+    },
+    {
+      "url": "/yunyou/vendor/three/three.module.js",
+      "kb": 1351
+    },
+    {
+      "url": "/yunyou/assets/blender/textures/18cf434655a75e30400d0e23.jpg",
+      "kb": 1339
+    },
+    {
+      "url": "/yunyou/assets/models/xiangbishan.bin",
+      "kb": 1335
+    },
+    {
+      "url": "/yunyou/assets/tex/foliage/leaves-normal.jpg",
+      "kb": 1245
+    },
+    {
+      "url": "/yunyou/assets/blender/textures/91675dc814c5a6dd64ac57be.jpg",
+      "kb": 1011
+    },
+    {
+      "url": "/yunyou/assets/blender/city-ground.glb",
+      "kb": 982
+    },
+    {
+      "url": "/yunyou/assets/tex/foliage/leaves-color.jpg",
+      "kb": 957
+    },
+    {
+      "url": "/yunyou/assets/tex/pbr/plaster/normal.jpg",
+      "kb": 879
+    },
+    {
+      "url": "/yunyou/assets/blender/jiefangqiao-far.glb",
+      "kb": 855
+    }
+  ],
+  "longTasks": {
+    "count": 50,
+    "totalMs": 45910,
+    "worst": [
+      {
+        "name": "self",
+        "duration": 26484,
+        "start": 47171.60000000149
+      },
+      {
+        "name": "self",
+        "duration": 4859,
+        "start": 73674
+      },
+      {
+        "name": "self",
+        "duration": 2213,
+        "start": 83435.20000000298
+      },
+      {
+        "name": "self",
+        "duration": 1039,
+        "start": 78548.60000000149
+      },
+      {
+        "name": "self",
+        "duration": 771,
+        "start": 85652.89999999851
+      },
+      {
+        "name": "self",
+        "duration": 684,
+        "start": 81156.5
+      },
+      {
+        "name": "self",
+        "duration": 482,
+        "start": 89213
+      },
+      {
+        "name": "self",
+        "duration": 334,
+        "start": 92127.39999999851
+      }
+    ]
+  },
+  "frames": {
+    "frameCount": 103,
+    "median": 216.7,
+    "p95": 300,
+    "mean": 335.75,
+    "drawCalls": 1,
+    "triangles": 1,
+    "textures": 39,
+    "geometries": 237,
+    "quality": "balanced"
+  },
+  "screenshot": "/Users/chenghaoliu/Projects/duomei-perf/tmp-perf/baseline-mobile.png"
+}

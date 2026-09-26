@@ -15,15 +15,16 @@ export function createRiverReflection(geometry,{mobile=false}={}) {
   .replace('( vec3( 0.1 ) + reflectionSample * 0.9 + reflectionSample * specularLight )','( reflectionSample * vec3( 0.86, 0.95, 0.92 ) + reflectionSample * specularLight * 0.6 )');
  water.material.fragmentShader=water.material.fragmentShader.replace('vec3 outgoingLight = albedo;','vec3 outgoingLight = albedo + specularLight * sunColor * 0.08;');
  water.material.uniforms.size.value=.55;
- const reflect=water.onBeforeRender,lastPosition=new THREE.Vector3(Infinity,Infinity,Infinity),lastRotation=new THREE.Quaternion();let lastTime=-Infinity,quality='high';
+ const reflect=water.onBeforeRender,lastPosition=new THREE.Vector3(Infinity,Infinity,Infinity),lastRotation=new THREE.Quaternion();let lastTime=-Infinity,quality='high',reflectedOnce=false,onFirstReflect=null;
  water.onBeforeRender=(renderer,scene,camera)=>{
   const now=performance.now(),moving=lastPosition.distanceToSquared(camera.position)>.01||1-Math.abs(lastRotation.dot(camera.quaternion))>1e-6;
   water.material.uniforms.eye.value.copy(camera.position);
   // Still water reflections refresh for animated boats; active camera stays exact.
   if(!moving&&now-lastTime<(quality==='high'?90:180))return;
   reflect(renderer,scene,camera);lastTime=now;lastPosition.copy(camera.position);lastRotation.copy(camera.quaternion);
+  if(!reflectedOnce){reflectedOnce=true;onFirstReflect?.();onFirstReflect=null;}
  };
- return {water,setQuality:q=>{quality=q;water.visible=q!=='flow';lastTime=-Infinity;},update:dt=>{water.material.uniforms.time.value+=dt*.25;},setNight:(n,sunDirection)=>{
+ return {water,setQuality:q=>{quality=q;water.visible=q!=='flow';lastTime=-Infinity;if(q==='flow')reflectedOnce=false;},get reflectedOnce(){return reflectedOnce;},set onFirstReflect(fn){onFirstReflect=fn;},update:dt=>{water.material.uniforms.time.value+=dt*.25;},setNight:(n,sunDirection)=>{
   water.material.uniforms.sunColor.value.setHex(0xfff1d8).lerp(new THREE.Color(0x819cc9),n);
   water.material.uniforms.waterColor.value.setHex(0x2a6f5a).lerp(new THREE.Color(0x102b2a),n);
   water.material.uniforms.sunDirection.value.copy(sunDirection).normalize();lastTime=-Infinity;
