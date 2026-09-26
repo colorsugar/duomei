@@ -1,9 +1,9 @@
 /**
- * 漓江水面：Clearwater（MIT, Aurélien / Lumaris）浅水焦散思路的 Three.js 移植。
- * 完整 FFT 实现见 tmp-xiaoyao/refs/clearwater — 此处为 MVP 折射 + 投影焦散 + 远距天空反射。
- * 许可：public/xiaoyao/vendor/clearwater-LICENSE.txt
+ * 漓江水面：WATER 真实轮廓 + 焦散 / 夜景反射
  */
 import * as THREE from 'three';
+import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
+import { flatRing } from '/yunyou/src/lib.js';
 
 const vertexShader = /* glsl */ `
 varying vec2 vWorldXZ;
@@ -23,13 +23,8 @@ uniform vec3 uShallow;
 uniform vec3 uSky;
 uniform float uNight;
 uniform float uCausticScale;
-uniform sampler2D uNoise;
 varying vec2 vWorldXZ;
 varying vec3 vView;
-
-float hash(vec2 p) {
-  return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453);
-}
 
 float caustic(vec2 p) {
   vec2 q = p * uCausticScale;
@@ -55,8 +50,11 @@ void main() {
   vec3 water = mix(uShallow, uDeep, shore);
   water += vec3(0.35, 0.55, 0.45) * c * (1.0 - uNight) * (1.0 - dist * 0.4);
   vec3 refl = mix(uSky, uDeep, 0.35);
-  water = mix(water, refl, fres * (0.45 + dist * 0.5));
-  water *= mix(1.0, 0.35, uNight);
+  float streak = exp(-abs(vWorldXZ.x * 0.015 + vWorldXZ.y * 0.008 - uTime * 0.2) * 2.5);
+  refl += vec3(0.45, 0.55, 0.95) * streak * uNight * 0.35;
+  refl += vec3(0.75, 0.65, 1.0) * uNight * 0.12 * sin(vWorldXZ.x * 0.04 + uTime * 0.5);
+  water = mix(water, refl, fres * (0.45 + dist * 0.5 + uNight * 0.25));
+  water *= mix(1.0, 0.42, uNight);
   gl_FragColor = vec4(water, 0.92);
 }`;
 
@@ -76,9 +74,18 @@ function makeNoiseTexture() {
   return tex;
 }
 
-export function createLijiangWater({ mobile = false } = {}) {
-  const geo = new THREE.PlaneGeometry(520, 380, 1, 1);
-  geo.rotateX(-Math.PI / 2);
+export function createLijiangWater({ mobile = false, waterPolys = [] } = {}) {
+  const geos = waterPolys.map((p) => flatRing(p.o, p.h, 0.08));
+  const geo =
+    geos.length > 0
+      ? mergeGeometries(geos)
+      : (() => {
+          const g = new THREE.PlaneGeometry(280, 200, 1, 1);
+          g.rotateX(-Math.PI / 2);
+          return g;
+        })();
+  if (geos.length) geos.forEach((g) => g.dispose());
+
   const mat = new THREE.ShaderMaterial({
     transparent: true,
     depthWrite: false,
@@ -96,10 +103,13 @@ export function createLijiangWater({ mobile = false } = {}) {
     fragmentShader,
   });
   const mesh = new THREE.Mesh(geo, mat);
-  mesh.position.set(40, 0.15, 120);
+  mesh.position.y = 0.12;
   mesh.name = 'lijiang-water';
   return {
     mesh,
+    setSkyColor(c) {
+      mat.uniforms.uSky.value.copy(c);
+    },
     update(t, sunDir, night) {
       mat.uniforms.uTime.value = t;
       if (sunDir) mat.uniforms.uSunDir.value.copy(sunDir);

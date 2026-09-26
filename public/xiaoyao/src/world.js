@@ -4,13 +4,31 @@ import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
 import { Sky } from 'three/addons/objects/Sky.js';
 import { loadXiaoyaolou, setXiaoyaolouNight } from '/yunyou/src/xiaoyaolou-model.js';
 import { createKarstHorizon } from '/yunyou/src/karst-horizon.js';
-import { XIAOYAO_LIGHTS } from '/yunyou/src/waterfront.js';
+import { HORIZON_DAY, HORIZON_NIGHT } from '/yunyou/src/atmosphere.js';
 import { LANDMARKS } from '/yunyou/data/landmarks.js';
 import { buildWalkColliders, heightAt } from './colliders.js';
 import { createLijiangWater } from './water-lijiang.js';
 import { latLonToLocal, worldToLocal, footLocal, bearingToXZ, ORIGIN_XY } from './geo-utils.js';
+import { createLocalCity } from './city.js';
+import { createNightDome } from './night-dome.js';
+import { createInterior } from './interior.js';
 
 const mat = (c, o = {}) => new THREE.MeshStandardMaterial({ color: c, roughness: 0.88, ...o });
+
+function measureGalleryFromTower(tower, platforms) {
+  tower.updateMatrixWorld(true);
+  const box = new THREE.Box3();
+  tower.traverse((o) => {
+    if (!o.isMesh) return;
+    const b = new THREE.Box3().setFromObject(o);
+    if (b.max.y > 5.5 && b.max.y < 10.5 && b.min.x < 12 && b.max.x > -12) box.union(b);
+  });
+  if (box.isEmpty()) return;
+  const gy = THREE.MathUtils.clamp(box.min.y + 0.08, 6.55, 7.05);
+  for (const p of platforms) {
+    if (p.y > 6 && p.y < 8.5) p.y = gy;
+  }
+}
 
 export async function buildWorld({ scene, mobile }) {
   const { walls, platforms } = buildWalkColliders();
@@ -20,9 +38,9 @@ export async function buildWorld({ scene, mobile }) {
   root.name = 'xiaoyao-world';
   scene.add(root);
 
-  // 可走面示意（低面数）
   const walkGroup = new THREE.Group();
   walkGroup.name = 'walk-debug';
+  walkGroup.visible = false;
   for (const p of platforms) {
     const g = new THREE.BoxGeometry(p.x1 - p.x0, 0.08, p.z1 - p.z0);
     const m = mat(0x8a7f6a, { transparent: true, opacity: 0.12 });
@@ -33,11 +51,7 @@ export async function buildWorld({ scene, mobile }) {
   }
   root.add(walkGroup);
 
-  // 地面
-  const ground = new THREE.Mesh(
-    new THREE.PlaneGeometry(200, 200),
-    mat(0x5a6b52)
-  );
+  const ground = new THREE.Mesh(new THREE.PlaneGeometry(200, 200), mat(0x5a6b52));
   ground.rotation.x = -Math.PI / 2;
   ground.position.y = -0.02;
   ground.receiveShadow = true;
@@ -66,8 +80,6 @@ export async function buildWorld({ scene, mobile }) {
     return g;
   }
 
-  // 逍遥楼精模：子节点 matrixWorld 已按 yunyou 世界坐标烘焙且冻结，
-  // 不能靠 position 挪；直接给 matrixWorld 乘平移，对齐本页原点。
   try {
     const tower = await loadXiaoyaolou();
     const shift = new THREE.Matrix4().makeTranslation(-ORIGIN_XY[0], 0, -ORIGIN_XY[1]);
@@ -80,10 +92,14 @@ export async function buildWorld({ scene, mobile }) {
     });
     root.add(tower);
     root.userData.tower = tower;
+    measureGalleryFromTower(tower, platforms);
     setXiaoyaolouNight(tower, true);
   } catch (e) {
     console.warn('逍遥楼精模加载失败', e);
   }
+
+  const city = await createLocalCity({ mobile });
+  root.add(city.group);
 
   const jf = footLocal('jiefangqiao');
   if (jf) {
@@ -91,41 +107,27 @@ export async function buildWorld({ scene, mobile }) {
     bridge.userData.isBridge = true;
   }
 
-  const xb = latLonToLocal(25.2700731, 110.2915099);
-  await loadGlb('xiangbishan-far', xb, 0, 1);
+  await loadGlb('xiangbishan-far', latLonToLocal(25.2700731, 110.2915099), 0, 1);
+  await loadGlb('fuboshan-far', latLonToLocal(25.2865648, 110.2993679), 0, 1);
+  await loadGlb('diecaishan-far', latLonToLocal(25.2932353, 110.298895), 0, 1);
 
-  const fb = latLonToLocal(25.2865648, 110.2993679);
-  await loadGlb('fuboshan-far', fb, 0, 1);
+  const qx = latLonToLocal(25.2754513, 110.3063811);
+  await loadGlb('qixing', qx, 0.15, 0.42);
+  await loadGlb('fuboshan-far', latLonToLocal(25.2757586, 110.3073327), -0.25, 1.05);
 
-  const qx = bearingToXZ(1050, 112);
-  await loadGlb('fuboshan-far', qx, 0.2, 1.4); // 七星方向远景占位
-
-  const pt = bearingToXZ(1150, 121);
-  await loadGlb('fuboshan-far', pt, -0.3, 1.35); // 普陀方向
-
-  const karst = createKarstHorizon({ center: new THREE.Vector3(0, 0, 80), inner: 800, outer: 4200, count: mobile ? 90 : 130 });
+  const karst = createKarstHorizon({
+    center: new THREE.Vector3(0, 0, 80),
+    inner: 800,
+    outer: 4200,
+    count: mobile ? 90 : 130,
+  });
   root.add(karst.group);
 
-  const water = createLijiangWater({ mobile });
+  const water = createLijiangWater({ mobile, waterPolys: city.waterPolys });
   root.add(water.mesh);
 
-  // 滨江灯柱（简化）
-  const lampGroup = new THREE.Group();
-  lampGroup.name = 'binjiang-lamps';
-  const lampMat = mat(0x74ece2, { emissive: 0x74ece2, emissiveIntensity: 0 });
-  const warmMat = mat(0xffcf83, { emissive: 0xffcf83, emissiveIntensity: 0 });
-  for (const [wx, wz] of XIAOYAO_LIGHTS) {
-    const [lx, lz] = worldToLocal(wx, wz);
-    const pole = new THREE.Mesh(new THREE.BoxGeometry(0.35, 8, 0.35), lampMat);
-    pole.position.set(lx, 4, lz);
-    lampGroup.add(pole);
-    const arch = new THREE.Mesh(new THREE.BoxGeometry(0.12, 6, 0.12), lampMat);
-    arch.position.set(lx, 7, lz);
-    lampGroup.add(arch);
-  }
-  root.add(lampGroup);
+  const interior = createInterior(root);
 
-  // 垛口冷白灯带、檐边灯串（示意）
   const decoLights = [];
   const eave = new THREE.PointLight(0xffc870, 0, 18);
   eave.position.set(0, 8.5, 0);
@@ -139,10 +141,17 @@ export async function buildWorld({ scene, mobile }) {
   const sun = new THREE.Vector3();
   const sky = new Sky();
   sky.scale.setScalar(4500);
+  sky.material.fog = false;
   root.add(sky);
   const skyUniforms = sky.material.uniforms;
   skyUniforms.turbidity.value = 2;
   skyUniforms.rayleigh.value = 1.2;
+  skyUniforms.mieCoefficient.value = 0.004;
+  skyUniforms.mieDirectionalG.value = 0.8;
+
+  const nightDome = createNightDome();
+  nightDome.visible = true;
+  root.add(nightDome);
 
   const hemi = new THREE.HemisphereLight(0xc8dbff, 0x3a4a32, 0.35);
   scene.add(hemi);
@@ -157,7 +166,7 @@ export async function buildWorld({ scene, mobile }) {
   dir.shadow.camera.bottom = -40;
   scene.add(dir);
 
-  const labelTargets = buildLabelTargets();
+  const labelTargets = buildLabelTargets(platforms);
 
   function setBridgeNight(on) {
     root.traverse((o) => {
@@ -165,13 +174,9 @@ export async function buildWorld({ scene, mobile }) {
       for (const m of [].concat(o.material)) {
         if (!m?.isMaterial) continue;
         const ns = m.userData?.nightStrength;
-        if (ns != null) {
-          m.emissiveIntensity = on ? ns : 0;
-        }
+        if (ns != null) m.emissiveIntensity = on ? ns : 0;
       }
     });
-    lampMat.emissiveIntensity = on ? 2.2 : 0;
-    warmMat.emissiveIntensity = on ? 1.4 : 0;
   }
 
   let night = 1;
@@ -183,12 +188,14 @@ export async function buildWorld({ scene, mobile }) {
     labelTargets,
     water,
     sky,
+    nightDome,
     skyUniforms,
     sun,
     dir,
     hemi,
     decoLights,
-    lampMat,
+    city,
+    interior,
     get night() {
       return night;
     },
@@ -199,35 +206,43 @@ export async function buildWorld({ scene, mobile }) {
       night = on ? 1 : 0;
       if (root.userData.tower) setXiaoyaolouNight(root.userData.tower, on);
       setBridgeNight(on);
+      city.setNight(on);
+      interior.setNight(on);
       for (const d of decoLights) d.light.intensity = on ? d.night : d.day;
       dir.intensity = on ? 0.08 : 1.05;
       hemi.intensity = on ? 0.22 : 0.55;
-      scene.background = null;
+      sky.visible = !on;
+      nightDome.visible = !!on;
+      scene.background = on ? HORIZON_NIGHT.clone() : null;
+      scene.fog.color.copy(on ? HORIZON_NIGHT : HORIZON_DAY);
+      scene.fog.density = on ? (mobile ? 0.0018 : 0.0014) : mobile ? 0.0014 : 0.0010;
+      water.setSkyColor(on ? HORIZON_NIGHT : HORIZON_DAY);
       this.updateSun(0);
     },
     updateSun(el) {
-      const phi = THREE.MathUtils.degToRad(88 - (night ? -8 : 28));
-      const theta = THREE.MathUtils.degToRad(200);
-      sun.setFromSphericalCoords(1, phi, theta);
-      skyUniforms.sunPosition.value.copy(sun);
-      dir.position.copy(sun).multiplyScalar(80);
+      if (night) {
+        sun.set(0.35, 0.55, 0.75).normalize();
+        dir.position.set(40, 60, 80);
+      } else {
+        const phi = THREE.MathUtils.degToRad(90 - 32);
+        const theta = THREE.MathUtils.degToRad(200 + el * 0.02);
+        sun.setFromSphericalCoords(1, phi, theta);
+        skyUniforms.sunPosition.value.copy(sun);
+        dir.position.copy(sun).multiplyScalar(80);
+      }
       dir.target.position.set(0, 0, 0);
       dir.target.updateMatrixWorld();
     },
-    update(t) {
+    update(t, camera) {
       water.update(t, sun, night);
+      city.update(camera);
     },
   };
 }
 
-function buildLabelTargets() {
-  const ids = [
-    'jiefangqiao',
-    'xiangbishan',
-    'fuboshan',
-    'zizhou',
-    'dongxixiang',
-  ];
+function buildLabelTargets(platforms) {
+  const gy = platforms.find((p) => p.z0 >= 8)?.y ?? 6.92;
+  const ids = ['jiefangqiao', 'xiangbishan', 'fuboshan', 'zizhou', 'dongxixiang'];
   const named = [
     { id: 'lijiang', name: '漓江', pos: bearingToXZ(180, 165) },
     { id: 'qixing', name: '七星山', pos: bearingToXZ(1000, 112) },
@@ -238,12 +253,11 @@ function buildLabelTargets() {
     const lm = LANDMARKS.find((l) => l.id === id);
     if (!lm) continue;
     const pos = latLonToLocal(lm.lat, lm.lon);
-    out.push({ id, name: lm.name, pos: [pos[0], 7.35, pos[1]], minYaw: null, maxYaw: null });
+    out.push({ id, name: lm.name, pos: [pos[0], gy, pos[1]], minYaw: null, maxYaw: null });
   }
   for (const n of named) {
-    out.push({ id: n.id, name: n.name, pos: [n.pos[0], 7.35, n.pos[1]], minYaw: null, maxYaw: null });
+    out.push({ id: n.id, name: n.name, pos: [n.pos[0], gy, n.pos[1]], minYaw: null, maxYaw: null });
   }
-  // 二层南望解放桥、东望漓江
   out.find((l) => l.id === 'jiefangqiao').minYaw = 2.0;
   out.find((l) => l.id === 'jiefangqiao').maxYaw = -2.6;
   out.find((l) => l.id === 'lijiang').minYaw = -1.2;

@@ -40,18 +40,18 @@ export function buildWalkColliders() {
   }
 
   // 二层回廊地面（中空：只铺外圈，避免盖住一层大厅）
-  const gy = 7.35;
+  const gy = 6.92;
   plat(-11, 11, -11, -8.2, gy);
   plat(-11, 11, 8.2, 11, gy);
   plat(-11, -8.2, -8.2, 8.2, gy);
   plat(8.2, 11, -8.2, 8.2, gy);
 
   // 回廊栏杆（高 1.05 m）
-  const railY = 7.35 + 1.05;
-  wall(-11, 11, -11.35, -11, railY, 7.35);
-  wall(-11, 11, 11, 11.35, railY, 7.35);
-  wall(-11.35, -11, -11, 11, railY, 7.35);
-  wall(11, 11.35, -11, 11, railY, 7.35);
+  const railY = gy + 1.05;
+  wall(-11, 11, -11.35, -11, railY, gy);
+  wall(-11, 11, 11, 11.35, railY, gy);
+  wall(-11.35, -11, -11, 11, railY, gy);
+  wall(11, 11.35, -11, 11, railY, gy);
 
   // 楼壳薄墙：南面留正门洞，西面留楼梯洞
   const shellTop = 12;

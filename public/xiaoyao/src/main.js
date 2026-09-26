@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { HORIZON_NIGHT } from '/yunyou/src/atmosphere.js';
 import { buildWorld } from './world.js';
 import { Player } from './player.js';
 import { createLabelUI } from './labels.js';
@@ -16,7 +17,7 @@ renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = mobile ? 0.95 : 1.05;
 
 const scene = new THREE.Scene();
-scene.fog = new THREE.FogExp2(0x0a1420, mobile ? 0.0028 : 0.0022);
+scene.fog = new THREE.FogExp2(HORIZON_NIGHT.clone(), mobile ? 0.0028 : 0.0022);
 
 const camera = new THREE.PerspectiveCamera(60, innerWidth / innerHeight, 0.05, 8000);
 
@@ -36,7 +37,7 @@ const labels = createLabelUI(document.getElementById('hud'), () => {});
 bindUI({
   onNight: (n) => world.setNight(n),
   onTeleport: (t) => {
-    const y = heightAt(t.pos[0], t.pos[2], world.platforms, t.pos[1] ?? 0);
+    const y = heightAt(t.pos[0], t.pos[2], world.platforms);
     player.teleport([t.pos[0], y, t.pos[2]], t.yaw, t.pitch);
   },
 });
@@ -49,7 +50,7 @@ function frame() {
   const dt = Math.min(clock.getDelta(), 0.05);
   const t = clock.elapsedTime;
   player.update(dt);
-  world.update(t);
+  world.update(t, camera);
   labels.update({ camera, player, targets: world.labelTargets });
   renderer.render(scene, camera);
 }
@@ -65,17 +66,18 @@ const TELEPORTS = {
   plaza: { pos: [0, 0, 22], yaw: 0, pitch: -0.12 },
   floor1: { pos: [0, 3.05, 2], yaw: 0, pitch: -0.02 },
   stairs: { pos: [-8.8, 4.5, -1.5], yaw: 0, pitch: -0.08 },
-  south: { pos: [0, 7.35, 9.2], yaw: Math.PI, pitch: -0.05 },
-  gallerySouth: { pos: [0, 7.35, 9.2], yaw: Math.PI, pitch: -0.05 },
-  east: { pos: [9.2, 7.35, 0], yaw: -Math.PI / 2, pitch: -0.04 },
-  galleryEast: { pos: [9.2, 7.35, 0], yaw: -Math.PI / 2, pitch: -0.04 },
+  south: { pos: [0, 6.92, 10.55], yaw: Math.PI, pitch: -0.04 },
+  gallerySouth: { pos: [0, 6.92, 10.55], yaw: Math.PI, pitch: -0.04 },
+  east: { pos: [10.55, 6.92, 0], yaw: -Math.PI / 2, pitch: -0.04 },
+  galleryEast: { pos: [10.55, 6.92, 0], yaw: -Math.PI / 2, pitch: -0.04 },
+  riverNight: { pos: [92, 3.4, 138], yaw: -2.38, pitch: -0.05 },
 };
 
 function doTeleport(name) {
   const t = TELEPORTS[name];
   if (!t) return null;
   // 用目标高度附近的平台，避免重叠平面取最高层
-  const y = heightAt(t.pos[0], t.pos[2], world.platforms, t.pos[1]);
+  const y = heightAt(t.pos[0], t.pos[2], world.platforms);
   player.teleport([t.pos[0], y, t.pos[2]], t.yaw, t.pitch);
   return { name, y, camY: camera.position.y };
 }

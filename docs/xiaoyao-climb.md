@@ -27,12 +27,14 @@ npm run dev -- --port 5191 --strictPort
 | 逍遥楼精模 | `public/yunyou/assets/xiaoyaolou/` + `xiaoyaolou-model.js` | 昼夜 `setXiaoyaolouNight` |
 | 解放桥 | `assets/blender/jiefangqiao.glb` | 真实跨径模型，桥灯材质 |
 | 象鼻山 / 伏波等远景 | `*-far.glb` | 方位按 `landmarks.js` / 调研表 |
-| 七星 / 普陀 | 远景占位 | 复用远峰模型，非精确山体 |
-| 可走平台、楼梯、栏杆 | `public/xiaoyao/src/colliders.js` | **示意**，非测绘楼梯位置 |
-| 滨江灯柱 | `waterfront.js` 坐标 | 简化几何，非完整 `createWaterfront` |
-| 峰林剪影 | `karst-horizon.js` | 程序化远景 |
-| 漓江水面 | `water-lijiang.js` | Clearwater 思路的折射 + 焦散（MVP 简化着色器） |
-| 天空 | Three.js `Sky.js`（r170） | Preetham 模型 |
+| 七星 / 普陀 | `qixing.glb` + 远峰 GLB | 按 landmarks 经纬 |
+| 城市 / 道路 / 绿地 | `city.js` ← `geo.js` BUILDINGS/ROADS | ~1.8 km 半径 |
+| 滨江路 / 尖拱灯柱 | `createWaterfront` 整组平移 | `waterfront.js` |
+| 可走平台、楼梯、栏杆 | `colliders.js` | 示意；二层传送 pitch≈−4° |
+| 一层陈设 / 碑亭 | `interior.js` | canvas 书法贴图 |
+| 峰林 | `karst-horizon.js` | 顶点色立体远景 |
+| 漓江水面 | `water-lijiang.js` | WATER 轮廓 + 焦散 / 夜景高光 |
+| 天空 | 日 `Sky.js`；夜 `night-dome.js` | 雾色 `atmosphere.js` 地平线 |
 
 场景原点：逍遥楼 FOOT 中心（`geo.js` `FOOT.xiaoyaolou.c`）。
 
