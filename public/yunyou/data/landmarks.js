@@ -1,5 +1,6 @@
 import { PLACE_PHOTOS } from './place-photos.js';
 import { CITY_PLACES } from './city-places.js';
+import { PLACE_GALLERY } from './place-gallery.js';
 // 桂林市中心（两江四湖）地标。坐标 WGS84（OpenStreetMap），高度单位米，来自公开资料；模型在 src/landmarks.js 按这些尺寸手工构建。
 // kind: hill 山 | pagoda 塔 | building 楼阁/城 | bridge 桥 | lake 湖 | poi 点     span: 飞行到此处时的相机距离
 export const LANDMARKS = [
@@ -53,4 +54,9 @@ export const LANDMARKS = [
   ...CITY_PLACES,
 ];
 
-for(const place of LANDMARKS) place.photo=PLACE_PHOTOS[place.id];
+// Card gallery: a whole-view photo first, then our own photo (多美实拍), then openly licensed extras; no image repeats within a card.
+const usedPhotos=new Set(); // one photograph belongs to one place only
+for(const place of LANDMARKS){
+  const seen=usedPhotos,extra=PLACE_GALLERY[place.id]||[],lead=PLACE_PHOTOS[place.id]||extra[0];place.gallery=[lead,place.photo,PLACE_PHOTOS[place.id],...extra].filter(p=>p&&!seen.has(p.src)&&seen.add(p.src));
+  place.photo=place.gallery[0];
+}

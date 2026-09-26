@@ -53,7 +53,7 @@ export function createHeritageStreets(TEX){
    for(let j=0;j<2;j++)beam(V(x+j*.3,y-1,z),V(x+j*.3,2+hash(seed+i+j)*3,z+.3),.035,bark,g);
   }
  };
- banyan(40,123,11);banyan(90,132,29);
+ // 正阳门前两棵古榕改由 main.js 的 Blender 树库实例绘制（冠幅约 30 m）
  // Zhengyang street: paving seams, shop awnings, planters and pedestrian lamps.
  for(let i=0;i<31;i++){const s=17+i*19;const seg=s<286?[ZHENGYANG[0],ZHENGYANG[1],s]:[ZHENGYANG[2],ZHENGYANG[3],s-286],a=seg[0],b=seg[1],L=Math.hypot(b[0]-a[0],b[1]-a[1]),t=seg[2]/L;if(t>1)continue;const x=a[0]+(b[0]-a[0])*t,z=a[1]+(b[1]-a[1])*t;
   for(const side of [-1,1]){box(.12,4.2,.12,wood,x+side*5.5,2.4,z);box(.6,.7,.6,warm,x+side*5.5,4.5,z);box(2.5,.6,1.4,trim,x+side*7,.3,z+5);leafPoints.push([x+side*7,z+5,.1,1.25]);}

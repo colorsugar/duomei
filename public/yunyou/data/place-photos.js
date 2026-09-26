@@ -50,26 +50,6 @@ export const PLACE_PHOTOS = {
     "height": 597,
     "official": false
   },
-  "yueta": {
-    "src": "./assets/photos/places/rita.jpg",
-    "alt": "杉湖日月双塔实景：左侧较矮琉璃色塔为月塔。",
-    "caption": "杉湖日月双塔实景：左侧较矮琉璃色塔为月塔。",
-    "source": "https://news.qq.com/rain/a/20240714A03JJL00",
-    "credit": "新闻晨报官方账号",
-    "width": 920,
-    "height": 597,
-    "official": false
-  },
-  "xiaoyaolou": {
-    "src": "./assets/photos/places/binjianglights.jpg",
-    "alt": "逍遥楼夜景，解放桥与漓江同框（漓江景区官网）",
-    "caption": "逍遥楼夜景，解放桥与漓江同框（漓江景区官网）",
-    "source": "https://www.liriver.com.cn/mobile/article/hdty.gztpy/28",
-    "credit": "桂林漓江风景名胜区市场拓展处",
-    "width": 872,
-    "height": 529,
-    "official": true
-  },
   "dongxixiang": {
     "src": "./assets/photos/places/dongxixiang.jpg",
     "alt": "游客在桂林市东西巷赶大集（新华社发，刘峥摄）",
@@ -280,40 +260,10 @@ export const PLACE_PHOTOS = {
     "height": 393,
     "official": true
   },
-  "luotuoshan": {
-    "src": "./assets/photos/places/qixing.png",
-    "alt": "桂林七星公园·骆驼山",
-    "caption": "桂林七星公园·骆驼山",
-    "source": "https://www.glqxjq.cn/post/01kqf0601xhmysa1qfv9hbwgeq.html",
-    "credit": "桂林七星景区管理处／桂林旅游投资有限公司七星分公司",
-    "width": 952,
-    "height": 526,
-    "official": true
-  },
-  "putuoshan": {
-    "src": "./assets/photos/places/qixiasi.jpg",
-    "alt": "普陀山西麓与栖霞禅寺",
-    "caption": "普陀山西麓与栖霞禅寺",
-    "source": "https://www.glqxjq.cn/post/xss.html",
-    "credit": "桂林七星景区管理处／桂林旅游投资有限公司七星分公司",
-    "width": 600,
-    "height": 393,
-    "official": true
-  },
   "yueyashan": {
     "src": "./assets/photos/places/yueyashan.jpg",
     "alt": "月牙山西南麓·龙隐岩石刻",
     "caption": "月牙山西南麓·龙隐岩石刻",
-    "source": "https://www.glqxjq.cn/post/ghbl.html",
-    "credit": "桂林七星景区管理处／桂林旅游投资有限公司七星分公司",
-    "width": 650,
-    "height": 366,
-    "official": true
-  },
-  "guihaibeilin": {
-    "src": "./assets/photos/places/yueyashan.jpg",
-    "alt": "桂海碑林·龙隐岩摩崖石刻",
-    "caption": "桂海碑林·龙隐岩摩崖石刻",
     "source": "https://www.glqxjq.cn/post/ghbl.html",
     "credit": "桂林七星景区管理处／桂林旅游投资有限公司七星分公司",
     "width": 650,
@@ -344,16 +294,6 @@ export const PLACE_PHOTOS = {
     "src": "./assets/photos/places/xishan.jpg",
     "alt": "桂林西山公园·西湖",
     "caption": "桂林西山公园·西湖",
-    "source": "https://www.glvisit.com/scenery_view.asp?id=117",
-    "credit": "桂林摄影旅游（glvisit.com）",
-    "width": 500,
-    "height": 329,
-    "official": false
-  },
-  "yinshan": {
-    "src": "./assets/photos/places/xishan.jpg",
-    "alt": "隐山所在的西山公园·西湖景观",
-    "caption": "隐山所在的西山公园·西湖景观",
     "source": "https://www.glvisit.com/scenery_view.asp?id=117",
     "credit": "桂林摄影旅游（glvisit.com）",
     "width": 500,
