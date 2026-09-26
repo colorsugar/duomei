@@ -15,3 +15,9 @@
 验证 PDF 共 81 页；纸面目录 74 行指向第 7–80 页；逐图地图 URL 的 entry 与 manifest 一致；页码、书签与标题对应。页面渲染检查涵盖封面、导读、目录、地理图版和新增建筑图版。
 
 网站版使用 `--web` 参数：图片最长边1280、JPEG78，PDF小于25MB。网站版与完整版页码、说明、目录和链接完全一致。公开 PDF 以1.8MB分片保存于 `artifacts/dalu/`，manifest记录各片与整册SHA-256；`prebuild` 自动重组到忽略的 `public/downloads/`。这样避免单次文件传输限制，用户始终下载完整 PDF。
+
+## 立体地图真实地形（2026-09-26）
+
+`/dalu/map` 立体版不再用底图亮度抬高度。`scripts/atlas-terrain/build_heightmap.py`（numpy/scipy/scikit-image）从两张底图生成 `public/atlas/v6/assets/terrain/<tile>.{height.bin,normal.png,mask.png}`：海 = 与图边连通的水与大内海；陆地基础高度随离岸距离上升；山地按底图左上光照的明暗反推坡度并 FFT 泊松积分成山脊（shape-from-shading），乘局部对比度包络；盐盆压平；两座火山为手工控制点的凹锥与火山口；768×512 上 25 万滴粒子水力侵蚀；海床离岸 60px 到 -26、120px 外 -30。高程 Uint16 小端，h = v/65535·150 − 30，世界单位 = 底图像素。高度是依据画面推算的示意地形，不是任何设定文本给出的测量数据。
+
+`3d/main.js` 读取上述数据生成 CPU 位移地形（`heightAt` 与标签/拾取一致，海面返回 0），材质按坡度露岩、按海拔积雪，底图作大色调；独立水面着色器按水深从浅滩到深海（深海不透明）、岸线泡沫、距离衰减波纹；天空穹顶与雾同色。数据缺失时自动回退旧的亮度高度。重新生成：`python3 -m venv tmp/atlas-terrain/venv && tmp/atlas-terrain/venv/bin/pip install numpy scipy pillow scikit-image && tmp/atlas-terrain/venv/bin/python scripts/atlas-terrain/build_heightmap.py`。
