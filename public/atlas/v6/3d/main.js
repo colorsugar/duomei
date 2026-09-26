@@ -1,6 +1,7 @@
 // 七国战略图志 · 立体版。地形由底图旁生成的 height/normal 资产抬升，标签与交互仍由同一份
 // 实体数据驱动。Same-origin iframe of /dalu/map.
 import * as THREE from "three";
+import { installTrackpadGestures } from "/yunyou/src/trackpad-gestures.js";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { CSS2DObject, CSS2DRenderer } from "three/addons/renderers/CSS2DRenderer.js";
 
@@ -79,6 +80,8 @@ const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = !reducedMotion;
 controls.dampingFactor = 0.09;
 controls.screenSpacePanning = false;
+// Mac trackpad: two-finger scroll pans, pinch zooms, Option+scroll rotates/tilts (mouse wheel still zooms).
+installTrackpadGestures(controls, { onChange: () => controls.dispatchEvent({ type: "change" }) });
 controls.minDistance = 230;
 controls.maxDistance = 3400;
 controls.minPolarAngle = 0.04;

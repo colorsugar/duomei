@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import { installTrackpadGestures } from "/yunyou/src/trackpad-gestures.js";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { CSS2DObject, CSS2DRenderer } from "three/addons/renderers/CSS2DRenderer.js";
 
@@ -129,6 +130,8 @@ const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = !reducedMotion;
 controls.dampingFactor = coarse ? 0.1 : 0.075;
 controls.screenSpacePanning = false;
+// Mac trackpad: two-finger scroll pans, pinch zooms, Option+scroll rotates/tilts (mouse wheel still zooms).
+installTrackpadGestures(controls, { onChange: () => controls.dispatchEvent({ type: "change" }) });
 controls.minDistance = 12;
 controls.maxDistance = 5600;
 controls.minPolarAngle = 0.04;
