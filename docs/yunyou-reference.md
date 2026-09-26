@@ -80,3 +80,13 @@ npm run test:guyu
 - 性能：自适应画质，连续渲染中位帧 >30 ms 时高清→均衡→流畅，只降不升；手机默认均衡档。M4 Pro（headless Chrome/Metal，DPR 2）自转中位帧约 6.6–9 ms（旧版 5.4 ms）；未做真机手机 FPS 测试。
 
 素材：未引入新的外部下载素材。叶簇卡由仓库既有 ambientCG LeafSet024（CC0）合成；岩石/混凝土/铺装细节图由仓库既有 Poly Haven（CC0）贴图灰度归一化；新增 Three.js r170 后期与 Sky 模块取自 npm `three@0.170.0`（与既有 vendored 版本同一完整性哈希，MIT）。
+
+
+## 手机端加载与流畅度（2026-09-26）
+
+分支 `cursor/yunyou-mobile-perf`。针对 iPhone 13 模拟 + 4× CPU + Fast 4G 下首屏过慢、拖动卡顿。
+
+- 首屏：loading 不再等待 `city-far.glb`；峰林、行道树点生成、城区补建改到首帧后空闲执行；补建按步长分帧 `yield`；手机补建 step 略疏、峰林数量减半；二级 GLB 流式加载也延到首帧之后。
+- 渲染：手机跳过 HDR/泛光/MSAA（直接 `renderer.render`）；均衡档 DPR 上限 1.15；阴影图 1024 且默认关；波纹默认关（避免每帧强制 dirty）；标签按距离裁剪；树 LOD 距离更近；补建网格按包围球距离隐藏。
+- 桌面「高清」路径（后期、倒影、2048 阴影、DPR 2）保持不变。逍遥楼 / 象鼻山 / 解放桥精模与照片卡逻辑未删。
+- 测量（Playwright iPhone 13，CDP 4× CPU + Fast 4G）：首屏可交互约 159s → 51s（−68%）；拖动/自转帧时间 p95 约 300ms → 33ms；桌面对照截图见 `tmp-perf/`。

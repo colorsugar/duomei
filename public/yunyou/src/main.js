@@ -20,7 +20,7 @@ import {createParkFallbacks} from './park-fallbacks.js';
 import {createLandmarkLighting} from './landmark-lighting.js';
 import {parkBuildingOwner} from './building-ownership.js';
 import { createCityMaterial, cityUV } from './city-material.js';
-import { createUrbanTrees, setTreeDetail } from './urban-trees.js';
+import { createUrbanTrees, setTreeDetail, setTreeLodDistances } from './urban-trees.js';
 import { createStreetDistrict } from './street-district.js';
 import { createStreetWalk } from './street-walk.js';
 import { installMapGestures } from './map-gestures.js';
@@ -37,14 +37,16 @@ const toLatLon = (x, z) => [ORIGIN.lat - z / ORIGIN.mPerLat, ORIGIN.lon + x / OR
 const mobileQuery = matchMedia('(max-width: 720px), (pointer: coarse)');
 let isMobile = mobileQuery.matches;
 let quality = isMobile ? 'balanced' : 'high', walk = null; // 手机从均衡档起步
-const effects={reflection:false,shadows:true,ripples:true,lights:true};
-const qualityDpr = () => quality === 'high' ? Math.min(devicePixelRatio,2) : quality === 'balanced' ? Math.min(devicePixelRatio,1.5) : Math.min(devicePixelRatio,1);
+const effects={reflection:false,shadows:!isMobile,ripples:!isMobile,lights:true};
+const qualityDpr = () => quality === 'high' ? Math.min(devicePixelRatio, isMobile ? 1.5 : 2) : quality === 'balanced' ? Math.min(devicePixelRatio, isMobile ? 1.15 : 1.5) : Math.min(devicePixelRatio, 1);
 const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const usePost = () => !isMobile && quality !== 'flow'; // 手机跳过泛光/MSAA，直接 renderer.render
+if (isMobile) setTreeLodDistances(55, 160);
 
 // ---- 渲染器 / 场景 / 相机 ----
 const app = document.getElementById('app');
 // Pixel density is independent of optional reflection and shadow passes.
-const renderer = new THREE.WebGLRenderer({ antialias: true, logarithmicDepthBuffer: true, powerPreference: 'high-performance' });
+const renderer = new THREE.WebGLRenderer({ antialias: !isMobile, logarithmicDepthBuffer: true, powerPreference: 'high-performance' });
 renderer.setPixelRatio(qualityDpr());
 renderer.setSize(innerWidth, innerHeight);
 renderer.shadowMap.enabled = effects.shadows;
@@ -94,7 +96,7 @@ scene.add(hemi);
 const sun = new THREE.DirectionalLight(0xfff1d0, 2.55);
 sun.position.set(1400, 2600, 2200);
 sun.castShadow = true;
-sun.shadow.mapSize.set(2048,2048);
+sun.shadow.mapSize.set(isMobile ? 1024 : 2048, isMobile ? 1024 : 2048);
 Object.assign(sun.shadow.camera, { left: -1600, right: 1600, top: 1700, bottom: -1700, near: 500, far: 7000 });
 sun.shadow.bias = -0.00001;
 sun.shadow.normalBias = 0.035; // close-view joinery needs contact shadows at centimetre scale
@@ -124,7 +126,9 @@ ground.rotation.x = -Math.PI / 2;
 ground.position.set((BOUNDS.x0 + BOUNDS.x1) / 2, 0, (BOUNDS.z0 + BOUNDS.z1) / 2);
 ground.receiveShadow = true;
 scene.add(ground);
-scene.add(createKarstHorizon().group); // 远景峰林
+// 远景峰林 / 城区补建延到首帧后空闲再建，避免挡住可交互
+let cityFill = null;
+const idle = () => new Promise(resolve => 'requestIdleCallback' in window ? requestIdleCallback(resolve,{timeout:900}) : setTimeout(resolve,25));
 const grid = new THREE.GridHelper(Math.max(groundW, groundD), Math.round(Math.max(groundW, groundD) / 500), 0xb8b2a2, 0xd8d3c6);
 grid.position.set(ground.position.x, 0.26, ground.position.z);
 grid.material.transparent = true;
@@ -250,10 +254,10 @@ const models = {
   shelita: LM.shelita(FOOT, M),
 };
 
-// 树：绿地内按面积撒点；山体上按坡度撒（缓坡长树、陡壁露岩）
+// 树：绿地内按面积撒点；山体上按坡度撒（缓坡长树、陡壁露岩）——首帧后再算，避免 20s+ 主线程长任务挡住可交互
 let crownMat;
 const urbanTreeGroups=[];
-{
+function buildAndLoadUrbanTrees() {
   const pts = [];
   GREEN.forEach((p, pi) => {
     const bb = ringBBox(p.o), area = (bb.x1 - bb.x0) * (bb.z1 - bb.z0);
@@ -362,7 +366,7 @@ scene.add(landmarkGroup);
 const waterfront = createWaterfront(TEX), cruises = createCruises();
 const heritage = createHeritageStreets(TEX), streetDistrict=createStreetDistrict();
 scene.add(waterfront.group, cruises.group, shadowed(heritage.group),streetDistrict.group);
-{
+async function buildCityFill() {
   // 空地块补建：OSM 没有记录建筑的街坊按街道方向补出多层住宅，避开水、绿地、山体、地标和岸线树带
   const segDist = (x, z, paths) => { let best = Infinity; for (const p of paths) for (let i = 1; i < p.length; i++) { const [ax, az] = p[i - 1], [bx, bz] = p[i], dx = bx - ax, dz = bz - az, t = Math.max(0, Math.min(1, ((x - ax) * dx + (z - az) * dz) / (dx * dx + dz * dz))); best = Math.min(best, Math.hypot(x - ax - dx * t, z - az - dz * t)); } return best; };
   const oldTown = (x, z) => x > 30 && x < 370 && z > 95 && z < 256; // 东西巷：只补灰瓦坡顶的低层老房子
@@ -371,8 +375,8 @@ scene.add(waterfront.group, cruises.group, shadowed(heritage.group),streetDistri
   const blocked = (x, z) => onHill(x, z) || pointInRing(x, z, FOOT.wangcheng.o) || ringDist(x, z, FOOT.wangcheng.o) < 18 || nearWater(x, z)
     || modelled.some(([mx, mz]) => Math.hypot(mx - x, mz - z) < 45) || landmarkXZ.some(([lx, lz]) => Math.hypot(lx - x, lz - z) < 55)
     || Math.hypot(x - 378, z - 187) < 48 || Math.hypot(x + 198, z - 1450) < 115 || (oldTown(x, z) && (segDist(x, z, ALLEYS) < 5 || segDist(x, z, HERITAGE_ROWS) < 9));
-  const fill = createCityFill({ material: cityMat, blocked, oldTown, taken: streetDistrict.collision.map((c) => c.box) });
-  cityGroup.add(fill); window.__infill = fill.userData.count;
+  cityFill = await createCityFill({ material: cityMat, blocked, oldTown, taken: streetDistrict.collision.map((c) => c.box), step: isMobile ? 28 : 21, yieldEvery: isMobile ? 24 : 48 });
+  cityGroup.add(cityFill); window.__infill = cityFill.userData.count; invalidate(true);
 }
 let boatMotion = false;
 
@@ -470,7 +474,6 @@ const detailGroup = new THREE.Group();
 scene.add(detailGroup);
 const detail = { cache: {} };
 const LOD_DIST = isMobile ? 800 : 1100;
-const idle = () => new Promise(resolve => 'requestIdleCallback' in window ? requestIdleCallback(resolve,{timeout:900}) : setTimeout(resolve,25));
 async function buildDetail(id, stillWanted) {
   const lm=LANDMARKS.find(l=>l.id===id), mod=await DETAIL[id]();
   await idle();
@@ -514,7 +517,8 @@ function requestNearbyDetails(now=performance.now()) {
   nextStreamCheck=now+350;
   sectors.update(camera,activeLandmark);
   landmarkLighting.focus(activeLandmark);
-  blenderModels.update(activeLandmark);
+  // city-far / 二级 GLB 等首帧后再拉，别和首屏可交互抢带宽
+  if(firstFramePainted)blenderModels.update(activeLandmark);
   stream.limit=isMobile?3:6;
   const candidates=LANDMARKS.filter(l=>DETAIL[l.id]&&(!blenderModels.enabled||!blenderModels.supports(l.id))).map(l=>({l,d:camera.position.distanceTo(new THREE.Vector3(l.x,(l.h||0)*.3,l.z))}));
   const wanted=candidates.filter(({l,d})=>d<Math.min(isMobile?850:1250,Math.max(260,(l.span||400)*1.35)))
@@ -763,6 +767,10 @@ bind('t-roads', (v) => { roadGroup.visible = v; waterfront.group.visible = v; })
 document.getElementById('quality').value=quality;
 document.getElementById('quality').addEventListener('change',e=>{quality=e.target.value;renderer.setPixelRatio(qualityDpr());post.resize();invalidate(true);});
 if (!isMobile) document.getElementById('t-reflection').checked = true; // 桌面默认开实时倒影
+else { // 手机默认关阴影/波纹，少一档持续重绘与 shadow pass
+  document.getElementById('t-shadows').checked = false;
+  document.getElementById('t-ripples').checked = false;
+}
 bind('t-reflection',v=>{effects.reflection=v;riverReflection.setQuality(v?'balanced':'flow');water.visible=!v;});
 bind('t-shadows',v=>{effects.shadows=v;applyMode(modeCur);});
 bind('t-ripples',v=>{effects.ripples=v&&!reduceMotion;});
@@ -858,15 +866,34 @@ function tick() {
   updateLod();
   for(const trees of urbanTreeGroups)trees.userData.update(camera);
   waterfront.group.traverse(o=>{if(o.userData.updateTrees)o.userData.updateTrees(camera);});
+  if (cityFill?.userData.update) cityFill.userData.update(camera, isMobile ? 1600 : 4500);
+  if (isMobile) {
+    const maxD = 2000, v = new THREE.Vector3();
+    for (const o of [...labels.main, ...labels.lake]) {
+      const show = camera.position.distanceTo(v.copy(o.position)) < maxD;
+      if (o.visible !== show) { o.visible = show; dirty = true; }
+    }
+  }
   compassSvg.style.transform = `rotate(${controls.getAzimuthalAngle() * 180 / Math.PI}deg)`;
   labelRenderer.render(scene, camera);
   }
-  if (quality === 'flow') renderer.render(scene, camera); else post.render();
+  if (usePost()) post.render(); else renderer.render(scene, camera);
   adaptQuality();
-  if (!firstFramePainted && (!blenderModels.enabled || blenderModels.ready)) {
+  // 首帧即可交互：不再等待 city-far.glb；远景/补建/树库在首帧后空闲加载
+  if (!firstFramePainted) {
     firstFramePainted = true;
     document.getElementById('loading')?.setAttribute('hidden', '');
     adaptAfter = performance.now() + 5000;
+    (async () => {
+      await idle();
+      try { scene.add(createKarstHorizon({ count: isMobile ? 90 : 170 }).group); invalidate(true); } catch (e) { console.warn('Karst horizon', e); }
+      await idle();
+      while (gestures.active || spinningDrag) await idle();
+      try { buildAndLoadUrbanTrees(); } catch (e) { console.warn('Urban trees schedule', e); }
+      await idle();
+      while (gestures.active || spinningDrag) await idle();
+      try { await buildCityFill(); } catch (e) { console.warn('City fill', e); }
+    })();
   }
 }
 controls.addEventListener('change', () => invalidate());
