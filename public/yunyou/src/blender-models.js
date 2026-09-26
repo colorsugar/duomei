@@ -92,13 +92,20 @@ export function installBlenderModels({droppedFootprints=[],scene,camera,landmark
   }
   if(!deferHeavy&&enabled&&!far&&!farPending&&!paused()&&performance.now()>nextFarAttempt){farPending=true;load('city-far').then(root=>{far=root;invalidate(true);}).catch(e=>{nextFarAttempt=performance.now()+15000;console.warn('City model overview',e);}).finally(()=>farPending=false);}
   const wanted=[];
-  if(enabled){for(const id of HERO)wanted.push(id);
+  if(enabled){
+   // 当前机位地标优先，保证首屏先换掉 SDF
+   if(active?.id&&HERO.includes(active.id))wanted.push(active.id);
+   for(const id of HERO)wanted.push(id);
    const k=key(active);if(k&&(!EXISTING.includes(k)||camera.position.distanceTo(new THREE.Vector3(active.x,active.h||0,active.z))<550))wanted.push(k);
    const nearest=landmarks.filter(l=>EXISTING.includes(l.id)).map(l=>[l,Math.hypot(camera.position.x-l.x,camera.position.z-l.z,camera.position.y-(l.h||0))]).sort((a,b)=>a[1]-b[1]);
    for(const [lm,d] of nearest)if(d<270)wanted.push(lm.id);
-   for(const id of Object.keys(PARKS)){const lm=find(id);if(lm&&Math.hypot(camera.position.x-lm.x,camera.position.z-lm.z)<1200&&camera.position.y<1100)wanted.push(id);}}
-  stream.limit=mobile()?2:3;stream.update(wanted);
- },applyVisibility(){
+   for(const id of Object.keys(PARKS)){const lm=find(id);if(lm&&Math.hypot(camera.position.x-lm.x,camera.position.z-lm.z)<1200&&camera.position.y<1100)wanted.push(id);}
+  }
+  // HERO 必须全部进 wanted；limit=2 会把象鼻山以外的精模裁掉，首屏仍露 SDF
+  stream.limit=Math.max(mobile()?2:3,enabled?HERO.length:0);stream.update(wanted);
+ },isReady(id){return !enabled||!id||stream.cache.has(id)||stream.failures.has(id);},
+ get heroesReady(){return !enabled||HERO.every(id=>stream.cache.has(id)||stream.failures.has(id));},
+ applyVisibility(){
   const regions=new Set();
   if(far){far.visible=enabled;for(const [id,part] of far.userData.parts){part.visible=true;if(enabled&&models[id])models[id].visible=false;}}
   for(const [id,e] of stream.cache){const show=enabled&&stream.wanted.includes(id);e.value.visible=show;if(show){if(PARKS[id])regions.add(id);e.value.userData.trees?.userData.update(camera);for(const old of e.value.userData.replaces){if(models[old])models[old].visible=false;if(detail.cache[old])detail.cache[old].visible=false;if(far?.userData.parts.has(old))far.userData.parts.get(old).visible=false;}}}

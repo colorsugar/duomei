@@ -126,9 +126,12 @@ ground.rotation.x = -Math.PI / 2;
 ground.position.set((BOUNDS.x0 + BOUNDS.x1) / 2, 0, (BOUNDS.z0 + BOUNDS.z1) / 2);
 ground.receiveShadow = true;
 scene.add(ground);
-// 远景峰林 / 城区补建延到首帧后空闲再建，避免挡住可交互
+// 远景峰林 / 城区补建：手机延到首帧后；桌面同步建，观感与 main 对齐
 let cityFill = null;
 const idle = () => new Promise(resolve => 'requestIdleCallback' in window ? requestIdleCallback(resolve,{timeout:900}) : setTimeout(resolve,25));
+if (!isMobile) {
+  try { scene.add(createKarstHorizon({ count: 170 }).group); } catch (e) { console.warn('Karst horizon', e); }
+}
 const grid = new THREE.GridHelper(Math.max(groundW, groundD), Math.round(Math.max(groundW, groundD) / 500), 0xb8b2a2, 0xd8d3c6);
 grid.position.set(ground.position.x, 0.26, ground.position.z);
 grid.material.transparent = true;
@@ -378,6 +381,10 @@ async function buildCityFill() {
   cityFill = await createCityFill({ material: cityMat, blocked, oldTown, taken: streetDistrict.collision.map((c) => c.box), step: isMobile ? 28 : 21, yieldEvery: isMobile ? 24 : 48 });
   cityGroup.add(cityFill); window.__infill = cityFill.userData.count; invalidate(true);
 }
+if (!isMobile) {
+  try { buildAndLoadUrbanTrees(); } catch (e) { console.warn('Urban trees', e); }
+  try { await buildCityFill(); } catch (e) { console.warn('City fill', e); }
+}
 let boatMotion = false;
 
 // ---- 标签 ----
@@ -513,12 +520,15 @@ const blenderModels=installBlenderModels({droppedFootprints,onRegions:parkFallba
 document.getElementById('model-version').addEventListener('change',e=>{blenderModels.setEnabled(e.target.value==='blender');for(const o of Object.values(models))o.visible=true;nextStreamCheck=0;invalidate(true);});
 let nextStreamCheck=0;
 function requestNearbyDetails(now=performance.now()) {
+  // 首屏等当前地标精模期间加快 pump
+  const bootId=activeLandmark?.id||'xiangbishan';
+  const gap=(!firstFramePainted&&isMobile&&!blenderModels.isReady(bootId))?40:350;
   if(now<nextStreamCheck)return;
-  nextStreamCheck=now+350;
+  nextStreamCheck=now+gap;
   sectors.update(camera,activeLandmark);
   landmarkLighting.focus(activeLandmark);
-  // 精华一线精模首帧即拉；city-far / 补建 GLB 延到首帧后
-  blenderModels.update(activeLandmark,{deferHeavy:!firstFramePainted});
+  // 手机：精模先拉、city-far 延后；桌面不 defer，等 city-far 就绪再关 loading（观感与 main 对齐）
+  blenderModels.update(activeLandmark,{deferHeavy:isMobile&&!firstFramePainted});
   stream.limit=isMobile?3:6;
   const candidates=LANDMARKS.filter(l=>DETAIL[l.id]&&(!blenderModels.enabled||!blenderModels.supports(l.id))).map(l=>({l,d:camera.position.distanceTo(new THREE.Vector3(l.x,(l.h||0)*.3,l.z))}));
   const wanted=candidates.filter(({l,d})=>d<Math.min(isMobile?850:1250,Math.max(260,(l.span||400)*1.35)))
@@ -860,6 +870,10 @@ function tick() {
   // 夜景/模式切换后也要能转：未拖动且开关开着就强制 autoRotate
   controls.autoRotate = !walk?.active && spin && !fly && !spinningDrag && performance.now() >= spinAfter;
   const moved = walk?.active ? walk.update(dt) : controls.update(dt);
+  // 手机等当前首屏地标精模（其余 HERO 后台继续）、桌面等 city-far；未就绪时持续重绘
+  const bootId = activeLandmark?.id || 'xiangbishan';
+  const bootReady = isMobile ? blenderModels.isReady(bootId) : blenderModels.ready;
+  if (!firstFramePainted && !bootReady) dirty = true;
   if (!fly && !moved && !dirty) return;
   dirty = false;
   if (spatialDirty || moved || fly) {
@@ -880,14 +894,15 @@ function tick() {
   }
   if (usePost()) post.render(); else renderer.render(scene, camera);
   adaptQuality();
-  // 首帧即可交互：不再等待 city-far.glb；远景/补建/树库在首帧后空闲加载
-  if (!firstFramePainted) {
+  // 手机：当前机位精模齐了再关 loading；峰林/树/补建空闲加载。桌面已在启动时同步建完。
+  if (!firstFramePainted && bootReady) {
     firstFramePainted = true;
     document.getElementById('loading')?.setAttribute('hidden', '');
     adaptAfter = performance.now() + 5000;
+    if (!isMobile) return;
     (async () => {
       await idle();
-      try { scene.add(createKarstHorizon({ count: isMobile ? 90 : 170 }).group); invalidate(true); } catch (e) { console.warn('Karst horizon', e); }
+      try { scene.add(createKarstHorizon({ count: 90 }).group); invalidate(true); } catch (e) { console.warn('Karst horizon', e); }
       await idle();
       while (gestures.active || spinningDrag) await idle();
       try { buildAndLoadUrbanTrees(); } catch (e) { console.warn('Urban trees schedule', e); }
