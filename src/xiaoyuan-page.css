@@ -1,0 +1,83 @@
+/* 多美的夏日小院 shell: full-viewport same-origin iframe (/xiaoyuan-scene/) plus a
+ * top-left back link. The scene keeps its own bottom dock, so the link stays at the top
+ * on every width; the minimized music orb sits beside it. */
+.xiaoyuan-page {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-base);
+  overflow: hidden;
+  background: #e7b07a;
+}
+
+.duomei-motion-root > .xiaoyuan-page {
+  position: fixed;
+  inset: 0;
+  inline-size: 100%;
+  block-size: 100svh;
+}
+
+.xiaoyuan-frame {
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+  border: 0;
+  background: #e7b07a;
+}
+
+.xiaoyuan-back {
+  position: fixed;
+  inset-block-start: max(var(--space-md), env(safe-area-inset-top, 0px));
+  inset-inline-start: max(var(--space-md), env(safe-area-inset-left, 0px));
+  z-index: var(--z-sticky);
+  min-block-size: var(--size-hit);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding-inline: var(--space-md);
+  color: var(--color-ink);
+  background: color-mix(in oklch, var(--color-paper) 88%, transparent);
+  border: var(--rule-hairline) solid var(--color-rule);
+  border-radius: var(--radius-pill);
+  box-shadow: var(--shadow-book-soft);
+  font-size: var(--text-sm);
+  text-decoration: none;
+  white-space: nowrap;
+  backdrop-filter: blur(var(--space-sm));
+  transition:
+    background-color var(--dur-short) var(--ease-out),
+    opacity var(--dur-short) var(--ease-out),
+    transform var(--dur-micro) var(--ease-out);
+}
+
+body:has(.duomei-music-player:not(.is-minimized)) .xiaoyuan-back {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(var(--space-xs));
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .xiaoyuan-back:hover {
+    background: var(--color-paper);
+  }
+}
+
+.xiaoyuan-back:active {
+  transform: translateY(var(--space-3xs));
+}
+
+.xiaoyuan-back:focus-visible {
+  outline: var(--rule-focus) solid var(--color-focus);
+  outline-offset: var(--space-2xs);
+}
+
+body:has(.xiaoyuan-page) .duomei-music-player.is-minimized {
+  --music-orb-size: 2.25rem;
+  inset-inline-start: calc(max(var(--space-md), env(safe-area-inset-left, 0px)) + 7.5rem);
+  inset-block-start: max(calc(var(--space-md) + 0.25rem), calc(env(safe-area-inset-top, 0px) + 0.25rem));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .xiaoyuan-back {
+    transition: none;
+  }
+}
