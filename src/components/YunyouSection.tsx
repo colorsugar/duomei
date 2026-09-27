@@ -12,27 +12,27 @@ export function YunyouSection() {
         <p>把桂林的山水、旧城和灯火，收进一张可以自由转动的地图。</p>
       </header>
 
-      <Link className="yunyou-card" to={YUNYOU_HREF} aria-label="打开云游 · 桂林两江四湖">
-        <span className="yunyou-card-cover" aria-hidden="true">
-          <img src="/images/yunyou-guilin-cover.webp" alt="" width="1600" height="900" loading="lazy" />
-        </span>
-        <span className="yunyou-card-kicker" aria-hidden="true">桂林 · 两江四湖</span>
-        <strong className="yunyou-card-title">沿着水岸，慢慢看桂林</strong>
-        <span className="yunyou-card-copy">从象鼻山到日月双塔，把熟悉的山水与旧城放进一张可以转动的地图。天色暗下来，城里的灯也会一盏盏亮起。</span>
-        <span className="yunyou-card-cta">开始云游 →</span>
-      </Link>
+      <div className="yunyou-cards">
+        <Link className="yunyou-card" to={YUNYOU_HREF} aria-label="打开云游 · 桂林两江四湖">
+          <span className="yunyou-card-cover" aria-hidden="true">
+            <img src="/images/yunyou-guilin-cover.webp" alt="" width="1600" height="900" loading="lazy" />
+          </span>
+          <span className="yunyou-card-kicker" aria-hidden="true">桂林 · 两江四湖</span>
+          <strong className="yunyou-card-title">沿着水岸，慢慢看桂林</strong>
+          <span className="yunyou-card-copy">从象鼻山到日月双塔，把熟悉的山水与旧城放进一张可以转动的地图。天色暗下来，城里的灯也会一盏盏亮起。</span>
+          <span className="yunyou-card-cta">开始云游 →</span>
+        </Link>
 
-      <Link className="yunyou-extra" to={XIAOYUAN_HREF} aria-label="打开 3D 场景 · 多美的夏日小院">
-        <span className="yunyou-extra-cover" aria-hidden="true">
-          <img src="/images/xiaoyuan-cover.webp" alt="" width="1200" height="675" loading="lazy" />
-        </span>
-        <span className="yunyou-extra-text">
-          <span className="yunyou-card-kicker">3D 场景 · 云上</span>
-          <strong className="yunyou-extra-title">多美的夏日小院</strong>
-          <span className="yunyou-extra-copy">悬浮在云海上的小院：葡萄架、荷花缸、冰镇西瓜和打盹的猫。拖动时间，从午后看到灯笼亮起。</span>
-        </span>
-        <span className="yunyou-card-cta yunyou-extra-cta">走进小院 →</span>
-      </Link>
+        <Link className="yunyou-card" to={XIAOYUAN_HREF} aria-label="打开 3D 场景 · 多美的夏日小院">
+          <span className="yunyou-card-cover" aria-hidden="true">
+            <img src="/images/xiaoyuan-cover.webp" alt="" width="1200" height="675" loading="lazy" />
+          </span>
+          <span className="yunyou-card-kicker" aria-hidden="true">3D 场景 · 云上小院</span>
+          <strong className="yunyou-card-title">多美的夏日小院</strong>
+          <span className="yunyou-card-copy">悬浮在云海上的小院：葡萄架、荷花缸、冰镇西瓜和打盹的猫。拖动时间，从午后一直看到灯笼亮起。</span>
+          <span className="yunyou-card-cta">走进小院 →</span>
+        </Link>
+      </div>
     </HomeSectionHold>
   );
 }
