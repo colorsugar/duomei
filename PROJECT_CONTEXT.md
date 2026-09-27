@@ -106,6 +106,8 @@ External runtime hosts intentionally referenced by the site are `duomei.site`, `
 | `/guyu/gui-xiang-huan-xiang` | `新说 / 桂巷还香`, 30 complete `full` Guilin landmark plates | No |
 | `/yunyou-map` | Immersive React shell for the Guilin map; preserves global music | No; bottom-safe `返回多美` on phones |
 | `/yunyou/` | Isolated static map runtime embedded by `/yunyou-map`; top-level visits redirect to the shell unless `?standalone=1` | Embedded chrome hides its duplicate return link |
+| `/xiaoyuan` | 多美的夏日小院 3D scene shell; embeds same-origin `/xiaoyuan-scene/index.html?embed=1`, keeps global music | No; top-left `返回多美` |
+| `/xiaoyuan-scene/` | Isolated static Three.js scene (Vite build output); top-level visits redirect to `/xiaoyuan` unless `?standalone=1` | Embedded mode hides its own title card |
 | `/skills` | Skill directory | Yes |
 | `/admin/login` | Supabase admin login | No |
 | `/admin`, `/admin/notes` | Note management | No |
@@ -268,3 +270,7 @@ Historical planning documents under `deploy/guyu-edgeone/docs/` remain useful ev
 ## 超级大陆立体卫星图 — 2026-09-09
 
 `/chaoji` 跳转 `/chaoji/map`，嵌入 `public/atlas/chaoji/3d.html`。Three.js 四级 LOD：大陆总览 → 八区（`regions.json` + `assets/regions/*.webp`）→ 十二城邦（`cities.json` + `assets/cities/*.webp`，城墙/道路/密铺建筑/地标/生物群）→ 街区最大细节（地点可点再放大）。浮层返回 + 缩小自动退 LOD：街区→城邦→地区→总览。城邦/街区层隐藏战略点标签，避免叠字。与奇幻大陆 V6（`/dalu/map`、`public/atlas/v6/`）不是同一套世界，禁止互相覆盖。手机侧栏默认可关。`edgeone.json` 对 `/atlas/chaoji/*` 与 `/atlas/v6/*`、`/yunyou/*` 放开为 `SAMEORIGIN` + `frame-ancestors 'self'`。总提示词暂与 `src/content/daluMasterPrompt.md` 共用。详情见 `docs/chaoji/README.md`。
+
+## 多美的夏日小院 — 2026-09-27
+
+`/xiaoyuan` is a React shell (`src/pages/DuomeiXiaoyuanPage.tsx`, `src/xiaoyuan-page.css`) that embeds the same-origin static scene `/xiaoyuan-scene/index.html?embed=1`, keeps the global music player mounted, and shows a top-left `← 返回多美` targeting `/#yunyou` (the scene has its own bottom dock, so the link stays at the top on every width). The homepage 云游 section keeps its Guilin card and adds a compact secondary entry (`.yunyou-extra`, cover `public/images/xiaoyuan-cover.webp`); homepage section order is unchanged. `public/xiaoyuan-scene/` is the built output of the separate `courtyard-3d` project (Three.js r180 bundled, no CDN): only files the scene actually requests at all device tiers are shipped (~133 MB; largest file 13.5 MB). The scene picks a device tier (`?tier=high|mid|low` override): desktops/iPads full assets, large @3x iPhones and ≥8 GB Android mid, others 1K textures and light models; BGM downloads only after the visitor enables sound. `edgeone.json` narrows only `/xiaoyuan-scene/*` to `SAMEORIGIN` + `frame-ancestors 'self'`; every other page stays `DENY`. Direct top-level `/xiaoyuan-scene/` visits redirect to `/xiaoyuan` unless `?standalone=1`.

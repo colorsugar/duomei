@@ -21,6 +21,7 @@ import { useSmoothScroll } from "./hooks/useSmoothScroll";
 import { MotionProvider } from "./motion";
 import { DuomeiMusicPlayer } from "./components/DuomeiMusicPlayer";
 import { DuomeiYunyouPage } from "./pages/DuomeiYunyouPage";
+import { DuomeiXiaoyuanPage } from "./pages/DuomeiXiaoyuanPage";
 import { DuomeiDaluPage } from "./pages/DuomeiDaluPage";
 import { DuomeiAtlasPage } from "./pages/DuomeiAtlasPage";
 import { DuomeiChaojiPage } from "./pages/DuomeiChaojiPage";
@@ -59,8 +60,9 @@ function AppRoutes() {
   const isZaobao = location.pathname === "/zaobao" || location.pathname.startsWith("/zaobao/");
   const isXunji = location.pathname === "/xunji" || location.pathname.startsWith("/xunji/");
   const isYunyouMap = location.pathname === "/yunyou-map";
+  const isXiaoyuan = location.pathname === "/xiaoyuan";
   const isAtlasMap = location.pathname === "/atlas-v6" || location.pathname === "/dalu/map" || location.pathname === "/chaoji/map";
-  const bareChrome = isAdmin || isGuyuReader || isZaobao || isXunji || isYunyouMap || isAtlasMap;
+  const bareChrome = isAdmin || isGuyuReader || isZaobao || isXunji || isYunyouMap || isAtlasMap || isXiaoyuan;
   useSmoothScroll(bareChrome || isTimePage);
 
   return (
@@ -83,6 +85,7 @@ function AppRoutes() {
         <Route path="/guyu/:bookId" element={<DuomeiGuyuReaderPage />} />
         <Route path="/skills" element={<DuomeiSkillsPage />} />
         <Route path="/yunyou-map" element={<DuomeiYunyouPage />} />
+        <Route path="/xiaoyuan" element={<DuomeiXiaoyuanPage />} />
         <Route path="/dalu" element={<DuomeiDaluPage />} />
         <Route path="/dalu/map" element={<DuomeiAtlasPage />} />
         <Route path="/atlas-v6" element={<DuomeiAtlasPage />} />
@@ -96,7 +99,7 @@ function AppRoutes() {
       </Routes>
       <PublicRoutePaperVeil pathname={location.pathname} disabled={isAdmin || isGuyuReader} />
       {!bareChrome ? <DuomeiFooter /> : null}
-      {!isAdmin ? <DuomeiMusicPlayer compactContext={isGuyuReader || isZaobao || isXunji || isYunyouMap || isAtlasMap} /> : null}
+      {!isAdmin ? <DuomeiMusicPlayer compactContext={isGuyuReader || isZaobao || isXunji || isYunyouMap || isAtlasMap || isXiaoyuan} /> : null}
       {!bareChrome ? <BackToTopButton /> : null}
     </DuomeiEditProvider>
   );
