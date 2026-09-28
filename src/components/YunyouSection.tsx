@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 
 const YUNYOU_HREF = "/yunyou-map";
 const XIAOYUAN_HREF = "/xiaoyuan";
+const JIANGNAN_HREF = "/jiangnan";
 
 export function YunyouSection() {
   return (
@@ -31,6 +32,16 @@ export function YunyouSection() {
           <strong className="yunyou-card-title">多美的夏日小院</strong>
           <span className="yunyou-card-copy">悬浮在云海上的小院：葡萄架、荷花缸、冰镇西瓜和打盹的猫。拖动时间，从午后一直看到灯笼亮起。</span>
           <span className="yunyou-card-cta">走进小院 →</span>
+        </Link>
+
+        <Link className="yunyou-card" to={JIANGNAN_HREF} aria-label="打开 3D 场景 · 诗语江南">
+          <span className="yunyou-card-cover" aria-hidden="true">
+            <img src="/images/jiangnan-cover.webp" alt="" width="1200" height="675" loading="lazy" />
+          </span>
+          <span className="yunyou-card-kicker" aria-hidden="true">3D 场景 · 江南园林</span>
+          <strong className="yunyou-card-title">诗语江南</strong>
+          <span className="yunyou-card-copy">照着网师园的格局，一池水居中，亭台楼阁绕水而筑。雨落荷叶会积成水珠，满了便自己倾倒；拖动时间，看烟雨、黄昏与秋夜。</span>
+          <span className="yunyou-card-cta">入园 →</span>
         </Link>
       </div>
     </HomeSectionHold>

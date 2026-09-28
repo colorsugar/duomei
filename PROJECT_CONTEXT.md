@@ -107,7 +107,8 @@ External runtime hosts intentionally referenced by the site are `duomei.site`, `
 | `/yunyou-map` | Immersive React shell for the Guilin map; preserves global music | No; bottom-safe `返回多美` on phones |
 | `/yunyou/` | Isolated static map runtime embedded by `/yunyou-map`; top-level visits redirect to the shell unless `?standalone=1` | Embedded chrome hides its duplicate return link |
 | `/xiaoyuan` | 多美的夏日小院 3D scene shell; embeds same-origin `/xiaoyuan-scene/index.html?embed=1`, keeps global music | No; top-left `返回多美` |
-| `/xiaoyuan-scene/` | Isolated static Three.js scene (Vite build output); top-level visits redirect to `/xiaoyuan` unless `?standalone=1` | Embedded mode hides its own title card |
+| `/jiangnan` | 诗语江南 3D garden shell; embeds the same runtime at `/xiaoyuan-scene/index.html?embed=1&scene=garden`, keeps global music | No; top-left `返回多美` |
+| `/xiaoyuan-scene/` | Isolated static Three.js scene (Vite build output); top-level visits redirect to `/xiaoyuan` (or `/jiangnan` for `?scene=garden`) unless `?standalone=1` | Embedded mode hides its own title card |
 | `/skills` | Skill directory | Yes |
 | `/admin/login` | Supabase admin login | No |
 | `/admin`, `/admin/notes` | Note management | No |
@@ -274,3 +275,7 @@ Historical planning documents under `deploy/guyu-edgeone/docs/` remain useful ev
 ## 多美的夏日小院 — 2026-09-27
 
 `/xiaoyuan` is a React shell (`src/pages/DuomeiXiaoyuanPage.tsx`, `src/xiaoyuan-page.css`) that embeds the same-origin static scene `/xiaoyuan-scene/index.html?embed=1`, keeps the global music player mounted, and shows a top-left `← 返回多美` targeting `/#yunyou` (the scene has its own bottom dock, so the link stays at the top on every width). The homepage 云游 section shows its Guilin card and the 小院 card side by side in `.yunyou-cards` (two equal columns on desktop, stacked on phones; cover `public/images/xiaoyuan-cover.webp`); homepage section order is unchanged. `public/xiaoyuan-scene/` is the built output of the separate `courtyard-3d` project (Three.js r180 bundled, no CDN): only files the scene actually requests at all device tiers are shipped (~133 MB; largest file 13.5 MB). The scene picks a device tier (`?tier=high|mid|low` override): desktops/iPads full assets, large @3x iPhones and ≥8 GB Android mid, others 1K textures and light models; BGM downloads only after the visitor enables sound. `edgeone.json` narrows only `/xiaoyuan-scene/*` to `SAMEORIGIN` + `frame-ancestors 'self'`; every other page stays `DENY`. Direct top-level `/xiaoyuan-scene/` visits redirect to `/xiaoyuan` unless `?standalone=1`.
+
+## 诗语江南 — 2026-09-29
+
+`/jiangnan` (`src/pages/DuomeiJiangnanPage.tsx`, reusing `src/xiaoyuan-page.css`) embeds the 江南园林 scene of the same `/xiaoyuan-scene` runtime (`?embed=1&scene=garden`). The two scenes link to each other: in the courtyard, opening the front doors frames the hall's handscroll titled 诗语江南 and tapping it enters the garden; in the garden, the south gate and the dock's `回小院` button return. Inside the site the scene posts `{type: "duomei-scene-goto", scene: "jiangnan" | "xiaoyuan"}` to its same-origin parent and both shells route with `useSceneNavigation()` (`src/lib/sceneNavigation.ts`), so the address bar, back link and music player survive. The 云游 section shows three cards side by side (Guilin, 小院, 诗语江南; cover `public/images/jiangnan-cover.webp`), stacked on phones. Scene source: `courtyard-3d` repo (`?scene=garden`); `/xiaoyuan-scene` ships only the assets both scenes request at both tiers.
