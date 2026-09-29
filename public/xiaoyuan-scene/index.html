@@ -12,12 +12,18 @@
     // supplies the back link and title; a direct top-level visit is sent to that shell (/jiangnan for the garden).
     (function () {
       var q = new URLSearchParams(location.search);
+      if (q.get('scene') === 'garden') { // 诗语江南: the loader unrolls the handscroll — fetch it first
+        var src = (location.pathname.indexOf('/xiaoyuan-scene/') === 0 ? '/xiaoyuan-scene/' : '/') + 'assets/garden/painting-titled.jpg';
+        document.documentElement.classList.add('is-garden');
+        document.documentElement.style.setProperty('--scroll-img', 'url(' + src + ')');
+        var pl = document.createElement('link'); pl.rel = 'preload'; pl.as = 'image'; pl.href = src; pl.setAttribute('fetchpriority', 'high'); document.head.appendChild(pl);
+      }
       if (q.has('embed')) document.documentElement.classList.add('is-embed');
       else if (!q.has('standalone') && !q.has('debug') && window.top === window.self && /\/xiaoyuan-scene\//.test(location.pathname)) location.replace(q.get('scene') === 'garden' ? '/jiangnan' : '/xiaoyuan');
     })();
   </script>
-  <script type="module" crossorigin src="/xiaoyuan-scene/assets/index-C4qS-TNA.js"></script>
-  <link rel="stylesheet" crossorigin href="/xiaoyuan-scene/assets/index-Dvhz8LTh.css">
+  <script type="module" crossorigin src="/xiaoyuan-scene/assets/index-DdJ0knik.js"></script>
+  <link rel="stylesheet" crossorigin href="/xiaoyuan-scene/assets/index-DB2LKOVL.css">
 </head>
 <body>
   <div id="app">
@@ -67,6 +73,7 @@
           <i></i><i></i><i></i><i></i><i></i>
         </div>
       </div>
+      <div class="scroll-loader" aria-hidden="true"><div class="scroll-paper"><div class="scroll-art"></div></div><i class="scroll-rod"></i><i class="scroll-rod"></i></div>
       <p class="loading-copy">正在搭建多美的小院…</p>
       <p id="loading-pct">0%</p>
       <div class="loading-bar" aria-hidden="true"><span id="loading-fill"></span></div>
