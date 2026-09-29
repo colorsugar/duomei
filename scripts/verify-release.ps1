@@ -226,7 +226,7 @@ $requiredMarkers = @(
   @{ File = "src/components/SkillsDirectory.tsx"; Marker = "pdf-to-immersive-flipbook" },
   @{ File = "src/components/SkillsDirectory.tsx"; Marker = "duomei-skill-open" },
   @{ File = "src/skills.css"; Marker = "grid-template-columns: repeat(3, minmax(0, 1fr))" },
-  @{ File = "src/components/YunyouSection.tsx"; Marker = "yunyou-card-copy" },
+  @{ File = "src/components/YunyouSection.tsx"; Marker = "yunyou-plate-copy" },
   @{ File = "src/components/YunyouSection.tsx"; Marker = 'YUNYOU_HREF = "/yunyou-map"' },
   @{ File = "src/pages/DuomeiYunyouPage.tsx"; Marker = 'src="/yunyou/index.html?embed=1"' },
   @{ File = "src/yunyou-page.css"; Marker = "component: immersive map shell" },

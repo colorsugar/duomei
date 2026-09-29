@@ -395,10 +395,11 @@ test("keeps the mobile footer compact with all nine shortcuts on one row", () =>
 
 test("ships Yunyou as a same-origin, vendored, accessible 3D map", () => {
   assert.match(yunyouSource, /const YUNYOU_HREF = "\/yunyou-map"/);
-  assert.match(yunyouSource, /<Link className="yunyou-card" to=\{YUNYOU_HREF\}/);
+  assert.match(yunyouSource, /\{ href: YUNYOU_HREF, cover: "\/images\/yunyou-guilin-cover\.webp"/);
+  assert.match(yunyouSource, /className=\{`yunyou-card yunyou-plate/);
   assert.match(yunyouSource, /\/images\/yunyou-guilin-cover\.webp/);
-  assert.match(yunyouSource, /沿着水岸，慢慢看桂林/);
-  assert.match(yunyouSource, /开始云游 →/);
+  assert.match(yunyouSource, /沿水看桂林/);
+  assert.match(yunyouSource, /cta: "游桂林"/);
   assert.doesNotMatch(yunyouSource, /Guilin · 1:1|点进去慢慢转/);
   assert.doesNotMatch(yunyouSource, /vercel\.app/);
   assert.match(yunyouCss, /@media \(prefers-reduced-motion: reduce\)/);

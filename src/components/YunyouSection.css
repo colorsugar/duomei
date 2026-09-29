@@ -1,237 +1,181 @@
+/* 云游 — three places as a set of travel-journal plates: one 16:10 image treatment,
+   serif titles, a shared hairline baseline; no card boxes (redesign 2026-09-29). */
 .yunyou-section {
   position: relative;
   z-index: var(--z-base);
   display: grid;
   align-content: center;
-  gap: var(--space-2xl);
+  gap: 56px;
   inline-size: 100%;
   min-inline-size: 0;
   min-block-size: 100svh;
-  padding: var(--space-3xl) clamp(var(--space-md), 6vw, var(--space-3xl));
-  color: var(--color-ink);
-  background: var(--color-paper-2);
+  padding: var(--space-3xl) clamp(24px, 10vw, 144px);
+  color: #292b25;
+  background: #f8f5eb;
 }
 
 .yunyou-heading,
-.yunyou-card,
-.yunyou-cards {
-  inline-size: min(100%, var(--layout-wide));
+.yunyou-plates {
+  inline-size: min(100%, 1152px);
   margin-inline: auto;
+  min-inline-size: 0;
 }
 
 .yunyou-heading {
   display: grid;
-  gap: var(--space-md);
-  min-inline-size: 0;
+  gap: 16px;
 }
 
 .yunyou-heading h2 {
-  min-inline-size: 0;
   margin: 0;
-  color: var(--color-ink);
+  color: #292b25;
   font-family: var(--font-display);
-  font-size: var(--text-display-s);
-  font-style: normal;
+  font-size: clamp(44px, 5vw, 72px);
   font-weight: 700;
-  letter-spacing: -0.035em;
-  line-height: 1;
-  overflow-wrap: anywhere;
-  text-wrap: balance;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
 }
 
 .yunyou-heading p {
   margin: 0;
-  max-inline-size: var(--layout-reading);
-  color: var(--color-muted-strong);
-  font-size: var(--text-base);
-  line-height: 1.65;
+  color: #74746a;
+  font-size: 15px;
+  letter-spacing: 0.04em;
+  line-height: 1.7;
 }
 
-.yunyou-card {
+.yunyou-plates {
   display: grid;
-  grid-template-columns: minmax(0, 1.35fr) minmax(18rem, 0.65fr);
-  grid-template-areas:
-    "cover kicker"
-    "cover title"
-    "cover copy"
-    "cover cta";
-  align-items: start;
-  gap: var(--space-sm) var(--space-xl);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 36px;
+}
+
+.yunyou-plate {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  gap: 20px;
   min-inline-size: 0;
-  padding-block: var(--space-xl);
-  border-block: var(--rule-hairline) solid var(--color-rule);
+  padding-block-end: 24px;
+  border-block-end: 1px solid #d8d2c5;
   color: inherit;
   text-decoration: none;
-  background: var(--color-paper);
-  transition: transform var(--dur-short) var(--ease-out);
 }
 
-.yunyou-card-cover {
-  grid-area: cover;
-  align-self: stretch;
-  min-inline-size: 0;
+.yunyou-plate-image {
+  position: relative;
+  display: block;
+  aspect-ratio: 16 / 10;
   overflow: clip;
-  border: var(--rule-hairline) solid var(--color-rule);
-  background: var(--color-paper-3);
+  background: #e9dfc9;
 }
 
-.yunyou-card-cover img {
+.yunyou-plate-image img {
   display: block;
   inline-size: 100%;
   block-size: 100%;
-  min-block-size: 18rem;
   object-fit: cover;
+  filter: saturate(0.72) contrast(0.94);
 }
 
-.yunyou-card:focus-visible {
-  outline: var(--rule-focus) solid var(--color-focus);
-  outline-offset: var(--space-2xs);
+/* the sunset sky would outshout the other two plates */
+.yunyou-plate.is-sunset .yunyou-plate-image img {
+  filter: saturate(0.62) contrast(0.94);
+  object-position: 50% 62%;
 }
 
-.yunyou-card-kicker {
-  grid-area: kicker;
-  min-block-size: var(--size-hit);
-  display: flex;
-  align-items: center;
-  border-block-end: var(--rule-hairline) solid var(--color-rule);
-  color: var(--color-muted-strong);
-  font-size: var(--text-xs);
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  writing-mode: horizontal-tb;
+/* a thin paper wash ties the three images into one set */
+.yunyou-plate-image::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgb(233 223 201 / 0.08);
+  box-shadow: inset 0 0 0 1px rgb(41 43 37 / 0.06);
 }
 
-.yunyou-card-title {
-  grid-area: title;
+.yunyou-plate-text {
+  display: grid;
+  align-content: start;
   min-inline-size: 0;
-  color: var(--color-ink);
+}
+
+.yunyou-plate-kicker {
+  color: #74746a;
+  font-size: 11px;
+  letter-spacing: 0.24em;
+}
+
+.yunyou-plate-title {
+  margin-block-start: 10px;
+  color: #292b25;
   font-family: var(--font-display);
-  font-size: var(--text-xl);
-  font-style: normal;
+  font-size: 28px;
   font-weight: 700;
   letter-spacing: 0.02em;
-  line-height: 1.2;
-  overflow-wrap: anywhere;
-  text-wrap: balance;
+  line-height: 1.35;
 }
 
-.yunyou-card-copy {
-  grid-area: copy;
-  min-inline-size: 0;
-  max-inline-size: var(--layout-reading);
-  color: var(--color-muted-strong);
-  line-height: 1.65;
-  overflow-wrap: anywhere;
+.yunyou-plate-copy {
+  margin-block-start: 12px;
+  color: #74746a;
+  font-size: 14px;
+  line-height: 1.7;
 }
 
-.yunyou-card-cta {
-  grid-area: cta;
+.yunyou-plate-cta {
+  margin-block-start: 24px;
   inline-size: fit-content;
-  min-block-size: var(--size-hit);
-  display: inline-flex;
-  align-items: center;
-  color: var(--color-accent);
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  white-space: nowrap;
+  color: #59624f;
+  font-size: 14px;
+  letter-spacing: 0.08em;
+  text-decoration: underline;
+  text-decoration-color: transparent;
+  text-underline-offset: 5px;
+  text-decoration-thickness: 1px;
+  transition: text-decoration-color 150ms ease;
 }
 
-@media (hover: hover) and (pointer: fine) {
-  .yunyou-card:hover {
-    transform: translate3d(0, calc(var(--space-2xs) * -1), 0);
-  }
+.yunyou-plate:hover .yunyou-plate-cta {
+  text-decoration-color: currentColor;
 }
 
+.yunyou-plate:focus-visible {
+  outline: 2px solid #59624f;
+  outline-offset: 6px;
+}
+
+/* phones and hoverless tablets: three compact rows, image left, text right */
 @media (max-width: 48rem), (max-width: 64rem) and (hover: none) and (pointer: coarse) {
   .yunyou-section {
-    padding-block: var(--space-2xl);
+    align-content: start;
+    gap: 32px;
+    padding: 64px 24px var(--space-2xl);
   }
 
-  .yunyou-card {
+  .yunyou-heading h2 { font-size: 44px; }
+  .yunyou-heading p { font-size: 13px; }
+
+  .yunyou-plates {
     grid-template-columns: minmax(0, 1fr);
-    grid-template-areas:
-      "cover"
-      "kicker"
-      "title"
-      "copy"
-      "cta";
-    gap: var(--space-sm);
+    gap: 0;
+    border-block-start: 1px solid #d8d2c5;
   }
 
-  .yunyou-card-cover img {
-    min-block-size: 0;
-    aspect-ratio: 16 / 9;
+  .yunyou-plate {
+    grid-template-columns: 120px minmax(0, 1fr);
+    grid-template-rows: auto;
+    gap: 16px;
+    align-items: center;
+    min-block-size: 152px;
+    padding-block: 20px;
   }
+
+  .yunyou-plate-image { aspect-ratio: 5 / 4; }
+  .yunyou-plate-kicker { font-size: 10px; letter-spacing: 0.18em; }
+  .yunyou-plate-title { margin-block-start: 6px; font-size: 20px; line-height: 1.3; }
+  .yunyou-plate-copy { margin-block-start: 6px; font-size: 12px; line-height: 1.6; }
+  .yunyou-plate-cta { margin-block-start: 10px; font-size: 12px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .yunyou-card {
-    transition: none;
-  }
-}
-
-@media (max-width: 48rem) and (max-height: 720px) {
-  .yunyou-section {
-    align-content: start;
-    gap: var(--space-lg);
-    padding-block-start: calc(var(--space-3xl) + var(--size-hit));
-  }
-
-  .yunyou-heading {
-    gap: var(--space-sm);
-  }
-
-  .yunyou-heading h2 {
-    font-size: clamp(var(--text-2xl), 14vw, var(--text-display-s));
-  }
-
-  .yunyou-card {
-    padding-block: var(--space-lg);
-  }
-
-  .yunyou-card-copy {
-    font-size: var(--text-sm);
-    line-height: 1.5;
-  }
-}
-
-@media (max-width: 360px) and (max-height: 720px) {
-  .yunyou-card-title,
-  .yunyou-card-copy,
-  .yunyou-card-cta {
-    max-inline-size: calc(100% - var(--size-hit) - var(--space-md));
-  }
-}
-
-/* Guilin map, 多美的夏日小院 and 诗语江南 side by side: each card stacks cover over text. */
-.yunyou-cards {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: var(--space-xl);
-  min-inline-size: 0;
-}
-
-.yunyou-cards .yunyou-card {
-  inline-size: 100%;
-  grid-template-columns: minmax(0, 1fr);
-  grid-template-rows: auto auto auto 1fr auto;
-  grid-template-areas:
-    "cover"
-    "kicker"
-    "title"
-    "copy"
-    "cta";
-  gap: var(--space-sm);
-}
-
-.yunyou-cards .yunyou-card-cover img {
-  min-block-size: 0;
-  aspect-ratio: 16 / 9;
-}
-
-@media (max-width: 48rem), (max-width: 64rem) and (hover: none) and (pointer: coarse) {
-  .yunyou-cards {
-    grid-template-columns: minmax(0, 1fr);
-    gap: var(--space-lg);
-  }
+  .yunyou-plate-cta { transition: none; }
 }
