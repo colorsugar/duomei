@@ -66,6 +66,7 @@
   display: block;
   aspect-ratio: 16 / 10;
   overflow: clip;
+  border-radius: calc(var(--radius-card) * 0.72);
   background: #e9dfc9;
 }
 
