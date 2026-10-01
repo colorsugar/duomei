@@ -291,3 +291,9 @@ Both `/jiangnan` and `/xiaoyuan` expose an explicit 自动游玩 button. A curat
 The route mixes first-person walks along authored paving/corridor paths with low flights around the lotus stands and courtyard. Grounded camera height follows the existing floor raycast; connected line segments round only immediate corners, and camera rotation is capped to avoid sudden swings. There are no stationary viewing waits. 下一站 is available while paused and preserves the remaining path before proceeding; the mobile card keeps next/pause/end on one row. The courtyard door opens before the approach. These are authored routes, not autonomous collision-aware navigation.
 
 Scene production builds must use `vite build --base=/xiaoyuan-scene/`. The root prebuild verifies scene entry script/styles stay within that prefix and resolve to real files; do not copy a default-root Vite build into this embedded scene.
+
+## 当前荷塘修复交接 — 2026-10-01
+
+荷塘/小院相关任务还须先读 `docs/jiangnan-water-handoff-2026-10-01.md`，其中区分已发布功能与正在本地验证、尚未发布的水下朝上修复，并列明文件定位、证据和下一步。必须保留现有水上倒影/折射、雨点波纹、荷叶积水倾泻、荷花生长、互动、第一人称、自动游玩和场景互通；不得用旧提交覆盖当前未提交源码。交接文件是日期快照，发布状态以重新核验的线上 marker 和 Git 为准。
+
+本轮水下修复只移除水下鱼/池底镜像采集，水上着色分支保持不变。雨景首次出现会初始化此前积雨形成的叶面水团，晴天仍从干叶开始；水账 `initial` 记录该水量，后续仍由既有物理和互动驱动，不能在切换雨量时反复补水。详细验证与发布状态见本轮交接文件。
