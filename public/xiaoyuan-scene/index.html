@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content" />
   <meta name="theme-color" content="#f6ead8" />
   <meta name="description" content="多美的夏日小院 — 一个悬浮在云上的夏天" />
   <title>多美的夏日小院</title>
@@ -22,8 +22,8 @@
       else if (!q.has('standalone') && !q.has('debug') && window.top === window.self && /\/xiaoyuan-scene\//.test(location.pathname)) location.replace(q.get('scene') === 'garden' ? '/jiangnan' : '/xiaoyuan');
     })();
   </script>
-  <script type="module" crossorigin src="/xiaoyuan-scene/assets/index-W8bNlxXZ.js"></script>
-  <link rel="stylesheet" crossorigin href="/xiaoyuan-scene/assets/index-L8-FynI7.css">
+  <script type="module" crossorigin src="/xiaoyuan-scene/assets/index-C0SYjs4w.js"></script>
+  <link rel="stylesheet" crossorigin href="/xiaoyuan-scene/assets/index-Bzfu4cm3.css">
 </head>
 <body>
   <div id="app">
@@ -75,7 +75,7 @@
         <button type="button" id="btn-walk" aria-pressed="false">第一人称</button>
         <button type="button" id="btn-flight" aria-pressed="false">自由飞行</button>
         <button type="button" id="btn-rotate" aria-pressed="true">自动旋转</button>
-        <button type="button" id="btn-audio" aria-pressed="true">声音</button>
+        <button type="button" id="btn-audio" aria-pressed="false">声音</button>
         <button type="button" id="btn-shot">截图</button>
         <button type="button" id="btn-full" aria-pressed="false">全屏</button>
       </div>
@@ -94,7 +94,8 @@
       </div>
       <div class="scroll-loader" aria-hidden="true"><div class="scroll-paper"><div class="scroll-art"></div></div><i class="scroll-rod"></i><i class="scroll-rod"></i></div>
       <p class="loading-copy">正在搭建多美的小院…</p>
-      <p id="loading-pct">0%</p>
+      <p id="loading-pct">正在载入场景引擎…</p>
+      <button type="button" id="loading-retry" hidden>重新加载</button>
       <div class="loading-bar" aria-hidden="true"><span id="loading-fill"></span></div>
     </div>
   </div>
