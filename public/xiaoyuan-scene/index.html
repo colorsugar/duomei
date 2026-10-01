@@ -22,8 +22,8 @@
       else if (!q.has('standalone') && !q.has('debug') && window.top === window.self && /\/xiaoyuan-scene\//.test(location.pathname)) location.replace(q.get('scene') === 'garden' ? '/jiangnan' : '/xiaoyuan');
     })();
   </script>
-  <script type="module" crossorigin src="/xiaoyuan-scene/assets/index-DEBPyFVk.js"></script>
-  <link rel="stylesheet" crossorigin href="/xiaoyuan-scene/assets/index-DWjGPxkM.css">
+  <script type="module" crossorigin src="/xiaoyuan-scene/assets/index-CX6lCLnu.js"></script>
+  <link rel="stylesheet" crossorigin href="/xiaoyuan-scene/assets/index-7h-5ixcK.css">
 </head>
 <body>
   <div id="app">
@@ -46,6 +46,10 @@
       </dl>
     </aside>
     <footer id="dock">
+      <section id="tour-controls" hidden aria-label="自动游玩控制">
+        <div class="tour-copy"><strong id="tour-title" role="status" aria-live="polite"></strong><p id="tour-detail"></p><small id="tour-progress"></small></div>
+        <div class="tour-buttons"><button type="button" id="tour-pause" aria-pressed="false">暂停</button><button type="button" id="tour-end">结束</button></div>
+      </section>
       <div class="tod">
         <p id="hint">双击任意处放大查看 · 双击天空回全景<br>点点看：多美 · 西瓜 · 猫咪 · 荷花缸 · 推门看画，入诗语江南</p>
         <label class="sr-only" for="tod">时间</label>
@@ -64,6 +68,7 @@
       </div>
       <div class="actions">
         <button type="button" id="btn-overview" hidden>返回全景</button>
+        <button type="button" id="btn-tour" aria-pressed="false" disabled>自动游玩</button>
         <button type="button" id="btn-scene" hidden>回小院</button>
         <button type="button" id="btn-feed" hidden>投食</button>
         <button type="button" id="btn-growth" hidden aria-pressed="false">看花开</button>
