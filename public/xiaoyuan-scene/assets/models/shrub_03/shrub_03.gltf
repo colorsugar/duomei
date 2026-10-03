@@ -1,6 +1,6 @@
 {
   "asset": {
-    "generator": "Khronos glTF Blender I/O v1.7.33",
+    "generator": "Khronos glTF Blender I/O v3.5.30",
     "version": "2.0"
   },
   "scene": 0,
@@ -18,33 +18,33 @@
   "nodes": [
     {
       "mesh": 0,
-      "name": "fern_02_b"
+      "name": "shrub_03_a"
     },
     {
       "mesh": 1,
-      "name": "fern_02_c",
+      "name": "shrub_03_b",
       "translation": [
-        1.0000009536743164,
+        0.45767831802368164,
         0,
         0
       ]
     },
     {
       "mesh": 2,
-      "name": "fern_02_a",
+      "name": "shrub_03_c",
       "translation": [
+        0.8514808416366577,
         0,
-        0,
-        1.0000001192092896
+        0
       ]
     },
     {
       "mesh": 3,
-      "name": "fern_02_d",
+      "name": "shrub_03_d",
       "translation": [
-        1,
+        1.2283505201339722,
         0,
-        0.9999995827674866
+        0
       ]
     }
   ],
@@ -53,7 +53,7 @@
       "alphaCutoff": 0.5,
       "alphaMode": "MASK",
       "doubleSided": true,
-      "name": "fern_02",
+      "name": "shrub_03",
       "normalTexture": {
         "index": 0
       },
@@ -70,13 +70,13 @@
   ],
   "meshes": [
     {
-      "name": "Plane.024",
+      "name": "Plane.002",
       "primitives": [
         {
           "attributes": {
             "POSITION": 0,
-            "NORMAL": 1,
-            "TEXCOORD_0": 2
+            "TEXCOORD_0": 1,
+            "NORMAL": 2
           },
           "indices": 3,
           "material": 0
@@ -84,13 +84,13 @@
       ]
     },
     {
-      "name": "Plane.044",
+      "name": "Plane.054",
       "primitives": [
         {
           "attributes": {
             "POSITION": 4,
-            "NORMAL": 5,
-            "TEXCOORD_0": 6
+            "TEXCOORD_0": 5,
+            "NORMAL": 6
           },
           "indices": 7,
           "material": 0
@@ -98,13 +98,13 @@
       ]
     },
     {
-      "name": "Plane.006",
+      "name": "Plane.128",
       "primitives": [
         {
           "attributes": {
             "POSITION": 8,
-            "NORMAL": 9,
-            "TEXCOORD_0": 10
+            "TEXCOORD_0": 9,
+            "NORMAL": 10
           },
           "indices": 11,
           "material": 0
@@ -112,13 +112,13 @@
       ]
     },
     {
-      "name": "Plane.059",
+      "name": "Plane.090",
       "primitives": [
         {
           "attributes": {
             "POSITION": 12,
-            "NORMAL": 13,
-            "TEXCOORD_0": 14
+            "TEXCOORD_0": 13,
+            "NORMAL": 14
           },
           "indices": 15,
           "material": 0
@@ -143,238 +143,254 @@
   "images": [
     {
       "mimeType": "image/webp",
-      "name": "fern_02_nor_gl",
-      "uri": "../../tex/models/fern_02/fern_02_nor_gl_1k.webp"
+      "name": "shrub_03_nor_gl",
+      "uri": "../../tex/models/shrub_03/shrub_03_nor_gl_2k.webp"
     },
     {
       "mimeType": "image/webp",
-      "name": "fern_02_diff-fern_02_alpha",
-      "uri": "../../tex/models/fern_02/fern_02_diff_1k.webp"
+      "name": "shrub_03_diff",
+      "uri": "../../tex/models/shrub_03/shrub_03_diff_2k.webp"
     },
     {
       "mimeType": "image/webp",
-      "name": "fern_02_rough",
-      "uri": "../../tex/models/fern_02/fern_02_arm_1k.webp"
+      "name": "shrub_03_rough",
+      "uri": "../../tex/models/shrub_03/shrub_03_arm_2k.webp"
     }
   ],
   "accessors": [
     {
       "bufferView": 0,
       "componentType": 5126,
-      "count": 1660,
+      "count": 1697,
       "max": [
-        0.4616048336029053,
-        0.39718443155288696,
-        0.4718152582645416
+        0.1270800232887268,
+        0.4009580910205841,
+        0.07849743962287903
       ],
       "min": [
-        -0.5281425714492798,
-        -0.030510280281305313,
-        -0.421874463558197
+        -0.07354381680488586,
+        -0.0018257149495184422,
+        -0.07270558923482895
       ],
       "type": "VEC3"
     },
     {
       "bufferView": 1,
       "componentType": 5126,
-      "count": 1660,
-      "type": "VEC3"
+      "count": 1697,
+      "type": "VEC2"
     },
     {
       "bufferView": 2,
       "componentType": 5126,
-      "count": 1660,
-      "type": "VEC2"
+      "count": 1697,
+      "type": "VEC3"
     },
     {
       "bufferView": 3,
       "componentType": 5123,
-      "count": 7152,
+      "count": 7155,
       "type": "SCALAR"
     },
     {
       "bufferView": 4,
       "componentType": 5126,
-      "count": 1568,
+      "count": 1530,
       "max": [
-        0.44438624382019043,
-        0.32024669647216797,
-        0.34794387221336365
+        0.09164728224277496,
+        0.35165777802467346,
+        0.060450129210948944
       ],
       "min": [
-        -0.4299395680427551,
-        -0.028773672878742218,
-        -0.4172818064689636
+        -0.09265579283237457,
+        -0.0008460530661977828,
+        -0.06211003288626671
       ],
       "type": "VEC3"
     },
     {
       "bufferView": 5,
       "componentType": 5126,
-      "count": 1568,
-      "type": "VEC3"
+      "count": 1530,
+      "type": "VEC2"
     },
     {
       "bufferView": 6,
       "componentType": 5126,
-      "count": 1568,
-      "type": "VEC2"
+      "count": 1530,
+      "type": "VEC3"
     },
     {
       "bufferView": 7,
       "componentType": 5123,
-      "count": 6744,
+      "count": 6402,
       "type": "SCALAR"
     },
     {
       "bufferView": 8,
       "componentType": 5126,
-      "count": 544,
+      "count": 1281,
       "max": [
-        0.25428348779678345,
-        0.2580300271511078,
-        0.3021530210971832
+        0.06041635572910309,
+        0.30356380343437195,
+        0.060411497950553894
       ],
       "min": [
-        -0.2976571321487427,
-        -0.028773518279194832,
-        -0.31126806139945984
+        -0.03539683669805527,
+        -0.0008309875847771764,
+        -0.052744340151548386
       ],
       "type": "VEC3"
     },
     {
       "bufferView": 9,
       "componentType": 5126,
-      "count": 544,
-      "type": "VEC3"
+      "count": 1281,
+      "type": "VEC2"
     },
     {
       "bufferView": 10,
       "componentType": 5126,
-      "count": 544,
-      "type": "VEC2"
+      "count": 1281,
+      "type": "VEC3"
     },
     {
       "bufferView": 11,
       "componentType": 5123,
-      "count": 2352,
+      "count": 5370,
       "type": "SCALAR"
     },
     {
       "bufferView": 12,
       "componentType": 5126,
-      "count": 565,
+      "count": 1397,
       "max": [
-        0.28200197219848633,
-        0.19950860738754272,
-        0.2411416471004486
+        0.06502506881952286,
+        0.25459757447242737,
+        0.054190050810575485
       ],
       "min": [
-        -0.2907802164554596,
-        -0.013578944839537144,
-        -0.35213664174079895
+        -0.0477474071085453,
+        -0.0009536516736261547,
+        -0.03508852794766426
       ],
       "type": "VEC3"
     },
     {
       "bufferView": 13,
       "componentType": 5126,
-      "count": 565,
-      "type": "VEC3"
+      "count": 1397,
+      "type": "VEC2"
     },
     {
       "bufferView": 14,
       "componentType": 5126,
-      "count": 565,
-      "type": "VEC2"
+      "count": 1397,
+      "type": "VEC3"
     },
     {
       "bufferView": 15,
       "componentType": 5123,
-      "count": 2448,
+      "count": 5934,
       "type": "SCALAR"
     }
   ],
   "bufferViews": [
     {
       "buffer": 0,
-      "byteLength": 19920,
-      "byteOffset": 0
+      "byteLength": 20364,
+      "byteOffset": 0,
+      "target": 34962
     },
     {
       "buffer": 0,
-      "byteLength": 19920,
-      "byteOffset": 19920
+      "byteLength": 13576,
+      "byteOffset": 20364,
+      "target": 34962
     },
     {
       "buffer": 0,
-      "byteLength": 13280,
-      "byteOffset": 39840
+      "byteLength": 20364,
+      "byteOffset": 33940,
+      "target": 34962
     },
     {
       "buffer": 0,
-      "byteLength": 14304,
-      "byteOffset": 53120
+      "byteLength": 14310,
+      "byteOffset": 54304,
+      "target": 34963
     },
     {
       "buffer": 0,
-      "byteLength": 18816,
-      "byteOffset": 67424
+      "byteLength": 18360,
+      "byteOffset": 68616,
+      "target": 34962
     },
     {
       "buffer": 0,
-      "byteLength": 18816,
-      "byteOffset": 86240
+      "byteLength": 12240,
+      "byteOffset": 86976,
+      "target": 34962
     },
     {
       "buffer": 0,
-      "byteLength": 12544,
-      "byteOffset": 105056
+      "byteLength": 18360,
+      "byteOffset": 99216,
+      "target": 34962
     },
     {
       "buffer": 0,
-      "byteLength": 13488,
-      "byteOffset": 117600
+      "byteLength": 12804,
+      "byteOffset": 117576,
+      "target": 34963
     },
     {
       "buffer": 0,
-      "byteLength": 6528,
-      "byteOffset": 131088
+      "byteLength": 15372,
+      "byteOffset": 130380,
+      "target": 34962
     },
     {
       "buffer": 0,
-      "byteLength": 6528,
-      "byteOffset": 137616
+      "byteLength": 10248,
+      "byteOffset": 145752,
+      "target": 34962
     },
     {
       "buffer": 0,
-      "byteLength": 4352,
-      "byteOffset": 144144
+      "byteLength": 15372,
+      "byteOffset": 156000,
+      "target": 34962
     },
     {
       "buffer": 0,
-      "byteLength": 4704,
-      "byteOffset": 148496
+      "byteLength": 10740,
+      "byteOffset": 171372,
+      "target": 34963
     },
     {
       "buffer": 0,
-      "byteLength": 6780,
-      "byteOffset": 153200
+      "byteLength": 16764,
+      "byteOffset": 182112,
+      "target": 34962
     },
     {
       "buffer": 0,
-      "byteLength": 6780,
-      "byteOffset": 159980
+      "byteLength": 11176,
+      "byteOffset": 198876,
+      "target": 34962
     },
     {
       "buffer": 0,
-      "byteLength": 4520,
-      "byteOffset": 166760
+      "byteLength": 16764,
+      "byteOffset": 210052,
+      "target": 34962
     },
     {
       "buffer": 0,
-      "byteLength": 4896,
-      "byteOffset": 171280
+      "byteLength": 11868,
+      "byteOffset": 226816,
+      "target": 34963
     }
   ],
   "samplers": [
@@ -385,8 +401,8 @@
   ],
   "buffers": [
     {
-      "byteLength": 176176,
-      "uri": "fern_02.bin"
+      "byteLength": 238684,
+      "uri": "shrub_03.bin"
     }
   ]
 }

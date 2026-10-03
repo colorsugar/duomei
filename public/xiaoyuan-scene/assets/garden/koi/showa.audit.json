@@ -1,0 +1,18 @@
+{
+  "source": "/Users/chenghaoliu/Projects/courtyard-3d/.claude/worktrees/elated-wilson-a91ac4/assets-src/koi/showa-hunyuan.glb",
+  "file": "/Users/chenghaoliu/Projects/courtyard-3d/.claude/worktrees/elated-wilson-a91ac4/public/assets/garden/koi/showa.glb",
+  "triangles": 5000,
+  "bytes": 503432,
+  "seconds": 13.27,
+  "textureMax": 1024,
+  "girths": [
+    0.2550480365753174,
+    0.04541884362697601
+  ],
+  "flipped": true,
+  "head": "+X",
+  "bodyLength": 1,
+  "rebaked": true,
+  "engine": "CYCLES",
+  "device": "CPU"
+}
