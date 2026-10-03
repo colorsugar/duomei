@@ -453,19 +453,19 @@
   ],
   "images": [
     {
-      "mimeType": "image/jpeg",
+      "mimeType": "image/webp",
       "name": "grass_medium_01_nor_gl",
-      "uri": "textures/grass_medium_01_nor_gl_1k.jpg"
+      "uri": "../../tex/models/grass_medium_01/grass_medium_01_nor_gl_1k.webp"
     },
     {
-      "mimeType": "image/jpeg",
+      "mimeType": "image/webp",
       "name": "grass_medium_01_diff-grass_medium_01_alpha",
-      "uri": "textures/grass_medium_01_diff_1k.jpg"
+      "uri": "../../tex/models/grass_medium_01/grass_medium_01_diff_1k.webp"
     },
     {
-      "mimeType": "image/jpeg",
+      "mimeType": "image/webp",
       "name": "grass_medium_01_rough",
-      "uri": "textures/grass_medium_01_arm_1k.jpg"
+      "uri": "../../tex/models/grass_medium_01/grass_medium_01_arm_1k.webp"
     }
   ],
   "accessors": [

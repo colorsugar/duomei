@@ -171,19 +171,19 @@
   ],
   "images": [
     {
-      "mimeType": "image/jpeg",
+      "mimeType": "image/webp",
       "name": "shrub_02_nor_gl",
-      "uri": "textures/shrub_02_nor_gl_1k.jpg"
+      "uri": "../../tex/models/shrub_02/shrub_02_nor_gl_1k.webp"
     },
     {
-      "mimeType": "image/jpeg",
+      "mimeType": "image/webp",
       "name": "shrub_02_diff",
-      "uri": "textures/shrub_02_diff_1k.jpg"
+      "uri": "../../tex/models/shrub_02/shrub_02_diff_1k.webp"
     },
     {
-      "mimeType": "image/jpeg",
+      "mimeType": "image/webp",
       "name": "shrub_02_rough",
-      "uri": "textures/shrub_02_arm_1k.jpg"
+      "uri": "../../tex/models/shrub_02/shrub_02_arm_1k.webp"
     }
   ],
   "accessors": [

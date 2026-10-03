@@ -22,19 +22,20 @@
       else if (!q.has('standalone') && !q.has('debug') && window.top === window.self && /\/xiaoyuan-scene\//.test(location.pathname)) location.replace(q.get('scene') === 'garden' ? '/jiangnan' : '/xiaoyuan');
     })();
   </script>
-  <script type="module" crossorigin src="/xiaoyuan-scene/assets/index-MEamXQjI.js"></script>
-  <link rel="stylesheet" crossorigin href="/xiaoyuan-scene/assets/index-Bzfu4cm3.css">
+  <script type="module" crossorigin src="/xiaoyuan-scene/assets/main-DCHMuhCc.js"></script>
+  <link rel="modulepreload" crossorigin href="/xiaoyuan-scene/assets/GLTFLoader-BDBQwcZv.js">
+  <link rel="stylesheet" crossorigin href="/xiaoyuan-scene/assets/main-DDC7NM_C.css">
 </head>
 <body>
   <div id="app">
     <canvas id="view"></canvas>
+    <div id="day-transition" aria-hidden="true" style="position:fixed;inset:0;z-index:2;pointer-events:none;background:#101723;opacity:0"></div>
 
     <header id="brand">
       <h1>多美的夏日小院</h1>
       <p>一个悬浮在云上的夏天</p>
     </header>
 
-    <a id="fish-credit" hidden href="https://sketchfab.com/3d-models/koi-fish-236859b809984f52b70c94fd040b9c59" target="_blank" rel="noopener">锦鲤：7PLUS · CC BY 4.0</a>
     <div id="hover-label" hidden></div>
     <aside id="info-card" hidden aria-live="polite">
       <button type="button" class="info-close" aria-label="关闭介绍">×</button>
@@ -50,34 +51,46 @@
         <div class="tour-copy"><strong id="tour-title" role="status" aria-live="polite"></strong><p id="tour-detail"></p><small id="tour-progress"></small></div>
         <div class="tour-buttons"><button type="button" id="tour-next">下一站</button><button type="button" id="tour-pause" aria-pressed="false">暂停</button><button type="button" id="tour-end">结束</button></div>
       </section>
-      <div class="tod">
-        <p id="hint">双击任意处放大查看 · 双击天空回全景<br>点点看：多美 · 西瓜 · 猫咪 · 荷花缸 · 推门看画，入诗语江南</p>
-        <label class="sr-only" for="tod">时间</label>
-        <input id="tod" type="range" min="0" max="1" step="0.001" value="0.5" aria-valuemin="0" aria-valuemax="1" aria-valuenow="0.5" aria-valuetext="黄昏" />
-        <div class="stops" role="group" aria-label="时辰">
-          <button type="button" data-tod="0">午后</button>
-          <button type="button" data-tod="0.27" hidden>晴午</button>
-          <button type="button" data-tod="0.5" class="is-current">黄昏</button>
-          <button type="button" data-tod="1">夜晚</button>
+      <p id="hint">双击任意处放大查看 · 双击天空回全景<br>点点看：多美 · 西瓜 · 猫咪 · 荷花缸 · 推门看画，入诗语江南</p>
+      <div id="rain-pop" class="dock-more rain-pop" hidden>
+        <div id="rain-controls" class="rain-controls" hidden>
+          <label for="rain-amount">雨量 <output id="rain-label">无雨</output></label>
+          <input id="rain-amount" type="range" min="0" max="50" step="1" value="0" aria-label="雨量" />
+          <button id="rain-auto" type="button">停雨</button>
         </div>
       </div>
-      <div id="rain-controls" class="rain-controls" hidden>
-        <label for="rain-amount">雨量 <output id="rain-label">随时辰</output></label>
-        <input id="rain-amount" type="range" min="0" max="50" step="1" value="0" aria-label="雨量" />
-        <button id="rain-auto" type="button">随时辰</button>
+      <div id="dock-more" class="dock-more" hidden>
+        <div class="more-grid actions">
+          <button type="button" id="btn-overview" hidden>返回全景</button>
+          <button type="button" id="btn-scene" hidden>回小院</button>
+          <button type="button" id="btn-feed" hidden>投食</button>
+          <button type="button" id="btn-growth" hidden aria-pressed="false">看花开</button>
+          <button type="button" id="btn-rotate" aria-pressed="true">自动旋转</button>
+          <button type="button" id="btn-shot">截图</button>
+          <button type="button" id="btn-full" aria-pressed="false">全屏</button>
+          <button type="button" id="btn-fps" aria-pressed="false">帧率</button>
+        </div>
       </div>
-      <div class="actions">
-        <button type="button" id="btn-overview" hidden>返回全景</button>
-        <button type="button" id="btn-tour" aria-pressed="false" disabled>自动游玩</button>
-        <button type="button" id="btn-scene" hidden>回小院</button>
-        <button type="button" id="btn-feed" hidden>投食</button>
-        <button type="button" id="btn-growth" hidden aria-pressed="false">看花开</button>
-        <button type="button" id="btn-walk" aria-pressed="false">第一人称</button>
-        <button type="button" id="btn-flight" aria-pressed="false">自由飞行</button>
-        <button type="button" id="btn-rotate" aria-pressed="true">自动旋转</button>
-        <button type="button" id="btn-audio" aria-pressed="false">声音</button>
-        <button type="button" id="btn-shot">截图</button>
-        <button type="button" id="btn-full" aria-pressed="false">全屏</button>
+      <div class="dock-bar">
+        <div class="tod">
+          <label class="sr-only" for="tod">时间</label>
+          <input id="tod" type="range" min="0" max="1" step="0.001" value="0.5" aria-valuemin="0" aria-valuemax="1" aria-valuenow="0.5" aria-valuetext="黄昏" />
+          <div class="stops" role="group" aria-label="时辰">
+            <button type="button" data-tod="0">午后</button>
+            <button type="button" data-tod="0.27" hidden>晴午</button>
+            <button type="button" data-tod="0.5" class="is-current">黄昏</button>
+            <button type="button" data-tod="1">夜晚</button>
+          </div>
+        </div>
+        <span class="dock-sep" aria-hidden="true"></span>
+        <div class="actions main-actions">
+          <button type="button" id="btn-tour" class="is-primary" aria-pressed="false" disabled>自动游玩</button>
+          <button type="button" id="btn-walk" aria-pressed="false">第一人称</button>
+          <button type="button" id="btn-flight" aria-pressed="false">自由飞行</button>
+          <button type="button" id="btn-rain" class="icon-btn" hidden aria-pressed="false" aria-expanded="false" aria-controls="rain-pop" aria-label="烟雨" title="烟雨"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 14a4 4 0 0 1-.5-8A6 6 0 0 1 17 5a4.5 4.5 0 0 1 1 9H6zM7 16h2l-2 5H5zm5 0h2l-2 5h-2zm5 0h2l-2 5h-2z"/></svg></button>
+          <button type="button" id="btn-audio" class="icon-btn" aria-pressed="false" aria-label="声音" title="声音"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z"/><path class="wave" d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11"/></svg></button>
+          <button type="button" id="btn-more" class="icon-btn" aria-expanded="false" aria-controls="dock-more" aria-label="更多" title="更多"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="18" cy="12" r="1.6"/></svg></button>
+        </div>
       </div>
     </footer>
 

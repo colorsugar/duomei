@@ -1,0 +1,18 @@
+{
+  "source": "/Users/chenghaoliu/Projects/courtyard-3d/.claude/worktrees/elated-wilson-a91ac4/assets-src/koi/asagi-hunyuan.glb",
+  "file": "/Users/chenghaoliu/Projects/courtyard-3d/.claude/worktrees/elated-wilson-a91ac4/public/assets/garden/koi/asagi.glb",
+  "triangles": 5000,
+  "bytes": 451124,
+  "seconds": 13.67,
+  "textureMax": 1024,
+  "girths": [
+    0.2250223159790039,
+    0.039628103375434875
+  ],
+  "flipped": true,
+  "head": "+X",
+  "bodyLength": 1,
+  "rebaked": true,
+  "engine": "CYCLES",
+  "device": "CPU"
+}
