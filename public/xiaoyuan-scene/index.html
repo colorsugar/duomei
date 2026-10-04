@@ -22,9 +22,9 @@
       else if (!q.has('standalone') && !q.has('debug') && window.top === window.self && /\/xiaoyuan-scene\//.test(location.pathname)) location.replace(q.get('scene') === 'garden' ? '/jiangnan' : '/xiaoyuan');
     })();
   </script>
-  <script type="module" crossorigin src="/xiaoyuan-scene/assets/main-cU2LqsLe.js"></script>
+  <script type="module" crossorigin src="/xiaoyuan-scene/assets/main-DKs17BQ4.js"></script>
   <link rel="modulepreload" crossorigin href="/xiaoyuan-scene/assets/GLTFLoader-BDBQwcZv.js">
-  <link rel="stylesheet" crossorigin href="/xiaoyuan-scene/assets/main-DDC7NM_C.css">
+  <link rel="stylesheet" crossorigin href="/xiaoyuan-scene/assets/main-D-njqep5.css">
 </head>
 <body>
   <div id="app">
@@ -58,6 +58,15 @@
           <input id="rain-amount" type="range" min="0" max="50" step="1" value="0" aria-label="雨量" />
           <button id="rain-auto" type="button">停雨</button>
         </div>
+      </div>
+      <div id="music-pop" class="dock-more music-pop" hidden>
+        <div class="music-now">
+          <button type="button" id="music-play" class="music-play" aria-pressed="false" aria-label="播放"><svg viewBox="0 0 24 24" aria-hidden="true"><path class="i-play" d="M8 5.5v13l10.5-6.5z"/><path class="i-pause" d="M7.5 5.5h3v13h-3zM13.5 5.5h3v13h-3z"/></svg></button>
+          <div class="music-meta"><strong id="music-title">暮色</strong><small id="music-sub">已暂停</small></div>
+          <button type="button" id="music-next" class="music-next" aria-label="下一首"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l9 6-9 6zM16.5 6h2v12h-2z"/></svg></button>
+        </div>
+        <ol id="music-list" class="music-list"></ol>
+        <div class="music-foot"><label for="music-volume">音量</label><input id="music-volume" type="range" min="0" max="100" step="1" value="75" aria-label="音乐音量" /><button type="button" id="music-mute">静音</button></div>
       </div>
       <div id="dock-more" class="dock-more" hidden>
         <div class="more-grid actions">
