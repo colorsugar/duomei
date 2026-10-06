@@ -22,7 +22,7 @@
       else if (!q.has('standalone') && !q.has('debug') && window.top === window.self && /\/xiaoyuan-scene\//.test(location.pathname)) location.replace(q.get('scene') === 'garden' ? '/jiangnan' : '/xiaoyuan');
     })();
   </script>
-  <script type="module" crossorigin src="/xiaoyuan-scene/assets/main-afhVTLxo.js"></script>
+  <script type="module" crossorigin src="/xiaoyuan-scene/assets/main-DtlSnRjy.js"></script>
   <link rel="modulepreload" crossorigin href="/xiaoyuan-scene/assets/three.module-9UAnMrUf.js">
   <link rel="modulepreload" crossorigin href="/xiaoyuan-scene/assets/OrbitControls-Dpmdr4n_.js">
   <link rel="modulepreload" crossorigin href="/xiaoyuan-scene/assets/GLTFLoader-D-y97875.js">
@@ -48,7 +48,7 @@
       <p class="info-meaning"></p>
     </aside>
     <footer id="dock">
-      <section id="tour-controls" hidden aria-label="自动游玩控制">
+      <section id="tour-controls" hidden aria-label="自动游览控制">
         <div class="tour-copy"><strong id="tour-title" role="status" aria-live="polite"></strong><p id="tour-detail"></p><small id="tour-progress"></small></div>
         <div class="tour-buttons"><button type="button" id="tour-next">下一处</button><button type="button" id="tour-pause" aria-pressed="false">暂停</button><button type="button" id="tour-end">结束</button></div>
       </section>
@@ -111,7 +111,7 @@
         <button type="button" id="btn-flow" class="icon-btn flow-btn" aria-pressed="true" aria-label="时光流转" title="时光流转：开着时时间自动走；点时辰或拖动时间条即定格"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.2" fill="none" stroke="currentColor" stroke-width="1.7"/><path class="flow-hand" d="M12 7v5.2l3.4 2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path class="flow-pause" d="M9.6 8.6v6.8M14.4 8.6v6.8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
         <span class="dock-sep" aria-hidden="true"></span>
         <div class="actions main-actions">
-          <button type="button" id="btn-tour" class="is-primary" aria-pressed="false" disabled>自动游玩</button>
+          <button type="button" id="btn-tour" class="is-primary" aria-pressed="false" disabled>自动游览</button>
           <button type="button" id="btn-walk" aria-pressed="false">第一人称</button>
           <button type="button" id="btn-flight" aria-pressed="false">自由飞行</button>
           <button type="button" id="btn-rain" class="icon-btn" hidden aria-pressed="false" aria-expanded="false" aria-controls="rain-pop" aria-label="烟雨" title="烟雨"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 14a4 4 0 0 1-.5-8A6 6 0 0 1 17 5a4.5 4.5 0 0 1 1 9H6zM7 16h2l-2 5H5zm5 0h2l-2 5h-2zm5 0h2l-2 5h-2z"/></svg></button>
