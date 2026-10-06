@@ -13,7 +13,7 @@
     (function () {
       var q = new URLSearchParams(location.search);
       if (q.get('scene') === 'garden') { // 诗语江南: the loader unrolls the handscroll — fetch it first
-        var src = (location.pathname.indexOf('/xiaoyuan-scene/') === 0 ? '/xiaoyuan-scene/' : '/') + 'assets/garden/painting-titled.jpg';
+        var src = (location.pathname.indexOf('/xiaoyuan-scene/') === 0 ? '/xiaoyuan-scene/' : '/') + 'assets/garden/painting-titled-v3.jpg';
         document.documentElement.classList.add('is-garden');
         document.documentElement.style.setProperty('--scroll-img', 'url(' + src + ')');
         var pl = document.createElement('link'); pl.rel = 'preload'; pl.as = 'image'; pl.href = src; pl.setAttribute('fetchpriority', 'high'); document.head.appendChild(pl);
@@ -22,12 +22,12 @@
       else if (!q.has('standalone') && !q.has('debug') && window.top === window.self && /\/xiaoyuan-scene\//.test(location.pathname)) location.replace(q.get('scene') === 'garden' ? '/jiangnan' : '/xiaoyuan');
     })();
   </script>
-  <script type="module" crossorigin src="/xiaoyuan-scene/assets/main-BkavXyDl.js"></script>
-  <link rel="modulepreload" crossorigin href="/xiaoyuan-scene/assets/three.module-DSWJ4Dm9.js">
-  <link rel="modulepreload" crossorigin href="/xiaoyuan-scene/assets/OrbitControls-C4TCM18g.js">
-  <link rel="modulepreload" crossorigin href="/xiaoyuan-scene/assets/GLTFLoader-B0P4jVRD.js">
+  <script type="module" crossorigin src="/xiaoyuan-scene/assets/main-BEoCSnPp.js"></script>
+  <link rel="modulepreload" crossorigin href="/xiaoyuan-scene/assets/three.module-BJVf_TCG.js">
+  <link rel="modulepreload" crossorigin href="/xiaoyuan-scene/assets/OrbitControls-OvKsbGZR.js">
+  <link rel="modulepreload" crossorigin href="/xiaoyuan-scene/assets/GLTFLoader-Do9HSZHK.js">
   <link rel="modulepreload" crossorigin href="/xiaoyuan-scene/assets/critterSdf-CuTcWX98.js">
-  <link rel="stylesheet" crossorigin href="/xiaoyuan-scene/assets/main-B1x988VY.css">
+  <link rel="stylesheet" crossorigin href="/xiaoyuan-scene/assets/main-BcvQAy5X.css">
 </head>
 <body>
   <div id="app">
@@ -44,10 +44,8 @@
       <button type="button" class="info-close" aria-label="关闭介绍">×</button>
       <h2></h2>
       <p class="info-en"></p>
-      <dl>
-        <dt>用途</dt><dd class="info-use"></dd>
-        <dt>意义</dt><dd class="info-meaning"></dd>
-      </dl>
+      <p class="info-use"></p>
+      <p class="info-meaning"></p>
     </aside>
     <footer id="dock">
       <section id="tour-controls" hidden aria-label="自动游玩控制">
