@@ -1,0 +1,72 @@
+{
+ "note": "scripts/bake/bake-garden.mjs 生成；src/baked.js 读取。签名对不上的数据运行时不用。",
+ "generated": "2026-10-06T11:29:57.939Z",
+ "data": {
+  "frogField": {
+   "variants": [
+    {
+     "sig": "d42989ce",
+     "bin": "frog-field-d42989ce.bin",
+     "type": "u16",
+     "nx": 625,
+     "nz": 525,
+     "stats": {
+      "meshes": 37,
+      "tris": 115449,
+      "rasterised": 33602,
+      "open": 191563,
+      "filled": 503,
+      "ms": 772,
+      "wallMs": 6984
+     },
+     "tier": "desktop"
+    }
+   ]
+  },
+  "dragonSight": {
+   "variants": [
+    {
+     "sig": "60e6dce9",
+     "json": "dragon-sight-60e6dce9.json",
+     "tier": "desktop"
+    },
+    {
+     "sig": "df4156f3",
+     "json": "dragon-sight-df4156f3.json",
+     "tier": "phone"
+    }
+   ]
+  },
+  "lanterns": {
+   "variants": [
+    {
+     "sig": "5839bfa8",
+     "json": "lanterns-5839bfa8.json",
+     "tier": "desktop"
+    }
+   ]
+  }
+ },
+ "textures": {
+  "assets/tex/white_plaster_rough_01/diff.webp": "tex/white_plaster_rough_01/diff.webp",
+  "assets/tex/white_plaster_rough_01/nor.webp": "tex/white_plaster_rough_01/nor.webp",
+  "assets/tex/white_plaster_rough_01/arm.webp": "tex/white_plaster_rough_01/arm.webp",
+  "assets/tex/grey_roof_tiles/diff.webp": "tex/grey_roof_tiles/diff.webp",
+  "assets/tex/grey_roof_tiles/nor.webp": "tex/grey_roof_tiles/nor.webp",
+  "assets/tex/grey_roof_tiles/arm.webp": "tex/grey_roof_tiles/arm.webp",
+  "assets/tex/leafy_grass/diff.webp": "tex/leafy_grass/diff.webp",
+  "assets/tex/leafy_grass/nor.webp": "tex/leafy_grass/nor.webp",
+  "assets/tex/leafy_grass/arm.webp": "tex/leafy_grass/arm.webp",
+  "assets/tex/clean_pebbles/diff.webp": "tex/clean_pebbles/diff.webp",
+  "assets/tex/clean_pebbles/nor.webp": "tex/clean_pebbles/nor.webp",
+  "assets/tex/clean_pebbles/arm.webp": "tex/clean_pebbles/arm.webp",
+  "assets/tex/rock_wall_10/diff.webp": "tex/rock_wall_10/diff.webp",
+  "assets/tex/rock_wall_10/nor.webp": "tex/rock_wall_10/nor.webp",
+  "assets/tex/rock_wall_10/arm.webp": "tex/rock_wall_10/arm.webp",
+  "assets/tex/forest_ground_04/diff.webp": "tex/forest_ground_04/diff.webp",
+  "assets/tex/forest_ground_04/nor.webp": "tex/forest_ground_04/nor.webp",
+  "assets/tex/forest_ground_04/arm.webp": "tex/forest_ground_04/arm.webp",
+  "assets/tex/pine_bark/arm.webp": "tex/pine_bark/arm.webp",
+  "assets/tex/bark_brown_02/arm.webp": "tex/bark_brown_02/arm.webp"
+ }
+}
