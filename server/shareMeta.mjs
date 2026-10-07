@@ -124,6 +124,13 @@ function routeCopy(segments) {
   if (segments[0] === "guyu" && segments.length === 1) {
     return { title: "故语", description: "一架旧书与新说：纸上飞檐、想象画本、月亮下的童梦、桂巷还香。" };
   }
+  if (segments[0] === "jiangnan" && segments.length === 1) {
+    return {
+      title: "诗语江南",
+      description: "一座漂在云海上的江南园林，用 three.js 在网页里实时渲染：下雨、荷叶积水倾倒、锦鲤、日夜流转、自动游览，浏览器打开就能游园。",
+      image: "/og-jiangnan.jpg",
+    };
+  }
   if (segments[0] === "skills" && segments.length === 1) {
     return { title: "Skill", description: "多美整理的 AI Agent Skill 目录，公开在 colorsugar/agent-skills。" };
   }

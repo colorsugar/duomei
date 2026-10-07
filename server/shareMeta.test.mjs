@@ -60,6 +60,9 @@ test("static route copy", () => {
   assert.equal(staticShareMeta("/guyu").image, "/og-image.png");
   assert.equal(staticShareMeta("/guyu").title, "故语");
   assert.equal(staticShareMeta("/skills").title, "Skill");
+  assert.equal(staticShareMeta("/jiangnan").title, "诗语江南");
+  assert.equal(staticShareMeta("/jiangnan").image, "/og-jiangnan.jpg");
+  assert.equal(staticShareMeta("/jiangnan/x"), null);
   assert.equal(staticShareMeta("/"), null);
   assert.equal(staticShareMeta("/guyu/xinshuo-01"), null);
 });
@@ -230,4 +233,13 @@ test("handleShellRequest fetches the site's own shell and tags the response", as
 
   const dead = await handleShellRequest(new Request("https://duomei.site/guyu"), { fetchImpl: async () => { throw new Error("down"); } });
   assert.equal(dead.status, 503);
+});
+
+test("the 诗语江南 page shares its own garden card", async () => {
+  const shell = `<!doctype html><html><head><title>x</title><meta property="og:title" content="DUOMEI 多美小记" /><meta property="og:image" content="https://duomei.site/og-image.png" /><meta name="twitter:image" content="https://duomei.site/og-image.png" /></head><body><div id="root"></div></body></html>`;
+  const out = await handleShellRequest(new Request("https://duomei.site/jiangnan", { headers: { "user-agent": "Twitterbot/1.0" } }), { fetchImpl: async () => new Response(shell, { status: 200, headers: { "content-type": "text/html" } }) });
+  const html = await out.text();
+  assert.match(html, /<meta property="og:title" content="诗语江南" \/>/);
+  assert.match(html, /<meta name="twitter:image" content="https:\/\/duomei\.site\/og-jiangnan\.jpg" \/>/);
+  assert.match(html, /<title>诗语江南 \| DUOMEI 多美小记<\/title>/);
 });
