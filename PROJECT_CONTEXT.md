@@ -106,6 +106,9 @@ External runtime hosts intentionally referenced by the site are `duomei.site`, `
 | `/guyu/gui-xiang-huan-xiang` | `新说 / 桂巷还香`, 30 complete `full` Guilin landmark plates | No |
 | `/yunyou-map` | Immersive React shell for the Guilin map; preserves global music | No; bottom-safe `返回多美` on phones |
 | `/yunyou/` | Isolated static map runtime embedded by `/yunyou-map`; top-level visits redirect to the shell unless `?standalone=1` | Embedded chrome hides its duplicate return link |
+| `/xiaoyuan` | 多美的夏日小院 3D scene shell; embeds same-origin `/xiaoyuan-scene/index.html?embed=1`, keeps global music | No; top-left `返回多美` |
+| `/jiangnan` | 诗语江南 3D garden shell; embeds the same runtime at `/xiaoyuan-scene/index.html?embed=1&scene=garden`, keeps global music | No; top-left `返回多美` |
+| `/xiaoyuan-scene/` | Isolated static Three.js scene (Vite build output); top-level visits redirect to `/xiaoyuan` (or `/jiangnan` for `?scene=garden`) unless `?standalone=1` | Embedded mode hides its own title card |
 | `/skills` | Skill directory | Yes |
 | `/admin/login` | Supabase admin login | No |
 | `/admin`, `/admin/notes` | Note management | No |
@@ -268,3 +271,36 @@ Historical planning documents under `deploy/guyu-edgeone/docs/` remain useful ev
 ## 超级大陆立体卫星图 — 2026-09-09
 
 `/chaoji` 跳转 `/chaoji/map`，嵌入 `public/atlas/chaoji/3d.html`。Three.js 四级 LOD：大陆总览 → 八区（`regions.json` + `assets/regions/*.webp`）→ 十二城邦（`cities.json` + `assets/cities/*.webp`，城墙/道路/密铺建筑/地标/生物群）→ 街区最大细节（地点可点再放大）。浮层返回 + 缩小自动退 LOD：街区→城邦→地区→总览。城邦/街区层隐藏战略点标签，避免叠字。与奇幻大陆 V6（`/dalu/map`、`public/atlas/v6/`）不是同一套世界，禁止互相覆盖。手机侧栏默认可关。`edgeone.json` 对 `/atlas/chaoji/*` 与 `/atlas/v6/*`、`/yunyou/*` 放开为 `SAMEORIGIN` + `frame-ancestors 'self'`。总提示词暂与 `src/content/daluMasterPrompt.md` 共用。详情见 `docs/chaoji/README.md`。
+
+## 多美的夏日小院 — 2026-09-27
+
+`/xiaoyuan` is a React shell (`src/pages/DuomeiXiaoyuanPage.tsx`, `src/xiaoyuan-page.css`) that embeds the same-origin static scene `/xiaoyuan-scene/index.html?embed=1`, keeps the global music player mounted, and shows a top-left `← 返回多美` targeting `/#yunyou` (the scene has its own bottom dock, so the link stays at the top on every width). The homepage 云游 section shows its Guilin card and the 小院 card side by side in `.yunyou-cards` (two equal columns on desktop, stacked on phones; cover `public/images/xiaoyuan-cover.webp`); homepage section order is unchanged. `public/xiaoyuan-scene/` is the built output of the separate `courtyard-3d` project (Three.js r180 bundled, no CDN): only files the scene actually requests at all device tiers are shipped (~133 MB; largest file 13.5 MB). The scene picks a device tier (`?tier=high|mid|low` override): desktops/iPads full assets, large @3x iPhones and ≥8 GB Android mid, others 1K textures and light models; BGM downloads only after the visitor enables sound. `edgeone.json` narrows only `/xiaoyuan-scene/*` to `SAMEORIGIN` + `frame-ancestors 'self'`; every other page stays `DENY`. Direct top-level `/xiaoyuan-scene/` visits redirect to `/xiaoyuan` unless `?standalone=1`.
+
+## 诗语江南 — 2026-09-29
+
+`/jiangnan` (`src/pages/DuomeiJiangnanPage.tsx`, reusing `src/xiaoyuan-page.css`) embeds the 江南园林 scene of the same `/xiaoyuan-scene` runtime (`?embed=1&scene=garden`). The two scenes link to each other: in the courtyard, opening the front doors frames the hall's handscroll titled 诗语江南 and tapping it enters the garden; in the garden, the south gate and the dock's `回小院` button return. Inside the site the scene posts `{type: "duomei-scene-goto", scene: "jiangnan" | "xiaoyuan"}` to its same-origin parent and both shells route with `useSceneNavigation()` (`src/lib/sceneNavigation.ts`), so the address bar, back link and music player survive. The 云游 section shows three cards side by side (Guilin, 小院, 诗语江南; cover `public/images/jiangnan-cover.webp`), stacked on phones. Scene source: `courtyard-3d` repo (`?scene=garden`); `/xiaoyuan-scene` ships only the assets both scenes request at both tiers.
+
+## 荷塘互动与第一人称 — 2026-10-01
+
+The shared `/xiaoyuan-scene` runtime now supports first-person walking (WASD, Shift sprint, E/click interaction) and faster free flight. Walking uses architecture/rock collision and floor height checks. Crossing the gate or using 回小院 preserves walking mode across the existing same-origin shell navigation via a one-time sessionStorage arrival flag. Lotus flowers grow from buds to open petals; 看花开 accelerates growth. Rain beads merge, pool, tilt the leaf and pour into leaves/the pond; water captures are separated above/below the surface. The garden uses complete procedural tree branches instead of the fragmented jacaranda scan. The refined koi model is 7PLUS CC BY 4.0 with attribution in the runtime and `assets/garden/FISH-CREDITS.md`; its URL follows the `/xiaoyuan-scene/` build base. This remains a visual work in progress: clear-water/leaf-pool realism and rain-ring visibility require further refinement, and real mobile-device acceptance has not been performed. Production remains EdgeOne `duomei.site`, `/jiangnan` and `/xiaoyuan`; the standalone Vercel upload is not the site release.
+
+## 无键盘自动游玩 — 2026-10-01
+
+Both `/jiangnan` and `/xiaoyuan` expose an explicit 自动游玩 button. A curated camera route visits six sights per scene, triggers lotus accelerated growth/koi feeding/rain and courtyard character/cat/pond/door interactions, continues through the existing same-origin scene navigation, then returns to its starting scene and stops. Pause/continue/end remain available on touch screens; Choosing a manual movement/time/scene control ends the route and hands back the view; a canvas tap does not interrupt auto play. Background tabs freeze route time. Cross-scene continuation uses a consumed, short-lived sessionStorage arrival; refresh or later visits never silently start a new tour. No keyboard or pointer lock is needed for auto play. The tour uses the existing Three.js camera/runtime, not a separate map or dependency; it is a guided camera visit rather than collision-based autonomous walking. Real phone-device testing remains separate from narrow-viewport Chrome verification.
+
+The route mixes first-person walks along authored paving/corridor paths with low flights around the lotus stands and courtyard. Grounded camera height follows the existing floor raycast; connected line segments round only immediate corners, and camera rotation is capped to avoid sudden swings. There are no stationary viewing waits. 下一站 is available while paused and preserves the remaining path before proceeding; the mobile card keeps next/pause/end on one row. The courtyard door opens before the approach. These are authored routes, not autonomous collision-aware navigation.
+
+Scene production builds must use `vite build --base=/xiaoyuan-scene/`. The root prebuild verifies scene entry script/styles stay within that prefix and resolve to real files; do not copy a default-root Vite build into this embedded scene.
+
+## 当前荷塘修复交接 — 2026-10-01
+
+荷塘/小院相关任务还须先读 `docs/jiangnan-water-handoff-2026-10-01.md`，其中区分已发布功能与正在本地验证、尚未发布的水下朝上修复，并列明文件定位、证据和下一步。必须保留现有水上倒影/折射、雨点波纹、荷叶积水倾泻、荷花生长、互动、第一人称、自动游玩和场景互通；不得用旧提交覆盖当前未提交源码。交接文件是日期快照，发布状态以重新核验的线上 marker 和 Git 为准。
+
+本轮水下修复只移除水下鱼/池底镜像采集，水上着色分支保持不变。雨景首次出现会初始化此前积雨形成的叶面水团，晴天仍从干叶开始；水账 `initial` 记录该水量，后续仍由既有物理和互动驱动，不能在切换雨量时反复补水。详细验证与发布状态见本轮交接文件。
+
+
+## 手机完整画质、降雨与加载阶段 — 2026-10-01
+
+用户明确要求手机/iPad不直接降低画质。共享场景现在固定完整纹理、模型、阴影、辉光与水面光学，不再按设备自动切轻水面/1K材质，也不自动降DPR或关闭AO/辉光。优化路径为GPU雨丝静态种子、后台动画暂停、已有视锥剔除及同步截图时再重绘（debug录像保留缓冲）。世界雨固定在实际围墙内，1200条保持原园内密度；近景雨只在园内附近启用并在围墙边界裁剪，禁止扩展到墙外浪费资源。水下上看保留岸景透射与动态雨圈，不能恢复镜像鱼/池底。
+
+手机/平板第一人称和飞行提供触屏摇杆、滑动转向、快走/互动及升降，复用既有碰撞；取消触摸/后台/失焦停止移动。加载显示真实已完成/已发现资源数和材质准备阶段，失败显示重试；仅实际资源/构建/材质与至少2帧完成才显示100%，没有8秒放行。声音默认关闭，需要明确点声音才能开启。真实手机网络等待与性能验收仍待真机；桌面触屏模拟不能声称真机通过。详见当前荷塘交接文件。

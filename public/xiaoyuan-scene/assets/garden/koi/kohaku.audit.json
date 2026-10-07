@@ -1,0 +1,18 @@
+{
+  "source": "/Users/chenghaoliu/Projects/courtyard-3d/.claude/worktrees/elated-wilson-a91ac4/assets-src/koi/kohaku-hunyuan.glb",
+  "file": "/Users/chenghaoliu/Projects/courtyard-3d/.claude/worktrees/elated-wilson-a91ac4/public/assets/garden/koi/kohaku.glb",
+  "triangles": 5000,
+  "bytes": 394568,
+  "seconds": 13.3,
+  "textureMax": 1024,
+  "girths": [
+    0.26569056510925293,
+    0.042347252368927
+  ],
+  "flipped": true,
+  "head": "+X",
+  "bodyLength": 1,
+  "rebaked": true,
+  "engine": "CYCLES",
+  "device": "CPU"
+}

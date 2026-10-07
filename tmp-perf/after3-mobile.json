@@ -1,0 +1,128 @@
+{
+  "label": "after3",
+  "mode": "mobile",
+  "url": "http://127.0.0.1:5190/yunyou/index.html?standalone=1",
+  "wallMs": 60541,
+  "interactiveMs": 50635,
+  "totalDownloadKB": 22150,
+  "top15": [
+    {
+      "url": "/yunyou/assets/blender/city-far.glb",
+      "kb": 8706
+    },
+    {
+      "url": "/yunyou/vendor/three/three.module.js",
+      "kb": 1351
+    },
+    {
+      "url": "/yunyou/assets/models/xiangbishan.bin",
+      "kb": 1335
+    },
+    {
+      "url": "/yunyou/assets/tex/foliage/leaves-normal.jpg",
+      "kb": 1245
+    },
+    {
+      "url": "/yunyou/assets/tex/foliage/leaves-color.jpg",
+      "kb": 957
+    },
+    {
+      "url": "/yunyou/assets/tex/pbr/plaster/normal.jpg",
+      "kb": 879
+    },
+    {
+      "url": "/yunyou/assets/tex/pbr/plaster/color.jpg",
+      "kb": 671
+    },
+    {
+      "url": "/yunyou/assets/tex/pbr/wood/ao.jpg",
+      "kb": 587
+    },
+    {
+      "url": "/yunyou/assets/tex/pbr/plaster/ao.jpg",
+      "kb": 543
+    },
+    {
+      "url": "/yunyou/assets/tex/pbr/paving/color.jpg",
+      "kb": 435
+    },
+    {
+      "url": "/yunyou/assets/blender/urban-vegetation.glb",
+      "kb": 419
+    },
+    {
+      "url": "/yunyou/assets/tex/pbr/paving/normal.jpg",
+      "kb": 379
+    },
+    {
+      "url": "/yunyou/assets/tex/pbr/paving/roughness.jpg",
+      "kb": 368
+    },
+    {
+      "url": "/yunyou/assets/tex/stone.jpg",
+      "kb": 357
+    },
+    {
+      "url": "/yunyou/assets/tex/pbr/plaster/roughness.jpg",
+      "kb": 346
+    }
+  ],
+  "longTasks": {
+    "count": 19,
+    "totalMs": 9741,
+    "worst": [
+      {
+        "name": "self",
+        "duration": 3414,
+        "start": 47210.30000000447
+      },
+      {
+        "name": "self",
+        "duration": 3197,
+        "start": 52774.40000000596
+      },
+      {
+        "name": "self",
+        "duration": 1775,
+        "start": 50635.10000000149
+      },
+      {
+        "name": "self",
+        "duration": 326,
+        "start": 52443.5
+      },
+      {
+        "name": "self",
+        "duration": 187,
+        "start": 57575.70000000298
+      },
+      {
+        "name": "self",
+        "duration": 83,
+        "start": 56542.80000000447
+      },
+      {
+        "name": "self",
+        "duration": 68,
+        "start": 57798.80000000447
+      },
+      {
+        "name": "self",
+        "duration": 67,
+        "start": 57195.80000000447
+      }
+    ]
+  },
+  "frames": {
+    "frameCount": 73,
+    "median": 16.7,
+    "p95": 33.4,
+    "mean": 18.95,
+    "drawCalls": 1256,
+    "triangles": 6537653,
+    "textures": 18,
+    "geometries": 44,
+    "quality": "balanced"
+  },
+  "screenshot": "/Users/chenghaoliu/Projects/duomei-perf/tmp-perf/after3-mobile.png"
+}

@@ -1,0 +1,128 @@
+{
+  "label": "after",
+  "mode": "desktop",
+  "url": "http://127.0.0.1:5190/yunyou/index.html?standalone=1",
+  "wallMs": 84332,
+  "interactiveMs": 1216,
+  "totalDownloadKB": 44977,
+  "top15": [
+    {
+      "url": "/yunyou/assets/blender/city-far.glb",
+      "kb": 8706
+    },
+    {
+      "url": "/yunyou/assets/blender/textures/440310f05af089f2c9335316.jpg",
+      "kb": 6036
+    },
+    {
+      "url": "/yunyou/assets/blender/textures/e0ffd8ebe2c93de8299a3efb.jpg",
+      "kb": 3568
+    },
+    {
+      "url": "/yunyou/assets/blender/xiangbishan.glb",
+      "kb": 2436
+    },
+    {
+      "url": "/yunyou/assets/blender/textures/7c02d7ba3df7ea61c5e5777c.png",
+      "kb": 1861
+    },
+    {
+      "url": "/yunyou/assets/blender/textures/d171f45ef01bc6e239b00dfa.jpg",
+      "kb": 1642
+    },
+    {
+      "url": "/yunyou/vendor/three/three.module.js",
+      "kb": 1351
+    },
+    {
+      "url": "/yunyou/assets/blender/textures/18cf434655a75e30400d0e23.jpg",
+      "kb": 1339
+    },
+    {
+      "url": "/yunyou/assets/models/xiangbishan.bin",
+      "kb": 1335
+    },
+    {
+      "url": "/yunyou/assets/tex/foliage/leaves-normal.jpg",
+      "kb": 1245
+    },
+    {
+      "url": "/yunyou/assets/blender/textures/91675dc814c5a6dd64ac57be.jpg",
+      "kb": 1011
+    },
+    {
+      "url": "/yunyou/assets/blender/city-ground.glb",
+      "kb": 982
+    },
+    {
+      "url": "/yunyou/assets/tex/foliage/leaves-color.jpg",
+      "kb": 957
+    },
+    {
+      "url": "/yunyou/assets/tex/pbr/plaster/normal.jpg",
+      "kb": 879
+    },
+    {
+      "url": "/yunyou/assets/blender/jiefangqiao-far.glb",
+      "kb": 855
+    }
+  ],
+  "longTasks": {
+    "count": 50,
+    "totalMs": 39160,
+    "worst": [
+      {
+        "name": "self",
+        "duration": 6779,
+        "start": 1216
+      },
+      {
+        "name": "self",
+        "duration": 3690,
+        "start": 13393.5
+      },
+      {
+        "name": "self",
+        "duration": 1813,
+        "start": 31883.39999999851
+      },
+      {
+        "name": "self",
+        "duration": 1229,
+        "start": 10664.5
+      },
+      {
+        "name": "self",
+        "duration": 1093,
+        "start": 120.79999999701977
+      },
+      {
+        "name": "self",
+        "duration": 963,
+        "start": 8476.5
+      },
+      {
+        "name": "self",
+        "duration": 763,
+        "start": 9671.19999999553
+      },
+      {
+        "name": "self",
+        "duration": 733,
+        "start": 18558.5
+      }
+    ]
+  },
+  "frames": {
+    "frameCount": 73,
+    "median": 483.3,
+    "p95": 566.7,
+    "mean": 514.36,
+    "drawCalls": 64358,
+    "triangles": 165387508,
+    "textures": 53,
+    "geometries": 279,
+    "quality": "high"
+  },
+  "screenshot": "/Users/chenghaoliu/Projects/duomei-perf/tmp-perf/after-desktop.png"
+}

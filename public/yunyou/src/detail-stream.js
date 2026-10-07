@@ -29,6 +29,6 @@ export class DetailStream {
         else this.dispose(id,value);
       }
     } catch(error) { this.failures.set(id,this.clock());console.warn('Landmark detail unavailable',id,error); }
-    finally {this.busy=null;this.trim();}
+    finally {this.busy=null;this.trim();this.pump();}
   }
 }

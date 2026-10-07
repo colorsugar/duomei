@@ -1,8 +1,9 @@
 import * as THREE from 'three';
 import {GLTFLoader} from '../vendor/three/addons/loaders/GLTFLoader.js';
 import {DRACOLoader} from '../vendor/three/addons/loaders/DRACOLoader.js';
-let library, detailed=true;
+let library, detailed=true, lodMid=90, lodFar=270;
 export function setTreeDetail(value){detailed=value;}
+export function setTreeLodDistances(mid=90,far=270){lodMid=mid;lodFar=far;}
 export function treeLibrary(){
  if(!library){const draco=new DRACOLoader();draco.setDecoderPath(new URL('../vendor/three/addons/libs/draco/gltf/',import.meta.url).href);draco.setWorkerLimit(1);const loader=new GLTFLoader().setDRACOLoader(draco);
  library=loader.loadAsync(new URL('../assets/blender/urban-vegetation.glb',import.meta.url).href).then(g=>{
@@ -27,12 +28,12 @@ export async function createUrbanTrees(points){
      mesh.castShadow=false;mesh.receiveShadow=false;mesh.userData.sharedTree=true;mesh.computeBoundingSphere();layer.add(mesh);
     }
    }
-   lod.addLevel(layer,[0,90,270][level],.16);
+   lod.addLevel(layer,[0,lodMid,lodFar][level],.16);
   }
   root.add(lod);
  }
  root.name='Blender 分枝乔木';
- root.userData.update=camera=>{root.updateWorldMatrix(true,false);for(const lod of root.children){lod.levels[1].distance=detailed?90:0;lod.updateWorldMatrix(true,false);lod.update(camera);}};
+ root.userData.update=camera=>{root.updateWorldMatrix(true,false);for(const lod of root.children){lod.levels[1].distance=detailed?lodMid:0;lod.levels[2].distance=lodFar;lod.updateWorldMatrix(true,false);lod.update(camera);}};
  root.userData.dispose=()=>{root.traverse(o=>{if(o.isInstancedMesh)o.dispose();});root.removeFromParent();};
  return root;
 }

@@ -503,8 +503,10 @@ body {
   gap: clamp(var(--space-xl), 7vw, var(--space-4xl));
   min-inline-size: 0;
   padding-block: var(--space-2xl);
+  padding-inline: clamp(var(--space-md), 3vw, var(--space-2xl));
   color: var(--color-ink);
-  border-block: var(--rule-hairline) solid var(--color-rule);
+  border: var(--rule-hairline) solid var(--color-rule);
+  border-radius: var(--radius-card);
   touch-action: pan-y pinch-zoom;
   transform: translate3d(var(--guyu-drag-x, 0), 0, 0);
   transition:

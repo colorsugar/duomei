@@ -1,0 +1,18 @@
+{
+  "source": "/Users/chenghaoliu/Projects/courtyard-3d/.claude/worktrees/elated-wilson-a91ac4/assets-src/koi/tancho-hunyuan.glb",
+  "file": "/Users/chenghaoliu/Projects/courtyard-3d/.claude/worktrees/elated-wilson-a91ac4/public/assets/garden/koi/tancho.glb",
+  "triangles": 5000,
+  "bytes": 333728,
+  "seconds": 13.04,
+  "textureMax": 1024,
+  "girths": [
+    0.21626168489456177,
+    0.04077542573213577
+  ],
+  "flipped": true,
+  "head": "+X",
+  "bodyLength": 1,
+  "rebaked": true,
+  "engine": "CYCLES",
+  "device": "CPU"
+}
