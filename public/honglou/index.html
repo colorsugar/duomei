@@ -168,6 +168,7 @@
     .ts-xz .ts-seal[data-act="cont"]::before { background-image: url(./dgy-build/F3-SIKz05pl.webp); }
     .ts-xz .ts-seal[data-act="set"]::before { background-image: url(./dgy-build/F4-DSIWSP9V.webp); }
     .ts-xz .ts-seal[data-act="dl"]::before { background-image: url(./dgy-build/F5-BsUu5g5s.webp); }
+    .ts-xz .ts-seal[data-ce]::before { background-image: url(./dgy-build/desk-S2v-BSgSH8fC.webp); background-size: cover; }
     .ts-xz .ts-seal::after { content: ""; position: absolute; left: 50%; top: calc(100% + 14px); width: 2px; height: 2.6vh; margin-left: -1px; background: linear-gradient(#c39d75, #933c2d 70%, transparent); opacity: .8; } /* 丝绦 */
     .ts-xz .ts-seal b { position: relative; writing-mode: horizontal-tb; font: 400 clamp(22px, 3.1vh, 32px)/1.1 "DGY XingUI", "Songti TC", serif; letter-spacing: .12em; color: #351f0a; white-space: nowrap; }
     .tsx-tip { display: none; }
@@ -219,7 +220,8 @@
     (function () { var st = 'hlm'; try { st = (JSON.parse(localStorage.getItem('dgy-settings') || 'null') || {}).uiStyle || 'hlm'; } catch (e) {} if (st !== 'plain' && !/[?&]notsxz/.test(location.search)) document.documentElement.classList.add('ts-xz'); })();
   </script>
 <!--TITLEXZ:END-->
-  <script type="module" crossorigin src="./dgy-build/daguanyuan-BLaWwPMo.js"></script>
+  <script type="module" crossorigin src="./dgy-build/daguanyuan-CqM9pF_t.js"></script>
+  <link rel="modulepreload" crossorigin href="./dgy-build/three.core-CPZAz1wr.js">
   <link rel="stylesheet" crossorigin href="./dgy-build/daguanyuan-CCAvPFKU.css">
 </head>
 <body>
@@ -231,6 +233,7 @@
     <nav class="ts-btns" aria-label="开始">
       <button type="button" class="ts-seal" data-act="start" disabled><b>游戏</b></button>
       <button type="button" class="ts-seal" data-act="cont" hidden><b>继续</b></button>
+      <button type="button" class="ts-seal" data-ce="1" aria-label="冊：不进园子，直接翻开书案"><b>冊</b></button>
       <button type="button" class="ts-seal" data-act="set"><b>设定</b></button>
       <button type="button" class="ts-seal" data-act="dl"><b>下载</b></button>
     </nav>
@@ -244,6 +247,8 @@
       if (window.__dgySkipIntro) return;
       var ts = document.getElementById('title-screen'); ts.hidden = false;
       try { var sv = JSON.parse(localStorage.getItem('dgy-save') || 'null'); if (sv && sv.pose) ts.querySelector('[data-act="cont"]').hidden = false; } catch (e) {}
+      // 「冊」：直接去轻量版书案（不建园子、不载地图）；不走 shell.js 的 data-act
+      var ce = ts.querySelector('[data-ce]'); if (ce) ce.addEventListener('click', function () { location.href = 'daguanyuan-lite.html?desk'; });
     })();
   </script>
   <!--TITLE:END-->
