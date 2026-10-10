@@ -1,0 +1,11 @@
+材质：石板
+目录：shiban
+来源：Poly Haven「Rock Tile Floor」
+URL：https://polyhaven.com/a/rock_tile_floor
+作者：Charlotte Baglioni
+授权：CC0 1.0（公有领域，可商用，无需署名；仍如实标注）
+下载日期：2026-10-09
+处理：原贴图是浅灰色条石铺面，微调为偏冷的青白灰。
+真实尺寸：约 1.96 米见方（原素材标注）
+用途：台基与月台面、阶条石、甬路、桥面与石栏板（浅灰花岗/青白石）。
+规格：1024×1024 webp，可平铺；color=sRGB；normal=OpenGL(Y+，three.js 默认)；rough=线性灰度（三通道同值，取 G）。

@@ -1,0 +1,11 @@
+材质：方砖地
+目录：fangzhuan-di
+来源：Poly Haven「Granite Tile 04」
+URL：https://polyhaven.com/a/granite_tile_04
+作者：Amal Kumar
+授权：CC0 1.0（公有领域，可商用，无需署名；仍如实标注）
+下载日期：2026-10-09
+处理：原贴图是棕灰方块，已去色并调成灰色方砖，砖缝保留。
+真实尺寸：约 2.00 米见方（原素材标注）
+用途：院落、天井、游廊廊下的方砖墁地（灰色方砖，砖缝细）。
+规格：1024×1024 webp，可平铺；color=sRGB；normal=OpenGL(Y+，three.js 默认)；rough=线性灰度（三通道同值，取 G）。

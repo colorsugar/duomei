@@ -1,0 +1,10 @@
+材质：宣纸窗
+目录：xuanzhi-chuang
+来源：程序生成（scripts/dgy-materials-build.py，numpy + Pillow 绘制线描、退晕、纤维和噪声；没有使用任何外部图片）
+作者：本项目（大观园）
+授权：CC0（自产，随项目自由使用）
+生成日期：2026-10-09
+参照：参照 bj-yihong-4（怡红院门窗，绿色棂格后面是白纸）。
+用途：窗格（步步锦、冰裂纹、万字等）背后糊的窗纸：怡红院、潇湘馆、蘅芜苑等各院门窗与槛窗。建议 MeshPhysicalMaterial 透射 0.3~0.5 或自发光暖黄，晚上做出灯光透出来。
+尺寸建议：真实尺寸约 0.6 米见方
+规格：1024×1024 webp，横向可平铺；color=sRGB；normal=OpenGL(Y+，three.js 默认)；rough=线性灰度（三通道同值，取 G）。

@@ -1,0 +1,3024 @@
+{
+  "说明": "大观园全部系统提示用语（Beta 版文绉绉口吻）。代码不再写死提示字，一律按 key 从这份读。界面层简体；匾额、印章、面板标题匾、引文是作品层，永远繁体、不随「界面文字：简体/繁體」切换（带 layer:\"作品\" 的条目）。src 字段：用户原句=T52 用语表原话一字不改；改写=按同口吻重写（note 里有原来的大白话和 文件:行号）；新拟=任务书没有、为补空缺新写；沿用=原字已是书面语或功能字，只是搬进来统一读取。text 里 {花括号} 是变量，由代码替换。\n",
+  "格式": "每组是数组，元素 {key, text, note, src, …}；key 形如 组.名，全文唯一。个别条目带额外字段：vars（变量名）、layer（作品=不随简繁切换）、sub/line（面板标题的副注/副题）、name/seal（成就名/印章）、rows（操作图表格）。",
+  "loading": [
+    {
+      "key": "loading.core",
+      "text": "且住，容我看看这园子。",
+      "note": "加载中。顶替标题页「整理园子」(daguanyuan.html:149 .ts-load-t) 和加载页进度条上方的字；T52 用语表原句。",
+      "src": "用户原句"
+    },
+    {
+      "key": "loading.slow",
+      "text": "园子大，脚程远，稍待片刻。",
+      "note": "加载慢。建议加载超过约 8 秒仍未完成时，把 loading.core 换成这句；T52 用语表原句。",
+      "src": "用户原句"
+    },
+    {
+      "key": "loading.gateOpen",
+      "text": "园门已开，府第尚在铺陈。",
+      "note": "标题页核心就绪、贾府仍在后台补造。原：园门已开 · 府第还在铺陈（shell.js:423）。",
+      "src": "改写"
+    },
+    {
+      "key": "loading.mansionResume",
+      "text": "府第尚在铺陈，请稍待。",
+      "note": "读档落点在贾府里、要等贾府造完。原：府第还在铺陈，稍等…（shell.js:446）。",
+      "src": "改写"
+    },
+    {
+      "key": "loading.mansionStreet",
+      "text": "宁荣街上正掌灯，请稍待。",
+      "note": "新开局但贾府未造完时的等待。原：宁荣街掌灯中，稍等…（shell.js:446）。",
+      "src": "改写"
+    },
+    {
+      "key": "loading.codex",
+      "text": "容我翻检翻检。",
+      "note": "图鉴数据尚未载入。原：载入中……（book.js:172）；同类 game.js:366 .cx-prog「载入中」。",
+      "src": "改写"
+    },
+    {
+      "key": "loading.chapter",
+      "text": "且住，翻到{hui}。",
+      "note": "原著阅读器打开某回。变量 hui=「第X回」。原：加载 第X回…（reader.js:788）。",
+      "src": "改写",
+      "vars": [
+        "hui"
+      ]
+    },
+    {
+      "key": "loading.toc",
+      "text": "容我翻开目录。",
+      "note": "原著目录加载中。原：加载目录…（reader.js:466）。",
+      "src": "改写"
+    },
+    {
+      "key": "loading.map",
+      "text": "徐徐展图……",
+      "note": "全图加载中。原：展图中……（mapFull.js:191 .loadmsg）。",
+      "src": "改写"
+    },
+    {
+      "key": "loading.lite",
+      "text": "园子铺得太满，此番先以简笔相迎；设置里画质换作「高」，便是全景。",
+      "note": "第 27 轮插单：手机上 20 秒没进园 / WebGL 丢了上下文 / 上回没进成，自动切极简档重进后提示一次（main.js）",
+      "src": "新拟"
+    }
+  ],
+  "error": [
+    {
+      "key": "error.generic",
+      "text": "一时眼花，重进园子便好。",
+      "note": "建园失败的总提示。原：园子没能铺开（可能是网络或显卡一时没跟上），点下面重试（main.js:1205）。技术错误只留 console。",
+      "src": "用户原句"
+    },
+    {
+      "key": "error.retry",
+      "text": "重试",
+      "note": "上一条的按钮。原：重试（main.js:1205）。T52 写明附「重试」。",
+      "src": "用户原句"
+    },
+    {
+      "key": "error.chapter",
+      "text": "此回一时翻不开。",
+      "note": "原著某回读不出来。原：这一回没读出来。（reader.js:798）。",
+      "src": "改写"
+    },
+    {
+      "key": "error.chapterRetry",
+      "text": "再翻一遍",
+      "note": "上一条的按钮。原：再试一次（reader.js:~801）。",
+      "src": "改写"
+    },
+    {
+      "key": "error.toc",
+      "text": "目录一时翻不开，请看看网络，再来。",
+      "note": "原：目录没读出来，检查一下网络再试。（reader.js:468）。",
+      "src": "改写"
+    },
+    {
+      "key": "error.map",
+      "text": "图卷一时展不开，稍后再试。",
+      "note": "全图数据载入失败。原：地图数据载不进来：+技术信息（mapFull.js:611）；技术信息改进 console，不给玩家看。",
+      "src": "改写"
+    },
+    {
+      "key": "error.poemsMissing",
+      "text": "（诗稿一时没翻到）",
+      "note": "检视面板读不到作品表。原：（作品表没取到）（inspect.js:289）。",
+      "src": "改写"
+    },
+    {
+      "key": "error.pointerLock",
+      "text": "鼠标未能锁住，按住拖动亦可转头。",
+      "note": "原：鼠标未锁定，按住拖动也能转头（viewctl.js:259）。",
+      "src": "改写"
+    },
+    {
+      "key": "error.pointerLockRetry",
+      "text": "鼠标未能锁住，轻点画面再试。",
+      "note": "原：鼠标未锁定，点击画面可重试（viewctl.js:283）。",
+      "src": "改写"
+    },
+    {
+      "key": "error.import",
+      "text": "册子读不开：{reason}",
+      "note": "导入存档失败。变量 reason 为原因短语（存档层给的）。原：导入失败：+err.message（shell.js:176）。",
+      "src": "改写",
+      "vars": [
+        "reason"
+      ]
+    },
+    {
+      "key": "error.importNotSave",
+      "text": "这不是园中的册子。",
+      "note": "导入的文件不是存档。原：不是大观园存档文件（save.js:75）。",
+      "src": "改写"
+    },
+    {
+      "key": "error.importEmpty",
+      "text": "册中空空，无可并入。",
+      "note": "存档里没内容。原：存档里没有内容（save.js:77）。",
+      "src": "改写"
+    },
+    {
+      "key": "error.feedbackNoConnect",
+      "text": "意见箱一时够不着，稍后再投。",
+      "note": "意见发送失败（三处同一句）。原：没连上意见箱（feedback.js:330/338/347）。",
+      "src": "改写"
+    },
+    {
+      "key": "error.feedbackEmpty",
+      "text": "且写一句，再投。",
+      "note": "意见框为空。原：写一句再送（feedback.js:295）。",
+      "src": "改写"
+    },
+    {
+      "key": "error.feedbackPos",
+      "text": "此刻不知身在园中何处，入园后再投。",
+      "note": "位置无效。原：位置不对（feedback.js:300）。",
+      "src": "改写"
+    }
+  ],
+  "gate": [
+    {
+      "key": "gate.closed",
+      "text": "园门未启，且在此处盘桓。",
+      "note": "区域未开放（院门外、傳送确认、飞行落地被拒时共用）。T52 用语表原句。",
+      "src": "用户原句"
+    },
+    {
+      "key": "gate.plaque",
+      "text": "未開",
+      "note": "院门外立的「未開」牌匾。作品层，永远繁体，不随简繁切换。T52 用语表原句。",
+      "src": "用户原句",
+      "layer": "作品"
+    },
+    {
+      "key": "gate.seal",
+      "text": "未開",
+      "note": "傳送面板里灰显条目上挂的印。作品层繁体。T52「挂印『未開』」。",
+      "src": "用户原句",
+      "layer": "作品"
+    },
+    {
+      "key": "gate.flyOnly",
+      "text": "此处只可凌空远观，不便落脚。",
+      "note": "自由飞行到未开放区域上空时，落地检查退回时的一句。T52 只写了「只看不落」没给句子，此为新拟。",
+      "src": "新拟"
+    },
+    {
+      "key": "gate.noPath",
+      "text": "此径不通，另觅他路。",
+      "note": "不能探索 / 此路不通。用于墙、山石、边界挡路；T52 用语表原句。",
+      "src": "用户原句"
+    },
+    {
+      "key": "gate.water",
+      "text": "前有碧水，过不去，走桥，或沿岸绕行。",
+      "note": "原：前面是水，过不去——走桥，或沿岸绕过去（main.js:926）。",
+      "src": "改写"
+    },
+    {
+      "key": "gate.wip",
+      "text": "此处尚在营造，匠人未歇，改日再来。",
+      "note": "开发中。原：这处地方园里还没有建出来。（game.js:420 人物关系「去這裡」找不到地点时）；凡「还没做」的入口都用这句。T52 原句。",
+      "src": "用户原句"
+    },
+    {
+      "key": "gate.contentLocked",
+      "text": "石头记尚缺此回，容后补录。",
+      "note": "内容未定稿（原著 / 长卷 / 条目灰显时的通用提示）。T52 原句。",
+      "src": "用户原句"
+    },
+    {
+      "key": "gate.albumLocked",
+      "text": "此册尚在描画，容后补入。",
+      "note": "画册未定稿册的灰显提示。新拟，体例同上。",
+      "src": "新拟"
+    },
+    {
+      "key": "gate.codexLocked",
+      "text": "此条尚待校订，容后补录。",
+      "note": "图鉴未定稿条目的灰显提示。新拟。",
+      "src": "新拟"
+    },
+    {
+      "key": "gate.scrollLocked",
+      "text": "此卷尚在裱糊，容后展阅。",
+      "note": "回目长卷未定稿部分的灰显提示。新拟。",
+      "src": "新拟"
+    }
+  ],
+  "beta": [
+    {
+      "key": "beta.welcome",
+      "text": "此乃试作之园，尚有未尽之处，望君海涵；所见所想，请投意见箱。",
+      "note": "Beta 首屏。T52 用语表原句。",
+      "src": "用户原句"
+    },
+    {
+      "key": "beta.enterBtn",
+      "text": "入园",
+      "note": "Beta 首屏按钮。新拟（T52 未给）。",
+      "src": "新拟"
+    },
+    {
+      "key": "beta.feedbackBtn",
+      "text": "意见箱",
+      "note": "Beta 内「意见」钮的字。原：意见（feedback.js:206/207）；与首屏「意见箱」对上。",
+      "src": "改写"
+    },
+    {
+      "key": "beta.areaNote",
+      "text": "现开放{areas}，余处容后再启。",
+      "note": "Beta 首屏或设置里说明开放范围；变量 areas 由构建变量 DGY_BETA 的开放区域名拼成（如「怡红院、潇湘馆」）。新拟。",
+      "src": "新拟",
+      "vars": [
+        "areas"
+      ]
+    },
+    {
+      "key": "beta.versionTag",
+      "text": "试作",
+      "note": "版本号里的「开发版」。原：v… · 开发版（version.js:8）。",
+      "src": "改写"
+    },
+    {
+      "key": "beta.builtAt",
+      "text": "刻于",
+      "note": "版本号里的「构建于」。原：构建于 … UTC（version.js:10）。",
+      "src": "改写"
+    },
+    {
+      "key": "beta.unbuilt",
+      "text": "试作（未刻版）",
+      "note": "原：开发版（未构建）（version.js:10）。",
+      "src": "改写"
+    }
+  ],
+  "save": [
+    {
+      "key": "save.done",
+      "text": "已记在册。",
+      "note": "存档成功。T52 原句。",
+      "src": "用户原句"
+    },
+    {
+      "key": "save.load",
+      "text": "接着上回说。",
+      "note": "读档。用于「继续」按钮的 title、读档进园时的一声提示。T52 原句。",
+      "src": "用户原句"
+    },
+    {
+      "key": "save.continueFree",
+      "text": "接着上回的游览",
+      "note": "标题页「继续」钮 title（上次玩的是游览）。原：接着上次的遊覽（shell.js:419）。",
+      "src": "改写"
+    },
+    {
+      "key": "save.continueGame",
+      "text": "接着上回的游戏",
+      "note": "同上（游戏）。原：接着上次的遊戲（shell.js:419）。",
+      "src": "改写"
+    },
+    {
+      "key": "save.exported",
+      "text": "已抄录成册，可携往别处。",
+      "note": "导出存档。原：存档已导出（shell.js:165）。",
+      "src": "改写"
+    },
+    {
+      "key": "save.imported",
+      "text": "已并入{n}项，重翻此园。",
+      "note": "导入成功。变量 n。原：导入了 N 项，重新载入…（shell.js:176）。",
+      "src": "改写",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "save.none",
+      "text": "册上尚无记载，入园后自会记下。",
+      "note": "原：还没有存档（进园后自动存）。（shell.js:154）。",
+      "src": "改写"
+    },
+    {
+      "key": "save.last",
+      "text": "上回记于{time}，已游{min}分钟。所抄之册，可携往别处接着读。",
+      "note": "设置里存档说明。变量 time、min。原：上次自动存档：…；已游 N 分钟。导出的文件可以换台电脑或浏览器导入。（shell.js:154）。",
+      "src": "改写",
+      "vars": [
+        "time",
+        "min"
+      ]
+    },
+    {
+      "key": "save.rehint",
+      "text": "指引已重置，下回入园再为君说。",
+      "note": "原：引导已重置：下回进各模式再出一遍（shell.js:164）。",
+      "src": "改写"
+    },
+    {
+      "key": "save.introSkipOn",
+      "text": "往后不演开场；欲复观，可于设置「開場動畫」中改回。",
+      "note": "原：以后不再播放开场（设置里「開場動畫」可改回）（shell.js:69）。",
+      "src": "改写"
+    },
+    {
+      "key": "save.introSkipOff",
+      "text": "开场照旧演来。",
+      "note": "原：开场照常播放（shell.js:69）。",
+      "src": "改写"
+    }
+  ],
+  "confirm": [
+    {
+      "key": "confirm.resetArm",
+      "text": "再点一下，即清空旧迹。",
+      "note": "清空进度按钮第一次点后变成的字（4 秒内再点才生效）。原：再点一次确认清空（shell.js:168）。",
+      "src": "改写"
+    },
+    {
+      "key": "confirm.resetBtn",
+      "text": "清空旧迹",
+      "note": "原：清空进度（shell.js:168 / 设置按钮）。",
+      "src": "改写"
+    },
+    {
+      "key": "confirm.resetDone",
+      "text": "旧迹已清，重新入园。",
+      "note": "原：进度已清空，重新载入…（shell.js:169）。",
+      "src": "改写"
+    },
+    {
+      "key": "confirm.resetNote",
+      "text": "任务、打卡、所览图鉴画册、成就、位置，尽数清去（设置与音量留着）。须点两下。",
+      "note": "设置里重置说明。原：任务、打卡、看过的图鉴和画册、成就、位置全部清掉（设置和音量留着）。要点两次。（shell.js:~150）。",
+      "src": "改写"
+    },
+    {
+      "key": "confirm.teleportArrive",
+      "text": "已至{place}。",
+      "note": "傳送到达后的一句。变量 place。原：{place}到了（game.js:294）。",
+      "src": "改写",
+      "vars": [
+        "place"
+      ]
+    },
+    {
+      "key": "confirm.teleportIndoor",
+      "text": "已入{place}正房。",
+      "note": "傳送进室内。原：{place} · 正房里（game.js:294）。",
+      "src": "改写",
+      "vars": [
+        "place"
+      ]
+    },
+    {
+      "key": "confirm.teleportHengwu",
+      "text": "已至蘅芜苑。迎面大石插天，须从石边绕进院去。",
+      "note": "原：蘅芜苑到了 · 迎面一座插天大石挡着（第十七回），从石边绕进院（game.js:293）。",
+      "src": "改写"
+    },
+    {
+      "key": "confirm.teleportDaoxiang",
+      "text": "已至稻香村。顺着篱笆，寻那篱门。",
+      "note": "原：稻香村到了 · 顺着篱笆找篱门（game.js:293）。",
+      "src": "改写"
+    },
+    {
+      "key": "confirm.routeStep",
+      "text": "循园路而行，下一站「{name}」在{dir}约{m}米。",
+      "note": "自动指路。变量 name、dir、m。原：沿园路走 · 下一站「X」在…约 N 米（main.js:657）。",
+      "src": "改写",
+      "vars": [
+        "name",
+        "dir",
+        "m"
+      ]
+    },
+    {
+      "key": "confirm.fuTitle",
+      "text": "荣国府",
+      "note": "首次出园门进府的提示条标题。沿用（game.js:476）。",
+      "src": "沿用"
+    },
+    {
+      "key": "confirm.fuBody",
+      "text": "出得园门，便是荣国府。第二条线「第三回 · 黛玉进府」，自宁荣街宁府门前起：翻开目录「任务」，点站名即可前往；小地图的红箭头，也改指此线了。",
+      "note": "原：出了园门就是荣国府。第二条任务线…点站名可以直接过去；小地图红箭头也改指这条线了。（game.js:476）。",
+      "src": "改写"
+    }
+  ],
+  "exit": [
+    {
+      "key": "exit.confirm",
+      "text": "出园去了？园中景物，随时可回。",
+      "note": "退出确认。T52 原句。现状：暂停菜单「回标题」(shell.js:373) 无确认直接 backToTitle，接入时要加一个确认条。",
+      "src": "用户原句"
+    },
+    {
+      "key": "exit.yes",
+      "text": "出园",
+      "note": "确认条按钮。新拟。",
+      "src": "新拟"
+    },
+    {
+      "key": "exit.no",
+      "text": "再逛逛",
+      "note": "确认条按钮。新拟。",
+      "src": "新拟"
+    }
+  ],
+  "dir": [
+    {
+      "key": "dir.front",
+      "text": "正前",
+      "note": "路线提示里的方位。原：正前方（main.js:656）。",
+      "src": "改写"
+    },
+    {
+      "key": "dir.behind",
+      "text": "身后",
+      "note": "路线提示里的方位。原：身后（main.js:656）。",
+      "src": "改写"
+    },
+    {
+      "key": "dir.frontLeft",
+      "text": "左前",
+      "note": "路线提示里的方位。原：左前方（main.js:656）。",
+      "src": "改写"
+    },
+    {
+      "key": "dir.left",
+      "text": "左侧",
+      "note": "路线提示里的方位。原：左手边（main.js:656）。",
+      "src": "改写"
+    },
+    {
+      "key": "dir.frontRight",
+      "text": "右前",
+      "note": "路线提示里的方位。原：右前方（main.js:656）。",
+      "src": "改写"
+    },
+    {
+      "key": "dir.right",
+      "text": "右侧",
+      "note": "路线提示里的方位。原：右手边（main.js:656）。",
+      "src": "改写"
+    }
+  ],
+  "teleport": [
+    {
+      "key": "teleport.indoorBtn",
+      "text": "入室",
+      "note": "傳送面板里「进屋」钮。原：进屋（game.js:304，book.js:99）。",
+      "src": "改写"
+    },
+    {
+      "key": "teleport.outdoorBtn",
+      "text": "院门外",
+      "note": "沿用（game.js:304）。",
+      "src": "沿用"
+    },
+    {
+      "key": "teleport.indoorTag",
+      "text": "室内",
+      "note": "沿用（book.js:95/110）。",
+      "src": "沿用"
+    }
+  ],
+  "tour": [
+    {
+      "key": "tour.start",
+      "text": "循第十七回，随贾政引宝玉游园的旧路。",
+      "note": "开自动游览。原：自动游览 · 照第十七回贾政带宝玉游园的路线（tour.js:122）。",
+      "src": "改写"
+    },
+    {
+      "key": "tour.takeover",
+      "text": "视角交还于君。",
+      "note": "玩家按键接管。原：已接管视角（tour.js:133，viewctl.js:103）。",
+      "src": "改写"
+    },
+    {
+      "key": "tour.manual",
+      "text": "改由自己行走。",
+      "note": "原：已切回手动游览（viewctl.js:78）。",
+      "src": "改写"
+    },
+    {
+      "key": "tour.station",
+      "text": "第{n}站 · {name}",
+      "note": "沿用格式；n 为汉字数字（tour.js:108）。",
+      "src": "沿用",
+      "vars": [
+        "n",
+        "name"
+      ]
+    },
+    {
+      "key": "tour.paused",
+      "text": "暂歇",
+      "note": "原：已暂停（tour.js:108/111）。",
+      "src": "改写"
+    },
+    {
+      "key": "tour.dwell",
+      "text": "驻足赏景，约{s}秒后往「{next}」",
+      "note": "原：驻足看景 · 约N秒后去「X」（tour.js:111）。",
+      "src": "改写",
+      "vars": [
+        "s",
+        "next"
+      ]
+    },
+    {
+      "key": "tour.lowFly",
+      "text": "掠空而行，约{s}秒后至",
+      "note": "原：低空看景 · 约N秒后到（tour.js:111）。",
+      "src": "改写",
+      "vars": [
+        "s"
+      ]
+    },
+    {
+      "key": "tour.dwellShort",
+      "text": "驻足赏景",
+      "note": "原：驻足看景（tour.js:111）。",
+      "src": "改写"
+    },
+    {
+      "key": "tour.pauseBtn",
+      "text": "暂歇",
+      "note": "原：暂停（tour.js:112）。",
+      "src": "改写"
+    },
+    {
+      "key": "tour.resumeBtn",
+      "text": "继续",
+      "note": "沿用（tour.js:112）。",
+      "src": "沿用"
+    },
+    {
+      "key": "tour.prefix",
+      "text": "第十七回游园 · ",
+      "note": "沿用（tour.js:111）。",
+      "src": "沿用"
+    }
+  ],
+  "hint": [
+    {
+      "key": "hint.orbit.kb",
+      "text": "拖动环顾 · 滚轮远近 · 点一处即飞往 · 按住 ? 看全部",
+      "note": "底部操作提示（键鼠）。原：拖动转 · 滚轮远近 · 点一处飞过去 · 按住 ? 看全部操作（hud.js:16）。",
+      "src": "改写"
+    },
+    {
+      "key": "hint.orbit.touch",
+      "text": "单指拖动环顾 · 双指捏合远近 · 点一处即飞往",
+      "note": "底部操作提示（触屏）。原：单指拖动转 · 双指捏合远近 · 点一处飞过去（hud.js:16）。",
+      "src": "改写"
+    },
+    {
+      "key": "hint.walk.kb",
+      "text": "点画面锁定视角 · WASD 行走 · 空格起跳 · Esc 回鸟瞰",
+      "note": "底部操作提示（键鼠）。原：点画面锁定视角 · W A S D 走 · 空格跳 · Esc 回鸟瞰（hud.js:17）。",
+      "src": "改写"
+    },
+    {
+      "key": "hint.walk.touch",
+      "text": "左下摇杆行走 · 滑动转头 · 轻点互动",
+      "note": "底部操作提示（触屏）。原：左下摇杆走 · 滑动画面转头 · 点一下互动（hud.js:17）。",
+      "src": "改写"
+    },
+    {
+      "key": "hint.fly.kb",
+      "text": "WASD 飞行 · 空格升 · Ctrl 降 · 滚轮调速 · F 回鸟瞰",
+      "note": "底部操作提示（键鼠）。原：W A S D 飞 · 空格升 · Ctrl 降 · 滚轮调速 · F 回鸟瞰（hud.js:18）。",
+      "src": "改写"
+    },
+    {
+      "key": "hint.fly.touch",
+      "text": "摇杆飞行 · 升降钮 · 滑动转头",
+      "note": "底部操作提示（触屏）。原：摇杆飞 · 上升 / 下降钮 · 滑动转头（hud.js:18）。",
+      "src": "改写"
+    },
+    {
+      "key": "hint.room.kb",
+      "text": "拖动环顾 · 走近陈设可「檢視」 · S 退出门",
+      "note": "底部操作提示（键鼠）。原：拖动看四周 · 走近陈设出「檢視」 · S 退出门（hud.js:19）。",
+      "src": "改写"
+    },
+    {
+      "key": "hint.room.touch",
+      "text": "滑动环顾 · 走近陈设可「檢視」",
+      "note": "底部操作提示（触屏）。原：滑动看四周 · 走近陈设出「檢視」（hud.js:19）。",
+      "src": "改写"
+    },
+    {
+      "key": "hint.inspect.kb",
+      "text": "拖动转面 · 滚轮远近 · Esc 放回",
+      "note": "底部操作提示（键鼠）。原：拖动转 · 滚轮远近 · Esc 放回（hud.js:20）。",
+      "src": "改写"
+    },
+    {
+      "key": "hint.inspect.touch",
+      "text": "拖动转面 · 双指远近 · 点「放回」",
+      "note": "底部操作提示（触屏）。原：拖动转 · 双指远近 · 点「放回」（hud.js:20）。",
+      "src": "改写"
+    },
+    {
+      "key": "hint.replay.kb",
+      "text": "点画面或按空格，读下一句 · Esc 退出",
+      "note": "底部操作提示（键鼠）。原：点画面或空格下一句 · Esc 退出（hud.js:21）。",
+      "src": "改写"
+    },
+    {
+      "key": "hint.replay.touch",
+      "text": "点画面，读下一句 · 右上退出",
+      "note": "底部操作提示（触屏）。原：点画面下一句 · 右上退出（hud.js:21）。",
+      "src": "改写"
+    },
+    {
+      "key": "hint.teleport.kb",
+      "text": "松开 Tab 即收起 · 点标签即傳送",
+      "note": "底部操作提示（键鼠）。原：松开 Tab 收起 · 点标签傳送（hud.js:22）。",
+      "src": "改写"
+    },
+    {
+      "key": "hint.teleport.touch",
+      "text": "松手即收起 · 点标签即傳送",
+      "note": "底部操作提示（触屏）。原：松手收起 · 点标签傳送（hud.js:22）。",
+      "src": "改写"
+    }
+  ],
+  "helpTable": [
+    {
+      "key": "helpTable.kb",
+      "text": "操作",
+      "note": "按住「?」/ 暂停页「操作」出的完整操作图，键鼠版。rows 为 [分组名, [[键, 作用]…]]；键名（W A S D、Shift 等）不翻译。原：hud.js:27-30 HELP_KB。",
+      "src": "改写",
+      "rows": [
+        [
+          "鸟瞰",
+          [
+            [
+              "拖动",
+              "转动"
+            ],
+            [
+              "滚轮 / 捏合",
+              "远近"
+            ],
+            [
+              "点一处",
+              "飞往"
+            ],
+            [
+              "双击天空",
+              "回全景"
+            ]
+          ]
+        ],
+        [
+          "第一人称",
+          [
+            [
+              "W A S D",
+              "行走"
+            ],
+            [
+              "Shift",
+              "疾行"
+            ],
+            [
+              "空格",
+              "起跳"
+            ],
+            [
+              "点画面",
+              "锁定视角"
+            ],
+            [
+              "Esc",
+              "放开 / 回鸟瞰"
+            ]
+          ]
+        ],
+        [
+          "飞行",
+          [
+            [
+              "W A S D",
+              "飞行"
+            ],
+            [
+              "空格 / Ctrl",
+              "升 / 降"
+            ],
+            [
+              "Shift",
+              "加速"
+            ],
+            [
+              "滚轮 / ±",
+              "调速"
+            ]
+          ]
+        ],
+        [
+          "随时",
+          [
+            [
+              "T",
+              "傳送"
+            ],
+            [
+              "M",
+              "全图"
+            ],
+            [
+              "V / F",
+              "第一人称 / 飞行"
+            ],
+            [
+              "按住 Tab",
+              "透视全园"
+            ],
+            [
+              "E",
+              "檢視"
+            ],
+            [
+              "Alt",
+              "底栏"
+            ],
+            [
+              "Esc",
+              "暂歇"
+            ]
+          ]
+        ]
+      ]
+    },
+    {
+      "key": "helpTable.touch",
+      "text": "操作",
+      "note": "完整操作图，触屏版。原：hud.js:32-36 HELP_TOUCH。",
+      "src": "改写",
+      "rows": [
+        [
+          "鸟瞰",
+          [
+            [
+              "单指拖",
+              "转动"
+            ],
+            [
+              "双指捏",
+              "远近"
+            ],
+            [
+              "点一处",
+              "飞往"
+            ]
+          ]
+        ],
+        [
+          "第一人称",
+          [
+            [
+              "左下摇杆",
+              "行走"
+            ],
+            [
+              "滑动画面",
+              "转头"
+            ],
+            [
+              "点一下",
+              "互动"
+            ],
+            [
+              "跳 / 疾行",
+              "右侧钮"
+            ]
+          ]
+        ],
+        [
+          "随时",
+          [
+            [
+              "轻点空白",
+              "底栏"
+            ],
+            [
+              "长按小地图",
+              "透视全园"
+            ],
+            [
+              "点小地图",
+              "全图"
+            ],
+            [
+              "长按「册」",
+              "暂歇"
+            ]
+          ]
+        ]
+      ]
+    },
+    {
+      "key": "helpTable.title",
+      "text": "操作",
+      "note": "操作图抬头。沿用（hud.js:71）。",
+      "src": "沿用"
+    },
+    {
+      "key": "helpTable.close.kb",
+      "text": "松开收起",
+      "note": "原：松开收起（hud.js:71）。沿用。",
+      "src": "沿用"
+    },
+    {
+      "key": "helpTable.close.touch",
+      "text": "松手收起",
+      "note": "沿用（hud.js:71）。",
+      "src": "沿用"
+    }
+  ],
+  "guide": [
+    {
+      "key": "guide.walk.title",
+      "text": "行走",
+      "note": "引导第一张标题。原：怎么走（shell.js:303）。",
+      "src": "改写"
+    },
+    {
+      "key": "guide.walk.touch",
+      "text": "左下摇杆，推之即行；右边空白处，按住拖动，可看四周。",
+      "note": "原：左下摇杆推着走，右边空白处按住拖动看四周。（shell.js:303）。",
+      "src": "改写"
+    },
+    {
+      "key": "guide.walk.kb",
+      "text": "W A S D 行走，按住 Shift 疾行；按住鼠标拖动，环顾四周。右上「鸟瞰 / 游园」可凌空看全园。",
+      "note": "原：W A S D 走，按住 Shift 快走；按住鼠标拖动看四周。右上「鸟瞰 / 游园」可以飞起来看全园。（shell.js:303）。",
+      "src": "改写"
+    },
+    {
+      "key": "guide.map.title",
+      "text": "展图",
+      "note": "原：怎么开地图（shell.js:304）。",
+      "src": "改写"
+    },
+    {
+      "key": "guide.map.opener.touch",
+      "text": "点右下角小地图",
+      "note": "沿用（shell.js:304）。",
+      "src": "沿用"
+    },
+    {
+      "key": "guide.map.opener.kb",
+      "text": "按 M，或点右下角小地图",
+      "note": "沿用（shell.js:304）。",
+      "src": "沿用"
+    },
+    {
+      "key": "guide.map.body",
+      "text": "，展开全园导览图：点任一处，便走过去；红箭头所指，是任务的下一站。",
+      "note": "接在 opener 后。原：，打开全园导览图：点任何一处就走过去，红箭头指任务的下一站。（shell.js:304）。",
+      "src": "改写"
+    },
+    {
+      "key": "guide.book.title",
+      "text": "翻册",
+      "note": "原：怎么看图鉴（shell.js:305）。",
+      "src": "改写"
+    },
+    {
+      "key": "guide.book.body",
+      "text": "左上「册」印是目录：景点、任务、画册、图鉴、长卷尽在其中。人名地名下带朱线者，点一下便翻到图鉴。",
+      "note": "原：左上「册」印章是目录：景点、任务、画册、图鉴、长卷都在里面。人名地名下面带朱线的，点一下就翻到图鉴。（shell.js:305）。",
+      "src": "改写"
+    },
+    {
+      "key": "guide.book.pause.touch",
+      "text": "长按「册」，是暂歇菜单。",
+      "note": "原：长按「册」是暂停菜单。（shell.js:305）。",
+      "src": "改写"
+    },
+    {
+      "key": "guide.book.pause.kb",
+      "text": "按 Esc，是暂歇菜单。",
+      "note": "原：按 Esc 是暂停菜单。（shell.js:305）。",
+      "src": "改写"
+    },
+    {
+      "key": "guide.skip",
+      "text": "不必指引",
+      "note": "原：不用引导（shell.js:319）。",
+      "src": "改写"
+    },
+    {
+      "key": "guide.prev",
+      "text": "上一步",
+      "note": "沿用（shell.js:319）。",
+      "src": "沿用"
+    },
+    {
+      "key": "guide.next",
+      "text": "下一步",
+      "note": "沿用（shell.js:319）。",
+      "src": "沿用"
+    },
+    {
+      "key": "guide.done",
+      "text": "晓得了",
+      "note": "原：知道了（shell.js:319）。",
+      "src": "改写"
+    }
+  ],
+  "intro": [
+    {
+      "key": "intro.skip",
+      "text": "略过开场",
+      "note": "开场段右下钮。作品气的繁体字形，沿用（shell.js:59 .sh-skipbtn）。",
+      "src": "沿用"
+    },
+    {
+      "key": "intro.never",
+      "text": "下回径入园中",
+      "note": "开场段勾选。原：以后不再播放（shell.js:59）。",
+      "src": "改写"
+    },
+    {
+      "key": "intro.skipAria",
+      "text": "跳过开场",
+      "note": "沿用（shell.js:59 aria-label，读屏用）。",
+      "src": "沿用"
+    }
+  ],
+  "title": [
+    {
+      "key": "title.free",
+      "text": "闲游",
+      "note": "标题页入口，界面层简体；沿用（shell.js:415，UI设计指导 §9）。",
+      "src": "沿用"
+    },
+    {
+      "key": "title.game",
+      "text": "隨書",
+      "note": "第 31 轮用户：「循回目」看不懂，改「隨書」（跟着原著一回一回地游）。用户原字；界面行书字库只有繁体「隨」，故简繁两模式都显「隨書」。原：循回目。",
+      "src": "沿用"
+    },
+    {
+      "key": "title.continue",
+      "text": "续游",
+      "note": "同上。沿用（daguanyuan.html:145）。",
+      "src": "沿用"
+    },
+    {
+      "key": "title.settings",
+      "text": "调弦",
+      "note": "同上。沿用（daguanyuan.html:146）。",
+      "src": "沿用"
+    },
+    {
+      "key": "title.download",
+      "text": "圖譜",
+      "note": "第 31 轮用户（UI设计指导-3A §26）：「函藏」改「圖譜」——游戏自己的艺术设定集（简体小字「图谱」）。本轮只改名与入口，点进去暂开现有下载面板。原：函藏。",
+      "src": "沿用"
+    },
+    {
+      "key": "title.gameTip",
+      "text": "游戏：循第十七回之路打卡，听对白，集成就。",
+      "note": "「游戏」钮的悬停说明。原：游戏：照第十七回的路线打卡，听对白，收集成就（shell.js:415）。",
+      "src": "改写"
+    },
+    {
+      "key": "title.freeTip",
+      "text": "游览：点哪飞哪，可自动游，可步行，不扰对白、不计打卡。",
+      "note": "「游览」钮的悬停说明。原：自由游览：点哪飞哪、自动游览、步行，不弹对白不打卡（shell.js:416）。",
+      "src": "改写"
+    },
+    {
+      "key": "title.foot",
+      "text": "依《石头记》原文，一砖一木复原大观园 · 鼠标、键盘、触屏皆可游",
+      "note": "标题页底行。原：依《红楼梦》原文复原的大观园 · 鼠标、键盘、触屏都能游（daguanyuan.html:150）。",
+      "src": "改写"
+    },
+    {
+      "key": "title.toGame",
+      "text": "转游戏",
+      "note": "册里的玩法切换钮。沿用（game.js:545）。",
+      "src": "沿用"
+    },
+    {
+      "key": "title.toFree",
+      "text": "转游览",
+      "note": "同上。沿用（game.js:545）。",
+      "src": "沿用"
+    },
+    {
+      "key": "title.playFree",
+      "text": "改作游览：只看景，不扰对白，不计打卡。",
+      "note": "中途切到自由游览。原：已转为自由遊覽：只看景，不弹对白、不打卡（shell.js:122）。",
+      "src": "改写"
+    },
+    {
+      "key": "title.playGame",
+      "text": "改作游戏：任务线、对白、成就，照常行来。",
+      "note": "中途切到游戏。原：已转为遊戲：任务线、打卡对白、成就照常（shell.js:122）。",
+      "src": "改写"
+    }
+  ],
+  "achievement": [
+    {
+      "key": "achievement.popTag",
+      "text": "得印一枚",
+      "note": "成就弹出条的小字。已是书面语，沿用（shell.js:254）。",
+      "src": "沿用"
+    },
+    {
+      "key": "achievement.discoverSeal",
+      "text": "初至",
+      "note": "走到新景点浮出的印。作品层繁体，沿用（shell.js:275）。",
+      "src": "沿用",
+      "layer": "作品"
+    },
+    {
+      "key": "achievement.sectionTitle",
+      "text": "收集",
+      "note": "成就页分组标题。沿用（shell.js:265）。",
+      "src": "沿用"
+    },
+    {
+      "key": "achievement.enter",
+      "text": "头一回迈进园门。",
+      "note": "成就「初入大观园」的说明；名字沿用，印章「初至」是作品层繁体，不动。原说明：第一次走进园门（shell.js:29-40 ACHS）。",
+      "src": "改写",
+      "name": "初入大观园",
+      "seal": "初至",
+      "layer_seal": "作品"
+    },
+    {
+      "key": "achievement.places",
+      "text": "二十四景，一一走到。",
+      "note": "成就「游遍二十四景」的说明；名字沿用，印章「遊遍」是作品层繁体，不动。原说明：走到园中全部二十四处景点（shell.js:29-40 ACHS）。",
+      "src": "改写",
+      "name": "游遍二十四景",
+      "seal": "遊遍",
+      "layer_seal": "作品"
+    },
+    {
+      "key": "achievement.ch17",
+      "text": "循第十七回，随贾政游园一周。",
+      "note": "成就「试才题对额」的说明；名字沿用，印章「題額」是作品层繁体，不动。原说明：照第十七回走完贾政游园一圈（shell.js:29-40 ACHS）。",
+      "src": "改写",
+      "name": "试才题对额",
+      "seal": "題額",
+      "layer_seal": "作品"
+    },
+    {
+      "key": "achievement.ch3",
+      "text": "循第三回，随黛玉进府九站。",
+      "note": "成就「黛玉进府」的说明；名字沿用，印章「進府」是作品层繁体，不动。原说明：照第三回走完黛玉进府九站（shell.js:29-40 ACHS）。",
+      "src": "改写",
+      "name": "黛玉进府",
+      "seal": "進府",
+      "layer_seal": "作品"
+    },
+    {
+      "key": "achievement.lines",
+      "text": "第十七回、第三回，两线皆走完。",
+      "note": "成就「两条任务线走完」的说明；名字沿用，印章「兩全」是作品层繁体，不动。原说明：第十七回、第三回两条线都走完（shell.js:29-40 ACHS）。",
+      "src": "改写",
+      "name": "两条任务线走完",
+      "seal": "兩全",
+      "layer_seal": "作品"
+    },
+    {
+      "key": "achievement.chai",
+      "text": "画册「人物志」，十二人逐一翻过。",
+      "note": "成就「读完十二钗」的说明；名字沿用，印章「十二釵」是作品层繁体，不动。原说明：画册「人物志」十二人一一翻过（shell.js:29-40 ACHS）。",
+      "src": "改写",
+      "name": "读完十二钗",
+      "seal": "十二釵",
+      "layer_seal": "作品"
+    },
+    {
+      "key": "achievement.plaque",
+      "text": "园中匾联，释义皆已展阅。",
+      "note": "成就「匾联尽识」的说明；名字沿用，印章「識匾」是作品层繁体，不动。原说明：园中匾额对联的释义都点开看过（shell.js:29-40 ACHS）。",
+      "src": "改写",
+      "name": "匾联尽识",
+      "seal": "識匾",
+      "layer_seal": "作品"
+    },
+    {
+      "key": "achievement.people",
+      "text": "图鉴人物，条条览过。",
+      "note": "成就「群芳谱」的说明；名字沿用，印章「群芳」是作品层繁体，不动。原说明：图鉴人物条目全部看过（shell.js:29-40 ACHS）。",
+      "src": "改写",
+      "name": "群芳谱",
+      "seal": "群芳",
+      "layer_seal": "作品"
+    },
+    {
+      "key": "achievement.comics",
+      "text": "每一册连环画，都翻开过。",
+      "note": "成就「连环画翻遍」的说明；名字沿用，印章「丹青」是作品层繁体，不动。原说明：每一册连环画都翻开过（shell.js:29-40 ACHS）。",
+      "src": "改写",
+      "name": "连环画翻遍",
+      "seal": "丹青",
+      "layer_seal": "作品"
+    },
+    {
+      "key": "achievement.night",
+      "text": "换作夜景，在园中走上一分钟。",
+      "note": "成就「月下游园」的说明；名字沿用，印章「夜遊」是作品层繁体，不动。原说明：设置里换成夜，在园中走上一分钟（shell.js:29-40 ACHS）。",
+      "src": "改写",
+      "name": "月下游园",
+      "seal": "夜遊",
+      "layer_seal": "作品"
+    },
+    {
+      "key": "achievement.codex",
+      "text": "图鉴五类，条条览过。",
+      "note": "成就「红楼图鉴通读」的说明；名字沿用，印章「通讀」是作品层繁体，不动。原说明：图鉴五类条目全部看过（shell.js:29-40 ACHS）。",
+      "src": "改写",
+      "name": "红楼图鉴通读",
+      "seal": "通讀",
+      "layer_seal": "作品"
+    },
+    {
+      "key": "achievement.haitang",
+      "text": "见 dgy-assets/text/yihong.json「成就」",
+      "note": "「海棠社」「怡紅」两条成就文案已在 yihong.json（ACH_TEXT，shell.js:35/41），不重复收。",
+      "src": "沿用"
+    }
+  ],
+  "panelTitle": [
+    {
+      "key": "panelTitle.teleport",
+      "text": "移步換景",
+      "note": "面板匾额标题（繁体，作品层，不随简繁切换）；副注为原简体标签。来源：§11 原表。原位置：book.js:15 PANE_TITLE，shell.js:131，game.js:365，reader.js:295，journal.js:374，mapFull.js:186。",
+      "src": "改写",
+      "sub": "傳送",
+      "line": "点一处，落在院门外",
+      "layer": "作品"
+    },
+    {
+      "key": "panelTitle.settings",
+      "text": "調弦理瑟",
+      "note": "面板匾额标题（繁体，作品层，不随简繁切换）；副注为原简体标签。来源：§11 原表。原位置：book.js:15 PANE_TITLE，shell.js:131，game.js:365，reader.js:295，journal.js:374，mapFull.js:186。",
+      "src": "改写",
+      "sub": "设置",
+      "line": "",
+      "layer": "作品"
+    },
+    {
+      "key": "panelTitle.album",
+      "text": "畫中有話",
+      "note": "面板匾额标题（繁体，作品层，不随简繁切换）；副注为原简体标签。来源：§11 原表。原位置：book.js:15 PANE_TITLE，shell.js:131，game.js:365，reader.js:295，journal.js:374，mapFull.js:186。",
+      "src": "改写",
+      "sub": "画册",
+      "line": "十二册连环画",
+      "layer": "作品"
+    },
+    {
+      "key": "panelTitle.codex",
+      "text": "博古通今",
+      "note": "面板匾额标题（繁体，作品层，不随简繁切换）；副注为原简体标签。来源：§11 原表。原位置：book.js:15 PANE_TITLE，shell.js:131，game.js:365，reader.js:295，journal.js:374，mapFull.js:186。",
+      "src": "改写",
+      "sub": "图鉴",
+      "line": "人物 · 地点 · 事件 · 作品 · 物件",
+      "layer": "作品"
+    },
+    {
+      "key": "panelTitle.achievement",
+      "text": "占花名",
+      "note": "面板匾额标题（繁体，作品层，不随简繁切换）；副注为原简体标签。来源：§11 原表。原位置：book.js:15 PANE_TITLE，shell.js:131，game.js:365，reader.js:295，journal.js:374，mapFull.js:186。",
+      "src": "改写",
+      "sub": "成就",
+      "line": "",
+      "layer": "作品"
+    },
+    {
+      "key": "panelTitle.journal",
+      "text": "遊園記",
+      "note": "面板匾额标题（繁体，作品层，不随简繁切换）；副注为原简体标签。来源：§11 原表（代码里叫「游记」journal.js:374/468）。原位置：book.js:15 PANE_TITLE，shell.js:131，game.js:365，reader.js:295，journal.js:374，mapFull.js:186。",
+      "src": "改写",
+      "sub": "手账",
+      "line": "",
+      "layer": "作品"
+    },
+    {
+      "key": "panelTitle.reader",
+      "text": "石頭記",
+      "note": "面板匾额标题（繁体，作品层，不随简繁切换）；副注为原简体标签。来源：§11 原表。原位置：book.js:15 PANE_TITLE，shell.js:131，game.js:365，reader.js:295，journal.js:374，mapFull.js:186。",
+      "src": "改写",
+      "sub": "原著",
+      "line": "一百二十回",
+      "layer": "作品"
+    },
+    {
+      "key": "panelTitle.quest",
+      "text": "行藏",
+      "note": "面板匾额标题（繁体，作品层，不随简繁切换）；副注为原简体标签。来源：§11 原表。原位置：book.js:15 PANE_TITLE，shell.js:131，game.js:365，reader.js:295，journal.js:374，mapFull.js:186。",
+      "src": "改写",
+      "sub": "任务",
+      "line": "照回目走一遍",
+      "layer": "作品"
+    },
+    {
+      "key": "panelTitle.map",
+      "text": "山河一覽",
+      "note": "面板匾额标题（繁体，作品层，不随简繁切换）；副注为原简体标签。来源：§11 原表。原位置：book.js:15 PANE_TITLE，shell.js:131，game.js:365，reader.js:295，journal.js:374，mapFull.js:186。",
+      "src": "改写",
+      "sub": "地图",
+      "line": "",
+      "layer": "作品"
+    },
+    {
+      "key": "panelTitle.places",
+      "text": "覽勝尋幽",
+      "note": "面板匾额标题（繁体，作品层，不随简繁切换）；副注为原简体标签。来源：新拟（§11 无「景点」）。原位置：book.js:15 PANE_TITLE，shell.js:131，game.js:365，reader.js:295，journal.js:374，mapFull.js:186。",
+      "src": "新拟",
+      "sub": "景点",
+      "line": "园中二十四景与府里",
+      "layer": "作品"
+    },
+    {
+      "key": "panelTitle.pause",
+      "text": "小憩片刻",
+      "note": "面板匾额标题（繁体，作品层，不随简繁切换）；副注为原简体标签。来源：新拟（§11 无「暂停」）。原位置：book.js:15 PANE_TITLE，shell.js:131，game.js:365，reader.js:295，journal.js:374，mapFull.js:186。",
+      "src": "新拟",
+      "sub": "暂停",
+      "line": "",
+      "layer": "作品"
+    },
+    {
+      "key": "panelTitle.download",
+      "text": "圖譜",
+      "note": "面板匾额标题（繁体，作品层，不随简繁切换）；副注为原简体标签。来源：新拟（§11 说下载是书函）。原位置：book.js:15 PANE_TITLE，shell.js:131，game.js:365，reader.js:295，journal.js:374，mapFull.js:186。",
+      "src": "新拟",
+      "sub": "下载",
+      "line": "连环画 · 人物像 · 壁纸",
+      "layer": "作品"
+    },
+    {
+      "key": "panelTitle.about",
+      "text": "卷末題記",
+      "note": "面板匾额标题（繁体，作品层，不随简繁切换）；副注为原简体标签。来源：新拟。原位置：book.js:15 PANE_TITLE，shell.js:131，game.js:365，reader.js:295，journal.js:374，mapFull.js:186。",
+      "src": "新拟",
+      "sub": "关于",
+      "line": "",
+      "layer": "作品"
+    },
+    {
+      "key": "panelTitle.people",
+      "text": "金陵十二釵",
+      "sub": "人物",
+      "line": "十二人一卷 · 点开看册页",
+      "note": "第 28 轮 §19：册签「金陵十二釵」面板匾。",
+      "src": "改写",
+      "layer": "作品"
+    },
+    {
+      "key": "panelTitle.poems",
+      "text": "詩稿",
+      "sub": "作品集",
+      "line": "按人 · 按回 · 按诗社",
+      "note": "第 28 轮 §19：册签「詩稿」面板匾。",
+      "src": "改写",
+      "layer": "作品"
+    }
+  ],
+  "ia": [
+    {
+      "key": "ia.tab.journal",
+      "text": "遊園記",
+      "note": "第 28 轮 §19 新增",
+      "src": "改写",
+      "sub": "游记",
+      "layer": "作品"
+    },
+    {
+      "key": "ia.tab.people",
+      "text": "金陵十二釵",
+      "note": "第 28 轮 §19 新增",
+      "src": "改写",
+      "sub": "人物",
+      "layer": "作品"
+    },
+    {
+      "key": "ia.tab.album",
+      "text": "畫中有話",
+      "note": "第 28 轮 §19 新增",
+      "src": "改写",
+      "sub": "画册",
+      "layer": "作品"
+    },
+    {
+      "key": "ia.tab.codex",
+      "text": "博古通今",
+      "note": "第 28 轮 §19 新增",
+      "src": "改写",
+      "sub": "图鉴",
+      "layer": "作品"
+    },
+    {
+      "key": "ia.tab.reader",
+      "text": "石頭記",
+      "note": "第 28 轮 §19 新增",
+      "src": "改写",
+      "sub": "原著",
+      "layer": "作品"
+    },
+    {
+      "key": "ia.tab.quest",
+      "text": "行藏",
+      "note": "第 28 轮 §19 新增",
+      "src": "改写",
+      "sub": "任务",
+      "layer": "作品"
+    },
+    {
+      "key": "ia.tab.achieve",
+      "text": "占花名",
+      "note": "第 28 轮 §19 新增",
+      "src": "改写",
+      "sub": "花签",
+      "layer": "作品"
+    },
+    {
+      "key": "ia.tab.poems",
+      "text": "詩稿",
+      "note": "第 28 轮 §19 新增",
+      "src": "改写",
+      "sub": "作品集",
+      "layer": "作品"
+    },
+    {
+      "key": "ia.dock.teleport",
+      "text": "移步",
+      "note": "第 28 轮 §19 新增",
+      "src": "改写",
+      "sub": "傳送",
+      "layer": "作品"
+    },
+    {
+      "key": "ia.dock.walk",
+      "text": "信步",
+      "note": "第 28 轮 §19 新增",
+      "src": "改写",
+      "sub": "步行",
+      "layer": "作品"
+    },
+    {
+      "key": "ia.dock.fly",
+      "text": "御風",
+      "note": "第 28 轮 §19 新增",
+      "src": "改写",
+      "sub": "飞行",
+      "layer": "作品"
+    },
+    {
+      "key": "ia.dock.tour",
+      "text": "隨喜",
+      "note": "第 28 轮 §19 新增",
+      "src": "改写",
+      "sub": "自动游园",
+      "layer": "作品"
+    },
+    {
+      "key": "ia.dock.overview",
+      "text": "覽勝",
+      "note": "第 28 轮 §19 新增",
+      "src": "改写",
+      "sub": "透视",
+      "layer": "作品"
+    },
+    {
+      "key": "ia.dock.pause",
+      "text": "小憩",
+      "note": "第 28 轮 §19 新增",
+      "src": "改写",
+      "sub": "暂停",
+      "layer": "作品"
+    },
+    {
+      "key": "ia.pause.resume",
+      "text": "接着游",
+      "note": "第 28 轮 §19 新增",
+      "src": "改写",
+      "sub": "继续",
+      "layer": "作品"
+    },
+    {
+      "key": "ia.pause.save",
+      "text": "存檔·讀檔",
+      "note": "第 28 轮 §19 新增",
+      "src": "改写",
+      "sub": "存档",
+      "layer": "作品"
+    },
+    {
+      "key": "ia.pause.settings",
+      "text": "調弦理瑟",
+      "note": "第 28 轮 §19 新增",
+      "src": "改写",
+      "sub": "设置",
+      "layer": "作品"
+    },
+    {
+      "key": "ia.pause.download",
+      "text": "圖譜",
+      "note": "第 28 轮 §19 新增",
+      "src": "改写",
+      "sub": "下载",
+      "layer": "作品"
+    },
+    {
+      "key": "ia.pause.feedback",
+      "text": "意見",
+      "note": "第 28 轮 §19 新增",
+      "src": "改写",
+      "sub": "意见",
+      "layer": "作品"
+    },
+    {
+      "key": "ia.pause.about",
+      "text": "卷末題記",
+      "note": "第 28 轮 §19 新增",
+      "src": "改写",
+      "sub": "关于",
+      "layer": "作品"
+    },
+    {
+      "key": "ia.pause.title",
+      "text": "回標題",
+      "note": "第 28 轮 §19 新增",
+      "src": "改写",
+      "sub": "回标题",
+      "layer": "作品"
+    },
+    {
+      "key": "ia.set.view",
+      "text": "畫面",
+      "note": "第 28 轮 §19 新增",
+      "src": "改写",
+      "sub": "画面",
+      "layer": "作品"
+    },
+    {
+      "key": "ia.set.sound",
+      "text": "聲音",
+      "note": "第 28 轮 §19 新增",
+      "src": "改写",
+      "sub": "声音",
+      "layer": "作品"
+    },
+    {
+      "key": "ia.set.control",
+      "text": "操作",
+      "note": "第 28 轮 §19 新增",
+      "src": "改写",
+      "sub": "操作",
+      "layer": "作品"
+    },
+    {
+      "key": "ia.set.text",
+      "text": "文字",
+      "note": "第 28 轮 §19 新增",
+      "src": "改写",
+      "sub": "文字",
+      "layer": "作品"
+    },
+    {
+      "key": "ia.set.intro",
+      "text": "開場",
+      "note": "第 28 轮 §19 新增",
+      "src": "改写",
+      "sub": "开场",
+      "layer": "作品"
+    },
+    {
+      "key": "ia.set.style",
+      "text": "界面風格",
+      "note": "第 28 轮 §19 新增",
+      "src": "改写",
+      "sub": "界面风格",
+      "layer": "作品"
+    },
+    {
+      "key": "ia.card.journal",
+      "text": "走过的院子、遇过的人、看过的东西，都记在这本手账里。",
+      "quote": "滿紙荒唐言，一把辛酸淚！",
+      "hui": 1,
+      "img": "dgy-assets/ui/xz/r31/gb/qinfang.webp",
+      "note": "第 28 轮 §19 册签预览卡（样张-册签.html）：text 简体说明；quote 原文繁体逐字核过 dgy-assets/text/hlm/第001回.json；hui 回数；img 预览图。",
+      "src": "改写"
+    },
+    {
+      "key": "ia.card.people",
+      "text": "十二人一人一卷：册页、判词、住处、大事，遇见过的才亮。",
+      "quote": "可歎停機德，誰憐詠絮才。",
+      "hui": 5,
+      "img": "dgy-assets/album/人物/daiyu-thumb.webp",
+      "note": "第 28 轮 §19 册签预览卡（样张-册签.html）：text 简体说明；quote 原文繁体逐字核过 dgy-assets/text/hlm/第005回.json；hui 回数；img 预览图。",
+      "src": "改写"
+    },
+    {
+      "key": "ia.card.album",
+      "text": "十二册连环画，封面网格，翻到哪幅记到哪幅。",
+      "quote": "原來是一幅畫兒",
+      "hui": 41,
+      "img": "dgy-assets/album/zanghua/01-s.webp",
+      "note": "第 28 轮 §19 册签预览卡（样张-册签.html）：text 简体说明；quote 原文繁体逐字核过 dgy-assets/text/hlm/第041回.json；hui 回数；img 预览图。",
+      "src": "改写"
+    },
+    {
+      "key": "ia.card.codex",
+      "text": "人物、地点、事件、作品、物件，每条带小图和出处。",
+      "quote": "或有貯書處，或有設鼎處，或安置筆硯處",
+      "hui": 17,
+      "img": "dgy-assets/ui/xz/r31/gb/xiaoxiang.webp",
+      "note": "第 28 轮 §19 册签预览卡（样张-册签.html）：text 简体说明；quote 原文繁体逐字核过 dgy-assets/text/hlm/第017回.json；hui 回数；img 预览图。",
+      "src": "改写"
+    },
+    {
+      "key": "ia.card.reader",
+      "text": "一百二十回原著竖排可读，另有回目长卷看园中大事。",
+      "quote": "列位看官，你道此書從何而來？",
+      "hui": 1,
+      "img": "dgy-assets/ui/xz/r31/gb/yihong.webp",
+      "note": "第 28 轮 §19 册签预览卡（样张-册签.html）：text 简体说明；quote 原文繁体逐字核过 dgy-assets/text/hlm/第001回.json；hui 回数；img 预览图。",
+      "src": "改写"
+    },
+    {
+      "key": "ia.card.quest",
+      "text": "照回目走一遍：接了什么、该去哪，带目标小图和距离。",
+      "quote": "非此一山，一進來園中所有之景悉入目中，則有何趣。",
+      "hui": 17,
+      "img": "dgy-assets/ui/xz/r31/gb/cuizhang.webp",
+      "note": "第 28 轮 §19 册签预览卡（样张-册签.html）：text 简体说明；quote 原文繁体逐字核过 dgy-assets/text/hlm/第017回.json；hui 回数；img 预览图。",
+      "src": "改写"
+    },
+    {
+      "key": "ia.card.achieve",
+      "text": "做成一件事，抽出一支花签，签上有第六十三回的花名与诗。",
+      "quote": "任是無情也動人",
+      "hui": 63,
+      "img": "dgy-assets/album/yeyan/01-s.webp",
+      "note": "第 28 轮 §19 册签预览卡（样张-册签.html）：text 简体说明；quote 原文繁体逐字核过 dgy-assets/text/hlm/第063回.json；hui 回数；img 预览图。",
+      "src": "改写"
+    },
+    {
+      "key": "ia.card.poems",
+      "text": "园中诗词四十六首：按人、按回、按诗社三种看法。",
+      "quote": "淡極始知花更艷",
+      "hui": 37,
+      "img": "dgy-assets/album/haitang/01-s.webp",
+      "note": "第 28 轮 §19 册签预览卡（样张-册签.html）：text 简体说明；quote 原文繁体逐字核过 dgy-assets/text/hlm/第037回.json；hui 回数；img 预览图。",
+      "src": "改写"
+    }
+  ],
+  "tip": [
+    {
+      "key": "tip.tab.journal",
+      "text": "手账一册，记下解锁与流水批注",
+      "note": "第 28 轮 §19 新增",
+      "src": "改写"
+    },
+    {
+      "key": "tip.tab.people",
+      "text": "十二钗人物志，兼看彼此关系图",
+      "note": "第 28 轮 §19 新增",
+      "src": "改写"
+    },
+    {
+      "key": "tip.tab.album",
+      "text": "连环画一卷，翻看园中旧事",
+      "note": "第 28 轮 §19 新增",
+      "src": "改写"
+    },
+    {
+      "key": "tip.tab.codex",
+      "text": "建筑草木器物与地点，尽收图鉴",
+      "note": "第 28 轮 §19 新增",
+      "src": "改写"
+    },
+    {
+      "key": "tip.tab.reader",
+      "text": "原著阅读与回目长卷，同入一门",
+      "note": "第 28 轮 §19 新增",
+      "src": "改写"
+    },
+    {
+      "key": "tip.tab.quest",
+      "text": "循线而行，任务尽在此册",
+      "note": "第 28 轮 §19 新增",
+      "src": "改写"
+    },
+    {
+      "key": "tip.tab.achieve",
+      "text": "成就皆化花签，一支支收齐",
+      "note": "第 28 轮 §19 新增",
+      "src": "改写"
+    },
+    {
+      "key": "tip.tab.poems",
+      "text": "诗词作品集，按人按回按诗社",
+      "note": "第 28 轮 §19 新增",
+      "src": "改写"
+    },
+    {
+      "key": "tip.dock.teleport",
+      "text": "心念所至，一步便到园中别处",
+      "note": "第 28 轮 §19 新增",
+      "src": "改写",
+      "kbd": "T"
+    },
+    {
+      "key": "tip.dock.walk",
+      "text": "放下身段，自在园中走走",
+      "note": "第 28 轮 §19 新增",
+      "src": "改写",
+      "kbd": "V"
+    },
+    {
+      "key": "tip.dock.fly",
+      "text": "乘风而起，俯看全园景致",
+      "note": "第 28 轮 §19 新增",
+      "src": "改写",
+      "kbd": "F"
+    },
+    {
+      "key": "tip.dock.tour",
+      "text": "随着游线，一处处慢慢看去",
+      "note": "第 28 轮 §19 新增",
+      "src": "改写",
+      "kbd": "G"
+    },
+    {
+      "key": "tip.dock.overview",
+      "text": "隔墙望去，园中名胜一览无余",
+      "note": "第 28 轮 §19 新增",
+      "src": "改写",
+      "kbd": "按住 Tab"
+    },
+    {
+      "key": "tip.dock.pause",
+      "text": "歇一歇脚，存档、设置、回标题",
+      "note": "第 28 轮 §19 新增",
+      "src": "改写",
+      "kbd": "Esc"
+    },
+    {
+      "key": "tip.pause.resume",
+      "text": "回到园中，接着往下游",
+      "note": "第 28 轮 §19 新增",
+      "src": "改写"
+    },
+    {
+      "key": "tip.pause.save",
+      "text": "三格存档，莫失莫忘",
+      "note": "第 28 轮 §19 新增",
+      "src": "改写"
+    },
+    {
+      "key": "tip.pause.settings",
+      "text": "调弦理瑟，画面声音随手调",
+      "note": "第 28 轮 §19 新增",
+      "src": "改写"
+    },
+    {
+      "key": "tip.pause.download",
+      "text": "画像、壁纸与画册，收藏带走",
+      "note": "第 28 轮 §19 新增",
+      "src": "改写"
+    },
+    {
+      "key": "tip.pause.feedback",
+      "text": "有话想说，投进意见箱",
+      "note": "第 28 轮 §19 新增",
+      "src": "改写"
+    },
+    {
+      "key": "tip.pause.about",
+      "text": "卷末题记，隐私与素材授权",
+      "note": "第 28 轮 §19 新增",
+      "src": "改写"
+    },
+    {
+      "key": "tip.pause.title",
+      "text": "回到标题，动身前先问一句",
+      "note": "第 28 轮 §19 新增",
+      "src": "改写"
+    },
+    {
+      "key": "tip.set.view",
+      "text": "画面精细与流畅，自行取舍",
+      "note": "第 28 轮 §19 新增",
+      "src": "改写"
+    },
+    {
+      "key": "tip.set.sound",
+      "text": "配乐、环境声、音效，丝竹随调",
+      "note": "第 28 轮 §19 新增",
+      "src": "改写"
+    },
+    {
+      "key": "tip.set.control",
+      "text": "视角灵敏与按键，顺手为上",
+      "note": "第 28 轮 §19 新增",
+      "src": "改写"
+    },
+    {
+      "key": "tip.set.text",
+      "text": "简繁与字号，读来舒心",
+      "note": "第 28 轮 §19 新增",
+      "src": "改写"
+    },
+    {
+      "key": "tip.set.intro",
+      "text": "开场动画去留，由你定夺",
+      "note": "第 28 轮 §19 新增",
+      "src": "改写"
+    },
+    {
+      "key": "tip.set.style",
+      "text": "换一副界面风神，随心所好",
+      "note": "第 28 轮 §19 新增",
+      "src": "改写"
+    },
+    {
+      "key": "tip.title.game",
+      "text": "跟着原著一回一回地游",
+      "note": "第 28 轮 §19④ 标题页",
+      "src": "改写"
+    },
+    {
+      "key": "tip.title.free",
+      "text": "不拘回目，园中随意走走",
+      "note": "第 28 轮 §19④ 标题页",
+      "src": "改写"
+    },
+    {
+      "key": "tip.title.continue",
+      "text": "接着上回的地方",
+      "note": "第 28 轮 §19④ 标题页",
+      "src": "改写"
+    },
+    {
+      "key": "tip.title.continueNone",
+      "text": "尚无游记",
+      "note": "第 28 轮 §19④ 标题页",
+      "src": "改写"
+    },
+    {
+      "key": "tip.title.settings",
+      "text": "画面、声音、操作诸事",
+      "note": "第 28 轮 §19④ 标题页",
+      "src": "改写"
+    },
+    {
+      "key": "tip.title.download",
+      "text": "游戏的设定集，可翻可取",
+      "note": "第 28 轮 §19④ 标题页",
+      "src": "改写"
+    },
+    {
+      "key": "tip.intro.skip",
+      "text": "不看开场，径直入园",
+      "note": "第 28 轮 §19④ 标题页",
+      "src": "改写"
+    },
+    {
+      "key": "tip.intro.never",
+      "text": "勾上后，下次打开不再放开场",
+      "note": "第 28 轮 §19④ 标题页",
+      "src": "改写"
+    }
+  ],
+  "ledger": [
+    {
+      "key": "ledger.title",
+      "text": "調弦理瑟",
+      "note": "第 28 轮 設置账簿（样张-設置.html）",
+      "src": "改写",
+      "sub": "设置",
+      "layer": "作品"
+    },
+    {
+      "key": "ledger.close",
+      "text": "閉",
+      "note": "第 28 轮 設置账簿（样张-設置.html）",
+      "src": "改写",
+      "layer": "作品"
+    },
+    {
+      "key": "ledger.index",
+      "text": "目 錄",
+      "note": "第 28 轮 設置账簿（样张-設置.html）",
+      "src": "改写",
+      "layer": "作品"
+    },
+    {
+      "key": "ledger.leaf",
+      "text": "葉",
+      "note": "第 28 轮 設置账簿（样张-設置.html）",
+      "src": "改写",
+      "layer": "作品"
+    },
+    {
+      "key": "ledger.back",
+      "text": "返回",
+      "note": "第 28 轮 設置账簿（样张-設置.html）",
+      "src": "改写"
+    },
+    {
+      "key": "ledger.closeAll",
+      "text": "尽数合上",
+      "note": "第 28 轮 設置账簿（样张-設置.html）",
+      "src": "改写"
+    },
+    {
+      "key": "ledger.page.view",
+      "text": "畫面",
+      "note": "第 28 轮 設置账簿（样张-設置.html）",
+      "src": "改写",
+      "sub": "画质、时辰与常驻之物",
+      "layer": "作品"
+    },
+    {
+      "key": "ledger.page.sound",
+      "text": "聲音",
+      "note": "第 28 轮 設置账簿（样张-設置.html）",
+      "src": "改写",
+      "sub": "丝竹、风物与动静",
+      "layer": "作品"
+    },
+    {
+      "key": "ledger.page.ctrl",
+      "text": "操作",
+      "note": "第 28 轮 設置账簿（样张-設置.html）",
+      "src": "改写",
+      "sub": "行止之速与视角",
+      "layer": "作品"
+    },
+    {
+      "key": "ledger.page.text",
+      "text": "文字",
+      "note": "第 28 轮 設置账簿（样张-設置.html）",
+      "src": "改写",
+      "sub": "界面之字与字号",
+      "layer": "作品"
+    },
+    {
+      "key": "ledger.page.intro",
+      "text": "開場",
+      "note": "第 28 轮 設置账簿（样张-設置.html）",
+      "src": "改写",
+      "sub": "入园之前",
+      "layer": "作品"
+    },
+    {
+      "key": "ledger.page.style",
+      "text": "界面風格",
+      "note": "第 28 轮 設置账簿（样张-設置.html）",
+      "src": "改写",
+      "sub": "界面风格",
+      "line": "风格、动效与释签",
+      "layer": "作品"
+    },
+    {
+      "key": "ledger.page.about",
+      "text": "卷末題記",
+      "note": "第 28 轮 設置账簿（样张-設置.html）",
+      "src": "改写",
+      "sub": "关于",
+      "layer": "作品"
+    },
+    {
+      "key": "ledger.q.high",
+      "text": "工筆",
+      "note": "第 28 轮 設置账簿（样张-設置.html）",
+      "src": "改写",
+      "sub": "高",
+      "layer": "作品"
+    },
+    {
+      "key": "ledger.q.mid",
+      "text": "寫意",
+      "note": "第 28 轮 設置账簿（样张-設置.html）",
+      "src": "改写",
+      "sub": "中",
+      "layer": "作品"
+    },
+    {
+      "key": "ledger.q.low",
+      "text": "省儉",
+      "note": "第 28 轮 設置账簿（样张-設置.html）",
+      "src": "改写",
+      "sub": "低",
+      "layer": "作品"
+    },
+    {
+      "key": "ledger.tod.overcast",
+      "text": "陰",
+      "note": "第 28 轮 設置账簿（样张-設置.html）",
+      "src": "改写",
+      "layer": "作品"
+    },
+    {
+      "key": "ledger.tod.day",
+      "text": "晴",
+      "note": "第 28 轮 設置账簿（样张-設置.html）",
+      "src": "改写",
+      "layer": "作品"
+    },
+    {
+      "key": "ledger.tod.dusk",
+      "text": "暮",
+      "note": "第 28 轮 設置账簿（样张-設置.html）",
+      "src": "改写",
+      "layer": "作品"
+    },
+    {
+      "key": "ledger.tod.night",
+      "text": "夜",
+      "note": "第 28 轮 設置账簿（样张-設置.html）",
+      "src": "改写",
+      "layer": "作品"
+    },
+    {
+      "key": "ledger.bgm.smooth",
+      "text": "隨地",
+      "note": "第 28 轮 設置账簿（样张-設置.html）",
+      "src": "改写",
+      "layer": "作品"
+    },
+    {
+      "key": "ledger.bgm.instant",
+      "text": "即換",
+      "note": "第 28 轮 設置账簿（样张-設置.html）",
+      "src": "改写",
+      "layer": "作品"
+    },
+    {
+      "key": "ledger.bgm.fixed",
+      "text": "固定一曲",
+      "note": "第 28 轮 設置账簿（样张-設置.html）",
+      "src": "改写",
+      "layer": "作品"
+    },
+    {
+      "key": "ledger.script.jian",
+      "text": "簡體",
+      "note": "第 28 轮 設置账簿（样张-設置.html）",
+      "src": "改写",
+      "layer": "作品"
+    },
+    {
+      "key": "ledger.script.fan",
+      "text": "繁體",
+      "note": "第 28 轮 設置账簿（样张-設置.html）",
+      "src": "改写",
+      "layer": "作品"
+    },
+    {
+      "key": "ledger.intro.play",
+      "text": "演",
+      "note": "第 28 轮 設置账簿（样张-設置.html）",
+      "src": "改写",
+      "layer": "作品"
+    },
+    {
+      "key": "ledger.intro.skip",
+      "text": "跳過",
+      "note": "第 28 轮 設置账簿（样张-設置.html）",
+      "src": "改写",
+      "layer": "作品"
+    },
+    {
+      "key": "ledger.style.hlm",
+      "text": "紅樓",
+      "note": "第 28 轮 設置账簿（样张-設置.html）",
+      "src": "改写",
+      "layer": "作品"
+    },
+    {
+      "key": "ledger.style.plain",
+      "text": "簡潔",
+      "note": "第 28 轮 設置账簿（样张-設置.html）",
+      "src": "改写",
+      "layer": "作品"
+    },
+    {
+      "key": "ledger.motion.full",
+      "text": "全",
+      "note": "第 28 轮 設置账簿（样张-設置.html）",
+      "src": "改写",
+      "layer": "作品"
+    },
+    {
+      "key": "ledger.motion.less",
+      "text": "省",
+      "note": "第 28 轮 設置账簿（样张-設置.html）",
+      "src": "改写",
+      "layer": "作品"
+    },
+    {
+      "key": "ledger.motion.off",
+      "text": "關",
+      "note": "第 28 轮 設置账簿（样张-設置.html）",
+      "src": "改写",
+      "layer": "作品"
+    },
+    {
+      "key": "ledger.on",
+      "text": "開",
+      "note": "第 28 轮 設置账簿（样张-設置.html）",
+      "src": "改写",
+      "layer": "作品"
+    },
+    {
+      "key": "ledger.off",
+      "text": "闔",
+      "note": "第 28 轮 設置账簿（样张-設置.html）",
+      "src": "改写",
+      "layer": "作品"
+    },
+    {
+      "key": "ledger.row.quality",
+      "text": "画质",
+      "note": "第 28 轮 設置账簿（样张-設置.html）",
+      "src": "改写",
+      "desc": "工笔：纤毫毕现；写意：略减，水影减半；省俭：去水影与近草。"
+    },
+    {
+      "key": "ledger.row.tod",
+      "text": "时辰",
+      "note": "第 28 轮 設置账簿（样张-設置.html）",
+      "src": "改写",
+      "desc": "阴天薄雾为常；晴则日影分明；黄昏夕照；入夜灯笼亮起，乐亦换夜曲。"
+    },
+    {
+      "key": "ledger.row.labels",
+      "text": "地点标签",
+      "note": "第 28 轮 設置账簿（样张-設置.html）",
+      "src": "改写",
+      "desc": "走近才现，按住 Tab 可览全园。"
+    },
+    {
+      "key": "ledger.row.compass",
+      "text": "顶上罗盘条",
+      "note": "第 28 轮 設置账簿（样张-設置.html）",
+      "src": "改写",
+      "desc": "三秒不动即淡去。"
+    },
+    {
+      "key": "ledger.row.mini",
+      "text": "右下小地图",
+      "note": "第 28 轮 設置账簿（样张-設置.html）",
+      "src": "改写",
+      "desc": "右下角一幅小图，随步而动，可收可放。"
+    },
+    {
+      "key": "ledger.row.full",
+      "text": "全屏",
+      "note": "第 28 轮 設置账簿（样张-設置.html）",
+      "src": "改写",
+      "desc": "画面铺满屏幕，再点还原。"
+    },
+    {
+      "key": "ledger.row.music",
+      "text": "絲竹",
+      "note": "第 28 轮 設置账簿（样张-設置.html）",
+      "src": "改写",
+      "desc": "配乐。随院落换曲，换时缓缓接上。"
+    },
+    {
+      "key": "ledger.row.musicOn",
+      "text": "丝竹开阖",
+      "note": "第 28 轮 設置账簿（样张-設置.html）",
+      "src": "改写",
+      "desc": "关了就不奏乐，环境声照旧。"
+    },
+    {
+      "key": "ledger.row.amb",
+      "text": "風物",
+      "note": "第 28 轮 設置账簿（样张-設置.html）",
+      "src": "改写",
+      "desc": "环境声。鸟鸣、流水、竹风、檐雨。"
+    },
+    {
+      "key": "ledger.row.sfx",
+      "text": "動靜",
+      "note": "第 28 轮 設置账簿（样张-設置.html）",
+      "src": "改写",
+      "desc": "音效。开门、落印、翻页。"
+    },
+    {
+      "key": "ledger.row.bgmMode",
+      "text": "配乐之法",
+      "note": "第 28 轮 設置账簿（样张-設置.html）",
+      "src": "改写",
+      "desc": "随地：到哪院奏哪曲，停满八秒才换；即换：到哪换哪；固定一曲：园里只奏沁芳游园。"
+    },
+    {
+      "key": "ledger.row.walkK",
+      "text": "步行之速",
+      "note": "第 28 轮 設置账簿（样张-設置.html）",
+      "src": "改写",
+      "desc": "行于园中的快慢，随手调之。"
+    },
+    {
+      "key": "ledger.row.flyK",
+      "text": "飞行之速",
+      "note": "第 28 轮 設置账簿（样张-設置.html）",
+      "src": "改写",
+      "desc": "御风时滚轮或 + / − 可临时调速。"
+    },
+    {
+      "key": "ledger.row.invY",
+      "text": "视角上下反转",
+      "note": "第 28 轮 設置账簿（样张-設置.html）",
+      "src": "改写",
+      "desc": "拖动或转头时，上下方向颠倒。"
+    },
+    {
+      "key": "ledger.row.invX",
+      "text": "视角左右反转",
+      "note": "第 28 轮 設置账簿（样张-設置.html）",
+      "src": "改写",
+      "desc": "拖动或转头时，左右方向颠倒。"
+    },
+    {
+      "key": "ledger.row.rehint",
+      "text": "指引",
+      "note": "第 28 轮 設置账簿（样张-設置.html）",
+      "src": "改写",
+      "desc": "每种玩法头一回，下方现三秒小提示。"
+    },
+    {
+      "key": "ledger.row.keys",
+      "text": "操作一览",
+      "note": "第 28 轮 設置账簿（样张-設置.html）",
+      "src": "改写",
+      "desc": "常用按键，一览无余。"
+    },
+    {
+      "key": "ledger.row.script",
+      "text": "界面文字",
+      "note": "第 28 轮 設置账簿（样张-設置.html）",
+      "src": "改写",
+      "desc": "只换界面之字；书中引文、匾额、印章，始终是繁体。"
+    },
+    {
+      "key": "ledger.row.sub",
+      "text": "字幕字号",
+      "note": "第 28 轮 設置账簿（样张-設置.html）",
+      "src": "改写",
+      "desc": "字幕与旁白的大小。"
+    },
+    {
+      "key": "ledger.row.intro",
+      "text": "開場動畫",
+      "note": "第 28 轮 設置账簿（样张-設置.html）",
+      "src": "改写",
+      "desc": "标题入场、进园飞行、首回指引。选「跳過」，则径直立在园门里。"
+    },
+    {
+      "key": "ledger.row.replay",
+      "text": "再看一遍",
+      "note": "第 28 轮 設置账簿（样张-設置.html）",
+      "src": "改写",
+      "desc": "再演一回入园之前的开场。"
+    },
+    {
+      "key": "ledger.row.style",
+      "text": "界面风格",
+      "note": "第 28 轮 設置账簿（样张-設置.html）",
+      "src": "改写",
+      "desc": "红楼：册页、花签、四字匾；简洁：素面样式。随时可切。"
+    },
+    {
+      "key": "ledger.row.motion",
+      "text": "动效",
+      "note": "第 28 轮 設置账簿（样张-設置.html）",
+      "src": "改写",
+      "desc": "省、关：只留淡入淡出，不位移不翻页。"
+    },
+    {
+      "key": "ledger.row.tips",
+      "text": "释签",
+      "note": "第 28 轮 設置账簿（样张-設置.html）",
+      "src": "改写",
+      "desc": "悬停或长按浮出的小签。"
+    },
+    {
+      "key": "ledger.row.feedback",
+      "text": "意见箱",
+      "note": "第 28 轮 設置账簿（样张-設置.html）",
+      "src": "改写",
+      "desc": "所见所想，请投一纸。"
+    },
+    {
+      "key": "ledger.btn.rehint",
+      "text": "重看指引",
+      "note": "第 28 轮 設置账簿（样张-設置.html）",
+      "src": "改写",
+      "layer": "作品"
+    },
+    {
+      "key": "ledger.btn.replay",
+      "text": "重演開場",
+      "note": "第 28 轮 設置账簿（样张-設置.html）",
+      "src": "改写",
+      "layer": "作品"
+    },
+    {
+      "key": "ledger.btn.feedback",
+      "text": "投意見箱",
+      "note": "第 28 轮 設置账簿（样张-設置.html）",
+      "src": "改写",
+      "layer": "作品"
+    },
+    {
+      "key": "ledger.btn.full",
+      "text": "全屏",
+      "note": "第 28 轮 設置账簿（样张-設置.html）",
+      "src": "改写",
+      "layer": "作品"
+    },
+    {
+      "key": "ledger.fen",
+      "text": "零,一,二,三,四,五,六,七,八,九,十",
+      "note": "第 28 轮 設置账簿（样张-設置.html）",
+      "src": "改写"
+    },
+    {
+      "key": "ledger.speed",
+      "text": "緩,緩,稍緩,常,常,稍疾,疾,疾,迅,迅,迅",
+      "note": "第 28 轮 設置账簿（样张-設置.html）",
+      "src": "改写"
+    },
+    {
+      "key": "ledger.keys",
+      "text": "行走",
+      "note": "第 28 轮 設置账簿（样张-設置.html）",
+      "src": "改写",
+      "rows": [
+        [
+          "W A S D",
+          "行走 / 飞行"
+        ],
+        [
+          "Shift",
+          "疾行"
+        ],
+        [
+          "T",
+          "移步"
+        ],
+        [
+          "V",
+          "信步"
+        ],
+        [
+          "F",
+          "御風"
+        ],
+        [
+          "G",
+          "隨喜"
+        ],
+        [
+          "Tab",
+          "按住覽勝"
+        ],
+        [
+          "Esc",
+          "小憩 / 退一层"
+        ]
+      ]
+    },
+    {
+      "key": "ledger.tiji",
+      "text": "此園依《紅樓夢》第十七回構築，一磚一木，皆有回目可考。夢影而已，聊以寄情。",
+      "note": "第 28 轮 設置账簿（样张-設置.html）",
+      "src": "改写",
+      "layer": "作品"
+    }
+  ],
+  "menu": [
+    {
+      "key": "menu.resume",
+      "text": "继续",
+      "note": "暂停菜单项（副注层，沿用）。shell.js:337。",
+      "src": "沿用"
+    },
+    {
+      "key": "menu.map",
+      "text": "地图",
+      "note": "暂停菜单项（副注层，沿用）。shell.js:337。",
+      "src": "沿用"
+    },
+    {
+      "key": "menu.codex",
+      "text": "图鉴",
+      "note": "暂停菜单项（副注层，沿用）。shell.js:337。",
+      "src": "沿用"
+    },
+    {
+      "key": "menu.quest",
+      "text": "任务",
+      "note": "暂停菜单项（副注层，沿用）。shell.js:337。",
+      "src": "沿用"
+    },
+    {
+      "key": "menu.settings",
+      "text": "设置",
+      "note": "暂停菜单项（副注层，沿用）。shell.js:337。",
+      "src": "沿用"
+    },
+    {
+      "key": "menu.help",
+      "text": "操作",
+      "note": "暂停菜单项（副注层，沿用）。shell.js:337。",
+      "src": "沿用"
+    },
+    {
+      "key": "menu.ach",
+      "text": "成就",
+      "note": "暂停菜单项（副注层，沿用）。shell.js:337。",
+      "src": "沿用"
+    },
+    {
+      "key": "menu.title",
+      "text": "出园",
+      "note": "暂停菜单最后一项，对应 exit.confirm。原：回标题（shell.js:337）。",
+      "src": "改写"
+    },
+    {
+      "key": "menu.bookAria",
+      "text": "目录",
+      "note": "「册」印的读屏名，沿用（daguanyuan.html:164）。",
+      "src": "沿用"
+    }
+  ],
+  "button": [
+    {
+      "key": "button.close",
+      "text": "合上",
+      "note": "设置面板、关系图等的关闭钮。沿用（shell.js:136/192，relations.js:1235）。",
+      "src": "沿用"
+    },
+    {
+      "key": "button.collapse",
+      "text": "收起",
+      "note": "沿用（map.js:962，mapFull.js:305）。",
+      "src": "沿用"
+    },
+    {
+      "key": "button.back",
+      "text": "返回",
+      "note": "沿用（nav.js:89，journal.js:653）。",
+      "src": "沿用"
+    },
+    {
+      "key": "button.closeAll",
+      "text": "尽数合上",
+      "note": "面板导航条「全部关闭」。原：全部关闭（nav.js:91）。",
+      "src": "改写"
+    },
+    {
+      "key": "button.go",
+      "text": "前往",
+      "note": "地图卡与图鉴的「去这里」。原：去这里（mapFull.js:537/549，codexUI.js:545）。",
+      "src": "改写"
+    },
+    {
+      "key": "button.lookCodex",
+      "text": "翻图鉴",
+      "note": "原：看图鉴（mapFull.js:537）。",
+      "src": "改写"
+    },
+    {
+      "key": "button.lookRel",
+      "text": "看关系图",
+      "note": "沿用（codexUI.js:547）。",
+      "src": "沿用"
+    },
+    {
+      "key": "button.openComic",
+      "text": "翻开连环画",
+      "note": "沿用（codexUI.js:546，game.js:92）。",
+      "src": "沿用"
+    },
+    {
+      "key": "button.readOrig",
+      "text": "读原文 · {n}句",
+      "note": "原：读原文 · N句（quest.js:188）；n 为汉字数字。",
+      "src": "沿用"
+    },
+    {
+      "key": "button.contTour",
+      "text": "继续游园",
+      "note": "沿用（quest.js:188）。",
+      "src": "沿用"
+    },
+    {
+      "key": "button.enterPlace",
+      "text": "到园中此处 · {name}",
+      "note": "沿用（album.js:245）。",
+      "src": "沿用"
+    },
+    {
+      "key": "button.chapterEnd",
+      "text": "且听下回分解",
+      "note": "每回末尾。原：本回完（reader.js:586）。",
+      "src": "改写"
+    },
+    {
+      "key": "button.bookEnd",
+      "text": "全书终",
+      "note": "原：全书完（reader.js:602）。",
+      "src": "改写"
+    },
+    {
+      "key": "button.nextChapter",
+      "text": "下一回",
+      "note": "沿用（reader.js:599）。",
+      "src": "沿用"
+    },
+    {
+      "key": "button.lastRead",
+      "text": "继续读 {hui}",
+      "note": "沿用（reader.js:453）。",
+      "src": "沿用"
+    },
+    {
+      "key": "button.lookPerson",
+      "text": "看人物",
+      "note": "阅读器里人名链接的悬停字。沿用（reader.js:539）。",
+      "src": "沿用"
+    },
+    {
+      "key": "button.teleportThere",
+      "text": "傳送至此",
+      "note": "地名链接悬停字。原：傳送去那里（reader.js:539）。→ 改「傳送至此」",
+      "src": "改写"
+    },
+    {
+      "key": "button.closeBook",
+      "text": "合冊",
+      "note": "第 28 轮：画册 / 册页面板的关闭钮（原「合上」，手机上被挤成两行）。",
+      "src": "改写",
+      "layer": "作品"
+    }
+  ],
+  "panel": [
+    {
+      "key": "panel.codexSearch",
+      "text": "寻人名、地名、诗题",
+      "note": "图鉴搜索框占位。原：搜人名、地名、诗题（game.js:367，book.js:175）。",
+      "src": "改写"
+    },
+    {
+      "key": "panel.codexSearchAria",
+      "text": "检索图鉴",
+      "note": "读屏名。原：搜索图鉴（game.js:367）。",
+      "src": "改写"
+    },
+    {
+      "key": "panel.codexSearch2",
+      "text": "寻名字或简介",
+      "note": "原：搜名字或简介（codexUI.js:572）。",
+      "src": "改写"
+    },
+    {
+      "key": "panel.seen",
+      "text": "已览 {seen} / {total}",
+      "note": "原：已看 N / M（game.js:376，codexUI.js:605）。",
+      "src": "改写",
+      "vars": [
+        "seen",
+        "total"
+      ]
+    },
+    {
+      "key": "panel.seenBadge",
+      "text": "已览",
+      "note": "条目已看过的小标。原：看过（book.js:178）。",
+      "src": "改写"
+    },
+    {
+      "key": "panel.figMissing",
+      "text": "画稿待补",
+      "note": "原：图待补（codexUI.js:438/449）。",
+      "src": "改写"
+    },
+    {
+      "key": "panel.albumMissing",
+      "text": "（画稿待补）",
+      "note": "原：（画作待补）（album.js:230）。",
+      "src": "改写"
+    },
+    {
+      "key": "panel.logEmpty",
+      "text": "尚无记述",
+      "note": "视觉小说回看记录为空。原：还没有记录（vn.js:223）。",
+      "src": "改写"
+    },
+    {
+      "key": "panel.journalEmpty",
+      "text": "尚无游记。\n入得园来，遇人、进院、观物，此页自会一行行记下。",
+      "note": "原：还没有游记。走进园子，遇见人、进了院、看了东西，这一页会自己一行行记下来。（journal.js:491）。",
+      "src": "改写"
+    },
+    {
+      "key": "panel.bookmarkEmpty",
+      "text": "尚无书签。读到何处，点上面的「书签」，便记在何处。",
+      "note": "原：还没有书签。读到哪儿，点上面的「书签」就记下哪儿。（reader.js:493）。",
+      "src": "改写"
+    },
+    {
+      "key": "panel.codexNoMatch",
+      "text": "查无此条",
+      "note": "原：没有对上的条目（codexUI.js:634）。",
+      "src": "改写"
+    },
+    {
+      "key": "panel.codexTypeEmpty",
+      "text": "此类暂付阙如。",
+      "note": "原：这一类还空着（codexUI.js:634）。",
+      "src": "改写"
+    },
+    {
+      "key": "panel.codexTypeNoMatch",
+      "text": "{type}中查无此条",
+      "note": "原：{type}里没有对上的（codexUI.js:637）。",
+      "src": "改写",
+      "vars": [
+        "type"
+      ]
+    },
+    {
+      "key": "panel.codexItemEmpty",
+      "text": "此条尚缺。",
+      "note": "原：这条还没有（codexUI.js:646）。",
+      "src": "改写"
+    },
+    {
+      "key": "panel.albumHere",
+      "text": "此处有连环画 {n} 册",
+      "note": "原：此处有N册连环画（game.js:93）。",
+      "src": "改写",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "panel.relMore",
+      "text": "展开全部 · {all} 人",
+      "note": "沿用（relations.js:1304）。",
+      "src": "沿用",
+      "vars": [
+        "all"
+      ]
+    },
+    {
+      "key": "panel.relFew",
+      "text": "只看核心 · {few} 人",
+      "note": "沿用（relations.js:1304）。",
+      "src": "沿用",
+      "vars": [
+        "few"
+      ]
+    },
+    {
+      "key": "panel.replayPoems",
+      "text": "四首咏白海棠，点开读全文",
+      "note": "原：四首咏白海棠（点开看全文）（replay.js:130）。",
+      "src": "改写"
+    },
+    {
+      "key": "panel.replayExit",
+      "text": "退出 · Esc",
+      "note": "沿用（replay.js:36）。",
+      "src": "沿用"
+    },
+    {
+      "key": "panel.toggleAuto.on",
+      "text": "停翻",
+      "note": "沿用符号按钮（album.js:188）。（第 28 轮：去掉 ‖ 符号，改两字）",
+      "src": "沿用"
+    },
+    {
+      "key": "panel.toggleAuto.off",
+      "text": "自翻",
+      "note": "沿用（album.js:188）。（第 28 轮：去掉 ▶ emoji，改两字）",
+      "src": "沿用"
+    },
+    {
+      "key": "panel.speedOn",
+      "text": "速度加倍",
+      "note": "原：同（viewctl.js:86）。沿用。",
+      "src": "沿用"
+    },
+    {
+      "key": "panel.speedOff",
+      "text": "速度还原",
+      "note": "沿用（viewctl.js:86）。",
+      "src": "沿用"
+    }
+  ],
+  "map": [
+    {
+      "key": "map.hint",
+      "text": "点一处或名字，即可前往；点空白处，或按退出键收起。",
+      "note": "原：点一处或名字前往 · 点空白处或按退出键收起（map.js:968）。",
+      "src": "改写"
+    },
+    {
+      "key": "map.here",
+      "text": "君在此",
+      "note": "小人标记悬停字。原：我在这（mapFull.js:189）。",
+      "src": "改写"
+    },
+    {
+      "key": "map.visited",
+      "text": "曾至",
+      "note": "地点卡状态。原：已到此（mapFull.js:549）。",
+      "src": "改写"
+    },
+    {
+      "key": "map.notVisited",
+      "text": "未至",
+      "note": "原：未去过（mapFull.js:549）。",
+      "src": "改写"
+    },
+    {
+      "key": "map.taskLabel",
+      "text": "往{name} {d}米",
+      "note": "小地图窄屏上的任务提示。沿用（map.js:1219）。",
+      "src": "沿用",
+      "vars": [
+        "name",
+        "d"
+      ]
+    },
+    {
+      "key": "map.legend",
+      "text": "红印未完，灰印已过",
+      "note": "沿用（map.js:957）。",
+      "src": "沿用"
+    },
+    {
+      "key": "map.closeTip",
+      "text": "收起全图（Esc / M）",
+      "note": "沿用（mapFull.js:191）。",
+      "src": "沿用"
+    },
+    {
+      "key": "map.dlTip",
+      "text": "导览图 PDF、地图包、壁纸",
+      "note": "沿用（mapFull.js:191）。",
+      "src": "沿用"
+    },
+    {
+      "key": "map.legendNote",
+      "text": "（开贾府图层看）",
+      "note": "沿用（mapFull.js:327）。",
+      "src": "沿用"
+    },
+    {
+      "key": "map.arrived",
+      "text": "到此",
+      "note": "沿用（mapFull.js:325）。",
+      "src": "沿用"
+    }
+  ],
+  "music": [
+    {
+      "key": "music.onTip",
+      "text": "乐声正起，点一下止之。",
+      "note": "原：音乐开着，点一下关（game.js:204）。",
+      "src": "改写"
+    },
+    {
+      "key": "music.offTip",
+      "text": "乐声已歇，点一下复起。",
+      "note": "原：音乐关着，点一下开（game.js:204）。",
+      "src": "改写"
+    },
+    {
+      "key": "music.muted",
+      "text": "乐声已歇",
+      "note": "原：已静音（game.js:206）。",
+      "src": "改写"
+    },
+    {
+      "key": "music.playing",
+      "text": "正奏：{name}",
+      "note": "原：正在放：X（game.js:206）。",
+      "src": "改写",
+      "vars": [
+        "name"
+      ]
+    },
+    {
+      "key": "music.live",
+      "text": "（即时合成）",
+      "note": "原：（实时版）（game.js:206）。",
+      "src": "改写"
+    },
+    {
+      "key": "music.idle",
+      "text": "点一下园子，乐声便起",
+      "note": "原：点一下园子开始放（game.js:206）。",
+      "src": "改写"
+    },
+    {
+      "key": "music.test",
+      "text": "自动测试中不奏乐（加 ?bgm=1 可听）",
+      "note": "开发检测专用，玩家见不到。沿用（game.js:206）。",
+      "src": "沿用"
+    }
+  ],
+  "feedback": [
+    {
+      "key": "feedback.sent",
+      "text": "已收入意见箱，多谢。",
+      "note": "原：已记下，谢谢（feedback.js:344）。",
+      "src": "改写"
+    },
+    {
+      "key": "feedback.placeholder",
+      "text": "留一句话",
+      "note": "原：写一句（feedback.js:219）。",
+      "src": "改写"
+    }
+  ],
+  "settings": [
+    {
+      "key": "settings.row.quality",
+      "text": "画质",
+      "note": "设置行标题，沿用（shell.js:134-150）；面板整体标题见 panelTitle.settings。",
+      "src": "沿用"
+    },
+    {
+      "key": "settings.row.tod",
+      "text": "时辰",
+      "note": "设置行标题，沿用（shell.js:134-150）；面板整体标题见 panelTitle.settings。",
+      "src": "沿用"
+    },
+    {
+      "key": "settings.row.volume",
+      "text": "音量",
+      "note": "设置行标题，沿用（shell.js:134-150）；面板整体标题见 panelTitle.settings。",
+      "src": "沿用"
+    },
+    {
+      "key": "settings.row.subtitle",
+      "text": "字幕字号",
+      "note": "设置行标题，沿用（shell.js:134-150）；面板整体标题见 panelTitle.settings。",
+      "src": "沿用"
+    },
+    {
+      "key": "settings.row.script",
+      "text": "界面文字",
+      "note": "设置行标题，沿用（shell.js:134-150）；面板整体标题见 panelTitle.settings。",
+      "src": "沿用"
+    },
+    {
+      "key": "settings.row.intro",
+      "text": "開場動畫",
+      "note": "设置行标题，沿用（shell.js:134-150）；面板整体标题见 panelTitle.settings。",
+      "src": "沿用"
+    },
+    {
+      "key": "settings.row.speed",
+      "text": "速度",
+      "note": "设置行标题，沿用（shell.js:134-150）；面板整体标题见 panelTitle.settings。",
+      "src": "沿用"
+    },
+    {
+      "key": "settings.row.operate",
+      "text": "操作",
+      "note": "设置行标题，沿用（shell.js:134-150）；面板整体标题见 panelTitle.settings。",
+      "src": "沿用"
+    },
+    {
+      "key": "settings.row.ui",
+      "text": "界面",
+      "note": "设置行标题，沿用（shell.js:134-150）；面板整体标题见 panelTitle.settings。",
+      "src": "沿用"
+    },
+    {
+      "key": "settings.row.save",
+      "text": "存档",
+      "note": "设置行标题，沿用（shell.js:134-150）；面板整体标题见 panelTitle.settings。",
+      "src": "沿用"
+    },
+    {
+      "key": "settings.row.reset",
+      "text": "重置进度",
+      "note": "设置行标题，沿用（shell.js:134-150）；面板整体标题见 panelTitle.settings。",
+      "src": "沿用"
+    },
+    {
+      "key": "settings.quality.note",
+      "text": "高：纤毫毕现；中：略减，水影减半；低：再减，去水影与近草。",
+      "note": "原：高：清晰度最高、阴影最细；中：降一档清晰度和阴影、水面倒影减半；低：再降、关掉水面倒影和近景草，材质贴图下次进园减半。（shell.js:138）。",
+      "src": "改写"
+    },
+    {
+      "key": "settings.quality.safari",
+      "text": "Safari 已自择「中」。",
+      "note": "原：Safari 默认「中」（按浏览器自动选的）。（shell.js:138）。",
+      "src": "改写"
+    },
+    {
+      "key": "settings.tod.note",
+      "text": "阴天薄雾为常；晴则日影分明；黄昏夕照；入夜灯笼亮起，窗纸透光，乐亦换夜曲。",
+      "note": "原：阴天柔光薄雾（默认）、晴天日影分明；黄昏夕照、夜里灯笼亮起、窗纸透光；夜里换夜景曲。（shell.js:139）。",
+      "src": "改写"
+    },
+    {
+      "key": "settings.script.note",
+      "text": "只换界面之字；书中引文，始终是繁体。",
+      "note": "原：只换界面；原著引文始终是繁体。（shell.js:142）。",
+      "src": "改写"
+    },
+    {
+      "key": "settings.intro.note",
+      "text": "标题入场、进园飞行、首回指引。选「跳過」，则径直立在园门里；放映时点屏、Esc、空格、回车皆可跳过。",
+      "note": "原：标题入场、进园飞行动画、首次引导。选「跳過」后点「遊覽 / 遊戲」直接站在园门里。放的时候随时可跳：点屏幕、Esc、空格、回车都行。（shell.js:143）。",
+      "src": "改写"
+    },
+    {
+      "key": "settings.speed.note",
+      "text": "0.5 至 4 倍。行走飞行之际，滚轮或 + / − 键可临时调速；底栏「⋯」里「快 / 慢」一键加倍。",
+      "note": "原：0.5×–4×（飞行默认已比原来快一倍）。走着、飞着时滚轮或 + / − 键临时调速…（shell.js:144）。",
+      "src": "改写"
+    },
+    {
+      "key": "settings.operate.note",
+      "text": "每种玩法头一回，下方会现三秒小提示；点「重看引导」可再看。随时按住底栏「?」看全部操作。",
+      "note": "原：每种玩法头一回会在底下出一条 3 秒的提示；点「重看引导」再出一遍。随时按住底栏「?」看全部操作。（shell.js:145）。",
+      "src": "改写"
+    },
+    {
+      "key": "settings.ui.note",
+      "text": "罗盘三秒不动即淡去；地点标签走近才现，按住 Tab（手机长按小地图）可览全园。",
+      "note": "原：罗盘 3 秒不动就淡下去。地点标签走近才出，按住 Tab（手机长按小地图）看全园。（shell.js:146）。",
+      "src": "改写"
+    },
+    {
+      "key": "settings.rehintBtn",
+      "text": "重看指引",
+      "note": "原：重看引导（shell.js:145）。",
+      "src": "改写"
+    },
+    {
+      "key": "settings.exportBtn",
+      "text": "抄录存档",
+      "note": "原：导出存档（shell.js:147）。",
+      "src": "改写"
+    },
+    {
+      "key": "settings.importBtn",
+      "text": "并入存档",
+      "note": "原：导入存档（shell.js:147）。",
+      "src": "改写"
+    },
+    {
+      "key": "settings.item.invY",
+      "text": "视角上下反转",
+      "note": "设置项名，沿用（shell.js:134-146）。",
+      "src": "沿用"
+    },
+    {
+      "key": "settings.item.invX",
+      "text": "视角左右反转",
+      "note": "设置项名，沿用（shell.js:134-146）。",
+      "src": "沿用"
+    },
+    {
+      "key": "settings.item.compass",
+      "text": "顶上罗盘条",
+      "note": "设置项名，沿用（shell.js:134-146）。",
+      "src": "沿用"
+    },
+    {
+      "key": "settings.item.mini",
+      "text": "右下小地图",
+      "note": "设置项名，沿用（shell.js:134-146）。",
+      "src": "沿用"
+    },
+    {
+      "key": "settings.item.labels",
+      "text": "地点标签",
+      "note": "设置项名，沿用（shell.js:134-146）。",
+      "src": "沿用"
+    },
+    {
+      "key": "settings.item.music",
+      "text": "音乐",
+      "note": "设置项名，沿用（shell.js:134-146）。",
+      "src": "沿用"
+    },
+    {
+      "key": "settings.item.amb",
+      "text": "环境",
+      "note": "设置项名，沿用（shell.js:134-146）。",
+      "src": "沿用"
+    },
+    {
+      "key": "settings.item.sfx",
+      "text": "音效",
+      "note": "设置项名，沿用（shell.js:134-146）。",
+      "src": "沿用"
+    },
+    {
+      "key": "settings.item.walk",
+      "text": "步行",
+      "note": "设置项名，沿用（shell.js:134-146）。",
+      "src": "沿用"
+    },
+    {
+      "key": "settings.item.fly",
+      "text": "飞行",
+      "note": "设置项名，沿用（shell.js:134-146）。",
+      "src": "沿用"
+    }
+  ],
+  "reader": [
+    {
+      "key": "reader.sourceNote",
+      "text": "来源：维基文库 · 红楼梦（繁体汇校本，前八十回庚辰本、后四十回程甲本）",
+      "note": "阅读器页脚来源声明，是事实陈述，沿用（reader.js:13）。",
+      "src": "沿用"
+    },
+    {
+      "key": "reader.convertNote",
+      "text": "转换版，以繁体为准",
+      "note": "简体转读开启时页脚小字。沿用（reader.js:363；UI设计指导 §9）。",
+      "src": "沿用"
+    },
+    {
+      "key": "reader.convertHint",
+      "text": "只换正文用字，转换版以繁体为准。",
+      "note": "沿用（reader.js:343）。",
+      "src": "沿用"
+    },
+    {
+      "key": "reader.tocCount",
+      "text": "一百二十回 · 已读 {n} / 120",
+      "note": "沿用（reader.js:448）。",
+      "src": "沿用",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "reader.bookmarkCount",
+      "text": "书签 {n}",
+      "note": "沿用（reader.js:458）。",
+      "src": "沿用",
+      "vars": [
+        "n"
+      ]
+    }
+  ]
+}

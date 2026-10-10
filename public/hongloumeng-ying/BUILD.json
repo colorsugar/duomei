@@ -1,0 +1,16 @@
+{
+ "version": "0.1.0",
+ "builtAt": "2026-10-10T17:01:29.964Z",
+ "site": "https://duomei.site/hongloumeng-ying/",
+ "split": false,
+ "assets": {
+  "core": {
+   "files": 1111,
+   "bytes": 172864183
+  },
+  "media": {
+   "files": 515,
+   "bytes": 643772262
+  }
+ }
+}

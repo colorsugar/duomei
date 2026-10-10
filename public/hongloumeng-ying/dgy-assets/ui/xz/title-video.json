@@ -1,0 +1,6 @@
+{
+ "说明": "第 31 轮：标题页背景循环视频接口（美术线出 dgy-assets/ui/art/motion/标题.mp4 / .webm，到了把路径填进来；null 时只用静图 title-S1.webp）。只在桌面档、未开减少动态时放。",
+ "src": "dgy-assets/ui/art/motion/标题.mp4",
+ "webm": "dgy-assets/ui/art/motion/标题.webm",
+ "poster": "dgy-assets/ui/xz/r31/title-v0.webp"
+}

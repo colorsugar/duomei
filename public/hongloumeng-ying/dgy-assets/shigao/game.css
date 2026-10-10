@@ -1,0 +1,67 @@
+/* 第 32 轮：詩稿 v3 接进游戏后补的样式（样张本身的样式原样在 index.html 里）。 */
+
+/* 单首展读：页面透明，只浮一张笺；背后是游戏（人物卡 / 园景，由游戏一侧压暗虚化） */
+html.sg-single, html.sg-single body, html.sg-club, html.sg-club body { background: transparent !important; }
+html.sg-single .scene, html.sg-single .collection, html.sg-single .petals { display: none !important; }
+html.sg-single dialog::backdrop { background: transparent; }
+/* 诗会长卷（园中案上诗笺）：不出书案底画 */
+html.sg-club .scene { display: none !important; }
+
+/* 开发备注、常驻操作说明不给玩家看（读屏仍有 aria-label） */
+#font-audit, #detail-font-audit, .footer-hint, .entry-foot, #sheet-note { display: none !important; }
+
+/* 函面「閉」：和册里内页右上角那枚同一个印 */
+.sg-entry-x { position: absolute; top: 22px; right: 24px; z-index: 30; }
+body[data-layout=mobile] .sg-entry-x { top: calc(10px + env(safe-area-inset-top)); right: 12px; }
+
+/* 作者名可点（见人物） */
+.sg-who { border: 0; background: none; padding: 0 1px; font: inherit; color: inherit; border-bottom: 1px dotted rgba(147, 60, 45, .55); cursor: pointer; min-height: 24px; }
+.sg-who:hover { color: var(--cinn); }
+
+/* 意象、古人评点：接在赏析 / 难字之后，同一套字号层级 */
+.poem-postscript .sg-extra h3 { margin-top: 18px; }
+.sg-yx dl { margin: 0; }
+.sg-yx dl > div { padding: 7px 0 8px; border-bottom: 1px dashed rgba(166, 143, 108, .35); }
+.sg-yx dl > div:last-child { border-bottom: 0; }
+.sg-yx dt { font: 600 15px/1.6 var(--song); color: #5a3d2b; letter-spacing: .06em; }
+.sg-yx dd { margin: 2px 0 0; font: 14px/1.85 var(--song); color: #6e5b48; }
+.sg-pd figure { margin: 8px 0 12px; }
+.sg-pd blockquote { margin: 0; padding: 4px 0 4px 12px; border-left: 2px solid rgba(147, 60, 45, .45); font: 15px/1.95 var(--song); color: #4a3626; letter-spacing: .04em; }
+.sg-pd figcaption { margin-top: 4px; padding-left: 12px; font: 12px/1.6 var(--song); color: #95816b; }
+.sg-pd figcaption::before { content: '—— '; }
+
+/* 左栏人名索引的小像（87 版立绘头像） */
+.index-item .sg-ix-face { width: 40px; height: 40px; flex: 0 0 40px; border-radius: 50%; object-fit: cover; object-position: 50% 18%; border: 1px solid rgba(169, 138, 78, .6); padding: 2px; background: var(--paper); }
+.sg-face-ph { display: inline-flex; align-items: center; justify-content: center; border-radius: 50%; border: 1px solid rgba(169, 138, 78, .6); background: var(--paper); color: #6e5b48; font: 19px var(--xing); }
+/* 段首大小像 */
+.section-head.sg-has-face { justify-content: flex-start; }
+.section-head.sg-has-face > div:first-of-type { flex: 1; min-width: 0; }
+.section-head .sg-head-face { width: 64px; height: 64px; flex: 0 0 64px; border-radius: 50%; object-fit: cover; object-position: 50% 16%; border: 1.5px solid rgba(169, 138, 78, .75); padding: 3px; background: var(--paper); box-shadow: 0 2px 6px rgba(53, 31, 10, .14); margin-right: 4px; }
+span.sg-head-face { font-size: 28px; }
+body[data-layout=mobile] .section-head .sg-head-face { width: 46px; height: 46px; flex-basis: 46px; padding: 2px; }
+body[data-layout=mobile] span.sg-head-face { font-size: 20px; }
+
+/* 手机：人名索引签（横排可滑，吸在笺带上方） */
+.sg-pidx { display: flex; gap: 6px; overflow-x: auto; overscroll-behavior-x: contain; scrollbar-width: none; padding: 2px 14px 8px; flex: 0 0 auto; -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 14px, #000 calc(100% - 14px), transparent 100%); mask-image: linear-gradient(90deg, transparent 0, #000 14px, #000 calc(100% - 14px), transparent 100%); }
+.sg-pidx::-webkit-scrollbar { display: none; }
+.sg-pidx button { flex: 0 0 auto; display: flex; align-items: center; gap: 5px; min-height: 44px; padding: 3px 9px 3px 3px; border: 1px solid rgba(169, 138, 78, .45); border-radius: 22px; background: rgba(248, 239, 222, .6); color: var(--ink); }
+.sg-pidx button[aria-pressed=true] { border-color: var(--cinn); color: var(--cinn); background: rgba(147, 60, 45, .06); }
+.sg-pidx .sg-pi-face { width: 34px; height: 34px; border-radius: 50%; object-fit: cover; object-position: 50% 16%; }
+.sg-pidx span.sg-pi-face { font-size: 16px; }
+.sg-pidx b { font: 15px var(--song); font-weight: 500; }
+.sg-pidx small { font: 12px var(--song); color: #95816b; }
+
+/* 第 32 轮（督察：小于 14px 的字）：样张里 10–13px 的小字一律 14 */
+.section-head p, .group-control, .slip-head small, .slip-sign .signature small, .card-actions, .card-actions span, .outline-btn, .sheet-top span, .annotation-source,
+.chapter-btn, .brand small, .index-item small, .index-foot, .society-intro small, .play-actions span, .portfolio-note small, .note-box small, .poem-postscript small, .detail-counter, .slip-head .num { font-size: 14px !important; }
+.chapter-btn b { font-size: 18px !important; }
+/* 第 32 轮（巡检字体回退）：样张里锦函、册名、赏析小标题这些界面字也用了诗文笔触字库（只收诗里的字），缺字退到同款行书界面字库，不落宋体 */
+.casket-label b, .casket-caption, .entry-instruction, .thread-book > span, .book-leaf > span, .desk-note, .poem-postscript h3, .lid-seal, .paperweight { font-family: V3Brush, UIScript, "Songti SC", serif !important; }
+#poem-back { font-family: "Songti SC", serif !important; }
+/* 第 32 轮（巡检）：手机触点 44；桌面长卷不强制吸附（滚轮 / 拖动停在哪是哪） */
+#close-poem, .stamp-btn { min-width: 44px !important; min-height: 44px !important; }
+.volume-picker button { min-width: 44px !important; min-height: 44px; }
+body[data-layout=mobile] #section-title { min-height: 44px; display: flex; align-items: center; }
+body[data-layout=desktop] .card-track, body[data-layout=desktop] .society-track { scroll-snap-type: none !important; }
+/* 第 32 轮（巡检看图）：手机单首展读，批注区最后一段不被底栏挡住 */
+body[data-layout=mobile] .detail-body { padding-bottom: 76px !important; }

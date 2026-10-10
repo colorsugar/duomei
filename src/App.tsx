@@ -23,6 +23,7 @@ import { DuomeiMusicPlayer } from "./components/DuomeiMusicPlayer";
 import { DuomeiYunyouPage } from "./pages/DuomeiYunyouPage";
 import { DuomeiXiaoyuanPage } from "./pages/DuomeiXiaoyuanPage";
 import { DuomeiJiangnanPage } from "./pages/DuomeiJiangnanPage";
+import { DuomeiHongloumengPage } from "./pages/DuomeiHongloumengPage";
 import { DuomeiDaluPage } from "./pages/DuomeiDaluPage";
 import { DuomeiAtlasPage } from "./pages/DuomeiAtlasPage";
 import { DuomeiChaojiPage } from "./pages/DuomeiChaojiPage";
@@ -62,8 +63,9 @@ function AppRoutes() {
   const isXunji = location.pathname === "/xunji" || location.pathname.startsWith("/xunji/");
   const isYunyouMap = location.pathname === "/yunyou-map";
   const isXiaoyuan = location.pathname === "/xiaoyuan" || location.pathname === "/jiangnan";
+  const isHongloumeng = location.pathname === "/hongloumeng-ying" || location.pathname === "/hongloumeng-ying/";
   const isAtlasMap = location.pathname === "/atlas-v6" || location.pathname === "/dalu/map" || location.pathname === "/chaoji/map";
-  const bareChrome = isAdmin || isGuyuReader || isZaobao || isXunji || isYunyouMap || isAtlasMap || isXiaoyuan;
+  const bareChrome = isAdmin || isGuyuReader || isZaobao || isXunji || isYunyouMap || isAtlasMap || isXiaoyuan || isHongloumeng;
   useSmoothScroll(bareChrome || isTimePage);
 
   return (
@@ -88,6 +90,7 @@ function AppRoutes() {
         <Route path="/yunyou-map" element={<DuomeiYunyouPage />} />
         <Route path="/xiaoyuan" element={<DuomeiXiaoyuanPage />} />
         <Route path="/jiangnan" element={<DuomeiJiangnanPage />} />
+        <Route path="/hongloumeng-ying" element={<DuomeiHongloumengPage />} />
         <Route path="/dalu" element={<DuomeiDaluPage />} />
         <Route path="/dalu/map" element={<DuomeiAtlasPage />} />
         <Route path="/atlas-v6" element={<DuomeiAtlasPage />} />

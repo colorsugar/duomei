@@ -1,0 +1,11 @@
+材质：白灰墙（新）
+目录：baihuiqiang-xin
+来源：Poly Haven「White Stucco 02」
+URL：https://polyhaven.com/a/white_stucco_02
+作者：Dimitrios Savva
+授权：CC0 1.0（公有领域，可商用，无需署名；仍如实标注）
+下载日期：2026-10-09
+处理：把原贴图（灰白拉毛灰泥）调成偏暖的白灰色，保留细微起伏，AO 轻烘焙。
+真实尺寸：约 1.80 米见方（原素材标注）
+用途：新刷的院墙与粉墙：怡红院/潇湘馆等院落围墙、垂花门两侧白墙、建筑山墙的上身。
+规格：1024×1024 webp，可平铺；color=sRGB；normal=OpenGL(Y+，three.js 默认)；rough=线性灰度（三通道同值，取 G）。
