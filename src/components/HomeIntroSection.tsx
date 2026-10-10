@@ -1,5 +1,5 @@
-import type { ChangeEvent, CSSProperties, KeyboardEvent, PointerEvent as ReactPointerEvent } from "react";
-import { useEffect, useRef, useState } from "react";
+import type { ChangeEvent, CSSProperties, KeyboardEvent, PointerEvent as ReactPointerEvent, WheelEvent } from "react";
+import { Suspense, lazy, useEffect, useRef, useState } from "react";
 import { animate, motion, useMotionValue, useReducedMotion, useScroll, useSpring, useTransform } from "framer-motion";
 import type { MotionValue, PanInfo } from "framer-motion";
 import type { DuomeiNote } from "../lib/noteTypes";
@@ -15,8 +15,11 @@ import { DaluSection } from "./DaluSection";
 import { XunjiSection } from "./XunjiSection";
 import { YunyouSection } from "./YunyouSection";
 import "./YunyouSection.css";
-import { PoetryCanvasEditor } from "./PoetryCanvasEditor";
 import "./HomeIntroSection.css";
+import { SectionTitle } from "./SectionTitle";
+
+// Admin-only: the poetry canvas editor (and its upload client) loads when editing starts.
+const PoetryCanvasEditor = lazy(() => import("./PoetryCanvasEditor").then((m) => ({ default: m.PoetryCanvasEditor })));
 
 type HomeIntroSectionProps = {
   canCreate: boolean;
@@ -31,12 +34,15 @@ const portalTitleColumns = ["来啊", "快活啊", "反正有大把时光"];
 
 const fallbackImage: TimePoetryImage = {
   label: "在路上的日子",
-  src: "/images/note-default-covers/duomei-default-cover-01.png",
+  src: "/images/note-default-covers/duomei-default-cover-01.webp",
   position: "50% 50%",
 };
 
 function createTextBlocks(work: TimePoetryWork): TimePoetryTextBlock[] {
   const reverse = work.layout === "image-right";
+  // A vertical poem needs ~7% of the panel per column; wider poems grow leftwards on image-right
+  // pages (the title sits to the right) and rightwards otherwise.
+  const poemWidth = Math.max(20, work.verticalColumns.length * 7);
   return [
     {
       id: `${work.id}-title`,
@@ -55,9 +61,9 @@ function createTextBlocks(work: TimePoetryWork): TimePoetryTextBlock[] {
       id: `${work.id}-poem`,
       kind: "poem",
       content: work.verticalColumns.join("\n"),
-      x: reverse ? 48 : 32,
+      x: reverse ? 48 - (poemWidth - 20) : 32,
       y: 14,
-      width: 20,
+      width: poemWidth,
       height: 66,
       fontSize: work.fontSize,
       direction: work.textDirection ?? "vertical",
@@ -181,11 +187,14 @@ function PortalTitle({ progress }: { progress: ReturnType<typeof useSpring> }) {
   return (
     <motion.h2
       className="poetry-portal-title"
-      style={{ opacity, fontFamily: defaultPoetryFont }}
+      style={{ opacity }}
       aria-label="来啊，快活啊，反正有大把时光"
     >
+      <motion.span className="poetry-portal-kicker" aria-hidden="true" style={{ clipPath: columnClips[0], y: columnYs[0] }}>
+        <b>03</b><i /><span>Joy · 快活</span>
+      </motion.span>
       {portalTitleColumns.map((column, index) => (
-        <motion.span key={column} aria-hidden="true" style={{ clipPath: columnClips[index], y: columnYs[index] }}>
+        <motion.span key={column} className="poetry-portal-column" data-column={index} aria-hidden="true" style={{ clipPath: columnClips[index], y: columnYs[index] }}>
           {column}
         </motion.span>
       ))}
@@ -196,7 +205,8 @@ function PortalTitle({ progress }: { progress: ReturnType<typeof useSpring> }) {
 
 const poetryEase = [0.16, 1, 0.3, 1] as const;
 const poetryDeckCompactPeek = 16;
-const poetryDeckWidePeek = 52;
+// Negative: on wide stages the next page parks just outside the stage (the page gutter), not over the text.
+const poetryDeckWidePeek = -14;
 
 function poetryEffectState(effect: TimePoetryEffect, visible: boolean, reverse: boolean, reducedMotion: boolean) {
   if (visible || reducedMotion || effect === "none") {
@@ -463,6 +473,17 @@ function PoetryStackDeck({
     });
   };
 
+  // Page dots: jump straight to any page (no slide), used by the dots under the stage.
+  const goToPage = (index: number) => {
+    if (transitioningRef.current || index === activeIndex || !pages[index]) return;
+    stopPositionAnimations();
+    animationSequenceRef.current += 1;
+    activeIndexRef.current = index;
+    setActivePageId(pages[index].id);
+    currentX.set(0);
+    nextX.set(nextRestX);
+  };
+
   const settleCards = () => {
     stopPositionAnimations();
     const sequence = animationSequenceRef.current;
@@ -515,6 +536,34 @@ function PoetryStackDeck({
     settleCards();
   };
 
+  // Turns a page every few seconds while nobody is touching the deck; stops at the last page.
+  const pausedRef = useRef(false);
+  const showNextRef = useRef<() => void>(() => undefined);
+  const hasNextRef = useRef(false);
+  useEffect(() => {
+    if (reducedMotion || canCreate) return;
+    const timer = window.setInterval(() => {
+      if (pausedRef.current || transitioningRef.current || document.hidden) return;
+      const stage = stageRef.current;
+      if (!stage) return;
+      const box = stage.getBoundingClientRect();
+      if (box.bottom < 0 || box.top > window.innerHeight) return;
+      if (hasNextRef.current) showNextRef.current();
+    }, 6_500);
+    return () => window.clearInterval(timer);
+  }, [canCreate, reducedMotion]);
+
+  const wheelLockRef = useRef(false);
+  const handleWheel = (event: WheelEvent<HTMLDivElement>) => {
+    // Horizontal trackpad swipes turn pages; vertical scrolling keeps scrolling the page.
+    if (Math.abs(event.deltaX) < 28 || Math.abs(event.deltaX) < Math.abs(event.deltaY) * 1.5) return;
+    if (wheelLockRef.current || transitioningRef.current) return;
+    wheelLockRef.current = true;
+    window.setTimeout(() => { wheelLockRef.current = false; }, 900);
+    if (event.deltaX > 0) showNext();
+    else showPrevious();
+  };
+
   const handleKeyDown = (event: KeyboardEvent<HTMLElement>) => {
     if (event.key === "ArrowRight") {
       event.preventDefault();
@@ -527,18 +576,32 @@ function PoetryStackDeck({
 
   if (!pages.length) return null;
 
+  showNextRef.current = showNext;
+  hasNextRef.current = hasNext;
+
   return (
     <HomeSectionHold id="weiyan" className="poetry-index" ariaLabelledBy="poetry-deck-title">
-      <header className="poetry-deck-heading">
-        <h2 id="poetry-deck-title">微言</h2>
-        <p>向左翻到下一页，向右揭开上一页。</p>
-      </header>
+      <SectionTitle
+        id="poetry-deck-title"
+        accent="weiyan"
+        index="09"
+        kicker="Few Words · 纸上风景"
+        title="微言"
+        lede="几句短话，一页一页慢慢翻；向左是下一页。"
+        className="poetry-deck-heading"
+      />
 
       <div
         className="poetry-deck-stage"
         ref={stageRef}
+        style={{ "--deck-peek": `${peekSize}px` } as CSSProperties}
         tabIndex={0}
         onKeyDown={handleKeyDown}
+        onWheel={handleWheel}
+        onPointerEnter={() => { pausedRef.current = true; }}
+        onPointerLeave={() => { pausedRef.current = false; }}
+        onFocusCapture={() => { pausedRef.current = true; }}
+        onBlurCapture={() => { pausedRef.current = false; }}
         aria-label={`微言，第 ${activeIndex + 1} 页，共 ${pages.length} 页`}
       >
         {pages.map((work, index) => {
@@ -579,13 +642,34 @@ function PoetryStackDeck({
             onDragStart={handleDragStart}
             onDrag={handleDrag}
             onDragEnd={handleDragEnd}
+            onTap={(_event, info) => {
+              const stage = stageRef.current;
+              if (!stage || transitioningRef.current) return;
+              const box = stage.getBoundingClientRect();
+              if (info.point.x - box.left > box.width / 2) showNext();
+              else showPrevious();
+            }}
           />
         ) : null}
       </div>
 
       <div className="poetry-deck-controls">
         <button type="button" onClick={showPrevious} disabled={!hasPrevious || transitioning} aria-label="上一页微言">上一页</button>
-        <span aria-live="polite"><b>{String(activeIndex + 1).padStart(2, "0")}</b> / {String(pages.length).padStart(2, "0")}</span>
+        <span className="poetry-deck-dots" aria-live="polite">
+          <b>{String(activeIndex + 1).padStart(2, "0")}</b>
+          {pages.map((page, index) => (
+            <button
+              key={page.id}
+              type="button"
+              className={index === activeIndex ? "is-active" : undefined}
+              aria-label={`第 ${index + 1} 页 ${page.title ?? ""}`}
+              aria-current={index === activeIndex ? "true" : undefined}
+              data-title={page.title ?? `第 ${index + 1} 页`}
+              onClick={() => goToPage(index)}
+            />
+          ))}
+          <i>/ {String(pages.length).padStart(2, "0")}</i>
+        </span>
         {canCreate ? <button type="button" onClick={() => onEdit(activeIndex)}>编辑当前页</button> : null}
         <button type="button" onClick={showNext} disabled={!hasNext || transitioning} aria-label="下一页微言">下一页</button>
       </div>
@@ -800,7 +884,7 @@ export function HomeIntroSection({ canCreate }: HomeIntroSectionProps) {
 
   const paperX = useTransform(progress, [0.08, 0.42], ["100%", "0%"]);
   const legacyScale = useTransform(progress, [0.08, 0.4], [1, compact ? 0.58 : 0.62]);
-  const legacyX = useTransform(progress, [0.08, 0.4], ["0%", compact ? "0%" : "-22%"]);
+  const legacyX = useTransform(progress, [0.08, 0.4], ["0%", compact ? "0%" : "-12%"]);
   const legacyY = useTransform(progress, [0.08, 0.4], ["0%", compact ? "0%" : "3%"]);
   const sceneY = useTransform(progress, compact ? [0.76, 1] : [0.84, 1], compact ? ["0%", "-54%"] : ["0%", "-106%"]);
   const sceneOpacity = useTransform(progress, compact ? [0.9, 1] : [0.965, 1], compact ? [1, 0.22] : [1, 0]);
@@ -942,6 +1026,7 @@ export function HomeIntroSection({ canCreate }: HomeIntroSectionProps) {
       <HomeSkillsSection />
 
       {canCreate && editorIndex !== null ? (
+        <Suspense fallback={null}>
         <PoetryCanvasEditor
           pages={pages}
           activeIndex={editorIndex}
@@ -959,6 +1044,7 @@ export function HomeIntroSection({ canCreate }: HomeIntroSectionProps) {
           onMove={(direction) => movePage(editorIndex, direction)}
           onUpdate={(updater) => updatePage(editorIndex, updater)}
         />
+        </Suspense>
       ) : null}
     </section>
   );

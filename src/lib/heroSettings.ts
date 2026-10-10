@@ -4,13 +4,13 @@ export type HeroTextSettings = {
   scrollHint: string;
 };
 
-const HERO_TEXT_KEY = "duomei-hero-text-settings";
+const HERO_TEXT_KEY = "duomei-hero-text-settings-v2";
 export const HERO_TEXT_UPDATED_EVENT = "duomei-hero-text-updated";
 const legacyScrollHints = new Set(["\u5411\u4e0b\u6ed1\u52a8"]);
 
 export const defaultHeroTextSettings: HeroTextSettings = {
-  subname: "多美小记",
-  line: "记录旅途，遇见生活，也遇见自己。",
+  subname: "多美",
+  line: "把看见的、想到的、画出来的，都收在这里。",
   scrollHint: "",
 };
 

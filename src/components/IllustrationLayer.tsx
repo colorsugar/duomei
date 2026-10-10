@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { BounceName } from "./BounceName";
+import { HeroDust } from "./HeroDust";
 import { HeroIllustration } from "./HeroIllustration";
+import { HeroPalette } from "./HeroPalette";
 import { useDuomeiEdit } from "./DuomeiEditProvider";
 import {
   HERO_TEXT_UPDATED_EVENT,
@@ -9,6 +11,36 @@ import {
   type HeroTextSettings,
 } from "../lib/heroSettings";
 import { AnimatedParagraph, RevealSection } from "../motion";
+import type { CSSProperties } from "react";
+
+// Hero copy choreography: 多美小记 rises character by character after the DUOMEI letters land;
+// the tagline types itself out, pausing at punctuation, then its three phrases take turns lighting up.
+const PUNCTUATION = /[，。、；：！？,.!?]/u;
+
+function HeroKineticCopy({ text, field }: { text: string; field: "subname" | "line" }) {
+  const phrases = field === "line" ? text.split(/(?<=[，,])/u) : [text];
+  let index = 0;
+  let delay = field === "line" ? 2100 : 1350;
+  return (
+    <>
+      {phrases.map((phrase, phraseIndex) => (
+        <span key={`${phraseIndex}-${phrase}`} className="hero-phrase" style={{ "--p": phraseIndex } as CSSProperties}>
+          {Array.from(phrase).map((character) => {
+            const style = { "--i": index, "--d": `${delay}ms` } as CSSProperties;
+            index += 1;
+            delay += field === "line" ? 34 : 110;
+            if (PUNCTUATION.test(character)) delay += 220;
+            return (
+              <span key={`${index}-${character}`} className="hero-char" style={style}>
+                {character}
+              </span>
+            );
+          })}
+        </span>
+      ))}
+    </>
+  );
+}
 
 type HeroEditableTextProps = {
   field: keyof HeroTextSettings;
@@ -22,10 +54,18 @@ function HeroEditableText({ field, settings, className, editable, onChange }: He
   const Tag = field === "subname" || field === "line" ? "p" : "span";
 
   if (!editable) {
+    const text = settings[field];
+    if (field === "scrollHint" || !text) {
+      return (
+        <AnimatedParagraph as={Tag} className={className}>
+          {text}
+        </AnimatedParagraph>
+      );
+    }
     return (
-      <AnimatedParagraph as={Tag} className={className}>
-        {settings[field]}
-      </AnimatedParagraph>
+      <Tag className={`${className} hero-kinetic-copy`} aria-label={text}>
+        <HeroKineticCopy text={text} field={field} />
+      </Tag>
     );
   }
 
@@ -178,6 +218,14 @@ export function IllustrationLayer() {
       className={`illustration-layer duomei-motion-ambient-background${editable ? " hero-editing" : ""}`}
       aria-label="DUOMEI hero"
     >
+      <div className="duomei-hero-aurora" aria-hidden="true">
+        <i />
+        <i />
+        <i />
+        <i />
+        <i />
+      </div>
+      <HeroDust />
       <div className="illustration-layer-inner">
         <div className="duomei-hero-trace" aria-hidden="true" />
         <HeroIllustration />
@@ -185,6 +233,7 @@ export function IllustrationLayer() {
         <HeroEditableText field="subname" settings={settings} className="duomei-hero-subname" editable={editable} onChange={setSettings} />
         <HeroEditableText field="line" settings={settings} className="duomei-hero-line" editable={editable} onChange={setSettings} />
         <HeroEditableText field="scrollHint" settings={settings} className="duomei-scroll-hint" editable={editable} onChange={setSettings} />
+        <HeroPalette />
       </div>
     </RevealSection>
   );

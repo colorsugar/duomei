@@ -72,4 +72,21 @@ function neteaseMusicDevApi() {
 export default defineConfig({
   base: process.env.GITHUB_PAGES ? "/duomei/" : "/",
   plugins: [react(), neteaseMusicDevApi()],
+  // Dev-only: keep the dependency scan off the static maps under public/, whose
+  // import maps point bare `three` at vendored files Vite cannot resolve.
+  optimizeDeps: { entries: ["index.html"] },
+  build: {
+    rollupOptions: {
+      output: {
+        // Long-lived vendor chunks: a content change no longer invalidates React or the motion runtime.
+        manualChunks(id) {
+          if (!id.includes("node_modules")) return undefined;
+          if (/node_modules\/(react|react-dom|scheduler|react-router|react-router-dom)\//u.test(id)) return "react";
+          if (/node_modules\/(framer-motion|motion-dom|motion-utils)\//u.test(id)) return "motion";
+          if (/node_modules\/@supabase\//u.test(id)) return "supabase";
+          return undefined;
+        },
+      },
+    },
+  },
 });

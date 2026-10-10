@@ -1410,17 +1410,40 @@
  */
 .home-section-hold {
   position: relative;
-  block-size: 230svh;
+  /* stage + dwell (0.55) + cover (1): HOME_SECTION_DWELL_VIEWPORTS / HOME_SECTION_COVER_VIEWPORTS */
+  block-size: 255svh;
   inline-size: 100%;
   min-inline-size: 0;
 }
 
+/* Stacked cards: the sticky stage is a transparent frame; the card inside is opaque, arrives small and
+ * rounded, docks to full bleed, and later folds back (HomeSectionHold drives scale/rotateX/veil). */
 .home-section-hold-stage {
   position: sticky;
   inset-block-start: 0;
   block-size: 100svh;
   min-block-size: 100svh;
+}
+
+.home-section-hold-card {
+  position: relative;
+  block-size: 100%;
+  min-block-size: 100svh;
   overflow: clip;
+  isolation: isolate;
+  background: var(--paper, #faf7f0);
+  box-shadow: 0 -1.6rem 4rem rgb(20 14 8 / 0.28), 0 0 0 1px rgb(20 14 8 / 0.05);
+  transform-origin: 50% 40%;
+}
+
+.home-section-hold-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 60;
+  background: #1c1510;
+  opacity: var(--cover-veil, 0);
+  pointer-events: none;
 }
 
 .home-section-hold-content {
@@ -1428,7 +1451,8 @@
 }
 
 /* Static notes keep the shared 230svh track but let their full content define the stage. */
-.home-section-hold[data-home-section-static="true"] .home-section-hold-stage {
+.home-section-hold[data-home-section-static="true"] .home-section-hold-stage,
+.home-section-hold[data-home-section-static="true"] .home-section-hold-card {
   block-size: auto;
   min-block-size: 100svh;
   overflow: visible;
@@ -1453,6 +1477,14 @@
   .home-section-hold-content {
     min-block-size: 0;
     transform: none !important;
+  }
+
+  .home-section-hold-card::after {
+    display: none;
+  }
+
+  .home-section-hold-card {
+    box-shadow: none;
   }
 }
 

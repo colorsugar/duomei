@@ -13,6 +13,8 @@
     "test:home-hold": "node --experimental-strip-types --test src/lib/homeSectionHold.test.ts src/lib/headerNavBreakpoint.test.ts src/lib/guyuCarousel.test.ts src/lib/xunjiEdition.test.ts && node --test server/xunjiProxy.test.mjs",
     "test:music": "node --experimental-strip-types --test src/lib/neteasePlaylist.test.ts src/lib/neteaseLyrics.test.ts && node --test server/neteaseMusic.test.mjs",
     "test:guyu": "node --experimental-strip-types --test server/guyuSession.test.ts server/guyuRateLimit.test.ts server/guyuBooks.test.ts server/guyuEdgeOneAdapter.test.mjs src/lib/guyuTouchSequence.test.ts src/lib/guyuPageSpread.test.ts deploy/guyu-edgeone/tests/auth-core.test.js",
+    "test:relay": "node --experimental-strip-types --test server/zaobaoProxy.test.mjs server/xunjiProxy.test.mjs server/shareMeta.test.mjs src/lib/xunjiEdition.test.ts",
+    "test": "npm run test:home-hold && npm run test:music && npm run test:guyu && npm run test:relay",
     "lint": "tsc -b",
     "preview": "vite preview",
     "release:check": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/verify-release.ps1",
@@ -22,6 +24,7 @@
   },
   "dependencies": {
     "@edgeone/pages-blob": "0.0.16",
+    "@fontsource-variable/fraunces": "^5.3.0",
     "@supabase/supabase-js": "^2.110.0",
     "@vitejs/plugin-react": "^5.0.0",
     "embla-carousel-autoplay": "^8.6.0",

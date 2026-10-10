@@ -37,13 +37,13 @@ test("waits five seconds after the settled cover is fully visible", () => {
 });
 
 test("keeps the fragment transition slow and fallbacks safely after CSS", () => {
-  assert.equal(GUYU_FRAGMENT_SCATTER_MS, 760);
-  assert.equal(GUYU_FRAGMENT_MAX_DELAY_MS, 144);
-  assert.equal(GUYU_FRAGMENT_HOLD_MS, 260);
-  assert.equal(GUYU_FRAGMENT_ASSEMBLE_MS, 1_180);
-  assert.equal(GUYU_FRAGMENT_VISUAL_MS, 2_488);
+  assert.equal(GUYU_FRAGMENT_SCATTER_MS, 300);
+  assert.equal(GUYU_FRAGMENT_MAX_DELAY_MS, 96);
+  assert.equal(GUYU_FRAGMENT_HOLD_MS, 70);
+  assert.equal(GUYU_FRAGMENT_ASSEMBLE_MS, 440);
+  assert.equal(GUYU_FRAGMENT_VISUAL_MS, 1_002);
   assert.ok(GUYU_SCATTER_FALLBACK_MS > GUYU_FRAGMENT_SCATTER_MS + GUYU_FRAGMENT_MAX_DELAY_MS);
   assert.ok(GUYU_ASSEMBLE_FALLBACK_MS > GUYU_FRAGMENT_ASSEMBLE_MS + GUYU_FRAGMENT_MAX_DELAY_MS);
-  assert.equal(GUYU_SETTLE_MS, 1_600);
+  assert.equal(GUYU_SETTLE_MS, 320);
   assert.ok(GUYU_SETTLE_FALLBACK_MS > GUYU_SETTLE_MS);
 });

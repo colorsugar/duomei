@@ -8,20 +8,24 @@ test("keeps short content in place and adds the dwell runway", () => {
     viewportHeight: 1000,
     contentHeight: 600,
     innerHeight: 1000,
-    dwell: 1300,
+    dwell: 550,
     travel: 0,
-    trackHeight: 2300,
+    cover: 1000,
+    trackHeight: 2550,
+    holdShare: 1,
   });
 });
 
-test("keeps the same 230svh rhythm when long content needs more travel", () => {
+test("holds for the dwell, scrolls the overflow, then stays pinned for a viewport while the next section covers it", () => {
   assert.deepEqual(getHomeSectionHoldLayout({ viewportHeight: 800, contentHeight: 2200, innerHeight: 760 }), {
     viewportHeight: 800,
     contentHeight: 2200,
     innerHeight: 760,
-    dwell: 988,
+    dwell: 418,
     travel: 1440,
-    trackHeight: 1748,
+    cover: 760,
+    trackHeight: 3378,
+    holdShare: 418 / (418 + 1440),
   });
 });
 
@@ -32,6 +36,8 @@ test("normalizes zero, negative, and non-finite measurements", () => {
     innerHeight: 0,
     dwell: 0,
     travel: 0,
+    cover: 0,
     trackHeight: 0,
+    holdShare: 1,
   });
 });

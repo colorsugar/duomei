@@ -1,4 +1,4 @@
-// /guyu — public shelf. Serves the SPA shell with route-specific share metadata.
+// /yunyou-map — serves the SPA shell with route-specific share metadata (server/shareMeta.mjs).
 import { handleShellRequest } from "../server/shareMeta.mjs";
 
 export function onRequest(context) {

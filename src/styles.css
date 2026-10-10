@@ -9950,6 +9950,36 @@ body.duomei-modal-open {
   transition: opacity 360ms ease-out;
 }
 
+/* Pointer sheen: a soft highlight that slides across the cover as the card tilts. */
+.duomei-note-card .note-card-cover::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  border-radius: inherit;
+  background: radial-gradient(
+    42% 42% at var(--note-glare-x, 50%) var(--note-glare-y, 50%),
+    rgba(255, 252, 240, 0.58),
+    rgba(255, 250, 230, 0.2) 46%,
+    transparent 100%
+  );
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 360ms ease-out;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .duomei-note-card.is-tilting .note-card-cover::after {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .duomei-note-card .note-card-cover::after {
+    display: none;
+  }
+}
+
 .duomei-note-card .note-card-cover .duomei-motion-image-media,
 .duomei-note-card .note-card-cover img,
 .duomei-note-card .note-cover-placeholder {
@@ -11067,7 +11097,8 @@ html.duomei-modal-open .duomei-companion {
 
 .illustration-layer .duomei-hero-cover-motion img {
   backface-visibility: hidden;
-  transform: translateZ(0);
+  /* Pointer parallax (HeroIllustration.tsx writes the variables; 0 on touch / reduced motion). */
+  transform: translate3d(var(--hero-parallax-x, 0px), var(--hero-parallax-y, 0px), 0);
 }
 
 .illustration-layer .bounce-name.duomei-hero-title-motion {

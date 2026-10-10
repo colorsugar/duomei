@@ -7,14 +7,10 @@ import { NoteBlockRenderer } from "../components/NoteBlockRenderer";
 import { NoteCover } from "../components/NoteCover";
 import { useDuomeiEdit } from "../components/DuomeiEditProvider";
 import { bodyToBlocks, createBlockId, deleteNote, getAllNotes, getNoteBySlug, getPublishedNotes, upsertNote } from "../lib/noteStore";
-import {
-  deleteCloudNote,
-  fetchAllCloudNotes,
-  fetchCloudNoteBySlug,
-  fetchPublishedNotes,
-  saveCloudNote,
-  uploadNoteDataUrl,
-} from "../lib/supabaseNotes";
+import { fetchPublishedNoteBySlug, fetchPublishedNotes } from "../lib/publicNotes";
+
+// Drafts, saves, uploads and deletes need the signed-in supabase-js client; readers never load it.
+const cloudNotes = () => import("../lib/supabaseNotes");
 import type { DuomeiNote, NoteContentBlock } from "../lib/noteTypes";
 import { runSharedJourneyTransition, sharedJourneyNames } from "../motion";
 
@@ -121,8 +117,8 @@ export function DuomeiNoteDetailPage() {
       }
       try {
         const [nextNote, nextNavigation] = await Promise.all([
-          fetchCloudNoteBySlug(slug, isLoggedIn),
-          isLoggedIn ? fetchAllCloudNotes() : fetchPublishedNotes(),
+          isLoggedIn ? cloudNotes().then((cloud) => cloud.fetchCloudNoteBySlug(slug, true)) : fetchPublishedNoteBySlug(slug),
+          isLoggedIn ? cloudNotes().then((cloud) => cloud.fetchAllCloudNotes()) : fetchPublishedNotes(),
         ]);
         if (!active) return;
         setCloudNote(nextNote);
@@ -339,7 +335,7 @@ export function DuomeiNoteDetailPage() {
     const uploadedBlocks: NoteContentBlock[] = [];
     for (const block of nextBlocks) {
       if (block.type === "image" && block.src.startsWith("data:image/")) {
-        const src = await withTimeout(uploadNoteDataUrl(block.src, "article"), 60000, "图片上传超时，请重新选择较小图片。");
+        const src = await withTimeout(cloudNotes().then((cloud) => cloud.uploadNoteDataUrl(block.src, "article")), 60000, "图片上传超时，请重新选择较小图片。");
         uploadedCount += 1;
         onProgress?.(uploadedCount, pendingImages.length);
         uploadedBlocks.push({ ...block, src });
@@ -352,7 +348,7 @@ export function DuomeiNoteDetailPage() {
 
   const uploadCoverIfNeeded = async (coverImageUrl: string) => {
     if (!coverImageUrl?.startsWith("data:image/")) return coverImageUrl;
-    return withTimeout(uploadNoteDataUrl(coverImageUrl, "covers"), 60000, "封面上传超时，请重新选择较小图片。");
+    return withTimeout(cloudNotes().then((cloud) => cloud.uploadNoteDataUrl(coverImageUrl, "covers")), 60000, "封面上传超时，请重新选择较小图片。");
   };
 
   const persistNote = async (status?: DuomeiNote["status"]) => {
@@ -390,7 +386,7 @@ export function DuomeiNoteDetailPage() {
       upsertNote(nextNote);
       setDraft(nextNote);
       setSyncMessage("database", "正在同步数据库...");
-      const saved = await withTimeout(saveCloudNote(nextNote), 45000, "数据库同步超时，请检查登录状态或网络。");
+      const saved = await withTimeout(cloudNotes().then((cloud) => cloud.saveCloudNote(nextNote)), 45000, "数据库同步超时，请检查登录状态或网络。");
       upsertNote(saved);
       setCloudNote(saved);
       setDraft(saved);
@@ -439,7 +435,7 @@ export function DuomeiNoteDetailPage() {
   const deleteCurrent = async () => {
     if (!note) return;
     try {
-      await deleteCloudNote(note.id);
+      await (await cloudNotes()).deleteCloudNote(note.id);
       deleteNote(note.id);
       navigate("/");
     } catch (error) {

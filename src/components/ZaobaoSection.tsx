@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { HomeSectionHold } from "./HomeSectionHold";
 import "./ZaobaoSection.css";
+import { SectionTitle } from "./SectionTitle";
 
 export const ZAOBAO_ROUTE = "/zaobao";
 export const ZAOBAO_ARCHIVE_ROUTE = "/zaobao/archive";
@@ -10,7 +11,7 @@ export const ZAOBAO_ARCHIVE_URL = `${ZAOBAO_URL}/archive/`;
 // Same-origin edge relay (edge-functions/zaobao-src*) — the visitor's browser never
 // has to reach vercel.app, which is unreachable from mainland China.
 export const ZAOBAO_PROXY_ROUTE = "/zaobao-src";
-const ZAOBAO_FALLBACK_COVER = "/images/note-default-covers/duomei-default-cover-02.png";
+const ZAOBAO_FALLBACK_COVER = "/images/note-default-covers/duomei-default-cover-02.webp";
 
 type ZaobaoDaily = {
   headline: string;
@@ -63,15 +64,16 @@ export function ZaobaoSection() {
 
   return (
     <HomeSectionHold id="zaobao" className="zaobao-section" ariaLabelledBy="zaobao-title">
-      <header className="zaobao-heading">
-        <h2 id="zaobao-title">早报</h2>
-        <div className="zaobao-heading-copy">
-          <p>每日一纸，给多美的今早。</p>
-          <Link className="zaobao-heading-archive" to={ZAOBAO_ARCHIVE_ROUTE}>
-            往期早报 →
-          </Link>
-        </div>
-      </header>
+      <SectionTitle
+        id="zaobao-title"
+        accent="zaobao"
+        index="01"
+        kicker="Morning Edition"
+        title="早报"
+        lede="每日一纸，把世界摊在早餐桌上。"
+        link={{ to: ZAOBAO_ARCHIVE_ROUTE, label: "往期早报" }}
+        className="zaobao-heading"
+      />
 
       <Link className="zaobao-card" to={ZAOBAO_ROUTE} aria-label={daily ? `打开今日早报：${daily.headline}` : "打开今日早报"}>
         <span className="zaobao-card-cover" aria-hidden="true">
@@ -103,7 +105,7 @@ export function ZaobaoSection() {
         </span>
         <span className="zaobao-card-kicker" aria-hidden="true">Daily · 今日</span>
         <strong className="zaobao-card-title">今日早报</strong>
-        <span className="zaobao-card-copy">国际、国内、科技、AI、兴趣、日常，加上堺与大阪本周能去的展和祭。每天早上更新一版。</span>
+        <span className="zaobao-card-copy">国际、科技、AI 和日常小事，加上堺与大阪本周值得去的展和祭。每天早上，换一版。</span>
         <span className="zaobao-card-cta">翻开今早 →</span>
       </Link>
     </HomeSectionHold>

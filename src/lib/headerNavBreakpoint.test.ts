@@ -117,7 +117,7 @@ test("keeps iOS header touch activation synchronous and deterministic", () => {
 });
 
 test("uses a real local morning illustration for the Zaobao magazine cover", () => {
-  assert.match(zaobaoSource, /duomei-default-cover-02\.png/);
+  assert.match(zaobaoSource, /duomei-default-cover-02\.webp/);
   assert.match(zaobaoSource, /className="zaobao-cover-image"/);
   assert.match(zaobaoCss, /\.zaobao-cover-image\s*\{/);
   assert.equal(
@@ -152,7 +152,7 @@ test("keeps the Zaobao archive inside duomei.site and reuses the same reader", (
   assert.match(appSource, /<Route path="\/zaobao\/archive" element=\{<DuomeiZaobaoArchivePage \/>\} \/>/);
   assert.match(appSource, /<Route path="\/zaobao\/:date" element=\{<DuomeiZaobaoPage \/>\} \/>/);
   assert.match(zaobaoSource, /ZAOBAO_ARCHIVE_ROUTE = "\/zaobao\/archive"/);
-  assert.match(zaobaoSource, /<Link className="zaobao-heading-archive" to=\{ZAOBAO_ARCHIVE_ROUTE\}/);
+  assert.match(zaobaoSource, /link=\{\{ to: ZAOBAO_ARCHIVE_ROUTE, label: "往期早报" \}\}/);
   assert.match(zaobaoPageSource, /ZAOBAO_DATE_PATTERN = \/\^\\d\{4\}-\\d\{2\}-\\d\{2\}\$\//);
   assert.match(zaobaoPageSource, /return date \? `\$\{ZAOBAO_URL\}\/\$\{date\}\/` : ZAOBAO_URL/);
   assert.match(zaobaoPageSource, /if \(invalidDate\) \{\s*return <Navigate to=\{ZAOBAO_ARCHIVE_ROUTE\} replace \/>/);
@@ -198,7 +198,7 @@ test("mounts 寻迹 the same way as 早报: same-origin proxy, reader, archive, 
   assert.match(xunjiSource, /XUNJI_PROXY_ROUTE = "\/xunji-src"/);
   assert.match(xunjiSource, /fetch\(XUNJI_PROXY_ROUTE, \{ signal \}\)/);
   assert.match(xunjiSource, /id="xunji"/);
-  assert.match(xunjiSource, />寻迹</);
+  assert.match(xunjiSource, /title="寻迹"/);
   assert.match(xunjiSource, /<Link className="xunji-home-card" to=\{XUNJI_ROUTE\}/);
   assert.match(xunjiPageSource, /XUNJI_DATE_PATTERN = \/\^\\d\{4\}-\\d\{2\}-\\d\{2\}\$\//);
   assert.match(xunjiPageSource, /return date \? `\$\{XUNJI_PROXY_ROUTE\}\/\$\{date\}\/` : XUNJI_PROXY_ROUTE/);
@@ -257,8 +257,8 @@ test("uses Skill naming and a three-column desktop directory", () => {
   assert.match(homePageSource, /\{ id: "skills", label: "Skill" \}/);
   assert.match(skillsSource, />Skill<|>Skill 目录</);
   assert.match(skillsSource, /查看 Skill 页/);
-  assert.match(skillsPageSource, /document\.title = "Skill \| 多美小记"/);
-  assert.match(skillsPageSource, /<h1>Skill<\/h1>/);
+  assert.match(skillsPageSource, /document\.title = "Skill \| DUOMEI"/);
+  assert.match(skillsPageSource, /<h1 className="duomei-page-title">Skill<\/h1>/);
   assert.match(skillsCss, /@media \(min-width: 60rem\)[\s\S]*grid-template-columns:\s*repeat\(3, minmax\(0, 1fr\)\)/);
 });
 
@@ -278,10 +278,10 @@ test("keeps the full NetEase playlist native, fixed at the top of every scene, a
   // Resting orb starts hidden beside the header brand, or beside an immersive scene's top-left back control, and opens below that bar.
   assert.match(musicPlayerSource, /const \[minimized, setMinimized\] = useState\(true\)/);
   assert.match(musicPlayerSource, /querySelector<HTMLElement>\("\.duomei-header \.duomei-brand"\)/);
-  assert.match(musicPlayerSource, /DOCK_ANCHOR_SELECTOR = "\.zaobao-reader-bar \.zaobao-page-back, \.dalu-map-nav > a:first-child"/);
+  assert.match(musicPlayerSource, /DOCK_ANCHOR_SELECTOR = "\.zaobao-reader-bar \.zaobao-page-back, \.dalu-map-nav > a:first-child, \.guyu-reader-back"/);
   assert.match(musicPlayerSource, /orb: \{ x: a\.left \+ a\.width \+ DOCK_GAP, y: a\.top \+ \(a\.height - orbSize\) \/ 2 \}/);
   assert.match(musicPlayerSource, /open: \{ x: a\.left, y: barBottom \+ DOCK_DROP \}/);
-  assert.match(musicPlayerSource, /\}, \[compactContext, pathname\]\);/);
+  assert.match(musicPlayerSource, /\}, \[compactContext, dockTick, pathname\]\);/);
   assert.match(musicPlayerCss, /\.duomei-music-player\.is-immersive:not\(\.is-docked\)\s*\{[\s\S]*?inset-block-start:\s*max\(var\(--space-md\), env\(safe-area-inset-top, 0px\)\)/);
   assert.match(musicPlayerSource, /createPortal\([\s\S]*document\.body,\s*\);/);
   assert.match(musicPlayerCss, /\.duomei-music-player\.is-docked\.is-minimized\s*\{[\s\S]*?z-index:\s*5201/);
@@ -289,7 +289,7 @@ test("keeps the full NetEase playlist native, fixed at the top of every scene, a
   assert.match(musicPlayerSource, /scheduleAutoMinimize/);
   assert.match(musicPlayerSource, /className="duomei-music-orb"/);
   assert.match(musicPlayerSource, /event\.pointerType !== "mouse"/);
-  assert.match(musicPlayerSource, /window\.setTimeout\(revealCompactPlayer, 180\)/);
+  assert.match(musicPlayerSource, /hoverRevealTimerRef\.current = window\.setTimeout\(\(\) => \{[\s\S]*?revealCompactPlayer\(\);/);
   assert.match(musicPlayerSource, /addEventListener\("wheel", containWheel, \{ passive: false \}\)/);
   assert.match(musicPlayerSource, /event\.preventDefault\(\)[\s\S]*event\.stopPropagation\(\)/);
   assert.match(musicPlayerSource, /event\.ctrlKey/);
@@ -305,7 +305,7 @@ test("keeps the full NetEase playlist native, fixed at the top of every scene, a
   assert.match(musicPlayerSource, /className="duomei-music-cover"[\s\S]*aria-label="打开歌单"/);
   assert.match(musicPlayerSource, /onPointerDown=\{seekFromPointer\}/);
   assert.match(musicPlayerSource, /fetchNeteaseLyrics/);
-  assert.match(musicPlayerSource, /className="duomei-music-lyrics-toggle"/);
+  assert.match(musicPlayerSource, /className="duomei-music-label"/);
   assert.match(neteaseClientSource, /fetch\(NETEASE_PLAYLIST_URL, \{ signal, credentials: "same-origin" \}\)/);
   assert.match(neteaseServerSource, /NETEASE_PLAYLIST_ID = 316500315/);
   assert.match(neteaseServerSource, /NETEASE_MAX_TRACKS = 3000/);
@@ -331,10 +331,10 @@ test("keeps the homepage Guyu preview slow, misted, manual, and linked only afte
     guyuPreviewSource.indexOf("const beginAssembly"),
   );
   assert.match(guyuCarouselSource, /GUYU_CAROUSEL_DWELL_MS = 5_000/);
-  assert.match(guyuCarouselSource, /GUYU_FRAGMENT_SCATTER_MS = 760/);
-  assert.match(guyuCarouselSource, /GUYU_FRAGMENT_ASSEMBLE_MS = 1_180/);
-  assert.match(guyuCarouselSource, /GUYU_SETTLE_MS = 1_600/);
-  assert.match(guyuCarouselSource, /GUYU_SETTLE_FALLBACK_MS = 2_400/);
+  assert.match(guyuCarouselSource, /GUYU_FRAGMENT_SCATTER_MS = 300/);
+  assert.match(guyuCarouselSource, /GUYU_FRAGMENT_ASSEMBLE_MS = 440/);
+  assert.match(guyuCarouselSource, /GUYU_SETTLE_MS = 320/);
+  assert.match(guyuCarouselSource, /GUYU_SETTLE_FALLBACK_MS = 720/);
   assert.match(guyuPreviewSource, /data-phase=\{transitionPhase\}/);
   assert.match(guyuPreviewSource, /guyu-home-fragment/);
   assert.match(guyuPreviewSource, /onPointerMove=\{handlePointerMove\}/);
@@ -354,7 +354,7 @@ test("keeps the homepage Guyu preview slow, misted, manual, and linked only afte
   assert.doesNotMatch(guyuCss, /\.guyu-home-carousel\[data-phase="settle"\][^{}]*\.guyu-home-book-base\s*\{[^}]*opacity:\s*0/);
   assert.match(guyuPreviewSource, /const linkedBook = transitionPhase === "settle"/);
   assert.match(guyuPreviewSource, /to=\{\`\/guyu\/\$\{linkedBook\.id\}\`\}/);
-  assert.match(guyuPreviewSource, /className="guyu-home-shelf-all"\s+to="\/guyu"/);
+  assert.match(guyuPreviewSource, /link=\{\{ to: "\/guyu", label: "查看所有" \}\}/);
   assert.match(guyuPreviewSource, /翻开\$\{getBookLabels\(linkedBook\)\.section\}《\$\{linkedBook\.title\}》/);
   assert.match(guyuCss, /\.guyu-library-back,\s*\.guyu-home-shelf-all\s*\{[^}]*min-block-size:\s*var\(--size-hit\)/);
 });
@@ -388,9 +388,8 @@ test("keeps the mobile footer compact with all nine shortcuts on one row", () =>
   assert.match(footerSource, /\{ label: "寻迹", to: "\/xunji" \}/);
   assert.match(footerSource, /\{ label: "云游", to: "\/#yunyou" \}/);
   assert.ok(footerSource.indexOf('{ label: "寻迹", to: "/xunji" }') < footerSource.indexOf('{ label: "云游", to: "/#yunyou" }'));
-  assert.match(backToTopSource, /document\.querySelector\("\.duomei-footer"\)/);
-  assert.match(backToTopSource, /document\.querySelector\("\.yunyou-card"\)/);
-  assert.match(backToTopSource, /visible && !footerVisible && !yunyouVisible/);
+  assert.match(backToTopSource, /createPortal/);
+  assert.match(backToTopSource, /window.scrollY > 520/);
 });
 
 test("ships Yunyou as a same-origin, vendored, accessible 3D map", () => {

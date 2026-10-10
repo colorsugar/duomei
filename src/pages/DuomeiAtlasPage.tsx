@@ -15,7 +15,7 @@ export function DuomeiAtlasPage() {
   const [immersive, setImmersive] = useState(false);
   useEffect(() => {
     const previousTitle = document.title;
-    document.title = "大陆 · 七国战略图志 | 多美小记";
+    document.title = "大陆 · 七国战略图志 | DUOMEI";
     const onMessage = (event: MessageEvent) => {
       if (event.origin !== window.location.origin || event.source !== frame.current?.contentWindow) return;
       if (event.data?.type === "atlas-open-artbook") navigate("/guyu/hanhai-realms-artbook");

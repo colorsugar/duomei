@@ -76,7 +76,7 @@ export const timePoetryWorks: TimePoetryWork[] = [
     ],
     meta: ["原创", "2026.07", "DUOMEI JOURNAL"],
     images: [
-      { label: "傍晚的路", src: "/images/note-default-covers/duomei-default-cover-03.png", position: "50% 50%" },
+      { label: "傍晚的路", src: "/images/note-default-covers/duomei-default-cover-03.webp", position: "50% 50%" },
     ],
   },
   {
@@ -94,7 +94,7 @@ export const timePoetryWorks: TimePoetryWork[] = [
     ],
     meta: ["原创", "2026.07", "DUOMEI JOURNAL"],
     images: [
-      { label: "在路上的日子", src: "/images/note-default-covers/duomei-default-cover-01.png", position: "50% 44%" },
+      { label: "在路上的日子", src: "/images/note-default-covers/duomei-default-cover-01.webp", position: "50% 44%" },
     ],
   },
   {

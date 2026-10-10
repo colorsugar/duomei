@@ -6,7 +6,7 @@ const FOOTER_SETTINGS_KEY = "duomei-footer-settings";
 export const FOOTER_SETTINGS_UPDATED_EVENT = "duomei-footer-settings-updated";
 
 export const defaultFooterSettings: FooterSettings = {
-  copyrightText: "© 多美2026 记录旅途，遇见生活，也遇见自己。",
+  copyrightText: "© 2026 多美 · 记录旅途，遇见生活，也遇见自己。",
 };
 
 function canUseStorage() {

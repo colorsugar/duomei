@@ -36,47 +36,12 @@ export function KineticHeroStage() {
   const compact = useCompactMotion();
   const reduceMotion = useReducedMotion();
 
-  const echoX = useTransform(progress, [0, 0.16, 0.62, 1], compact ? ["-22vw", "-4vw", "12vw", "42vw"] : ["-28vw", "-6vw", "18vw", "48vw"]);
-  const echoY = useTransform(progress, [0, 0.4, 1], compact ? ["18svh", "2svh", "-34svh"] : ["28svh", "-2svh", "-46svh"]);
-  const echoScale = useTransform(progress, [0, 0.45, 1], compact ? [0.72, 1.08, 1.82] : [0.66, 1.16, 2.28]);
-  const echoRotate = useTransform(progress, [0, 1], compact ? [-12, 12] : [-14, 18]);
-  const echoOpacity = useTransform(progress, [0, 0.12, 0.7, 1], [0, 0.13, 0.09, 0]);
-
-  const sashX = useTransform(progress, [0, 0.18, 0.72, 1], ["-92%", "-22%", "24%", "108%"]);
-  const sashY = useTransform(progress, [0, 1], compact ? ["56svh", "12svh"] : ["64svh", "8svh"]);
-  const sashRotate = useTransform(progress, [0, 0.5, 1], compact ? [-10, 4, 15] : [-12, 5, 18]);
-  const sashOpacity = useTransform(progress, [0, 0.08, 0.82, 1], [0, 0.96, 0.82, 0]);
-
-  const foldX = useTransform(progress, [0, 1], ["-36%", "92%"]);
-  const foldScale = useTransform(progress, [0, 0.6, 1], [0.72, 1.15, 1.48]);
-  const foldRotate = useTransform(progress, [0, 1], compact ? [-20, 22] : [-24, 28]);
-  const foldOpacity = useTransform(progress, [0, 0.14, 0.76, 1], [0, 0.7, 0.46, 0]);
-
-  return (
-    <>
-      {!reduceMotion ? (
-        <div className="duomei-kinetic-hero-canvas" aria-hidden="true">
-          <motion.div
-            className="duomei-kinetic-echo"
-            style={{ x: echoX, y: echoY, scale: echoScale, rotate: echoRotate, opacity: echoOpacity }}
-          >
-            DUOMEI
-          </motion.div>
-          <motion.div
-            className="duomei-kinetic-sash"
-            style={{ x: sashX, y: sashY, rotate: sashRotate, opacity: sashOpacity }}
-          >
-            <span>多美小记 · DUOMEI JOURNAL · 多美小记 · DUOMEI JOURNAL</span>
-          </motion.div>
-          <motion.div
-            className="duomei-kinetic-paper-fold"
-            style={{ x: foldX, scale: foldScale, rotate: foldRotate, opacity: foldOpacity }}
-          />
-        </div>
-      ) : null}
-      <IllustrationLayer />
-    </>
-  );
+  // The hero itself carries the transition now (sphere burst, letters flying, motes); the first
+  // section card simply stacks over it like every other card.
+  void progress;
+  void compact;
+  void reduceMotion;
+  return <IllustrationLayer />;
 }
 
 type KineticNotesStageProps = {
@@ -120,7 +85,7 @@ export function KineticNotesStage({ children, noteCount, staticContent = false }
       {!reduceMotion ? (
         <div className="duomei-kinetic-notes-canvas" aria-hidden="true">
           <motion.div className="duomei-kinetic-notes-title" style={{ x: titleX, y: titleY, rotate: titleRotate, opacity: titleOpacity }}>
-            多美的小记
+            小记
           </motion.div>
           <motion.div className="duomei-kinetic-notes-rail" style={{ x: railX, rotate: railRotate, opacity: railOpacity }} />
           <motion.div className="duomei-kinetic-notes-count" style={{ y: countY, rotate: countRotate }}>

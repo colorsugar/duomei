@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { HomeSectionHold } from "./HomeSectionHold";
+import { SectionTitle } from "./SectionTitle";
 
 const stickerPacks = [
   {
@@ -67,10 +68,15 @@ export function StickerPackSection() {
 
   return (
     <HomeSectionHold id="color" className="sticker-pack-section" ariaLabelledBy="sticker-pack-title">
-      <header className="sticker-pack-heading">
-        <h2 id="sticker-pack-title">颜色</h2>
-        <p>两套微信表情，留住多美不同的样子。</p>
-      </header>
+      <SectionTitle
+        id="sticker-pack-title"
+        accent="color"
+        index="08"
+        kicker="Color · 多美的表情"
+        title="颜色"
+        lede="两套微信表情，多美的两副面孔。"
+        className="sticker-pack-heading"
+      />
 
       <ol className="sticker-pack-list" aria-label="微信表情包">
         {stickerPacks.map((pack) => (

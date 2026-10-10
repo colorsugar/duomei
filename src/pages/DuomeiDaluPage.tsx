@@ -15,12 +15,12 @@ export function DuomeiDaluPage() {
   const copyLabel = { idle: "复制全文", copied: "已复制全文 ✓", failed: "复制失败，请下载" }[copyState];
   useEffect(() => {
     const previous = document.title;
-    document.title = "大陆 · 奇幻大陆 | 多美小记";
+    document.title = "大陆 · 奇幻大陆 | DUOMEI";
     return () => { document.title = previous; };
   }, []);
   return <main className="dalu-page">
     <Link className="dalu-back" to="/#dalu">← 返回多美 · 大陆</Link>
-    <header className="dalu-heading"><span className="dalu-eyebrow">DUOMEI / 奇幻大陆</span><h1>大陆</h1><p>山河决定路的方向，城市留下人的故事。<br />从七国走向烬月，把远行、宫堡与庄园放回各自的风土。</p></header>
+    <header className="dalu-heading"><span className="dalu-eyebrow">DUOMEI / 奇幻大陆</span><h1 className="duomei-page-title">大陆</h1><p>山河决定路的方向，城市留下人的故事。<br />从七国走向烬月，把远行、宫堡与庄园放回各自的风土。</p></header>
     <section className="dalu-map-section" aria-labelledby="dalu-map-title">
       <div className="dalu-section-heading"><h2 id="dalu-map-title">地图</h2><span>七国与烬月 · 宫堡庄园已收录</span></div>
       <Link to="/dalu/map" className="dalu-map-card">
