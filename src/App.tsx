@@ -28,6 +28,7 @@ const pageLoaders = {
   DuomeiYunyouPage: () => import("./pages/DuomeiYunyouPage"),
   DuomeiXiaoyuanPage: () => import("./pages/DuomeiXiaoyuanPage"),
   DuomeiJiangnanPage: () => import("./pages/DuomeiJiangnanPage"),
+  DuomeiHongloumengPage: () => import("./pages/DuomeiHongloumengPage"),
   DuomeiAtlasPage: () => import("./pages/DuomeiAtlasPage"),
   DuomeiChaojiMapPage: () => import("./pages/DuomeiChaojiMapPage"),
   DuomeiSkillsPage: () => import("./pages/DuomeiSkillsPage"),
@@ -102,6 +103,7 @@ const DuomeiXunjiArchivePage = lazy(() => import("./pages/DuomeiXunjiArchivePage
 const DuomeiYunyouPage = lazy(() => import("./pages/DuomeiYunyouPage").then((m) => ({ default: m.DuomeiYunyouPage })));
 const DuomeiXiaoyuanPage = lazy(() => import("./pages/DuomeiXiaoyuanPage").then((m) => ({ default: m.DuomeiXiaoyuanPage })));
 const DuomeiJiangnanPage = lazy(() => import("./pages/DuomeiJiangnanPage").then((m) => ({ default: m.DuomeiJiangnanPage })));
+const DuomeiHongloumengPage = lazy(() => import("./pages/DuomeiHongloumengPage").then((m) => ({ default: m.DuomeiHongloumengPage })));
 const DuomeiDaluPage = lazy(() => import("./pages/DuomeiDaluPage").then((m) => ({ default: m.DuomeiDaluPage })));
 const DuomeiAtlasPage = lazy(() => import("./pages/DuomeiAtlasPage").then((m) => ({ default: m.DuomeiAtlasPage })));
 const DuomeiChaojiPage = lazy(() => import("./pages/DuomeiChaojiPage").then((m) => ({ default: m.DuomeiChaojiPage })));
@@ -152,8 +154,9 @@ function AppRoutes() {
   const isXunji = location.pathname === "/xunji" || location.pathname.startsWith("/xunji/");
   const isYunyouMap = location.pathname === "/yunyou-map";
   const isXiaoyuan = location.pathname === "/xiaoyuan" || location.pathname === "/jiangnan";
+  const isHongloumeng = location.pathname === "/hongloumeng-ying" || location.pathname === "/hongloumeng-ying/";
   const isAtlasMap = location.pathname === "/atlas-v6" || location.pathname === "/dalu/map" || location.pathname === "/chaoji/map";
-  const bareChrome = isAdmin || isGuyuReader || isZaobao || isXunji || isYunyouMap || isAtlasMap || isXiaoyuan;
+  const bareChrome = isAdmin || isGuyuReader || isZaobao || isXunji || isYunyouMap || isAtlasMap || isXiaoyuan || isHongloumeng;
   useSmoothScroll(bareChrome || isTimePage);
   usePrefetchPages();
   useRouteSection(location.pathname);
@@ -181,6 +184,7 @@ function AppRoutes() {
         <Route path="/yunyou-map" element={<DuomeiYunyouPage />} />
         <Route path="/xiaoyuan" element={<DuomeiXiaoyuanPage />} />
         <Route path="/jiangnan" element={<DuomeiJiangnanPage />} />
+        <Route path="/hongloumeng-ying" element={<DuomeiHongloumengPage />} />
         <Route path="/dalu" element={<DuomeiDaluPage />} />
         <Route path="/dalu/map" element={<DuomeiAtlasPage />} />
         <Route path="/atlas-v6" element={<DuomeiAtlasPage />} />

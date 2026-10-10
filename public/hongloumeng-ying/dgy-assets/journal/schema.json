@@ -1,0 +1,6196 @@
+{
+ "版本": 1,
+ "说明": "遊記条目表（dgy/journal.js 读）。id 对应：人物 = codexData 人物 id；地点 = layout PLACES / MANSION_PLACES id（同 map-data.json）；物件 = yihongProps PROPS id（yh01–yh22）；画册 = ALBUMS id + \":\" + 幅序号；诗词 = poems.json 作品 id；回目 = 回数（字符串 \"1\"–\"120\"）。由 dgy-assets/journal/build-schema.mjs 生成，别手改。",
+ "生成": "2026-10-09",
+ "顺序": [
+  "person",
+  "place",
+  "prop",
+  "album",
+  "poem",
+  "hui"
+ ],
+ "页": {
+  "person": {
+   "kind": "person",
+   "名": "人物志",
+   "单位": "人",
+   "总": 38,
+   "来源": {
+    "文件": [
+     "dgy/codexData.js",
+     "dgy-assets/text/yihong.json",
+     "dgy-assets/codex/faces.json",
+     "dgy-assets/map/faces/"
+    ],
+    "字段": "CODEX.人物[id].{名,身份,住处,出处,外貌,外貌回目}；怡红院四人生平取 yihong.json 人物.{生平,原文,回目}；图 = album/人物 缩略 → codex/人物 + 脸框 → sprites/<id>-ping.webp",
+    "说明": "「人物 x / 18」按立绘十八人计；另有 25 幅画像（codex/人物）单独成组，各自计数；同一人在两组里时只解锁一次。"
+   },
+   "分组": [
+    {
+     "id": "p18",
+     "名": "立绘十八人",
+     "ids": [
+      "baoyu",
+      "daiyu",
+      "baochai",
+      "xiangyun",
+      "tanchun",
+      "yingchun",
+      "xichun",
+      "xifeng",
+      "liwan",
+      "miaoyu",
+      "yuanchun",
+      "qiaojie",
+      "jiazheng",
+      "jiamu",
+      "wangfuren",
+      "liulaolao",
+      "xiren",
+      "qingwen"
+     ]
+    },
+    {
+     "id": "p25",
+     "名": "画像二十五幅",
+     "ids": [
+      "beijingwang",
+      "jiahuan",
+      "jialan",
+      "jialian",
+      "jiamu",
+      "jiarong",
+      "jiashe",
+      "jiayucun",
+      "jiazhen",
+      "jiazheng",
+      "mingyan",
+      "pinger",
+      "qingwen",
+      "qinkeqing",
+      "sheyue",
+      "wangfuren",
+      "xiangling",
+      "xiaohong",
+      "xingfuren",
+      "xiren",
+      "xueyan",
+      "youshi",
+      "yuanyang",
+      "zhenshiyin",
+      "zijuan"
+     ]
+    }
+   ],
+   "条目": {
+    "baoyu": {
+     "n": "贾宝玉",
+     "t": "賈寶玉",
+     "line": "贾家的宝贝疙瘩，衔玉而生，不爱读书爱厮混。",
+     "place": "yihong",
+     "hui": [
+      37,
+      3,
+      23,
+      32,
+      33
+     ],
+     "quote": {
+      "文": "當不起，當不起，倒是隨你們混叫去罷。",
+      "回": 37
+     },
+     "img": {
+      "thumb": "dgy-assets/album/人物/baoyu-thumb.webp",
+      "full": "dgy-assets/album/人物/baoyu.webp",
+      "avatar": "dgy-assets/map/faces/baoyu.webp"
+     },
+     "in": [
+      "p18"
+     ]
+    },
+    "daiyu": {
+     "n": "林黛玉",
+     "t": "林黛玉",
+     "line": "林如海与贾敏的独女，贾母的外孙女。",
+     "place": "xiaoxiang",
+     "hui": [
+      3,
+      5,
+      23,
+      27,
+      34
+     ],
+     "quote": {
+      "文": "廝見畢歸坐，細看形容，與眾各別：兩灣似蹙非蹙罥煙眉，一雙似泣非泣含露目。",
+      "回": 3
+     },
+     "img": {
+      "thumb": "dgy-assets/album/人物/daiyu-thumb.webp",
+      "full": "dgy-assets/album/人物/daiyu.webp",
+      "avatar": "dgy-assets/map/faces/daiyu.webp"
+     },
+     "in": [
+      "p18"
+     ]
+    },
+    "baochai": {
+     "n": "薛宝钗",
+     "t": "薛寶釵",
+     "line": "薛姨妈的女儿，薛蟠的妹妹；王夫人的外甥女。",
+     "place": "hengwu",
+     "hui": [
+      4,
+      5,
+      8,
+      27,
+      28
+     ],
+     "quote": {
+      "文": "寶玉掀簾一邁步進去，",
+      "回": 8
+     },
+     "img": {
+      "thumb": "dgy-assets/album/人物/baochai-thumb.webp",
+      "full": "dgy-assets/album/人物/baochai.webp",
+      "avatar": "dgy-assets/map/faces/baochai.webp"
+     },
+     "in": [
+      "p18"
+     ]
+    },
+    "xiangyun": {
+     "n": "史湘云",
+     "t": "史湘雲",
+     "line": "史家的姑娘，常来贾母处住；襁褓中父母双亡。",
+     "place": "hengwu",
+     "hui": [
+      5,
+      20,
+      31,
+      49,
+      50
+     ],
+     "quote": {
+      "文": "一時史湘雲來了，",
+      "回": 49
+     },
+     "img": {
+      "thumb": "dgy-assets/album/人物/xiangyun-thumb.webp",
+      "full": "dgy-assets/album/人物/xiangyun.webp",
+      "avatar": "dgy-assets/map/faces/xiangyun.webp"
+     },
+     "in": [
+      "p18"
+     ]
+    },
+    "tanchun": {
+     "n": "贾探春",
+     "t": "賈探春",
+     "line": "贾政之女，庶出，贾环同母的姐姐。",
+     "place": "qiushuang",
+     "hui": [
+      3,
+      5,
+      27,
+      37,
+      55
+     ],
+     "quote": {
+      "文": "第二個削肩細腰，長挑身材，鴨蛋臉面，俊眼修眉，顧盼神飛，文彩精華，見之忘俗。",
+      "回": 3
+     },
+     "img": {
+      "thumb": "dgy-assets/album/人物/tanchun-thumb.webp",
+      "full": "dgy-assets/album/人物/tanchun.webp",
+      "avatar": "dgy-assets/map/faces/tanchun.webp"
+     },
+     "in": [
+      "p18"
+     ]
+    },
+    "yingchun": {
+     "n": "贾迎春",
+     "t": "賈迎春",
+     "line": "贾赦之女，前妻所出。",
+     "place": "ziling",
+     "hui": [
+      3,
+      5,
+      22,
+      40,
+      73
+     ],
+     "quote": {
+      "文": "第一個肌膚微豐，合中身材，腮凝新荔，鼻膩鵝脂，溫柔沉默，觀之可親。",
+      "回": 3
+     },
+     "img": {
+      "thumb": "dgy-assets/album/人物/yingchun-thumb.webp",
+      "full": "dgy-assets/album/人物/yingchun.webp",
+      "avatar": "dgy-assets/map/faces/yingchun.webp"
+     },
+     "in": [
+      "p18"
+     ]
+    },
+    "xichun": {
+     "n": "贾惜春",
+     "t": "賈惜春",
+     "line": "宁国府贾珍的胞妹，自小跟在贾母这边。",
+     "place": "nuanxiang",
+     "hui": [
+      3,
+      5,
+      22,
+      40,
+      50
+     ],
+     "quote": {
+      "文": "第三個身量未足，形容尚小。",
+      "回": 3
+     },
+     "img": {
+      "thumb": "dgy-assets/album/人物/xichun-thumb.webp",
+      "full": "dgy-assets/album/人物/xichun.webp",
+      "avatar": "dgy-assets/map/faces/xichun.webp"
+     },
+     "in": [
+      "p18"
+     ]
+    },
+    "xifeng": {
+     "n": "王熙凤",
+     "t": "王熙鳳",
+     "line": "贾琏之妻，王夫人的内侄女，荣国府管家。",
+     "hui": [
+      3,
+      5,
+      6,
+      12,
+      13
+     ],
+     "quote": {
+      "文": "這個人打扮與眾姑娘不同，",
+      "回": 3
+     },
+     "img": {
+      "thumb": "dgy-assets/album/人物/xifeng-thumb.webp",
+      "full": "dgy-assets/album/人物/xifeng.webp",
+      "avatar": "dgy-assets/map/faces/xifeng.webp"
+     },
+     "in": [
+      "p18"
+     ]
+    },
+    "liwan": {
+     "n": "李纨",
+     "t": "李紈",
+     "line": "贾珠的遗孀，贾兰的母亲；父亲李守中做过国子监祭酒。",
+     "place": "daoxiang",
+     "hui": [
+      4,
+      5,
+      18,
+      23,
+      33
+     ],
+     "quote": {
+      "文": "因此這李紈雖青春喪偶，",
+      "回": 4
+     },
+     "img": {
+      "thumb": "dgy-assets/album/人物/liwan-thumb.webp",
+      "full": "dgy-assets/album/人物/liwan.webp",
+      "avatar": "dgy-assets/map/faces/liwan.webp"
+     },
+     "in": [
+      "p18"
+     ]
+    },
+    "miaoyu": {
+     "n": "妙玉",
+     "t": "妙玉",
+     "line": "苏州人，带发修行，第18回请进园住栊翠庵。",
+     "place": "longcui",
+     "hui": [
+      5,
+      18,
+      41,
+      50,
+      63
+     ],
+     "quote": {
+      "文": "只見妙玉頭帶妙常髻，",
+      "回": 109
+     },
+     "img": {
+      "thumb": "dgy-assets/album/人物/miaoyu-thumb.webp",
+      "full": "dgy-assets/album/人物/miaoyu.webp",
+      "avatar": "dgy-assets/map/faces/miaoyu.webp"
+     },
+     "in": [
+      "p18"
+     ]
+    },
+    "yuanchun": {
+     "n": "贾元春",
+     "t": "賈元春",
+     "line": "贾政与王夫人的长女，选入宫中。",
+     "place": "xingqin",
+     "hui": [
+      5,
+      16,
+      18,
+      22,
+      83
+     ],
+     "quote": {
+      "文": "賈妃滿眼垂淚，",
+      "回": 18
+     },
+     "img": {
+      "thumb": "dgy-assets/album/人物/yuanchun-thumb.webp",
+      "full": "dgy-assets/album/人物/yuanchun.webp"
+     },
+     "in": [
+      "p18"
+     ]
+    },
+    "qiaojie": {
+     "n": "巧姐",
+     "t": "巧姐",
+     "line": "凤姐的女儿，生在七月初七，刘姥姥给她取名「巧哥兒」。",
+     "place": null,
+     "hui": [
+      42
+     ],
+     "quote": {
+      "文": "可巧是七月初七日",
+      "回": 42
+     },
+     "img": {
+      "full": "dgy-assets/sprites/qiaojie-ping.webp",
+      "thumb": "dgy-assets/sprites/qiaojie-ping.webp"
+     },
+     "in": [
+      "p18"
+     ]
+    },
+    "jiazheng": {
+     "n": "贾政",
+     "t": "賈政",
+     "line": "贾代善次子。第2回：皇上额外赐了主事，后升员外郎。元春、宝玉、探春、贾环的父亲。",
+     "hui": [
+      2,
+      3,
+      17,
+      18,
+      22
+     ],
+     "img": {
+      "full": "dgy-assets/codex/人物/jiazheng.webp",
+      "thumb": "dgy-assets/codex/人物/jiazheng.webp",
+      "face": [
+       0.2608,
+       0.1032,
+       0.0482,
+       0.0856
+      ]
+     },
+     "in": [
+      "p18",
+      "p25"
+     ]
+    },
+    "jiamu": {
+     "n": "贾母",
+     "t": "賈母",
+     "line": "荣国公贾代善之妻，金陵世勋史侯家的小姐。贾赦、贾政的母亲，黛玉的外祖母。",
+     "hui": [
+      2,
+      3,
+      18,
+      22,
+      40
+     ],
+     "quote": {
+      "文": "只見兩個人攙著一位鬢髮如銀的老母迎上來，黛玉便知是他外祖母。",
+      "回": 3
+     },
+     "img": {
+      "full": "dgy-assets/codex/人物/jiamu.webp",
+      "thumb": "dgy-assets/codex/人物/jiamu.webp",
+      "face": [
+       0.2781,
+       0.1664,
+       0.0742,
+       0.1319
+      ],
+      "avatar": "dgy-assets/map/faces/jiamu.webp"
+     },
+     "in": [
+      "p18",
+      "p25"
+     ]
+    },
+    "wangfuren": {
+     "n": "王夫人",
+     "t": "王夫人",
+     "line": "贾政之妻，元春、宝玉的母亲，探春、贾环的嫡母。薛姨妈是她的妹妹，凤姐是她的内侄女。",
+     "hui": [
+      3,
+      23,
+      30,
+      33,
+      74
+     ],
+     "img": {
+      "full": "dgy-assets/codex/人物/wangfuren.webp",
+      "thumb": "dgy-assets/codex/人物/wangfuren.webp",
+      "face": [
+       0.4875,
+       0.0969,
+       0.0668,
+       0.1187
+      ],
+      "avatar": "dgy-assets/map/faces/wangfuren.webp"
+     },
+     "in": [
+      "p18",
+      "p25"
+     ]
+    },
+    "liulaolao": {
+     "n": "刘姥姥",
+     "t": "劉姥姥",
+     "line": "乡下老寡妇，王家旧日连宗的狗儿的岳母。",
+     "hui": [
+      6,
+      39,
+      40,
+      41,
+      113
+     ],
+     "quote": {
+      "文": "這劉姥姥乃是個積年的老寡婦，膝下又無兒女，只靠兩畝薄田度日。",
+      "回": 6
+     },
+     "img": {
+      "thumb": "dgy-assets/album/人物/liulaolao-thumb.webp",
+      "full": "dgy-assets/album/人物/liulaolao.webp"
+     },
+     "in": [
+      "p18"
+     ]
+    },
+    "xiren": {
+     "n": "袭人",
+     "t": "袭人",
+     "line": "宝玉屋里管事的人，针线、茶饭、规矩都归她。",
+     "place": "yihong",
+     "hui": [
+      23,
+      3,
+      5,
+      19,
+      28
+     ],
+     "quote": {
+      "文": "花氣襲人知晝暖",
+      "回": 23
+     },
+     "img": {
+      "full": "dgy-assets/codex/人物/xiren.webp",
+      "thumb": "dgy-assets/codex/人物/xiren.webp",
+      "face": [
+       0.334,
+       0.1108,
+       0.0625,
+       0.1111
+      ]
+     },
+     "in": [
+      "p18",
+      "p25"
+     ]
+    },
+    "qingwen": {
+     "n": "晴雯",
+     "t": "晴雯",
+     "line": "针线最好，嘴也最快，连宝玉都敢呛。",
+     "place": "yihong",
+     "hui": [
+      31,
+      5,
+      20,
+      34,
+      52
+     ],
+     "quote": {
+      "文": "既這麼說，你就拿了扇子來我撕。我最喜歡撕的。",
+      "回": 31
+     },
+     "img": {
+      "full": "dgy-assets/codex/人物/qingwen.webp",
+      "thumb": "dgy-assets/codex/人物/qingwen.webp",
+      "face": [
+       0.3428,
+       0.1704,
+       0.0607,
+       0.1079
+      ]
+     },
+     "in": [
+      "p18",
+      "p25"
+     ]
+    },
+    "beijingwang": {
+     "n": "北静王",
+     "t": "北靜王",
+     "line": "北静郡王。第14回说四王里当日只有北静王功高，子孙仍袭王爵。",
+     "hui": [
+      14,
+      15,
+      16,
+      28,
+      45
+     ],
+     "quote": {
+      "文": "話說寶玉舉目見北靜王水溶頭上戴著潔白簪纓銀翅王帽，",
+      "回": 15
+     },
+     "img": {
+      "full": "dgy-assets/codex/人物/beijingwang.webp",
+      "thumb": "dgy-assets/codex/人物/beijingwang.webp",
+      "face": [
+       0.324,
+       0.1124,
+       0.0463,
+       0.0823
+      ]
+     },
+     "in": [
+      "p25"
+     ]
+    },
+    "jiahuan": {
+     "n": "贾环",
+     "t": "賈環",
+     "line": "贾政的庶子，赵姨娘所生；探春是他同母的姐姐。",
+     "hui": [
+      20,
+      23,
+      25,
+      33,
+      75
+     ],
+     "quote": {
+      "文": "看看賈環，",
+      "回": 23
+     },
+     "img": {
+      "full": "dgy-assets/codex/人物/jiahuan.webp",
+      "thumb": "dgy-assets/codex/人物/jiahuan.webp",
+      "face": [
+       0.3372,
+       0.1194,
+       0.0562,
+       0.0999
+      ]
+     },
+     "in": [
+      "p25"
+     ]
+    },
+    "jialan": {
+     "n": "贾兰",
+     "t": "賈蘭",
+     "line": "贾珠与李纨的儿子。第4回：「今方五歲，已入學攻書。」",
+     "place": "daoxiang",
+     "hui": [
+      4,
+      26,
+      75,
+      119
+     ],
+     "img": {
+      "full": "dgy-assets/codex/人物/jialan.webp",
+      "thumb": "dgy-assets/codex/人物/jialan.webp",
+      "face": [
+       0.2711,
+       0.2135,
+       0.0554,
+       0.0985
+      ]
+     },
+     "in": [
+      "p25"
+     ]
+    },
+    "jialian": {
+     "n": "贾琏",
+     "t": "賈琏",
+     "line": "贾赦之子。第2回：二十来岁，捐了个同知，住在叔叔贾政家里帮着料理家务，娶的是王夫人的内侄女凤姐。",
+     "hui": [
+      2,
+      12,
+      16,
+      44,
+      75
+     ],
+     "img": {
+      "full": "dgy-assets/codex/人物/jialian.webp",
+      "thumb": "dgy-assets/codex/人物/jialian.webp",
+      "face": [
+       0.3765,
+       0.1204,
+       0.0555,
+       0.0987
+      ],
+      "avatar": "dgy-assets/map/faces/jialian.webp"
+     },
+     "in": [
+      "p25"
+     ]
+    },
+    "jiarong": {
+     "n": "贾蓉",
+     "t": "賈蓉",
+     "line": "贾珍之子，秦可卿的丈夫。第13回捐了龙禁尉。",
+     "hui": [
+      2,
+      6,
+      13,
+      75
+     ],
+     "quote": {
+      "文": "只聽一路靴子腳響，",
+      "回": 6
+     },
+     "img": {
+      "full": "dgy-assets/codex/人物/jiarong.webp",
+      "thumb": "dgy-assets/codex/人物/jiarong.webp",
+      "face": [
+       0.3148,
+       0.1635,
+       0.0483,
+       0.0859
+      ]
+     },
+     "in": [
+      "p25"
+     ]
+    },
+    "jiashe": {
+     "n": "贾赦",
+     "t": "賈赦",
+     "line": "贾母长子，袭一等将军。贾琏、迎春的父亲，迎春是他前妻所出。",
+     "hui": [
+      2,
+      3,
+      16,
+      46,
+      75
+     ],
+     "img": {
+      "full": "dgy-assets/codex/人物/jiashe.webp",
+      "thumb": "dgy-assets/codex/人物/jiashe.webp",
+      "face": [
+       0.3207,
+       0.1819,
+       0.0932,
+       0.1657
+      ]
+     },
+     "in": [
+      "p25"
+     ]
+    },
+    "jiayucun": {
+     "n": "贾雨村",
+     "t": "賈雨村",
+     "line": "落魄书生，寄居姑苏葫芦庙卖字为生；得甄士隐资助进京，中了进士。第2回在林如海家作西宾，教黛玉读书；第4回补授应天府。",
+     "hui": [
+      1,
+      2,
+      3,
+      4
+     ],
+     "quote": {
+      "文": "敝巾舊服，雖是貧窘，然生得腰圓背厚，面闊口方，更兼劍眉星眼，直鼻權腮。",
+      "回": 1
+     },
+     "img": {
+      "full": "dgy-assets/codex/人物/jiayucun.webp",
+      "thumb": "dgy-assets/codex/人物/jiayucun.webp",
+      "face": [
+       0.2365,
+       0.1002,
+       0.0559,
+       0.0994
+      ]
+     },
+     "in": [
+      "p25"
+     ]
+    },
+    "jiazhen": {
+     "n": "贾珍",
+     "t": "賈珍",
+     "line": "贾敬之子，袭了官。尤氏之夫，贾蓉之父，惜春的胞兄。",
+     "hui": [
+      2,
+      13,
+      14,
+      17,
+      63
+     ],
+     "img": {
+      "full": "dgy-assets/codex/人物/jiazhen.webp",
+      "thumb": "dgy-assets/codex/人物/jiazhen.webp",
+      "face": [
+       0.3192,
+       0.1095,
+       0.0648,
+       0.1151
+      ],
+      "avatar": "dgy-assets/map/faces/jiazhen.webp"
+     },
+     "in": [
+      "p25"
+     ]
+    },
+    "mingyan": {
+     "n": "茗烟",
+     "t": "茗煙",
+     "line": "宝玉的书童、小厮。第9回：「這茗煙乃是寶玉第一個得用的，且又年輕不諳世事」。",
+     "hui": [
+      9,
+      19,
+      24,
+      34
+     ],
+     "img": {
+      "full": "dgy-assets/codex/人物/mingyan.webp",
+      "thumb": "dgy-assets/codex/人物/mingyan.webp",
+      "face": [
+       0.2999,
+       0.1208,
+       0.0532,
+       0.0945
+      ]
+     },
+     "in": [
+      "p25"
+     ]
+    },
+    "pinger": {
+     "n": "平儿",
+     "t": "平兒",
+     "line": "凤姐自幼的丫头，陪嫁过来的四个里只剩她一个，收在贾琏屋里。",
+     "hui": [
+      6,
+      11,
+      44,
+      52,
+      74
+     ],
+     "quote": {
+      "文": "劉姥姥見平兒遍身綾羅，插金帶銀，花容玉貌的，便當是鳳姐兒了。",
+      "回": 6
+     },
+     "img": {
+      "full": "dgy-assets/codex/人物/pinger.webp",
+      "thumb": "dgy-assets/codex/人物/pinger.webp",
+      "face": [
+       0.2979,
+       0.1004,
+       0.062,
+       0.1103
+      ]
+     },
+     "in": [
+      "p25"
+     ]
+    },
+    "qinkeqing": {
+     "n": "秦可卿",
+     "t": "秦可卿",
+     "line": "营缮郎秦业从养生堂抱养的女儿，贾蓉之妻。第8回：「因素與賈家有些瓜葛，故結了親，許與賈蓉為妻。」",
+     "hui": [
+      5,
+      8,
+      11,
+      13
+     ],
+     "quote": {
+      "文": "賈母素知秦氏是個極妥當的人，",
+      "回": 5
+     },
+     "img": {
+      "full": "dgy-assets/codex/人物/qinkeqing.webp",
+      "thumb": "dgy-assets/codex/人物/qinkeqing.webp",
+      "face": [
+       0.3316,
+       0.1491,
+       0.0532,
+       0.0946
+      ],
+      "avatar": "dgy-assets/map/faces/qinkeqing.webp"
+     },
+     "in": [
+      "p25"
+     ]
+    },
+    "sheyue": {
+     "n": "麝月",
+     "t": "麝月",
+     "line": "稳稳当当的一个，从不抢话，也不争着出头。",
+     "place": "yihong",
+     "hui": [
+      63,
+      20,
+      52,
+      74,
+      78
+     ],
+     "quote": {
+      "文": "開到荼縻花事了。",
+      "回": 63
+     },
+     "img": {
+      "full": "dgy-assets/codex/人物/sheyue.webp",
+      "thumb": "dgy-assets/codex/人物/sheyue.webp",
+      "face": [
+       0.3243,
+       0.1216,
+       0.0761,
+       0.1353
+      ]
+     },
+     "in": [
+      "p25"
+     ]
+    },
+    "xiangling": {
+     "n": "香菱",
+     "t": "香菱",
+     "line": "甄士隐的女儿。五岁元宵被拐，被卖进薛家；第16回薛姨妈摆酒请客，正式给薛蟠作妾。",
+     "place": "hengwu",
+     "hui": [
+      1,
+      4,
+      5,
+      7,
+      16
+     ],
+     "quote": {
+      "文": "其模樣雖然出脫得齊整好些，然大概相貌，自是不改，熟人易認。",
+      "回": 4
+     },
+     "img": {
+      "full": "dgy-assets/codex/人物/xiangling.webp",
+      "thumb": "dgy-assets/codex/人物/xiangling.webp",
+      "face": [
+       0.3662,
+       0.1648,
+       0.0529,
+       0.094
+      ]
+     },
+     "in": [
+      "p25"
+     ]
+    },
+    "xiaohong": {
+     "n": "小红",
+     "t": "小紅",
+     "line": "荣国府世代旧仆的女儿，父母收管各处房田事务；第27回李纨说破她是管家林之孝之女。分到怡红院时十六岁。",
+     "place": "yihong",
+     "hui": [
+      24,
+      27,
+      28
+     ],
+     "quote": {
+      "文": "穿著幾件半新不舊的衣裳，",
+      "回": 24
+     },
+     "img": {
+      "full": "dgy-assets/codex/人物/xiaohong.webp",
+      "thumb": "dgy-assets/codex/人物/xiaohong.webp",
+      "face": [
+       0.2958,
+       0.1051,
+       0.0561,
+       0.0998
+      ]
+     },
+     "in": [
+      "p25"
+     ]
+    },
+    "xingfuren": {
+     "n": "邢夫人",
+     "t": "邢夫人",
+     "line": "贾赦之妻。迎春是贾赦前妻所出，邢夫人是她的继母。贾琏、凤姐称她太太，凤姐是她的儿媳。",
+     "hui": [
+      3,
+      46,
+      74,
+      75
+     ],
+     "img": {
+      "full": "dgy-assets/codex/人物/xingfuren.webp",
+      "thumb": "dgy-assets/codex/人物/xingfuren.webp",
+      "face": [
+       0.3486,
+       0.1123,
+       0.0645,
+       0.1147
+      ]
+     },
+     "in": [
+      "p25"
+     ]
+    },
+    "xueyan": {
+     "n": "雪雁",
+     "t": "雪雁",
+     "line": "黛玉从苏州带来的小丫头。第3回：「一個是十歲的小丫頭，亦是自幼隨身的，名喚作雪雁。」",
+     "place": "xiaoxiang",
+     "hui": [
+      3,
+      8,
+      97
+     ],
+     "img": {
+      "full": "dgy-assets/codex/人物/xueyan.webp",
+      "thumb": "dgy-assets/codex/人物/xueyan.webp",
+      "face": [
+       0.4707,
+       0.1402,
+       0.0571,
+       0.1015
+      ]
+     },
+     "in": [
+      "p25"
+     ]
+    },
+    "youshi": {
+     "n": "尤氏",
+     "t": "尤氏",
+     "line": "贾珍之妻，宁国府的女主人。贾蓉称她母亲。",
+     "hui": [
+      5,
+      11,
+      62,
+      63,
+      76
+     ],
+     "img": {
+      "full": "dgy-assets/codex/人物/youshi.webp",
+      "thumb": "dgy-assets/codex/人物/youshi.webp",
+      "face": [
+       0.3208,
+       0.1568,
+       0.0642,
+       0.114
+      ],
+      "avatar": "dgy-assets/map/faces/youshi.webp"
+     },
+     "in": [
+      "p25"
+     ]
+    },
+    "yuanyang": {
+     "n": "鸳鸯",
+     "t": "鸳鸯",
+     "line": "贾母身边最得用的丫头。第46回邢夫人说满府里「就只你是個尖兒」。",
+     "hui": [
+      24,
+      40,
+      46,
+      52
+     ],
+     "quote": {
+      "文": "只見他穿著半新的藕合色的綾襖，青緞掐牙背心，下面水綠裙子。",
+      "回": 46
+     },
+     "img": {
+      "full": "dgy-assets/codex/人物/yuanyang.webp",
+      "thumb": "dgy-assets/codex/人物/yuanyang.webp",
+      "face": [
+       0.3348,
+       0.0886,
+       0.0733,
+       0.1303
+      ]
+     },
+     "in": [
+      "p25"
+     ]
+    },
+    "zhenshiyin": {
+     "n": "甄士隐",
+     "t": "甄士隱",
+     "line": "姑苏阊门外十里街仁清巷葫芦庙旁的乡宦，妻子封氏。香菱的父亲。",
+     "hui": [
+      1
+     ],
+     "img": {
+      "full": "dgy-assets/codex/人物/zhenshiyin.webp",
+      "thumb": "dgy-assets/codex/人物/zhenshiyin.webp",
+      "face": [
+       0.3103,
+       0.1244,
+       0.0501,
+       0.0891
+      ]
+     },
+     "in": [
+      "p25"
+     ]
+    },
+    "zijuan": {
+     "n": "紫鹃",
+     "t": "紫鹃",
+     "line": "黛玉的贴身丫头，原是贾母房里的二等丫头。",
+     "place": "xiaoxiang",
+     "hui": [
+      3,
+      8,
+      57,
+      96,
+      97
+     ],
+     "img": {
+      "full": "dgy-assets/codex/人物/zijuan.webp",
+      "thumb": "dgy-assets/codex/人物/zijuan.webp",
+      "face": [
+       0.3261,
+       0.1648,
+       0.0729,
+       0.1295
+      ]
+     },
+     "in": [
+      "p25"
+     ]
+    }
+   },
+   "主分组": "p18"
+  },
+  "place": {
+   "kind": "place",
+   "名": "地点志",
+   "单位": "处",
+   "总": 42,
+   "来源": {
+    "文件": [
+     "dgy-assets/map/map-data.json",
+     "dgy/layout.js",
+     "dgy/codexData.js"
+    ],
+    "字段": "map-data.places[id].{名,名繁,匾,图标,区,说明,住户,同住}；codex 地点[id].{原文,匾联,出处,截图}",
+    "说明": "24 景（区=园）+ 贾府 18 处（区=府）共 42；截图约定路径 dgy-assets/codex/地点/<id>.webp（目前尚无文件，界面用匾额题字占位）。"
+   },
+   "分组": [
+    {
+     "id": "garden",
+     "名": "大观园二十四景",
+     "ids": [
+      "gate",
+      "cuizhang",
+      "qinfang",
+      "xiaoxiang",
+      "ziling",
+      "qiushuang",
+      "nuanxiang",
+      "daoxiang",
+      "luxue",
+      "ouxiang",
+      "aojing",
+      "tubi",
+      "jiayin",
+      "dicui",
+      "flowers",
+      "hongxiang",
+      "huaxu",
+      "hengwu",
+      "xingqin",
+      "qinfangzha",
+      "longcui",
+      "yihong",
+      "kitchen",
+      "backgate"
+     ]
+    },
+    {
+     "id": "mansion",
+     "名": "贾府",
+     "ids": [
+      "fu-rongmen",
+      "fu-xijiaomen",
+      "fu-rongxi",
+      "fu-erfang",
+      "fu-donglang",
+      "fu-jiamu",
+      "fu-chuihua",
+      "fu-fengjie",
+      "fu-lixiang",
+      "fu-tiren",
+      "fu-jiashe",
+      "fu-ningmen",
+      "fu-ancestral",
+      "fu-ningzheng",
+      "fu-youshi",
+      "fu-qinke",
+      "fu-tianxiang",
+      "fu-jie"
+     ]
+    }
+   ],
+   "条目": {
+    "gate": {
+     "n": "正门",
+     "t": "正門",
+     "区": "大观园",
+     "匾": "大觀園",
+     "图标": "gate",
+     "line": "正门五间，上面桶瓦泥鳅脊，门栏窗槅皆是细雕新鲜花样，并无朱粉涂饰",
+     "hui": [
+      17
+     ],
+     "quote": {
+      "文": "只見正門五間，",
+      "回": 17
+     },
+     "img": {},
+     "imgWant": "dgy-assets/codex/地点/gate.webp"
+    },
+    "cuizhang": {
+     "n": "翠嶂",
+     "t": "翠嶂",
+     "区": "大观园",
+     "匾": "曲徑通幽處",
+     "图标": "jiashan",
+     "line": "遂命开门，只见迎面一带翠嶂挡在前面……白石峻嶒，或如鬼怪，或如猛兽，纵横拱立，上面苔藓…",
+     "hui": [
+      17
+     ],
+     "quote": {
+      "文": "只見迎面一帶翠嶂擋在前面。",
+      "回": 17
+     },
+     "联": [
+      "曲徑通幽處"
+     ],
+     "img": {},
+     "imgWant": "dgy-assets/codex/地点/cuizhang.webp"
+    },
+    "qinfang": {
+     "n": "沁芳亭",
+     "t": "沁芳亭",
+     "区": "大观园",
+     "匾": "沁芳",
+     "图标": "ting",
+     "line": "再进数步，渐向北边，平坦宽豁……俯而视之，则清溪泻雪，石磴穿云，白石为栏，环抱池沿，石…",
+     "hui": [
+      17
+     ],
+     "quote": {
+      "文": "俯而視之，則清溪瀉雪，石磴穿雲，白石為欄，環抱池沿，石橋三港，獸面銜吐。",
+      "回": 17
+     },
+     "联": [
+      "沁芳",
+      "繞堤柳借三篙翠，隔岸花分一脈香。"
+     ],
+     "img": {},
+     "imgWant": "dgy-assets/codex/地点/qinfang.webp"
+    },
+    "xiaoxiang": {
+     "n": "潇湘馆",
+     "t": "瀟湘館",
+     "区": "大观园",
+     "匾": "瀟湘館",
+     "图标": "yuanmen",
+     "line": "出亭过池……一带粉垣，里面数楹修舍，有千百竿翠竹遮映",
+     "hui": [
+      17
+     ],
+     "quote": {
+      "文": "忽抬頭看見前面一帶粉垣，裡面數楹修舍，有千百竿翠竹遮映。",
+      "回": 17
+     },
+     "people": [
+      "daiyu",
+      "zijuan",
+      "xueyan"
+     ],
+     "联": [
+      "有鳳來儀",
+      "瀟湘館"
+     ],
+     "img": {},
+     "imgWant": "dgy-assets/codex/地点/xiaoxiang.webp"
+    },
+    "ziling": {
+     "n": "紫菱洲",
+     "t": "紫菱洲",
+     "区": "大观园",
+     "匾": "紫菱洲",
+     "图标": "louge",
+     "line": "迎春住缀锦楼",
+     "hui": [
+      23,
+      37,
+      40,
+      79
+     ],
+     "quote": {
+      "文": "薛寶釵住了蘅蕪苑，",
+      "回": 23
+     },
+     "people": [
+      "yingchun"
+     ],
+     "联": [
+      "紫菱洲"
+     ],
+     "img": {},
+     "imgWant": "dgy-assets/codex/地点/ziling.webp"
+    },
+    "qiushuang": {
+     "n": "秋爽斋",
+     "t": "秋爽齋",
+     "区": "大观园",
+     "匾": "秋爽齋",
+     "图标": "yuanmen",
+     "line": "探春素喜阔朗，这三间屋子并不曾隔断",
+     "hui": [
+      40
+     ],
+     "quote": {
+      "文": "探春素喜闊朗，這三間屋子並不曾隔斷。",
+      "回": 40
+     },
+     "people": [
+      "tanchun"
+     ],
+     "联": [
+      "煙霞閒骨格，泉石野生涯。"
+     ],
+     "img": {},
+     "imgWant": "dgy-assets/codex/地点/qiushuang.webp"
+    },
+    "nuanxiang": {
+     "n": "暖香坞",
+     "t": "暖香塢",
+     "区": "大观园",
+     "匾": "暖香塢",
+     "图标": "yuanmen",
+     "line": "过了藕香榭，穿入一条夹道，东西两边皆有过街门……向外的匾上凿着「穿云」，向里的凿着「度…",
+     "hui": [
+      23,
+      50
+     ],
+     "quote": {
+      "文": "薛寶釵住了蘅蕪苑，",
+      "回": 23
+     },
+     "people": [
+      "xichun"
+     ],
+     "联": [
+      "蓼風軒",
+      "暖香塢"
+     ],
+     "img": {},
+     "imgWant": "dgy-assets/codex/地点/nuanxiang.webp"
+    },
+    "daoxiang": {
+     "n": "稻香村",
+     "t": "稻香村",
+     "区": "大观园",
+     "匾": "稻香村",
+     "图标": "cunshe",
+     "line": "倏尔青山斜阻，转过山怀中，隐隐露出一带黄泥筑就矮墙，墙头皆用稻茎掩护",
+     "hui": [
+      17,
+      18
+     ],
+     "quote": {
+      "文": "隱隱露出一帶黃泥築就矮牆，牆頭皆用稻莖掩護。",
+      "回": 17
+     },
+     "people": [
+      "liwan",
+      "jialan"
+     ],
+     "联": [
+      "杏簾在望",
+      "稻香村"
+     ],
+     "img": {},
+     "imgWant": "dgy-assets/codex/地点/daoxiang.webp"
+    },
+    "luxue": {
+     "n": "芦雪广",
+     "t": "蘆雪广",
+     "区": "大观园",
+     "图标": "cunshe",
+     "line": "盖在傍山临水河滩之上，一带几间，茅檐土壁，槿篱竹牖，推窗便可垂钓，四面都是芦苇掩覆，一…",
+     "hui": [
+      49
+     ],
+     "quote": {
+      "文": "原來這蘆雪庵蓋在傍山臨水河灘之上，",
+      "回": 49
+     },
+     "img": {},
+     "imgWant": "dgy-assets/codex/地点/luxue.webp"
+    },
+    "ouxiang": {
+     "n": "藕香榭",
+     "t": "藕香榭",
+     "区": "大观园",
+     "匾": "藕香榭",
+     "图标": "shuixie",
+     "line": "原来这藕香榭盖在池中，四面有窗，左右有曲廊可通，亦是跨水接岸，后面又有曲折竹桥暗接",
+     "hui": [
+      38
+     ],
+     "quote": {
+      "文": "原來這藕香榭蓋在池中，",
+      "回": 38
+     },
+     "联": [
+      "藕香榭",
+      "芙蓉影破歸蘭槳，菱藕香深寫竹橋。"
+     ],
+     "img": {},
+     "imgWant": "dgy-assets/codex/地点/ouxiang.webp"
+    },
+    "aojing": {
+     "n": "凹晶溪馆",
+     "t": "凹晶溪館",
+     "区": "大观园",
+     "匾": "凹晶溪館",
+     "图标": "shuixie",
+     "line": "这山坡底下就是池沿，山坳里近水一个所在就是凹晶馆……只一转弯，就是池沿，沿上一带竹栏相…",
+     "hui": [
+      76
+     ],
+     "quote": {
+      "文": "只一轉彎，就是池沿，沿上一帶竹欄相接，直通著那邊藕香榭的路徑。",
+      "回": 76
+     },
+     "联": [
+      "凹晶溪館"
+     ],
+     "img": {},
+     "imgWant": "dgy-assets/codex/地点/aojing.webp"
+    },
+    "tubi": {
+     "n": "凸碧山庄",
+     "t": "凸碧山莊",
+     "区": "大观园",
+     "匾": "凸碧山莊",
+     "图标": "tingtang",
+     "line": "从下逶迤而上，不过百余步，至山之峰脊上，便是这座敞厅",
+     "hui": [
+      75
+     ],
+     "quote": {
+      "文": "至山之峰脊上，便是這座敞廳。",
+      "回": 75
+     },
+     "联": [
+      "凸碧山莊"
+     ],
+     "img": {},
+     "imgWant": "dgy-assets/codex/地点/tubi.webp"
+    },
+    "jiayin": {
+     "n": "嘉荫堂",
+     "t": "嘉蔭堂",
+     "区": "大观园",
+     "匾": "嘉蔭堂",
+     "图标": "tingtang",
+     "line": "嘉荫堂前月台上，焚着斗香，秉着风烛",
+     "hui": [
+      75
+     ],
+     "quote": {
+      "文": "嘉蔭堂前月台上，焚著斗香，秉著風燭，陳獻著瓜餅及各色果品。",
+      "回": 75
+     },
+     "联": [
+      "嘉蔭堂"
+     ],
+     "img": {},
+     "imgWant": "dgy-assets/codex/地点/jiayin.webp"
+    },
+    "dicui": {
+     "n": "滴翠亭",
+     "t": "滴翠亭",
+     "区": "大观园",
+     "匾": "滴翠亭",
+     "图标": "ting",
+     "line": "四面俱是游廊曲栏，盖造在池中水上，四面雕镂槅子糊着纸",
+     "hui": [
+      27
+     ],
+     "quote": {
+      "文": "原來這亭子四面俱是遊廊曲橋，蓋造在池中水上，四面雕鏤隔子糊著紙。",
+      "回": 27
+     },
+     "img": {},
+     "imgWant": "dgy-assets/codex/地点/dicui.webp"
+    },
+    "flowers": {
+     "n": "花圃",
+     "t": "花圃",
+     "区": "大观园",
+     "图标": "huapu",
+     "line": "转过山坡，穿花度柳，抚石依泉，过了荼蘼架，再入木香棚，越牡丹亭，度芍药圃，入蔷薇院，出…",
+     "hui": [
+      17
+     ],
+     "quote": {
+      "文": "轉過山坡，",
+      "回": 17
+     },
+     "img": {},
+     "imgWant": "dgy-assets/codex/地点/flowers.webp"
+    },
+    "hongxiang": {
+     "n": "红香圃",
+     "t": "紅香圃",
+     "区": "大观园",
+     "匾": "紅香圃",
+     "图标": "tingtang",
+     "line": "芍药栏中红香圃三间小敞厅",
+     "hui": [
+      62
+     ],
+     "quote": {
+      "文": "同到了芍藥欄中紅香圃三間小敞廳內。",
+      "回": 62
+     },
+     "联": [
+      "紅香圃"
+     ],
+     "img": {},
+     "imgWant": "dgy-assets/codex/地点/hongxiang.webp"
+    },
+    "huaxu": {
+     "n": "蓼汀花溆",
+     "t": "蓼汀花漵",
+     "区": "大观园",
+     "匾": "花漵",
+     "图标": "xi",
+     "line": "忽闻水声潺湲，泻出石洞，上则萝薜倒垂，下则落花浮荡",
+     "hui": [
+      17
+     ],
+     "quote": {
+      "文": "忽聞水聲潺湲，瀉出石洞，上則蘿薜倒垂，下則落花浮蕩。",
+      "回": 17
+     },
+     "联": [
+      "蓼汀花漵"
+     ],
+     "img": {},
+     "imgWant": "dgy-assets/codex/地点/huaxu.webp"
+    },
+    "hengwu": {
+     "n": "蘅芜苑",
+     "t": "蘅蕪苑",
+     "区": "大观园",
+     "匾": "蘅蕪苑",
+     "图标": "yuanmen",
+     "line": "一色水磨砖墙，清瓦花堵，那大主山所分之脉，皆穿墙而过",
+     "hui": [
+      17,
+      40,
+      49
+     ],
+     "quote": {
+      "文": "便見一所清涼瓦舍，一色水磨磚牆，清瓦花堵。",
+      "回": 17
+     },
+     "people": [
+      "baochai",
+      "xiangyun",
+      "xiangling"
+     ],
+     "联": [
+      "蘅芷清芬",
+      "蘅蕪苑"
+     ],
+     "img": {},
+     "imgWant": "dgy-assets/codex/地点/hengwu.webp"
+    },
+    "xingqin": {
+     "n": "省亲别墅",
+     "t": "省親別墅",
+     "区": "大观园",
+     "匾": "省親別墅",
+     "图标": "paifang",
+     "line": "舟临内岸，复弃舟上舆，便见琳宫绰约",
+     "hui": [
+      16,
+      18
+     ],
+     "quote": {
+      "文": "先令匠人拆寧府會芳園牆垣樓閣，直接入榮府東大院中。",
+      "回": 16
+     },
+     "联": [
+      "省親別墅",
+      "顧恩思義"
+     ],
+     "img": {},
+     "imgWant": "dgy-assets/codex/地点/xingqin.webp"
+    },
+    "qinfangzha": {
+     "n": "沁芳闸",
+     "t": "沁芳閘",
+     "区": "大观园",
+     "匾": "沁芳閘",
+     "图标": "zha",
+     "line": "至一大桥前，见水如晶帘一般奔入",
+     "hui": [
+      17,
+      23
+     ],
+     "quote": {
+      "文": "至一大橋前，見水如晶簾一般奔入。",
+      "回": 17
+     },
+     "联": [
+      "沁芳閘"
+     ],
+     "img": {},
+     "imgWant": "dgy-assets/codex/地点/qinfangzha.webp"
+    },
+    "longcui": {
+     "n": "栊翠庵",
+     "t": "櫳翠庵",
+     "区": "大观园",
+     "匾": "櫳翠庵",
+     "图标": "an",
+     "line": "闸以南「或山下得幽尼佛寺」",
+     "hui": [
+      17,
+      41,
+      49
+     ],
+     "people": [
+      "miaoyu"
+     ],
+     "联": [
+      "櫳翠庵"
+     ],
+     "img": {},
+     "imgWant": "dgy-assets/codex/地点/longcui.webp"
+    },
+    "yihong": {
+     "n": "怡红院",
+     "t": "怡紅院",
+     "区": "大观园",
+     "匾": "怡紅快綠",
+     "图标": "yuanmen",
+     "line": "粉墙环护，绿柳周垂",
+     "hui": [
+      17
+     ],
+     "quote": {
+      "文": "粉牆環護，綠柳周垂。",
+      "回": 17
+     },
+     "people": [
+      "baoyu",
+      "xiren",
+      "qingwen",
+      "sheyue",
+      "xiaohong"
+     ],
+     "联": [
+      "怡紅快綠",
+      "怡紅院"
+     ],
+     "img": {},
+     "imgWant": "dgy-assets/codex/地点/yihong.webp"
+    },
+    "kitchen": {
+     "n": "园中厨房",
+     "t": "園中廚房",
+     "区": "大观园",
+     "图标": "chufang",
+     "line": "后园门里头的五间大房子",
+     "hui": [
+      51
+     ],
+     "img": {},
+     "imgWant": "dgy-assets/codex/地点/kitchen.webp"
+    },
+    "backgate": {
+     "n": "后门",
+     "t": "後門",
+     "区": "大观园",
+     "图标": "gate",
+     "line": "",
+     "hui": [
+      51
+     ],
+     "img": {},
+     "imgWant": "dgy-assets/codex/地点/backgate.webp"
+    },
+    "fu-rongmen": {
+     "n": "荣府正门",
+     "t": "榮府正門",
+     "区": "贾府",
+     "图标": "gate",
+     "line": "「照樣也是三間大門，方是榮國府了",
+     "hui": [
+      3,
+      6
+     ],
+     "img": {},
+     "imgWant": "dgy-assets/codex/地点/fu-rongmen.webp"
+    },
+    "fu-xijiaomen": {
+     "n": "西角门",
+     "t": "西角門",
+     "区": "贾府",
+     "图标": "yuanmen",
+     "line": "黛玉的轿子从这里进府：「那轎夫抬進去，走了一射之地，將轉彎時，便歇下退出去了」",
+     "hui": [
+      3
+     ],
+     "img": {},
+     "imgWant": "dgy-assets/codex/地点/fu-xijiaomen.webp"
+    },
+    "fu-rongxi": {
+     "n": "荣禧堂",
+     "t": "榮禧堂",
+     "区": "贾府",
+     "图标": "tingtang",
+     "line": "荣府正堂：「上面五間大正房，兩邊廂房鹿頂耳房鑽山，四通八達，軒昂壯麗」，堂上「赤金九龍…",
+     "hui": [
+      3
+     ],
+     "img": {},
+     "imgWant": "dgy-assets/codex/地点/fu-rongxi.webp"
+    },
+    "fu-erfang": {
+     "n": "东耳房",
+     "t": "東耳房",
+     "区": "贾府",
+     "图标": "tingtang",
+     "line": "「原來王夫人時常居坐宴息，亦不在這正室，只在這正室東邊的三間耳房內」",
+     "hui": [
+      3
+     ],
+     "people": [
+      "wangfuren"
+     ],
+     "img": {},
+     "imgWant": "dgy-assets/codex/地点/fu-erfang.webp"
+    },
+    "fu-donglang": {
+     "n": "东廊三间",
+     "t": "東廊三間",
+     "区": "贾府",
+     "图标": "tingtang",
+     "line": "王夫人在这里见黛玉：「靠東壁面西設著半舊的青緞靠背引枕",
+     "hui": [
+      3
+     ],
+     "img": {},
+     "imgWant": "dgy-assets/codex/地点/fu-donglang.webp"
+    },
+    "fu-jiamu": {
+     "n": "贾母上房",
+     "t": "賈母上房",
+     "区": "贾府",
+     "图标": "tingtang",
+     "line": "「正面五間上房，皆雕梁畫棟，兩邊穿山遊廊廂房，掛著各色鸚鵡，畫眉等鳥雀」",
+     "hui": [
+      3
+     ],
+     "people": [
+      "jiamu",
+      "yuanyang"
+     ],
+     "img": {},
+     "imgWant": "dgy-assets/codex/地点/fu-jiamu.webp"
+    },
+    "fu-chuihua": {
+     "n": "贾母院垂花门",
+     "t": "賈母院垂花門",
+     "区": "贾府",
+     "图标": "yuanmen",
+     "line": "「進了垂花門，兩邊是抄手遊廊，當中是穿堂，當地放著一個紫檀架子大理石的大插屏」",
+     "hui": [
+      3
+     ],
+     "img": {},
+     "imgWant": "dgy-assets/codex/地点/fu-chuihua.webp"
+    },
+    "fu-fengjie": {
+     "n": "凤姐院",
+     "t": "鳳姐院",
+     "区": "贾府",
+     "图标": "tingtang",
+     "line": "「北邊立著一個粉油大影壁，後有一半大門，小小一所房室」",
+     "hui": [
+      3,
+      6
+     ],
+     "people": [
+      "xifeng",
+      "jialian",
+      "pinger"
+     ],
+     "img": {},
+     "imgWant": "dgy-assets/codex/地点/fu-fengjie.webp"
+    },
+    "fu-lixiang": {
+     "n": "梨香院",
+     "t": "梨香院",
+     "区": "贾府",
+     "图标": "xitai",
+     "line": "「小小巧巧，約有十餘間房屋，前廳後舍俱全",
+     "hui": [
+      4
+     ],
+     "people": [
+      "baochai",
+      "xueyima"
+     ],
+     "img": {},
+     "imgWant": "dgy-assets/codex/地点/fu-lixiang.webp"
+    },
+    "fu-tiren": {
+     "n": "体仁沐德",
+     "t": "體仁沐德",
+     "区": "贾府",
+     "图标": "tingtang",
+     "line": "元春省亲更衣的院子：「上面有一匾燈，寫著『體仁沐德』四字」",
+     "hui": [
+      18
+     ],
+     "img": {},
+     "imgWant": "dgy-assets/codex/地点/fu-tiren.webp"
+    },
+    "fu-jiashe": {
+     "n": "贾赦院",
+     "t": "賈赦院",
+     "区": "贾府",
+     "图标": "tingtang",
+     "line": "「必是榮府中花園隔斷過來的……悉皆小巧別致，不似方纔那邊軒峻壯麗」",
+     "hui": [
+      3
+     ],
+     "img": {},
+     "imgWant": "dgy-assets/codex/地点/fu-jiashe.webp"
+    },
+    "fu-ningmen": {
+     "n": "宁府正门",
+     "t": "寧府正門",
+     "区": "贾府",
+     "图标": "gate",
+     "line": "「街北蹲著兩個大石獅子，三間獸頭大門……正門之上有一匾，匾上大書『敕造寧國府』五個大字」",
+     "hui": [
+      3
+     ],
+     "img": {},
+     "imgWant": "dgy-assets/codex/地点/fu-ningmen.webp"
+    },
+    "fu-ancestral": {
+     "n": "贾氏宗祠",
+     "t": "賈氏宗祠",
+     "区": "贾府",
+     "图标": "tingtang",
+     "line": "「寧府西邊另一個院子，黑油柵欄內五間大門，上懸一塊匾，寫著是『賈氏宗祠』四個字」",
+     "hui": [
+      53
+     ],
+     "img": {},
+     "imgWant": "dgy-assets/codex/地点/fu-ancestral.webp"
+    },
+    "fu-ningzheng": {
+     "n": "宁府正堂",
+     "t": "寧府正堂",
+     "区": "贾府",
+     "图标": "tingtang",
+     "line": "「五間大廳，三間抱廈，內外廊檐，階上階下兩丹墀」",
+     "hui": [
+      53
+     ],
+     "img": {},
+     "imgWant": "dgy-assets/codex/地点/fu-ningzheng.webp"
+    },
+    "fu-youshi": {
+     "n": "尤氏上房",
+     "t": "尤氏上房",
+     "区": "贾府",
+     "图标": "tingtang",
+     "line": "除夕「尤氏上房早已襲地舖滿紅氈」",
+     "hui": [
+      53
+     ],
+     "people": [
+      "jiazhen",
+      "youshi"
+     ],
+     "img": {},
+     "imgWant": "dgy-assets/codex/地点/fu-youshi.webp"
+    },
+    "fu-qinke": {
+     "n": "秦可卿房",
+     "t": "秦可卿房",
+     "区": "贾府",
+     "图标": "tingtang",
+     "line": "「有唐伯虎畫的《海棠春睡圖》，兩邊有宋學士秦太虛寫的一副對聯」",
+     "hui": [
+      5
+     ],
+     "people": [
+      "qinkeqing"
+     ],
+     "img": {},
+     "imgWant": "dgy-assets/codex/地点/fu-qinke.webp"
+    },
+    "fu-tianxiang": {
+     "n": "天香楼",
+     "t": "天香樓",
+     "区": "贾府",
+     "图标": "louge",
+     "line": "凤姐「款步提衣上了樓，見尤氏已在樓梯口等著呢」",
+     "hui": [
+      11,
+      75
+     ],
+     "img": {},
+     "imgWant": "dgy-assets/codex/地点/fu-tianxiang.webp"
+    },
+    "fu-jie": {
+     "n": "宁荣街",
+     "t": "寧榮街",
+     "区": "贾府",
+     "line": "刘姥姥「找至寧榮街」",
+     "hui": [
+      6
+     ],
+     "img": {},
+     "imgWant": "dgy-assets/codex/地点/fu-jie.webp"
+    }
+   }
+  },
+  "prop": {
+   "kind": "prop",
+   "名": "物件志",
+   "单位": "件",
+   "总": 22,
+   "来源": {
+    "文件": [
+     "dgy-assets/text/yihong.json",
+     "dgy/yihongProps.js"
+    ],
+    "字段": "yihong.json 物件[id].{名,一句,二句,原文,回目,推断}；id 同 yihongProps PROPS（yh01–yh22）",
+    "说明": "先放怡红院 22 件；以后别院加件只需往这里补条目。"
+   },
+   "分组": [
+    {
+     "id": "yihong",
+     "名": "怡红院",
+     "ids": [
+      "yh01",
+      "yh02",
+      "yh03",
+      "yh04",
+      "yh05",
+      "yh06",
+      "yh07",
+      "yh08",
+      "yh09",
+      "yh10",
+      "yh11",
+      "yh12",
+      "yh13",
+      "yh14",
+      "yh15",
+      "yh16",
+      "yh17",
+      "yh18",
+      "yh19",
+      "yh20",
+      "yh21",
+      "yh22"
+     ]
+    }
+   ],
+   "条目": {
+    "yh01": {
+     "n": "填漆床",
+     "t": "填漆牀",
+     "line": "小小一张填漆床，大红销金撒花的帐子垂着，红得晃眼。贾芸头一回进来那天，宝玉就倚在这床上看书，见人来才把书一扔。",
+     "place": "yihong",
+     "推断": false,
+     "hui": [
+      26
+     ],
+     "img": {},
+     "quote": {
+      "文": "只見小小一張填漆床上，懸著大紅銷金撒花帳子。",
+      "回": 26
+     }
+    },
+    "yh02": {
+     "n": "穿衣镜",
+     "t": "穿衣鏡",
+     "line": "一面落地大玻璃镜，嵌在紫檀板壁里，推一下能开，后头是暗门。刘姥姥醉醺醺撞见镜子里的老太太，还以为是亲家母。",
+     "place": "yihong",
+     "推断": false,
+     "hui": [
+      41
+     ],
+     "img": {},
+     "quote": {
+      "文": "只見他親家母也從外面迎了進來。",
+      "回": 41
+     }
+    },
+    "yh03": {
+     "n": "书案",
+     "t": "書案",
+     "line": "花梨书案靠着北墙，案头收拾得干干净净，像刚有人起身。想来宝玉写字念书就在这儿。",
+     "place": "yihong",
+     "推断": true,
+     "hui": [],
+     "img": {}
+    },
+    "yh04": {
+     "n": "笔砚",
+     "t": "筆砚",
+     "line": "一方砚，一只青花笔筒，几支湘竹笔，摆得整整齐齐。槅子里原有一格专安笔砚，案头这套想来是拿出来用的。",
+     "place": "yihong",
+     "推断": false,
+     "hui": [
+      17
+     ],
+     "img": {},
+     "quote": {
+      "文": "或安置筆硯處",
+      "回": 17
+     }
+    },
+    "yh05": {
+     "n": "书函",
+     "t": "書函",
+     "line": "六函书，翻开不是经史，是宝玉自己写的诗。想看哪首点哪首。",
+     "place": "yihong",
+     "推断": false,
+     "hui": [
+      17
+     ],
+     "img": {},
+     "quote": {
+      "文": "或有貯書處",
+      "回": 17
+     }
+    },
+    "yh06": {
+     "n": "卷轴",
+     "t": "卷軸",
+     "line": "一卷没题款的画，想来是哪回诗社留下的。",
+     "place": "yihong",
+     "推断": true,
+     "hui": [],
+     "img": {}
+    },
+    "yh07": {
+     "n": "八仙桌",
+     "t": "八仙桌",
+     "line": "明间正中一张紫檀八仙桌，四四方方，稳稳当当。想来待客吃茶都在这儿。",
+     "place": "yihong",
+     "推断": true,
+     "hui": [],
+     "img": {}
+    },
+    "yh08": {
+     "n": "圈椅",
+     "t": "圈椅",
+     "line": "八仙桌东西各摆一把圈椅，扶手圆润，想必坐着很稳。夜宴那晚，袭人她们端了椅子，在炕沿下陪着。",
+     "place": "yihong",
+     "推断": false,
+     "hui": [
+      63
+     ],
+     "img": {},
+     "quote": {
+      "文": "襲人等都端了椅子在炕沿下一陪。",
+      "回": 63
+     }
+    },
+    "yh09": {
+     "n": "茶具",
+     "t": "茶具",
+     "line": "四只白瓷盖碗围着一把茶壶，摆得像随时待客。宝玉屋里常喊茶，想来壶是不让空着的。",
+     "place": "yihong",
+     "推断": true,
+     "hui": [],
+     "img": {}
+    },
+    "yh10": {
+     "n": "古琴",
+     "t": "古琴",
+     "line": "琴嵌在墙槽里，跟墙一样平，不细看以为是画。听一段？",
+     "place": "yihong",
+     "推断": false,
+     "hui": [
+      17
+     ],
+     "img": {},
+     "quote": {
+      "文": "諸如琴，劍，懸瓶，桌屏之類，雖懸於壁，卻都是與壁相平的。",
+      "回": 17
+     }
+    },
+    "yh11": {
+     "n": "花几与瓶",
+     "t": "花幾與瓶",
+     "line": "紫檀花几上立一只白釉瓶，插着一枝海棠。槅子里本有专供瓶花的格，花几想来是后添的。",
+     "place": "yihong",
+     "推断": false,
+     "hui": [
+      17
+     ],
+     "img": {},
+     "quote": {
+      "文": "或供花設瓶",
+      "回": 17
+     }
+    },
+    "yh12": {
+     "n": "梅瓶",
+     "t": "梅瓶",
+     "line": "条几上立着一只青花梅瓶，口小肩圆，蓝得安静。墙槽里嵌的是悬瓶，这只想来是摆着看的。",
+     "place": "yihong",
+     "推断": true,
+     "hui": [],
+     "img": {}
+    },
+    "yh13": {
+     "n": "香鼎",
+     "t": "香鼎",
+     "line": "一只小铜香鼎，罩着镂空罩子，烟丝细得几乎看不见。刘姥姥醉卧那天，袭人悄悄往鼎里添了三四把百合香，怕宝玉知道。",
+     "place": "yihong",
+     "推断": false,
+     "hui": [
+      41
+     ],
+     "img": {},
+     "quote": {
+      "文": "忙將鼎內貯了三四把百合香，仍用罩子罩上。",
+      "回": 41
+     }
+    },
+    "yh14": {
+     "n": "盆景",
+     "t": "盆景",
+     "line": "青花六角盆里一株小松，立在东北角的高几上。槅格里原有安放盆景的地方，这盆想来是搬下来的。",
+     "place": "yihong",
+     "推断": false,
+     "hui": [
+      17
+     ],
+     "img": {},
+     "quote": {
+      "文": "安放盆景處",
+      "回": 17
+     }
+    },
+    "yh15": {
+     "n": "挂画",
+     "t": "掛畫",
+     "line": "一幅美人画得太像真人，刘姥姥进门就跟她打招呼，一头撞在板壁上。",
+     "place": "yihong",
+     "推断": false,
+     "hui": [
+      41
+     ],
+     "img": {},
+     "quote": {
+      "文": "原來是一幅畫兒。",
+      "回": 41
+     }
+    },
+    "yh16": {
+     "n": "烛台",
+     "t": "燭臺",
+     "line": "明间左右各立一座铜烛台，红烛一点，满屋暖黄。夜里屋里的灯，原文只写移灯、剔灯，烛台是想来的。",
+     "place": "yihong",
+     "推断": true,
+     "hui": [],
+     "img": {}
+    },
+    "yh17": {
+     "n": "碧纱厨",
+     "t": "碧紗廚",
+     "line": "一道糊着绿纱的隔扇，掀帘进去，才看见里头那张小床。贾政一行在这几重纱厨锦槅里转昏了头，还得贾珍领着出去。",
+     "place": "yihong",
+     "推断": false,
+     "hui": [
+      17
+     ],
+     "img": {},
+     "quote": {
+      "文": "倏爾五色紗糊就，竟系小窗，倏爾彩凌輕覆，竟系幽戶。",
+      "回": 17
+     }
+    },
+    "yh18": {
+     "n": "衣架",
+     "t": "衣架",
+     "line": "床边立着紫檀衣架，横杆上搭一件外褂。想来是丫鬟们顺手挂衣裳的地方。",
+     "place": "yihong",
+     "推断": true,
+     "hui": [],
+     "img": {}
+    },
+    "yh19": {
+     "n": "脚踏",
+     "t": "腳踏",
+     "line": "床前矮矮一个脚踏，抬脚就能蹬上，漆色跟床是一家的。莺儿来了，袭人忙端来一个脚踏，她还是不敢坐。",
+     "place": "yihong",
+     "推断": false,
+     "hui": [
+      35
+     ],
+     "img": {},
+     "quote": {
+      "文": "襲人便忙端了個腳踏來",
+      "回": 35
+     }
+    },
+    "yh20": {
+     "n": "十锦槅子",
+     "t": "十錦槅子",
+     "line": "高到顶的雕花槅子，格子有圆有方，里头摆满小玩意。贾政一进来就迷了路：左瞧有门，右瞧有窗，到跟前又被一架书挡住。",
+     "place": "yihong",
+     "推断": false,
+     "hui": [
+      17
+     ],
+     "img": {},
+     "quote": {
+      "文": "竟分不出間隔來的。",
+      "回": 17
+     }
+    },
+    "yh21": {
+     "n": "水晶缸",
+     "t": "水晶缸",
+     "line": "一口水晶缸，缸里湃着果子，缸壁凉得凝出水珠。鸳鸯才送来的果子，都湃在这里头，专等宝玉洗了手来吃。",
+     "place": "yihong",
+     "推断": false,
+     "hui": [
+      31
+     ],
+     "img": {},
+     "quote": {
+      "文": "才剛鴛鴦送了好些果子來，都湃在那水晶缸里呢",
+      "回": 31
+     }
+    },
+    "yh22": {
+     "n": "鹦鹉架",
+     "t": "鸚鵡架",
+     "line": "铜丝金笼，里头一只绿鹦鹉，张口就喊茶。后来晴雯去了，檐前的鹦鹉还在叫她的名字。",
+     "place": "yihong",
+     "推断": false,
+     "hui": [
+      23
+     ],
+     "img": {},
+     "quote": {
+      "文": "金籠鸚鵡喚茶湯",
+      "回": 23
+     }
+    }
+   }
+  },
+  "album": {
+   "kind": "album",
+   "名": "画册",
+   "单位": "幅",
+   "总": 65,
+   "来源": {
+    "文件": [
+     "dgy/albumData.js"
+    ],
+    "字段": "ALBUMS[id].幅[i].{解析,旁白,旁白回目,地点,图}；条目 id = 册id:幅序号(从1起)",
+    "说明": "按册分组，每册若干幅；有 -s.webp 小图就用小图。"
+   },
+   "分组": [
+    {
+     "id": "zanghua",
+     "名": "黛玉葬花",
+     "ids": [
+      "zanghua:1",
+      "zanghua:2",
+      "zanghua:3",
+      "zanghua:4",
+      "zanghua:5",
+      "zanghua:6"
+     ],
+     "回目": [
+      27
+     ],
+     "地点": "qinfangzha"
+    },
+    {
+     "id": "pudie",
+     "名": "宝钗扑蝶",
+     "ids": [
+      "pudie:1",
+      "pudie:2",
+      "pudie:3",
+      "pudie:4",
+      "pudie:5"
+     ],
+     "回目": [
+      27
+     ],
+     "地点": "dicui"
+    },
+    {
+     "id": "zuiyan",
+     "名": "湘云醉眠芍药裀",
+     "ids": [
+      "zuiyan:1",
+      "zuiyan:2",
+      "zuiyan:3",
+      "zuiyan:4",
+      "zuiyan:5"
+     ],
+     "回目": [
+      62
+     ],
+     "地点": "hongxiang"
+    },
+    {
+     "id": "youyuan",
+     "名": "刘姥姥进大观园",
+     "ids": [
+      "youyuan:1",
+      "youyuan:2",
+      "youyuan:3",
+      "youyuan:4",
+      "youyuan:5",
+      "youyuan:6"
+     ],
+     "回目": [
+      40,
+      41
+     ],
+     "地点": "qinfang"
+    },
+    {
+     "id": "haitang",
+     "名": "海棠诗社",
+     "ids": [
+      "haitang:1",
+      "haitang:2",
+      "haitang:3",
+      "haitang:4",
+      "haitang:5",
+      "haitang:6"
+     ],
+     "回目": [
+      37
+     ],
+     "地点": "qiushuang"
+    },
+    {
+     "id": "pinchamei",
+     "名": "栊翠庵品茶与乞梅",
+     "ids": [
+      "pinchamei:1",
+      "pinchamei:2",
+      "pinchamei:3",
+      "pinchamei:4",
+      "pinchamei:5",
+      "pinchamei:6"
+     ],
+     "回目": [
+      41,
+      50
+     ],
+     "地点": "longcui"
+    },
+    {
+     "id": "lianju",
+     "名": "凹晶馆联诗",
+     "ids": [
+      "lianju:1",
+      "lianju:2",
+      "lianju:3",
+      "lianju:4",
+      "lianju:5",
+      "lianju:6"
+     ],
+     "回目": [
+      76
+     ],
+     "地点": "aojing"
+    },
+    {
+     "id": "aida",
+     "名": "宝玉挨打",
+     "ids": [
+      "aida:1",
+      "aida:2",
+      "aida:3",
+      "aida:4",
+      "aida:5",
+      "aida:6"
+     ],
+     "回目": [
+      33
+     ],
+     "地点": null
+    },
+    {
+     "id": "zhengmen",
+     "名": "正门初入",
+     "ids": [
+      "zhengmen:1",
+      "zhengmen:2",
+      "zhengmen:3",
+      "zhengmen:4"
+     ],
+     "回目": [
+      17
+     ],
+     "地点": "gate"
+    },
+    {
+     "id": "gexing",
+     "名": "芦雪广割腥啖膻",
+     "ids": [
+      "gexing:1",
+      "gexing:2",
+      "gexing:3",
+      "gexing:4",
+      "gexing:5"
+     ],
+     "回目": [
+      49,
+      50
+     ],
+     "地点": "luxue"
+    },
+    {
+     "id": "zhouru",
+     "名": "舟入花溆",
+     "ids": [
+      "zhouru:1",
+      "zhouru:2",
+      "zhouru:3",
+      "zhouru:4",
+      "zhouru:5"
+     ],
+     "回目": [
+      18,
+      40
+     ],
+     "地点": "huaxu"
+    },
+    {
+     "id": "chufang",
+     "名": "柳家的厨房",
+     "ids": [
+      "chufang:1",
+      "chufang:2",
+      "chufang:3",
+      "chufang:4",
+      "chufang:5"
+     ],
+     "回目": [
+      61,
+      62
+     ],
+     "地点": "kitchen"
+    }
+   ],
+   "条目": {
+    "zanghua:1": {
+     "n": "黛玉葬花·第1幅",
+     "t": "黛玉葬花·第一幅",
+     "册": "zanghua",
+     "幅": 1,
+     "line": "芒种一过就算入夏，花都谢了，所以要给花神送行。",
+     "place": "qinfangzha",
+     "hui": [
+      27
+     ],
+     "img": {
+      "full": "dgy-assets/album/zanghua/01.webp",
+      "thumb": "dgy-assets/album/zanghua/01.webp"
+     },
+     "quote": {
+      "文": "至次日乃是四月二十六日，原來這日未時交芒種節。",
+      "回": 27
+     }
+    },
+    "zanghua:2": {
+     "n": "黛玉葬花·第2幅",
+     "t": "黛玉葬花·第二幅",
+     "册": "zanghua",
+     "幅": 2,
+     "line": "他要去的，是第二十三回和黛玉一起埋桃花的那个花冢。",
+     "place": "qinfangzha",
+     "hui": [
+      27
+     ],
+     "img": {
+      "full": "dgy-assets/album/zanghua/02.webp",
+      "thumb": "dgy-assets/album/zanghua/02.webp"
+     }
+    },
+    "zanghua:3": {
+     "n": "黛玉葬花·第3幅",
+     "t": "黛玉葬花·第三幅",
+     "册": "zanghua",
+     "幅": 3,
+     "line": "这是《葬花吟》开头一句。宝玉还没转过山坡，只听见有人在哭。",
+     "place": "qinfangzha",
+     "hui": [
+      27
+     ],
+     "img": {
+      "full": "dgy-assets/album/zanghua/03.webp",
+      "thumb": "dgy-assets/album/zanghua/03.webp"
+     },
+     "quote": {
+      "文": "花謝花飛花滿天，紅消香斷有誰憐？",
+      "回": 27
+     }
+    },
+    "zanghua:4": {
+     "n": "黛玉葬花·第4幅",
+     "t": "黛玉葬花·第四幅",
+     "册": "zanghua",
+     "幅": 4,
+     "line": "宁可把花埋进干净土里，也不让它掉进脏水沟——跟第二十三回她对宝玉说的一样。",
+     "place": "qinfangzha",
+     "hui": [
+      27
+     ],
+     "img": {
+      "full": "dgy-assets/album/zanghua/04.webp",
+      "thumb": "dgy-assets/album/zanghua/04.webp"
+     },
+     "quote": {
+      "文": "未若錦囊收艷骨，一抔淨土掩風流。",
+      "回": 27
+     }
+    },
+    "zanghua:5": {
+     "n": "黛玉葬花·第5幅",
+     "t": "黛玉葬花·第五幅",
+     "册": "zanghua",
+     "幅": 5,
+     "line": "她葬的是花，问的是自己：将来谁来葬我？",
+     "place": "qinfangzha",
+     "hui": [
+      27
+     ],
+     "img": {
+      "full": "dgy-assets/album/zanghua/05.webp",
+      "thumb": "dgy-assets/album/zanghua/05.webp"
+     },
+     "quote": {
+      "文": "儂今葬花人笑痴，他年葬儂知是誰？",
+      "回": 27
+     }
+    },
+    "zanghua:6": {
+     "n": "黛玉葬花·第6幅",
+     "t": "黛玉葬花·第六幅",
+     "册": "zanghua",
+     "幅": 6,
+     "line": "第二十八回开头补了一句：他恸倒在山坡上，兜的落花撒了一地。",
+     "place": "qinfangzha",
+     "hui": [
+      27
+     ],
+     "img": {
+      "full": "dgy-assets/album/zanghua/06.webp",
+      "thumb": "dgy-assets/album/zanghua/06.webp"
+     },
+     "quote": {
+      "文": "一朝春盡紅顏老，花落人亡兩不知！",
+      "回": 27
+     }
+    },
+    "pudie:1": {
+     "n": "宝钗扑蝶·第1幅",
+     "t": "寶釵撲蝶·第一幅",
+     "册": "pudie",
+     "幅": 1,
+     "line": "平日稳重的宝钗，只有这一回像个小姑娘。",
+     "place": "dicui",
+     "hui": [
+      27
+     ],
+     "img": {
+      "full": "dgy-assets/album/pudie/01.webp",
+      "thumb": "dgy-assets/album/pudie/01.webp"
+     },
+     "quote": {
+      "文": "剛要尋別的姊妹去，忽見前面一雙玉色蝴蝶，大如團扇，一上一下迎風翩躚，十分有趣。",
+      "回": 27
+     }
+    },
+    "pudie:2": {
+     "n": "宝钗扑蝶·第2幅",
+     "t": "寶釵撲蝶·第二幅",
+     "册": "pudie",
+     "幅": 2,
+     "line": "隔扇是糊纸的，里面说什么外面全听得见。",
+     "place": "dicui",
+     "hui": [
+      27
+     ],
+     "img": {
+      "full": "dgy-assets/album/pudie/02.webp",
+      "thumb": "dgy-assets/album/pudie/02.webp"
+     },
+     "quote": {
+      "文": "寶釵也無心撲了，",
+      "回": 27
+     }
+    },
+    "pudie:3": {
+     "n": "宝钗扑蝶·第3幅",
+     "t": "寶釵撲蝶·第三幅",
+     "册": "pudie",
+     "幅": 3,
+     "line": "她心里想的是使个“金蝉脱壳”的法子，喊“颦儿”就是装作在找黛玉。",
+     "place": "dicui",
+     "hui": [
+      27
+     ],
+     "img": {
+      "full": "dgy-assets/album/pudie/03.webp",
+      "thumb": "dgy-assets/album/pudie/03.webp"
+     },
+     "quote": {
+      "文": "猶未想完，",
+      "回": 27
+     }
+    },
+    "pudie:4": {
+     "n": "宝钗扑蝶·第4幅",
+     "t": "寶釵撲蝶·第四幅",
+     "册": "pudie",
+     "幅": 4,
+     "line": "黛玉这时根本不在这里，这是宝钗随口编的。",
+     "place": "dicui",
+     "hui": [
+      27
+     ],
+     "img": {
+      "full": "dgy-assets/album/pudie/04.webp",
+      "thumb": "dgy-assets/album/pudie/04.webp"
+     }
+    },
+    "pudie:5": {
+     "n": "宝钗扑蝶·第5幅",
+     "t": "寶釵撲蝶·第五幅",
+     "册": "pudie",
+     "幅": 5,
+     "line": "她们怕的是黛玉，不是宝钗——宝钗这一招，脱了身，也把偷听的嫌疑推给了黛玉。",
+     "place": "dicui",
+     "hui": [
+      27
+     ],
+     "img": {
+      "full": "dgy-assets/album/pudie/05.webp",
+      "thumb": "dgy-assets/album/pudie/05.webp"
+     },
+     "quote": {
+      "文": "紅玉道：「若是寶姑娘聽見，還倒罷了。",
+      "回": 27
+     }
+    },
+    "zuiyan:1": {
+     "n": "湘云醉眠芍药裀·第1幅",
+     "t": "湘雲醉眠芍藥裀·第一幅",
+     "册": "zuiyan",
+     "幅": 1,
+     "line": "散席时大家才发现，湘云不见了。",
+     "place": "hongxiang",
+     "hui": [
+      62
+     ],
+     "img": {
+      "full": "dgy-assets/album/zuiyan/01.webp",
+      "thumb": "dgy-assets/album/zuiyan/01-s.webp"
+     },
+     "quote": {
+      "文": "頑了一回，",
+      "回": 62
+     }
+    },
+    "zuiyan:2": {
+     "n": "湘云醉眠芍药裀·第2幅",
+     "t": "湘雲醉眠芍藥裀·第二幅",
+     "册": "zuiyan",
+     "幅": 2,
+     "line": "回目叫“芍药裀”（花铺的褥子），其实她睡的是石凳，身上盖的是落花。",
+     "place": "hongxiang",
+     "hui": [
+      62
+     ],
+     "img": {
+      "full": "dgy-assets/album/zuiyan/02.webp",
+      "thumb": "dgy-assets/album/zuiyan/02.webp"
+     }
+    },
+    "zuiyan:3": {
+     "n": "湘云醉眠芍药裀·第3幅",
+     "t": "湘雲醉眠芍藥裀·第三幅",
+     "册": "zuiyan",
+     "幅": 3,
+     "line": "睡着了嘴里念的还是席上的酒令。",
+     "place": "hongxiang",
+     "hui": [
+      62
+     ],
+     "img": {
+      "full": "dgy-assets/album/zuiyan/03.webp",
+      "thumb": "dgy-assets/album/zuiyan/03.webp"
+     },
+     "quote": {
+      "文": "泉香而酒冽，玉碗盛來琥珀光，直飲到梅梢月上，醉扶歸，卻為宜會親友。",
+      "回": 62
+     }
+    },
+    "zuiyan:4": {
+     "n": "湘云醉眠芍药裀·第4幅",
+     "t": "湘雲醉眠芍藥裀·第四幅",
+     "册": "zuiyan",
+     "幅": 4,
+     "line": "她本来只是想找个凉快地方躲一躲。",
+     "place": "hongxiang",
+     "hui": [
+      62
+     ],
+     "img": {
+      "full": "dgy-assets/album/zuiyan/04.webp",
+      "thumb": "dgy-assets/album/zuiyan/04.webp"
+     },
+     "quote": {
+      "文": "湘雲慢啟秋波，見了眾人，低頭看了一看自己，方知是醉了。",
+      "回": 62
+     }
+    },
+    "zuiyan:5": {
+     "n": "湘云醉眠芍药裀·第5幅",
+     "t": "湘雲醉眠芍藥裀·第五幅",
+     "册": "zuiyan",
+     "幅": 5,
+     "line": "醒酒石是含在嘴里解酒的石头。",
+     "place": "hongxiang",
+     "hui": [
+      62
+     ],
+     "img": {
+      "full": "dgy-assets/album/zuiyan/05.webp",
+      "thumb": "dgy-assets/album/zuiyan/05.webp"
+     },
+     "quote": {
+      "文": "探春忙命將醒酒石拿來給他銜在口內，一時又命他喝了一些酸湯，方才覺得好了些。",
+      "回": 62
+     }
+    },
+    "youyuan:1": {
+     "n": "刘姥姥进大观园·第1幅",
+     "t": "劉姥姥進大觀園·第一幅",
+     "册": "youyuan",
+     "幅": 1,
+     "line": "她不恼，反说“今儿老风流才好”——一开场就把大家逗乐了。",
+     "place": "qinfang",
+     "hui": [
+      40
+     ],
+     "img": {
+      "full": "dgy-assets/album/youyuan/01.webp",
+      "thumb": "dgy-assets/album/youyuan/01.webp"
+     },
+     "quote": {
+      "文": "一語未完，鳳姐便拉過劉姥姥，笑道：「讓我打扮你。",
+      "回": 40
+     }
+    },
+    "youyuan:2": {
+     "n": "刘姥姥进大观园·第2幅",
+     "t": "劉姥姥進大觀園·第二幅",
+     "册": "youyuan",
+     "幅": 2,
+     "line": "琥珀刚提醒“仔细苍苔滑了”，她说“我们走熟了的”，话音没落就摔了。",
+     "place": "xiaoxiang",
+     "hui": [
+      40
+     ],
+     "img": {
+      "full": "dgy-assets/album/youyuan/02.webp",
+      "thumb": "dgy-assets/album/youyuan/02.webp"
+     },
+     "quote": {
+      "文": "他只顧上頭和人說話，不防底下果踩滑了，咕咚一跤跌倒。",
+      "回": 40
+     }
+    },
+    "youyuan:3": {
+     "n": "刘姥姥进大观园·第3幅",
+     "t": "劉姥姥進大觀園·第三幅",
+     "册": "youyuan",
+     "幅": 3,
+     "line": "这是鸳鸯、凤姐事先教好的。她心里明白，事后说“你先嘱咐我，我就明白了”。",
+     "place": "qiushuang",
+     "hui": [
+      40
+     ],
+     "img": {
+      "full": "dgy-assets/album/youyuan/03.webp",
+      "thumb": "dgy-assets/album/youyuan/03.webp"
+     },
+     "quote": {
+      "文": "賈母這邊說聲「請」，",
+      "回": 40
+     }
+    },
+    "youyuan:4": {
+     "n": "刘姥姥进大观园·第4幅",
+     "t": "劉姥姥進大觀園·第四幅",
+     "册": "youyuan",
+     "幅": 4,
+     "line": "妙玉事后叫把这只杯子搁在外头，不要了。",
+     "place": "longcui",
+     "hui": [
+      41
+     ],
+     "img": {
+      "full": "dgy-assets/album/youyuan/04.webp",
+      "thumb": "dgy-assets/album/youyuan/04.webp"
+     },
+     "quote": {
+      "文": "賈母便吃了半盞，便笑著遞與劉姥姥說：「你嘗嘗這個茶。",
+      "回": 41
+     }
+    },
+    "youyuan:5": {
+     "n": "刘姥姥进大观园·第5幅",
+     "t": "劉姥姥進大觀園·第五幅",
+     "册": "youyuan",
+     "幅": 5,
+     "line": "牌坊上写的是“省亲别墅”，她把这里当成了大庙。",
+     "place": "xingqin",
+     "hui": [
+      41
+     ],
+     "img": {
+      "full": "dgy-assets/album/youyuan/05.webp",
+      "thumb": "dgy-assets/album/youyuan/05.webp"
+     },
+     "quote": {
+      "文": "眾人笑道：「你認得這是什麼廟？",
+      "回": 41
+     }
+    },
+    "youyuan:6": {
+     "n": "刘姥姥进大观园·第6幅",
+     "t": "劉姥姥進大觀園·第六幅",
+     "册": "youyuan",
+     "幅": 6,
+     "line": "她迷了路，误打误撞睡在了宝玉的床上；袭人找到她，只对外说她在草地上睡着了。",
+     "place": "yihong",
+     "hui": [
+      41
+     ],
+     "img": {
+      "full": "dgy-assets/album/youyuan/06.webp",
+      "thumb": "dgy-assets/album/youyuan/06-s.webp"
+     },
+     "quote": {
+      "文": "他此時又帶了七八分醉，",
+      "回": 41
+     }
+    },
+    "haitang:1": {
+     "n": "海棠诗社·第1幅",
+     "t": "海棠詩社·第一幅",
+     "册": "haitang",
+     "幅": 1,
+     "line": "花笺是探春写的，邀大家起诗社。",
+     "place": "yihong",
+     "hui": [
+      37
+     ],
+     "img": {
+      "full": "dgy-assets/album/haitang/01.webp",
+      "thumb": "dgy-assets/album/haitang/01-s.webp"
+     },
+     "quote": {
+      "文": "這日正無聊之際，只見翠墨進來，手裡拿著一副花箋送與他。",
+      "回": 37
+     }
+    },
+    "haitang:2": {
+     "n": "海棠诗社·第2幅",
+     "t": "海棠詩社·第二幅",
+     "册": "haitang",
+     "幅": 2,
+     "line": "李纨说自己不会作诗，掌坛却当仁不让。",
+     "place": "qiushuang",
+     "hui": [
+      37
+     ],
+     "img": {
+      "full": "dgy-assets/album/haitang/02.webp",
+      "thumb": "dgy-assets/album/haitang/02.webp"
+     }
+    },
+    "haitang:3": {
+     "n": "海棠诗社·第3幅",
+     "t": "海棠詩社·第三幅",
+     "册": "haitang",
+     "幅": 3,
+     "line": "稻香老农，取的是她住的稻香村。",
+     "place": "qiushuang",
+     "hui": [
+      37
+     ],
+     "img": {
+      "full": "dgy-assets/album/haitang/03.webp",
+      "thumb": "dgy-assets/album/haitang/03.webp"
+     },
+     "quote": {
+      "文": "李紈道：「極是，何不大家起個別號，彼此稱呼則雅。",
+      "回": 37
+     }
+    },
+    "haitang:4": {
+     "n": "海棠诗社·第4幅",
+     "t": "海棠詩社·第四幅",
+     "册": "haitang",
+     "幅": 4,
+     "line": "黛玉还接一句“快做了鹿脯来”。探春当场回敬，给她起了“潇湘妃子”的号。",
+     "place": "qiushuang",
+     "hui": [
+      37
+     ],
+     "img": {
+      "full": "dgy-assets/album/haitang/04.webp",
+      "thumb": "dgy-assets/album/haitang/04.webp"
+     }
+    },
+    "haitang:5": {
+     "n": "海棠诗社·第5幅",
+     "t": "海棠詩社·第五幅",
+     "册": "haitang",
+     "幅": 5,
+     "line": "众人看了都叫好，说她“果然比别人又是一样心肠”。",
+     "place": "qiushuang",
+     "hui": [
+      37
+     ],
+     "img": {
+      "full": "dgy-assets/album/haitang/05.webp",
+      "thumb": "dgy-assets/album/haitang/05.webp"
+     },
+     "quote": {
+      "文": "偷來梨蕊三分白，借得梅花一縷魂。",
+      "回": 37
+     }
+    },
+    "haitang:6": {
+     "n": "海棠诗社·第6幅",
+     "t": "海棠詩社·第六幅",
+     "册": "haitang",
+     "幅": 6,
+     "line": "第一给了宝钗，第二是黛玉，宝玉压尾——他还想争，被李纨一句“再有多说者必罚”堵了回去。",
+     "place": "qiushuang",
+     "hui": [
+      37
+     ],
+     "img": {
+      "full": "dgy-assets/album/haitang/06.webp",
+      "thumb": "dgy-assets/album/haitang/06.webp"
+     },
+     "quote": {
+      "文": "李紈道：「若論風流別致，自是這首，若論含蓄渾厚，終讓蘅稿。",
+      "回": 37
+     }
+    },
+    "pinchamei:1": {
+     "n": "栊翠庵品茶与乞梅·第1幅",
+     "t": "櫳翠庵品茶與乞梅·第一幅",
+     "册": "pinchamei",
+     "幅": 1,
+     "line": "刚在园里喝过酒吃过肉，贾母知礼，不进佛堂。",
+     "place": "longcui",
+     "hui": [
+      41
+     ],
+     "img": {
+      "full": "dgy-assets/album/pinchamei/01.webp",
+      "thumb": "dgy-assets/album/pinchamei/01-s.webp"
+     },
+     "quote": {
+      "文": "妙玉笑往裡讓，",
+      "回": 41
+     }
+    },
+    "pinchamei:2": {
+     "n": "栊翠庵品茶与乞梅·第2幅",
+     "t": "櫳翠庵品茶與乞梅·第二幅",
+     "册": "pinchamei",
+     "幅": 2,
+     "line": "贾母先说“我不吃六安茶”，妙玉早有准备，泡的是老君眉，水用的是旧年雨水。",
+     "place": "longcui",
+     "hui": [
+      41
+     ],
+     "img": {
+      "full": "dgy-assets/album/pinchamei/02.webp",
+      "thumb": "dgy-assets/album/pinchamei/02.webp"
+     },
+     "quote": {
+      "文": "妙玉笑說：「知道。",
+      "回": 41
+     }
+    },
+    "pinchamei:3": {
+     "n": "栊翠庵品茶与乞梅·第3幅",
+     "t": "櫳翠庵品茶與乞梅·第三幅",
+     "册": "pinchamei",
+     "幅": 3,
+     "line": "给宝玉的，偏是她自己天天用的那只。",
+     "place": "longcui",
+     "hui": [
+      41
+     ],
+     "img": {
+      "full": "dgy-assets/album/pinchamei/03.webp",
+      "thumb": "dgy-assets/album/pinchamei/03.webp"
+     },
+     "quote": {
+      "文": "仍將前番自己常日吃茶的那隻綠玉斗來斟與寶玉。",
+      "回": 41
+     }
+    },
+    "pinchamei:4": {
+     "n": "栊翠庵品茶与乞梅·第4幅",
+     "t": "櫳翠庵品茶與乞梅·第四幅",
+     "册": "pinchamei",
+     "幅": 4,
+     "line": "话虽刻薄，她还是只给他斟了一杯。",
+     "place": "longcui",
+     "hui": [
+      41
+     ],
+     "img": {
+      "full": "dgy-assets/album/pinchamei/04.webp",
+      "thumb": "dgy-assets/album/pinchamei/04.webp"
+     },
+     "quote": {
+      "文": "豈不聞『一杯為品，二杯即是解渴的蠢物，三杯便是飲牛飲騾了』。",
+      "回": 41
+     }
+    },
+    "pinchamei:5": {
+     "n": "栊翠庵品茶与乞梅·第5幅",
+     "t": "櫳翠庵品茶與乞梅·第五幅",
+     "册": "pinchamei",
+     "幅": 5,
+     "line": "宝玉联句落了第，罚他去栊翠庵讨红梅。",
+     "place": "luxue",
+     "hui": [
+      50
+     ],
+     "img": {
+      "full": "dgy-assets/album/pinchamei/05.webp",
+      "thumb": "dgy-assets/album/pinchamei/05.webp"
+     },
+     "quote": {
+      "文": "可厭妙玉為人，我不理他。",
+      "回": 50
+     }
+    },
+    "pinchamei:6": {
+     "n": "栊翠庵品茶与乞梅·第6幅",
+     "t": "櫳翠庵品茶與乞梅·第六幅",
+     "册": "pinchamei",
+     "幅": 6,
+     "line": "“掮”是扛在肩上。他一进门就说：你们赏罢，不知费了我多少精神。",
+     "place": "luxue",
+     "hui": [
+      50
+     ],
+     "img": {
+      "full": "dgy-assets/album/pinchamei/06.webp",
+      "thumb": "dgy-assets/album/pinchamei/06.webp"
+     },
+     "quote": {
+      "文": "一語未了，只見寶玉笑嘻嘻的掮了一枝紅梅進來，眾丫鬟忙已接過，插入瓶內。",
+      "回": 50
+     }
+    },
+    "lianju:1": {
+     "n": "凹晶馆联诗·第1幅",
+     "t": "凹晶館聯詩·第一幅",
+     "册": "lianju",
+     "幅": 1,
+     "line": "山顶叫“凸碧”，水边叫“凹晶”，一高一低正好一对——这两个名字是黛玉拟的。",
+     "place": "aojing",
+     "hui": [
+      76
+     ],
+     "img": {
+      "full": "dgy-assets/album/lianju/01.webp",
+      "thumb": "dgy-assets/album/lianju/01.webp"
+     },
+     "quote": {
+      "文": "因這幾間就在此山懷抱之中，乃凸碧山莊之退居，因窪而近水，故顏其額曰「凹晶溪館」。",
+      "回": 76
+     }
+    },
+    "lianju:2": {
+     "n": "凹晶馆联诗·第2幅",
+     "t": "凹晶館聯詩·第二幅",
+     "册": "lianju",
+     "幅": 2,
+     "line": "宴席上人散得冷清，两人干脆躲到这里联句。",
+     "place": "aojing",
+     "hui": [
+      76
+     ],
+     "img": {
+      "full": "dgy-assets/album/lianju/02.webp",
+      "thumb": "dgy-assets/album/lianju/02.webp"
+     },
+     "quote": {
+      "文": "二人遂在兩個湘妃竹墩上坐下。",
+      "回": 76
+     }
+    },
+    "lianju:3": {
+     "n": "凹晶馆联诗·第3幅",
+     "t": "凹晶館聯詩·第三幅",
+     "册": "lianju",
+     "幅": 3,
+     "line": "黛玉以为池里黑影是鬼，湘云说她不怕鬼，拾石片一打，打出一只鹤来。",
+     "place": "aojing",
+     "hui": [
+      76
+     ],
+     "img": {
+      "full": "dgy-assets/album/lianju/03.webp",
+      "thumb": "dgy-assets/album/lianju/03.webp"
+     },
+     "quote": {
+      "文": "只聽那黑影裡嘎然一聲，卻飛起一個大白鶴來，直往藕香榭去了。",
+      "回": 76
+     }
+    },
+    "lianju:4": {
+     "n": "凹晶馆联诗·第4幅",
+     "t": "凹晶館聯詩·第四幅",
+     "册": "lianju",
+     "幅": 4,
+     "line": "湘云上句是“寒塘渡鹤影”，黛玉对“冷月葬花魂”。湘云叫好，又劝她病中别作这样太颓丧的句子。",
+     "place": "aojing",
+     "hui": [
+      76
+     ],
+     "img": {
+      "full": "dgy-assets/album/lianju/04.webp",
+      "thumb": "dgy-assets/album/lianju/04.webp"
+     },
+     "quote": {
+      "文": "黛玉只看天，不理他，半日，猛然笑道：「你不必說嘴，我也有了，你聽聽。",
+      "回": 76
+     }
+    },
+    "lianju:5": {
+     "n": "凹晶馆联诗·第5幅",
+     "t": "凹晶館聯詩·第五幅",
+     "册": "lianju",
+     "幅": 5,
+     "line": "她赏月走到这里，在石后听了半天，嫌太悲凉，出来止住。",
+     "place": "aojing",
+     "hui": [
+      76
+     ],
+     "img": {
+      "full": "dgy-assets/album/lianju/05.webp",
+      "thumb": "dgy-assets/album/lianju/05.webp"
+     },
+     "quote": {
+      "文": "一語未了，只見欄外山石後轉出一個人來，笑道：「好詩，好詩，果然太悲涼了。",
+      "回": 76
+     }
+    },
+    "lianju:6": {
+     "n": "凹晶馆联诗·第6幅",
+     "t": "凹晶館聯詩·第六幅",
+     "册": "lianju",
+     "幅": 6,
+     "line": "她说两人已联了二十二韵，警句已出，由她来收尾。黛玉从没见她作过诗。",
+     "place": "longcui",
+     "hui": [
+      76
+     ],
+     "img": {
+      "full": "dgy-assets/album/lianju/06.webp",
+      "thumb": "dgy-assets/album/lianju/06.webp"
+     },
+     "quote": {
+      "文": "我意思想著你二位警句已出，再若續時，恐後力不加。",
+      "回": 76
+     }
+    },
+    "aida:1": {
+     "n": "宝玉挨打·第1幅",
+     "t": "寶玉挨打·第一幅",
+     "册": "aida",
+     "幅": 1,
+     "line": "挨打之前，他已经知道金钏投井死了，心里正难受。走到厅上，迎面撞进贾政怀里。",
+     "place": null,
+     "hui": [
+      33
+     ],
+     "img": {
+      "full": "dgy-assets/album/aida/01.webp",
+      "thumb": "dgy-assets/album/aida/01-s.webp"
+     },
+     "quote": {
+      "文": "原來寶玉會過雨村回來聽見了，",
+      "回": 33
+     }
+    },
+    "aida:2": {
+     "n": "宝玉挨打·第2幅",
+     "t": "寶玉挨打·第二幅",
+     "册": "aida",
+     "幅": 2,
+     "line": "长史官是来要人的：王府唱小旦的琪官跑了，满城都说跟宝玉相好。",
+     "place": null,
+     "hui": [
+      33
+     ],
+     "img": {
+      "full": "dgy-assets/album/aida/02.webp",
+      "thumb": "dgy-assets/album/aida/02.webp"
+     },
+     "quote": {
+      "文": "這一城內，十停人倒有八停人都說，他近日和銜玉的那位令郎相與甚厚。",
+      "回": 33
+     }
+    },
+    "aida:3": {
+     "n": "宝玉挨打·第3幅",
+     "t": "寶玉挨打·第三幅",
+     "册": "aida",
+     "幅": 3,
+     "line": "这是贾环一面之词，添油加醋，正好火上浇油。回目叫“手足耽耽小动唇舌”。",
+     "place": null,
+     "hui": [
+      33
+     ],
+     "img": {
+      "full": "dgy-assets/album/aida/03.webp",
+      "thumb": "dgy-assets/album/aida/03.webp"
+     },
+     "quote": {
+      "文": "賈環便悄悄說道：「我母親告訴我說，",
+      "回": 33
+     }
+    },
+    "aida:4": {
+     "n": "宝玉挨打·第4幅",
+     "t": "寶玉挨打·第四幅",
+     "册": "aida",
+     "幅": 4,
+     "line": "王夫人先赶到，哭着说天这么热，老太太身上不好，打死宝玉事小，惊动了老太太事大。",
+     "place": null,
+     "hui": [
+      33
+     ],
+     "img": {
+      "full": "dgy-assets/album/aida/04.webp",
+      "thumb": "dgy-assets/album/aida/04.webp"
+     },
+     "quote": {
+      "文": "賈政還欲打時，早被王夫人抱住板子。",
+      "回": 33
+     }
+    },
+    "aida:5": {
+     "n": "宝玉挨打·第5幅",
+     "t": "寶玉挨打·第五幅",
+     "册": "aida",
+     "幅": 5,
+     "line": "绿纱小衣是夏天的薄衣裳。王夫人哭着想起早死的贾珠，李纨也跟着放声哭了。",
+     "place": null,
+     "hui": [
+      33
+     ],
+     "img": {
+      "full": "dgy-assets/album/aida/05.webp",
+      "thumb": "dgy-assets/album/aida/05.webp"
+     },
+     "quote": {
+      "文": "王夫人抱著寶玉，",
+      "回": 33
+     }
+    },
+    "aida:6": {
+     "n": "宝玉挨打·第6幅",
+     "t": "寶玉挨打·第六幅",
+     "册": "aida",
+     "幅": 6,
+     "line": "贾母一到，这顿打才算停下。",
+     "place": null,
+     "hui": [
+      33
+     ],
+     "img": {
+      "full": "dgy-assets/album/aida/06.webp",
+      "thumb": "dgy-assets/album/aida/06.webp"
+     },
+     "quote": {
+      "文": "一句話未了，只聽窗外顫巍巍的聲氣說道：「先打死我，再打死他，豈不乾淨了！",
+      "回": 33
+     }
+    },
+    "zhengmen:1": {
+     "n": "正门初入·第1幅",
+     "t": "正門初入·第一幅",
+     "册": "zhengmen",
+     "幅": 1,
+     "line": "题匾之前，先把园门关上，从外面看一遍。",
+     "place": "gate",
+     "hui": [
+      17
+     ],
+     "img": {
+      "full": "dgy-assets/album/zhengmen/01.webp",
+      "thumb": "dgy-assets/album/zhengmen/01.webp"
+     },
+     "quote": {
+      "文": "賈政道：「你且把園門都關上，我們先瞧了外面再進去。",
+      "回": 17
+     }
+    },
+    "zhengmen:2": {
+     "n": "正门初入·第2幅",
+     "t": "正門初入·第二幅",
+     "册": "zhengmen",
+     "幅": 2,
+     "line": "大门不走朱门金钉那一路：细雕，不涂朱粉，台基上凿的是西番草花。",
+     "place": "gate",
+     "hui": [
+      17
+     ],
+     "img": {
+      "full": "dgy-assets/album/zhengmen/02.webp",
+      "thumb": "dgy-assets/album/zhengmen/02.webp"
+     },
+     "quote": {
+      "文": "只見正門五間，",
+      "回": 17
+     }
+    },
+    "zhengmen:3": {
+     "n": "正门初入·第3幅",
+     "t": "正門初入·第三幅",
+     "册": "zhengmen",
+     "幅": 3,
+     "line": "他欢喜的是不落富丽俗套。",
+     "place": "gate",
+     "hui": [
+      17
+     ],
+     "img": {
+      "full": "dgy-assets/album/zhengmen/03.webp",
+      "thumb": "dgy-assets/album/zhengmen/03.webp"
+     },
+     "quote": {
+      "文": "左右一望，皆雪白粉牆，下面虎皮石，隨勢砌去，果然不落富麗俗套，自是歡喜。",
+      "回": 17
+     }
+    },
+    "zhengmen:4": {
+     "n": "正门初入·第4幅",
+     "t": "正門初入·第四幅",
+     "册": "zhengmen",
+     "幅": 4,
+     "line": "门一开先看见山，看不见园子。山的细部在「曲径通幽」册。",
+     "place": "gate",
+     "hui": [
+      17
+     ],
+     "img": {
+      "full": "dgy-assets/album/zhengmen/04.webp",
+      "thumb": "dgy-assets/album/zhengmen/04.webp"
+     },
+     "quote": {
+      "文": "遂命開門，只見迎面一帶翠嶂擋在前面。",
+      "回": 17
+     }
+    },
+    "gexing:1": {
+     "n": "芦雪广割腥啖膻·第1幅",
+     "t": "蘆雪廣割腥啖膻·第一幅",
+     "册": "gexing",
+     "幅": 1,
+     "line": "头一天李纨说稻香村不如这里，已经让人笼了地炕。联句和烤鹿肉都在这几间屋里和屋外。",
+     "place": "luxue",
+     "hui": [
+      49
+     ],
+     "img": {
+      "full": "dgy-assets/album/gexing/01.webp",
+      "thumb": "dgy-assets/album/gexing/01.webp"
+     },
+     "quote": {
+      "文": "原來這蘆雪庵蓋在傍山臨水河灘之上，",
+      "回": 49
+     }
+    },
+    "gexing:2": {
+     "n": "芦雪广割腥啖膻·第2幅",
+     "t": "蘆雪廣割腥啖膻·第二幅",
+     "册": "gexing",
+     "幅": 2,
+     "line": "李婶看见他们商量着要吃生肉，说给了众人，李纨才出来找。湘云在贾母房里吃饭时就悄悄和宝玉说好，要一块鹿肉来园里“又顽又吃”。",
+     "place": "luxue",
+     "hui": [
+      49
+     ],
+     "img": {
+      "full": "dgy-assets/album/gexing/02.webp",
+      "thumb": "dgy-assets/album/gexing/02.webp"
+     },
+     "quote": {
+      "文": "李紈等忙出來找著他兩個說道：「你們兩個要吃生的，我送你們到老太太那裡吃去。",
+      "回": 49
+     }
+    },
+    "gexing:3": {
+     "n": "芦雪广割腥啖膻·第3幅",
+     "t": "蘆雪廣割腥啖膻·第三幅",
+     "册": "gexing",
+     "幅": 3,
+     "line": "平儿那只镯子吃完才发现丢了，凤姐说“不出三日包管就有”。湘云的道理是：吃了鹿肉才爱吃酒，吃了酒才有诗。",
+     "place": "luxue",
+     "hui": [
+      49
+     ],
+     "img": {
+      "full": "dgy-assets/album/gexing/03.webp",
+      "thumb": "dgy-assets/album/gexing/03.webp"
+     },
+     "quote": {
+      "文": "湘雲一面吃，一面說道：「我吃這個方愛吃酒，吃了酒才有詩。",
+      "回": 49
+     }
+    },
+    "gexing:4": {
+     "n": "芦雪广割腥啖膻·第4幅",
+     "t": "蘆雪廣割腥啖膻·第四幅",
+     "册": "gexing",
+     "幅": 4,
+     "line": "宝钗的意思是：你要是作不好，就把肉掏出来，塞进被雪压着的芦苇里，算了结这场劫。",
+     "place": "luxue",
+     "hui": [
+      49
+     ],
+     "img": {
+      "full": "dgy-assets/album/gexing/04.webp",
+      "thumb": "dgy-assets/album/gexing/04.webp"
+     },
+     "quote": {
+      "文": "黛玉笑道：「那裡找這一群花子去！",
+      "回": 49
+     }
+    },
+    "gexing:5": {
+     "n": "芦雪广割腥啖膻·第5幅",
+     "t": "蘆雪廣割腥啖膻·第五幅",
+     "册": "gexing",
+     "幅": 5,
+     "line": "题目是「即景联句，五言排律一首，限二萧韵」，贴在墙上。湘云自己说“不是作诗，竟是抢命”。",
+     "place": "luxue",
+     "hui": [
+      50
+     ],
+     "img": {
+      "full": "dgy-assets/album/gexing/05.webp",
+      "thumb": "dgy-assets/album/gexing/05.webp"
+     },
+     "quote": {
+      "文": "湘雲伏著已笑軟了。",
+      "回": 50
+     }
+    },
+    "zhouru:1": {
+     "n": "舟入花溆·第1幅",
+     "t": "舟入花漵·第一幅",
+     "册": "zhouru",
+     "幅": 1,
+     "line": "这是进石港之前的水面，下一幅才进港。",
+     "place": "huaxu",
+     "hui": [
+      18
+     ],
+     "img": {
+      "full": "dgy-assets/album/zhouru/01.webp",
+      "thumb": "dgy-assets/album/zhouru/01.webp"
+     },
+     "quote": {
+      "文": "忽又見執拂太監跪請登舟，賈妃乃下輿。",
+      "回": 18
+     }
+    },
+    "zhouru:2": {
+     "n": "舟入花溆·第2幅",
+     "t": "舟入花漵·第二幅",
+     "册": "zhouru",
+     "幅": 2,
+     "line": "假花是这一夜的灯饰，不是树本身开了花。",
+     "place": "huaxu",
+     "hui": [
+      18
+     ],
+     "img": {
+      "full": "dgy-assets/album/zhouru/02.webp",
+      "thumb": "dgy-assets/album/zhouru/02.webp"
+     },
+     "quote": {
+      "文": "上面柳杏諸樹雖無花葉，",
+      "回": 18
+     }
+    },
+    "zhouru:3": {
+     "n": "舟入花溆·第3幅",
+     "t": "舟入花漵·第三幅",
+     "册": "zhouru",
+     "幅": 3,
+     "line": "这四个字是第十七回宝玉题的。",
+     "place": "huaxu",
+     "hui": [
+      18
+     ],
+     "img": {
+      "full": "dgy-assets/album/zhouru/03.webp",
+      "thumb": "dgy-assets/album/zhouru/03.webp"
+     },
+     "quote": {
+      "文": "已而入一石港，港上一面匾燈，明現著「蓼汀花漵」四字。",
+      "回": 18
+     }
+    },
+    "zhouru:4": {
+     "n": "舟入花溆·第4幅",
+     "t": "舟入花漵·第四幅",
+     "册": "zhouru",
+     "幅": 4,
+     "line": "元春只要「花漵」两个字，不要「蓼汀」。底本这句「何必」后面有逗号，照抄。换完匾，船才驶向内岸的省亲别墅。",
+     "place": "huaxu",
+     "hui": [
+      18
+     ],
+     "img": {
+      "full": "dgy-assets/album/zhouru/04.webp",
+      "thumb": "dgy-assets/album/zhouru/04.webp"
+     },
+     "quote": {
+      "文": "賈妃看了四字，笑道：「『花漵』二字便妥，何必，『蓼汀』？",
+      "回": 18
+     }
+    },
+    "zhouru:5": {
+     "n": "舟入花溆·第5幅",
+     "t": "舟入花漵·第五幅",
+     "册": "zhouru",
+     "幅": 5,
+     "line": "黛玉要留着残荷听雨声，宝玉说以后就别叫人拔了。船随后在蘅芜苑前靠岸。",
+     "place": "huaxu",
+     "hui": [
+      40
+     ],
+     "img": {
+      "full": "dgy-assets/album/zhouru/05.webp",
+      "thumb": "dgy-assets/album/zhouru/05.webp"
+     },
+     "quote": {
+      "文": "林黛玉道：「我最不喜歡李義山的詩，只喜他這一句：『留得殘荷聽雨聲』。",
+      "回": 40
+     }
+    },
+    "chufang:1": {
+     "n": "柳家的厨房·第1幅",
+     "t": "柳家的廚房·第一幅",
+     "册": "chufang",
+     "幅": 1,
+     "line": "迎春房的莲花儿接着来要一碗嫩嫩的炖鸡蛋。柳家的说鸡蛋短，莲花儿翻出菜箱里的鸡蛋，吵了起来。",
+     "place": "kitchen",
+     "hui": [
+      61
+     ],
+     "img": {
+      "full": "dgy-assets/album/chufang/01.webp",
+      "thumb": "dgy-assets/album/chufang/01.webp"
+     },
+     "quote": {
+      "文": "一面來至廚房，",
+      "回": 61
+     }
+    },
+    "chufang:2": {
+     "n": "柳家的厨房·第2幅",
+     "t": "柳家的廚房·第二幅",
+     "册": "chufang",
+     "幅": 2,
+     "line": "莲花儿回去添油加醋，司棋才起火。",
+     "place": "kitchen",
+     "hui": [
+      61
+     ],
+     "img": {
+      "full": "dgy-assets/album/chufang/02.webp",
+      "thumb": "dgy-assets/album/chufang/02.webp"
+     },
+     "quote": {
+      "文": "司棋便喝命小丫頭子動手，",
+      "回": 61
+     }
+    },
+    "chufang:3": {
+     "n": "柳家的厨房·第3幅",
+     "t": "柳家的廚房·第三幅",
+     "册": "chufang",
+     "幅": 3,
+     "line": "司棋闹过一场，被劝走了。这碗蛋是补上的，仍然被泼。",
+     "place": "kitchen",
+     "hui": [
+      61
+     ],
+     "img": {
+      "full": "dgy-assets/album/chufang/03.webp",
+      "thumb": "dgy-assets/album/chufang/03.webp"
+     },
+     "quote": {
+      "文": "柳家的只好摔碗丟盤自己咕嘟了一回，蒸了一碗蛋令人送去。",
+      "回": 61
+     }
+    },
+    "chufang:4": {
+     "n": "柳家的厨房·第4幅",
+     "t": "柳家的廚房·第四幅",
+     "册": "chufang",
+     "幅": 4,
+     "line": "柳家的母女被带走之后，秦显家的趁空子顶了差事，只得意了半天。",
+     "place": "kitchen",
+     "hui": [
+      62
+     ],
+     "img": {
+      "full": "dgy-assets/album/chufang/04.webp",
+      "thumb": "dgy-assets/album/chufang/04.webp"
+     },
+     "quote": {
+      "文": "那秦顯家的好容易等了這個空子鑽了來，只興頭上半天。",
+      "回": 62
+     }
+    },
+    "chufang:5": {
+     "n": "柳家的厨房·第5幅",
+     "t": "柳家的廚房·第五幅",
+     "册": "chufang",
+     "幅": 5,
+     "line": "平儿说“大事化为小事，小事化为没事”，让柳家的母女照旧当差。秦显家的送出去的礼白丢了，还要折变了赔补亏空。",
+     "place": "kitchen",
+     "hui": [
+      62
+     ],
+     "img": {
+      "full": "dgy-assets/album/chufang/05.webp",
+      "thumb": "dgy-assets/album/chufang/05.webp"
+     },
+     "quote": {
+      "文": "正亂著，忽有人來說與他：「看過這早飯就出去罷。",
+      "回": 62
+     }
+    }
+   }
+  },
+  "poem": {
+   "kind": "poem",
+   "名": "诗词",
+   "单位": "首",
+   "总": 46,
+   "来源": {
+    "文件": [
+     "dgy-assets/poems.json"
+    ],
+    "字段": "作品[id].{题,作者,名,回,句,白话}；按作者分组",
+    "说明": "诗句为繁体逐字；图鉴 codexData 作品表的 id 不同（如 haitang-tan），这里以 poems.json 为准。"
+   },
+   "分组": [
+    {
+     "id": "tanchun",
+     "名": "贾探春",
+     "人": "tanchun",
+     "ids": [
+      "haitang-tanchun",
+      "ju-zan",
+      "ju-can",
+      "dengmi-tanchun"
+     ]
+    },
+    {
+     "id": "baochai",
+     "名": "薛宝钗",
+     "人": "baochai",
+     "ids": [
+      "haitang-baochai",
+      "ju-hua",
+      "ju-yi",
+      "liuxu-chai",
+      "pangxie",
+      "dengmi-baochai"
+     ]
+    },
+    {
+     "id": "baoyu",
+     "名": "贾宝玉",
+     "人": "baoyu",
+     "ids": [
+      "haitang-baoyu",
+      "jishi-chun",
+      "jishi-xia",
+      "jishi-qiu",
+      "jishi-dong",
+      "ju-fang",
+      "ju-zhong",
+      "qimei-shi",
+      "guihua-ci",
+      "furong-lei"
+     ]
+    },
+    {
+     "id": "daiyu",
+     "名": "林黛玉",
+     "人": "daiyu",
+     "ids": [
+      "haitang-daiyu",
+      "zanghua-yin",
+      "qiuchuang",
+      "taohua-xing",
+      "ju-yong",
+      "ju-wen",
+      "ju-meng",
+      "wumei-xi",
+      "wumei-yu",
+      "wumei-ming",
+      "wumei-lu",
+      "wumei-hong",
+      "tipa",
+      "liuxu-dai"
+     ]
+    },
+    {
+     "id": "xiangyun",
+     "名": "史湘云",
+     "人": "xiangyun",
+     "ids": [
+      "ju-dui",
+      "ju-gong",
+      "ju-ying",
+      "haitang-xiangyun-1",
+      "haitang-xiangyun-2",
+      "liuxu-yun"
+     ]
+    },
+    {
+     "id": [
+      "tanchun",
+      "baoyu"
+     ],
+     "名": [
+      "tanchun",
+      "baoyu"
+     ],
+     "人": [
+      "tanchun",
+      "baoyu"
+     ],
+     "ids": [
+      "liuxu-tan"
+     ]
+    },
+    {
+     "id": "yingchun",
+     "名": "贾迎春",
+     "人": "yingchun",
+     "ids": [
+      "dengmi-yingchun"
+     ]
+    },
+    {
+     "id": "xichun",
+     "名": "贾惜春",
+     "人": "xichun",
+     "ids": [
+      "dengmi-xichun"
+     ]
+    },
+    {
+     "id": [
+      "daiyu",
+      "xiangyun"
+     ],
+     "名": [
+      "daiyu",
+      "xiangyun"
+     ],
+     "人": [
+      "daiyu",
+      "xiangyun"
+     ],
+     "ids": [
+      "zhongqiu-lian"
+     ]
+    },
+    {
+     "id": "miaoyu",
+     "名": "妙玉",
+     "人": "miaoyu",
+     "ids": [
+      "zhongqiu-miaoyu"
+     ]
+    },
+    {
+     "id": [
+      "fengjie",
+      "liwan",
+      "xiangling",
+      "tanchun",
+      "liqi",
+      "liwen",
+      "xiuyan",
+      "xiangyun",
+      "baoqin",
+      "daiyu",
+      "baoyu",
+      "baochai"
+     ],
+     "名": [
+      "fengjie",
+      "liwan",
+      "xiangling",
+      "tanchun",
+      "liqi",
+      "liwen",
+      "xiuyan",
+      "xiangyun",
+      "baoqin",
+      "daiyu",
+      "baoyu",
+      "baochai"
+     ],
+     "人": [
+      "fengjie",
+      "liwan",
+      "xiangling",
+      "tanchun",
+      "liqi",
+      "liwen",
+      "xiuyan",
+      "xiangyun",
+      "baoqin",
+      "daiyu",
+      "baoyu",
+      "baochai"
+     ],
+     "ids": [
+      "luxue-lianju"
+     ]
+    }
+   ],
+   "条目": {
+    "haitang-tanchun": {
+     "n": "詠白海棠",
+     "t": "詠白海棠",
+     "author": "tanchun",
+     "作者名": "探春",
+     "line": "斜阳照着关上的门，雨后苔绿了盆。花的精神比玉、肌骨像雪，半夜的影子留着痕。末句说不要讲缟仙羽化，多情的人伴着它咏黄昏。",
+     "句": [
+      "斜陽寒草帶重門，苔翠盈舖雨後盆。",
+      "玉是精神難比潔，雪為肌骨易銷魂。",
+      "芳心一點嬌無力，倩影三更月有痕。",
+      "莫謂縞仙能羽化，多情伴我詠黃昏。"
+     ],
+     "hui": [
+      37
+     ],
+     "img": {},
+     "people": [
+      "tanchun"
+     ]
+    },
+    "haitang-baochai": {
+     "n": "詠白海棠",
+     "t": "詠白海棠",
+     "author": "baochai",
+     "作者名": "宝钗",
+     "line": "白天把门掩上，自己提瓮浇盆里的苔。洗掉胭脂才看见秋花，冰雪里招来魂。淡到极处才知道花更艳。末句是花不说话，婷婷地又到了黄",
+     "句": [
+      "珍重芳姿晝掩門，自攜手瓮灌苔盆。",
+      "胭脂洗出秋階影，冰雪招來露砌魂。",
+      "淡極始知花更艷，愁多焉得玉無痕。",
+      "欲償白帝憑清潔，不語婷婷日又昏。"
+     ],
+     "hui": [
+      37
+     ],
+     "img": {},
+     "people": [
+      "baochai"
+     ]
+    },
+    "haitang-baoyu": {
+     "n": "詠白海棠",
+     "t": "詠白海棠",
+     "author": "baoyu",
+     "作者名": "宝玉",
+     "line": "海棠的秋容浅，七节攒成一盆雪。他用出浴的太真、捧心的西子作比。晓风吹不散愁，宿雨又添一痕泪。末句是独自靠着栏杆，听砧声和",
+     "句": [
+      "秋容淺淡映重門，七節攢成雪滿盆。",
+      "出浴太真冰作影，捧心西子玉為魂。",
+      "曉風不散愁千點，宿雨還添淚一痕。",
+      "獨倚畫欄如有意，清砧怨笛送黃昏。"
+     ],
+     "hui": [
+      37
+     ],
+     "img": {},
+     "people": [
+      "baoyu"
+     ]
+    },
+    "haitang-daiyu": {
+     "n": "詠白海棠",
+     "t": "詠白海棠",
+     "author": "daiyu",
+     "作者名": "黛玉",
+     "line": "帘半卷，门半掩，用碾碎的冰做土、用玉做盆。白借梨花，魂借梅花。月里的人缝白袖子，闺中人擦眼泪。末句是羞着不说，靠着西风，",
+     "句": [
+      "半卷湘簾半掩門，碾冰為土玉為盆。",
+      "偷來梨蕊三分白，借得梅花一縷魂。",
+      "月窟仙人縫縞袂，秋閨怨女拭啼痕。",
+      "嬌羞默默同誰訴，倦倚西風夜已昏。"
+     ],
+     "hui": [
+      37
+     ],
+     "img": {},
+     "people": [
+      "daiyu"
+     ]
+    },
+    "jishi-chun": {
+     "n": "春夜即事",
+     "t": "春夜即事",
+     "author": "baoyu",
+     "作者名": "宝玉",
+     "line": "春夜：帐子铺开，隔巷的更声听不真。窗外下雨、枕上微寒，眼前是春色、梦里是人。小丫头娇懒惯了，拥着被子还笑个不停。",
+     "句": [
+      "霞綃雲幄任舖陳，隔巷蟆更聽未真。",
+      "枕上輕寒窗外雨，眼前春色夢中人。",
+      "盈盈燭淚因誰泣，點點花愁為我嗔。",
+      "自是小鬟嬌懶慣，擁衾不耐笑言頻。"
+     ],
+     "hui": [
+      23
+     ],
+     "img": {},
+     "people": [
+      "baoyu"
+     ]
+    },
+    "jishi-xia": {
+     "n": "夏夜即事",
+     "t": "夏夜即事",
+     "author": "baoyu",
+     "作者名": "宝玉",
+     "line": "夏夜：绣倦了的人睡得沉，笼里鹦鹉叫着要茶。句里藏着丫鬟名字——麝月、檀云。琥珀杯、玻璃槛，水亭里团扇摇，朱楼卷帘卸了晚妆",
+     "句": [
+      "倦繡佳人幽夢長，金籠鸚鵡喚茶湯。",
+      "窗明麝月開宮鏡，室靄檀雲品御香。",
+      "琥珀杯傾荷露滑，玻璃檻納柳風涼。",
+      "水亭處處齊紈動，簾捲朱樓罷晚妝。"
+     ],
+     "hui": [
+      23
+     ],
+     "img": {},
+     "people": [
+      "baoyu"
+     ]
+    },
+    "jishi-qiu": {
+     "n": "秋夜即事",
+     "t": "秋夜即事",
+     "author": "baoyu",
+     "作者名": "宝玉",
+     "line": "秋夜：绛芸轩里安静下来，月光透进茜纱窗。苔石边睡着鹤，井边梧桐的露水打湿了栖鸦。丫鬟抱被来铺，夜里酒渴睡不着，拨香要茶。",
+     "句": [
+      "絳芸軒裡絕喧嘩，桂魄流光浸茜紗。",
+      "苔鎖石紋容睡鶴，井飄桐露濕棲鴉。",
+      "抱衾婢至舒金鳳，倚檻人歸落翠花。",
+      "靜夜不眠因酒渴，沉煙重撥索烹茶。"
+     ],
+     "hui": [
+      23
+     ],
+     "img": {},
+     "people": [
+      "baoyu"
+     ]
+    },
+    "jishi-dong": {
+     "n": "冬夜即事",
+     "t": "冬夜即事",
+     "author": "baoyu",
+     "作者名": "宝玉",
+     "line": "冬夜：三更了还睡不着。满院松影里只看见鹤，雪像梨花铺了一地。诗冷酒薄，幸好丫头懂茶，扫了新雪来煮。",
+     "句": [
+      "梅魂竹夢已三更，錦罽鷫衾睡未成。",
+      "松影一庭惟見鶴，梨花滿地不聞鶯。",
+      "女兒翠袖詩懷冷，公子金貂酒力輕。",
+      "卻喜侍兒知試茗，掃將新雪及時烹。"
+     ],
+     "hui": [
+      23
+     ],
+     "img": {},
+     "people": [
+      "baoyu"
+     ]
+    },
+    "zanghua-yin": {
+     "n": "葬花吟",
+     "t": "葬花吟",
+     "author": "daiyu",
+     "作者名": "黛玉",
+     "line": "暮春花落，她把落花埋进干净土里，一句一句问自己：今天我葬花，笑我痴；将来谁来葬我？",
+     "句": [
+      "花謝花飛花滿天，紅消香斷有誰憐？",
+      "游絲軟繫飄春榭，落絮輕沾撲繡簾。",
+      "閨中女兒惜春暮，愁緒滿懷無釋處，",
+      "手把花鋤出繡閨，忍踏落花來復去。",
+      "柳絲榆莢自芳菲，不管桃飄與李飛。",
+      "桃李明年能再發，明年閨中知有誰？",
+      "三月香巢已壘成，梁間燕子太無情！",
+      "明年花發雖可啄，卻不道人去梁空巢也傾。"
+     ],
+     "hui": [
+      27
+     ],
+     "img": {},
+     "people": [
+      "daiyu"
+     ]
+    },
+    "qiuchuang": {
+     "n": "秋窗風雨夕",
+     "t": "秋窗風雨夕",
+     "author": "daiyu",
+     "作者名": "黛玉",
+     "line": "秋夜雨里一个人灯下写词，一句一个「秋」字，写风雨穿窗、泪烛摇摇，到最后连窗纱都被眼泪湿透。",
+     "句": [
+      "秋花慘淡秋草黃，耿耿秋燈秋夜長。",
+      "已覺秋窗秋不盡，那堪風雨助淒涼！",
+      "助秋風雨來何速！驚破秋窗秋夢綠。",
+      "抱得秋情不忍眠，自向秋屏移淚燭。",
+      "淚燭搖搖爇短檠，牽愁照恨動離情。",
+      "誰家秋院無風入？何處秋窗無雨聲？",
+      "羅衾不奈秋風力，殘漏聲催秋雨急。",
+      "連宵脈脈復颼颼，燈前似伴離人泣。"
+     ],
+     "hui": [
+      45
+     ],
+     "img": {},
+     "people": [
+      "daiyu"
+     ]
+    },
+    "taohua-xing": {
+     "n": "桃花行",
+     "t": "桃花行",
+     "author": "daiyu",
+     "作者名": "黛玉",
+     "line": "帘外桃花开，帘里人比花瘦；用眼泪比花，泪流不停、花开自媚，杜鹃一叫春天走尽，只剩帘里空月。",
+     "句": [
+      "桃花簾外東風軟，桃花簾內晨妝懶。",
+      "簾外桃花簾內人，人與桃花隔不遠。",
+      "東風有意揭簾櫳，花欲窺人簾不捲。",
+      "桃花簾外開仍舊，簾中人比桃花瘦。",
+      "花解憐人花也愁，隔簾消息風吹透。",
+      "風透湘簾花滿庭，庭前春色倍傷情。",
+      "閒苔院落門空掩，斜日欄杆人自憑。",
+      "憑欄人向東風泣，茜裙偷傍桃花立。"
+     ],
+     "hui": [
+      70
+     ],
+     "img": {},
+     "people": [
+      "daiyu"
+     ]
+    },
+    "ju-yong": {
+     "n": "詠菊",
+     "t": "詠菊",
+     "author": "daiyu",
+     "作者名": "黛玉",
+     "line": "诗魔缠身，绕着篱笆倚着石头吟，对着月亮念，满纸写的是素日的怨；说自陶渊明评定菊花以后，千古高风一直说到今天。",
+     "句": [
+      "無賴詩魔昏曉侵，繞籬欹石自沉音。",
+      "毫端蘊秀臨霜寫，口齒噙香對月吟。",
+      "滿紙自憐題素怨，片言誰解訴秋心。",
+      "一從陶令平章後，千古高風說到今。"
+     ],
+     "hui": [
+      38
+     ],
+     "img": {},
+     "people": [
+      "daiyu"
+     ]
+    },
+    "ju-wen": {
+     "n": "問菊",
+     "t": "問菊",
+     "author": "daiyu",
+     "作者名": "黛玉",
+     "line": "想打听秋天的心事没人知道，背着手低声去叩篱笆：你孤高傲世，能和谁一起隐？为什么偏偏开得这样迟？别说世上没人谈心，会说话的",
+     "句": [
+      "欲訊秋情眾莫知，喃喃負手叩東籬。",
+      "孤標傲世偕誰隱，一樣花開為底遲？",
+      "圃露庭霜何寂寞，鴻歸蛩病可相思？",
+      "休言舉世無談者，解語何妨片語時。"
+     ],
+     "hui": [
+      38
+     ],
+     "img": {},
+     "people": [
+      "daiyu"
+     ]
+    },
+    "ju-meng": {
+     "n": "菊夢",
+     "t": "菊夢",
+     "author": "daiyu",
+     "作者名": "黛玉",
+     "line": "篱边醉了一觉清醒，和云伴月迷迷糊糊；不羡庄周化蝶，只想找回和陶渊明的旧盟；梦醒时的幽怨对谁说，只有衰草寒烟。",
+     "句": [
+      "籬畔秋酣一覺清，和雲伴月不分明。",
+      "登仙非慕莊生蝶，憶舊還尋陶令盟。",
+      "睡去依依隨雁斷，驚回故故惱蛩鳴。",
+      "醒時幽怨同誰訴，衰草寒煙無限情。"
+     ],
+     "hui": [
+      38
+     ],
+     "img": {},
+     "people": [
+      "daiyu"
+     ]
+    },
+    "ju-hua": {
+     "n": "畫菊",
+     "t": "畫菊",
+     "author": "baochai",
+     "作者名": "宝钗",
+     "line": "这只是作诗之余的游戏笔墨，不必费心较量；泼墨成叶、染出一痕霜，别把它当成东篱闲采的真菊，只是贴在屏风上慰藉重阳。",
+     "句": [
+      "詩餘戲筆不知狂，豈是丹青費較量。",
+      "聚葉潑成千點墨，攢花染出幾痕霜。",
+      "淡濃神會風前影，跳脫秋生腕底香。",
+      "莫認東籬閒采掇，粘屏聊以慰重陽。"
+     ],
+     "hui": [
+      38
+     ],
+     "img": {},
+     "people": [
+      "baochai"
+     ]
+    },
+    "ju-yi": {
+     "n": "憶菊",
+     "t": "憶菊",
+     "author": "baochai",
+     "作者名": "宝钗",
+     "line": "西风里惆怅，蓼红苇白的断肠时节；空篱旧圃没了秋的踪迹，只在梦里知道；谁怜我为黄花生病，只好劝慰自己重阳会有个约期。",
+     "句": [
+      "悵望西風抱悶思，蓼紅葦白斷腸時。",
+      "空籬舊圃秋無跡，瘦月清霜夢有知。",
+      "念念心隨歸雁遠，寥寥坐聽晚砧痴，",
+      "誰憐我為黃花病，慰語重陽會有期。"
+     ],
+     "hui": [
+      38
+     ],
+     "img": {},
+     "people": [
+      "baochai"
+     ]
+    },
+    "ju-fang": {
+     "n": "訪菊",
+     "t": "訪菊",
+     "author": "baoyu",
+     "作者名": "宝玉",
+     "line": "趁着霜晴出去走走，拄杖寻菊；霜前月下谁家种，篱边何处有愁；若黄花懂得怜惜诗客，别辜负今天杖头挂钱出来寻访的这一趟。",
+     "句": [
+      "閒趁霜晴試一游，酒杯藥盞莫淹留。",
+      "霜前月下誰家種，檻外籬邊何處愁。",
+      "蠟屐遠來情得得，冷吟不盡興悠悠。",
+      "黃花若解憐詩客，休負今朝掛杖頭。"
+     ],
+     "hui": [
+      38
+     ],
+     "img": {},
+     "people": [
+      "baoyu"
+     ]
+    },
+    "ju-zhong": {
+     "n": "種菊",
+     "t": "種菊",
+     "author": "baoyu",
+     "作者名": "宝玉",
+     "line": "扛着锄头把菊花从秋圃移来，篱边庭前栽满；一夜雨后居然活了，今朝带霜开；勤勤护惜，只愿这里的小路不染尘埃。",
+     "句": [
+      "攜鋤秋圃自移來，籬畔庭前故故栽。",
+      "昨夜不期經雨活，今朝猶喜帶霜開。",
+      "冷吟秋色詩千首，醉酹寒香酒一杯。",
+      "泉溉泥封勤護惜，好知井徑絕塵埃。"
+     ],
+     "hui": [
+      38
+     ],
+     "img": {},
+     "people": [
+      "baoyu"
+     ]
+    },
+    "ju-dui": {
+     "n": "對菊",
+     "t": "對菊",
+     "author": "xiangyun",
+     "作者名": "湘云",
+     "line": "从别的园子移来的菊花，贵比黄金，一丛浅一丛深；坐在篱边抱膝吟诗，数来没有谁比它更傲世，看来只有我是它的知音。",
+     "句": [
+      "別圃移來貴比金，一叢淺淡一叢深。",
+      "蕭疏籬畔科頭坐，清冷香中抱膝吟。",
+      "數去更無君傲世，看來惟有我知音。",
+      "秋光荏苒休辜負，相對原宜惜寸陰。"
+     ],
+     "hui": [
+      38
+     ],
+     "img": {},
+     "people": [
+      "xiangyun"
+     ]
+    },
+    "ju-gong": {
+     "n": "供菊",
+     "t": "供菊",
+     "author": "xiangyun",
+     "作者名": "湘云",
+     "line": "弹琴喝酒有菊作伴，几案上摆着幽雅的一枝；香从三径的露里分来，放下书正对着一枝秋；它傲世也因气味相投，春风里的桃李留不住它",
+     "句": [
+      "彈琴酌酒喜堪儔，几案婷婷點綴幽。",
+      "隔座香分三徑露，拋書人對一枝秋。",
+      "霜清紙帳來新夢，圃冷斜陽憶舊游。",
+      "傲世也因同氣味，春風桃李未淹留。"
+     ],
+     "hui": [
+      38
+     ],
+     "img": {},
+     "people": [
+      "xiangyun"
+     ]
+    },
+    "ju-ying": {
+     "n": "菊影",
+     "t": "菊影",
+     "author": "xiangyun",
+     "作者名": "湘云",
+     "line": "秋光层层叠叠，悄悄在三径间移动；窗隔着灯描出远近，篱把月筛碎；珍重暗香别踏碎，醉眼谁认得出这朦胧。",
+     "句": [
+      "秋光疊疊復重重，潛度偷移三徑中。",
+      "窗隔疏燈描遠近，籬篩破月鎖玲瓏。",
+      "寒芳留照魂應駐，霜印傳神夢也空。",
+      "珍重暗香休踏碎，憑誰醉眼認朦朧。"
+     ],
+     "hui": [
+      38
+     ],
+     "img": {},
+     "people": [
+      "xiangyun"
+     ]
+    },
+    "ju-zan": {
+     "n": "簪菊",
+     "t": "簪菊",
+     "author": "tanchun",
+     "作者名": "探春",
+     "line": "瓶里供、篱边栽，天天忙；折来别当镜里的妆；长安公子爱花，彭泽先生爱酒；短鬓戴着花沾露、葛巾染着霜，高情不入俗人眼，任凭路",
+     "句": [
+      "瓶供籬栽日日忙，折來休認鏡中妝。",
+      "長安公子因花癖，彭澤先生是酒狂。",
+      "短鬢冷沾三徑露，葛巾香染九秋霜。",
+      "高情不入時人眼，拍手憑他笑路旁。"
+     ],
+     "hui": [
+      38
+     ],
+     "img": {},
+     "people": [
+      "tanchun"
+     ]
+    },
+    "ju-can": {
+     "n": "殘菊",
+     "t": "殘菊",
+     "author": "tanchun",
+     "作者名": "探春",
+     "line": "露凝霜重，花渐渐倾斜，赏宴刚过小雪；花蒂还有余香、枝上没有整片叶；半床落月、一声病蛩，万里寒云、迟迟的雁阵；明年秋风再会",
+     "句": [
+      "露凝霜重漸傾欹，宴賞才過小雪時。",
+      "蒂有餘香金淡泊，枝無全葉翠離披。",
+      "半床落月蛩聲病，萬里寒雲雁陣遲。",
+      "明歲秋風知再會，暫時分手莫相思。"
+     ],
+     "hui": [
+      38
+     ],
+     "img": {},
+     "people": [
+      "tanchun"
+     ]
+    },
+    "wumei-xi": {
+     "n": "西施",
+     "t": "西施",
+     "author": "daiyu",
+     "作者名": "黛玉",
+     "line": "西施如今只剩一个传说：一代美人被浪花淘去，吴宫空自念着她；别笑东村效颦的女子，头发白了仍在溪边浣纱。",
+     "句": [
+      "一代傾城逐浪花，吳宮空自憶兒家。",
+      "效顰莫笑東村女，頭白溪邊尚浣紗。"
+     ],
+     "hui": [
+      64
+     ],
+     "img": {},
+     "people": [
+      "daiyu"
+     ]
+    },
+    "wumei-yu": {
+     "n": "虞姬",
+     "t": "虞姬",
+     "author": "daiyu",
+     "作者名": "黛玉",
+     "line": "夜里乌骓风中嘶鸣，虞姬对着重瞳的项王含恨；韩信、彭越将来甘受酷刑，哪里比得上在楚营帐里拔剑自刎。",
+     "句": [
+      "腸斷烏騅夜嘯風，虞兮幽恨對重瞳。",
+      "黥彭甘受他年醢，飲劍何如楚帳中。"
+     ],
+     "hui": [
+      64
+     ],
+     "img": {},
+     "people": [
+      "daiyu"
+     ]
+    },
+    "wumei-ming": {
+     "n": "明妃",
+     "t": "明妃",
+     "author": "daiyu",
+     "作者名": "黛玉",
+     "line": "王昭君绝艳惊人地出了汉宫，红颜命薄古今一样；君王纵使轻看颜色，生杀予夺的权力怎能交给画工？",
+     "句": [
+      "絕艷驚人出漢宮，紅顏命薄古今同。",
+      "君王縱使輕顏色，予奪權何畀畫工？"
+     ],
+     "hui": [
+      64
+     ],
+     "img": {},
+     "people": [
+      "daiyu"
+     ]
+    },
+    "wumei-lu": {
+     "n": "綠珠",
+     "t": "綠珠",
+     "author": "daiyu",
+     "作者名": "黛玉",
+     "line": "绿珠一例被抛作瓦砾间的明珠，石崇何曾真重视她；都因前世修下的顽福，还有同归于尽来安慰寂寥。",
+     "句": [
+      "瓦礫明珠一例拋，何曾石尉重嬌嬈。",
+      "都緣頑福前生造，更有同歸慰寂寥。"
+     ],
+     "hui": [
+      64
+     ],
+     "img": {},
+     "people": [
+      "daiyu"
+     ]
+    },
+    "wumei-hong": {
+     "n": "紅拂",
+     "t": "紅拂",
+     "author": "daiyu",
+     "作者名": "黛玉",
+     "line": "红拂长揖雄谈、风姿特别，美人慧眼识得落魄英雄；杨素那样空占着尸居余气的官位，怎能羁縻这位女丈夫。",
+     "句": [
+      "長揖雄談態自殊，美人巨眼識窮途。",
+      "屍居餘氣楊公幕，豈得羈縻女丈夫。"
+     ],
+     "hui": [
+      64
+     ],
+     "img": {},
+     "people": [
+      "daiyu"
+     ]
+    },
+    "tipa": {
+     "n": "題帕三絕",
+     "t": "題帕三絕",
+     "author": "daiyu",
+     "作者名": "黛玉",
+     "line": "她在宝玉送来的两条旧帕上题三首：第一首问眼泪为谁洒，第二首说泪擦不干，第三首对着窗前的竹子，问它认不认帕上的泪痕。",
+     "句": [
+      "眼空蓄淚淚空垂，暗灑閒拋卻為誰？",
+      "尺幅鮫鮹勞解贈，叫人焉得不傷悲！",
+      "其二",
+      "拋珠滾玉只偷潸，鎮日無心鎮日閒，",
+      "枕上袖邊難拂拭，任他點點與斑斑。",
+      "其三",
+      "彩線難收面上珠，湘江舊跡已模糊，",
+      "窗前亦有千竿竹，不識香痕漬也無？"
+     ],
+     "hui": [
+      34
+     ],
+     "img": {},
+     "people": [
+      "daiyu"
+     ]
+    },
+    "liuxu-dai": {
+     "n": "唐多令·柳絮",
+     "t": "唐多令·柳絮",
+     "author": "daiyu",
+     "作者名": "黛玉",
+     "line": "柳絮落满百花洲，像人命薄：团团逐对成毬，飘泊没有归处；草木也知愁、韶华白了头，最后说嫁与东风它也不管，只能由它去、忍着挽",
+     "句": [
+      "粉墮百花州，香殘燕子樓。一團團逐對成毬。飄泊亦如人命薄，空繾綣，說風流。",
+      "草木也知愁，韶華竟白頭！歎今生誰捨誰收？嫁與東風春不管，憑爾去，忍淹留。"
+     ],
+     "hui": [
+      70
+     ],
+     "img": {},
+     "people": [
+      "daiyu"
+     ]
+    },
+    "liuxu-chai": {
+     "n": "臨江仙·柳絮",
+     "t": "臨江仙·柳絮",
+     "author": "baochai",
+     "作者名": "宝钗",
+     "line": "偏要把柳絮说好：它在白玉堂前随东风起舞，蜂团蝶阵里乱纷纷，万缕千丝始终不改，哪怕本无根，只要好风借力，就送我上青云。",
+     "句": [
+      "白玉堂前春解舞，東風卷得均勻。",
+      "蜂團蝶陣亂紛紛。幾曾隨逝水，豈必委芳塵。",
+      "萬縷千絲終不改，任他隨聚隨分。韶華休笑本無根，好風頻借力，送我上青雲！"
+     ],
+     "hui": [
+      70
+     ],
+     "img": {},
+     "people": [
+      "baochai"
+     ]
+    },
+    "pangxie": {
+     "n": "螃蟹詠",
+     "t": "螃蟹詠",
+     "author": "baochai",
+     "作者名": "宝钗",
+     "line": "借吃螃蟹讽刺世人：坐在桂荫桐阴下举杯，只盼重阳；它横行却路径无章，皮里春秋空有黑黄；酒也敌不过腥，要用菊和姜，如今落了锅",
+     "句": [
+      "桂靄桐陰坐舉觴，長安涎口盼重陽。",
+      "眼前道路無經緯，皮裡春秋空黑黃。",
+      "酒未敵腥還用菊，性防積冷定須薑。",
+      "於今落釜成何益，月浦空餘禾黍香。"
+     ],
+     "hui": [
+      38
+     ],
+     "img": {},
+     "people": [
+      "baochai"
+     ]
+    },
+    "haitang-xiangyun-1": {
+     "n": "詠白海棠（其一）",
+     "t": "詠白海棠（其一）",
+     "author": "xiangyun",
+     "作者名": "湘云",
+     "line": "湘云一进社就依韵和了两首。第一首说海棠像神仙昨日降到都门、种下的一盆蓝田玉，偏爱冷，不是倩女离魂；秋阴捧出雪，雨痕添了隔",
+     "句": [
+      "神仙昨日降都門，種得藍田玉一盆。",
+      "自是霜娥偏愛冷，非關倩女亦離魂。",
+      "秋陰捧出何方雪，雨漬添來隔宿痕。",
+      "卻喜詩人吟不倦，豈令寂寞度朝昏。"
+     ],
+     "hui": [
+      37
+     ],
+     "img": {},
+     "people": [
+      "xiangyun"
+     ]
+    },
+    "haitang-xiangyun-2": {
+     "n": "詠白海棠（其二）",
+     "t": "詠白海棠（其二）",
+     "author": "xiangyun",
+     "作者名": "湘云",
+     "line": "第二首：蘅芷阶通到蘿薜门，海棠墙角盆里都宜；花因爱洁难寻同伴，人为悲秋易断魂；风里泪、月中痕，想对嫦娥倾诉，无奈走廊空、",
+     "句": [
+      "蘅芷階通蘿薜門，也宜牆角也宜盆。",
+      "花因喜潔難尋偶，人為悲秋易斷魂。",
+      "玉燭滴乾風裡淚，晶簾隔破月中痕。",
+      "幽情慾向嫦娥訴，無奈虛廊夜色昏。"
+     ],
+     "hui": [
+      37
+     ],
+     "img": {},
+     "people": [
+      "xiangyun"
+     ]
+    },
+    "liuxu-yun": {
+     "n": "如夢令·柳絮",
+     "t": "如夢令·柳絮",
+     "author": "xiangyun",
+     "作者名": "湘云",
+     "line": "她看见柳花飘舞，随手填了这首小令：哪是绣绒吐残、卷起半帘香雾，是纤手拈起的，只让杜鹃啼、燕子嫉妒；且住且住，别让春光走了",
+     "句": [
+      "豈是繡絨殘吐，捲起半簾香霧，纖手自拈來，空使鵑啼燕妒。且住，且住！莫使春光別去。"
+     ],
+     "hui": [
+      70
+     ],
+     "img": {},
+     "people": [
+      "xiangyun"
+     ]
+    },
+    "qimei-shi": {
+     "n": "訪妙玉乞紅梅",
+     "t": "訪妙玉乞紅梅",
+     "author": "baoyu",
+     "作者名": "宝玉",
+     "line": "被罚去栊翠庵向妙玉讨红梅，在黛玉、湘云催逼下一联联念出：不求观音瓶里的露，只乞嫦娥栏外的梅；入世挑红雪、离尘割紫云，衣上",
+     "句": [
+      "酒未開樽句未裁，",
+      "尋春問臘到蓬萊。",
+      "不求大士瓶中露，為乞嫦娥檻外梅。",
+      "入世冷挑紅雪去，離塵香割紫雲來。",
+      "槎枒誰惜詩肩瘦，衣上猶沾佛院苔。"
+     ],
+     "hui": [
+      50
+     ],
+     "img": {},
+     "people": [
+      "baoyu"
+     ]
+    },
+    "liuxu-tan": {
+     "n": "南柯子·柳絮",
+     "t": "南柯子·柳絮",
+     "author": [
+      "tanchun",
+      "baoyu"
+     ],
+     "作者名": "探春、宝玉",
+     "line": "探春只写了半首：柳丝空挂、络络垂丝，既难系又难羁，任它东西南北各分离；宝玉续下半：落去你别惜，飞来我自知，莺愁蝶倦的晚芳",
+     "句": [
+      "空掛纖纖縷，徒垂絡絡絲，也難綰繫也難羈，一任東西南北各分離。",
+      "落去君休惜，飛來我自知。鶯愁蝶倦晚芳時，縱是明春再見隔年期！"
+     ],
+     "hui": [
+      70
+     ],
+     "img": {},
+     "people": [
+      [
+       "tanchun",
+       "baoyu"
+      ]
+     ]
+    },
+    "guihua-ci": {
+     "n": "姽嫿詞",
+     "t": "姽嫿詞",
+     "author": "baoyu",
+     "作者名": "宝玉",
+     "line": "贾政命作林四娘的事，宝玉先说要古体长篇歌行，边念边被贾政改：恒王好武又好色，教美女学骑射；流寇来犯，恒王战死，众将保身，",
+     "句": [
+      "恆王好武兼好色，",
+      "遂教美女習騎射。",
+      "穠歌艷舞不成歡，列陣挽戈為自得。",
+      "眼前不見塵沙起，將軍俏影紅燈裡。",
+      "叱吒時聞口舌香，霜矛雪劍嬌難舉。",
+      "丁香結子芙蓉絛，",
+      "不繫明珠繫寶刀。",
+      "戰罷夜闌心力怯，脂痕粉漬污鮫鮹。"
+     ],
+     "hui": [
+      78
+     ],
+     "img": {},
+     "people": [
+      "baoyu"
+     ]
+    },
+    "furong-lei": {
+     "n": "芙蓉女兒誄（節選）",
+     "t": "芙蓉女兒誄（節選）",
+     "author": "baoyu",
+     "作者名": "宝玉",
+     "line": "祭晴雯的祭文，他拿群花的蕊、冰蚕丝织的绡、沁芳泉、枫露茶祭她；说她质地金玉不足比贵、性情冰雪不足比洁，鸠和鹰、恶草和兰容",
+     "句": [
+      "維太平不易之元，蓉桂競芳之月，無可奈何之日，怡紅院濁玉，謹以群花之蕊、冰鮫之縠、沁芳之泉、楓露之茗，四者雖微，聊以達誠申信，乃致祭於白帝宮中撫司秋艷芙蓉女兒之前曰：",
+      "竊思女兒自臨濁世，迄今凡十有六載。其先之鄉籍姓氏，湮淪而莫能考者久矣。而玉得於衾枕櫛沐之間，棲息宴遊之夕，親昵狎褻，相與共處者，僅五年八月有畸。憶女兒曩生之昔，其為質則金玉不足喻其貴，其為性則冰雪不足喻其潔，其為神則星日不足喻其精，其為貌則花月不足喻其色。姊妹悉慕媖嫻，嫗媼咸仰惠德。孰料鳩鴆惡其高，鷹鷙翻遭罦罬，薋葹妒其臭，茞蘭竟被芟鉏！花原自怯，豈奈狂飆，柳本多愁，何禁驟雨。"
+     ],
+     "hui": [
+      78
+     ],
+     "img": {},
+     "people": [
+      "baoyu"
+     ]
+    },
+    "dengmi-yingchun": {
+     "n": "燈謎（算盤）",
+     "t": "燈謎（算盤）",
+     "author": "yingchun",
+     "作者名": "迎春",
+     "line": "谜底算盘：天运人功道理不穷，有功没运也难逢；为什么整天纷纷乱，只为阴阳数不同。",
+     "句": [
+      "天運人功理不窮，有功無運也難逢。",
+      "因何鎮日紛紛亂，只為陰陽數不同。"
+     ],
+     "hui": [
+      22
+     ],
+     "img": {},
+     "people": [
+      "yingchun"
+     ]
+    },
+    "dengmi-xichun": {
+     "n": "燈謎（海燈）",
+     "t": "燈謎（海燈）",
+     "author": "xichun",
+     "作者名": "惜春",
+     "line": "谜底佛前海灯：前身色相一场空，不听菱歌听佛经；别说此生沉在黑海，性中自有大光明。",
+     "句": [
+      "前身色相總無成，不聽菱歌聽佛經。",
+      "莫道此生沉黑海，性中自有大光明。"
+     ],
+     "hui": [
+      22
+     ],
+     "img": {},
+     "people": [
+      "xichun"
+     ]
+    },
+    "dengmi-tanchun": {
+     "n": "燈謎（風箏）",
+     "t": "燈謎（風箏）",
+     "author": "tanchun",
+     "作者名": "探春",
+     "line": "谜底风筝：阶下孩子仰面看，清明时节装点最宜；游丝一断就没了力气，别在东风里怨别离。",
+     "句": [
+      "階下兒童仰面時，清明妝點最堪宜。",
+      "游絲一斷渾無力，莫向東風怨別離。"
+     ],
+     "hui": [
+      22
+     ],
+     "img": {},
+     "people": [
+      "tanchun"
+     ]
+    },
+    "dengmi-baochai": {
+     "n": "燈謎（更香）",
+     "t": "燈謎（更香）",
+     "author": "baochai",
+     "作者名": "宝钗",
+     "line": "谜底更香：朝罢谁带着满袖香烟，琴边被里都没缘分；不用报晓的鸡人，五更不烦侍女添；整天焦首煎心，光阴荏苒要珍惜，风雨阴晴任",
+     "句": [
+      "朝罷誰攜兩袖煙，琴邊衾裡總無緣。",
+      "曉籌不用雞人報，五夜無煩侍女添。",
+      "焦首朝朝還暮暮，煎心日日復年年。",
+      "光陰荏苒須當惜，風雨陰晴任變遷。"
+     ],
+     "hui": [
+      22
+     ],
+     "img": {},
+     "people": [
+      "baochai"
+     ]
+    },
+    "zhongqiu-lian": {
+     "n": "中秋夜大觀園即景聯句（湘雲黛玉二十二韻）",
+     "t": "中秋夜大觀園即景聯句（湘雲黛玉二十二韻）",
+     "author": [
+      "daiyu",
+      "xiangyun"
+     ],
+     "作者名": "黛玉、湘云",
+     "line": "中秋夜在凹晶溪馆，黛玉起句、湘云接，二人轮流联了二十二韵：从满园管弦、分瓜射覆，一路联到秋湍、寒塘；湘云「寒塘渡鶴影」，",
+     "句": [
+      "三五中秋夕，清游擬上元。",
+      "撒天箕斗燦，匝地管弦繁。",
+      "幾處狂飛盞，誰家不啟軒。",
+      "輕寒風剪剪，良夜景暄暄。",
+      "爭餅嘲黃發，分瓜笑綠嬡。",
+      "香新榮玉桂，色健茂金萱。",
+      "蠟燭輝瓊宴，觥籌亂綺園。",
+      "分曹尊一令，射覆聽三宣。"
+     ],
+     "hui": [
+      76
+     ],
+     "img": {},
+     "people": [
+      [
+       "daiyu",
+       "xiangyun"
+      ]
+     ]
+    },
+    "zhongqiu-miaoyu": {
+     "n": "中秋聯句續（妙玉十三韵）",
+     "t": "中秋聯句續（妙玉十三韵）",
+     "author": "miaoyu",
+     "作者名": "妙玉",
+     "line": "妙玉出来拦住「太悲凉」，带二人回栊翠庵，提笔一挥而就续了十三韵，把联句从颓败拉回到「香篆、脂冰」的闺阁本色，结在「徹旦休",
+     "句": [
+      "香篆銷金鼎，脂冰膩玉盆。",
+      "簫增嫠婦泣，衾倩侍兒溫。",
+      "空帳懸文鳳，閒屏掩彩鴛。",
+      "露濃苔更滑，霜重竹難捫。",
+      "猶步縈紆沼，還登寂歷原。",
+      "石奇神鬼搏，木怪虎狼蹲。",
+      "贔屭朝光透，罘罳曉露屯。",
+      "振林千樹鳥，啼谷一聲猿。"
+     ],
+     "hui": [
+      76
+     ],
+     "img": {},
+     "people": [
+      "miaoyu"
+     ]
+    },
+    "luxue-lianju": {
+     "n": "蘆雪广即景聯句（雪）",
+     "t": "蘆雪广即景聯句（雪）",
+     "author": [
+      "fengjie",
+      "liwan",
+      "xiangling",
+      "tanchun",
+      "liqi",
+      "liwen",
+      "xiuyan",
+      "xiangyun",
+      "baoqin",
+      "daiyu",
+      "baoyu",
+      "baochai"
+     ],
+     "作者名": "李纨等",
+     "line": "雪天在芦雪庵联句，凤姐起了「一夜北风紧」，李纨接「开门雪尚飘」，随后香菱、探春、湘云、宝琴、黛玉、宝玉、宝钗、岫烟、李纹",
+     "句": [
+      "一夜北風緊，開門雪尚飄。",
+      "入泥憐潔白，匝地惜瓊瑤。",
+      "有意榮枯草，無心飾萎苕。",
+      "價高村釀熟，年稔府粱饒。",
+      "葭動灰飛管，陽回斗轉杓。",
+      "寒山已失翠，凍浦不聞潮。",
+      "易掛疏枝柳，難堆破葉蕉。",
+      "麝煤融寶鼎，綺袖籠金貂。"
+     ],
+     "hui": [
+      50
+     ],
+     "img": {},
+     "people": [
+      [
+       "fengjie",
+       "liwan",
+       "xiangling",
+       "tanchun",
+       "liqi",
+       "liwen",
+       "xiuyan",
+       "xiangyun",
+       "baoqin",
+       "daiyu",
+       "baoyu",
+       "baochai"
+      ]
+     ]
+    }
+   }
+  },
+  "hui": {
+   "kind": "hui",
+   "名": "回目",
+   "单位": "回",
+   "总": 120,
+   "来源": {
+    "文件": [
+     "dgy-assets/text/hlm/index.json",
+     "dgy-assets/replay/*.json",
+     "dgy/albumData.js"
+    ],
+    "字段": "index.json 各回.{回,回名,回目}；replay.*.回/id；ALBUMS.*.回目",
+    "说明": "解锁条件：看完该回的重现，或在阅读器里读过（读到末尾）。"
+   },
+   "分组": [
+    {
+     "id": "v0",
+     "名": "第一回至第十回",
+     "ids": [
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "8",
+      "9",
+      "10"
+     ]
+    },
+    {
+     "id": "v1",
+     "名": "第十一回至第二十回",
+     "ids": [
+      "11",
+      "12",
+      "13",
+      "14",
+      "15",
+      "16",
+      "17",
+      "18",
+      "19",
+      "20"
+     ]
+    },
+    {
+     "id": "v2",
+     "名": "第二十一回至第三十回",
+     "ids": [
+      "21",
+      "22",
+      "23",
+      "24",
+      "25",
+      "26",
+      "27",
+      "28",
+      "29",
+      "30"
+     ]
+    },
+    {
+     "id": "v3",
+     "名": "第三十一回至第四十回",
+     "ids": [
+      "31",
+      "32",
+      "33",
+      "34",
+      "35",
+      "36",
+      "37",
+      "38",
+      "39",
+      "40"
+     ]
+    },
+    {
+     "id": "v4",
+     "名": "第四十一回至第五十回",
+     "ids": [
+      "41",
+      "42",
+      "43",
+      "44",
+      "45",
+      "46",
+      "47",
+      "48",
+      "49",
+      "50"
+     ]
+    },
+    {
+     "id": "v5",
+     "名": "第五十一回至第六十回",
+     "ids": [
+      "51",
+      "52",
+      "53",
+      "54",
+      "55",
+      "56",
+      "57",
+      "58",
+      "59",
+      "60"
+     ]
+    },
+    {
+     "id": "v6",
+     "名": "第六十一回至第七十回",
+     "ids": [
+      "61",
+      "62",
+      "63",
+      "64",
+      "65",
+      "66",
+      "67",
+      "68",
+      "69",
+      "70"
+     ]
+    },
+    {
+     "id": "v7",
+     "名": "第七十一回至第八十回",
+     "ids": [
+      "71",
+      "72",
+      "73",
+      "74",
+      "75",
+      "76",
+      "77",
+      "78",
+      "79",
+      "80"
+     ]
+    },
+    {
+     "id": "v8",
+     "名": "第八十一回至第九十回",
+     "ids": [
+      "81",
+      "82",
+      "83",
+      "84",
+      "85",
+      "86",
+      "87",
+      "88",
+      "89",
+      "90"
+     ]
+    },
+    {
+     "id": "v9",
+     "名": "第九十一回至第一百回",
+     "ids": [
+      "91",
+      "92",
+      "93",
+      "94",
+      "95",
+      "96",
+      "97",
+      "98",
+      "99",
+      "100"
+     ]
+    },
+    {
+     "id": "v10",
+     "名": "第一百零一回至第一百十回",
+     "ids": [
+      "101",
+      "102",
+      "103",
+      "104",
+      "105",
+      "106",
+      "107",
+      "108",
+      "109",
+      "110"
+     ]
+    },
+    {
+     "id": "v11",
+     "名": "第一百十一回至第一百二十回",
+     "ids": [
+      "111",
+      "112",
+      "113",
+      "114",
+      "115",
+      "116",
+      "117",
+      "118",
+      "119",
+      "120"
+     ]
+    }
+   ],
+   "条目": {
+    "1": {
+     "n": "第一回",
+     "t": "第一回",
+     "mu": "甄士隱夢幻識通靈 賈雨村風塵懷閨秀",
+     "line": "甄士隱夢幻識通靈 賈雨村風塵懷閨秀",
+     "hui": [
+      1
+     ]
+    },
+    "2": {
+     "n": "第二回",
+     "t": "第二回",
+     "mu": "賈夫人仙逝揚州城 冷子興演說榮國府",
+     "line": "賈夫人仙逝揚州城 冷子興演說榮國府",
+     "hui": [
+      2
+     ]
+    },
+    "3": {
+     "n": "第三回",
+     "t": "第三回",
+     "mu": "金陵城起復賈雨村 榮國府收養林黛玉",
+     "line": "金陵城起復賈雨村 榮國府收養林黛玉",
+     "hui": [
+      3
+     ]
+    },
+    "4": {
+     "n": "第四回",
+     "t": "第四回",
+     "mu": "薄命女偏逢薄命郎 葫蘆僧亂判葫蘆案",
+     "line": "薄命女偏逢薄命郎 葫蘆僧亂判葫蘆案",
+     "hui": [
+      4
+     ]
+    },
+    "5": {
+     "n": "第五回",
+     "t": "第五回",
+     "mu": "開生面夢演紅樓夢 立新場情傳幻境情",
+     "line": "開生面夢演紅樓夢 立新場情傳幻境情",
+     "hui": [
+      5
+     ]
+    },
+    "6": {
+     "n": "第六回",
+     "t": "第六回",
+     "mu": "賈寶玉初試雲雨情 劉姥姥一進榮國府",
+     "line": "賈寶玉初試雲雨情 劉姥姥一進榮國府",
+     "hui": [
+      6
+     ]
+    },
+    "7": {
+     "n": "第七回",
+     "t": "第七回",
+     "mu": "送宮花周瑞嘆英蓮 談肄業秦鐘結寶玉",
+     "line": "送宮花周瑞嘆英蓮 談肄業秦鐘結寶玉",
+     "hui": [
+      7
+     ]
+    },
+    "8": {
+     "n": "第八回",
+     "t": "第八回",
+     "mu": "薛寶釵小恙梨香院 賈寶玉大醉絳芸軒",
+     "line": "薛寶釵小恙梨香院 賈寶玉大醉絳芸軒",
+     "hui": [
+      8
+     ]
+    },
+    "9": {
+     "n": "第九回",
+     "t": "第九回",
+     "mu": "戀風流情友入家塾 起嫌疑頑童鬧學堂",
+     "line": "戀風流情友入家塾 起嫌疑頑童鬧學堂",
+     "hui": [
+      9
+     ]
+    },
+    "10": {
+     "n": "第十回",
+     "t": "第十回",
+     "mu": "金寡婦貪利權受辱 張太醫論病細窮源",
+     "line": "金寡婦貪利權受辱 張太醫論病細窮源",
+     "hui": [
+      10
+     ]
+    },
+    "11": {
+     "n": "第十一回",
+     "t": "第十一回",
+     "mu": "慶壽辰寧府排家宴 見熙鳳賈瑞起淫心",
+     "line": "慶壽辰寧府排家宴 見熙鳳賈瑞起淫心",
+     "hui": [
+      11
+     ]
+    },
+    "12": {
+     "n": "第十二回",
+     "t": "第十二回",
+     "mu": "王熙鳳毒設相思局 賈天祥正照風月鑒",
+     "line": "王熙鳳毒設相思局 賈天祥正照風月鑒",
+     "hui": [
+      12
+     ]
+    },
+    "13": {
+     "n": "第十三回",
+     "t": "第十三回",
+     "mu": "秦可卿死封龍禁尉 王熙鳳協理寧國府",
+     "line": "秦可卿死封龍禁尉 王熙鳳協理寧國府",
+     "hui": [
+      13
+     ]
+    },
+    "14": {
+     "n": "第十四回",
+     "t": "第十四回",
+     "mu": "林如海捐館揚州城 賈寶玉路謁北靜王",
+     "line": "林如海捐館揚州城 賈寶玉路謁北靜王",
+     "hui": [
+      14
+     ]
+    },
+    "15": {
+     "n": "第十五回",
+     "t": "第十五回",
+     "mu": "王鳳姐弄權鐵檻寺 秦鯨卿得趣饅頭庵",
+     "line": "王鳳姐弄權鐵檻寺 秦鯨卿得趣饅頭庵",
+     "hui": [
+      15
+     ]
+    },
+    "16": {
+     "n": "第十六回",
+     "t": "第十六回",
+     "mu": "賈元春才選鳳藻宮 秦鯨卿夭逝黃泉路",
+     "line": "賈元春才選鳳藻宮 秦鯨卿夭逝黃泉路",
+     "hui": [
+      16
+     ]
+    },
+    "17": {
+     "n": "第十七回",
+     "t": "第十七回",
+     "mu": "會芳園試才題對額 賈寶玉機敏動諸賓",
+     "line": "會芳園試才題對額 賈寶玉機敏動諸賓",
+     "hui": [
+      17
+     ],
+     "album": [
+      "zhengmen"
+     ]
+    },
+    "18": {
+     "n": "第十八回",
+     "t": "第十八回",
+     "mu": "林黛玉誤剪香囊袋 賈元春歸省慶元宵",
+     "line": "林黛玉誤剪香囊袋 賈元春歸省慶元宵",
+     "hui": [
+      18
+     ],
+     "album": [
+      "zhouru"
+     ]
+    },
+    "19": {
+     "n": "第十九回",
+     "t": "第十九回",
+     "mu": "情切切良宵花解語 意綿綿靜日玉生香",
+     "line": "情切切良宵花解語 意綿綿靜日玉生香",
+     "hui": [
+      19
+     ]
+    },
+    "20": {
+     "n": "第二十回",
+     "t": "第二十回",
+     "mu": "王熙鳳正言彈妒意 林黛玉俏語謔嬌音",
+     "line": "王熙鳳正言彈妒意 林黛玉俏語謔嬌音",
+     "hui": [
+      20
+     ]
+    },
+    "21": {
+     "n": "第二十一回",
+     "t": "第二十一回",
+     "mu": "賢襲人嬌嗔箴寶玉 俏平兒軟語救賈璉",
+     "line": "賢襲人嬌嗔箴寶玉 俏平兒軟語救賈璉",
+     "hui": [
+      21
+     ]
+    },
+    "22": {
+     "n": "第二十二回",
+     "t": "第二十二回",
+     "mu": "聽曲文寶玉悟禪機 製燈迷賈政悲讖語",
+     "line": "聽曲文寶玉悟禪機 製燈迷賈政悲讖語",
+     "hui": [
+      22
+     ]
+    },
+    "23": {
+     "n": "第二十三回",
+     "t": "第二十三回",
+     "mu": "西廂記妙詞通戲語 牡丹亭艷曲警芳心",
+     "line": "西廂記妙詞通戲語 牡丹亭艷曲警芳心",
+     "hui": [
+      23
+     ],
+     "replay": [
+      "gongdu"
+     ]
+    },
+    "24": {
+     "n": "第二十四回",
+     "t": "第二十四回",
+     "mu": "醉金剛輕財尚義俠 痴女兒遺帕惹相思",
+     "line": "醉金剛輕財尚義俠 痴女兒遺帕惹相思",
+     "hui": [
+      24
+     ]
+    },
+    "25": {
+     "n": "第二十五回",
+     "t": "第二十五回",
+     "mu": "魘魔法姊弟逢五鬼 紅樓夢通靈遇雙真",
+     "line": "魘魔法姊弟逢五鬼 紅樓夢通靈遇雙真",
+     "hui": [
+      25
+     ]
+    },
+    "26": {
+     "n": "第二十六回",
+     "t": "第二十六回",
+     "mu": "蜂腰橋設言傳心事 瀟湘館春困發幽情",
+     "line": "蜂腰橋設言傳心事 瀟湘館春困發幽情",
+     "hui": [
+      26
+     ]
+    },
+    "27": {
+     "n": "第二十七回",
+     "t": "第二十七回",
+     "mu": "滴翠亭楊妃戲彩蝶 埋香冢飛燕泣殘紅",
+     "line": "滴翠亭楊妃戲彩蝶 埋香冢飛燕泣殘紅",
+     "hui": [
+      27
+     ],
+     "replay": [
+      "zanghua"
+     ],
+     "album": [
+      "zanghua",
+      "pudie"
+     ]
+    },
+    "28": {
+     "n": "第二十八回",
+     "t": "第二十八回",
+     "mu": "蔣玉菡情贈茜香羅 薛寶釵羞籠紅麝串",
+     "line": "蔣玉菡情贈茜香羅 薛寶釵羞籠紅麝串",
+     "hui": [
+      28
+     ]
+    },
+    "29": {
+     "n": "第二十九回",
+     "t": "第二十九回",
+     "mu": "享福人福深還禱福 痴情女情重愈斟情",
+     "line": "享福人福深還禱福 痴情女情重愈斟情",
+     "hui": [
+      29
+     ]
+    },
+    "30": {
+     "n": "第三十回",
+     "t": "第三十回",
+     "mu": "寶釵借扇機帶雙敲 齡官劃薔痴及局外",
+     "line": "寶釵借扇機帶雙敲 齡官劃薔痴及局外",
+     "hui": [
+      30
+     ]
+    },
+    "31": {
+     "n": "第三十一回",
+     "t": "第三十一回",
+     "mu": "撕扇子作千金一笑 因麒麟伏白首雙星",
+     "line": "撕扇子作千金一笑 因麒麟伏白首雙星",
+     "hui": [
+      31
+     ]
+    },
+    "32": {
+     "n": "第三十二回",
+     "t": "第三十二回",
+     "mu": "訴肺腑心迷活寶玉 含恥辱情烈死金釧",
+     "line": "訴肺腑心迷活寶玉 含恥辱情烈死金釧",
+     "hui": [
+      32
+     ]
+    },
+    "33": {
+     "n": "第三十三回",
+     "t": "第三十三回",
+     "mu": "手足耽耽小動唇舌 不肖種種大承笞撻",
+     "line": "手足耽耽小動唇舌 不肖種種大承笞撻",
+     "hui": [
+      33
+     ],
+     "replay": [
+      "aida"
+     ],
+     "album": [
+      "aida"
+     ]
+    },
+    "34": {
+     "n": "第三十四回",
+     "t": "第三十四回",
+     "mu": "情中情因情感妹妹 錯里錯以錯勸哥哥",
+     "line": "情中情因情感妹妹 錯里錯以錯勸哥哥",
+     "hui": [
+      34
+     ]
+    },
+    "35": {
+     "n": "第三十五回",
+     "t": "第三十五回",
+     "mu": "白玉釧親嘗蓮葉羹 黃金鶯巧結梅花絡",
+     "line": "白玉釧親嘗蓮葉羹 黃金鶯巧結梅花絡",
+     "hui": [
+      35
+     ]
+    },
+    "36": {
+     "n": "第三十六回",
+     "t": "第三十六回",
+     "mu": "繡鴛鴦夢兆絳芸軒 識分定情悟梨香院",
+     "line": "繡鴛鴦夢兆絳芸軒 識分定情悟梨香院",
+     "hui": [
+      36
+     ]
+    },
+    "37": {
+     "n": "第三十七回",
+     "t": "第三十七回",
+     "mu": "秋爽齋偶結海棠社 蘅蕪苑夜擬菊花題",
+     "line": "秋爽齋偶結海棠社 蘅蕪苑夜擬菊花題",
+     "hui": [
+      37
+     ],
+     "replay": [
+      "haitang"
+     ],
+     "album": [
+      "haitang"
+     ]
+    },
+    "38": {
+     "n": "第三十八回",
+     "t": "第三十八回",
+     "mu": "林瀟湘魁奪菊花詩 薛蘅蕪諷和螃蟹詠",
+     "line": "林瀟湘魁奪菊花詩 薛蘅蕪諷和螃蟹詠",
+     "hui": [
+      38
+     ]
+    },
+    "39": {
+     "n": "第三十九回",
+     "t": "第三十九回",
+     "mu": "村老嫗謊談承色笑 癡情子實意覓蹤跡",
+     "line": "村老嫗謊談承色笑 癡情子實意覓蹤跡",
+     "hui": [
+      39
+     ]
+    },
+    "40": {
+     "n": "第四十回",
+     "t": "第四十回",
+     "mu": "史太君兩宴大觀園 金鴛鴦三宣牙牌令",
+     "line": "史太君兩宴大觀園 金鴛鴦三宣牙牌令",
+     "hui": [
+      40
+     ],
+     "album": [
+      "youyuan",
+      "zhouru"
+     ]
+    },
+    "41": {
+     "n": "第四十一回",
+     "t": "第四十一回",
+     "mu": "賈寶玉品茶攏翠庵 劉姥姥醉臥怡紅院",
+     "line": "賈寶玉品茶攏翠庵 劉姥姥醉臥怡紅院",
+     "hui": [
+      41
+     ],
+     "album": [
+      "youyuan",
+      "pinchamei"
+     ]
+    },
+    "42": {
+     "n": "第四十二回",
+     "t": "第四十二回",
+     "mu": "蘅蕪君蘭言解疑語 瀟湘子雅謔補餘香",
+     "line": "蘅蕪君蘭言解疑語 瀟湘子雅謔補餘香",
+     "hui": [
+      42
+     ]
+    },
+    "43": {
+     "n": "第四十三回",
+     "t": "第四十三回",
+     "mu": "閒取樂偶攢金慶壽 不了情暫撮土為香",
+     "line": "閒取樂偶攢金慶壽 不了情暫撮土為香",
+     "hui": [
+      43
+     ]
+    },
+    "44": {
+     "n": "第四十四回",
+     "t": "第四十四回",
+     "mu": "變生不測鳳姐潑醋 喜出望外平兒理妝",
+     "line": "變生不測鳳姐潑醋 喜出望外平兒理妝",
+     "hui": [
+      44
+     ]
+    },
+    "45": {
+     "n": "第四十五回",
+     "t": "第四十五回",
+     "mu": "金蘭契互剖金蘭語 風雨夕悶製風雨詞",
+     "line": "金蘭契互剖金蘭語 風雨夕悶製風雨詞",
+     "hui": [
+      45
+     ]
+    },
+    "46": {
+     "n": "第四十六回",
+     "t": "第四十六回",
+     "mu": "尷尬人難免尷尬事 鴛鴦女誓絕鴛鴦偶",
+     "line": "尷尬人難免尷尬事 鴛鴦女誓絕鴛鴦偶",
+     "hui": [
+      46
+     ]
+    },
+    "47": {
+     "n": "第四十七回",
+     "t": "第四十七回",
+     "mu": "呆霸王調情遭苦打 冷郎君懼禍走他鄉",
+     "line": "呆霸王調情遭苦打 冷郎君懼禍走他鄉",
+     "hui": [
+      47
+     ]
+    },
+    "48": {
+     "n": "第四十八回",
+     "t": "第四十八回",
+     "mu": "濫情人情誤思游藝 慕雅女雅集苦吟詩",
+     "line": "濫情人情誤思游藝 慕雅女雅集苦吟詩",
+     "hui": [
+      48
+     ]
+    },
+    "49": {
+     "n": "第四十九回",
+     "t": "第四十九回",
+     "mu": "琉璃世界白雪紅梅 脂粉香娃割腥啖膻",
+     "line": "琉璃世界白雪紅梅 脂粉香娃割腥啖膻",
+     "hui": [
+      49
+     ],
+     "album": [
+      "gexing"
+     ]
+    },
+    "50": {
+     "n": "第五十回",
+     "t": "第五十回",
+     "mu": "蘆雪广爭聯即景詩 暖香塢創製春燈謎",
+     "line": "蘆雪广爭聯即景詩 暖香塢創製春燈謎",
+     "hui": [
+      50
+     ],
+     "album": [
+      "pinchamei",
+      "gexing"
+     ]
+    },
+    "51": {
+     "n": "第五十一回",
+     "t": "第五十一回",
+     "mu": "薛小妹新編懷古詩 胡庸醫亂用虎狼藥",
+     "line": "薛小妹新編懷古詩 胡庸醫亂用虎狼藥",
+     "hui": [
+      51
+     ]
+    },
+    "52": {
+     "n": "第五十二回",
+     "t": "第五十二回",
+     "mu": "俏平兒情掩蝦鬚鐲 勇晴雯病補雀金裘",
+     "line": "俏平兒情掩蝦鬚鐲 勇晴雯病補雀金裘",
+     "hui": [
+      52
+     ]
+    },
+    "53": {
+     "n": "第五十三回",
+     "t": "第五十三回",
+     "mu": "寧國府除夕祭宗祠 榮國府元宵開夜宴",
+     "line": "寧國府除夕祭宗祠 榮國府元宵開夜宴",
+     "hui": [
+      53
+     ]
+    },
+    "54": {
+     "n": "第五十四回",
+     "t": "第五十四回",
+     "mu": "史太君破陳腐舊套 王熙鳳效戲彩斑衣",
+     "line": "史太君破陳腐舊套 王熙鳳效戲彩斑衣",
+     "hui": [
+      54
+     ]
+    },
+    "55": {
+     "n": "第五十五回",
+     "t": "第五十五回",
+     "mu": "辱親女愚妾爭閒氣 欺幼主刁奴蓄險心",
+     "line": "辱親女愚妾爭閒氣 欺幼主刁奴蓄險心",
+     "hui": [
+      55
+     ]
+    },
+    "56": {
+     "n": "第五十六回",
+     "t": "第五十六回",
+     "mu": "敏探春興利除宿弊 識寶釵小惠全大體",
+     "line": "敏探春興利除宿弊 識寶釵小惠全大體",
+     "hui": [
+      56
+     ]
+    },
+    "57": {
+     "n": "第五十七回",
+     "t": "第五十七回",
+     "mu": "慧紫鵑情辭試莽玉 慈姨媽愛語慰痴顰",
+     "line": "慧紫鵑情辭試莽玉 慈姨媽愛語慰痴顰",
+     "hui": [
+      57
+     ]
+    },
+    "58": {
+     "n": "第五十八回",
+     "t": "第五十八回",
+     "mu": "杏子陰假鳳泣虛凰 茜紗窗真情揆痴理",
+     "line": "杏子陰假鳳泣虛凰 茜紗窗真情揆痴理",
+     "hui": [
+      58
+     ]
+    },
+    "59": {
+     "n": "第五十九回",
+     "t": "第五十九回",
+     "mu": "柳葉渚邊嗔鶯吒燕 絳芸軒里召將飛符",
+     "line": "柳葉渚邊嗔鶯吒燕 絳芸軒里召將飛符",
+     "hui": [
+      59
+     ]
+    },
+    "60": {
+     "n": "第六十回",
+     "t": "第六十回",
+     "mu": "茉莉粉替去薔薇硝 玫瑰露引來茯苓霜",
+     "line": "茉莉粉替去薔薇硝 玫瑰露引來茯苓霜",
+     "hui": [
+      60
+     ]
+    },
+    "61": {
+     "n": "第六十一回",
+     "t": "第六十一回",
+     "mu": "投鼠忌器寶玉瞞贓 判冤決獄平兒行權",
+     "line": "投鼠忌器寶玉瞞贓 判冤決獄平兒行權",
+     "hui": [
+      61
+     ],
+     "album": [
+      "chufang"
+     ]
+    },
+    "62": {
+     "n": "第六十二回",
+     "t": "第六十二回",
+     "mu": "憨湘雲醉眠芍藥裀 呆香菱情解石榴裙",
+     "line": "憨湘雲醉眠芍藥裀 呆香菱情解石榴裙",
+     "hui": [
+      62
+     ],
+     "album": [
+      "zuiyan",
+      "chufang"
+     ]
+    },
+    "63": {
+     "n": "第六十三回",
+     "t": "第六十三回",
+     "mu": "壽怡紅群芳開夜宴 死金丹獨艷理親喪",
+     "line": "壽怡紅群芳開夜宴 死金丹獨艷理親喪",
+     "hui": [
+      63
+     ]
+    },
+    "64": {
+     "n": "第六十四回",
+     "t": "第六十四回",
+     "mu": "幽淑女悲題五美吟 浪蕩子情遺九龍珮",
+     "line": "幽淑女悲題五美吟 浪蕩子情遺九龍珮",
+     "hui": [
+      64
+     ]
+    },
+    "65": {
+     "n": "第六十五回",
+     "t": "第六十五回",
+     "mu": "賈二舍偷娶尤二姨 尤三姐思嫁柳二郎",
+     "line": "賈二舍偷娶尤二姨 尤三姐思嫁柳二郎",
+     "hui": [
+      65
+     ]
+    },
+    "66": {
+     "n": "第六十六回",
+     "t": "第六十六回",
+     "mu": "情小妹恥情歸地府 冷二郎一冷入空門",
+     "line": "情小妹恥情歸地府 冷二郎一冷入空門",
+     "hui": [
+      66
+     ]
+    },
+    "67": {
+     "n": "第六十七回",
+     "t": "第六十七回",
+     "mu": "見土儀顰卿思故里 聞秘事鳳姐訊家童",
+     "line": "見土儀顰卿思故里 聞秘事鳳姐訊家童",
+     "hui": [
+      67
+     ]
+    },
+    "68": {
+     "n": "第六十八回",
+     "t": "第六十八回",
+     "mu": "苦尤娘賺入大觀園 酸鳳姐大鬧寧國府",
+     "line": "苦尤娘賺入大觀園 酸鳳姐大鬧寧國府",
+     "hui": [
+      68
+     ]
+    },
+    "69": {
+     "n": "第六十九回",
+     "t": "第六十九回",
+     "mu": "弄小巧用借劍殺人 覺大限吞生金自逝",
+     "line": "弄小巧用借劍殺人 覺大限吞生金自逝",
+     "hui": [
+      69
+     ]
+    },
+    "70": {
+     "n": "第七十回",
+     "t": "第七十回",
+     "mu": "林黛玉重建桃花社 史湘雲偶填柳絮詞",
+     "line": "林黛玉重建桃花社 史湘雲偶填柳絮詞",
+     "hui": [
+      70
+     ]
+    },
+    "71": {
+     "n": "第七十一回",
+     "t": "第七十一回",
+     "mu": "嫌隙人有心生嫌隙 鴛鴦女無意遇鴛鴦",
+     "line": "嫌隙人有心生嫌隙 鴛鴦女無意遇鴛鴦",
+     "hui": [
+      71
+     ]
+    },
+    "72": {
+     "n": "第七十二回",
+     "t": "第七十二回",
+     "mu": "王熙鳳恃強羞說病 來旺婦倚勢霸成親",
+     "line": "王熙鳳恃強羞說病 來旺婦倚勢霸成親",
+     "hui": [
+      72
+     ]
+    },
+    "73": {
+     "n": "第七十三回",
+     "t": "第七十三回",
+     "mu": "痴丫頭誤拾繡春囊 懦小姐不問累金鳳",
+     "line": "痴丫頭誤拾繡春囊 懦小姐不問累金鳳",
+     "hui": [
+      73
+     ]
+    },
+    "74": {
+     "n": "第七十四回",
+     "t": "第七十四回",
+     "mu": "惑奸讒抄揀大觀園 矢孤介杜絕寧國府",
+     "line": "惑奸讒抄揀大觀園 矢孤介杜絕寧國府",
+     "hui": [
+      74
+     ]
+    },
+    "75": {
+     "n": "第七十五回",
+     "t": "第七十五回",
+     "mu": "開夜宴異兆發悲音 賞中秋新詞得佳讖",
+     "line": "開夜宴異兆發悲音 賞中秋新詞得佳讖",
+     "hui": [
+      75
+     ]
+    },
+    "76": {
+     "n": "第七十六回",
+     "t": "第七十六回",
+     "mu": "凸碧堂品笛感淒清 凹晶館聯詩悲寂寞",
+     "line": "凸碧堂品笛感淒清 凹晶館聯詩悲寂寞",
+     "hui": [
+      76
+     ],
+     "album": [
+      "lianju"
+     ]
+    },
+    "77": {
+     "n": "第七十七回",
+     "t": "第七十七回",
+     "mu": "俏丫鬟抱屈夭風流 美優伶斬情歸水月",
+     "line": "俏丫鬟抱屈夭風流 美優伶斬情歸水月",
+     "hui": [
+      77
+     ]
+    },
+    "78": {
+     "n": "第七十八回",
+     "t": "第七十八回",
+     "mu": "老學士閒徵姽嫿詞 痴公子杜撰芙蓉誄",
+     "line": "老學士閒徵姽嫿詞 痴公子杜撰芙蓉誄",
+     "hui": [
+      78
+     ]
+    },
+    "79": {
+     "n": "第七十九回",
+     "t": "第七十九回",
+     "mu": "薛文龍悔娶河東獅 賈迎春誤嫁中山狼",
+     "line": "薛文龍悔娶河東獅 賈迎春誤嫁中山狼",
+     "hui": [
+      79
+     ]
+    },
+    "80": {
+     "n": "第八十回",
+     "t": "第八十回",
+     "mu": "懦弱迎春腸回九曲 姣怯香菱病入膏肓",
+     "line": "懦弱迎春腸回九曲 姣怯香菱病入膏肓",
+     "hui": [
+      80
+     ]
+    },
+    "81": {
+     "n": "第八十一回",
+     "t": "第八十一回",
+     "mu": "占旺相四美釣游魚 奉嚴詞兩番入家塾",
+     "line": "占旺相四美釣游魚 奉嚴詞兩番入家塾",
+     "hui": [
+      81
+     ]
+    },
+    "82": {
+     "n": "第八十二回",
+     "t": "第八十二回",
+     "mu": "老學究講義警頑心 病瀟湘痴魂驚惡夢",
+     "line": "老學究講義警頑心 病瀟湘痴魂驚惡夢",
+     "hui": [
+      82
+     ]
+    },
+    "83": {
+     "n": "第八十三回",
+     "t": "第八十三回",
+     "mu": "省宮闈賈元妃染恙 鬧閨閫薛寶釵吞聲",
+     "line": "省宮闈賈元妃染恙 鬧閨閫薛寶釵吞聲",
+     "hui": [
+      83
+     ]
+    },
+    "84": {
+     "n": "第八十四回",
+     "t": "第八十四回",
+     "mu": "試文字寶玉始提親 探驚風賈環重結怨",
+     "line": "試文字寶玉始提親 探驚風賈環重結怨",
+     "hui": [
+      84
+     ]
+    },
+    "85": {
+     "n": "第八十五回",
+     "t": "第八十五回",
+     "mu": "賈存周報升郎中任 薛文起復惹放流刑",
+     "line": "賈存周報升郎中任 薛文起復惹放流刑",
+     "hui": [
+      85
+     ]
+    },
+    "86": {
+     "n": "第八十六回",
+     "t": "第八十六回",
+     "mu": "受私賄老官翻案牘 寄閒情淑女解琴書",
+     "line": "受私賄老官翻案牘 寄閒情淑女解琴書",
+     "hui": [
+      86
+     ]
+    },
+    "87": {
+     "n": "第八十七回",
+     "t": "第八十七回",
+     "mu": "感深秋撫琴悲往事 坐禪寂走火入邪魔",
+     "line": "感深秋撫琴悲往事 坐禪寂走火入邪魔",
+     "hui": [
+      87
+     ]
+    },
+    "88": {
+     "n": "第八十八回",
+     "t": "第八十八回",
+     "mu": "博庭歡寶玉贊孤兒 正家法賈珍鞭悍仆",
+     "line": "博庭歡寶玉贊孤兒 正家法賈珍鞭悍仆",
+     "hui": [
+      88
+     ]
+    },
+    "89": {
+     "n": "第八十九回",
+     "t": "第八十九回",
+     "mu": "人亡物在公子填詞 蛇影杯弓顰卿絕粒",
+     "line": "人亡物在公子填詞 蛇影杯弓顰卿絕粒",
+     "hui": [
+      89
+     ]
+    },
+    "90": {
+     "n": "第九十回",
+     "t": "第九十回",
+     "mu": "失綿衣貧女耐嗷嘈 送果品小郎驚叵測",
+     "line": "失綿衣貧女耐嗷嘈 送果品小郎驚叵測",
+     "hui": [
+      90
+     ]
+    },
+    "91": {
+     "n": "第九十一回",
+     "t": "第九十一回",
+     "mu": "縱淫心寶蟾工設計 布疑陣寶玉妄談禪",
+     "line": "縱淫心寶蟾工設計 布疑陣寶玉妄談禪",
+     "hui": [
+      91
+     ]
+    },
+    "92": {
+     "n": "第九十二回",
+     "t": "第九十二回",
+     "mu": "評女傳巧姐慕賢良 玩母珠賈政參聚散",
+     "line": "評女傳巧姐慕賢良 玩母珠賈政參聚散",
+     "hui": [
+      92
+     ]
+    },
+    "93": {
+     "n": "第九十三回",
+     "t": "第九十三回",
+     "mu": "甄家僕投靠賈家門 水月庵掀翻風月案",
+     "line": "甄家僕投靠賈家門 水月庵掀翻風月案",
+     "hui": [
+      93
+     ]
+    },
+    "94": {
+     "n": "第九十四回",
+     "t": "第九十四回",
+     "mu": "宴海棠賈母賞花妖 失寶玉通靈知奇禍",
+     "line": "宴海棠賈母賞花妖 失寶玉通靈知奇禍",
+     "hui": [
+      94
+     ]
+    },
+    "95": {
+     "n": "第九十五回",
+     "t": "第九十五回",
+     "mu": "因訛成實元妃薨逝 以假混真寶玉瘋顛",
+     "line": "因訛成實元妃薨逝 以假混真寶玉瘋顛",
+     "hui": [
+      95
+     ]
+    },
+    "96": {
+     "n": "第九十六回",
+     "t": "第九十六回",
+     "mu": "瞞消息鳳姐設奇謀 泄機關顰兒迷本性",
+     "line": "瞞消息鳳姐設奇謀 泄機關顰兒迷本性",
+     "hui": [
+      96
+     ]
+    },
+    "97": {
+     "n": "第九十七回",
+     "t": "第九十七回",
+     "mu": "林黛玉焚稿斷痴情 薛寶釵出閨成大禮",
+     "line": "林黛玉焚稿斷痴情 薛寶釵出閨成大禮",
+     "hui": [
+      97
+     ]
+    },
+    "98": {
+     "n": "第九十八回",
+     "t": "第九十八回",
+     "mu": "苦絳珠魂歸離恨天 病神瑛淚灑相思地",
+     "line": "苦絳珠魂歸離恨天 病神瑛淚灑相思地",
+     "hui": [
+      98
+     ]
+    },
+    "99": {
+     "n": "第九十九回",
+     "t": "第九十九回",
+     "mu": "守官箴惡奴同破例 閱邸報老舅自擔驚",
+     "line": "守官箴惡奴同破例 閱邸報老舅自擔驚",
+     "hui": [
+      99
+     ]
+    },
+    "100": {
+     "n": "第一零零回",
+     "t": "第一零零回",
+     "mu": "破好事香菱結深恨 悲遠嫁寶玉感離情",
+     "line": "破好事香菱結深恨 悲遠嫁寶玉感離情",
+     "hui": [
+      100
+     ]
+    },
+    "101": {
+     "n": "第一零一回",
+     "t": "第一零一回",
+     "mu": "大觀園月夜感幽魂 散花寺神簽驚異兆",
+     "line": "大觀園月夜感幽魂 散花寺神簽驚異兆",
+     "hui": [
+      101
+     ]
+    },
+    "102": {
+     "n": "第一零二回",
+     "t": "第一零二回",
+     "mu": "寧國府骨肉病災襟 大觀園符水驅妖孽",
+     "line": "寧國府骨肉病災襟 大觀園符水驅妖孽",
+     "hui": [
+      102
+     ]
+    },
+    "103": {
+     "n": "第一零三回",
+     "t": "第一零三回",
+     "mu": "施毒計金桂自焚身 昧真禪雨村空遇舊",
+     "line": "施毒計金桂自焚身 昧真禪雨村空遇舊",
+     "hui": [
+      103
+     ]
+    },
+    "104": {
+     "n": "第一零四回",
+     "t": "第一零四回",
+     "mu": "醉金剛小鰍生大浪 痴公子餘痛觸前情",
+     "line": "醉金剛小鰍生大浪 痴公子餘痛觸前情",
+     "hui": [
+      104
+     ]
+    },
+    "105": {
+     "n": "第一零五回",
+     "t": "第一零五回",
+     "mu": "錦衣軍查抄寧國府 驄馬使彈劾平安州",
+     "line": "錦衣軍查抄寧國府 驄馬使彈劾平安州",
+     "hui": [
+      105
+     ]
+    },
+    "106": {
+     "n": "第一零六回",
+     "t": "第一零六回",
+     "mu": "王熙鳳致禍抱羞慚 賈太君禱天消禍患",
+     "line": "王熙鳳致禍抱羞慚 賈太君禱天消禍患",
+     "hui": [
+      106
+     ]
+    },
+    "107": {
+     "n": "第一零七回",
+     "t": "第一零七回",
+     "mu": "散餘資賈母明大義 復世職政老沐天恩",
+     "line": "散餘資賈母明大義 復世職政老沐天恩",
+     "hui": [
+      107
+     ]
+    },
+    "108": {
+     "n": "第一零八回",
+     "t": "第一零八回",
+     "mu": "強歡笑蘅蕪慶生辰 死纏綿瀟湘聞鬼哭",
+     "line": "強歡笑蘅蕪慶生辰 死纏綿瀟湘聞鬼哭",
+     "hui": [
+      108
+     ]
+    },
+    "109": {
+     "n": "第一零九回",
+     "t": "第一零九回",
+     "mu": "候芳魂五兒承錯愛 還孽債迎女返真元",
+     "line": "候芳魂五兒承錯愛 還孽債迎女返真元",
+     "hui": [
+      109
+     ]
+    },
+    "110": {
+     "n": "第一一零回",
+     "t": "第一一零回",
+     "mu": "史太君壽終歸地府 王鳳姐力詘失人心",
+     "line": "史太君壽終歸地府 王鳳姐力詘失人心",
+     "hui": [
+      110
+     ]
+    },
+    "111": {
+     "n": "第一一一回",
+     "t": "第一一一回",
+     "mu": "鴛鴦女殉主登太虛 狗彘奴欺天招伙盜",
+     "line": "鴛鴦女殉主登太虛 狗彘奴欺天招伙盜",
+     "hui": [
+      111
+     ]
+    },
+    "112": {
+     "n": "第一一二回",
+     "t": "第一一二回",
+     "mu": "活冤孽妙尼遭大劫 死讎仇趙妾赴冥曹",
+     "line": "活冤孽妙尼遭大劫 死讎仇趙妾赴冥曹",
+     "hui": [
+      112
+     ]
+    },
+    "113": {
+     "n": "第一一三回",
+     "t": "第一一三回",
+     "mu": "懺宿冤鳳姐託村嫗 釋舊憾情婢感痴郎",
+     "line": "懺宿冤鳳姐託村嫗 釋舊憾情婢感痴郎",
+     "hui": [
+      113
+     ]
+    },
+    "114": {
+     "n": "第一一四回",
+     "t": "第一一四回",
+     "mu": "王熙鳳歷幻返金陵 甄應嘉蒙恩還玉闕",
+     "line": "王熙鳳歷幻返金陵 甄應嘉蒙恩還玉闕",
+     "hui": [
+      114
+     ]
+    },
+    "115": {
+     "n": "第一一五回",
+     "t": "第一一五回",
+     "mu": "惑偏私惜春矢素志 證同類寶玉失相知",
+     "line": "惑偏私惜春矢素志 證同類寶玉失相知",
+     "hui": [
+      115
+     ]
+    },
+    "116": {
+     "n": "第一一六回",
+     "t": "第一一六回",
+     "mu": "得通靈幻境悟仙緣 送慈柩故鄉全孝道",
+     "line": "得通靈幻境悟仙緣 送慈柩故鄉全孝道",
+     "hui": [
+      116
+     ]
+    },
+    "117": {
+     "n": "第一一七回",
+     "t": "第一一七回",
+     "mu": "阻超凡佳人雙護玉 欣聚黨惡子獨承家",
+     "line": "阻超凡佳人雙護玉 欣聚黨惡子獨承家",
+     "hui": [
+      117
+     ]
+    },
+    "118": {
+     "n": "第一一八回",
+     "t": "第一一八回",
+     "mu": "記微嫌舅兄欺弱女 驚謎語妻妾諫痴人",
+     "line": "記微嫌舅兄欺弱女 驚謎語妻妾諫痴人",
+     "hui": [
+      118
+     ]
+    },
+    "119": {
+     "n": "第一一九回",
+     "t": "第一一九回",
+     "mu": "中鄉魁寶玉卻塵緣 沐皇恩賈家延世澤",
+     "line": "中鄉魁寶玉卻塵緣 沐皇恩賈家延世澤",
+     "hui": [
+      119
+     ]
+    },
+    "120": {
+     "n": "第一二零回",
+     "t": "第一二零回",
+     "mu": "甄士隱詳說太虛情 賈雨村歸結紅樓夢",
+     "line": "甄士隱詳說太虛情 賈雨村歸結紅樓夢",
+     "hui": [
+      120
+     ]
+    }
+   }
+  }
+ },
+ "重现": {
+  "aida": {
+   "id": "aida",
+   "名简": "宝玉挨打",
+   "回": [
+    33
+   ],
+   "地点": "yihong"
+  },
+  "gongdu": {
+   "id": "gongdu",
+   "名简": "共读西厢",
+   "回": [
+    23
+   ],
+   "地点": "qinfangzha"
+  },
+  "haitang": {
+   "id": "haitang",
+   "名简": "海棠诗社",
+   "回": [
+    37
+   ],
+   "地点": "yihong"
+  },
+  "zanghua": {
+   "id": "zanghua",
+   "名简": "黛玉葬花",
+   "回": [
+    27
+   ],
+   "地点": "qinfangzha"
+  }
+ }
+}

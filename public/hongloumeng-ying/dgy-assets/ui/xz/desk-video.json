@@ -1,0 +1,6 @@
+{
+ "说明": "第 31 轮：书案（册展开）循环小视频接口。美术线视频到了填 src（mp4，必填）/ webm（可选，优先）；为 null 时只用静图 desk-S2.webp。须与去字版-S2 同一取景。",
+ "src": "dgy-assets/ui/art/motion/册底.mp4",
+ "webm": "dgy-assets/ui/art/motion/册底.webm",
+ "poster": "dgy-assets/ui/xz/r31/desk-S2v.webp"
+}

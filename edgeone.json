@@ -34,6 +34,13 @@
       ]
     },
     {
+      "source": "/hongloumeng-ying/*",
+      "headers": [
+        { "key": "X-Frame-Options", "value": "SAMEORIGIN" },
+        { "key": "Content-Security-Policy", "value": "frame-ancestors 'self'" }
+      ]
+    },
+    {
       "source": "/atlas/v6/*",
       "headers": [
         { "key": "X-Frame-Options", "value": "SAMEORIGIN" },

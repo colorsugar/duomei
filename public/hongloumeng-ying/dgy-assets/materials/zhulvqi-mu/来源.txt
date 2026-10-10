@@ -1,0 +1,11 @@
+材质：竹绿漆木
+目录：zhulvqi-mu
+来源：Poly Haven「Wood Cabinet Worn Long」
+URL：https://polyhaven.com/a/wood_cabinet_worn_long
+作者：Dimitrios Savva、Rico Cilliers
+授权：CC0 1.0（公有领域，可商用，无需署名；仍如实标注）
+下载日期：2026-10-09
+处理：竖向木纹，带轻微磨损；颜色重设为深竹绿，保留部分磨损起伏。
+真实尺寸：约 1.00 米见方（原素材标注）
+用途：怡红院、潇湘馆的门窗框与门扇、游廊柱、栏杆、槛窗框（深竹绿/松绿油漆）。
+规格：1024×1024 webp，可平铺；color=sRGB；normal=OpenGL(Y+，three.js 默认)；rough=线性灰度（三通道同值，取 G）。

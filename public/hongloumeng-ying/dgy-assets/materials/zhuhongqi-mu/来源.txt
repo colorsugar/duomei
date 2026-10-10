@@ -1,0 +1,11 @@
+材质：朱红漆木
+目录：zhuhongqi-mu
+来源：Poly Haven「Dark Wood」
+URL：https://polyhaven.com/a/dark_wood
+作者：Dario Barresi、Dimitrios Savva、Rico Cilliers
+授权：CC0 1.0（公有领域，可商用，无需署名；仍如实标注）
+下载日期：2026-10-09
+处理：原贴图木纹是横的，已整体旋转 90° 让木纹沿竖向（柱子 V 方向）；颜色重设为朱红，木纹反差压到很低。
+真实尺寸：约 2.00 米见方（原素材标注）
+用途：大门板与门柱、省亲别墅正殿柱枋、廊柱、墙柱（朱红油漆，木纹隐约透出）。
+规格：1024×1024 webp，可平铺；color=sRGB；normal=OpenGL(Y+，three.js 默认)；rough=线性灰度（三通道同值，取 G）。

@@ -1,0 +1,80 @@
+{
+  "说明": "第 31 轮 移步換景（dgy/yibu.js）的底图配置。换底图只改这里：day / night 填图片路径（相对网站根），night 为 null 时夜里用昼图加滤镜。新底图要和 guide-4k 院落位置对齐；对不齐就改 fit（guide 坐标 0–2048 映射到图片的哪一块，单位是图片宽高的比例）。",
+  "day": {
+    "src": "dgy-assets/map/gongbi-day-4096.webp",
+    "small": "dgy-assets/map/gongbi-day-2048.webp",
+    "来源": "Grok 试版（dgy-assets/map/gongbi-day-grok.webp，scripts/dgy-r31-prep.py 转 webp），ChatGPT 正式工笔底图到了换掉"
+  },
+  "night": null,
+  "fallback": "dgy-assets/map/guide-4096.webp",
+  "fit": {
+    "x0": 0,
+    "y0": 0,
+    "x1": 1,
+    "y1": 1
+  },
+  "desk": "dgy-assets/ui/xz/r31/yibu-desk.webp",
+  "deskNote": "X1 效果图去字版（书案与案上器物）；舆图、菜单、地点卡都被游戏里的 HTML 盖住",
+  "court": {
+    "yihong": {
+      "src": "dgy-assets/ui/xz/r31/court-yihong.webp",
+      "w": 1675,
+      "h": 915,
+      "rooms": [
+        {
+          "名": "正房 · 五間抱廈",
+          "x": 820,
+          "y": 318,
+          "住": [
+            "baoyu"
+          ]
+        },
+        {
+          "名": "遊廊",
+          "x": 268,
+          "y": 430
+        },
+        {
+          "名": "遊廊",
+          "x": 1395,
+          "y": 430
+        },
+        {
+          "名": "西府海棠",
+          "x": 500,
+          "y": 250
+        },
+        {
+          "名": "芭蕉",
+          "x": 1120,
+          "y": 250
+        },
+        {
+          "名": "院門",
+          "x": 820,
+          "y": 700
+        },
+        {
+          "名": "襲人 · 晴雯 · 麝月",
+          "x": 1240,
+          "y": 560,
+          "住": [
+            "xiren",
+            "qingwen",
+            "sheyue"
+          ],
+          "小": true
+        }
+      ],
+      "依据": "第十七回「一入門，兩邊都是遊廊相接。院中點襯幾塊山石，一邊種著數本芭蕉，那一邊乃是一棵西府海棠」；第二十六回「上面小小五間抱廈，一色雕鏤新鮮花樣隔扇，上面懸著一個匾額，四個大字，題道是「怡紅快綠」」（均对本地 dgy-assets/text/hlm 逐字）；底图为 X3 效果图去字版，房屋形制只是示意"
+    }
+  },
+  "room": {
+    "yihong": {
+      "src": "dgy-assets/ui/xz/r31/room-yihong.webp",
+      "w": 1672,
+      "h": 564,
+      "依据": "设计图/yihong/gpt-正房.webp（第 24 轮按图施工所用平面），裁去标题与清单"
+    }
+  }
+}

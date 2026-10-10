@@ -1,0 +1,11 @@
+材质：栗壳漆木
+目录：likeqi-mu
+来源：Poly Haven「Wood Table 001」
+URL：https://polyhaven.com/a/wood_table_001
+作者：Dimitrios Savva、Rico Cilliers
+授权：CC0 1.0（公有领域，可商用，无需署名；仍如实标注）
+下载日期：2026-10-09
+处理：竖向木纹；整体换成深栗壳色，粗糙度降到 0.26~0.48 做出大漆光泽，法线减弱。
+真实尺寸：约 1.50 米见方（原素材标注）
+用途：荣国府正厅/荣禧堂的门窗框、隔扇、榻几与家具、板壁（深栗壳色大漆）。
+规格：1024×1024 webp，可平铺；color=sRGB；normal=OpenGL(Y+，three.js 默认)；rough=线性灰度（三通道同值，取 G）。

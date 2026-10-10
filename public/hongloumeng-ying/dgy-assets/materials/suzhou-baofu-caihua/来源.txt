@@ -1,0 +1,10 @@
+材质：苏式包袱彩画带
+目录：suzhou-baofu-caihua
+来源：程序生成（scripts/dgy-materials-build.py，numpy + Pillow 绘制线描、退晕、纤维和噪声；没有使用任何外部图片）
+作者：本项目（大观园）
+授权：CC0（自产，随项目自由使用）
+生成日期：2026-10-09
+参照：参照 shots/dgy/ref-tv 里 bj-xiaoxiang-3（潇湘馆门额）、zhengmen-2（大观园正门）、bj-yihong-1/yihong-5（怡红院、游廊）的苏式梁枋。
+用途：怡红院、潇湘馆、游廊的檐下梁枋（大额枋/小额枋）。一张 = 一个开间中段：中间是留白的包袱，两侧找头卷草，左右两端各半个箍头，横向首尾相接可无限平铺。
+尺寸建议：建议贴在约 3.2 米长 × 0.8 米高的梁枋面上
+规格：1024×256 webp，横向可平铺；color=sRGB；normal=OpenGL(Y+，three.js 默认)；rough=线性灰度（三通道同值，取 G）。
