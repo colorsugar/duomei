@@ -1,0 +1,299 @@
+/* Section titles · one system, ten colours.
+ * states: idle · is-in (reveal) · hover link · reduced-motion
+ * The hue per section lives here; everything else reads the three --sec-* tokens.
+ */
+.duomei-sec-head {
+  --sec-accent: var(--color-accent);
+  --sec-accent-ink: var(--color-accent);
+  --sec-accent-soft: var(--color-paper-3);
+  --sec-stroke: linear-gradient(90deg, var(--sec-accent) 0%, color-mix(in oklch, var(--sec-accent) 70%, white) 100%);
+  --sec-ease: cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  z-index: var(--z-raised);
+  isolation: isolate;
+  display: grid;
+  grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+  align-items: end;
+  gap: var(--space-xl);
+  inline-size: min(100%, var(--layout-wide));
+  min-inline-size: 0;
+  margin-inline: auto;
+}
+
+.duomei-sec-head[data-accent="zaobao"] { --sec-accent: var(--accent-zaobao); --sec-accent-ink: var(--accent-zaobao-ink); --sec-accent-soft: var(--accent-zaobao-soft); }
+.duomei-sec-head[data-accent="guyu"] { --sec-accent: var(--accent-guyu); --sec-accent-ink: var(--accent-guyu-ink); --sec-accent-soft: var(--accent-guyu-soft); }
+.duomei-sec-head[data-accent="xunji"] { --sec-accent: var(--accent-xunji); --sec-accent-ink: var(--accent-xunji-ink); --sec-accent-soft: var(--accent-xunji-soft); }
+.duomei-sec-head[data-accent="dalu"] { --sec-accent: var(--accent-dalu); --sec-accent-ink: var(--accent-dalu-ink); --sec-accent-soft: var(--accent-dalu-soft); }
+.duomei-sec-head[data-accent="yunyou"] { --sec-accent: var(--accent-yunyou); --sec-accent-ink: var(--accent-yunyou-ink); --sec-accent-soft: var(--accent-yunyou-soft); }
+.duomei-sec-head[data-accent="weiyan"] { --sec-accent: var(--accent-weiyan); --sec-accent-ink: var(--accent-weiyan-ink); --sec-accent-soft: var(--accent-weiyan-soft); }
+.duomei-sec-head[data-accent="skills"] { --sec-accent: var(--accent-skills); --sec-accent-ink: var(--accent-skills-ink); --sec-accent-soft: var(--accent-skills-soft); }
+.duomei-sec-head[data-accent="color"] {
+  --sec-accent: var(--accent-color);
+  --sec-accent-ink: var(--accent-color-ink);
+  --sec-accent-soft: var(--accent-color-soft);
+  --sec-stroke: linear-gradient(
+    90deg,
+    oklch(72% 0.16 25) 0%,
+    oklch(78% 0.15 70) 22%,
+    oklch(80% 0.14 130) 44%,
+    oklch(74% 0.12 210) 66%,
+    oklch(68% 0.15 290) 84%,
+    oklch(70% 0.16 340) 100%
+  );
+}
+
+/* Soft glow behind the heading, bleeding out to the top-right of the section. */
+.duomei-sec-head::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset-block-start: -12rem;
+  inset-inline-end: -14rem;
+  inline-size: min(66vw, 56rem);
+  block-size: 26rem;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, var(--sec-accent-soft), color-mix(in oklch, var(--sec-accent-soft) 45%, transparent) 40%, transparent 68%);
+  opacity: 0;
+  transform: translate3d(2rem, 1rem, 0) scale(0.92);
+  transition: opacity 1200ms var(--sec-ease), transform 1200ms var(--sec-ease);
+  pointer-events: none;
+}
+
+.duomei-sec-head.is-in::before {
+  opacity: 1;
+  transform: translate3d(0, 0, 0) scale(1);
+}
+
+.duomei-sec-head .duomei-sec-main,
+.duomei-sec-head .duomei-sec-aside {
+  display: grid;
+  gap: var(--space-xs);
+  min-inline-size: 0;
+  justify-items: start;
+}
+
+.duomei-sec-head .duomei-sec-aside {
+  gap: var(--space-sm);
+  padding-block-end: 0.35rem;
+}
+
+/* Kicker: index · pulsing dot · English label */
+.duomei-sec-head .duomei-sec-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  margin: 0;
+  color: var(--sec-accent-ink);
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.duomei-sec-head .duomei-sec-index {
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0;
+  opacity: 0;
+  transform: translate3d(0, 0.5rem, 0);
+  transition: opacity 600ms var(--sec-ease), transform 600ms var(--sec-ease);
+}
+
+.duomei-sec-head .duomei-sec-dot {
+  inline-size: 0.42rem;
+  block-size: 0.42rem;
+  border-radius: 50%;
+  background: var(--sec-accent);
+  box-shadow: 0 0 0 0 color-mix(in oklch, var(--sec-accent) 45%, transparent);
+  opacity: 0;
+  transition: opacity 500ms var(--sec-ease) 200ms;
+}
+
+.duomei-sec-head .duomei-sec-kicker-text {
+  clip-path: inset(0 100% 0 0);
+  transition: clip-path 900ms var(--sec-ease) 220ms;
+}
+
+.duomei-sec-head.is-in .duomei-sec-index {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+}
+
+.duomei-sec-head.is-in .duomei-sec-dot {
+  opacity: 1;
+  animation: duomeiSecDot 2.6s ease-in-out 900ms infinite;
+}
+
+.duomei-sec-head.is-in .duomei-sec-kicker-text {
+  clip-path: inset(0 -4% 0 0);
+}
+
+@keyframes duomeiSecDot {
+  0%, 100% { box-shadow: 0 0 0 0 color-mix(in oklch, var(--sec-accent) 45%, transparent); }
+  50% { box-shadow: 0 0 0 0.45rem color-mix(in oklch, var(--sec-accent) 0%, transparent); }
+}
+
+/* Title: characters rise one by one, a brush stroke sweeps in underneath. */
+.duomei-sec-head .duomei-sec-title {
+  position: relative;
+  min-inline-size: 0;
+  margin: 0;
+  color: var(--color-ink);
+  font-family: var(--font-display);
+  font-size: var(--text-display-s);
+  font-style: normal;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.035em;
+  overflow-wrap: anywhere;
+  text-wrap: balance;
+}
+
+.duomei-sec-head .duomei-sec-word {
+  position: relative;
+  display: inline-block;
+  padding-inline-end: 0.06em;
+}
+
+.duomei-sec-head .duomei-sec-char {
+  display: inline-block;
+  opacity: 0;
+  transform: translate3d(0, 0.42em, 0) rotate(4deg);
+  transform-origin: 20% 100%;
+  transition:
+    opacity 640ms var(--sec-ease) calc(var(--char-index, 0) * 85ms),
+    transform 760ms var(--sec-ease) calc(var(--char-index, 0) * 85ms);
+}
+
+.duomei-sec-head.is-in .duomei-sec-char {
+  opacity: 1;
+  transform: translate3d(0, 0, 0) rotate(0deg);
+}
+
+.duomei-sec-head .duomei-sec-stroke {
+  position: absolute;
+  z-index: -1;
+  inset-inline: -0.1em -0.04em;
+  inset-block-end: 0.1em;
+  block-size: 0.28em;
+  border-radius: 0.12em 0.3em 0.1em 0.26em;
+  background: var(--sec-stroke);
+  opacity: 0.62;
+  transform: skewX(-8deg) rotate(-1.4deg) scaleX(0);
+  transform-origin: 0% 60%;
+  transition: transform 900ms var(--sec-ease) 340ms, opacity 600ms var(--sec-ease) 340ms;
+}
+
+.duomei-sec-head.is-in .duomei-sec-stroke {
+  transform: skewX(-8deg) rotate(-1.4deg) scaleX(1);
+}
+
+/* Lede + link */
+.duomei-sec-head .duomei-sec-lede {
+  max-inline-size: var(--layout-reading);
+  margin: 0;
+  color: var(--color-muted-strong);
+  font-size: var(--text-base);
+  line-height: 1.7;
+  opacity: 0;
+  transform: translate3d(0, 0.6rem, 0);
+  transition: opacity 700ms var(--sec-ease) 320ms, transform 700ms var(--sec-ease) 320ms;
+}
+
+.duomei-sec-head .duomei-sec-link {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4em;
+  min-block-size: var(--size-hit);
+  color: var(--sec-accent-ink);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-decoration: none;
+  white-space: nowrap;
+  background-image: linear-gradient(var(--sec-accent), var(--sec-accent)), linear-gradient(var(--color-rule), var(--color-rule));
+  background-repeat: no-repeat;
+  background-size: 0% 1px, 100% 1px;
+  background-position: 0 calc(100% - 0.55rem), 0 calc(100% - 0.55rem);
+  transition:
+    background-size 520ms var(--sec-ease),
+    color 220ms var(--sec-ease),
+    opacity 700ms var(--sec-ease) 460ms,
+    transform 700ms var(--sec-ease) 460ms;
+  opacity: 0;
+  transform: translate3d(0, 0.6rem, 0);
+}
+
+.duomei-sec-head .duomei-sec-arrow {
+  display: inline-block;
+  transition: transform 420ms var(--sec-ease);
+}
+
+.duomei-sec-head.is-in .duomei-sec-lede,
+.duomei-sec-head.is-in .duomei-sec-link {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .duomei-sec-head .duomei-sec-link:hover {
+    background-size: 100% 1px, 100% 1px;
+  }
+
+  .duomei-sec-head .duomei-sec-link:hover .duomei-sec-arrow {
+    transform: translate3d(0.3em, 0, 0);
+  }
+}
+
+.duomei-sec-head .duomei-sec-link:focus-visible {
+  outline: var(--rule-focus) solid var(--color-focus);
+  outline-offset: var(--space-2xs);
+}
+
+@media (max-width: 48rem) {
+  .duomei-sec-head {
+    grid-template-columns: minmax(0, 1fr);
+    align-items: start;
+    gap: var(--space-md);
+  }
+
+  .duomei-sec-head .duomei-sec-aside {
+    padding-block-end: 0;
+  }
+
+  .duomei-sec-head::before {
+    inset-block-start: -6rem;
+    inset-inline-end: -8rem;
+    inline-size: 26rem;
+    block-size: 18rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .duomei-sec-head::before,
+  .duomei-sec-head .duomei-sec-index,
+  .duomei-sec-head .duomei-sec-dot,
+  .duomei-sec-head .duomei-sec-char,
+  .duomei-sec-head .duomei-sec-lede,
+  .duomei-sec-head .duomei-sec-link {
+    opacity: 1;
+    transform: none;
+    transition: none;
+    animation: none;
+  }
+
+  .duomei-sec-head .duomei-sec-kicker-text {
+    clip-path: none;
+    transition: none;
+  }
+
+  .duomei-sec-head .duomei-sec-stroke {
+    transform: skewX(-8deg) rotate(-1.4deg) scaleX(1);
+    transition: none;
+  }
+}

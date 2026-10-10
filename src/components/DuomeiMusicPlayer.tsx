@@ -16,19 +16,29 @@ import {
   type NeteasePlaylistTrack,
 } from "../lib/neteasePlaylist";
 import { fetchNeteaseLyrics, type NeteaseLyricLine } from "../lib/neteaseLyrics";
+import { albumOf, isOriginalTrack, originalAlbums, originalPlaylist, randomOriginalIndex } from "../lib/originalMusic";
 import type { FloatingWidgetPosition } from "../lib/floatingWidget";
 import "../music-player.css";
+import "../music-player-colorful.css";
 
 const NETEASE_PLAYLIST_ID = "316500315";
 const PLAYBACK_MODE_KEY = "duomei-music-playback-mode";
 const DOCK_GAP = 12;
 // Immersive scenes without the global header: dock beside their own top-left back control.
-const DOCK_ANCHOR_SELECTOR = ".zaobao-reader-bar .zaobao-page-back, .dalu-map-nav > a:first-child";
+const DOCK_ANCHOR_SELECTOR = ".zaobao-reader-bar .zaobao-page-back, .dalu-map-nav > a:first-child, .guyu-reader-back";
 const DOCK_DROP = 8;
 const PANEL_KEY = "duomei-music-player-panel-v2";
 const INITIAL_VISIBLE_TRACKS = 80;
 
 type PlaybackMode = "sequence" | "shuffle" | "one";
+// 多美原创 is the default source; the NetEase playlist stays one tap away.
+type MusicSource = "originals" | "netease";
+
+function readSource(): MusicSource {
+  if (typeof window === "undefined") return "originals";
+  // NetEase stays in the code but is no longer offered: 多美原创 only.
+  return "originals";
+}
 type PanelView = "queue" | "lyrics";
 // Where the resting orb sits beside the header brand and where the opened bar drops beneath the header.
 type DockPositions = { orb: FloatingWidgetPosition; open: FloatingWidgetPosition };
@@ -150,18 +160,23 @@ export function DuomeiMusicPlayer({ compactContext = false }: { compactContext?:
   const lyricAbortRef = useRef<AbortController | null>(null);
   const lyricCacheRef = useRef(new Map<string, NeteaseLyricLine[]>());
   const playlistPromiseRef = useRef<Promise<NeteasePlaylist> | null>(null);
-  const playlistRef = useRef<NeteasePlaylist | null>(null);
+  const playlistRef = useRef<NeteasePlaylist | null>(readSource() === "originals" ? originalPlaylist : null);
+  const neteaseRef = useRef<NeteasePlaylist | null>(null);
+  const [source, setSource] = useState<MusicSource>(readSource);
+  const sourceRef = useRef(source);
+  sourceRef.current = source;
   const failedTrackIdsRef = useRef(new Set<string>());
   const [dock, setDock] = useState<DockPositions | null>(null);
+  const [dockTick, setDockTick] = useState(0);
   const [playbackMode, setPlaybackMode] = useState<PlaybackMode>(readPlaybackMode);
   const [panelClosed, setPanelClosed] = useState(() => compactContext || readPanelClosed());
   const [panelView, setPanelView] = useState<PanelView>("queue");
   const [minimized, setMinimized] = useState(true);
-  const [playlist, setPlaylist] = useState<NeteasePlaylist | null>(null);
-  const [playlistStatus, setPlaylistStatus] = useState<"idle" | "loading" | "ready" | "error">("idle");
+  const [playlist, setPlaylist] = useState<NeteasePlaylist | null>(() => (readSource() === "originals" ? originalPlaylist : null));
+  const [playlistStatus, setPlaylistStatus] = useState<"idle" | "loading" | "ready" | "error">(() => (readSource() === "originals" ? "ready" : "idle"));
   const [playlistMessage, setPlaylistMessage] = useState("");
   const [playbackMessage, setPlaybackMessage] = useState("");
-  const [currentIndex, setCurrentIndex] = useState(-1);
+  const [currentIndex, setCurrentIndex] = useState(() => (readSource() === "originals" ? (readPlaybackMode() === "shuffle" ? randomOriginalIndex() : 0) : -1));
   const [isPlaying, setIsPlaying] = useState(false);
   const [isBuffering, setIsBuffering] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
@@ -182,7 +197,8 @@ export function DuomeiMusicPlayer({ compactContext = false }: { compactContext?:
   };
 
   const loadPlaylist = useCallback(() => {
-    if (playlistRef.current) return Promise.resolve(playlistRef.current);
+    if (sourceRef.current === "originals") return Promise.resolve(originalPlaylist);
+    if (neteaseRef.current) return Promise.resolve(neteaseRef.current);
     if (playlistPromiseRef.current) return playlistPromiseRef.current;
     playlistAbortRef.current?.abort();
     const controller = new AbortController();
@@ -191,6 +207,8 @@ export function DuomeiMusicPlayer({ compactContext = false }: { compactContext?:
     setPlaylistMessage("");
     const request = fetchNeteasePlaylist(controller.signal)
       .then((next) => {
+        neteaseRef.current = next;
+        if (sourceRef.current !== "netease") return next;
         playlistRef.current = next;
         setPlaylist(next);
         setPlaylistStatus("ready");
@@ -250,7 +268,15 @@ export function DuomeiMusicPlayer({ compactContext = false }: { compactContext?:
     const bar = anchor?.closest<HTMLElement>("header, nav") ?? null;
     if (!anchor || !bar) {
       setDock(null);
-      return;
+      // Lazy routes render their bar after this effect ran; re-run once it shows up.
+      const watcher = new MutationObserver(() => {
+        if (document.querySelector(".duomei-header .duomei-brand") || document.querySelector(DOCK_ANCHOR_SELECTOR)) {
+          watcher.disconnect();
+          setDockTick((value) => value + 1);
+        }
+      });
+      watcher.observe(document.body, { childList: true, subtree: true });
+      return () => watcher.disconnect();
     }
     const measure = () => {
       const orbSize = playerRef.current?.querySelector<HTMLElement>(".duomei-music-orb")?.offsetWidth || 52;
@@ -273,11 +299,31 @@ export function DuomeiMusicPlayer({ compactContext = false }: { compactContext?:
     observer.observe(anchor);
     void document.fonts?.ready.then(measure);
     return () => observer.disconnect();
-  }, [compactContext, pathname]);
+  }, [compactContext, dockTick, pathname]);
 
+  // The playlist is ~430 KB of JSON for 2300 tracks: fetch it only once the page has finished
+  // loading and the browser is idle, so it never competes with the hero and cover images.
   useEffect(() => {
-    const preloadTimer = window.setTimeout(() => void loadPlaylist().catch(() => undefined), 1_200);
-    return () => window.clearTimeout(preloadTimer);
+    let timer = 0;
+    let idle = 0;
+    let cancelled = false;
+    const run = () => {
+      if (!cancelled) void loadPlaylist().catch(() => undefined);
+    };
+    const schedule = () => {
+      timer = window.setTimeout(() => {
+        if (typeof window.requestIdleCallback === "function") idle = window.requestIdleCallback(run, { timeout: 4_000 });
+        else run();
+      }, 1_200);
+    };
+    if (document.readyState === "complete") schedule();
+    else window.addEventListener("load", schedule, { once: true });
+    return () => {
+      cancelled = true;
+      window.removeEventListener("load", schedule);
+      window.clearTimeout(timer);
+      if (idle && typeof window.cancelIdleCallback === "function") window.cancelIdleCallback(idle);
+    };
   }, [loadPlaylist]);
 
   useEffect(() => {
@@ -296,6 +342,13 @@ export function DuomeiMusicPlayer({ compactContext = false }: { compactContext?:
 
   useEffect(() => {
     if (panelClosed || panelView !== "lyrics" || !currentTrack) return;
+    if (isOriginalTrack(currentTrack)) {
+      lyricAbortRef.current?.abort();
+      setLyrics([]);
+      setLyricsStatus("ready");
+      setLyricsMessage("");
+      return;
+    }
     const cached = lyricCacheRef.current.get(currentTrack.id);
     if (cached) {
       setLyrics(cached);
@@ -342,6 +395,37 @@ export function DuomeiMusicPlayer({ compactContext = false }: { compactContext?:
     return () => list.removeEventListener("wheel", containWheel);
   }, [panelView, playlistStatus]);
 
+  // While open on a fine pointer: stay open as long as the pointer is over the player or the spot
+  // the orb came from (inside the header), fold ~0.7 s after it wanders off. Prevents the open/close
+  // loop a docked orb used to get into when it slid out from under the pointer.
+  useEffect(() => {
+    if (minimized) return;
+    if (!window.matchMedia("(hover: hover) and (pointer: fine)").matches) return;
+    let away = false;
+    const onMove = (event: globalThis.PointerEvent) => {
+      if (event.pointerType !== "mouse") return;
+      const box = playerRef.current?.getBoundingClientRect();
+      if (!box) return;
+      const inside = event.clientX >= box.left - 28 && event.clientX <= box.right + 28
+        && event.clientY >= box.top - 120 && event.clientY <= box.bottom + 28;
+      if (inside) {
+        if (away) {
+          away = false;
+          clearAutoMinimize();
+        }
+        pointerInsideRef.current = true;
+        return;
+      }
+      if (!away) {
+        away = true;
+        pointerInsideRef.current = false;
+        if (!pointerFocusGuardRef.current) scheduleAutoMinimize(700);
+      }
+    };
+    document.addEventListener("pointermove", onMove, { passive: true });
+    return () => document.removeEventListener("pointermove", onMove);
+  }, [minimized]);
+
   useEffect(() => () => {
     clearAutoMinimize();
     clearHoverReveal();
@@ -366,7 +450,7 @@ export function DuomeiMusicPlayer({ compactContext = false }: { compactContext?:
     setDuration(track.durationMs / 1_000);
     if (audio.dataset.trackId !== track.id) {
       audio.dataset.trackId = track.id;
-      audio.src = `/api/music-stream?id=${encodeURIComponent(track.id)}`;
+      audio.src = isOriginalTrack(track) ? track.src : `/api/music-stream?id=${encodeURIComponent(track.id)}`;
       audio.load();
     }
     setIsBuffering(true);
@@ -501,7 +585,9 @@ export function DuomeiMusicPlayer({ compactContext = false }: { compactContext?:
   const nowSubtitle = playbackMessage
     || (isBuffering
       ? "正在缓冲…"
-      : currentTrack?.artist ?? (playlistStatus === "loading" ? "正在整理可播放歌曲…" : "网易云歌单"));
+      : isOriginalTrack(currentTrack)
+        ? currentTrack.sub
+        : currentTrack?.artist ?? (playlistStatus === "loading" ? "正在整理可播放歌曲…" : source === "originals" ? "多美 · 原创" : "网易云歌单"));
   const playbackModeLabel = playbackMode === "shuffle" ? "随机播放" : playbackMode === "one" ? "单曲循环" : "顺序播放";
   const progressStyle = {
     "--music-progress": `${duration > 0 ? Math.min(100, Math.max(0, currentTime / duration * 100)) : 0}%`,
@@ -522,10 +608,15 @@ export function DuomeiMusicPlayer({ compactContext = false }: { compactContext?:
       onPointerEnter={(event) => {
         pointerInsideRef.current = true;
         clearAutoMinimize();
-        // A docked orb opens below the header, out from under the pointer; hover-reveal would loop, so it opens on click.
-        if (event.pointerType !== "mouse" || !minimized || docked) return;
+        if (event.pointerType !== "mouse" || !minimized) return;
+        // Hover opens the player and its list; the pointermove watcher below decides when it folds.
         clearHoverReveal();
-        hoverRevealTimerRef.current = window.setTimeout(revealCompactPlayer, 180);
+        hoverRevealTimerRef.current = window.setTimeout(() => {
+          revealCompactPlayer();
+          setPanelView("queue");
+          setPanelClosed(false);
+          window.localStorage.setItem(PANEL_KEY, "open");
+        }, 140);
       }}
       onPointerLeave={() => {
         pointerInsideRef.current = false;
@@ -581,7 +672,7 @@ export function DuomeiMusicPlayer({ compactContext = false }: { compactContext?:
           {currentTrack?.coverUrl ? <img src={currentTrack.coverUrl} alt="" referrerPolicy="no-referrer" /> : <span aria-hidden="true">♪</span>}
         </button>
         <button className="duomei-music-now" type="button" onClick={(event) => togglePanel(event.detail > 0)} aria-expanded={!panelClosed}>
-          <strong>{currentTrack?.name ?? "Tamidesu 的歌单"}</strong>
+          <strong>{currentTrack?.name ?? (source === "originals" ? "多美原创" : "Tamidesu 的歌单")}</strong>
           <small>{nowSubtitle}</small>
         </button>
         <button className="duomei-music-skip is-previous" type="button" title="上一首" aria-label="上一首" disabled={!playlist} onClick={() => moveTrack(-1)}><SkipIcon direction="previous" /></button>
@@ -597,17 +688,7 @@ export function DuomeiMusicPlayer({ compactContext = false }: { compactContext?:
           onClick={cyclePlaybackMode}
         >
           <PlaybackModeIcon mode={playbackMode} />
-        </button>
-        <button
-          className="duomei-music-lyrics-toggle"
-          type="button"
-          disabled={!currentTrack}
-          title="歌词"
-          aria-label={panelView === "lyrics" && !panelClosed ? "收起歌词" : "显示歌词"}
-          aria-pressed={panelView === "lyrics" && !panelClosed}
-          onClick={(event) => togglePanelView("lyrics", event.detail > 0)}
-        >
-          <LyricsIcon />
+          <span className="duomei-music-label">{playbackMode === "shuffle" ? "随机" : playbackMode === "one" ? "单曲" : "顺序"}</span>
         </button>
         <button
           className="duomei-music-mute"
@@ -620,6 +701,7 @@ export function DuomeiMusicPlayer({ compactContext = false }: { compactContext?:
           }}
         >
           <VolumeIcon muted={isMuted} />
+          <span className="duomei-music-label">{isMuted ? "已静音" : "静音"}</span>
         </button>
         <button
           className="duomei-music-queue"
@@ -629,6 +711,7 @@ export function DuomeiMusicPlayer({ compactContext = false }: { compactContext?:
           onClick={(event) => togglePanelView("queue", event.detail > 0)}
         >
           <QueueIcon />
+          <span className="duomei-music-label">歌单</span>
         </button>
         <input
           className="duomei-music-progress"
@@ -652,7 +735,14 @@ export function DuomeiMusicPlayer({ compactContext = false }: { compactContext?:
       </div>
 
       <section className="duomei-music-panel" aria-label={panelView === "lyrics" ? "歌词" : "歌单"} aria-hidden={panelClosed} inert={panelClosed}>
-        {panelView === "lyrics" ? (
+        {panelView === "lyrics" && isOriginalTrack(currentTrack) ? (
+          <div className="duomei-music-about">
+            <img src={albumOf(currentTrack).cover} alt="" width="512" height="512" />
+            <strong>{currentTrack.name}</strong>
+            <span>{currentTrack.sub}</span>
+            <small>{albumOf(currentTrack).title} · {albumOf(currentTrack).note}</small>
+          </div>
+        ) : panelView === "lyrics" ? (
           <div ref={lyricListRef} className="duomei-music-lyrics" aria-live="off">
             {lyricsStatus === "loading" ? <p className="duomei-music-loading">歌词缓缓展开中…</p> : null}
             {lyricsStatus === "error" ? <p className="duomei-music-loading">{lyricsMessage || "这首歌暂时没有歌词。"}</p> : null}
@@ -666,6 +756,39 @@ export function DuomeiMusicPlayer({ compactContext = false }: { compactContext?:
                 <span>{line.text}</span>
                 {line.translation ? <small>{line.translation}</small> : null}
               </p>
+            ))}
+          </div>
+        ) : source === "originals" ? (
+          <div ref={trackListRef} className="duomei-music-track-list duomei-music-albums" role="list">
+            {originalAlbums.map((item) => (
+              <section key={item.id} className="duomei-music-album">
+                <header className="duomei-music-album-head">
+                  <img src={item.cover} alt="" width="512" height="512" loading="lazy" />
+                  <div>
+                    <strong>{item.title}</strong>
+                    <small>{item.note} · {item.tracks.length} 首</small>
+                  </div>
+                </header>
+                {item.tracks.map((track, position) => {
+                  const index = originalPlaylist.tracks.indexOf(track);
+                  return (
+                    <button
+                      className={currentIndex === index ? "is-current" : undefined}
+                      type="button"
+                      role="listitem"
+                      key={track.id}
+                      onClick={() => void playTrackAt(index)}
+                    >
+                      <span>{String(position + 1).padStart(2, "0")}</span>
+                      <span>
+                        <strong>{track.name}</strong>
+                        <small>{track.sub}</small>
+                      </span>
+                      <em>{formatTime(track.durationMs / 1_000)}</em>
+                    </button>
+                  );
+                })}
+              </section>
             ))}
           </div>
         ) : playlistStatus === "error" ? (

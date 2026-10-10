@@ -7,9 +7,16 @@ declare global {
   }
 }
 
+// Safari's own scrolling is already smooth, and Lenis's re-scrolled frames fight sticky stages there
+// (a stutter at every section hand-over), so Safari keeps native scrolling.
+function isSafari() {
+  const ua = navigator.userAgent;
+  return /safari/i.test(ua) && !/chrome|chromium|crios|android|edg/i.test(ua);
+}
+
 export function useSmoothScroll(disabled = false) {
   useEffect(() => {
-    if (disabled) return;
+    if (disabled || isSafari()) return;
 
     const lenis = new Lenis({
       lerp: 0.08,

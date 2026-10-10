@@ -2,13 +2,13 @@
 // index.html for every path, so crawlers must be handed a rewritten copy.
 // Runs in the V8 edge runtime: Web APIs only, no Node built-ins.
 
-export const SITE_NAME = "DUOMEI 多美小记";
+export const SITE_NAME = "DUOMEI 多美";
 export const ZAOBAO_SOURCE = "https://zaobao-six.vercel.app";
 export const XUNJI_SOURCE = "https://xihuan.vercel.app";
 
 const DEFAULT_DESCRIPTION = "记录旅途中的风景、生活片段、旅行照片和心情文字。";
 const ZAOBAO_DESCRIPTION = "国际、国内、日本、科技、AI、新品、兴趣、日常，八个栏目的每日早报。";
-const XUNJI_DESCRIPTION = "西幻写作素材 · 多美小记。每天从琐事里摘出可直接开写的故事骨架。";
+const XUNJI_DESCRIPTION = "西幻写作素材 · 多美。每天从琐事里摘出可直接开写的故事骨架。";
 const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 // Story ids come from the source's `data-id` slugs; anything else is not a story route.
 const STORY_ID_PATTERN = /^[\w-]{1,120}$/;
@@ -18,9 +18,22 @@ const CRAWLER_PATTERN =
   /bot|spider|crawl|slurp|facebookexternalhit|twitterbot|linkedinbot|slackbot|telegrambot|whatsapp|discordbot|embedly|pinterest|applebot|bytespider|baiduspider|sogou|yisou|360spider|skypeuripreview|iframely|mastodon|bluesky|dingtalk|feishu|lark|preview|micromessenger|wechat|weixin/i;
 // WeChat renders only absolute https PNG/JPG covers; SVG and WebP show as a grey block.
 const SHARE_IMAGE_PATTERN = /^https:\/\/[^?#\s]+\.(?:png|jpe?g)(?:[?#]|$)/i;
-const DEFAULT_IMAGE = "/og-image.png";
-const ZAOBAO_IMAGE = "/og-zaobao.png";
-const XUNJI_IMAGE = "/og-image.png";
+// Share covers live in public/og/ (1200×630 PNG, one per section; generated from a template, see CLAUDE.md).
+const DEFAULT_IMAGE = "/og/duomei.png";
+const ZAOBAO_IMAGE = "/og/zaobao.png";
+const XUNJI_IMAGE = "/og/xunji.png";
+const SECTION_IMAGES = {
+  notes: "/og/notes.png",
+  note: "/og/notes.png",
+  time: "/og/kuaihuo.png",
+  guyu: "/og/guyu.png",
+  dalu: "/og/dalu.png",
+  chaoji: "/og/dalu.png",
+  "yunyou-map": "/og/yunyou.png",
+  yunyou: "/og/yunyou.png",
+  skills: "/og/skills.png",
+  xiaoyuan: "/og/xiaoyuan.png",
+};
 
 export function isCrawler(userAgent) {
   return CRAWLER_PATTERN.test(userAgent ?? "");
@@ -134,6 +147,29 @@ function routeCopy(segments) {
   if (segments[0] === "skills" && segments.length === 1) {
     return { title: "Skill", description: "多美整理的 AI Agent Skill 目录，公开在 colorsugar/agent-skills。" };
   }
+  if (segments[0] === "guyu" && segments.length === 2 && STORY_ID_PATTERN.test(segments[1])) {
+    return { title: "故语 · 翻开这一本", description: "有些话，只适合留在纸页之间。" };
+  }
+  if (segments[0] === "note" && segments.length === 2) {
+    return { title: "小记", description: "记录旅途，遇见生活，也遇见自己。" };
+  }
+  if (segments[0] === "time" && segments.length === 1) {
+    return { title: "多美时光", description: "几行诗、几张画，快活一下。" };
+  }
+  if (segments[0] === "dalu" && segments.length <= 2) {
+    return segments[1] === "map"
+      ? { title: "大陆立体地图", description: "可以转动的七国大陆，山川、城邦与航线。" }
+      : { title: "大陆", description: "交互地图、地理风物与宫堡庄园，收在同一片大陆。" };
+  }
+  if (segments[0] === "chaoji" && segments.length <= 2) {
+    return { title: segments[1] === "map" ? "超级大陆立体地图" : "超级大陆", description: "火山与冰原之间的超级大陆，可以转动的山海。" };
+  }
+  if ((segments[0] === "yunyou-map" || segments[0] === "yunyou") && segments.length === 1) {
+    return { title: "云游", description: "桂林的山水、七国的大陆、超级大陆的山海，都收进了可以转动的地图。" };
+  }
+  if (segments[0] === "xiaoyuan" && segments.length === 1) {
+    return { title: "多美的夏日小院", description: "一个悬浮在云上的夏天，可以走进去看看。" };
+  }
   return null;
 }
 
@@ -141,7 +177,7 @@ function routeCopy(segments) {
 export function staticShareMeta(pathname) {
   const segments = pathname.split("/").filter(Boolean);
   const copy = routeCopy(segments);
-  const fallbackImage = segments[0] === "zaobao" ? ZAOBAO_IMAGE : segments[0] === "xunji" ? XUNJI_IMAGE : DEFAULT_IMAGE;
+  const fallbackImage = segments[0] === "zaobao" ? ZAOBAO_IMAGE : segments[0] === "xunji" ? XUNJI_IMAGE : SECTION_IMAGES[segments[0]] ?? DEFAULT_IMAGE;
   return copy && { image: fallbackImage, ...copy };
 }
 

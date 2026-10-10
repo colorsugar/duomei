@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef } from "react";
+import { optimizeCoverSrc } from "../lib/coverSource";
 import type { DragEvent, MouseEvent, PointerEvent, WheelEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import type { DuomeiNote } from "../lib/noteTypes";
@@ -143,6 +144,8 @@ export function NotesCarousel({ notes }: { notes: DuomeiNote[] }) {
     card.classList.add("is-resetting-tilt");
     card.style.setProperty("--note-tilt-x", "0deg");
     card.style.setProperty("--note-tilt-y", "0deg");
+    card.style.setProperty("--note-glare-x", "50%");
+    card.style.setProperty("--note-glare-y", "50%");
     window.setTimeout(() => card.classList.remove("is-resetting-tilt"), 180);
   };
 
@@ -164,6 +167,9 @@ export function NotesCarousel({ notes }: { notes: DuomeiNote[] }) {
     card.classList.remove("is-resetting-tilt");
     card.style.setProperty("--note-tilt-x", `${relativeY * -tiltLimit * 2}deg`);
     card.style.setProperty("--note-tilt-y", `${relativeX * tiltLimit * 2}deg`);
+    // The cover's sheen follows the pointer through the same frame (see note-card-cover::after).
+    card.style.setProperty("--note-glare-x", `${((relativeX + 0.5) * 100).toFixed(1)}%`);
+    card.style.setProperty("--note-glare-y", `${((relativeY + 0.5) * 100).toFixed(1)}%`);
   };
 
   const scheduleCardTilt = (card: HTMLElement, clientX: number, clientY: number) => {
@@ -344,7 +350,7 @@ export function NotesCarousel({ notes }: { notes: DuomeiNote[] }) {
       carouselLeft: viewport?.scrollLeft ?? 0,
       noteId: note.id,
     });
-    preloadJourneyImage(note.coverImageUrl);
+    preloadJourneyImage(optimizeCoverSrc(note.coverImageUrl));
 
     runSharedJourneyTransition(() => {
       navigate(`/note/${note.slug}`);

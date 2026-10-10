@@ -1,5 +1,6 @@
 import { HomeSectionHold } from "./HomeSectionHold";
 import { Link } from "react-router-dom";
+import { SectionTitle } from "./SectionTitle";
 
 const YUNYOU_HREF = "/yunyou-map";
 
@@ -16,10 +17,16 @@ const PLACES: Place[] = [
 export function YunyouSection() {
   return (
     <HomeSectionHold id="yunyou" className="yunyou-section" ariaLabelledBy="yunyou-title">
-      <header className="yunyou-heading">
-        <h2 id="yunyou-title">云游</h2>
-        <p>循着山水与灯火，走进三处可以停留的风景。</p>
-      </header>
+      <SectionTitle
+        id="yunyou-title"
+        accent="yunyou"
+        index="07"
+        kicker="Wander · 三处可以停留的风景"
+        title="云游"
+        lede="循着山水与灯火：桂林的两江四湖、云上的夏日小院、荷叶上落雨的江南园子。"
+        link={{ to: YUNYOU_HREF, label: "开始云游" }}
+        className="yunyou-heading"
+      />
 
       <div className="yunyou-plates">
         {PLACES.map((p) => (

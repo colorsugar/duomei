@@ -4,13 +4,13 @@ export type HomeSettings = {
   notesSubtitle: string;
 };
 
-const HOME_SETTINGS_KEY = "duomei-home-settings";
+const HOME_SETTINGS_KEY = "duomei-home-settings-v2";
 export const HOME_SETTINGS_UPDATED_EVENT = "duomei-home-settings-updated";
 
 export const defaultHomeSettings: HomeSettings = {
   notesEyebrow: "旅途记录 / Travel Notes",
-  notesTitle: "多美的小记",
-  notesSubtitle: "记录旅途中的风景、心情与故事",
+  notesTitle: "小记",
+  notesSubtitle: "记录旅途，遇见生活，也遇见自己。",
 };
 
 function canUseStorage() {

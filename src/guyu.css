@@ -448,9 +448,9 @@ body {
 
 .guyu-home-carousel {
   --guyu-drag-x: 0px;
-  --guyu-scatter-duration: 760ms;
-  --guyu-assemble-duration: 1180ms;
-  --guyu-settle-duration: 1600ms;
+  --guyu-scatter-duration: 300ms;
+  --guyu-assemble-duration: 440ms;
+  --guyu-settle-duration: 320ms;
   display: grid;
   grid-template-areas:
     "work"
@@ -743,8 +743,13 @@ body {
   transform: translate3d(0, 0, 0) scale(1);
 }
 
+/* By the settle phase the incoming copy has already faded in at exactly this position, so the (now
+ * current) copy must simply be there — re-entering from zero read as a flash and a replayed animation. */
 .guyu-home-carousel[data-phase="settle"] .guyu-home-work-copy.is-current {
-  animation: guyuCopySettle var(--guyu-settle-duration) cubic-bezier(0.22, 1, 0.36, 1) both;
+  opacity: 1;
+  filter: blur(0);
+  transform: translate3d(0, 0, 0);
+  transition: none;
 }
 
 .guyu-home-carousel[data-phase="settle"] .guyu-home-work-copy.is-incoming {
@@ -767,15 +772,15 @@ body {
 
 @keyframes guyuCoverSettle {
   0% {
-    opacity: 0.42;
-    filter: blur(7px) saturate(0.7);
-    transform: scale(1.024);
+    opacity: 1;
+    filter: blur(0.8px) saturate(0.96);
+    transform: scale(1.006);
   }
 
   58% {
     opacity: 1;
-    filter: blur(0.6px) saturate(0.98);
-    transform: scale(0.997);
+    filter: blur(0.3px) saturate(0.99);
+    transform: scale(0.999);
   }
 
   100% {
@@ -808,28 +813,28 @@ body {
 @keyframes guyuCopyBreath {
   0%,
   100% {
-    opacity: 0.76;
-    filter: blur(0.35px);
-    transform: translate3d(0, 0.18rem, 0) scale(0.992);
+    opacity: 1;
+    filter: blur(0);
+    transform: translate3d(0, 0, 0) scale(1);
   }
 
   50% {
-    opacity: 1;
+    opacity: 0.86;
     filter: blur(0);
-    transform: translate3d(0, -0.28rem, 0) scale(1.01);
+    transform: translate3d(0, -0.22rem, 0) scale(1.006);
   }
 }
 
 @keyframes guyuPhraseBreath {
   0%,
   100% {
-    opacity: 0.68;
-    transform: translate3d(0, 0.18em, 0);
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
   }
 
   50% {
-    opacity: 1;
-    transform: translate3d(0, -0.08em, 0);
+    opacity: 0.8;
+    transform: translate3d(0, -0.1em, 0);
   }
 }
 

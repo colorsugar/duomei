@@ -272,7 +272,7 @@ $requiredMarkers = @(
   @{ File = "src/content/guyuBooks.ts"; Marker = 'access: "class-gated"' },
   @{ File = "src/content/guyuBooks.ts"; Marker = 'access: "public"' },
   @{ File = "src/lib/guyuCarousel.ts"; Marker = 'GUYU_CAROUSEL_DWELL_MS = 5_000' },
-  @{ File = "src/lib/guyuCarousel.ts"; Marker = 'GUYU_FRAGMENT_ASSEMBLE_MS = 1_180' },
+  @{ File = "src/lib/guyuCarousel.ts"; Marker = 'GUYU_FRAGMENT_ASSEMBLE_MS = 440' },
   @{ File = "src/components/GuyuShelfPreview.tsx"; Marker = 'guyu-home-fragment' },
   @{ File = "src/components/GuyuShelfPreview.tsx"; Marker = 'transitionPhaseRef.current = "settle"' },
   @{ File = "src/components/GuyuShelfPreview.tsx"; Marker = 'image.decode().then' },
@@ -289,7 +289,7 @@ $requiredMarkers = @(
   @{ File = "src/lib/guyuTouchSequence.ts"; Marker = 'activeTouchCount >= 2' },
   @{ File = "src/lib/guyuTouchSequence.ts"; Marker = 'isGuyuViewportZoomed' },
   @{ File = "src/guyu.css"; Marker = '.guyu-book-meta .guyu-title-phrases > span' },
-  @{ File = "src/components/BackToTopButton.tsx"; Marker = 'visible && !footerVisible' },
+  @{ File = "src/components/BackToTopButton.tsx"; Marker = 'window.scrollY > 520' },
   @{ File = "src/styles.css"; Marker = 'flex-wrap: nowrap' },
   @{ File = "server/guyuBooks.test.ts"; Marker = 'maps zhi-shang-feiyan as a full-page new-book' },
   @{ File = "server/guyuBooks.test.ts"; Marker = 'keeps every public new-book page present, ordered, and byte-stable' },
@@ -313,7 +313,7 @@ $requiredMarkers = @(
   @{ File = "src/lib/supabaseNotes.ts"; Marker = 'new URL("/v1/upload", NOTE_MEDIA_ORIGIN)' },
   @{ File = "vercel.json"; Marker = '/api/guyu-page?book=:book&page=:page' },
   @{ File = "src/pages/DuomeiAdmin.tsx"; Marker = 'id="note-management"' },
-  @{ File = "src/components/PaperLayer.tsx"; Marker = "paper-stroke-reveal-rect" },
+  @{ File = "src/components/PaperLayer.tsx"; Marker = "paper-fill" },
   @{ File = "src/styles.css"; Marker = ".paper-stroke-reveal-rect" }
   @{ File = "src/components/HomeIntroSection.css"; Marker = "Static notes keep the shared 230svh track" }
   @{ File = "src/components/HomeIntroSection.css"; Marker = "(max-height: 720px)" }

@@ -1,6 +1,9 @@
 import { supabase } from "./supabaseClient";
-import { bodyToBlocks } from "./noteStore";
-import type { DuomeiNote, NoteContentBlock, NoteStatus } from "./noteTypes";
+import { toNote, type NoteRow } from "./noteRow";
+import type { DuomeiNote } from "./noteTypes";
+
+// Public reads live in publicNotes.ts (plain fetch, no supabase-js); re-exported for existing callers.
+export { fetchPublishedNotes } from "./publicNotes";
 
 const NOTE_MEDIA_ORIGIN = (import.meta.env.VITE_DUOMEI_MEDIA_ORIGIN
   || "https://duomei-media-storage.colorsugar.workers.dev").replace(/\/+$/u, "");
@@ -11,49 +14,6 @@ const NOTE_MEDIA_TYPES = new Map([
   ["image/webp", "webp"],
 ]);
 const NOTE_MEDIA_FOLDERS = new Set(["article", "covers", "notes", "poetry"]);
-
-type NoteRow = {
-  id: string;
-  slug: string;
-  title: string;
-  date: string;
-  location: string;
-  category: string;
-  tags: string[] | null;
-  excerpt: string;
-  body: string;
-  cover_image_url: string | null;
-  style_prompt: string | null;
-  status: "published" | "draft" | "hidden";
-  body_images: string[] | null;
-  content_blocks: NoteContentBlock[] | null;
-  created_at: string;
-  updated_at: string;
-};
-
-function toNote(row: NoteRow): DuomeiNote {
-  const bodyImages = row.body_images ?? [];
-  const contentBlocks = row.content_blocks?.length ? row.content_blocks : bodyToBlocks(row.body ?? "", bodyImages);
-
-  return {
-    id: row.id,
-    slug: row.slug,
-    title: row.title,
-    date: row.date ?? "",
-    location: row.location ?? "",
-    category: row.category ?? "",
-    tags: row.tags ?? [],
-    excerpt: row.excerpt ?? "",
-    body: row.body ?? "",
-    coverImageUrl: row.cover_image_url ?? "",
-    bodyImages,
-    contentBlocks,
-    stylePrompt: row.style_prompt ?? "",
-    status: row.status === "hidden" ? "draft" : (row.status as NoteStatus),
-    createdAt: row.created_at,
-    updatedAt: row.updated_at,
-  };
-}
 
 function toRow(note: DuomeiNote) {
   return {
@@ -86,19 +46,6 @@ export async function loginCloudAdmin(email: string, password: string) {
 
 export async function logoutCloudAdmin() {
   await supabase.auth.signOut();
-}
-
-export async function fetchPublishedNotes() {
-  const { data, error } = await supabase
-    .from("notes")
-    .select("*")
-    .eq("status", "published")
-    .is("deleted_at", null)
-    .order("date", { ascending: false })
-    .order("updated_at", { ascending: false });
-
-  if (error) throw error;
-  return (data as NoteRow[]).map(toNote);
 }
 
 export async function fetchAllCloudNotes() {

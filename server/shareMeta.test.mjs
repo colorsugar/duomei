@@ -49,22 +49,25 @@ test("static route copy", () => {
   assert.equal(staticShareMeta("/zaobao/archive").title, "往期早报");
   assert.equal(staticShareMeta("/zaobao/2026-09-05").title, "2026-09-05 早报");
   assert.equal(staticShareMeta("/zaobao/2026-09-05").sourceUrl, "https://zaobao-six.vercel.app/2026-09-05/");
-  assert.equal(staticShareMeta("/zaobao").image, "/og-zaobao.png");
-  assert.equal(staticShareMeta("/zaobao/archive").image, "/og-zaobao.png");
-  assert.equal(staticShareMeta("/zaobao/2026-09-05").image, "/og-zaobao.png");
+  assert.equal(staticShareMeta("/zaobao").image, "/og/zaobao.png");
+  assert.equal(staticShareMeta("/zaobao/archive").image, "/og/zaobao.png");
+  assert.equal(staticShareMeta("/zaobao/2026-09-05").image, "/og/zaobao.png");
   assert.equal(staticShareMeta("/xunji").title, "今日寻迹");
   assert.equal(staticShareMeta("/xunji/archive").title, "往期寻迹");
   assert.equal(staticShareMeta("/xunji/2026-09-20").title, "2026-09-20 寻迹");
   assert.equal(staticShareMeta("/xunji/2026-09-20").sourceUrl, "https://xihuan.vercel.app/2026-09-20/");
-  assert.equal(staticShareMeta("/xunji").image, "/og-image.png");
-  assert.equal(staticShareMeta("/guyu").image, "/og-image.png");
+  assert.equal(staticShareMeta("/xunji").image, "/og/xunji.png");
+  assert.equal(staticShareMeta("/guyu").image, "/og/guyu.png");
   assert.equal(staticShareMeta("/guyu").title, "故语");
   assert.equal(staticShareMeta("/skills").title, "Skill");
   assert.equal(staticShareMeta("/jiangnan").title, "诗语江南");
   assert.equal(staticShareMeta("/jiangnan").image, "/og-jiangnan.jpg");
   assert.equal(staticShareMeta("/jiangnan/x"), null);
   assert.equal(staticShareMeta("/"), null);
-  assert.equal(staticShareMeta("/guyu/xinshuo-01"), null);
+  assert.equal(staticShareMeta("/guyu/xinshuo-01").image, "/og/guyu.png");
+  assert.equal(staticShareMeta("/dalu").image, "/og/dalu.png");
+  assert.equal(staticShareMeta("/jiangnan").title, "诗语江南");
+  assert.equal(staticShareMeta("/nope/x"), null);
 });
 
 test("edition summary is extracted from the source markup", () => {
@@ -85,7 +88,7 @@ test("crawlers get the edition headline, browsers get the static title without f
   assert.equal(bot.image, FIRST_IMAGE);
   const human = await resolveShareMeta("/zaobao", { crawler: false, fetchImpl: counting });
   assert.equal(human.title, "今日早报");
-  assert.equal(human.image, "/og-zaobao.png");
+  assert.equal(human.image, "/og/zaobao.png");
   // One fetch for the edition, one probe for its cover; the browser path fetches nothing.
   assert.equal(fetched, 2);
 });
@@ -105,13 +108,13 @@ test("story routes resolve to the article's own title, first paragraph and figur
   assert.equal(story.image, STORY_IMAGE);
 
   const human = await resolveShareMeta("/zaobao/2026-09-08/i/gpt6-astra-portal-clear-0907", { crawler: false, fetchImpl: fetchStorySource });
-  assert.deepEqual(human, { title: "2026-09-08 早报", description: "国际、国内、日本、科技、AI、新品、兴趣、日常，八个栏目的每日早报。", image: "/og-zaobao.png" });
+  assert.deepEqual(human, { title: "2026-09-08 早报", description: "国际、国内、日本、科技、AI、新品、兴趣、日常，八个栏目的每日早报。", image: "/og/zaobao.png" });
 
   // No data-title and no figure: h2 fills the title, `.source` is skipped for the lede, the site cover stays.
   const bare = await resolveShareMeta("/zaobao/i/no-figure-0907", { crawler: true, fetchImpl: fetchStorySource });
   assert.equal(bare.title, "没有图的一条 · 今日早报");
   assert.equal(bare.description, "只有来源后的正文。");
-  assert.equal(bare.image, "/og-zaobao.png");
+  assert.equal(bare.image, "/og/zaobao.png");
 
   // An id the edition no longer contains degrades to the edition card instead of a blank one.
   const gone = await resolveShareMeta("/zaobao/i/vanished-0901", { crawler: true, fetchImpl: fetchStorySource });
@@ -125,10 +128,10 @@ test("a cover the CDN refuses to serve falls back to the fixed zaobao PNG", asyn
     /\.jpg$/.test(urlOf(input)) ? new Response("denied", { status: 403, headers: { "content-type": "text/html" } }) : htmlResponse(storyHtml);
   const meta = await resolveShareMeta("/zaobao/i/gpt6-astra-portal-clear-0907", { crawler: true, fetchImpl: forbidden });
   assert.equal(meta.title, "OpenAI GPT-6 Astra 自主通关《传送门》：约 24 小时、成本 571 美元 · 今日早报");
-  assert.equal(meta.image, "/og-zaobao.png");
+  assert.equal(meta.image, "/og/zaobao.png");
 
   const htmlInstead = async (input) => (/\.jpg$/.test(urlOf(input)) ? htmlResponse("<p>login</p>") : htmlResponse(storyHtml));
-  assert.equal((await resolveShareMeta("/zaobao/i/gpt6-astra-portal-clear-0907", { crawler: true, fetchImpl: htmlInstead })).image, "/og-zaobao.png");
+  assert.equal((await resolveShareMeta("/zaobao/i/gpt6-astra-portal-clear-0907", { crawler: true, fetchImpl: htmlInstead })).image, "/og/zaobao.png");
 
   // A slow or unreachable probe is not evidence against the cover.
   const slowImage = (input) => (/\.jpg$/.test(urlOf(input)) ? new Promise(() => {}) : htmlResponse(storyHtml));
@@ -139,8 +142,8 @@ test("editions without a usable image keep the fixed zaobao cover", async () => 
   const noImage = async () => new Response("<h1>Headline</h1><img src=\"https://cdn.example/a.webp\">", { status: 200 });
   const meta = await resolveShareMeta("/zaobao/2026-09-05", { crawler: true, fetchImpl: noImage });
   assert.equal(meta.title, "Headline · 2026-09-05 早报");
-  assert.equal(meta.image, "/og-zaobao.png");
-  assert.equal((await resolveShareMeta("/zaobao/archive", { crawler: true, fetchImpl: noImage })).image, "/og-zaobao.png");
+  assert.equal(meta.image, "/og/zaobao.png");
+  assert.equal((await resolveShareMeta("/zaobao/archive", { crawler: true, fetchImpl: noImage })).image, "/og/zaobao.png");
 });
 
 test("source failures and timeouts fall back to static copy", async () => {
@@ -154,19 +157,19 @@ test("source failures and timeouts fall back to static copy", async () => {
 
 test("injection rewrites every share tag in the real shell and escapes content", () => {
   const html = injectShareMeta(shell, { title: 'A "quoted" <title>', description: "desc & more" }, "https://duomei.site/zaobao");
-  assert.match(html, /<title>A &quot;quoted&quot; &lt;title&gt; \| DUOMEI 多美小记<\/title>/);
+  assert.match(html, /<title>A &quot;quoted&quot; &lt;title&gt; \| DUOMEI 多美<\/title>/);
   assert.equal(metaContent(html, "property", "og:title"), "A &quot;quoted&quot; &lt;title&gt;");
   assert.equal(metaContent(html, "name", "twitter:title"), "A &quot;quoted&quot; &lt;title&gt;");
   assert.equal(metaContent(html, "property", "og:description"), "desc &amp; more");
   assert.equal(metaContent(html, "name", "description"), "desc &amp; more");
   assert.equal(metaContent(html, "property", "og:url"), "https://duomei.site/zaobao");
-  assert.equal(metaContent(html, "property", "og:image"), "https://duomei.site/og-image.png");
-  assert.equal(metaContent(html, "name", "twitter:image"), "https://duomei.site/og-image.png");
-  const cover = injectShareMeta(shell, { title: "x", image: "/og-zaobao.png" }, "https://duomei.site/zaobao");
-  assert.equal(metaContent(cover, "property", "og:image"), "https://duomei.site/og-zaobao.png");
+  assert.equal(metaContent(html, "property", "og:image"), "https://duomei.site/og/duomei.png");
+  assert.equal(metaContent(html, "name", "twitter:image"), "https://duomei.site/og/duomei.png");
+  const cover = injectShareMeta(shell, { title: "x", image: "/og/zaobao.png" }, "https://duomei.site/zaobao");
+  assert.equal(metaContent(cover, "property", "og:image"), "https://duomei.site/og/zaobao.png");
   const remote = injectShareMeta(shell, { title: "x", image: FIRST_IMAGE }, "https://duomei.site/zaobao");
   assert.equal(metaContent(remote, "property", "og:image"), "https://img.example/2026/9/first.png?w=1200&amp;h=630");
-  assert.equal(metaContent(html, "property", "og:site_name"), "DUOMEI 多美小记");
+  assert.equal(metaContent(html, "property", "og:site_name"), "DUOMEI 多美");
   assert.match(html, /<div id="root"><\/div>/);
   assert.equal((html.match(/<title>/g) ?? []).length, 1);
 });
@@ -236,10 +239,10 @@ test("handleShellRequest fetches the site's own shell and tags the response", as
 });
 
 test("the 诗语江南 page shares its own garden card", async () => {
-  const shell = `<!doctype html><html><head><title>x</title><meta property="og:title" content="DUOMEI 多美小记" /><meta property="og:image" content="https://duomei.site/og-image.png" /><meta name="twitter:image" content="https://duomei.site/og-image.png" /></head><body><div id="root"></div></body></html>`;
+  const shell = `<!doctype html><html><head><title>x</title><meta property="og:title" content="DUOMEI 多美" /><meta property="og:image" content="https://duomei.site/og-image.png" /><meta name="twitter:image" content="https://duomei.site/og-image.png" /></head><body><div id="root"></div></body></html>`;
   const out = await handleShellRequest(new Request("https://duomei.site/jiangnan", { headers: { "user-agent": "Twitterbot/1.0" } }), { fetchImpl: async () => new Response(shell, { status: 200, headers: { "content-type": "text/html" } }) });
   const html = await out.text();
   assert.match(html, /<meta property="og:title" content="诗语江南" \/>/);
   assert.match(html, /<meta name="twitter:image" content="https:\/\/duomei\.site\/og-jiangnan\.jpg" \/>/);
-  assert.match(html, /<title>诗语江南 \| DUOMEI 多美小记<\/title>/);
+  assert.match(html, /<title>诗语江南 \| DUOMEI 多美<\/title>/);
 });

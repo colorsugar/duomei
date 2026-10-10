@@ -4,7 +4,8 @@ import {
   getHomeSettings,
   saveHomeSettings,
 } from "../lib/homeSettings";
-import { AnimatedButton, AnimatedParagraph, AnimatedTitle, RevealSection } from "../motion";
+import { AnimatedButton, RevealSection } from "../motion";
+import { SectionTitle } from "./SectionTitle";
 
 export function NotesIntro({ onCreate, canCreate }: { onCreate: () => void; canCreate: boolean }) {
   const [settings, setSettings] = useState(() => getHomeSettings());
@@ -26,7 +27,7 @@ export function NotesIntro({ onCreate, canCreate }: { onCreate: () => void; canC
   };
 
   return (
-    <RevealSection className={`notes-intro${canCreate ? " is-editable" : ""}`}>
+    <RevealSection className={canCreate ? "notes-intro is-editable" : "notes-head"}>
       {canCreate ? (
         <>
           <input
@@ -43,10 +44,15 @@ export function NotesIntro({ onCreate, canCreate }: { onCreate: () => void; canC
           />
         </>
       ) : (
-        <>
-          <AnimatedTitle as="h2">{settings.notesTitle}</AnimatedTitle>
-          <AnimatedParagraph as="span">{settings.notesSubtitle}</AnimatedParagraph>
-        </>
+        <SectionTitle
+          id="notes-title"
+          accent="notes"
+          index="02"
+          kicker="Notes · 旅途小记"
+          title={settings.notesTitle}
+          lede={settings.notesSubtitle}
+          className="notes-intro-title-block"
+        />
       )}
       {canCreate ? (
         <AnimatedButton type="button" onClick={onCreate}>

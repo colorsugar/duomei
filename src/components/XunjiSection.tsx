@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { HomeSectionHold } from "./HomeSectionHold";
 import "./XunjiSection.css";
+import { SectionTitle } from "./SectionTitle";
 
 export const XUNJI_ROUTE = "/xunji";
 export const XUNJI_ARCHIVE_ROUTE = "/xunji/archive";
@@ -58,14 +59,16 @@ export function XunjiSection() {
 
   return (
     <HomeSectionHold id="xunji" className="xunji-home" ariaLabelledBy="xunji-title">
-      <header className="xunji-heading">
-        <span className="xunji-eyebrow">西幻写作素材</span>
-        <h2 id="xunji-title">寻迹</h2>
-        <p>从琐事里，摘出可直接开写的西幻故事骨架。</p>
-        <Link className="xunji-heading-archive" to={XUNJI_ARCHIVE_ROUTE}>
-          往期寻迹 →
-        </Link>
-      </header>
+      <SectionTitle
+        id="xunji-title"
+        accent="xunji"
+        index="05"
+        kicker="Traces · 西幻写作素材"
+        title="寻迹"
+        lede="从日常琐事里，摘出一副可以直接开写的西幻故事骨架。"
+        link={{ to: XUNJI_ARCHIVE_ROUTE, label: "往期寻迹" }}
+        className="xunji-heading"
+      />
 
       <Link className="xunji-home-card" to={XUNJI_ROUTE} aria-label={daily ? `打开寻迹：${daily.lede || daily.headline}` : "打开寻迹"}>
         <span className="xunji-home-kicker">

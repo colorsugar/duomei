@@ -13,7 +13,7 @@ export const defaultNotes: DuomeiNote[] = [
     tags: ["夕阳", "古镇", "书写"],
     excerpt: "太阳落到屋檐后面，茶杯、木桌和空白本子忽然都有了慢下来的理由。",
     body: "傍晚的光从叶子缝里落下来，河面被照得很软，远处的屋顶和小桥都像被轻轻擦淡了。\n\n我把杯子放在桌边，翻开本子，却迟迟没有写字。很多时候，小记不是为了立刻留下完整的故事，而是先替一个瞬间占好位置。\n\n那天最清楚的声音，是杯沿碰到桌面的轻响。城市在远处，晚风在近处，生活忽然变得刚刚好。",
-    coverImageUrl: "/images/note-default-covers/duomei-default-cover-01.png",
+    coverImageUrl: "/images/note-default-covers/duomei-default-cover-01.webp",
     bodyImages: [],
     contentBlocks: [
       { id: "tea-town-sunset-p1", type: "paragraph", text: "傍晚的光从叶子缝里落下来，河面被照得很软，远处的屋顶和小桥都像被轻轻擦淡了。" },
@@ -36,7 +36,7 @@ export const defaultNotes: DuomeiNote[] = [
     tags: ["晨光", "窗边", "日常"],
     excerpt: "一扇窗、一页纸、一杯温水，足够把普通的一天重新打开。",
     body: "早上的光没有很用力，只是慢慢铺在桌面上。窗外的树叶晃动，影子落进本子，像有人先替今天写好了开头。\n\n我喜欢这种还没有被消息和待办填满的时间。杯子在右手边，笔在本子上，心里那些散乱的念头终于有地方坐下来。\n\n今日小记不一定要写得漂亮。它只需要诚实地记下：我看见了光，也看见自己还愿意重新开始。",
-    coverImageUrl: "/images/note-default-covers/duomei-default-cover-02.png",
+    coverImageUrl: "/images/note-default-covers/duomei-default-cover-02.webp",
     bodyImages: [],
     contentBlocks: [
       { id: "window-morning-note-p1", type: "paragraph", text: "早上的光没有很用力，只是慢慢铺在桌面上。窗外的树叶晃动，影子落进本子，像有人先替今天写好了开头。" },
@@ -59,7 +59,7 @@ export const defaultNotes: DuomeiNote[] = [
     tags: ["多美", "纸影", "片刻"],
     excerpt: "有些日子不需要远行，只要把光影和心事安静地放在一张纸上。",
     body: "墙上的叶影很淡，淡到像一口还没有说出口的呼吸。纸面留着空白，反而让人想起很多已经走过的小路。\n\n多美小记最初想记录的，也许就是这种不耀眼的时刻。没有大事件，没有必须抵达的目的地，只有一点光、一点影、一点想写下来的心情。\n\n我越来越相信，生活的厚度不是靠热闹堆出来的。它常常藏在一张纸、一句话、一个被认真看见的下午里。",
-    coverImageUrl: "/images/note-default-covers/duomei-default-cover-03.png",
+    coverImageUrl: "/images/note-default-covers/duomei-default-cover-03.webp",
     bodyImages: [],
     contentBlocks: [
       { id: "duomei-paper-shadow-p1", type: "paragraph", text: "墙上的叶影很淡，淡到像一口还没有说出口的呼吸。纸面留着空白，反而让人想起很多已经走过的小路。" },
@@ -82,7 +82,7 @@ export const defaultNotes: DuomeiNote[] = [
     tags: ["远眺", "老城", "黄昏"],
     excerpt: "近处是瓦檐和木栏，远处是雾里的城市，黄昏把两种生活轻轻放在一起。",
     body: "站在高处的时候，老城的屋顶一层一层铺开，像一本被风翻动的旧书。阳光从右边斜过来，树叶亮得几乎透明。\n\n远处的高楼很模糊，却让画面多了一点现在。新和旧并没有争吵，它们只是一起待在傍晚里，各自安静。\n\n我在栏杆边坐了一会儿，给本子写下几个字：今天看见的不是风景，是时间的层次。",
-    coverImageUrl: "/images/note-default-covers/duomei-default-cover-04.png",
+    coverImageUrl: "/images/note-default-covers/duomei-default-cover-04.webp",
     bodyImages: [],
     contentBlocks: [
       { id: "old-town-overlook-p1", type: "paragraph", text: "站在高处的时候，老城的屋顶一层一层铺开，像一本被风翻动的旧书。阳光从右边斜过来，树叶亮得几乎透明。" },
@@ -105,7 +105,7 @@ export const defaultNotes: DuomeiNote[] = [
     tags: ["相机", "书桌", "光影"],
     excerpt: "相机放在桌角，笔记本摊开，墙上的影子把一个安静午后拉得很长。",
     body: "午后的桌面总有一种让人想整理照片的魔力。花枝在玻璃瓶里伸展开，墙上的叶影慢慢移动，相机安静地待在右边。\n\n我翻开本子，本来想写旅行计划，最后却只写下：今天的光很好。也许这就是摄影给我的习惯，先承认眼前的东西值得被看见。\n\n那些没有按下快门的瞬间，也会留在身体里。等到很久以后想起，会带着木桌的温度和茶的味道一起回来。",
-    coverImageUrl: "/images/note-default-covers/duomei-default-cover-05.png",
+    coverImageUrl: "/images/note-default-covers/duomei-default-cover-05.webp",
     bodyImages: [],
     contentBlocks: [
       { id: "desk-camera-light-p1", type: "paragraph", text: "午后的桌面总有一种让人想整理照片的魔力。花枝在玻璃瓶里伸展开，墙上的叶影慢慢移动，相机安静地待在右边。" },
@@ -128,7 +128,7 @@ export const defaultNotes: DuomeiNote[] = [
     tags: ["桂林", "漓江", "山水"],
     excerpt: "太阳落在水面上，小船慢慢经过，山影像一封从故乡寄来的信。",
     body: "桂林的傍晚总有一种熟悉的湿润。竹叶在上方摇着，江面把天空和山都收进去，连小船划过的声音也变得很轻。\n\n茶壶和杯子放在石头上，本子摊开，像是专门等这束光。那些山没有说话，却让我想起很多离开以后才懂的事情。\n\n故乡不是固定在地图上的一个点。它会变成水面的反光，变成空气里的青草味，变成你忽然想写下来的那一句：我又回来了。",
-    coverImageUrl: "/images/note-default-covers/duomei-default-cover-06.png",
+    coverImageUrl: "/images/note-default-covers/duomei-default-cover-06.webp",
     bodyImages: [],
     contentBlocks: [
       { id: "guilin-river-tea-p1", type: "paragraph", text: "桂林的傍晚总有一种熟悉的湿润。竹叶在上方摇着，江面把天空和山都收进去，连小船划过的声音也变得很轻。" },
@@ -151,7 +151,7 @@ export const defaultNotes: DuomeiNote[] = [
     tags: ["甜品", "桂林", "黄昏"],
     excerpt: "抹茶冰淇淋举到山水前，旅行忽然从宏大的风景变成一口具体的甜。",
     body: "夕阳落在河面上，山的轮廓一层层退到远处。我举着一杯抹茶甜品，忽然觉得这趟路有了很轻的注脚。\n\n旅行不总是需要庄重地面对风景。它也可以是边走边吃，是被晚风吹乱袖口，是发现自己在陌生地方也能开心地停下来。\n\n那一口甜很快就化了，但黄昏没有。它留在水面、山影和手心里，像一张可以反复打开的小照片。",
-    coverImageUrl: "/images/note-default-covers/duomei-default-cover-07.png",
+    coverImageUrl: "/images/note-default-covers/duomei-default-cover-07.webp",
     bodyImages: [],
     contentBlocks: [
       { id: "guilin-matcha-parfait-p1", type: "paragraph", text: "夕阳落在河面上，山的轮廓一层层退到远处。我举着一杯抹茶甜品，忽然觉得这趟路有了很轻的注脚。" },

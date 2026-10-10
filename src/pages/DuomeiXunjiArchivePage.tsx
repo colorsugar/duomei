@@ -95,7 +95,7 @@ export function DuomeiXunjiArchivePage() {
       <div className="zaobao-archive">
         <header className="zaobao-archive-hero">
           <p className="zaobao-edition-kicker">寻迹 · 往期</p>
-          <h1>往期寻迹</h1>
+          <h1 className="duomei-page-title">往期寻迹</h1>
           <p>每天一束西幻素材，按日子往回翻。点任意一天，在多美站内读那天的摘录。</p>
         </header>
 

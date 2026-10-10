@@ -5,7 +5,7 @@ import { guyuBooks } from "../content/guyuBooks";
 export function DuomeiGuyuPage() {
   useEffect(() => {
     const previousTitle = document.title;
-    document.title = "故语 | 多美小记";
+    document.title = "故语 | DUOMEI";
     return () => {
       document.title = previousTitle;
     };
@@ -15,7 +15,7 @@ export function DuomeiGuyuPage() {
     <main className="guyu-library-page">
       <header className="guyu-library-intro">
         <Link className="guyu-library-back" to="/#guyu">← 返回首页</Link>
-        <h1>故语</h1>
+        <h1 className="duomei-page-title">故语</h1>
         <p>把旧日收好，等后来的人翻阅。</p>
       </header>
 

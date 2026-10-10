@@ -1,6 +1,6 @@
-import { Link } from "react-router-dom";
 import { HomeSectionHold } from "./HomeSectionHold";
 import "../skills.css";
+import { SectionTitle } from "./SectionTitle";
 
 export const skills = [
   {
@@ -61,13 +61,16 @@ export function SkillsDirectory({ headingId }: { headingId: string }) {
 export function HomeSkillsSection() {
   return (
     <HomeSectionHold id="skills" className="duomei-home-skills" ariaLabelledBy="duomei-home-skills-title">
-      <header className="duomei-home-skills-heading">
-        <h2 id="duomei-home-skills-title">Skill</h2>
-        <div>
-          <p>把真正走过的流程，整理成可以继续使用的 Skill。</p>
-          <Link to="/skills">查看 Skill 页 <span aria-hidden="true">→</span></Link>
-        </div>
-      </header>
+      <SectionTitle
+        id="duomei-home-skills-title"
+        accent="skills"
+        index="10"
+        kicker="Skill · 走过的流程"
+        title="Skill"
+        lede="真正走过一遍的流程，整理成下次还能用的 Skill。"
+        link={{ to: "/skills", label: "查看 Skill 页" }}
+        className="duomei-home-skills-heading"
+      />
       <SkillsDirectory headingId="duomei-home-skills-directory-title" />
     </HomeSectionHold>
   );

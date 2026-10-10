@@ -6,7 +6,7 @@ export function DuomeiChaojiMapPage() {
   const frame = useRef<HTMLIFrameElement>(null);
   useEffect(() => {
     const previousTitle = document.title;
-    document.title = "超级大陆 · 立体卫星图 | 多美小记";
+    document.title = "超级大陆 · 立体卫星图 | DUOMEI";
     return () => { document.title = previousTitle; };
   }, []);
   return <main className="duomei-atlas-page" aria-label="超级大陆立体卫星地图">

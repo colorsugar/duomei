@@ -9,9 +9,9 @@ export const ABOUT_SETTINGS_UPDATED_EVENT = "duomei-about-settings-updated";
 
 export const defaultAboutSettings: AboutSettings = {
   eyebrow: "ABOUT",
-  title: "关于多美小记",
+  title: "关于多美",
   paragraphs: [
-    "多美小记是一个很小的个人记录空间。它暂时不区分复杂栏目，只保存旅途记录、生活记录、旅行照片和心情文字。",
+    "多美是一个很小的个人记录空间。它暂时不区分复杂栏目，只保存旅途记录、生活记录、旅行照片和心情文字。",
     "希望每一次打开，都像翻到一页安静的旅行手账。",
   ],
 };

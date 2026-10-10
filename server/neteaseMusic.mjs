@@ -105,8 +105,22 @@ function getArtist(song) {
   return names.join(" / ") || "未知歌手";
 }
 
+// Album art from the NetEase CDN is the full-size scan (often 3–5 MB); the player shows it at
+// most ~200 px, so ask the CDN for a 400×400 derivative instead.
+const COVER_THUMB_PARAM = "400y400";
+
 function getCoverUrl(song) {
-  return normalizeHttpsUrl(song?.al?.picUrl ?? song?.album?.picUrl);
+  const href = normalizeHttpsUrl(song?.al?.picUrl ?? song?.album?.picUrl);
+  if (!href) return href;
+  try {
+    const url = new URL(href);
+    if (/(^|\.)music\.126\.net$/u.test(url.hostname) && !url.searchParams.has("param")) {
+      url.searchParams.set("param", COVER_THUMB_PARAM);
+    }
+    return url.toString();
+  } catch {
+    return href;
+  }
 }
 
 function getDurationMs(song) {

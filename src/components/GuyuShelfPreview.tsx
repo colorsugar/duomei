@@ -26,6 +26,7 @@ import {
   type GuyuCarouselDirection,
 } from "../lib/guyuCarousel";
 import { HomeSectionHold } from "./HomeSectionHold";
+import { SectionTitle } from "./SectionTitle";
 
 type TransitionPhase = "idle" | "scatter" | "assemble" | "settle";
 
@@ -107,6 +108,10 @@ export function GuyuShelfPreview() {
   const [incomingIndex, setIncomingIndex] = useState<number | null>(null);
   const [transitionDirection, setTransitionDirection] = useState<GuyuCarouselDirection>(1);
   const [transitionPhase, setTransitionPhase] = useState<TransitionPhase>("idle");
+  // A request made mid-transition is remembered and played as soon as the current one settles.
+  const pendingRef = useRef<{ index: number; direction: GuyuCarouselDirection } | null>(null);
+  const hoverSelectTimerRef = useRef(0);
+  const goToBookRef = useRef<((index: number, direction: GuyuCarouselDirection) => void) | null>(null);
   const [isInView, setIsInView] = useState(false);
   const [isDocumentVisible, setIsDocumentVisible] = useState(true);
   const [isHoverPaused, setIsHoverPaused] = useState(false);
@@ -141,6 +146,11 @@ export function GuyuShelfPreview() {
     phaseStartedAtRef.current = performance.now();
     setIncomingIndex(null);
     setTransitionPhase("idle");
+    const pending = pendingRef.current;
+    if (pending) {
+      pendingRef.current = null;
+      window.setTimeout(() => goToBookRef.current?.(pending.index, pending.direction), 0);
+    }
   }, [clearPhaseFallback, clearPhaseRaf]);
 
   const beginSettle = useCallback((cycleToken: number) => {
@@ -192,7 +202,13 @@ export function GuyuShelfPreview() {
 
   const goToBook = useCallback((requestedIndex: number, direction: GuyuCarouselDirection) => {
     const targetIndex = wrapGuyuCarouselIndex(requestedIndex, bookCount);
-    if (bookCount < 2 || targetIndex === currentIndexRef.current || transitionPhaseRef.current !== "idle") return;
+    if (bookCount < 2) return;
+    if (transitionPhaseRef.current !== "idle") {
+      const settledTarget = incomingIndexRef.current ?? currentIndexRef.current;
+      pendingRef.current = targetIndex === settledTarget ? null : { index: targetIndex, direction };
+      return;
+    }
+    if (targetIndex === currentIndexRef.current) return;
 
     clearPhaseFallback();
     clearPhaseRaf();
@@ -222,9 +238,18 @@ export function GuyuShelfPreview() {
     );
   }, [bookCount, clearPhaseFallback, clearPhaseRaf, queueAssembly, reducedMotion]);
 
+  goToBookRef.current = goToBook;
+
   const moveBy = useCallback((direction: GuyuCarouselDirection) => {
     goToBook(currentIndexRef.current + direction, direction);
   }, [goToBook]);
+
+  const selectBook = useCallback((index: number) => {
+    const current = incomingIndexRef.current ?? currentIndexRef.current;
+    const forward = wrapGuyuCarouselIndex(index - current, bookCount);
+    const backward = wrapGuyuCarouselIndex(current - index, bookCount);
+    goToBook(index, forward <= backward ? 1 : -1);
+  }, [bookCount, goToBook]);
 
   const handleFragmentTransitionEnd = useCallback((event: ReactTransitionEvent<HTMLSpanElement>) => {
     if (event.target !== event.currentTarget || event.propertyName !== "transform") return;
@@ -446,11 +471,16 @@ export function GuyuShelfPreview() {
 
   return (
     <HomeSectionHold id="guyu" className="guyu-home-shelf" ariaLabelledBy="guyu-home-shelf-title">
-      <header className="guyu-home-shelf-heading">
-        <h2 id="guyu-home-shelf-title">故语</h2>
-        <p>把旧日收好，等后来的人翻阅。</p>
-        <Link className="guyu-home-shelf-all" to="/guyu">查看所有</Link>
-      </header>
+      <SectionTitle
+        id="guyu-home-shelf-title"
+        accent="guyu"
+        index="04"
+        kicker="Old Words · 旧日书页"
+        title="故语"
+        lede="把旧日收好，等后来的人翻阅。"
+        link={{ to: "/guyu", label: "查看所有" }}
+        className="guyu-home-shelf-heading"
+      />
 
       <div
         ref={carouselRef}
@@ -489,13 +519,19 @@ export function GuyuShelfPreview() {
                 aria-label={`查看第 ${index + 1} 本《${candidate.title}》`}
                 aria-current={indicatedIndex === index ? "true" : undefined}
                 onClick={() => {
-                  const current = currentIndexRef.current;
-                  const forward = wrapGuyuCarouselIndex(index - current, bookCount);
-                  const backward = wrapGuyuCarouselIndex(current - index, bookCount);
-                  goToBook(index, forward <= backward ? 1 : -1);
+                  window.clearTimeout(hoverSelectTimerRef.current);
+                  selectBook(index);
                 }}
+                onPointerEnter={(event) => {
+                  // A pointer sweeping across the strip must not queue a switch per cover: wait until it rests.
+                  if (event.pointerType !== "mouse") return;
+                  window.clearTimeout(hoverSelectTimerRef.current);
+                  hoverSelectTimerRef.current = window.setTimeout(() => selectBook(index), 160);
+                }}
+                onPointerLeave={() => window.clearTimeout(hoverSelectTimerRef.current)}
               >
-                <span />
+                <img src={candidate.previewCoverSrc} alt="" width="1100" height="1684" loading="lazy" decoding="async" />
+                <span>{candidate.title}</span>
               </button>
             ))}
           </nav>

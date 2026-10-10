@@ -25,59 +25,6 @@ body {
   contain: paint;
 }
 
-.duomei-kinetic-echo {
-  position: absolute;
-  inset-inline-start: 0;
-  inset-block-start: 0;
-  color: var(--color-ink);
-  font-family: var(--font-display);
-  font-size: clamp(7rem, 24vw, 22rem);
-  font-style: normal;
-  font-weight: 700;
-  line-height: 0.72;
-  letter-spacing: -0.07em;
-  white-space: nowrap;
-  transform-origin: center;
-  mix-blend-mode: multiply;
-}
-
-.duomei-kinetic-sash {
-  position: absolute;
-  inset-inline-start: -12%;
-  inset-block-start: 0;
-  width: 124%;
-  min-height: clamp(3.25rem, 8vw, 7rem);
-  display: grid;
-  place-items: center;
-  overflow: hidden;
-  border-block: var(--rule-hairline) solid color-mix(in oklch, var(--color-ink) 32%, transparent);
-  color: var(--color-ink);
-  background: color-mix(in oklch, var(--color-paper) 91%, transparent);
-  box-shadow: 0 var(--space-lg) var(--space-2xl) color-mix(in oklch, var(--color-ink) 12%, transparent);
-  transform-origin: center;
-}
-
-.duomei-kinetic-sash span {
-  font-family: var(--font-body);
-  font-size: clamp(var(--text-sm), 2vw, var(--text-lg));
-  font-weight: 700;
-  letter-spacing: 0.18em;
-  white-space: nowrap;
-}
-
-.duomei-kinetic-paper-fold {
-  position: absolute;
-  inset-inline-start: -8%;
-  inset-block-start: -24%;
-  width: 54%;
-  height: 148%;
-  border-inline: var(--rule-hairline) solid color-mix(in oklch, var(--color-caramel) 46%, transparent);
-  background: color-mix(in oklch, var(--color-paper-3) 72%, transparent);
-  clip-path: polygon(18% 0, 100% 12%, 78% 100%, 0 82%);
-  transform-origin: center;
-  mix-blend-mode: multiply;
-}
-
 .duomei-kinetic-active .duomei-hero-cover-motion {
   translate: 0 var(--duomei-kinetic-hero-lift, 0px);
   rotate: var(--duomei-kinetic-hero-spin, 0deg);

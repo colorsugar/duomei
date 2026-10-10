@@ -63,7 +63,7 @@ export function DuomeiZaobaoArchivePage() {
       <div className="zaobao-archive">
         <header className="zaobao-archive-hero">
           <p className="zaobao-edition-kicker">早报 · 往期</p>
-          <h1>往期早报</h1>
+          <h1 className="duomei-page-title">往期早报</h1>
           <p>每天一纸，按日子往回翻。点任意一天，在多美站内读那天的版面。</p>
         </header>
 
