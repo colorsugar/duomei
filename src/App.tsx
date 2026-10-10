@@ -44,7 +44,7 @@ function routeSectionOf(pathname: string): SectionAccentId {
     : pathname.startsWith("/xunji") ? "xunji"
     : pathname.startsWith("/dalu") || pathname.startsWith("/atlas") ? "dalu"
     : pathname.startsWith("/chaoji") ? "dalu"
-    : pathname.startsWith("/yunyou") || pathname === "/xiaoyuan" || pathname === "/jiangnan" ? "yunyou"
+    : pathname.startsWith("/yunyou") || pathname === "/xiaoyuan" || pathname === "/jiangnan" || pathname.startsWith("/hongloumeng-ying") ? "yunyou"
     : pathname.startsWith("/skills") ? "skills"
     : pathname.startsWith("/time") ? "weiyan"
     : "home";

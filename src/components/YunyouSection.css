@@ -46,8 +46,16 @@
 
 .yunyou-plates {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 36px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 28px;
+}
+
+/* four plates need room: two by two on narrow desktops and tablets */
+@media (max-width: 70rem) {
+  .yunyou-plates {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    row-gap: 32px;
+  }
 }
 
 .yunyou-plate {
