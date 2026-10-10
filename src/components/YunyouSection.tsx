@@ -12,7 +12,7 @@ const PLACES: Place[] = [
   { href: YUNYOU_HREF, cover: "/images/yunyou-guilin-cover.webp", kicker: "桂林 · 两江四湖", title: "沿水看桂林", copy: "山水连着旧城，灯火渐次亮起。", cta: "游桂林", label: "打开云游 · 桂林两江四湖" },
   { href: "/xiaoyuan", cover: "/images/xiaoyuan-cover.webp", kicker: "云上 · 夏日小院", title: "多美的夏日小院", copy: "葡萄架下有猫，院外是晚霞。", cta: "进小院", label: "打开 3D 场景 · 多美的夏日小院", tone: "is-sunset" },
   { href: "/jiangnan", cover: "/images/jiangnan-cover.webp", kicker: "江南 · 园林一隅", title: "诗语江南", copy: "绕池走一圈，听雨落在荷叶上。", cta: "入园", label: "打开 3D 场景 · 诗语江南" },
-  { href: "/hongloumeng-ying", cover: "/images/hongloumeng-cover.webp", kicker: "大观园 · 3D 游园", title: "紅樓夢影", copy: "依《红楼梦》原文复原的大观园。", cta: "游大观园", label: "打开 3D 游戏 · 紅樓夢影" },
+  { href: "/honglou", cover: "/images/hongloumeng-cover.webp", kicker: "大观园 · 3D 游园", title: "紅樓夢影", copy: "依《红楼梦》原文复原的大观园。", cta: "游大观园", label: "打开 3D 游戏 · 紅樓夢影" },
 ];
 
 export function YunyouSection() {
