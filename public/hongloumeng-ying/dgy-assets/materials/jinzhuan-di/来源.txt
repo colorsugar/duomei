@@ -1,0 +1,11 @@
+材质：金砖地
+目录：jinzhuan-di
+来源：Poly Haven「Granite Tile」
+URL：https://polyhaven.com/a/granite_tile
+作者：Charlotte Baglioni
+授权：CC0 1.0（公有领域，可商用，无需署名；仍如实标注）
+下载日期：2026-10-09
+处理：原贴图是深灰大方砖；颜色调成偏暖深灰，粗糙度降到 0.22~0.42 做出墁地的光亮感。
+真实尺寸：约 2.30 米见方（原素材标注）
+用途：正殿、厅堂（荣禧堂、荣庆堂、省亲正殿）室内墁地：深灰细腻、桐油浸过的光亮地面。
+规格：1024×1024 webp，可平铺；color=sRGB；normal=OpenGL(Y+，three.js 默认)；rough=线性灰度（三通道同值，取 G）。

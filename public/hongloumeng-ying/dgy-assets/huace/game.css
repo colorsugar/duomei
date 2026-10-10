@@ -1,0 +1,28 @@
+/* 第 32 轮：畫中有話 v4 接进游戏后补的样式（样张样式原样在 index.html 里）。 */
+/* 册签：十三册一排，放不下就横滑（不折行、不压画） */
+.album-tabs { max-width: min(1312px, calc(100vw - 48px)); justify-content: flex-start; gap: 22px; overflow-x: auto; overscroll-behavior-x: contain; scrollbar-width: none; padding: 0 12px; white-space: nowrap;
+  -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 24px, #000 calc(100% - 24px), transparent 100%); mask-image: linear-gradient(90deg, transparent 0, #000 24px, #000 calc(100% - 24px), transparent 100%); }
+.album-tabs::-webkit-scrollbar { display: none; }
+.album-tabs button { flex: 0 0 auto; }
+.album-tabs .tab-mark:empty { display: none; }
+/* 匾：行书（游戏界面行书字体；样张因简体缺字整块用宋体占位，这里是繁体「畫中有話」，字都在） */
+@font-face { font-family: HzXing; src: url('../fonts/HanWangShinSuMedium-ui.woff2') format('woff2'); font-display: swap; }
+.plaque { font-family: HzXing, var(--song); }
+/* 常驻的操作说明不显示（读屏仍可从按钮名读到） */
+.folio small { display: none; }
+/* 循环片：盖在画上，开播才淡入（首帧就是这幅画） */
+.painting .hz-loop { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 400ms var(--ease-out); pointer-events: none; z-index: 1; }
+.painting .hz-loop.on { opacity: 1; }
+.painting .particle-field { z-index: 2; }
+/* 没有题词的册：题词位不留空线 */
+.image-inscription[hidden] { display: none; }
+@media (max-width: 767px), (pointer: coarse) and (max-height: 600px) {
+  .album-tabs { gap: 14px; padding: 0 16px; max-width: 100vw; }
+}
+/* 第 32 轮（督察：小于 14px 的字）：样张里 11–13px 的小字一律 14 */
+.top-back, .album-tabs .tab-mark, .art-caption small, .painting-footer .quiet, .turn-buttons button, .small-seal, .chapter-tag, .metadata, .metadata span, .annotation-label, .related-people button, .breadcrumbs, .source-head, .source-nav button, .skip-ink, .note-type, .folio small { font-size: 14px !important; }
+/* 第 32 轮（巡检）：手机触点——「见人物」44 高；正文里的字注词不动排版，可点范围撑到 44 */
+.related-people button { min-height: 44px !important; }
+@media (pointer: coarse) { .term { padding: 7px 5px !important; margin: -7px -5px !important; } }
+/* 第 32 轮（流畅线：开册那一帧 133 ms）：整页书案底不用 fixed（滚动 / 首绘都要整屏重画），改随页 */
+body { background-attachment: scroll !important; }

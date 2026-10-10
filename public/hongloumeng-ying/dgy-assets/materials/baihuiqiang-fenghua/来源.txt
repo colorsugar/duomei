@@ -1,0 +1,11 @@
+材质：白灰墙（风化）
+目录：baihuiqiang-fenghua
+来源：Poly Haven「Worn Mossy Plasterwall」
+URL：https://polyhaven.com/a/worn_mossy_plasterwall
+作者：Amal Kumar
+授权：CC0 1.0（公有领域，可商用，无需署名；仍如实标注）
+下载日期：2026-10-09
+处理：原贴图带青苔与水渍，已压低绿色饱和度，改成灰白底，保留污渍与剥落的起伏。
+真实尺寸：约 1.80 米见方（原素材标注）
+用途：年久的墙：园墙外侧、月洞门/洞门两侧、稻香村与蘅芜苑的旧墙、墙根泛碱处。
+规格：1024×1024 webp，可平铺；color=sRGB；normal=OpenGL(Y+，three.js 默认)；rough=线性灰度（三通道同值，取 G）。

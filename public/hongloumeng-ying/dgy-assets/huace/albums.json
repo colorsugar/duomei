@@ -1,0 +1,1977 @@
+{
+ "说明": "第 32 轮 scripts/dgy-r32-album-v4.mjs 生成，勿手改。畫中有話 v4（dgy-assets/huace/index.html）的画册数据。",
+ "生成": "2026-10-10T14:55:24.960Z",
+ "册": [
+  {
+   "id": "zanghua",
+   "title": "黛玉葬花",
+   "chapters": [
+    27
+   ],
+   "place": "qinfangzha",
+   "placeName": "沁芳闸",
+   "bg": "第二十七回后半，回目是“埋香冢飞燕泣残红”。花冢第二十三回就有了，在沁芳闸桥边。这天四月二十六日芒种，满园在给花神送行，黛玉却一个人在花冢边哭。前一晚她去怡红院叫门，晴雯没给开，她心里正委屈。",
+   "bgPz": "前夜叩门不开，一腔委屈，第二天全埋进了花冢。小儿女一场误会，偏生出一首葬花吟，把一生都唱了进去。",
+   "source": "扩写稿 + 新版画稿",
+   "inscription": "花謝花飛花滿天，紅消香斷有誰憐？",
+   "pages": [
+    {
+     "no": 1,
+     "title": "怡红院门外",
+     "narr": "宝玉被老爷叫去一日，黛玉替他悬心，晚饭后寻来叩门。晴雯正和碧痕拌嘴，问也不问便是一句「都睡下了，明兒再來罷」。一扇门两边都在怄气，门里的人偏不知门外是谁。",
+     "scene": "夜里，怡红院门紧闭。黛玉白披风、淡紫立领袄，站在门外抬手叩门，侧耳候着；门里院中，晴雯黑底红点比甲、桃粉袄，背对门嚷着，一脸没好气，碧痕在旁。门内门外分两半构图，中景。",
+     "chapter": 26,
+     "paragraph": 19,
+     "highlights": [
+      "再往怡紅院來，只見院門關著，黛玉便以手扣門。",
+      "忽聽又有人叫門，晴雯越發動了氣，也並不問是誰，便說道：「都睡下了，明兒再來罷！」",
+      "晴雯偏生還沒聽出來，便使性子說道：「憑你是誰，二爺吩咐的，一概不許放人進來呢！」"
+     ],
+     "img": "dgy-assets/huace/img/zanghua-01.webp",
+     "place": "怡红院院门外",
+     "placeId": "yihong",
+     "season": "四月二十五日 · 夜",
+     "loop": null,
+     "src": "dgy-assets/album-v2/zanghua/01.webp",
+     "thumb": "dgy-assets/huace/img/zanghua-01-s.webp"
+    },
+    {
+     "no": 2,
+     "title": "怡红院墙角",
+     "narr": "她气怔在门外，回思到底是客边，又听院里笑语，竟是宝玉宝钗二人。便不顾苍苔露冷，花径风寒，独立墙角花阴下呜咽起来。连宿鸟栖鸦都飞起远避，不忍再听，书里难得这样替她说一句。",
+     "scene": "怡红院墙角花阴下，黛玉白披风裹身，独立苍苔上，以帕掩面低声呜咽；院内窗纸透出暖黄灯光。附近柳枝花朵上，宿鸟栖鸦扑棱棱惊飞四散。夜景，冷暖对比，中景。",
+     "chapter": 26,
+     "paragraph": 20,
+     "highlights": [
+      "只聽裡面一陣笑語之聲，細聽一聽，竟是寶玉『寶釵二人。",
+      "也不顧蒼苔露冷，花徑風寒，獨立牆角邊花陰之下，悲悲戚戚嗚咽起來。",
+      "那附近柳枝花朵上的宿鳥栖鴉一聞此聲，俱忒楞楞飛起遠避，不忍再聽。"
+     ],
+     "img": "dgy-assets/huace/img/zanghua-02.webp",
+     "place": "怡红院墙外",
+     "placeId": "yihong",
+     "season": "四月二十五日 · 夜",
+     "loop": "dgy-assets/album-motion/loop-v2/zanghua-02.mp4",
+     "src": "dgy-assets/album-v2/zanghua/02.webp",
+     "thumb": "dgy-assets/huace/img/zanghua-02-s.webp"
+    },
+    {
+     "no": 3,
+     "title": "怡红院门外",
+     "narr": "院门一开，出来的是宝钗，宝玉袭人一群人送着。她待要上去问，又怕当着众人羞了他，只得闪过一旁。等门关了，才转过来望着门洒几点泪，这一夜的委屈都落在一扇门上。",
+     "scene": "院门开处，宝钗粉紫织金交领衫被宝玉、袭人一群人送出来，门内灯光透出；黛玉闪在门旁花树影里，白披风半掩，看着众人。门随后关上，她独自望着门落泪。中景，门口亮，黛玉在暗处。",
+     "chapter": 27,
+     "paragraph": 0,
+     "highlights": [
+      "話說林黛玉正自悲泣，忽聽院門響處，只見寶釵出來了，寶玉襲人一群人送了出來。待要上去問著寶玉，又恐當著眾人問羞了寶玉不便，因而閃過一旁，讓寶釵去了，寶玉等進去關了門，方轉過來，猶望著門灑了幾點淚。"
+     ],
+     "img": "dgy-assets/huace/img/zanghua-03.webp",
+     "place": "怡红院院门外",
+     "placeId": "yihong",
+     "season": "四月二十五日 · 夜",
+     "loop": null,
+     "src": "dgy-assets/album-v2/zanghua/03.webp",
+     "thumb": "dgy-assets/huace/img/zanghua-03-s.webp"
+    },
+    {
+     "no": 4,
+     "title": "潇湘馆",
+     "narr": "回到潇湘馆，她倚着床栏，两手抱膝，好似木雕泥塑的一般，直坐到二更多天。紫鹃雪雁看惯了，也不理论，由她去闷坐。最冷的不是夜，是旁人都看惯了。",
+     "scene": "潇湘馆卧房，一盏孤灯。黛玉已卸了残妆，倚着床栏，两手抱膝，眼里含泪，一动不动；外间紫鹃、雪雁各自睡了。窗纱上竹影摇动。夜景，近景，冷色调，人物小而静。",
+     "chapter": 27,
+     "paragraph": 1,
+     "highlights": [
+      "紫鵑雪雁素日知道林黛玉的情性：無事悶坐，不是愁眉，便是長歎，且好端端的不知為了什麼，常常的便自淚道不乾的。",
+      "那林黛玉倚著床欄杆，兩手抱著膝，眼睛含著淚，好似木雕泥塑的一般，直坐到二更多天方才睡了。"
+     ],
+     "img": "dgy-assets/huace/img/zanghua-04.webp",
+     "place": "潇湘馆",
+     "placeId": "xiaoxiang",
+     "season": "四月二十五日 · 夜",
+     "loop": null,
+     "src": "dgy-assets/album-v2/zanghua/04.webp",
+     "thumb": "dgy-assets/huace/img/zanghua-04-s.webp"
+    },
+    {
+     "no": 5,
+     "title": "园中",
+     "narr": "芒种这日要祭饯花神，女孩子们用花瓣柳枝编成轿马，用绫锦叠成旌幢，系满了每一枝花。满园绣带飘飖，人人打扮得桃羞杏让。热闹是给花神送行的，独不见那个最惜花的人。",
+     "scene": "四月二十六日芒种，一早，园中桃柳花树下。几个丫鬟踮脚往花枝上系花瓣柳枝编的轿马、绫锦叠的小旌幢，彩线飘动；远处宝钗一身粉红、凤姐大红窄袄与姊妹们说笑。满园绣带，远景俯视。",
+     "chapter": 27,
+     "paragraph": 1,
+     "highlights": [
+      "尚古風俗：凡交芒種節的這日，都要設擺各色禮物，祭餞花神，言芒種一過，便是夏日了，眾花皆卸，花神退位，須要餞行。",
+      "那些女孩子們，或用花瓣柳枝編成轎馬的，或用綾錦紗羅疊成干旄旌幢的，都用彩線繫了。",
+      "滿園里繡帶飄颻，花枝招展，更兼這些人打扮得桃羞杏讓，燕妒鶯慚，一時也道不盡。"
+     ],
+     "img": "dgy-assets/huace/img/zanghua-05.webp",
+     "place": "园中各处",
+     "placeId": "qinfang",
+     "season": "四月二十六日 · 芒種",
+     "loop": "dgy-assets/album-motion/loop-v2/zanghua-05.mp4",
+     "src": "dgy-assets/album-v2/zanghua/05.webp",
+     "thumb": "dgy-assets/huace/img/zanghua-05-s.webp"
+    },
+    {
+     "no": 6,
+     "title": "潇湘馆",
+     "narr": "宝玉进门便问「你昨兒可告我了不曾」，黛玉只回头吩咐紫鹃，看那大燕子回来放帘子。他打恭作揖，她正眼也不看，各自出了院门。他记的是昨日中晌，她记的是昨夜那扇门。",
+     "scene": "潇湘馆院中竹下，黛玉淡紫立领袄，刚梳洗出来，回头吩咐紫鹃收拾屋子、放帘子；宝玉大红金莲袍，进门弯腰打恭作揖，满脸赔笑。黛玉正眼不看，径直往院门走。紫鹃青莲紫比甲立在廊下。中景。",
+     "chapter": 27,
+     "paragraph": 13,
+     "highlights": [
+      "林黛玉便回頭叫紫鵑道：「把屋子收拾了，撂下一扇紗屜，看那大燕子回來，把帘子放下來，拿獅子倚住，燒了香就把爐罩上。」",
+      "林黛玉正眼也不看，各自出了院門，一直找別的姊妹去了。"
+     ],
+     "img": "dgy-assets/huace/img/zanghua-06.webp",
+     "place": "潇湘馆",
+     "placeId": "xiaoxiang",
+     "season": "四月二十六日 · 芒種",
+     "loop": null,
+     "src": "dgy-assets/album-v2/zanghua/06.webp",
+     "thumb": "dgy-assets/huace/img/zanghua-06-s.webp"
+    },
+    {
+     "no": 7,
+     "title": "园中",
+     "narr": "黛玉躲开了，宝玉低头只见凤仙石榴落了一地，叹道这是她生了气，连花也不收拾了。他便替她兜了起来，要送到花冢去。赔不是赔不上，便替她做她要做的事，这是宝玉的笨法子。",
+     "scene": "园中花树下，凤仙、石榴等落花锦重重铺了一地。宝玉独自低头看花，撩起大红袍前襟，弯腰把落花一捧捧兜进衣襟里；远处宝钗一身粉红、探春浅橙黄衫正往外走，回头招呼他。中景，落花红艳。",
+     "chapter": 27,
+     "paragraph": 16,
+     "highlights": [
+      "因低頭看見許多鳳仙石榴等各色落花，錦重重的落了一地，因歎道：「這是他心裡生了氣，也不收拾這花兒來了。待我送了去，明兒再問著他。」"
+     ],
+     "img": "dgy-assets/huace/img/zanghua-07.webp",
+     "place": "园中花树下",
+     "placeId": null,
+     "season": "四月二十六日 · 芒種",
+     "loop": null,
+     "src": "dgy-assets/album-v2/zanghua/07.webp",
+     "thumb": "dgy-assets/huace/img/zanghua-07-s.webp"
+    },
+    {
+     "no": 8,
+     "title": "沁芳闸山坡",
+     "narr": "他登山渡水，过树穿花，一直奔到那日同黛玉葬桃花的去处。还没转过山坡，便听见那边有呜咽之声，一行数落着，哭得好不伤感。他只当是哪房的丫头受了委屈，先煞住了脚。",
+     "scene": "花冢所在的山坡这一侧，宝玉兜着一襟落花，登到半坡，忽然停步，侧身贴着坡上山石，侧耳倾听；坡那边看不见人，只有花树梢头落英纷纷。中景，山坡斜线把画面一分为二。",
+     "chapter": 27,
+     "paragraph": 16,
+     "highlights": [
+      "說畢，等他二人去遠了，便把那花兜了起來，登山渡水，過樹穿花，一直奔了那日同林黛玉葬桃花的去處來。將已到了花冢，猶未轉過山坡，只聽山坡那邊有嗚咽之聲，一行數落著，哭的好不傷感。"
+     ],
+     "img": "dgy-assets/huace/img/zanghua-08.webp",
+     "place": "沁芳闸花冢山坡这一侧",
+     "placeId": "qinfangzha",
+     "season": "四月二十六日 · 芒種",
+     "loop": null,
+     "src": "dgy-assets/album-v2/zanghua/08.webp",
+     "thumb": "dgy-assets/huace/img/zanghua-08-s.webp"
+    },
+    {
+     "no": 9,
+     "title": "花冢",
+     "narr": "「花謝花飛花滿天，紅消香斷有誰憐」，开口便是满天的花。山坡那边只有她一个，山坡这边也只有他一个。这一首原是吟给落花听的，偏有一个人在听。",
+     "scene": "山坡那边花冢旁，一树残花正落。黛玉淡紫立领袄、米白长裙，独立落英之中，一手扶着花锄，一手以帕掩面而泣；锄上挂着花囊，脚下落花满地。山坡这边隐约露出宝玉停步侧耳的半个身影。中景。",
+     "chapter": 27,
+     "paragraph": 17,
+     "highlights": [
+      "花謝花飛花滿天，紅消香斷有誰憐？",
+      "游絲軟系飄春榭，落絮輕沾撲繡簾。"
+     ],
+     "img": "dgy-assets/huace/img/zanghua-09.webp",
+     "place": "沁芳闸花冢",
+     "placeId": "qinfangzha",
+     "season": "四月二十六日 · 芒種",
+     "loop": null,
+     "src": "dgy-assets/album-v2/zanghua/09.webp",
+     "thumb": "dgy-assets/huace/img/zanghua-09-s.webp"
+    },
+    {
+     "no": 10,
+     "title": "花冢",
+     "narr": "「一年三百六十日，風刀霜劍嚴相逼」，说的是花，也是寄人篱下的日子。她独倚花锄，泪洒空枝，竟见了血痕。批一句：葬花的人心里早有一座冢。",
+     "scene": "黛玉独倚花锄，仰望一树将空的花枝，泪珠一颗颗落下，滴在枝头残瓣上；花囊半满挂在锄头，脚边堆着扫拢的落花。风过处几片花瓣斜飞。近景半身，以空枝与泪痕为焦点。",
+     "chapter": 27,
+     "paragraph": 17,
+     "highlights": [
+      "一年三百六十日，風刀霜劍嚴相逼，",
+      "明媚鮮妍能幾時，一朝飄泊難尋覓。",
+      "獨倚花鋤淚暗灑，灑上空枝見血痕。"
+     ],
+     "img": "dgy-assets/huace/img/zanghua-10.webp",
+     "place": "沁芳闸花冢",
+     "placeId": "qinfangzha",
+     "season": "四月二十六日 · 芒種",
+     "loop": null,
+     "src": "dgy-assets/album-v2/zanghua/10.webp",
+     "thumb": "dgy-assets/huace/img/zanghua-10-s.webp"
+    },
+    {
+     "no": 11,
+     "title": "花冢",
+     "narr": "「未若錦囊收艷骨，一抔淨土掩風流」，宁可埋进干净土里，也不叫它落进污淖渠沟。第二十三回她对宝玉说的道理，到这里成了誓。质本洁来还洁去，说的是花，也是她自己。",
+     "scene": "近景，黛玉蹲在花冢前，花锄横放一旁，土坑已挖好；她双手捧起一捧落花，轻轻装进绢囊，再放进坑里。眼含泪，神情却决绝。新翻的泥土，花瓣粉白相间，囊口丝绳垂着。",
+     "chapter": 27,
+     "paragraph": 17,
+     "highlights": [
+      "未若錦囊收艷骨，一抔淨土掩風流。",
+      "質本潔來還潔去，強於污淖陷渠溝。"
+     ],
+     "img": "dgy-assets/huace/img/zanghua-11.webp",
+     "place": "沁芳闸花冢",
+     "placeId": "qinfangzha",
+     "season": "四月二十六日 · 芒種",
+     "loop": "dgy-assets/album-motion/loop-v2/zanghua-11.mp4",
+     "src": "dgy-assets/album-v2/zanghua/11.webp",
+     "thumb": "dgy-assets/huace/img/zanghua-11-s.webp"
+    },
+    {
+     "no": 12,
+     "title": "花冢山坡",
+     "narr": "「儂今葬花人笑痴，他年葬儂知是誰」，一句问到身后去。宝玉在坡上听到这里，不觉恸倒，怀里兜的落花撒了一地。他推及黛玉，推及众人，再推到这园子，原来这一哭是替所有人哭的。",
+     "scene": "前景黛玉站起，仰头望残花，泪流满面，手里捏着一片花瓣；后景山坡上，宝玉大红金莲袍，跌坐坡上，衣襟松开，兜的落花撒了一地，怔怔出神。两人一前一后，隔着山坡互不相见。中景。",
+     "chapter": 27,
+     "paragraph": -1,
+     "highlights": [],
+     "img": "dgy-assets/huace/img/zanghua-12.webp",
+     "place": "沁芳闸花冢两侧",
+     "placeId": "qinfangzha",
+     "season": "四月二十六日 · 芒種",
+     "loop": null,
+     "src": "dgy-assets/album-v2/zanghua/12.webp",
+     "thumb": "dgy-assets/huace/img/zanghua-12-s.webp"
+    },
+    {
+     "no": 13,
+     "title": "花冢山坡",
+     "narr": "她只道人人笑她痴，难道还有一个痴子，抬头一看却是宝玉。「原來是這個狠心短命的」，说到短命二字又把口掩住，长叹一声抽身便走。骂出口的半句是气，咽回去的半句是怕。",
+     "scene": "黛玉闻声抬头，看见坡上的宝玉，脸色一变，一手刚指出去又缩回来掩住口，身子已侧转要走；宝玉仍坐在坡上，泪痕满面，没有察觉。花锄留在冢边。中景，两人隔坡相望的一瞬。",
+     "chapter": 28,
+     "paragraph": 1,
+     "highlights": [
+      "那林黛玉正自傷感，忽聽山坡上也有悲聲，心下想道：「人人都笑我有些痴病，難道還有一個痴子不成？」",
+      "林黛玉看見，便道：「啐！我道是誰，原來是這個狠心短命的……」剛說到「短命」二字，又把口掩住，長歎了一聲，自己抽身便走了。"
+     ],
+     "img": "dgy-assets/huace/img/zanghua-13.webp",
+     "place": "沁芳闸花冢",
+     "placeId": "qinfangzha",
+     "season": "四月二十六日 · 芒種",
+     "loop": null,
+     "src": "dgy-assets/album-v2/zanghua/13.webp",
+     "thumb": "dgy-assets/huace/img/zanghua-13-s.webp"
+    },
+    {
+     "no": 14,
+     "title": "回怡红院的路上",
+     "narr": "宝玉在身后叹一句「既有今日，何必當初」，她由不得站住了。听他把从小一处长大的话数落一遍，心内灰了大半，也滴下泪来。昨夜那扇门，原来不是他关的。",
+     "scene": "园中小径上，黛玉在前回过头来，帕子掩着眼角，泪光盈盈；宝玉在身后几步站住，大红袍上沾着泥土，低头叹气，也滴下泪来。路旁残花零落。中景，两人一前一后，中间留一段空路。",
+     "chapter": 28,
+     "paragraph": 2,
+     "highlights": [
+      "寶玉在身後面歎道：「既有今日，何必當初！」林黛玉聽見這話，由不得站住，回頭道：「當初怎麼樣？今日怎麼樣？」",
+      "黛玉耳內聽了這話，眼內見了這形景，心內不覺灰了大半，也不覺滴下淚來，低頭不語。"
+     ],
+     "img": "dgy-assets/huace/img/zanghua-14.webp",
+     "place": "园中小径",
+     "placeId": null,
+     "season": "四月二十六日 · 芒種",
+     "loop": null,
+     "src": "dgy-assets/album-v2/zanghua/14.webp",
+     "thumb": "dgy-assets/huace/img/zanghua-14-s.webp"
+    }
+   ],
+   "oldMap": {
+    "0": 0,
+    "1": 0,
+    "2": 7,
+    "3": 8,
+    "4": 10,
+    "5": 4,
+    "6": 5
+   },
+   "mood": "petal",
+   "cover": 0
+  },
+  {
+   "id": "pudie",
+   "title": "宝钗扑蝶",
+   "chapters": [
+    27
+   ],
+   "place": "dicui",
+   "placeName": "滴翠亭",
+   "bg": "第二十七回前半，回目是“滴翠亭杨妃戏彩蝶”，和葬花是同一天。红玉、坠儿在亭里说的是红玉丢了手帕、被贾芸拾去的私事。宝钗无意中听见，用一句“颦儿”把自己摘了出去。",
+   "bgPz": "与葬花同日，前半回扑蝶，后半回葬花。一热一冷，作者不评，并排摆着便是评。",
+   "source": "画册定稿",
+   "inscription": "",
+   "pages": [
+    {
+     "no": 1,
+     "title": "滴翠亭",
+     "narr": "「剛要尋別的姊妹去，忽見前面一雙玉色蝴蝶，大如團扇，一上一下迎風翩躚，十分有趣。寶釵意欲撲了來玩耍，遂向袖中取出扇子來，向草地下來撲。」平日稳重的宝钗，只有这一回像个小姑娘。宝钗原要去潇湘馆找黛玉，见宝玉先进去了，便抽身回来。一对蝴蝶，正好替她遮了这一转身。",
+     "scene": "芒种节白天，池边草地。宝钗从袖中取出团扇，轻提裙角，追一对大如团扇的玉色蝴蝶，神情难得地活泼带笑；身后柳枝、远处池中亭子。",
+     "chapter": 27,
+     "paragraph": 3,
+     "highlights": [
+      "剛要尋別的姊妹去，忽見前面一雙玉色蝴蝶，大如團扇，一上一下迎風翩躚，十分有趣。寶釵意欲撲了來玩耍，遂向袖中取出扇子來，向草地下來撲。"
+     ],
+     "img": "dgy-assets/huace/img/pudie-01.webp",
+     "place": "滴翠亭",
+     "placeId": "dicui",
+     "season": "四月二十六日芒种，暮春",
+     "loop": null,
+     "src": "dgy-assets/album/pudie/01.webp",
+     "thumb": "dgy-assets/huace/img/pudie-01-s.webp"
+    },
+    {
+     "no": 2,
+     "title": "滴翠亭",
+     "narr": "「寶釵也無心撲了，剛欲回來，只聽滴翠亭裡邊嘁嘁喳喳有人說話。原來這亭子四面俱是遊廊曲橋，蓋造在池中水上，四面雕鏤隔子糊著紙。」隔扇是糊纸的，里面说什么外面全听得见。隔扇糊的是纸，话是关不住的。这园里本没有真私话，到抄检那一回便知（第74回）。",
+     "scene": "游廊曲桥尽头的水上亭子，四面雕花隔扇糊着纸。宝钗停在亭外桥上，扇子垂在身侧，微微侧头，屏息听里面说话；蝴蝶已飞远。",
+     "chapter": 27,
+     "paragraph": 3,
+     "highlights": [
+      "寶釵也無心撲了，剛欲回來，只聽滴翠亭裡邊嘁嘁喳喳有人說話。原來這亭子四面俱是遊廊曲橋，蓋造在池中水上，四面雕鏤隔子糊著紙。"
+     ],
+     "img": "dgy-assets/huace/img/pudie-02.webp",
+     "place": "滴翠亭",
+     "placeId": "dicui",
+     "season": "四月二十六日芒种，暮春",
+     "loop": null,
+     "src": "dgy-assets/album/pudie/02.webp",
+     "thumb": "dgy-assets/huace/img/pudie-02-s.webp"
+    },
+    {
+     "no": 3,
+     "title": "滴翠亭",
+     "narr": "「猶未想完，只聽「咯吱」一聲，寶釵便故意放重了腳步，笑著叫道：「顰兒，我看你往那裡藏！」一面說，一面故意往前趕。」她心里想的是使个“金蝉脱壳”的法子，喊“颦儿”就是装作在找黛玉。窗子一响，她只来得及想一个名字，想到的是颦儿。急中脱口的，偏是平日最该避开的那个人。",
+     "scene": "亭子一扇窗刚被推开，露出红玉、坠儿两个丫鬟吃惊的脸。宝钗在桥上故意加重脚步往前赶，回头笑着朝远处喊，像在追人。",
+     "chapter": 27,
+     "paragraph": 5,
+     "highlights": [
+      "猶未想完，只聽「咯吱」一聲，寶釵便故意放重了腳步，笑著叫道：「顰兒，我看你往那裡藏！」一面說，一面故意往前趕。"
+     ],
+     "img": "dgy-assets/huace/img/pudie-03.webp",
+     "place": "滴翠亭",
+     "placeId": "dicui",
+     "season": "四月二十六日芒种，暮春",
+     "loop": null,
+     "src": "dgy-assets/album/pudie/03.webp",
+     "thumb": "dgy-assets/huace/img/pudie-03-s.webp"
+    },
+    {
+     "no": 4,
+     "title": "滴翠亭",
+     "narr": "「我才在河那邊看著林姑娘在這裡蹲著弄水兒的。我要悄悄的唬他一跳，還沒有走到跟前，他倒看見我了，朝東一繞就不見了。」黛玉这时根本不在这里，这是宝钗随口编的。蹲着，弄水，朝东一绕，说得有鼻子有眼。急中生出的一句谎，也编得这样周全，这是宝钗的应变。",
+     "scene": "亭内，宝钗笑盈盈地四下张望、掀帘作寻人状，红玉、坠儿怔怔站着，脸色发白。",
+     "chapter": 27,
+     "paragraph": 5,
+     "highlights": [
+      "我才在河那邊看著林姑娘在這裡蹲著弄水兒的。我要悄悄的唬他一跳，還沒有走到跟前，他倒看見我了，朝東一繞就不見了。"
+     ],
+     "img": "dgy-assets/huace/img/pudie-04.webp",
+     "place": "滴翠亭",
+     "placeId": "dicui",
+     "season": "四月二十六日芒种，暮春",
+     "loop": null,
+     "src": "dgy-assets/album/pudie/04.webp",
+     "thumb": "dgy-assets/huace/img/pudie-04-s.webp"
+    },
+    {
+     "no": 5,
+     "title": "滴翠亭",
+     "narr": "「紅玉道：「若是寶姑娘聽見，還倒罷了。林姑娘嘴裡又愛刻薄人，心裡又細，他一聽見了，倘或走露了風聲，怎麼樣呢？」」她们怕的是黛玉，不是宝钗——宝钗这一招，脱了身，也把偷听的嫌疑推给了黛玉。红玉怕的是走露风声，转眼却被凤姐唤去使唤，攀了高枝。同一回里，她的运道走得比谁都快。",
+     "scene": "宝钗已走远。亭内红玉拉着坠儿的手，两人凑近低声说话，满脸惊慌；窗外池水平静。",
+     "chapter": 27,
+     "paragraph": 6,
+     "highlights": [
+      "紅玉道：「若是寶姑娘聽見，還倒罷了。林姑娘嘴裡又愛刻薄人，心裡又細，他一聽見了，倘或走露了風聲，怎麼樣呢？」"
+     ],
+     "img": "dgy-assets/huace/img/pudie-05.webp",
+     "place": "滴翠亭",
+     "placeId": "dicui",
+     "season": "四月二十六日芒种，暮春",
+     "loop": null,
+     "src": "dgy-assets/album/pudie/05.webp",
+     "thumb": "dgy-assets/huace/img/pudie-05-s.webp"
+    }
+   ],
+   "oldMap": {
+    "0": 0,
+    "1": 0,
+    "2": 1,
+    "3": 2,
+    "4": 3,
+    "5": 4
+   },
+   "mood": "petal",
+   "cover": 0
+  },
+  {
+   "id": "zuiyan",
+   "title": "湘云醉眠芍药裀",
+   "chapters": [
+    62
+   ],
+   "place": "hongxiang",
+   "placeName": "红香圃",
+   "bg": "第六十二回，宝玉生日，宝琴、平儿、邢岫烟恰好也是这一天，大家在红香圃芍药栏里给四个寿星摆席，行酒令。湘云划拳输了多罚了酒，就有了这一觉。",
+   "bgPz": "四个寿星同一日，长辈又都不在家，园里少有这样放肆的一天。再过十来回，便是抄检。",
+   "source": "画册定稿",
+   "inscription": "",
+   "pages": [
+    {
+     "no": 1,
+     "title": "红香圃",
+     "narr": "「頑了一回，大家方起席散了一散，倏然不見了湘雲，只當他外頭自便就來，誰知越等越沒了影響，使人各處去找，那裡找得著。」散席时大家才发现，湘云不见了。席上她头一个等不得，和宝玉三五乱叫地划拳，散席时偏不见了人。老太太太太不在家，园里连找人都找得热闹。",
+     "scene": "芍药栏中红香圃三间小敞厅，寿宴将散，杯盘狼藉。众姐妹起身四顾，丫鬟们分头出去找人，神情又好笑又着急——湘云不见了。",
+     "chapter": 62,
+     "paragraph": 19,
+     "highlights": [
+      "頑了一回，大家方起席散了一散，倏然不見了湘雲，只當他外頭自便就來，誰知越等越沒了影響，使人各處去找，那裡找得著。"
+     ],
+     "img": "dgy-assets/huace/img/zuiyan-01.webp",
+     "place": "红香圃",
+     "placeId": "hongxiang",
+     "season": "芍药盛开时节，白天",
+     "loop": null,
+     "src": "dgy-assets/album/zuiyan/01.webp",
+     "thumb": "dgy-assets/huace/img/zuiyan-01-s.webp"
+    },
+    {
+     "no": 2,
+     "title": "红香圃",
+     "narr": "「說著，都走來看時，果見湘雲臥於山石僻處一個石凳子上，業經香夢沉酣，四面芍藥花飛了一身，滿頭臉衣襟上皆是紅香散亂，手中的扇子在地下，也半被落花埋了，一群蜂蝶鬧穰穰的圍著他，又用鮫帕包了一包芍藥花瓣枕著。」回目叫“芍药裀”（花铺的褥子），其实她睡的是石凳，身上盖的是落花。蜂蝶围着，红香满身，这是园里最无忧的一觉。曲子里的「雲散高唐，水涸湘江」，此刻还远（第5回）。",
+     "scene": "山石后僻静处，一条青石凳上，湘云侧身酣睡，满头满身落着芍药花瓣，手里的扇子掉在地上半埋进落花，头下枕着一包用手帕包起的花瓣，一群蜂蝶绕着她飞；脸颊酒红，睡得香甜。",
+     "chapter": 62,
+     "paragraph": 21,
+     "highlights": [
+      "說著，都走來看時，果見湘雲臥於山石僻處一個石凳子上，業經香夢沉酣，四面芍藥花飛了一身，滿頭臉衣襟上皆是紅香散亂，手中的扇子在地下，也半被落花埋了，一群蜂蝶鬧穰穰的圍著他，又用鮫帕包了一包芍藥花瓣枕著。"
+     ],
+     "img": "dgy-assets/huace/img/zuiyan-02.webp",
+     "place": "红香圃",
+     "placeId": "hongxiang",
+     "season": "芍药盛开时节，白天",
+     "loop": null,
+     "src": "dgy-assets/album/zuiyan/02.webp",
+     "thumb": "dgy-assets/huace/img/zuiyan-02-s.webp"
+    },
+    {
+     "no": 3,
+     "title": "红香圃",
+     "narr": "「泉香而酒冽，玉碗盛來琥珀光，直飲到梅梢月上，醉扶歸，卻為宜會親友。」睡着了嘴里念的还是席上的酒令。梦里一句话凑齐了古文、旧诗、骨牌、曲牌、时宪书，五样不缺。人醉了，令倒没乱。",
+     "scene": "同一处，众姐妹围在石凳边掩口而笑，有人伸手推她；湘云闭着眼，嘴唇微动，还在说梦话。",
+     "chapter": 62,
+     "paragraph": 22,
+     "highlights": [
+      "泉香而酒冽，玉碗盛來琥珀光，直飲到梅梢月上，醉扶歸，卻為宜會親友。"
+     ],
+     "img": "dgy-assets/huace/img/zuiyan-03.webp",
+     "place": "红香圃",
+     "placeId": "hongxiang",
+     "season": "芍药盛开时节，白天",
+     "loop": null,
+     "src": "dgy-assets/album/zuiyan/03.webp",
+     "thumb": "dgy-assets/huace/img/zuiyan-03-s.webp"
+    },
+    {
+     "no": 4,
+     "title": "红香圃",
+     "narr": "「湘雲慢啟秋波，見了眾人，低頭看了一看自己，方知是醉了。原是來納涼避靜的，不覺的因多罰了兩杯酒，嬌嫋不勝，便睡著了，心中反覺自愧。」她本来只是想找个凉快地方躲一躲。平日大说大笑的人，这会子也知道低头。娇袅二字，书里难得落在湘云身上。",
+     "scene": "湘云刚睁开眼，半撑起身子，低头看自己一身花瓣，有点不好意思地笑；众人围着看她。",
+     "chapter": 62,
+     "paragraph": 23,
+     "highlights": [
+      "湘雲慢啟秋波，見了眾人，低頭看了一看自己，方知是醉了。原是來納涼避靜的，不覺的因多罰了兩杯酒，嬌嫋不勝，便睡著了，心中反覺自愧。"
+     ],
+     "img": "dgy-assets/huace/img/zuiyan-04.webp",
+     "place": "红香圃",
+     "placeId": "hongxiang",
+     "season": "芍药盛开时节，白天",
+     "loop": null,
+     "src": "dgy-assets/album/zuiyan/04.webp",
+     "thumb": "dgy-assets/huace/img/zuiyan-04-s.webp"
+    },
+    {
+     "no": 5,
+     "title": "红香圃",
+     "narr": "「探春忙命將醒酒石拿來給他銜在口內，一時又命他喝了一些酸湯，方才覺得好了些。」醒酒石是含在嘴里解酒的石头。醒酒石、酸汤，都是探春吩咐的。这阵子她替凤姐理家，席上席下的事，样样想在头里。",
+     "scene": "回到红香圃敞厅里，湘云坐着，鬓边还粘着花瓣；探春递来一块醒酒石让她含在嘴里，丫鬟端着一碗酸汤候着。",
+     "chapter": 62,
+     "paragraph": 23,
+     "highlights": [
+      "探春忙命將醒酒石拿來給他銜在口內，一時又命他喝了一些酸湯，方才覺得好了些。"
+     ],
+     "img": "dgy-assets/huace/img/zuiyan-05.webp",
+     "place": "红香圃",
+     "placeId": "hongxiang",
+     "season": "芍药盛开时节，白天",
+     "loop": null,
+     "src": "dgy-assets/album/zuiyan/05.webp",
+     "thumb": "dgy-assets/huace/img/zuiyan-05-s.webp"
+    }
+   ],
+   "oldMap": {
+    "0": 0,
+    "1": 0,
+    "2": 1,
+    "3": 2,
+    "4": 3,
+    "5": 4
+   },
+   "mood": "petal",
+   "cover": 0
+  },
+  {
+   "id": "youyuan",
+   "title": "刘姥姥进大观园",
+   "chapters": [
+    40,
+    41
+   ],
+   "place": "qinfang",
+   "placeName": "沁芳亭",
+   "bg": "第四十回、第四十一回，贾母两宴大观园。刘姥姥第二次进府，贾母留她住下，带她逛园子：沁芳亭、潇湘馆、秋爽斋、栊翠庵、省亲别墅，最后醉卧怡红院。她明知大家拿她取笑，事后对凤姐、鸳鸯说：咱们哄着老太太开个心儿，有什么恼的。",
+   "bgPz": "螃蟹宴一顿，她算过，「夠我們莊家人過一年了」（第39回）。揣着这本账逛园子，一草一木都有了价钱。",
+   "source": "画册定稿",
+   "inscription": "",
+   "pages": [
+    {
+     "no": 1,
+     "title": "沁芳亭",
+     "narr": "「一語未完，鳳姐便拉過劉姥姥，笑道：「讓我打扮你。」說著，將一盤子花橫三豎四的插了一頭。賈母和眾人笑的了不得。」她不恼，反说“今儿老风流才好”——一开场就把大家逗乐了。满头的花是凤姐插的，这一天的差事，鸳鸯早叫破了，「女篾片」。肯戴这一头花，才是刘姥姥的本事。",
+     "scene": "秋日上午，沁芳亭一带。丫鬟捧着荷叶式翡翠盘，盘里是各色折枝菊花；凤姐笑着把菊花横三竖四插满刘姥姥一头，贾母鬓边簪着一朵大红菊，众人笑弯了腰，刘姥姥咧着缺牙的嘴也跟着笑。",
+     "chapter": 40,
+     "paragraph": 1,
+     "highlights": [
+      "一語未完，鳳姐便拉過劉姥姥，笑道：「讓我打扮你。」說著，將一盤子花橫三豎四的插了一頭。賈母和眾人笑的了不得。"
+     ],
+     "img": "dgy-assets/huace/img/youyuan-01.webp",
+     "place": "沁芳亭",
+     "placeId": "qinfang",
+     "season": "秋天",
+     "loop": null,
+     "src": "dgy-assets/album/youyuan/01.webp",
+     "thumb": "dgy-assets/huace/img/youyuan-01-s.webp"
+    },
+    {
+     "no": 2,
+     "title": "潇湘馆",
+     "narr": "「他只顧上頭和人說話，不防底下果踩滑了，咕咚一跤跌倒。眾人拍手都哈哈的笑起來。」琥珀刚提醒“仔细苍苔滑了”，她说“我们走熟了的”，话音没落就摔了。跌完一跤，进屋看了一眼，便说「竟比那上等的書房還好」。乡下人一句话，把黛玉的住处说准了。",
+     "scene": "潇湘馆院里，两边翠竹夹路，中间一条石子小路，地上满是青苔。刘姥姥让开石子路，自己走在青苔土上，一边回头和人说话，脚下一滑咕咚摔倒；众人拍手大笑。",
+     "chapter": 40,
+     "paragraph": 3,
+     "highlights": [
+      "他只顧上頭和人說話，不防底下果踩滑了，咕咚一跤跌倒。眾人拍手都哈哈的笑起來。"
+     ],
+     "img": "dgy-assets/huace/img/youyuan-02.webp",
+     "place": "潇湘馆",
+     "placeId": "xiaoxiang",
+     "season": "秋天",
+     "loop": null,
+     "src": "dgy-assets/album/youyuan/02.webp",
+     "thumb": "dgy-assets/huace/img/youyuan-02-s.webp"
+    },
+    {
+     "no": 3,
+     "title": "秋爽斋",
+     "narr": "「賈母這邊說聲「請」，劉姥姥便站起身來，高聲說道：「老劉，老劉，食量大似牛，吃一個老母豬不抬頭。」自己卻鼓著腮不語。」这是鸳鸯、凤姐事先教好的。她心里明白，事后说“你先嘱咐我，我就明白了”。笑声未落，她又和鸽子蛋较上劲。「一兩銀子，也沒聽見響聲兒就沒了」，满桌笑声里，银子落地的声儿只有她听得见。",
+     "scene": "秋爽斋晓翠堂，摆着长桌宴席。刘姥姥站起身高声说话，说完鼓着腮帮子一声不吭；满座笑翻：湘云喷饭，黛玉伏桌笑岔气，宝玉滚进贾母怀里，探春的饭碗扣在迎春身上。",
+     "chapter": 40,
+     "paragraph": 6,
+     "highlights": [
+      "賈母這邊說聲「請」，劉姥姥便站起身來，高聲說道：「老劉，老劉，食量大似牛，吃一個老母豬不抬頭。」自己卻鼓著腮不語。"
+     ],
+     "img": "dgy-assets/huace/img/youyuan-03.webp",
+     "place": "秋爽斋",
+     "placeId": "qiushuang",
+     "season": "秋天",
+     "loop": null,
+     "src": "dgy-assets/album/youyuan/03.webp",
+     "thumb": "dgy-assets/huace/img/youyuan-03-s.webp"
+    },
+    {
+     "no": 4,
+     "title": "栊翠庵",
+     "narr": "「賈母便吃了半盞，便笑著遞與劉姥姥說：「你嘗嘗這個茶。」劉姥姥便一口吃盡，笑道：「好是好，就是淡些，再熬濃些更好了。」」妙玉事后叫把这只杯子搁在外头，不要了。她嫌淡的这一钟，转眼成了妙玉嫌脏的杯子。宝玉替她讨了来，说「他賣了也可以度日」。",
+     "scene": "栊翠庵院中，贾母坐着，把一只成窑五彩小盖钟递给刘姥姥；刘姥姥仰头一口喝干，咂嘴说淡；妙玉立在一旁，面无表情；众人在笑。",
+     "chapter": 41,
+     "paragraph": 4,
+     "highlights": [
+      "賈母便吃了半盞，便笑著遞與劉姥姥說：「你嘗嘗這個茶。」劉姥姥便一口吃盡，笑道：「好是好，就是淡些，再熬濃些更好了。」"
+     ],
+     "img": "dgy-assets/huace/img/youyuan-04.webp",
+     "place": "栊翠庵",
+     "placeId": "longcui",
+     "season": "秋天",
+     "loop": null,
+     "src": "dgy-assets/album/youyuan/04.webp",
+     "thumb": "dgy-assets/huace/img/youyuan-04-s.webp"
+    },
+    {
+     "no": 5,
+     "title": "省亲别墅",
+     "narr": "「眾人笑道：「你認得這是什麼廟？」劉姥姥便抬頭指那字道：「這不是『玉皇寶殿』四字？」」牌坊上写的是“省亲别墅”，她把这里当成了大庙。认错了字，没认错地方。贵妃回来一夜便走，这座殿原本就是供着的。",
+     "scene": "省亲别墅的石牌坊下，刘姥姥趴在地上磕头，又抬头指着牌坊上的字，一脸认真；身后众人笑得拍手跺脚。",
+     "chapter": 41,
+     "paragraph": 8,
+     "highlights": [
+      "眾人笑道：「你認得這是什麼廟？」劉姥姥便抬頭指那字道：「這不是『玉皇寶殿』四字？」"
+     ],
+     "img": "dgy-assets/huace/img/youyuan-05.webp",
+     "place": "省亲别墅",
+     "placeId": "xingqin",
+     "season": "秋天",
+     "loop": null,
+     "src": "dgy-assets/album/youyuan/05.webp",
+     "thumb": "dgy-assets/huace/img/youyuan-05-s.webp"
+    },
+    {
+     "no": 6,
+     "title": "怡红院",
+     "narr": "「他此時又帶了七八分醉，又走乏了，便一屁股坐在床上，只說歇歇，不承望身不由己，前仰後合的，朦朧著兩眼，一歪身就睡熟在床上。」她迷了路，误打误撞睡在了宝玉的床上；袭人找到她，只对外说她在草地上睡着了。镜里撞见自己，还当是亲家母，笑她「沒死活戴了一頭」。笑人的和挨笑的，原是一个人。",
+     "scene": "怡红院宝玉卧室，精致的床帐，旁边一面西洋穿衣镜刚被撞开。刘姥姥带着七八分醉，满头还插着花，一歪身倒在床上睡熟，鼾声大作。",
+     "chapter": 41,
+     "paragraph": 9,
+     "highlights": [
+      "他此時又帶了七八分醉，又走乏了，便一屁股坐在床上，只說歇歇，不承望身不由己，前仰後合的，朦朧著兩眼，一歪身就睡熟在床上。"
+     ],
+     "img": "dgy-assets/huace/img/youyuan-06.webp",
+     "place": "怡红院",
+     "placeId": "yihong",
+     "season": "秋天",
+     "loop": null,
+     "src": "dgy-assets/album/youyuan/06.webp",
+     "thumb": "dgy-assets/huace/img/youyuan-06-s.webp"
+    }
+   ],
+   "oldMap": {
+    "0": 0,
+    "1": 0,
+    "2": 1,
+    "3": 2,
+    "4": 3,
+    "5": 4,
+    "6": 5
+   },
+   "mood": "petal",
+   "cover": 0
+  },
+  {
+   "id": "haitang",
+   "title": "海棠诗社",
+   "chapters": [
+    37
+   ],
+   "place": "qiushuang",
+   "placeName": "秋爽斋",
+   "bg": "第三十七回，回目是“秋爽斋偶结海棠社”。贾政八月二十日出门去当学差，园里没人管了，探春发帖起诗社。这一天定下各人的号，咏白海棠，李纨定每月初二、十六开社，探春取名“海棠社”。",
+   "bgPz": "贾政一出门，园子便成了孩子们的天下。海棠社后来改作桃花社，社主换了黛玉，诗已满纸凄凉（第70回）。",
+   "source": "扩写稿 + 新版画稿",
+   "inscription": "",
+   "pages": [
+    {
+     "no": 1,
+     "title": "洒泪亭",
+     "narr": "贾政点了学差，八月二十日起身，子弟们一直送到洒泪亭。老爷一走，园子里便没人管了，宝玉每日任意纵性的逛荡。可知天下的诗社，多半是在严父出门那一日开张的。",
+     "scene": "八月二十日，城外洒泪亭。贾政月白浅灰蓝袍，正要登车，回身叮嘱；宝玉浅金褐团花袍，与贾环、贾兰等子弟垂手站成一排送行。车马行李在亭外候着，秋树疏朗。远中景，人物小。",
+     "chapter": 37,
+     "paragraph": 0,
+     "highlights": [
+      "這年賈政又點了學差，擇於八月二十日起身。是日拜過宗祠及賈母起身，寶玉諸子弟等送至灑淚亭。",
+      "單表寶玉每日在園中任意縱性的逛蕩，真把光陰虛度，歲月空添。"
+     ],
+     "img": "dgy-assets/huace/img/haitang-01.webp",
+     "place": "园外·城外洒泪亭",
+     "placeId": null,
+     "season": "八月 · 初秋",
+     "loop": null,
+     "src": "dgy-assets/album-v2/haitang/01.webp",
+     "thumb": "dgy-assets/huace/img/haitang-01-s.webp"
+    },
+    {
+     "no": 2,
+     "title": "怡红院",
+     "narr": "正无聊之际，翠墨送来一副花笺，是探春亲笔。笺上说「孰謂蓮社之雄才，獨許鬚眉」，要邀众姊妹结社。宝玉看了拍手便走，三妹妹一纸帖子，把一园的闲人都请动了。",
+     "scene": "秋日，怡红院屋里，宝玉浅金褐团花袍，百无聊赖歪在榻上；丫鬟翠墨进门，双手递上一副花笺。宝玉坐直身子展开来看，脸上渐渐露出喜色，作势要起身。近景，窗外芭蕉海棠。",
+     "chapter": 37,
+     "paragraph": 1,
+     "highlights": [
+      "這日正無聊之際，只見翠墨進來，手裡拿著一副花箋送與他。",
+      "孰謂蓮社之雄才，獨許鬚眉，直以東山之雅會，讓余脂粉。"
+     ],
+     "img": "dgy-assets/huace/img/haitang-02.webp",
+     "place": "怡红院",
+     "placeId": "yihong",
+     "season": "八月 · 初秋",
+     "loop": null,
+     "src": "dgy-assets/album-v2/haitang/02.webp",
+     "thumb": "dgy-assets/huace/img/haitang-02-s.webp"
+    },
+    {
+     "no": 3,
+     "title": "沁芳亭",
+     "narr": "才到沁芳亭，后门婆子又送来一张帖，是贾芸写给他这个干爹的帖子，说寻得两盆白海棠。「不肖男芸恭請父親大人萬福金安」，宝玉看了只是笑。诗社还没起，诗题倒先自己送上门来。",
+     "scene": "沁芳亭桥头，宝玉浅金褐团花袍，与翠墨正往秋爽斋去；一个守后门的婆子迎上来，递过一张字帖。宝玉展开一看，忍不住笑出声，翠墨在旁探头。亭外秋水，柳叶微黄。中景，字帖为焦点。",
+     "chapter": 37,
+     "paragraph": 4,
+     "highlights": [
+      "不肖男芸恭請父親大人萬福金安。",
+      "因忽見有白海棠一種，不可多得。故變盡方法，只弄得兩盆。"
+     ],
+     "img": "dgy-assets/huace/img/haitang-03.webp",
+     "place": "沁芳亭",
+     "placeId": "qinfang",
+     "season": "八月 · 初秋",
+     "loop": null,
+     "src": "dgy-assets/album-v2/haitang/03.webp",
+     "thumb": "dgy-assets/huace/img/haitang-03-s.webp"
+    },
+    {
+     "no": 4,
+     "title": "秋爽斋",
+     "narr": "众人见宝玉进来，笑说又来了一个，探春道一招皆到。李纨进门便说「雅的緊！要起詩社，我自薦我掌壇」。她自称不会作诗，掌坛却当仁不让，这是寡居的人难得的一点兴头。",
+     "scene": "秋爽斋屋里，宝钗杏黄袄、黛玉淡紫袄、迎春姜黄褙子、惜春藕荷袄已坐下，探春浅橙黄交领衫起身笑迎宝玉；李纨雪青蓝褙子掀帘进门，满面笑意抬手说话。窗外梧桐芭蕉。中景群像。",
+     "chapter": 37,
+     "paragraph": 6,
+     "highlights": [
+      "探春笑道：「我不算俗，偶然起個念頭，寫了幾個帖兒試一試，誰知一招皆到。」",
+      "一語未了，李紈也來了，進門笑道：「雅的緊！要起詩社，我自薦我掌壇。"
+     ],
+     "img": "dgy-assets/huace/img/haitang-04.webp",
+     "place": "秋爽斋",
+     "placeId": "qiushuang",
+     "season": "八月 · 初秋",
+     "loop": null,
+     "src": "dgy-assets/album-v2/haitang/04.webp",
+     "thumb": "dgy-assets/huace/img/haitang-04-s.webp"
+    },
+    {
+     "no": 5,
+     "title": "秋爽斋",
+     "narr": "探春自号蕉下客，黛玉便要众人牵了她去炖脯子吃酒，可不是一只鹿了。探春也不饶，说她住潇湘馆又爱哭，竹子将来也要变成斑竹，就叫「瀟湘妃子」。一笑一谶，黛玉低了头，竟不言语了。",
+     "scene": "窗外一丛芭蕉。探春刚说完自己的号，黛玉掩口笑着指她打趣，众人哄笑；探春佯嗔，转身向众人说话，黛玉随即低了头。宝玉在旁拍手叫妙。中景，芭蕉叶大片入画。",
+     "chapter": 37,
+     "paragraph": 7,
+     "highlights": [
+      "他自稱『蕉下客』，可不是一隻鹿了？",
+      "以後都叫他作『瀟湘妃子』就完了。」",
+      "林黛玉低了頭方不言語。"
+     ],
+     "img": "dgy-assets/huace/img/haitang-05.webp",
+     "place": "秋爽斋",
+     "placeId": "qiushuang",
+     "season": "八月 · 初秋",
+     "loop": null,
+     "src": "dgy-assets/album-v2/haitang/05.webp",
+     "thumb": "dgy-assets/huace/img/haitang-05-s.webp"
+    },
+    {
+     "no": 6,
+     "title": "秋爽斋",
+     "narr": "李纨封宝钗作蘅芜君，宝钗却回送宝玉一个号，说天下难得是富贵，又难得是闲散，你兼有了，就叫「富貴閒人」。宝玉连说当不起。旁人起号是雅，宝钗起号是看人看到了根上。",
+     "scene": "宝钗杏黄袄端坐含笑，侧身对宝玉说话；宝玉浅金褐团花袍，连连拱手推辞，笑着作揖。李纨坐在上首点头，迎春、惜春相视而笑。中景，宝钗一坐、宝玉一立，金锁在宝钗胸前显眼。",
+     "chapter": 37,
+     "paragraph": 7,
+     "highlights": [
+      "寶釵道：「還得我送你個號罷。有最俗的一個號，卻於你最當。天下難得的是富貴，又難得的是閒散，這兩樣再不能兼有，不想你兼有了，就叫你『富貴閒人』也罷了。」"
+     ],
+     "img": "dgy-assets/huace/img/haitang-06.webp",
+     "place": "秋爽斋",
+     "placeId": "qiushuang",
+     "season": "八月 · 初秋",
+     "loop": null,
+     "src": "dgy-assets/album-v2/haitang/06.webp",
+     "thumb": "dgy-assets/huace/img/haitang-06-s.webp"
+    },
+    {
+     "no": 7,
+     "title": "秋爽斋",
+     "narr": "李纨说抬进来两盆白海棠，就咏它罢。迎春随手一揭是七言律，又叫倚门的小丫头随口说一个字，偏是个门字。宝玉直叫这两个字不好作，限韵的人不会作诗，难为的是会作诗的人。",
+     "scene": "书架前，迎春姜黄褙子随手抽出一本诗集翻开；倚门站着的小丫头张口说了一个字，迎春回头笑着点头。案上韵牌匣子打开，露出几块韵牌。探春、宝玉围过来看。中景。",
+     "chapter": 37,
+     "paragraph": 9,
+     "highlights": [
+      "迎春掩了詩，又向一個小丫頭道：「你隨口說一個字來。」",
+      "那丫頭正倚門立著，便說了個「門」字。",
+      "寶玉道：「這『盆』『門』兩個字不大好作呢！」"
+     ],
+     "img": "dgy-assets/huace/img/haitang-07.webp",
+     "place": "秋爽斋",
+     "placeId": "qiushuang",
+     "season": "八月 · 初秋",
+     "loop": null,
+     "src": "dgy-assets/album-v2/haitang/07.webp",
+     "thumb": "dgy-assets/huace/img/haitang-07-s.webp"
+    },
+    {
+     "no": 8,
+     "title": "秋爽斋回廊",
+     "narr": "一支梦甜香燃着，香尽未成便要罚。探春先有了，宝钗也誊了，宝玉在回廊上踱来踱去，独黛玉或抚梧桐，或看秋色。急的急，闲的闲，诗还没写出来，各人的性情倒先写出来了。",
+     "scene": "案上一支三寸来长的梦甜香已燃去大半。探春伏案改抹诗稿，宝钗已在誊写；宝玉背着手在回廊上踱来踱去；黛玉淡紫袄、白披风，一手抚着廊外梧桐，看秋色出神。中景，回廊横贯画面。",
+     "chapter": 37,
+     "paragraph": 10,
+     "highlights": [
+      "獨黛玉或撫梧桐，或看秋色，或又和丫鬟們嘲笑。",
+      "寶玉背著手，在迴廊上踱來踱去，因向黛玉說道：「你聽，他們都有了。」黛玉道：「你別管我。」"
+     ],
+     "img": "dgy-assets/huace/img/haitang-08.webp",
+     "place": "秋爽斋",
+     "placeId": "qiushuang",
+     "season": "八月 · 初秋",
+     "loop": null,
+     "src": "dgy-assets/album-v2/haitang/08.webp",
+     "thumb": "dgy-assets/huace/img/haitang-08-s.webp"
+    },
+    {
+     "no": 9,
+     "title": "秋爽斋",
+     "narr": "宝钗诗里一句「淡極始知花更艷」，李纨看了便笑道到底是蘅芜君。她说有却有了，只是不好，交出来的偏是最稳的一首。淡到极处方见颜色，说的是海棠，更像说她自己。",
+     "scene": "李纨雪青蓝褙子坐在上首，手执宝钗的诗笺细看，点头称许；宝钗杏黄袄、玫瑰粉裙，端坐含笑不语；探春凑近同看，宝玉在旁张望。案上一炉残香。中近景，诗笺为焦点。",
+     "chapter": 37,
+     "paragraph": 14,
+     "highlights": [
+      "胭脂洗出秋階影，冰雪招來露砌魂。",
+      "淡極始知花更艷，愁多焉得玉無痕。",
+      "李紈笑道：「到底是蘅蕪君。」"
+     ],
+     "img": "dgy-assets/huace/img/haitang-09.webp",
+     "place": "秋爽斋",
+     "placeId": "qiushuang",
+     "season": "八月 · 初秋",
+     "loop": null,
+     "src": "dgy-assets/album-v2/haitang/09.webp",
+     "thumb": "dgy-assets/huace/img/haitang-09-s.webp"
+    }
+   ],
+   "oldMap": {
+    "0": 0,
+    "1": 1,
+    "2": 3,
+    "3": 2,
+    "4": 3,
+    "5": 4,
+    "6": 5
+   },
+   "mood": "smoke",
+   "cover": 0
+  },
+  {
+   "id": "pinchamei",
+   "title": "栊翠庵品茶与乞梅",
+   "chapters": [
+    41,
+    50
+   ],
+   "place": "longcui",
+   "placeName": "栊翠庵",
+   "bg": "两回都写妙玉怎么待人。第四十一回她给贾母奉茶，刘姥姥用过的杯子不要了，却请宝钗黛玉喝梯己茶。第五十回大雪天，李纨嘴上说厌她，还是罚宝玉去讨红梅；梅花讨回来了，后来她又给每人送了一枝。",
+   "bgPz": "两回隔着九回，一回奉茶，一回送梅。妙玉待人分作三等，老太太是礼，姑娘们是情，刘姥姥是嫌；宝玉算哪一等，书里不说。",
+   "source": "画册定稿",
+   "inscription": "",
+   "pages": [
+    {
+     "no": 1,
+     "title": "栊翠庵",
+     "narr": "「妙玉笑往裡讓，賈母道：「我們才都吃了酒肉，你這裡頭有菩薩，沖了罪過。我們這裡坐坐，把你的好茶拿來，我們吃一杯就去了。」」刚在园里喝过酒吃过肉，贾母知礼，不进佛堂。老太太年高位尊，偏守着佛门规矩不进去。门外这一站，比进去还见得敬重。",
+     "scene": "秋日，栊翠庵东禅堂外，花木繁盛。贾母带着众人停在门外，摆手不肯进去，笑着说话；妙玉站在门边让客，神情恭谨而冷淡。",
+     "chapter": 41,
+     "paragraph": 4,
+     "highlights": [
+      "妙玉笑往裡讓，賈母道：「我們才都吃了酒肉，你這裡頭有菩薩，沖了罪過。我們這裡坐坐，把你的好茶拿來，我們吃一杯就去了。」"
+     ],
+     "img": "dgy-assets/huace/img/pinchamei-01.webp",
+     "place": "栊翠庵",
+     "placeId": "longcui",
+     "season": "第41回秋天；第50回十月头场雪",
+     "loop": null,
+     "src": "dgy-assets/album/pinchamei/01.webp",
+     "thumb": "dgy-assets/huace/img/pinchamei-01-s.webp"
+    },
+    {
+     "no": 2,
+     "title": "栊翠庵",
+     "narr": "「妙玉笑說：「知道。這是老君眉。」」贾母先说“我不吃六安茶”，妙玉早有准备，泡的是老君眉，水用的是旧年雨水。出家的人，把老太太不吃六安茶记得这样准。槛外人做起人情来，比槛内的还周全。",
+     "scene": "妙玉双手捧一个海棠花式雕漆小茶盘，盘里一只成窑五彩小盖钟，躬身递给贾母；贾母正要开口。",
+     "chapter": 41,
+     "paragraph": 4,
+     "highlights": [
+      "妙玉笑說：「知道。這是老君眉。」"
+     ],
+     "img": "dgy-assets/huace/img/pinchamei-02.webp",
+     "place": "栊翠庵",
+     "placeId": "longcui",
+     "season": "第41回秋天；第50回十月头场雪",
+     "loop": null,
+     "src": "dgy-assets/album/pinchamei/02.webp",
+     "thumb": "dgy-assets/huace/img/pinchamei-02-s.webp"
+    },
+    {
+     "no": 3,
+     "title": "栊翠庵",
+     "narr": "「仍將前番自己常日吃茶的那隻綠玉斗來斟與寶玉。寶玉笑道：「常言『世法平等』，他兩個就用那樣古玩奇珍，我就是個俗器了。」」给宝玉的，偏是她自己天天用的那只。两个姑娘用的是古玩，宝玉用的是她日常的绿玉斗。她偏说「獨你來了，我是不給你吃的」，越撇越撇不清。",
+     "scene": "栊翠庵耳房，陈设清简。宝钗坐在榻上，黛玉坐在蒲团上，各捧一只古雅奇特的杯子；妙玉执壶，给刚溜进来的宝玉斟一只碧绿的玉斗，宝玉笑着说话。",
+     "chapter": 41,
+     "paragraph": 5,
+     "highlights": [
+      "仍將前番自己常日吃茶的那隻綠玉斗來斟與寶玉。寶玉笑道：「常言『世法平等』，他兩個就用那樣古玩奇珍，我就是個俗器了。」"
+     ],
+     "img": "dgy-assets/huace/img/pinchamei-03.webp",
+     "place": "栊翠庵",
+     "placeId": "longcui",
+     "season": "第41回秋天；第50回十月头场雪",
+     "loop": null,
+     "src": "dgy-assets/album/pinchamei/03.webp",
+     "thumb": "dgy-assets/huace/img/pinchamei-03-s.webp"
+    },
+    {
+     "no": 4,
+     "title": "栊翠庵",
+     "narr": "「豈不聞『一杯為品，二杯即是解渴的蠢物，三杯便是飲牛飲騾了』。你吃這一海便成什麼？」话虽刻薄，她还是只给他斟了一杯。一杯为品，三杯饮骡，论的是茶，嘲的是宝玉。他依言细细吃了，「果覺輕浮無比」，乖得很。",
+     "scene": "同一耳房，妙玉手里托着一只竹根整雕、盘曲如虬的大茶盒，似笑非笑地看宝玉；宝钗、黛玉、宝玉都笑了。",
+     "chapter": 41,
+     "paragraph": 5,
+     "highlights": [
+      "豈不聞『一杯為品，二杯即是解渴的蠢物，三杯便是飲牛飲騾了』。你吃這一海便成什麼？"
+     ],
+     "img": "dgy-assets/huace/img/pinchamei-04.webp",
+     "place": "栊翠庵",
+     "placeId": "longcui",
+     "season": "第41回秋天；第50回十月头场雪",
+     "loop": null,
+     "src": "dgy-assets/album/pinchamei/04.webp",
+     "thumb": "dgy-assets/huace/img/pinchamei-04-s.webp"
+    },
+    {
+     "no": 5,
+     "title": "芦雪广",
+     "narr": "「可厭妙玉為人，我不理他。如今罰你去取一枝來。」宝玉联句落了第，罚他去栊翠庵讨红梅。厌其人，爱其梅，李纨这一罚，公私两便。满园都明白，这枝梅只有宝玉讨得来。",
+     "scene": "十月头场雪，芦雪广屋里围着火盆，众人刚联完诗。李纨坐在上首，笑着指宝玉罚他；宝玉起身答应，湘云、黛玉在旁说外头冷。窗外大雪。",
+     "chapter": 50,
+     "paragraph": 91,
+     "highlights": [
+      "可厭妙玉為人，我不理他。如今罰你去取一枝來。"
+     ],
+     "img": "dgy-assets/huace/img/pinchamei-05.webp",
+     "place": "芦雪广",
+     "placeId": "luxue",
+     "season": "第41回秋天；第50回十月头场雪",
+     "loop": null,
+     "src": "dgy-assets/album/pinchamei/05.webp",
+     "thumb": "dgy-assets/huace/img/pinchamei-05-s.webp"
+    },
+    {
+     "no": 6,
+     "title": "芦雪广",
+     "narr": "「一語未了，只見寶玉笑嘻嘻的掮了一枝紅梅進來，眾丫鬟忙已接過，插入瓶內。」“掮”是扛在肩上。他一进门就说：你们赏罢，不知费了我多少精神。一身蓑笠一肩梅，雪里这一幅已胜过诗。同一回里宝琴立在雪坡上，众人说她像「仇十洲畫的《雙艷圖》」。",
+     "scene": "雪天，芦雪广门口，宝玉披蓑戴笠，肩上扛着一枝二尺来高、横枝五六尺长的红梅，笑嘻嘻进门；丫鬟们接过梅花插进美女耸肩瓶，又上前替他接蓑笠、掸雪。",
+     "chapter": 50,
+     "paragraph": 92,
+     "highlights": [
+      "一語未了，只見寶玉笑嘻嘻的掮了一枝紅梅進來，眾丫鬟忙已接過，插入瓶內。"
+     ],
+     "img": "dgy-assets/huace/img/pinchamei-06.webp",
+     "place": "芦雪广",
+     "placeId": "luxue",
+     "season": "第41回秋天；第50回十月头场雪",
+     "loop": null,
+     "src": "dgy-assets/album/pinchamei/06.webp",
+     "thumb": "dgy-assets/huace/img/pinchamei-06-s.webp"
+    }
+   ],
+   "oldMap": {
+    "0": 0,
+    "1": 0,
+    "2": 1,
+    "3": 2,
+    "4": 3,
+    "5": 4,
+    "6": 5
+   },
+   "mood": "smoke",
+   "cover": 0
+  },
+  {
+   "id": "lianju",
+   "title": "凹晶馆联诗",
+   "chapters": [
+    76
+   ],
+   "place": "aojing",
+   "placeName": "凹晶溪馆",
+   "bg": "第七十六回，回目是“凹晶馆联诗悲寂寞”。这是前八十回最后一个中秋，贾府已经抄检过大观园，凸碧山庄上的宴席冷冷清清。黛玉、湘云躲到水边联句，联出最冷的两句，被妙玉听见叫停，三人到栊翠庵喝茶续诗，那时天都快亮了。",
+   "bgPz": "抄检过后的中秋，宝钗姊妹回家团圆去了，湘云恨得直说她。山上宴越冷，水边诗越冷，冷到妙玉也听不下去。",
+   "source": "画册定稿",
+   "inscription": "",
+   "pages": [
+    {
+     "no": 1,
+     "title": "凹晶溪馆",
+     "narr": "「因這幾間就在此山懷抱之中，乃凸碧山莊之退居，因窪而近水，故顏其額曰「凹晶溪館」。」山顶叫“凸碧”，水边叫“凹晶”，一高一低正好一对——这两个名字是黛玉拟的。园子盖好几年，凸碧凹晶的来历，到今夜才由黛玉说出来，「凡我擬的，一字不改都用了」。",
+     "scene": "中秋夜，月光下，黛玉、湘云两人携手从山坡下来，一转弯就是池沿，一带竹栏相接；水边几间矮小的房子，门额上写“凹晶溪馆”，灯已熄了。",
+     "chapter": 76,
+     "paragraph": 4,
+     "highlights": [
+      "因這幾間就在此山懷抱之中，乃凸碧山莊之退居，因窪而近水，故顏其額曰「凹晶溪館」。"
+     ],
+     "img": "dgy-assets/huace/img/lianju-01.webp",
+     "place": "凹晶溪馆",
+     "placeId": "aojing",
+     "season": "中秋夜",
+     "loop": null,
+     "src": "dgy-assets/album/lianju/01.webp",
+     "thumb": "dgy-assets/huace/img/lianju-01-s.webp"
+    },
+    {
+     "no": 2,
+     "title": "凹晶溪馆",
+     "narr": "「二人遂在兩個湘妃竹墩上坐下。只見天上一輪皓月，池中一輪水月，上下爭輝，如置身於晶宮鮫室之內。」宴席上人散得冷清，两人干脆躲到这里联句。天上一轮，水里一轮，竹墩上坐着两个没爹娘的姑娘。中秋团圆夜，团圆的只有月亮。",
+     "scene": "凹晶溪馆前水边，两只湘妃竹墩，黛玉、湘云并肩坐着；天上一轮满月，池里一轮倒影，四下清冷如水晶宫。",
+     "chapter": 76,
+     "paragraph": 4,
+     "highlights": [
+      "二人遂在兩個湘妃竹墩上坐下。只見天上一輪皓月，池中一輪水月，上下爭輝，如置身於晶宮鮫室之內。"
+     ],
+     "img": "dgy-assets/huace/img/lianju-02.webp",
+     "place": "凹晶溪馆",
+     "placeId": "aojing",
+     "season": "中秋夜",
+     "loop": null,
+     "src": "dgy-assets/album/lianju/02.webp",
+     "thumb": "dgy-assets/huace/img/lianju-02-s.webp"
+    },
+    {
+     "no": 3,
+     "title": "凹晶溪馆",
+     "narr": "「只聽那黑影裡嘎然一聲，卻飛起一個大白鶴來，直往藕香榭去了。黛玉笑道：「原來是他，猛然想不到，反嚇了一跳。」」黛玉以为池里黑影是鬼，湘云说她不怕鬼，拾石片一打，打出一只鹤来。黛玉疑是鬼，湘云偏去打。一块石片打出来的，竟是下一句诗。",
+     "scene": "湘云弯腰向池中扔出一块小石片，水面月影荡开；池中黑影里一只大白鹤惊起，振翅朝远处水榭飞去；黛玉在竹栏边吓了一跳，随即笑了。",
+     "chapter": 76,
+     "paragraph": 47,
+     "highlights": [
+      "只聽那黑影裡嘎然一聲，卻飛起一個大白鶴來，直往藕香榭去了。黛玉笑道：「原來是他，猛然想不到，反嚇了一跳。」"
+     ],
+     "img": "dgy-assets/huace/img/lianju-03.webp",
+     "place": "凹晶溪馆",
+     "placeId": "aojing",
+     "season": "中秋夜",
+     "loop": null,
+     "src": "dgy-assets/album/lianju/03.webp",
+     "thumb": "dgy-assets/huace/img/lianju-03-s.webp"
+    },
+    {
+     "no": 4,
+     "title": "凹晶溪馆",
+     "narr": "「黛玉只看天，不理他，半日，猛然笑道：「你不必說嘴，我也有了，你聽聽。」因對道：冷月葬花魂。」湘云上句是“寒塘渡鹤影”，黛玉对“冷月葬花魂”。湘云叫好，又劝她病中别作这样太颓丧的句子。鹤影归湘云，花魂归黛玉，一联里两个人的下场都分派好了。月影打散还能复聚，人散了不聚。",
+     "scene": "湘云刚借白鹤对出一句，得意地看着黛玉；黛玉仰头望着冷月不理她，半晌忽然一笑开口；水面月影碎银般闪动。",
+     "chapter": 76,
+     "paragraph": 49,
+     "highlights": [
+      "黛玉只看天，不理他，半日，猛然笑道：「你不必說嘴，我也有了，你聽聽。」因對道：冷月葬花魂。"
+     ],
+     "img": "dgy-assets/huace/img/lianju-04.webp",
+     "place": "凹晶溪馆",
+     "placeId": "aojing",
+     "season": "中秋夜",
+     "loop": null,
+     "src": "dgy-assets/album/lianju/04.webp",
+     "thumb": "dgy-assets/huace/img/lianju-04-s.webp"
+    },
+    {
+     "no": 5,
+     "title": "凹晶溪馆",
+     "narr": "「一語未了，只見欄外山石後轉出一個人來，笑道：「好詩，好詩，果然太悲涼了。不必再往下聯，若底下只這樣去，反不顯這兩句了，倒覺得堆砌牽強。」」她赏月走到这里，在石后听了半天，嫌太悲凉，出来止住。躲在石后听诗的，又是一个孤零零的人。三个人凑成的中秋，倒比山上的家宴更像一家。",
+     "scene": "竹栏外假山石后转出一个人：妙玉，月白衣衫，手执拂尘，含笑说话；黛玉、湘云回头，一脸惊诧。",
+     "chapter": 76,
+     "paragraph": 52,
+     "highlights": [
+      "一語未了，只見欄外山石後轉出一個人來，笑道：「好詩，好詩，果然太悲涼了。不必再往下聯，若底下只這樣去，反不顯這兩句了，倒覺得堆砌牽強。」"
+     ],
+     "img": "dgy-assets/huace/img/lianju-05.webp",
+     "place": "凹晶溪馆",
+     "placeId": "aojing",
+     "season": "中秋夜",
+     "loop": null,
+     "src": "dgy-assets/album/lianju/05.webp",
+     "thumb": "dgy-assets/huace/img/lianju-05-s.webp"
+    },
+    {
+     "no": 6,
+     "title": "栊翠庵",
+     "narr": "「我意思想著你二位警句已出，再若續時，恐後力不加。我竟要續貂，又恐有玷。」她说两人已联了二十二韵，警句已出，由她来收尾。黛玉从没见她作过诗。她说收结「還該歸到本來面目上去」，硬把悲音挽了回来。挽回了诗，挽不回人。",
+     "scene": "栊翠庵禅房，夜将尽，佛龛灯焰青青、炉香未尽，小丫鬟在蒲团上打盹。妙玉坐在案前取纸笔把两人的诗从头写出，黛玉、湘云在旁看着，神情惊喜。",
+     "chapter": 76,
+     "paragraph": 53,
+     "highlights": [
+      "我意思想著你二位警句已出，再若續時，恐後力不加。我竟要續貂，又恐有玷。"
+     ],
+     "img": "dgy-assets/huace/img/lianju-06.webp",
+     "place": "栊翠庵",
+     "placeId": "longcui",
+     "season": "中秋夜",
+     "loop": null,
+     "src": "dgy-assets/album/lianju/06.webp",
+     "thumb": "dgy-assets/huace/img/lianju-06-s.webp"
+    }
+   ],
+   "oldMap": {
+    "0": 0,
+    "1": 0,
+    "2": 1,
+    "3": 2,
+    "4": 3,
+    "5": 4,
+    "6": 5
+   },
+   "mood": "smoke",
+   "cover": 0
+  },
+  {
+   "id": "aida",
+   "title": "宝玉挨打",
+   "chapters": [
+    33,
+    34
+   ],
+   "place": null,
+   "placeName": "园外",
+   "bg": "第三十三回，回目是“手足耽耽小动唇舌　不肖种种大承笞挞”，在园外荣国府。金钏投井、忠顺府来要琪官、贾环告状，三件事撞在同一天。打完才有第三十四回宝玉托晴雯送旧帕、黛玉题帕。",
+   "bgPz": "三件事撞在一天，哪一件都不全是宝玉的错，板子却都落在他身上。打完了，黛玉一双眼「腫的桃兒一般」（第34回）。",
+   "source": "扩写稿 + 新版画稿",
+   "inscription": "",
+   "pages": [
+    {
+     "no": 1,
+     "title": "王夫人上房",
+     "narr": "金钏投了井，王夫人在里间垂泪，宝钗把自己的两套新衣送来给她妆裹。宝玉坐在一旁也垂着泪，见宝钗进来，王夫人便掩了口。这一回的祸，是从一屋子说不出口的话起的。",
+     "scene": "盛夏白天，王夫人上房里间，鸦雀无闻。王夫人湘黄缎褙子，坐在炕边拭泪，见宝钗捧着两套衣裳进门，忙掩了口；宝玉橘红短褂，坐在一旁垂泪，低头不语。窗外日光白亮。中景。",
+     "chapter": 32,
+     "paragraph": 8,
+     "highlights": [
+      "一時寶釵取了衣服回來，只見寶玉在王夫人旁邊坐著垂淚。王夫人正才說他，因寶釵來了，卻掩了口不說了。",
+      "寶釵見此光景，察言觀色，早知覺了八分，"
+     ],
+     "img": "dgy-assets/huace/img/aida-01.webp",
+     "place": "园外·荣国府王夫人上房",
+     "placeId": null,
+     "season": "盛夏",
+     "loop": null,
+     "src": "dgy-assets/album-v2/aida/01.webp",
+     "thumb": "dgy-assets/huace/img/aida-01-s.webp"
+    },
+    {
+     "no": 2,
+     "title": "厅上屏门",
+     "narr": "他背着手低头，一面感叹一面慢走，刚转过屏门，正撞在父亲怀里。贾政问他为何垂头丧气，他一心只在金钏身上，只怔呵呵的站着。父子之间，最怕的就是这一怔。",
+     "scene": "厅上屏门转角，宝玉背着手低头慢走，满脸失魂落魄；迎面贾政浅灰蓝袍、黄扁小冠正往里走，两人撞个满怀。贾政喝住，宝玉抬头倒抽一口气，垂手退到一旁。中近景，屏门作框。",
+     "chapter": 33,
+     "paragraph": 0,
+     "highlights": [
+      "背著手，低頭一面感歎，一面慢慢的走著，信步來至廳上。剛轉過屏門，不想對面來了一人正往裡走，可巧兒撞了個滿懷。",
+      "只聽那人喝了一聲「站住！」"
+     ],
+     "img": "dgy-assets/huace/img/aida-02.webp",
+     "place": "园外·荣国府厅上",
+     "placeId": null,
+     "season": "盛夏",
+     "loop": null,
+     "src": "dgy-assets/album-v2/aida/02.webp",
+     "thumb": "dgy-assets/huace/img/aida-02-s.webp"
+    },
+    {
+     "no": 3,
+     "title": "厅上",
+     "narr": "素不往来的忠顺府忽然打发长史官来，坐下便冷笑着要人。王府唱小旦的琪官三五日不见，满城都说他和「銜玉的那位令郎相與甚厚」。贾政又惊又气，这把火先从外头点起来了。",
+     "scene": "厅上，忠顺府长史官官服端坐客位，手扶茶盏，嘴角冷笑；贾政浅灰蓝袍，赔笑起身拱手，脸色由疑转惊。门外两个小厮垂手侍立。中景，长史官居画面偏左，茶盏冒着热气。",
+     "chapter": 33,
+     "paragraph": 1,
+     "highlights": [
+      "我們府里有一個做小旦的琪官，一向好好在府里，如今竟三五日不見回去，各處去找，又摸不著他的道路，因此各處訪察。這一城內，十停人倒有八停人都說，他近日和銜玉的那位令郎相與甚厚。"
+     ],
+     "img": "dgy-assets/huace/img/aida-03.webp",
+     "place": "园外·荣国府厅上",
+     "placeId": null,
+     "season": "盛夏",
+     "loop": null,
+     "src": "dgy-assets/album-v2/aida/03.webp",
+     "thumb": "dgy-assets/huace/img/aida-03-s.webp"
+    },
+    {
+     "no": 4,
+     "title": "厅上",
+     "narr": "宝玉连说不知琪官为何物，长史官只冷笑问一句，那红汗巾子怎么到了公子腰里。他登时轰去魂魄，只得说出紫檀堡来打发人走。一条汗巾，比十句分辩都重。",
+     "scene": "宝玉被叫到厅上，站在贾政面前哭着分辩；长史官冷笑着抬手指向宝玉腰间。宝玉一怔，目瞪口呆，手不由自主按住腰带。贾政气得胡须发抖。中景，三人成三角，宝玉居中。",
+     "chapter": 33,
+     "paragraph": 2,
+     "highlights": [
+      "既雲不知此人，那紅汗巾子怎麼到了公子腰裡？」",
+      "寶玉聽了這話，不覺轟去魂魄，目瞪口呆，"
+     ],
+     "img": "dgy-assets/huace/img/aida-04.webp",
+     "place": "园外·荣国府厅上",
+     "placeId": null,
+     "season": "盛夏",
+     "loop": null,
+     "src": "dgy-assets/album-v2/aida/04.webp",
+     "thumb": "dgy-assets/huace/img/aida-04-s.webp"
+    },
+    {
+     "no": 5,
+     "title": "厅上",
+     "narr": "长史官前脚走，贾环后脚撞上来，先说井里淹死了丫头，再扯住袍襟贴膝跪下。回头四顾一看，才悄悄说出「拉著太太的丫頭金釧兒強奸不遂」。回目叫「小動唇舌」，唇舌虽小，板子却大。",
+     "scene": "贾政送客回身，满面怒容；贾环扯住他的袍襟贴膝跪下，回头四顾，凑近压低嗓子说话。几个小厮会意，往两边后面退去。贾环少年常服，色暗于宝玉，神情鬼祟。中景，贾环在前景。",
+     "chapter": 33,
+     "paragraph": 3,
+     "highlights": [
+      "賈環忙上前拉住賈政的袍襟，貼膝跪下道：「父親不用生氣。此事除太太房裡的人，別人一點也不知道。我聽見我母親說……」說到這里，便回頭四顧一看。",
+      "賈環便悄悄說道：「我母親告訴我說，寶玉哥哥前日在太太屋裡，拉著太太的丫頭金釧兒強奸不遂，打了一頓。那金釧兒便賭氣投井死了。」"
+     ],
+     "img": "dgy-assets/huace/img/aida-05.webp",
+     "place": "园外·荣国府厅上",
+     "placeId": null,
+     "season": "盛夏",
+     "loop": null,
+     "src": "dgy-assets/album-v2/aida/05.webp",
+     "thumb": "dgy-assets/huace/img/aida-05-s.webp"
+    },
+    {
+     "no": 6,
+     "title": "书房",
+     "narr": "贾政气得面如金纸，坐在椅子上一叠声喝「拿寶玉！拿大棍！拿索子捆上」。门客们啖指咬舌，连忙退出。做父亲的满面泪痕下令打儿子，可知这一棍先打在他自己心上。",
+     "scene": "书房里，贾政直挺挺坐在椅上，喘吁吁满面泪痕，一手拍着扶手连声喝令；门客们咬指吐舌，纷纷退出门外；几个小厮应声往外跑。门窗外夏日刺眼。中景，贾政居中，众人向外散。",
+     "chapter": 33,
+     "paragraph": 3,
+     "highlights": [
+      "那賈政喘吁吁直挺挺坐在椅子上，滿面淚痕，一疊聲「拿寶玉！拿大棍！拿索子捆上！把各門都關上！有人傳信往裡頭去，立刻打死！」"
+     ],
+     "img": "dgy-assets/huace/img/aida-06.webp",
+     "place": "园外·荣国府书房",
+     "placeId": null,
+     "season": "盛夏",
+     "loop": null,
+     "src": "dgy-assets/album-v2/aida/06.webp",
+     "thumb": "dgy-assets/huace/img/aida-06-s.webp"
+    },
+    {
+     "no": 7,
+     "title": "厅上",
+     "narr": "偏生焙茗不在，好容易撞见一个老姆姆，宝玉拉住她说「要緊，要緊」，她偏听作了跳井。还笑他「跳井讓他跳去，二爺怕什麼」。可笑处正是可怕处，金钏的死在府里已成了一句闲话。",
+     "scene": "厅上，宝玉急得跺脚，一把拉住一个白发老姆姆的衣袖，凑在她耳边大声说话；老姆姆侧着耳朵，满脸笑意，摆手不以为然。四下再无别人，廊外日光白亮。中近景，一急一笑。",
+     "chapter": 33,
+     "paragraph": 4,
+     "highlights": [
+      "寶玉一則急了，說話不明白，二則老婆子偏生又聾，竟不曾聽見是什麼話，把「要緊」二字只聽作「跳井」二字，便笑道：「跳井讓他跳去，二爺怕什麼？」"
+     ],
+     "img": "dgy-assets/huace/img/aida-07.webp",
+     "place": "园外·荣国府厅上",
+     "placeId": null,
+     "season": "盛夏",
+     "loop": null,
+     "src": "dgy-assets/album-v2/aida/07.webp",
+     "thumb": "dgy-assets/huace/img/aida-07-s.webp"
+    },
+    {
+     "no": 8,
+     "title": "书房",
+     "narr": "小厮们打了十来下，贾政还嫌轻，一脚踢开掌板的，自己夺过来咬着牙狠命盖了三四十下。门客们上前夺劝，反被他一句「釀到他弒君殺父」顶了回去。打的是儿子，恨的是这些年没管住的一切。",
+     "scene": "书房里，宝玉被按在长凳上，嘴已堵住；贾政一脚踢开掌板的小厮，自己夺过大板，咬牙高高举起，浅灰蓝袍下摆飞起。门客们上前要拦又不敢。中景，动势强烈，色调压暗。",
+     "chapter": 33,
+     "paragraph": 5,
+     "highlights": [
+      "小廝們不敢違拗，只得將寶玉按在凳上，舉起大板打了十來下。賈政猶嫌打輕了，一腳踢開掌板的，自己奪過來，咬著牙狠命蓋了三四十下。"
+     ],
+     "img": "dgy-assets/huace/img/aida-08.webp",
+     "place": "园外·荣国府书房",
+     "placeId": null,
+     "season": "盛夏",
+     "loop": null,
+     "src": "dgy-assets/album-v2/aida/08.webp",
+     "thumb": "dgy-assets/huace/img/aida-08-s.webp"
+    },
+    {
+     "no": 9,
+     "title": "书房",
+     "narr": "王夫人顾不得有人没人，赶进书房一把抱住板子。她说「寶玉雖然該打，老爺也要自重」，又说炎天暑日，老太太身上不好。这是这一回里头一句软话，可惜软话总来迟一步。",
+     "scene": "王夫人湘黄褙子，鬓发微乱，冲进书房死死抱住贾政手里的板子，满脸是泪；按人的两个小厮已松手退开，宝玉趴在凳上动弹不得。贾政举板的手僵在半空。近景，三人纠在一处。",
+     "chapter": 33,
+     "paragraph": 6,
+     "highlights": [
+      "賈政還欲打時，早被王夫人抱住板子。賈政道：「罷了，罷了！今日必定要氣死我才罷！」王夫人哭道：「寶玉雖然該打，老爺也要自重。況且炎天暑日的，老太太身上也不大好，打死寶玉事小，倘或老太太一時不自在了，豈不事大！」"
+     ],
+     "img": "dgy-assets/huace/img/aida-09.webp",
+     "place": "园外·荣国府书房",
+     "placeId": null,
+     "season": "盛夏",
+     "loop": null,
+     "src": "dgy-assets/album-v2/aida/09.webp",
+     "thumb": "dgy-assets/huace/img/aida-09-s.webp"
+    },
+    {
+     "no": 10,
+     "title": "书房",
+     "narr": "绿纱小衣上全是血渍，由臀至胫，竟无一点好处。王夫人哭出一声苦命儿，忽又想起贾珠，叫着贾珠的名字哭。别人还可，惟有李纨放声哭了，她哭的是自己早死的丈夫。",
+     "scene": "王夫人伏在凳边抱着宝玉，宝玉面白气弱，下身一条绿纱小衣浸满血渍；王夫人解下汗巾看伤，失声大哭。身后李纨天蓝褙子、凤姐大红窄袄、迎春姊妹赶进门来，李纨以帕掩面。中景。",
+     "chapter": 33,
+     "paragraph": 6,
+     "highlights": [
+      "王夫人抱著寶玉，只見他面白氣弱，底下穿著一條綠紗小衣皆是血漬，禁不住解下汗巾看，由臀至脛，或青或紫，或整或破，竟無一點好處，不覺失聲大哭起來，「苦命的兒嚇！」",
+      "王夫人哭著賈珠的名字，別人還可，惟有宮裁禁不住也放聲哭了。"
+     ],
+     "img": "dgy-assets/huace/img/aida-10.webp",
+     "place": "园外·荣国府书房",
+     "placeId": null,
+     "season": "盛夏",
+     "loop": null,
+     "src": "dgy-assets/album-v2/aida/10.webp",
+     "thumb": "dgy-assets/huace/img/aida-10-s.webp"
+    },
+    {
+     "no": 11,
+     "title": "书房窗外",
+     "narr": "一句话未了，窗外颤巍巍一声「先打死我，再打死他，豈不乾淨了」。贾政连忙迎出来，躬身陪笑说大暑热天何必亲自走来。满屋人劝不住的，老祖宗一句话便劝住了。",
+     "scene": "书房窗外廊下，贾母银灰蓝宽袖褂、满头银发，扶着丫鬟喘吁吁颤巍巍赶来，满脸怒容；贾政慌忙迎出门，躬身陪笑。门内隐约是哭成一团的众人。中景，贾母居高，贾政躬身在低处。",
+     "chapter": 33,
+     "paragraph": 6,
+     "highlights": [
+      "一句話未了，只聽窗外顫巍巍的聲氣說道：「先打死我，再打死他，豈不乾淨了！」",
+      "賈政見他母親來了，又急又痛，連忙迎接出來，只見賈母扶著丫頭，喘吁吁的走來。"
+     ],
+     "img": "dgy-assets/huace/img/aida-11.webp",
+     "place": "园外·荣国府书房外",
+     "placeId": null,
+     "season": "盛夏",
+     "loop": null,
+     "src": "dgy-assets/album-v2/aida/11.webp",
+     "thumb": "dgy-assets/huace/img/aida-11-s.webp"
+    },
+    {
+     "no": 12,
+     "title": "书房外",
+     "narr": "贾政跪下说教训儿子为光宗耀祖，贾母啐他一口，「當初你父親怎麼教訓你來」。说着便要看轿马回南京去，贾政只得苦苦叩求认罪。一家之主跪在地上，这是贾府最大的一条规矩。",
+     "scene": "贾政跪在贾母面前含泪叩头，贾母扶着丫鬟立着，一面落泪一面厉声说话；后面凤姐大红窄袄，指着媳妇们抬出藤屉春凳，众人七手八脚把宝玉抬上去。中景，前跪后忙。",
+     "chapter": 33,
+     "paragraph": 6,
+     "highlights": [
+      "賈母聽說，便啐了一口，說道：「我說一句話，你就禁不起，你那樣下死手的板子，難道寶玉就禁得起了？你說教訓兒子是光宗耀祖，當初你父親怎麼教訓你來！」",
+      "還不快進去把那藤屜子春凳抬出來呢。」"
+     ],
+     "img": "dgy-assets/huace/img/aida-12.webp",
+     "place": "园外·荣国府书房外",
+     "placeId": null,
+     "season": "盛夏",
+     "loop": null,
+     "src": "dgy-assets/album-v2/aida/12.webp",
+     "thumb": "dgy-assets/huace/img/aida-12-s.webp"
+    },
+    {
+     "no": 13,
+     "title": "怡红院",
+     "narr": "宝钗托着一丸药进来，嘱咐用酒研开敷上。说到「早聽人一句話，也不至今日」，又忙咽住，红了脸低下头去。话只说了半句，宝玉倒把疼痛丢在了九霄云外。",
+     "scene": "怡红院卧房，宝玉趴卧床上，身上盖一床袷纱被；宝钗粉紫织金交领衫，手心托着一丸药立在床前说话，说到半句忽然红了脸，低头摆弄衣带；袭人玫粉袄在旁伸手接药。近景，药丸为焦点。",
+     "chapter": 34,
+     "paragraph": 0,
+     "highlights": [
+      "只見寶釵手裡托著一丸藥走進來，向襲人說道：「晚上把這藥用酒研開，替他敷上，把那淤血的熱毒散開，可以就好了。」",
+      "寶釵見他睜開眼說話，不象先時，心中也寬慰了好些，便點頭歎道：「早聽人一句話，也不至今日。別說老太太，太太心疼，就是我們看著，心裡也疼。」剛說了半句又忙咽住，自悔說的話急了，不覺的就紅了臉，低下頭來。"
+     ],
+     "img": "dgy-assets/huace/img/aida-13.webp",
+     "place": "怡红院",
+     "placeId": "yihong",
+     "season": "盛夏",
+     "loop": null,
+     "src": "dgy-assets/album-v2/aida/13.webp",
+     "thumb": "dgy-assets/huace/img/aida-13-s.webp"
+    },
+    {
+     "no": 14,
+     "title": "怡红院",
+     "narr": "宝玉醒来，见她两个眼睛肿得桃儿一般，还哄她说是装出来的。她心中虽有万句言语，半日只抽噎出一句「你從此可都改了罷」。他答就便为这些人死了也是情愿，一劝一答，两个人的路都定了。",
+     "scene": "太阳刚落，怡红院床前。黛玉淡紫立领袄，坐在床沿，两眼肿得桃儿一般，满面泪光，抽抽噎噎；宝玉欠起半身细细认她，又疼得倒下。屋角通后院的小门虚掩。近景，暮色偏暖。",
+     "chapter": 34,
+     "paragraph": 2,
+     "highlights": [
+      "寶玉猶恐是夢，忙又將身子欠起來，向臉上細細一認，只見兩個眼睛腫的桃兒一般，滿面淚光，不是黛玉，卻是那個？",
+      "半日，方抽抽噎噎的說道：「你從此可都改了罷！」寶玉聽說，便長歎一聲道：「你放心，別說這樣話。就便為這些人死了，也是情願的！」"
+     ],
+     "img": "dgy-assets/huace/img/aida-14.webp",
+     "place": "怡红院",
+     "placeId": "yihong",
+     "season": "盛夏",
+     "loop": "dgy-assets/album-motion/loop-v2/aida-14.mp4",
+     "src": "dgy-assets/album-v2/aida/14.webp",
+     "thumb": "dgy-assets/huace/img/aida-14-s.webp"
+    }
+   ],
+   "oldMap": {
+    "0": 0,
+    "1": 0,
+    "2": 2,
+    "3": 4,
+    "4": 8,
+    "5": 9,
+    "6": 10,
+    "7": 13
+   },
+   "mood": "smoke",
+   "cover": 0
+  },
+  {
+   "id": "zhengmen",
+   "title": "正门初入",
+   "chapters": [
+    17
+   ],
+   "place": "gate",
+   "placeName": "正门",
+   "bg": "第十七回，回目「會芳園試才題對額　賈寶玉機敏動諸賓」。园子刚完工，贾政带清客和宝玉进园题匾。正门这一段只有看门、开门，题字从翠嶂上的镜面白石开始。",
+   "bgPz": "园子刚落成，贵妃未临，贾政领清客和宝玉先拟匾额。名为题园，实是考子。",
+   "source": "画册定稿",
+   "inscription": "",
+   "pages": [
+    {
+     "no": 1,
+     "title": "正门",
+     "narr": "「賈政道：「你且把園門都關上，我們先瞧了外面再進去。」賈珍聽說，命人將門關了。」题匾之前，先把园门关上，从外面看一遍。宝玉原是一溜烟要出园的，顶头撞上，「躲之不及」，只得一边站了。一园的匾额，都从这一躲不及里来。",
+     "scene": "白天，园门外的空场。贾政立在台阶前，抬手吩咐；贾珍侧身恭立听令；几个仆人把五开间的大门扇合上。宝玉带着奶娘小厮站在贾政身后侧，垂手低头（中景侧身，不要求认脸）。门前没有人喧哗。",
+     "chapter": 17,
+     "paragraph": 2,
+     "highlights": [
+      "賈政道：「你且把園門都關上，我們先瞧了外面再進去。」賈珍聽說，命人將門關了。"
+     ],
+     "img": "dgy-assets/huace/img/zhengmen-01.webp",
+     "place": "正门",
+     "placeId": "gate",
+     "season": "春日，天气和暖",
+     "loop": null,
+     "src": "dgy-assets/album/zhengmen/01.webp",
+     "thumb": "dgy-assets/huace/img/zhengmen-01-s.webp"
+    },
+    {
+     "no": 2,
+     "title": "正门",
+     "narr": "「只見正門五間，上面桶瓦泥鰍脊，那門欄窗槅，皆是細雕新鮮花樣，並無朱粉塗飾，一色水磨群牆，下面白石臺磯，鑿成西番草花樣。」大门不走朱门金钉那一路：细雕，不涂朱粉，台基上凿的是西番草花。细雕而不施彩，钱都花在看不见的刀工上。富贵人家最贵的一种俭省，便是这扇门。",
+     "scene": "正门五间近景：桶瓦泥鳅脊的屋顶；门框窗槅细雕新鲜花样，不涂朱红；粉墙水磨砖，下面白石台基，凿出西番草花样。台阶前没有人。",
+     "chapter": 17,
+     "paragraph": 2,
+     "highlights": [
+      "只見正門五間，上面桶瓦泥鰍脊，那門欄窗槅，皆是細雕新鮮花樣，並無朱粉塗飾，一色水磨群牆，下面白石臺磯，鑿成西番草花樣。"
+     ],
+     "img": "dgy-assets/huace/img/zhengmen-02.webp",
+     "place": "正门",
+     "placeId": "gate",
+     "season": "春日，天气和暖",
+     "loop": null,
+     "src": "dgy-assets/album/zhengmen/02.webp",
+     "thumb": "dgy-assets/huace/img/zhengmen-02-s.webp"
+    },
+    {
+     "no": 3,
+     "title": "正门",
+     "narr": "「左右一望，皆雪白粉牆，下面虎皮石，隨勢砌去，果然不落富麗俗套，自是歡喜。」他欢喜的是不落富丽俗套。贾政这一喜，喜在不俗。他一路骂宝玉，也是怕俗；偏生宝玉题的，处处比清客们不俗。",
+     "scene": "贾政站在台阶上左右看：雪白粉墙，下面砌着虎皮石，随着地势砌去。他微微点头，神色放松；贾珍和清客在后面等着。",
+     "chapter": 17,
+     "paragraph": 2,
+     "highlights": [
+      "左右一望，皆雪白粉牆，下面虎皮石，隨勢砌去，果然不落富麗俗套，自是歡喜。"
+     ],
+     "img": "dgy-assets/huace/img/zhengmen-03.webp",
+     "place": "正门",
+     "placeId": "gate",
+     "season": "春日，天气和暖",
+     "loop": null,
+     "src": "dgy-assets/album/zhengmen/03.webp",
+     "thumb": "dgy-assets/huace/img/zhengmen-03-s.webp"
+    },
+    {
+     "no": 4,
+     "title": "正门",
+     "narr": "「遂命開門，只見迎面一帶翠嶂擋在前面。」门一开先看见山，看不见园子。山的细部在「曲径通幽」册。门开了，园子还藏着，头一眼只给一座山。好比这部书开卷，先不说人，先说一块石头。",
+     "scene": "大门打开了。画面从门外看进去：门洞里迎面一座翠嶂，挡住了园里的景。贾政、宝玉和清客的背影立在门槛前（背影，不画玉）。",
+     "chapter": 17,
+     "paragraph": 2,
+     "highlights": [
+      "遂命開門，只見迎面一帶翠嶂擋在前面。"
+     ],
+     "img": "dgy-assets/huace/img/zhengmen-04.webp",
+     "place": "正门",
+     "placeId": "gate",
+     "season": "春日，天气和暖",
+     "loop": null,
+     "src": "dgy-assets/album/zhengmen/04.webp",
+     "thumb": "dgy-assets/huace/img/zhengmen-04-s.webp"
+    }
+   ],
+   "oldMap": {
+    "0": 0,
+    "1": 0,
+    "2": 1,
+    "3": 2,
+    "4": 3
+   },
+   "mood": "petal",
+   "cover": 0
+  },
+  {
+   "id": "gexing",
+   "title": "芦雪广割腥啖膻",
+   "chapters": [
+    49,
+    50
+   ],
+   "place": "luxue",
+   "placeName": "芦雪广",
+   "bg": "第四十九回回目「琉璃世界白雪紅梅　脂粉香娃割腥啖膻」，第五十回回目「蘆雪广爭聯即景詩　暖香塢創製春燈謎」。宝玉联句落第、罚去栊翠庵讨红梅，已在「栊翠庵品茶与乞梅」册，这里不重复。",
+   "bgPz": "第四十九、五十回，宝琴、岫烟、李纹李绮新来，园里人最齐。前八十回里，再没有比这更热闹的冬天。",
+   "source": "画册定稿",
+   "inscription": "",
+   "pages": [
+    {
+     "no": 1,
+     "title": "芦雪广",
+     "narr": "「原來這蘆雪庵蓋在傍山臨水河灘之上，一帶幾間，茅檐土壁，槿籬竹牖，推窗便可垂釣，四面都是蘆葦掩覆，一條去徑逶迤穿蘆度葦過去，便是藕香榭的竹橋了。」头一天李纨说稻香村不如这里，已经让人笼了地炕。联句和烤鹿肉都在这几间屋里和屋外。茅檐土壁，四面芦苇，是园里最荒的一处。这一冬最热闹的一场，偏摆在这里。",
+     "scene": "雪后清晨。傍山临水的河滩上，一带茅檐土壁的小屋，屋顶压着厚雪；槿篱竹窗；丫鬟婆子正在扫雪开径；一条小路穿过白头芦苇，通向远处的竹桥。窗外是水面。",
+     "chapter": 49,
+     "paragraph": 15,
+     "highlights": [
+      "原來這蘆雪庵蓋在傍山臨水河灘之上，一帶幾間，茅檐土壁，槿籬竹牖，推窗便可垂釣，四面都是蘆葦掩覆，一條去徑逶迤穿蘆度葦過去，便是藕香榭的竹橋了。"
+     ],
+     "img": "dgy-assets/huace/img/gexing-01.webp",
+     "place": "芦雪广",
+     "placeId": "luxue",
+     "season": "十月头场雪",
+     "loop": null,
+     "src": "dgy-assets/album/gexing/01.webp",
+     "thumb": "dgy-assets/huace/img/gexing-01-s.webp"
+    },
+    {
+     "no": 2,
+     "title": "芦雪广",
+     "narr": "「李紈等忙出來找著他兩個說道：「你們兩個要吃生的，我送你們到老太太那裡吃去。那怕吃一隻生鹿，撐病了不與我相干。這麼大雪，怪冷的，替我作禍呢。」寶玉笑道：「沒有的事，我們燒著吃呢。」李紈道：「這還罷了。」只見老婆們拿了鐵爐，鐵叉，鐵絲幪來，李紈道：「仔細割了手，不許哭！」」李婶看见他们商量着要吃生肉，说给了众人，李纨才出来找。湘云在贾母房里吃饭时就悄悄和宝玉说好，要一块鹿肉来园里“又顽又吃”。李纨嘴上撵他们去老太太那里吃，铁炉铁叉倒先送了来。这位寡嫂的管，是带着疼的管。",
+     "scene": "雪地里，李纨站在檐下，一手指着宝玉和湘云教训；老婆子抱着铁炉、铁叉、铁丝蒙走来；宝玉笑着摆手解释，湘云在他旁边抿嘴笑。",
+     "chapter": 49,
+     "paragraph": 18,
+     "highlights": [
+      "李紈等忙出來找著他兩個說道：「你們兩個要吃生的，我送你們到老太太那裡吃去。那怕吃一隻生鹿，撐病了不與我相干。這麼大雪，怪冷的，替我作禍呢。」寶玉笑道：「沒有的事，我們燒著吃呢。」李紈道：「這還罷了。」只見老婆們拿了鐵爐，鐵叉，鐵絲幪來，李紈道：「仔細割了手，不許哭！」"
+     ],
+     "img": "dgy-assets/huace/img/gexing-02.webp",
+     "place": "芦雪广",
+     "placeId": "luxue",
+     "season": "十月头场雪",
+     "loop": null,
+     "src": "dgy-assets/album/gexing/02.webp",
+     "thumb": "dgy-assets/huace/img/gexing-02-s.webp"
+    },
+    {
+     "no": 3,
+     "title": "芦雪广",
+     "narr": "「湘雲一面吃，一面說道：「我吃這個方愛吃酒，吃了酒才有詩。若不是這鹿肉，今兒斷不能作詩。」」平儿那只镯子吃完才发现丢了，凤姐说“不出三日包管就有”。湘云的道理是：吃了鹿肉才爱吃酒，吃了酒才有诗。平儿褪镯子最不经意。那只虾须镯，后来查出是怡红院的坠儿拿的，晴雯病中撵了她（第52回）。",
+     "scene": "雪地里生着铁炉，宝玉蹲着用铁叉烤肉，湘云一手拿着烤好的肉，边吃边说话；平儿挽着袖子蹲在炉边，褪下的镯子放在一旁石头上。远处宝琴披着凫靥裘笑着站着看，宝钗黛玉并肩立在后面，侧身，不要求认脸。",
+     "chapter": 49,
+     "paragraph": 19,
+     "highlights": [
+      "湘雲一面吃，一面說道：「我吃這個方愛吃酒，吃了酒才有詩。若不是這鹿肉，今兒斷不能作詩。」"
+     ],
+     "img": "dgy-assets/huace/img/gexing-03.webp",
+     "place": "芦雪广",
+     "placeId": "luxue",
+     "season": "十月头场雪",
+     "loop": null,
+     "src": "dgy-assets/album/gexing/03.webp",
+     "thumb": "dgy-assets/huace/img/gexing-03-s.webp"
+    },
+    {
+     "no": 4,
+     "title": "芦雪广",
+     "narr": "「黛玉笑道：「那裡找這一群花子去！罷了，罷了，今日蘆雪庵遭劫，生生被雲丫頭作踐了。我為蘆雪庵一大哭！」湘雲冷笑道：「你知道什麼！『是真名士自風流』，你們都是假清高，最可厭的。我們這會子腥膻大吃大嚼，回來卻是錦心繡口。」寶釵笑道：「你回來若作的不好了，把那肉掏了出來，就把這雪壓的蘆葦子揌上些，以完此劫。」」宝钗的意思是：你要是作不好，就把肉掏出来，塞进被雪压着的芦苇里，算了结这场劫。黛玉骂花子，湘云回真名士，宝钗这一句最毒也最好笑：诗作不好，连吃下去的肉都要退回来。",
+     "scene": "凤姐披着斗篷走来，凑在炉边也吃，背影，不要求认脸；黛玉笑着用手帕掩口、手指湘云，湘云冷笑着抬下巴；宝钗抿嘴笑。",
+     "chapter": 49,
+     "paragraph": 19,
+     "highlights": [
+      "黛玉笑道：「那裡找這一群花子去！罷了，罷了，今日蘆雪庵遭劫，生生被雲丫頭作踐了。我為蘆雪庵一大哭！」湘雲冷笑道：「你知道什麼！『是真名士自風流』，你們都是假清高，最可厭的。我們這會子腥膻大吃大嚼，回來卻是錦心繡口。」寶釵笑道：「你回來若作的不好了，把那肉掏了出來，就把這雪壓的蘆葦子揌上些，以完此劫。」"
+     ],
+     "img": "dgy-assets/huace/img/gexing-04.webp",
+     "place": "芦雪广",
+     "placeId": "luxue",
+     "season": "十月头场雪",
+     "loop": null,
+     "src": "dgy-assets/album/gexing/04.webp",
+     "thumb": "dgy-assets/huace/img/gexing-04-s.webp"
+    },
+    {
+     "no": 5,
+     "title": "芦雪广",
+     "narr": "「湘雲伏著已笑軟了。眾人看他三人對搶，也都不顧作詩，看著也只是笑。黛玉還推他往下聯，又道：「你也有才盡之時。我聽聽還有什麼舌根嚼了！」湘雲只伏在寶釵懷裡，笑個不住。寶釵推他起來道：「你有本事，把『二蕭』的韻全用完了，我才伏你。」湘雲起身笑道：「我也不是作詩，竟是搶命呢。」」题目是「即景联句，五言排律一首，限二萧韵」，贴在墙上。湘云自己说“不是作诗，竟是抢命”。这一冬湘云执意要和宝钗一处住（第49回）。抢命抢到末了，还是往宝姐姐怀里一伏。",
+     "scene": "地炕屋里，墙上贴着一张空白的题纸条，杯盘果菜已摆齐。湘云笑得伏在宝钗怀里，站不直；黛玉伸手推她往下联。",
+     "chapter": 50,
+     "paragraph": 86,
+     "highlights": [
+      "湘雲伏著已笑軟了。眾人看他三人對搶，也都不顧作詩，看著也只是笑。黛玉還推他往下聯，又道：「你也有才盡之時。我聽聽還有什麼舌根嚼了！」湘雲只伏在寶釵懷裡，笑個不住。寶釵推他起來道：「你有本事，把『二蕭』的韻全用完了，我才伏你。」湘雲起身笑道：「我也不是作詩，竟是搶命呢。」"
+     ],
+     "img": "dgy-assets/huace/img/gexing-05.webp",
+     "place": "芦雪广",
+     "placeId": "luxue",
+     "season": "十月头场雪",
+     "loop": null,
+     "src": "dgy-assets/album/gexing/05.webp",
+     "thumb": "dgy-assets/huace/img/gexing-05-s.webp"
+    }
+   ],
+   "oldMap": {
+    "0": 0,
+    "1": 0,
+    "2": 1,
+    "3": 2,
+    "4": 3,
+    "5": 4
+   },
+   "mood": "smoke",
+   "cover": 0
+  },
+  {
+   "id": "zhouru",
+   "title": "舟入花溆",
+   "chapters": [
+    18,
+    40
+   ],
+   "place": "huaxu",
+   "placeName": "蓼汀花溆",
+   "bg": "前四幅是第十八回省亲夜，页面回目「林黛玉誤剪香囊袋　賈元春歸省慶元宵」；末幅是第四十回，回目「史太君兩宴大觀園　金鴛鴦三宣牙牌令」，贾母带人坐船，宝玉一船行到花溆的萝港下。第十七回宝玉题「蓼汀花漵」，贾政当时说“胡说”。",
+   "bgPz": "一处水口，看了两回：一回灯火通明，一回衰草残菱。同一个萝港，热的时候是贵妃的，冷的时候是姑娘们的。",
+   "source": "画册定稿",
+   "inscription": "",
+   "pages": [
+    {
+     "no": 1,
+     "title": "蓼汀花溆",
+     "narr": "「忽又見執拂太監跪請登舟，賈妃乃下輿。只見清流一帶，勢如游龍，兩邊石欄上，皆係水晶玻璃各色風燈，點的如銀花雪浪」这是进石港之前的水面，下一幅才进港。灯火到这里，作者反收了笔，说恐「入了別書的俗套」。写得最省的，正是最阔的一夜。",
+     "scene": "夜里，元春下轿登舟，凤冠、明黄；两岸石栏上挂着水晶玻璃风灯，亮得如银花雪浪；船在一带清流上缓行。",
+     "chapter": 18,
+     "paragraph": 9,
+     "highlights": [
+      "忽又見執拂太監跪請登舟，賈妃乃下輿。只見清流一帶，勢如游龍，兩邊石欄上，皆係水晶玻璃各色風燈，點的如銀花雪浪"
+     ],
+     "img": "dgy-assets/huace/img/zhouru-01.webp",
+     "place": "蓼汀花溆",
+     "placeId": "huaxu",
+     "season": "第18回正月十五夜；第40回秋天",
+     "loop": null,
+     "src": "dgy-assets/album/zhouru/01.webp",
+     "thumb": "dgy-assets/huace/img/zhouru-01-s.webp"
+    },
+    {
+     "no": 2,
+     "title": "蓼汀花溆",
+     "narr": "「上面柳杏諸樹雖無花葉，然皆用通草綢綾紙絹依勢作成，粘於枝上的，每一株懸燈數盞，更兼池中荷荇鳧鷺之屬，亦皆係螺蚌羽毛之類作就的。」假花是这一夜的灯饰，不是树本身开了花。元宵时节柳杏无花，就拿绸绢粘上去。这园子头一回见贵人，满树开的是假花。",
+     "scene": "岸上柳树、杏树没有花叶，枝上用通草、绸绫、纸绢做成假花假叶，每株挂灯数盏；池中荷荇凫鹭是螺蚌羽毛做的，在灯光里闪着光。",
+     "chapter": 18,
+     "paragraph": 9,
+     "highlights": [
+      "上面柳杏諸樹雖無花葉，然皆用通草綢綾紙絹依勢作成，粘於枝上的，每一株懸燈數盞，更兼池中荷荇鳧鷺之屬，亦皆係螺蚌羽毛之類作就的。"
+     ],
+     "img": "dgy-assets/huace/img/zhouru-02.webp",
+     "place": "蓼汀花溆",
+     "placeId": "huaxu",
+     "season": "第18回正月十五夜；第40回秋天",
+     "loop": null,
+     "src": "dgy-assets/album/zhouru/02.webp",
+     "thumb": "dgy-assets/huace/img/zhouru-02-s.webp"
+    },
+    {
+     "no": 3,
+     "title": "蓼汀花溆",
+     "narr": "「已而入一石港，港上一面匾燈，明現著「蓼汀花漵」四字。」这四个字是第十七回宝玉题的。试才那天贾政批它胡说，今夜还是做成匾灯挂在港口。宝玉三四岁时的书，原是元春「手引口傳」教的。",
+     "scene": "船进一座石港。港口上方悬着一面匾灯，灯面空白（不画字）；萝薜倒垂在洞口，灯影落水。",
+     "chapter": 18,
+     "paragraph": 9,
+     "highlights": [
+      "已而入一石港，港上一面匾燈，明現著「蓼汀花漵」四字。"
+     ],
+     "img": "dgy-assets/huace/img/zhouru-03.webp",
+     "place": "蓼汀花溆",
+     "placeId": "huaxu",
+     "season": "第18回正月十五夜；第40回秋天",
+     "loop": null,
+     "src": "dgy-assets/album/zhouru/03.webp",
+     "thumb": "dgy-assets/huace/img/zhouru-03-s.webp"
+    },
+    {
+     "no": 4,
+     "title": "蓼汀花溆",
+     "narr": "「賈妃看了四字，笑道：「『花漵』二字便妥，何必，『蓼汀』？」侍座太監聽了，忙下小舟登岸，飛傳與賈政。賈政聽了，即忙移換。」元春只要「花漵」两个字，不要「蓼汀」。底本这句「何必」后面有逗号，照抄。换完匾，船才驶向内岸的省亲别墅。删两个字，太监便下船飞传，一家子半夜换匾。省亲的规矩，连一句笑谈也是旨意。",
+     "scene": "船舱里，元春看着匾灯，抬手说话；太监躬身，随即下到一条小舟划向岸边传话；岸上贾政忙叫人换匾。",
+     "chapter": 18,
+     "paragraph": 11,
+     "highlights": [
+      "賈妃看了四字，笑道：「『花漵』二字便妥，何必，『蓼汀』？」侍座太監聽了，忙下小舟登岸，飛傳與賈政。賈政聽了，即忙移換。"
+     ],
+     "img": "dgy-assets/huace/img/zhouru-04.webp",
+     "place": "蓼汀花溆",
+     "placeId": "huaxu",
+     "season": "第18回正月十五夜；第40回秋天",
+     "loop": null,
+     "src": "dgy-assets/album/zhouru/04.webp",
+     "thumb": "dgy-assets/huace/img/zhouru-04-s.webp"
+    },
+    {
+     "no": 5,
+     "title": "蓼汀花溆",
+     "narr": "「林黛玉道：「我最不喜歡李義山的詩，只喜他這一句：『留得殘荷聽雨聲』。偏你們又不留著殘荷了。」寶玉道：「果然好句，以後咱們就別叫人拔去了。」說著已到了花漵的蘿港之下，覺得陰森透骨，兩灘上衰草殘菱，更助秋情。」黛玉要留着残荷听雨声，宝玉说以后就别叫人拔了。船随后在蘅芜苑前靠岸。省亲那夜，这池里是羽毛扎的荷，灯照得通明；如今真荷残了，黛玉倒要留着听雨。",
+     "scene": "秋日白天，一只棠木舫驶近萝港：石洞口萝薜倒垂，阴森；岸边衰草残菱，水面破荷叶。船里黛玉抬头望着残荷，宝玉回话，宝钗在旁；迎春探春惜春坐在船尾，侧身。",
+     "chapter": 40,
+     "paragraph": 11,
+     "highlights": [
+      "林黛玉道：「我最不喜歡李義山的詩，只喜他這一句：『留得殘荷聽雨聲』。偏你們又不留著殘荷了。」寶玉道：「果然好句，以後咱們就別叫人拔去了。」說著已到了花漵的蘿港之下，覺得陰森透骨，兩灘上衰草殘菱，更助秋情。"
+     ],
+     "img": "dgy-assets/huace/img/zhouru-05.webp",
+     "place": "蓼汀花溆",
+     "placeId": "huaxu",
+     "season": "第18回正月十五夜；第40回秋天",
+     "loop": null,
+     "src": "dgy-assets/album/zhouru/05.webp",
+     "thumb": "dgy-assets/huace/img/zhouru-05-s.webp"
+    }
+   ],
+   "oldMap": {
+    "0": 0,
+    "1": 0,
+    "2": 1,
+    "3": 2,
+    "4": 3,
+    "5": 4
+   },
+   "mood": "smoke",
+   "cover": 0
+  },
+  {
+   "id": "chufang",
+   "title": "柳家的厨房",
+   "chapters": [
+    61,
+    62
+   ],
+   "place": "kitchen",
+   "placeName": "园中厨房",
+   "bg": "第六十一回回目「投鼠忌器寶玉瞞贓　判冤決獄平兒行權」，第六十二回接写厨房交还。玫瑰露、茯苓霜的案子牵出厨房，判案在平儿那边，这册只留厨房里的几场。",
+   "bgPz": "玫瑰露原是彩云偷给贾环的，宝玉一口应了下来。平儿顺水推舟，怕的不是贼，是伤了探春的脸面。",
+   "source": "画册定稿",
+   "inscription": "",
+   "pages": [
+    {
+     "no": 1,
+     "title": "园中厨房",
+     "narr": "「一面來至廚房，——雖有幾個同伴的人，他們都不敢自專，單等他來調停分派——一面問眾人：「五丫頭那去了？」」迎春房的莲花儿接着来要一碗嫩嫩的炖鸡蛋。柳家的说鸡蛋短，莲花儿翻出菜箱里的鸡蛋，吵了起来。她一进门先问五丫头，心里挂着女儿进怡红院的事。后头的玫瑰露、茯苓霜，都是从这一问里牵出来的。",
+     "scene": "柳家的推门进了厨房：灶台、菜箱、案板；几个同伴站着不敢自作主张，等她分派；她一边问五丫头去哪了，一边按房头分菜。",
+     "chapter": 61,
+     "paragraph": 1,
+     "highlights": [
+      "一面來至廚房，——雖有幾個同伴的人，他們都不敢自專，單等他來調停分派——一面問眾人：「五丫頭那去了？」"
+     ],
+     "img": "dgy-assets/huace/img/chufang-01.webp",
+     "place": "园中厨房",
+     "placeId": "kitchen",
+     "season": "初夏",
+     "loop": null,
+     "src": "dgy-assets/album/chufang/01.webp",
+     "thumb": "dgy-assets/huace/img/chufang-01-s.webp"
+    },
+    {
+     "no": 2,
+     "title": "园中厨房",
+     "narr": "「司棋便喝命小丫頭子動手，「凡箱櫃所有的菜蔬，只管丟出去餵狗，大家賺不成。」小丫頭子們巴不得一聲，七手八腳搶上去，一頓亂翻亂擲的。」莲花儿回去添油加醋，司棋才起火。主子是人称二木头的迎春（第65回），大丫头倒最泼辣。主子不出头，司棋便替她出头。",
+     "scene": "厨房里人正在吃饭，司棋带着小丫头闯进来，喝命把菜丢出去喂狗；小丫头们七手八脚翻箱倒柜，菜蔬撒了一地；几个人拉的拉、劝的劝。",
+     "chapter": 61,
+     "paragraph": 2,
+     "highlights": [
+      "司棋便喝命小丫頭子動手，「凡箱櫃所有的菜蔬，只管丟出去餵狗，大家賺不成。」小丫頭子們巴不得一聲，七手八腳搶上去，一頓亂翻亂擲的。"
+     ],
+     "img": "dgy-assets/huace/img/chufang-02.webp",
+     "place": "园中厨房",
+     "placeId": "kitchen",
+     "season": "初夏",
+     "loop": null,
+     "src": "dgy-assets/album/chufang/02.webp",
+     "thumb": "dgy-assets/huace/img/chufang-02-s.webp"
+    },
+    {
+     "no": 3,
+     "title": "园中厨房",
+     "narr": "「柳家的只好摔碗丟盤自己咕嘟了一回，蒸了一碗蛋令人送去。司棋全潑了地下了。」司棋闹过一场，被劝走了。这碗蛋是补上的，仍然被泼。柳家的嘴里嘟囔，手上还是蒸了，算是认了错；司棋连认错也不收。一碗鸡蛋，泼的是二姑娘屋里的体面。",
+     "scene": "人散了。柳家的自己摔碗丢盘，嘟囔着，还是蒸了一碗蛋让人送去；送去的人回来，站在门口低头不敢说话，地上有一团泼了的蛋。",
+     "chapter": 61,
+     "paragraph": 2,
+     "highlights": [
+      "柳家的只好摔碗丟盤自己咕嘟了一回，蒸了一碗蛋令人送去。司棋全潑了地下了。"
+     ],
+     "img": "dgy-assets/huace/img/chufang-03.webp",
+     "place": "园中厨房",
+     "placeId": "kitchen",
+     "season": "初夏",
+     "loop": null,
+     "src": "dgy-assets/album/chufang/03.webp",
+     "thumb": "dgy-assets/huace/img/chufang-03-s.webp"
+    },
+    {
+     "no": 4,
+     "title": "园中厨房",
+     "narr": "「那秦顯家的好容易等了這個空子鑽了來，只興頭上半天。在廚房內正亂著接收傢伙米糧煤炭等物，又查出許多虧空來，說：「粳米短了兩石，常用米又多支了一個月的，炭也欠著額數。」」柳家的母女被带走之后，秦显家的趁空子顶了差事，只得意了半天。她来得快，账上的窟窿露得也快。一个厨房，人人都盯着这点油水。",
+     "scene": "厨房里，秦显家的在接收锅盆、米、炭，手忙脚乱，账本摊在案上；旁边的人念着短了两石粳米、多支了一个月的常用米、炭也欠着额数。",
+     "chapter": 62,
+     "paragraph": 0,
+     "highlights": [
+      "那秦顯家的好容易等了這個空子鑽了來，只興頭上半天。在廚房內正亂著接收傢伙米糧煤炭等物，又查出許多虧空來，說：「粳米短了兩石，常用米又多支了一個月的，炭也欠著額數。」"
+     ],
+     "img": "dgy-assets/huace/img/chufang-04.webp",
+     "place": "园中厨房",
+     "placeId": "kitchen",
+     "season": "初夏",
+     "loop": null,
+     "src": "dgy-assets/album/chufang/04.webp",
+     "thumb": "dgy-assets/huace/img/chufang-04-s.webp"
+    },
+    {
+     "no": 5,
+     "title": "园中厨房",
+     "narr": "「正亂著，忽有人來說與他：「看過這早飯就出去罷。柳嫂兒原無事，如今還交與他管了。」秦顯家的聽了，轟去魂魄，垂頭喪氣，登時掩旗息鼓，卷包而出。」平儿说“大事化为小事，小事化为没事”，让柳家的母女照旧当差。秦显家的送出去的礼白丢了，还要折变了赔补亏空。送出去的礼白丢了，还要赔亏空。厨房这个差事，进得去的未必坐得住，全看平儿一句话。",
+     "scene": "秦显家的正请同事们吃饭、摆着菜蔬；有人进门说话，她听了脸色发白，垂头丧气，收拾包袱往外走。",
+     "chapter": 62,
+     "paragraph": 0,
+     "highlights": [
+      "正亂著，忽有人來說與他：「看過這早飯就出去罷。柳嫂兒原無事，如今還交與他管了。」秦顯家的聽了，轟去魂魄，垂頭喪氣，登時掩旗息鼓，卷包而出。"
+     ],
+     "img": "dgy-assets/huace/img/chufang-05.webp",
+     "place": "园中厨房",
+     "placeId": "kitchen",
+     "season": "初夏",
+     "loop": null,
+     "src": "dgy-assets/album/chufang/05.webp",
+     "thumb": "dgy-assets/huace/img/chufang-05-s.webp"
+    }
+   ],
+   "oldMap": {
+    "0": 0,
+    "1": 0,
+    "2": 1,
+    "3": 2,
+    "4": 3,
+    "5": 4
+   },
+   "mood": "smoke",
+   "cover": 0
+  },
+  {
+   "id": "gongdu",
+   "title": "共读西厢",
+   "chapters": [
+    23
+   ],
+   "place": "qinfangzha",
+   "placeName": "沁芳闸",
+   "bg": "第二十三回，搬进园子不久。宝玉在沁芳闸桥边桃花下偷看《会真记》，黛玉担着花锄来葬花，两人共读，又拌了嘴。葬花的花冢第一次出现就在这一回。",
+   "bgPz": "第二十三回，奉元春之命，宝玉和姐妹们搬进园子不久。进园头一桩风流事，是一本书、一树花。",
+   "source": "画册定稿",
+   "inscription": "",
+   "pages": [
+    {
+     "no": 1,
+     "title": "沁芳闸",
+     "narr": "「那一日正當三月中浣，早飯後，寶玉攜了一套《會真記》，走到沁芳閘橋邊桃花底下一塊石上坐著，展開《會真記》，從頭細玩。正看到「落紅成陣」」书是他带进园的。桥就是第十七回那座引水的闸桥。书是茗烟从书坊买来的，宝玉只挑「文理細密」的几套带进园，粗俗的都藏在外面书房里。",
+     "scene": "三月，沁芳闸桥边，桃花盛开，树下一块大石。宝玉坐在石上，展开一本书，低头细看（书页留空，不画字）。",
+     "chapter": 23,
+     "paragraph": 21,
+     "highlights": [
+      "那一日正當三月中浣，早飯後，寶玉攜了一套《會真記》，走到沁芳閘橋邊桃花底下一塊石上坐著，展開《會真記》，從頭細玩。正看到「落紅成陣」"
+     ],
+     "img": "dgy-assets/huace/img/gongdu-01.webp",
+     "place": "沁芳闸",
+     "placeId": "qinfangzha",
+     "season": "三月中浣，春",
+     "loop": null,
+     "src": "dgy-assets/album/gongdu/01.webp",
+     "thumb": "dgy-assets/huace/img/gongdu-01-s.webp"
+    },
+    {
+     "no": 2,
+     "title": "沁芳闸",
+     "narr": "「只見一陣風過，把樹頭上桃花吹下一大半來，落的滿身滿書滿地皆是。」他要抖花，又怕踩坏了落花。书上正读到落红成阵，树上就真落了一阵。曹公借一阵风，给西厢记添了一笔。",
+     "scene": "一阵风过，桃花落下大半，落了宝玉满身、满书、满地。他捧着书站起，想抖，又怕脚下踩坏花瓣。",
+     "chapter": 23,
+     "paragraph": 21,
+     "highlights": [
+      "只見一陣風過，把樹頭上桃花吹下一大半來，落的滿身滿書滿地皆是。"
+     ],
+     "img": "dgy-assets/huace/img/gongdu-02.webp",
+     "place": "沁芳闸",
+     "placeId": "qinfangzha",
+     "season": "三月中浣，春",
+     "loop": null,
+     "src": "dgy-assets/album/gongdu/02.webp",
+     "thumb": "dgy-assets/huace/img/gongdu-02-s.webp"
+    },
+    {
+     "no": 3,
+     "title": "沁芳闸",
+     "narr": "「寶玉要抖將下來，恐怕腳步踐踏了，只得兜了那花瓣，來至池邊，抖在池內。那花瓣浮在水面，飄飄蕩蕩，竟流出沁芳閘去了。」第二十七回他再来，兜的是凤仙、石榴，奔的就是第二十三回黛玉说的那个花冢。花随水出了沁芳闸，出园便是外头的人间。园里的东西，一出闸就由不得自己。",
+     "scene": "宝玉兜着一兜花瓣，走到池边抖进水里；花瓣浮在水面，飘飘荡荡，向沁芳闸口流去。",
+     "chapter": 23,
+     "paragraph": 21,
+     "highlights": [
+      "寶玉要抖將下來，恐怕腳步踐踏了，只得兜了那花瓣，來至池邊，抖在池內。那花瓣浮在水面，飄飄蕩蕩，竟流出沁芳閘去了。"
+     ],
+     "img": "dgy-assets/huace/img/gongdu-03.webp",
+     "place": "沁芳闸",
+     "placeId": "qinfangzha",
+     "season": "三月中浣，春",
+     "loop": null,
+     "src": "dgy-assets/album/gongdu/03.webp",
+     "thumb": "dgy-assets/huace/img/gongdu-03-s.webp"
+    },
+    {
+     "no": 4,
+     "title": "沁芳闸",
+     "narr": "「寶玉一回頭，卻是林黛玉來了，肩上擔著花鋤，鋤上掛著花囊，手內拿著花帚。寶玉笑道：「好，好，來把這個花掃起來，撂在那水裡。我才撂了好些在那裡呢。」林黛玉道：「撂在水裡不好。你看這里的水乾淨，只一流出去，有人家的地方髒的臭的混倒，仍舊把花遭塌了。那畸角上我有一個花冢，如今把他掃了，裝在這絹袋裡，拿土埋上，日久不過隨土化了，豈不乾淨。」」葬花从这里开始：花冢在“畸角上”。第二十七回芒种那天的哭诵，说的就是这个花冢。宝玉只想到别踩着，黛玉想到了流出去以后。她看花，向来比人多看一步。",
+     "scene": "黛玉从背后来，肩上担着花锄，锄上挂着花囊，手里拿着花帚；宝玉笑着回头；黛玉摇头，指着池水，说那水流出去会脏，要装进绢袋拿土埋了。",
+     "chapter": 23,
+     "paragraph": 22,
+     "highlights": [
+      "寶玉一回頭，卻是林黛玉來了，肩上擔著花鋤，鋤上掛著花囊，手內拿著花帚。寶玉笑道：「好，好，來把這個花掃起來，撂在那水裡。我才撂了好些在那裡呢。」林黛玉道：「撂在水裡不好。你看這里的水乾淨，只一流出去，有人家的地方髒的臭的混倒，仍舊把花遭塌了。那畸角上我有一個花冢，如今把他掃了，裝在這絹袋裡，拿土埋上，日久不過隨土化了，豈不乾淨。」"
+     ],
+     "img": "dgy-assets/huace/img/gongdu-04.webp",
+     "place": "沁芳闸",
+     "placeId": "qinfangzha",
+     "season": "三月中浣，春",
+     "loop": null,
+     "src": "dgy-assets/album/gongdu/04.webp",
+     "thumb": "dgy-assets/huace/img/gongdu-04-s.webp"
+    },
+    {
+     "no": 5,
+     "title": "沁芳闸",
+     "narr": "「寶玉笑道：「我就是個『多愁多病身』，你就是那『傾國傾城貌』。」林黛玉聽了，不覺帶腮連耳通紅，登時直豎起兩道似蹙非蹙的眉，瞪了兩只似睜非睜的眼，微腮帶怒，薄面含嗔，指寶玉道：「你這該死的胡說！好好的把這淫詞艷曲弄了來，還學了這些混話來欺負我。我告訴舅舅舅母去。」」《会真记》就是《西厢记》。黛玉随后被宝玉的赌咒逗得又笑了，还用戏词回他“银样镴枪头”。人没有离开这块石头。宝玉借戏词说真心，黛玉恼是恼，转眼又借戏词回他。两个人的真话，都得托戏文说出来。",
+     "scene": "两人还在桃花下。宝玉笑着说了那两句；黛玉红到耳朵，竖起眉毛，瞪着眼，伸手指着他，眼圈红了。",
+     "chapter": 23,
+     "paragraph": 24,
+     "highlights": [
+      "寶玉笑道：「我就是個『多愁多病身』，你就是那『傾國傾城貌』。」林黛玉聽了，不覺帶腮連耳通紅，登時直豎起兩道似蹙非蹙的眉，瞪了兩只似睜非睜的眼，微腮帶怒，薄面含嗔，指寶玉道：「你這該死的胡說！好好的把這淫詞艷曲弄了來，還學了這些混話來欺負我。我告訴舅舅舅母去。」"
+     ],
+     "img": "dgy-assets/huace/img/gongdu-05.webp",
+     "place": "沁芳闸",
+     "placeId": "qinfangzha",
+     "season": "三月中浣，春",
+     "loop": null,
+     "src": "dgy-assets/album/gongdu/05.webp",
+     "thumb": "dgy-assets/huace/img/gongdu-05-s.webp"
+    }
+   ],
+   "oldMap": {
+    "0": 0,
+    "1": 0,
+    "2": 1,
+    "3": 2,
+    "4": 3,
+    "5": 4
+   },
+   "mood": "petal",
+   "cover": 0
+  }
+ ]
+}

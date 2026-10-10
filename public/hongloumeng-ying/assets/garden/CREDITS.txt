@@ -1,0 +1,5 @@
+bamboo_clump.glb — "Bamboo" by arthur (https://sketchfab.com/Arthur_mf), CC BY 4.0, https://sketchfab.com/3d-models/bamboo-b2e6f889630e4ab593376a151836a3e1 — decimated, rescaled.
+banana_real.glb — "Banana tree" by Alnazir (https://sketchfab.com/Nzr.3d), CC BY 4.0, https://sketchfab.com/3d-models/banana-tree-3b658ecad29f4d9a9606dbf8fea7c9bb — decimated, rescaled.
+lotus_1.glb, lotus_2.glb — "CC0 Indian Lotus" by ffish.asia / floraZia.com, CC0.
+yew_card.webp — rendered from "CC0 Japanese Yew, P. macrophyllus" by ffish.asia / floraZia.com, CC0.
+Rocks, jacaranda, textures — Poly Haven, CC0.

@@ -1,0 +1,11 @@
+材质：虎皮石
+目录：hupishi
+来源：Poly Haven「Rock Wall 14」
+URL：https://polyhaven.com/a/rock_wall_14
+作者：Dimitrios Savva
+授权：CC0 1.0（公有领域，可商用，无需署名；仍如实标注）
+下载日期：2026-10-09
+处理：原贴图是黄色灰缝嵌深色卵石的毛石墙，仅微调饱和度与亮度。
+真实尺寸：约 1.80 米见方（原素材标注）
+用途：园墙墙基、山石驳岸的石砌基座、稻香村农舍墙基、蘅芜苑山石台基（黄泥缝里嵌深色卵石）。
+规格：1024×1024 webp，可平铺；color=sRGB；normal=OpenGL(Y+，three.js 默认)；rough=线性灰度（三通道同值，取 G）。
