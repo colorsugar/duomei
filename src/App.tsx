@@ -44,7 +44,7 @@ function routeSectionOf(pathname: string): SectionAccentId {
     : pathname.startsWith("/xunji") ? "xunji"
     : pathname.startsWith("/dalu") || pathname.startsWith("/atlas") ? "dalu"
     : pathname.startsWith("/chaoji") ? "dalu"
-    : pathname.startsWith("/yunyou") || pathname === "/xiaoyuan" || pathname === "/jiangnan" || pathname.startsWith("/hongloumeng-ying") ? "yunyou"
+    : pathname.startsWith("/yunyou") || pathname === "/xiaoyuan" || pathname === "/jiangnan" || pathname.startsWith("/honglou") || pathname.startsWith("/hongloumeng-ying") ? "yunyou"
     : pathname.startsWith("/skills") ? "skills"
     : pathname.startsWith("/time") ? "weiyan"
     : "home";
@@ -154,7 +154,7 @@ function AppRoutes() {
   const isXunji = location.pathname === "/xunji" || location.pathname.startsWith("/xunji/");
   const isYunyouMap = location.pathname === "/yunyou-map";
   const isXiaoyuan = location.pathname === "/xiaoyuan" || location.pathname === "/jiangnan";
-  const isHongloumeng = location.pathname === "/hongloumeng-ying" || location.pathname === "/hongloumeng-ying/";
+  const isHongloumeng = location.pathname === "/honglou" || location.pathname === "/honglou/";
   const isAtlasMap = location.pathname === "/atlas-v6" || location.pathname === "/dalu/map" || location.pathname === "/chaoji/map";
   const bareChrome = isAdmin || isGuyuReader || isZaobao || isXunji || isYunyouMap || isAtlasMap || isXiaoyuan || isHongloumeng;
   useSmoothScroll(bareChrome || isTimePage);
@@ -184,7 +184,9 @@ function AppRoutes() {
         <Route path="/yunyou-map" element={<DuomeiYunyouPage />} />
         <Route path="/xiaoyuan" element={<DuomeiXiaoyuanPage />} />
         <Route path="/jiangnan" element={<DuomeiJiangnanPage />} />
-        <Route path="/hongloumeng-ying" element={<DuomeiHongloumengPage />} />
+        <Route path="/honglou" element={<DuomeiHongloumengPage />} />
+        {/* 旧网址（已经发出去的链接）跳到新址 */}
+        <Route path="/hongloumeng-ying/*" element={<Navigate to="/honglou" replace />} />
         <Route path="/dalu" element={<DuomeiDaluPage />} />
         <Route path="/dalu/map" element={<DuomeiAtlasPage />} />
         <Route path="/atlas-v6" element={<DuomeiAtlasPage />} />
