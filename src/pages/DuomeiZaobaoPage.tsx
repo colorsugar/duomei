@@ -64,6 +64,51 @@ function ZaobaoStoryShare({ title, text, path }: { title: string; text: string; 
   );
 }
 
+const ZAOBAO_VOTES = [
+  { vote: "up", label: "感兴趣" },
+  { vote: "down", label: "不感兴趣" },
+  { vote: "love", label: "喜欢" },
+] as const;
+
+function ZaobaoStoryVote({ id, title }: { id: string; title: string }) {
+  const key = `zaobao-fb-${id}`;
+  const [voted, setVoted] = useState<string | null>(() => {
+    try {
+      return window.localStorage.getItem(key);
+    } catch {
+      return null;
+    }
+  });
+  const send = (vote: string) => {
+    if (voted) return;
+    setVoted(vote);
+    try {
+      window.localStorage.setItem(key, vote);
+    } catch {
+      /* storage unavailable */
+    }
+    fetch(`${ZAOBAO_URL}/api/feedback`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id, title, vote, via: "duomei" }),
+      keepalive: true,
+    }).catch(() => {});
+  };
+  if (voted) {
+    const label = ZAOBAO_VOTES.find((item) => item.vote === voted)?.label;
+    return <span className="zaobao-story-vote is-done">记下了{label ? ` · ${label}` : ""}</span>;
+  }
+  return (
+    <span className="zaobao-story-vote" role="group" aria-label="这条你觉得怎么样">
+      {ZAOBAO_VOTES.map((item) => (
+        <button key={item.vote} type="button" className="zaobao-story-share" onClick={() => send(item.vote)}>
+          {item.label}
+        </button>
+      ))}
+    </span>
+  );
+}
+
 const SKIP_STORY_P = /\b(source|fb|kicker|date|orig-link|lede|brand|hist-bar)\b/;
 
 type ZaobaoStory = {
@@ -390,6 +435,7 @@ export function DuomeiZaobaoPage() {
                           text={story.paragraphs[0] ?? story.body[0] ?? edition.headline}
                           path={zaobaoStoryPath(story.id, date ?? isoDateFromLabel(edition.date))}
                         />
+                        <ZaobaoStoryVote id={story.id} title={story.title} />
                       </div>
                     </article>
                     );
@@ -450,6 +496,7 @@ export function DuomeiZaobaoPage() {
                     text={openStory.body[0] ?? openStory.paragraphs[0] ?? edition.headline}
                     path={zaobaoStoryPath(openStory.id, date ?? isoDateFromLabel(edition.date))}
                   />
+                  <ZaobaoStoryVote id={openStory.id} title={openStory.title} />
                 </div>
               </article>
             </div>

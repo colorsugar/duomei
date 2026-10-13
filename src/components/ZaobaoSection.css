@@ -1224,3 +1224,17 @@ button.zaobao-story-open {
     line-height: 1.5;
   }
 }
+
+.zaobao-story-vote {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0 var(--space-md, 0.75rem);
+}
+
+.zaobao-story-vote.is-done {
+  min-block-size: var(--size-hit);
+  color: var(--color-muted, currentColor);
+  font-size: var(--text-sm);
+  font-weight: 600;
+}
