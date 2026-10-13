@@ -39,12 +39,17 @@
       }
     }
     if (s.indexOf(" · ") > 0) {
-      var parts = s.split(" · "), outParts = [];
-      for (var j = 0; j < parts.length; j++) {
-        var p = parts[j];
-        var t = p === "" ? "" : trCore(p);
-        if (t == null) return null;
-        outParts.push(t);
+      // Greedy: match the longest run of " · "-joined pieces the dictionary knows.
+      var parts = s.split(" · "), outParts = [], i = 0;
+      while (i < parts.length) {
+        var hit = null, j;
+        for (j = parts.length; j > i; j--) {
+          var seg = parts.slice(i, j).join(" · ");
+          hit = seg === "" ? "" : (j - i === parts.length ? null : trCore(seg));
+          if (hit != null) break;
+        }
+        if (hit == null) return null;
+        outParts.push(hit); i = j;
       }
       return outParts.join(" · ");
     }

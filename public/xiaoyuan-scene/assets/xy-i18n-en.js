@@ -303,6 +303,10 @@
     "古风纯音乐 · 多美 作曲": "Classical-style instrumentals · composed by Duomei",
     "正在播放 · ": "Now playing · ",
     "古风纯音乐": "Classical-style instrumentals",
+    "正在播放": "Now playing",
+    "国潮": "Modern Chinese", "鼓点": "drums", "古筝": "Guzheng", "洞箫": "xiao flute", "流水": "running water",
+    "琵琶": "Pipa", "竹笛": "bamboo flute", "蝉声": "cicadas", "二胡": "Erhu", "古琴": "Guqin", "细雨": "fine rain",
+    "曲笛": "Qudi flute", "扬琴": "Yangqin", "箫": "xiao", "笙": "sheng",
     "多美 作曲": "composed by Duomei",
     "已暂停 · ": "Paused · ",
     "竹影": "Bamboo Shadows", "风过修竹": "Wind through tall bamboo",
@@ -347,6 +351,7 @@
     [/^到「(.+)」$/, function (m, t) { return t(m[1]); }],
     [/^跟随(.+?) · 拖动可环视 · Esc 或点空处退出$/, function (m, t) { return "Following " + t(m[1]).replace(/^The /, "the ") + " · drag to look around · Esc or tap empty space to stop"; }],
     [/^(.+)（点按切换）$/, function (m, t) { return t(m[1]) + " (tap to switch)"; }],
+    [/^(无雨|小雨|中雨|大雨|暴雨) (.+)$/, function (m, t) { return m[1] === "无雨" ? "No rain" : t(m[1]) + " " + m[2]; }],
     [/^播放模式：(.+)$/, function (m, t) { return "Play mode: " + t(m[1]); }]
   ];
   window.__XY_I18N_EN = { dict: D, poems: POEMS, rules: rules };

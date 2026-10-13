@@ -3,7 +3,7 @@ html.lang-en {
   --serif: "Iowan Old Style", "Palatino", Georgia, "Times New Roman", "Songti SC", "Noto Serif SC", serif;
   --sans: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Inter, "PingFang SC", "Noto Sans SC", sans-serif;
 }
-html.lang-en #app :is(button, small, strong, p, label, output, span, h1, h2, li) { letter-spacing: normal; }
+html.lang-en #app, html.lang-en #app * { letter-spacing: normal !important; }
 html.lang-en #hint { max-inline-size: min(46rem, 92vw); text-wrap: balance; }
 html.lang-en #info-card .info-en { font-family: var(--serif); letter-spacing: .08em; }
 html.lang-en #info-card .info-use { hyphens: auto; text-wrap: pretty; }
