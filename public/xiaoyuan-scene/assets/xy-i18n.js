@@ -1,6 +1,6 @@
 /* ZH/EN switch for the 多美的夏日小院 / 诗语江南 scene runtime (prebuilt bundle).
  * Chinese is the default and is never rewritten: in zh mode this script only listens.
- * In en mode it swaps visible text and accessible labels through en.js, keeps classical
+ * In en mode it swaps visible text and accessible labels through xy-i18n-en.js, keeps classical
  * verse in Chinese with the English beneath, and restores every original on switching back.
  * Language: ?lang=en|zh, else localStorage "duomei-lang", else zh. The /xiaoyuan shell
  * posts {type: "duomei-lang", lang} to switch live without reloading the scene. */
