@@ -82,8 +82,8 @@ body:has(.xiaoyuan-page) .duomei-music-player.is-minimized {
   }
 }
 
-/* 中 / EN switch: same paper pill as the back link, pinned top-right so it never meets the
- * back link or the minimized music orb on the left. */
+/* 中 / EN switch: same paper pill as the back link, placed just after the minimized music orb.
+ * The top-right corner belongs to the scene's own info card (and its close button). */
 .duomei-lang-toggle {
   display: inline-flex;
   align-items: center;
@@ -139,8 +139,19 @@ body:has(.xiaoyuan-page) .duomei-music-player.is-minimized {
 .xiaoyuan-lang {
   position: fixed;
   inset-block-start: max(var(--space-md), env(safe-area-inset-top, 0px));
-  inset-inline-end: max(var(--space-md), env(safe-area-inset-right, 0px));
+  inset-inline-start: calc(max(var(--space-md), env(safe-area-inset-left, 0px)) + 10.25rem);
   z-index: var(--z-sticky);
+  transition: opacity var(--dur-short) var(--ease-out);
+}
+
+/* Hidden together with the back link while the full music player is open. */
+body:has(.duomei-music-player:not(.is-minimized)) .xiaoyuan-lang {
+  opacity: 0;
+  pointer-events: none;
+}
+
+html.lang-en .xiaoyuan-lang {
+  inset-inline-start: calc(max(var(--space-md), env(safe-area-inset-left, 0px)) + 13.25rem);
 }
 
 /* "← Back to Duomei" is wider than "← 返回多美": slide the minimized orb over to match. */
