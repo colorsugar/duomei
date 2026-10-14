@@ -1,0 +1,93 @@
+--- a/src/main.js	2026-10-14 17:03:52
++++ b/src/main.js	2026-10-14 17:03:52
+@@ -2221,7 +2221,7 @@
+   load.shown = Math.max(load.shown, t);
+   const p = load.shown;
+   loadingFill.style.width = (p * 100).toFixed(1) + '%';
+-  loadingEl.style.setProperty('--p', p.toFixed(4));
++  if (!unroll.on) loadingEl.style.setProperty('--p', p.toFixed(4));
+   loadingPct.textContent = `${Math.round(p * 100)}%` + (load.label ? ` · ${load.label}` : '');
+ }
+ setInterval(() => {
+@@ -2229,6 +2229,34 @@
+   const t = loadTarget(), room = 0.04; // creep at most 4 points past the last real mark
+   if (load.shown < t + room) { load.shown = Math.min(t + room, load.shown + 0.0025); paintProgress(); }
+ }, 120);
++// 展卷 (garden): ?unroll=a (default) — the scroll follows the real load through a smooth, never-reversing
++// ease; when it is fully open the garden is entered at once. ?unroll=b — the scroll stays rolled while loading
++// (the percentage still counts), then one quick unroll and straight in. ?unroll=old — the previous timings.
++const UNROLL = (() => { const v = new URLSearchParams(location.search).get('unroll'); return v === 'b' || v === 'old' ? v : 'a'; })();
++const unroll = { s: 0.03, on: false, done: null, t0: 0, from: 0 };
++function unrollLoop(now) {
++  if (!unroll.on) return;
++  const dt = Math.min(0.05, (now - (unroll.last ?? now)) / 1000); unroll.last = now;
++  if (UNROLL === 'a') {
++    const target = revealed ? 1 : load.shown;
++    // exponential ease toward the real mark: quick on a big step, gentle on a creep; faster once the scene is ready
++    const rate = revealed ? 9 : 4;
++    let next = unroll.s + (target - unroll.s) * (1 - Math.exp(-rate * dt));
++    if (revealed && 1 - next < 0.004) next = 1;
++    unroll.s = Math.max(unroll.s, Math.min(1, next));
++  } else if (UNROLL === 'b') {
++    if (revealed) {
++      if (!unroll.t0) { unroll.t0 = now; unroll.from = unroll.s; }
++      const k = Math.min(1, (now - unroll.t0) / 850), e = k < 0.5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2;
++      unroll.s = unroll.from + (1 - unroll.from) * e;
++    }
++  }
++  loadingEl.style.setProperty('--p', unroll.s.toFixed(4));
++  if (globalThis.__unrollLog) globalThis.__unrollLog.push([Math.round(now), +unroll.s.toFixed(4)]);
++  if (unroll.s >= 1 && unroll.done) { const f = unroll.done; unroll.done = null; unroll.on = false; f(); return; }
++  requestAnimationFrame(unrollLoop);
++}
++if (IS_GARDEN && UNROLL !== 'old' && PAINT_ENTRY) { loadingEl.classList.add('p-live'); unroll.on = true; requestAnimationFrame(unrollLoop); }
+ kit.progress.build = (f, label) => { if (globalThis.__loadT) console.info('[load] step', f, Math.round(performance.now())); load.build = Math.max(load.build, f); if (label) load.label = label; paintProgress(); };
+ function setProgress(loaded, total) {
+   if(loadErrors.size) return;
+@@ -2550,7 +2578,7 @@
+ 
+ // 入画: grow the unrolled scroll (paper margin gone) until its painting covers the screen at the 3D view's own
+ // framing, then let the ink bleed away from the centre onto the live garden; the camera starts gliding just before.
+-function enterPainting() {
++function enterPainting(quick = false) {
+   const box = loadingEl.querySelector('.scroll-loader');
+   if (!box) { loadingEl.classList.add('is-done'); paintHold = 0; return; }
+   const r = box.getBoundingClientRect(), vw = innerWidth, vh = innerHeight;
+@@ -2559,8 +2587,8 @@
+   box.style.setProperty('--ey', (vh / 2 - (r.top + r.height / 2)).toFixed(1) + 'px');
+   box.style.setProperty('--es', s.toFixed(4));
+   loadingEl.classList.add('is-enter');
+-  setTimeout(() => loadingEl.classList.add('is-done'), 1350);
+-  paintHold = 2.5;
++  setTimeout(() => loadingEl.classList.add('is-done'), quick ? 380 : 1350);
++  paintHold = quick ? 1.4 : 2.5;
+ }
+ 
+ function stepIntro(dt) {
+@@ -2855,9 +2883,10 @@
+     performance.mark('duomei-scene-ready'); // Assets, shaders and two real frames completed.
+     loadingPct.textContent = '100%'; load.shown = 1;
+     loadingFill.style.width = '100%';
+-    loadingEl.style.setProperty('--p', '1');
++    if (!unroll.on) loadingEl.style.setProperty('--p', '1');
+     // let the scroll finish unrolling before it fades into the garden
+-    if (PAINT_ENTRY) setTimeout(enterPainting, 700);
++    if (PAINT_ENTRY && unroll.on) { loadingEl.classList.add('is-quick'); unroll.done = () => enterPainting(true); }
++    else if (PAINT_ENTRY) setTimeout(enterPainting, 700);
+     else setTimeout(() => loadingEl.classList.add('is-done'), IS_GARDEN && !NESTED ? 700 : 0);
+     if (NESTED && !(IS_GARDEN && dive)) window.__handoffReady = true;
+     else if (NESTED) diveWarm = 120; // ready once warmed (above)
+--- a/src/style.css	2026-10-14 17:03:52
++++ b/src/style.css	2026-10-14 17:03:52
+@@ -924,3 +924,11 @@
+ @media (prefers-reduced-motion: reduce) { .flow-btn .flow-hand { animation: none !important; } }
+ .auto-touring #btn-flow, .manual-roaming #btn-flow { display: none; }
+ @media (max-width: 720px), (orientation: portrait) { .dock-bar .tod { width: calc(100% - 42px); } .dock-bar .flow-btn { width: 32px; height: 32px; } }
++
++/* 展卷 driven frame by frame from main.js (unroll a/b): no CSS easing on top of the JS ease */
++.is-garden #loading.p-live .scroll-paper, .is-garden #loading.p-live .scroll-rod:last-of-type { transition: none; }
++/* quick entry after the scroll is open: same zoom into the painting and ink bleed, shorter */
++.is-garden #loading.is-quick.is-enter .scroll-loader { transition: transform 0.8s cubic-bezier(0.45, 0, 0.2, 1), filter 0.4s ease; }
++.is-garden #loading.is-quick.is-enter .scroll-paper { transition: padding 0.8s cubic-bezier(0.45, 0, 0.2, 1); }
++.is-garden #loading.is-quick.is-enter .scroll-rod, .is-garden #loading.is-quick.is-enter .loading-copy, .is-garden #loading.is-quick.is-enter #loading-pct { transition: opacity 0.3s ease; }
++.is-garden #loading.is-quick.is-enter.is-done { transition: --inkr 1.2s cubic-bezier(0.35, 0, 0.25, 1), opacity 0.4s ease 0.9s, visibility 0s linear 1.3s; }
