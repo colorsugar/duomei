@@ -1,17 +1,24 @@
-import { useI18n } from "./I18nProvider";
+import { LANGS, useI18n, type Lang } from "./I18nProvider";
 
-// 中 / EN segmented switch. Chinese first; the active side is marked with aria-pressed.
+const LABELS: Record<Lang, { text: string; lang: string }> = {
+  zh: { text: "中", lang: "zh-CN" },
+  en: { text: "EN", lang: "en" },
+  ja: { text: "日", lang: "ja" },
+};
+
+// 中 / EN / 日 segmented switch. Chinese first; the active choice is marked with aria-pressed.
 export function LangToggle({ className = "" }: { className?: string }) {
   const { lang, setLang, t } = useI18n();
   return (
     <div className={`duomei-lang-toggle ${className}`.trim()} role="group" aria-label={t("lang.switch")}>
-      <button type="button" lang="zh-CN" aria-pressed={lang === "zh"} onClick={() => setLang("zh")}>
-        中
-      </button>
-      <span aria-hidden="true">/</span>
-      <button type="button" lang="en" aria-pressed={lang === "en"} onClick={() => setLang("en")}>
-        EN
-      </button>
+      {LANGS.map((l, i) => (
+        <span key={l} className="duomei-lang-toggle__item">
+          {i > 0 && <span aria-hidden="true">/</span>}
+          <button type="button" lang={LABELS[l].lang} aria-pressed={lang === l} onClick={() => setLang(l)}>
+            {LABELS[l].text}
+          </button>
+        </span>
+      ))}
     </div>
   );
 }

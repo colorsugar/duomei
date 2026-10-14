@@ -1,22 +1,27 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { en } from "./en";
+import { ja } from "./ja";
 import { zh, type I18nKey } from "./zh";
 
-export type Lang = "zh" | "en";
+export type Lang = "zh" | "en" | "ja";
+export const LANGS: readonly Lang[] = ["zh", "en", "ja"];
+const isLang = (value: unknown): value is Lang => typeof value === "string" && (LANGS as readonly string[]).includes(value);
+const HTML_LANG: Record<Lang, string> = { zh: "zh-CN", en: "en", ja: "ja" };
 export const LANG_STORAGE_KEY = "duomei-lang";
 
-const dictionaries: Record<Lang, Record<I18nKey, string>> = { zh, en };
+const dictionaries: Record<Lang, Record<I18nKey, string>> = { zh, en, ja };
 
-// Chinese is the default. ?lang=en|zh wins (and is remembered), then localStorage, then zh.
+// Chinese is the default. ?lang=zh|en|ja wins (and is remembered), then localStorage, then zh.
 export function readInitialLang(): Lang {
   if (typeof window === "undefined") return "zh";
   try {
     const fromQuery = new URLSearchParams(window.location.search).get("lang");
-    if (fromQuery === "en" || fromQuery === "zh") {
+    if (isLang(fromQuery)) {
       window.localStorage.setItem(LANG_STORAGE_KEY, fromQuery);
       return fromQuery;
     }
-    return window.localStorage.getItem(LANG_STORAGE_KEY) === "en" ? "en" : "zh";
+    const saved = window.localStorage.getItem(LANG_STORAGE_KEY);
+    return isLang(saved) ? saved : "zh";
   } catch {
     return "zh";
   }
@@ -40,9 +45,9 @@ export function I18nProvider({ children }: { children: ReactNode }) {
   const [lang, setLangState] = useState<Lang>(readInitialLang);
 
   useEffect(() => {
-    // Leave <html lang="zh-CN"> exactly as shipped unless English is chosen.
-    document.documentElement.lang = lang === "en" ? "en" : "zh-CN";
-    document.documentElement.classList.toggle("lang-en", lang === "en");
+    // Leave <html lang="zh-CN"> exactly as shipped unless another language is chosen.
+    document.documentElement.lang = HTML_LANG[lang];
+    for (const l of LANGS) if (l !== "zh") document.documentElement.classList.toggle(`lang-${l}`, lang === l);
   }, [lang]);
 
   const setLang = useCallback((next: Lang) => {
@@ -50,8 +55,8 @@ export function I18nProvider({ children }: { children: ReactNode }) {
     try {
       window.localStorage.setItem(LANG_STORAGE_KEY, next);
       const url = new URL(window.location.href);
-      if (url.searchParams.has("lang") || next === "en") {
-        if (next === "en") url.searchParams.set("lang", "en");
+      if (url.searchParams.has("lang") || next !== "zh") {
+        if (next !== "zh") url.searchParams.set("lang", next);
         else url.searchParams.delete("lang");
         window.history.replaceState(window.history.state, "", url.pathname + url.search + url.hash);
       }

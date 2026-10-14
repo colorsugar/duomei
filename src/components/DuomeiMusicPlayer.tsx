@@ -225,7 +225,7 @@ export function DuomeiMusicPlayer({ compactContext = false }: { compactContext?:
       .catch((error: unknown) => {
         if (!controller.signal.aborted) {
           setPlaylistStatus("error");
-          setPlaylistMessage(langRef.current === "en" ? tRef.current("music.playlistUnavailable") : error instanceof Error ? error.message : tRef.current("music.playlistUnavailable"));
+          setPlaylistMessage(langRef.current !== "zh" ? tRef.current("music.playlistUnavailable") : error instanceof Error ? error.message : tRef.current("music.playlistUnavailable"));
         }
         throw error;
       })
@@ -378,7 +378,7 @@ export function DuomeiMusicPlayer({ compactContext = false }: { compactContext?:
       .catch((error: unknown) => {
         if (controller.signal.aborted) return;
         setLyricsStatus("error");
-        setLyricsMessage(langRef.current === "en" ? tRef.current("music.lyricsUnavailable") : error instanceof Error ? error.message : tRef.current("music.lyricsUnavailable"));
+        setLyricsMessage(langRef.current !== "zh" ? tRef.current("music.lyricsUnavailable") : error instanceof Error ? error.message : tRef.current("music.lyricsUnavailable"));
       });
     return () => controller.abort();
   }, [currentTrack, panelClosed, panelView]);

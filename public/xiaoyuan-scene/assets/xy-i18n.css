@@ -17,3 +17,21 @@ html.lang-en #info-card .info-meaning-en {
   line-height: 1.6;
   color: var(--ink-soft);
 }
+
+/* Japanese typography for the scene runtime; only applies under html.lang-ja. System fonts only (no downloads). */
+html.lang-ja {
+  --serif: "Hiragino Mincho ProN", "Hiragino Mincho Pro", "Yu Mincho", YuMincho, "Noto Serif JP", "Noto Serif CJK JP", serif;
+  --sans: "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic", YuGothic, "Noto Sans JP", "Noto Sans CJK JP", -apple-system, sans-serif;
+}
+html.lang-ja #app, html.lang-ja #app * { letter-spacing: .04em !important; }
+html.lang-ja #hint { max-inline-size: min(40rem, 92vw); text-wrap: balance; line-break: strict; }
+html.lang-ja #info-card .info-en { font-family: var(--serif); letter-spacing: .08em; }
+html.lang-ja #info-card .info-use { line-break: strict; text-wrap: pretty; }
+html.lang-ja #info-card .info-meaning-en {
+  white-space: pre-line;
+  margin: 6px 0 0;
+  font-family: var(--serif);
+  font-size: 12px;
+  line-height: 1.75;
+  color: var(--ink-soft);
+}
