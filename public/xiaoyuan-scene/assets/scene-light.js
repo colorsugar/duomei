@@ -6,6 +6,9 @@
 import { bm as Scene, bE as HemisphereLight } from "./three.module-9UAnMrUf.js";
 
 const off = new URLSearchParams(location.search).get("light") === "0";
+const GARDEN = new URLSearchParams(location.search).get("scene") === "garden";
+const NIGHT_FILL = GARDEN ? 1.4 : 0;
+const LOW_FILL = GARDEN ? 1.6 : 0.7; // 小院房子是白墙，补光少一些保住夜色
 const FOLIAGE = /foliage|needle|leaf|leaves|shrub|grass|calamus|lance|pinna|mondo|fern|bamboo|reed|moss|ivy|vine|willow/i;
 const FLOWER = /blossom|floret|lotus|petal|flower|lily|bloom|plum|peach|azalea|rose|violet/i;
 const SKIP = /stem|bed|gravel|pebble|mist|blob|pool|drop|bark|trunk/i;
@@ -68,7 +71,7 @@ function apply() {
   const tod = todEl ? Number(todEl.value) : 0.3;
   const night = clamp((tod - 0.62) / 0.25);
   const low = Math.max(night, 1 - clamp((elev - 0.12) / 0.4) * clamp(sunI / 3)); // 1 = dawn / dusk / night
-  state.noon = noon; state.low = low;
+  state.noon = noon; state.low = low; state.night = night;
   for (const [mat, info] of state.mats) {
     if (!info) continue;
     if (info.kind === "leafHue") {
@@ -77,16 +80,18 @@ function apply() {
     } else if (info.kind === "leaf") {
       // 带贴图的白底叶片（蕨、苔、盆栽、灌木）提亮要克制，否则浅色叶会发黄发白。
       const pale = mat.map && info.color.r > 0.9 && info.color.g > 0.9;
-      mat.color.copy(info.color).multiplyScalar(pale ? 1.1 + 0.1 * low : 1.24 + 0.16 * low);
+      // 夜里不再加大提亮，免得树叶像自己发光。
+      const dusk = Math.max(0, low - night);
+      mat.color.copy(info.color).multiplyScalar((pale ? 1.1 : 1.24) + 0.12 * dusk);
       if (info.emissive) {
         mat.emissive.copy(info.emissive).add(state.green ||= new mat.emissive.constructor(0.035, 0.06, 0.025));
-        mat.emissiveIntensity = Math.max(info.ei, (pale ? 0.2 : 0.3) + 0.3 * low);
+        mat.emissiveIntensity = Math.max(info.ei, (pale ? 0.2 : 0.3) * (1 - 0.5 * night) + 0.2 * dusk);
       }
     } else if (info.kind === "flower") {
       mat.color.copy(info.color).multiplyScalar(1 - 0.24 * noon);
     }
   }
-  if (state.fill) state.fill.intensity = 0.2 + 1.35 * low;
+  if (state.fill) state.fill.intensity = 0.2 + LOW_FILL * low + NIGHT_FILL * night; // 夜里建筑要看得清（小院本来就亮，只加一点）
 }
 
 // 截图对比用：window.__xyCam = { p: [x,y,z], t: [x,y,z] } 时把镜头钉在固定位置（开/关光照都生效）。
