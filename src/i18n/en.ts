@@ -4,6 +4,7 @@ import type { I18nKey } from "./zh";
 export const en: Record<I18nKey, string> = {
   "lang.switch": "Language",
   "scene.back": "Back to Duomei",
+  "scene.backShort": "Duomei",
   "xiaoyuan.title": "Duomei's Summer Courtyard",
   "xiaoyuan.docTitle": "Duomei's Summer Courtyard | DUOMEI",
   "xiaoyuan.frameTitle": "Duomei's Summer Courtyard · 3D scene",

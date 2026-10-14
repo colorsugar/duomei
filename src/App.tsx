@@ -26,8 +26,7 @@ const pageLoaders = {
   DuomeiGuyuReaderPage: () => import("./pages/DuomeiGuyuReaderPage"),
   DuomeiDaluPage: () => import("./pages/DuomeiDaluPage"),
   DuomeiYunyouPage: () => import("./pages/DuomeiYunyouPage"),
-  DuomeiXiaoyuanPage: () => import("./pages/DuomeiXiaoyuanPage"),
-  DuomeiJiangnanPage: () => import("./pages/DuomeiJiangnanPage"),
+  DuomeiScenePage: () => import("./pages/DuomeiScenePage"),
   DuomeiHongloumengPage: () => import("./pages/DuomeiHongloumengPage"),
   DuomeiAtlasPage: () => import("./pages/DuomeiAtlasPage"),
   DuomeiChaojiMapPage: () => import("./pages/DuomeiChaojiMapPage"),
@@ -101,8 +100,9 @@ const DuomeiZaobaoArchivePage = lazy(() => import("./pages/DuomeiZaobaoArchivePa
 const DuomeiXunjiPage = lazy(() => import("./pages/DuomeiXunjiPage").then((m) => ({ default: m.DuomeiXunjiPage })));
 const DuomeiXunjiArchivePage = lazy(() => import("./pages/DuomeiXunjiArchivePage").then((m) => ({ default: m.DuomeiXunjiArchivePage })));
 const DuomeiYunyouPage = lazy(() => import("./pages/DuomeiYunyouPage").then((m) => ({ default: m.DuomeiYunyouPage })));
-const DuomeiXiaoyuanPage = lazy(() => import("./pages/DuomeiXiaoyuanPage").then((m) => ({ default: m.DuomeiXiaoyuanPage })));
-const DuomeiJiangnanPage = lazy(() => import("./pages/DuomeiJiangnanPage").then((m) => ({ default: m.DuomeiJiangnanPage })));
+// /xiaoyuan and /jiangnan share one shell component (same type at the same place in the tree), so walking
+// between the two scenes keeps the page mounted: no blank frame, no section board, the music runs on.
+const DuomeiScenePage = lazy(() => import("./pages/DuomeiScenePage").then((m) => ({ default: m.DuomeiScenePage })));
 const DuomeiHongloumengPage = lazy(() => import("./pages/DuomeiHongloumengPage").then((m) => ({ default: m.DuomeiHongloumengPage })));
 const DuomeiDaluPage = lazy(() => import("./pages/DuomeiDaluPage").then((m) => ({ default: m.DuomeiDaluPage })));
 const DuomeiAtlasPage = lazy(() => import("./pages/DuomeiAtlasPage").then((m) => ({ default: m.DuomeiAtlasPage })));
@@ -182,8 +182,8 @@ function AppRoutes() {
         <Route path="/guyu/:bookId" element={<DuomeiGuyuReaderPage />} />
         <Route path="/skills" element={<DuomeiSkillsPage />} />
         <Route path="/yunyou-map" element={<DuomeiYunyouPage />} />
-        <Route path="/xiaoyuan" element={<DuomeiXiaoyuanPage />} />
-        <Route path="/jiangnan" element={<DuomeiJiangnanPage />} />
+        <Route path="/xiaoyuan" element={<DuomeiScenePage scene="xiaoyuan" />} />
+        <Route path="/jiangnan" element={<DuomeiScenePage scene="jiangnan" />} />
         <Route path="/honglou" element={<DuomeiHongloumengPage />} />
         {/* 旧网址（已经发出去的链接）跳到新址 */}
         <Route path="/hongloumeng-ying/*" element={<Navigate to="/honglou" replace />} />
@@ -199,7 +199,8 @@ function AppRoutes() {
         <Route path="*" element={<DuomeiNotFoundPage />} />
       </Routes>
       </Suspense>
-      <PublicRoutePaperVeil pathname={location.pathname} disabled={isAdmin || isGuyuReader} />
+      {/* The 3D scenes bring their own paper loading screen: no section board over them (it flashed 「云游」). */}
+      <PublicRoutePaperVeil pathname={location.pathname} disabled={isAdmin || isGuyuReader || isXiaoyuan} />
       {!bareChrome ? <DuomeiFooter /> : null}
       {!isAdmin ? <DuomeiMusicPlayer compactContext={isGuyuReader || isZaobao || isXunji || isYunyouMap || isAtlasMap || isXiaoyuan} /> : null}
       {!bareChrome ? <BackToTopButton /> : null}

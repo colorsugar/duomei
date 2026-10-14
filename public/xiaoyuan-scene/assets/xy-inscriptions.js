@@ -39,7 +39,7 @@
     { id: "studio-couplet", keys: ["石瘦留云住", "泉清照影闲"], r: 11, orig: "石瘦留云住\n泉清照影闲",
       zh: "瘦削的山石把云留住了；清澈的泉水悠闲地映出人影。",
       en: "Lean stones keep the clouds from leaving;\na clear spring mirrors shadows at their ease.",
-      ja: "石痩せて雲を留めて住まわしめ　泉清くして影を照らして閑かなり\n細く痩せた石は雲を引きとめ、澄んだ泉は人影を静かに映す。" },
+      ja: "石痩せて雲を留めて住ましめ　泉清くして影を照らして閑かなり\n痩せた石は雲を引きとめ、清らかな泉はのどかに人影を映す。" },
     { id: "water-hall", keys: ["听荷"], r: 10, orig: "听荷",
       zh: "匾额「听荷」：听雨打荷叶的声音。这是池上的水榭听荷榭。",
       en: "\u201cListening to the Lotus\u201d — to the rain pattering on lotus leaves. The pavilion over the pond.",
@@ -60,7 +60,7 @@
     { id: "yard-plaque", keys: ["多美小院"], r: 7, orig: "多美小院",
       zh: "门楣上的匾额「多美小院」：多美的夏日小院。",
       en: "\u201cDuomei's Courtyard\u201d — the plaque over the door of Duomei's summer home.",
-      ja: "多美小院（たみしょういん）\n「多美の小さな庭」。夏の住まいの門に掛かる扁額です。" },
+      ja: "多美小院（ドゥオメイしょういん）\n「多美の小さな庭」。夏の住まいの門に掛かる扁額です。" },
     { id: "yard-couplet", keys: ["葡萄满架乐童心", "西瓜清甜消暑气"], r: 7, orig: "葡萄满架乐童心\n西瓜清甜消暑气",
       zh: "满架葡萄，让人像孩子一样开心；西瓜清甜，一口下去暑气全消。",
       en: "A trellis full of grapes delights the child at heart;\nsweet, cool watermelon chases off the summer heat.",
@@ -72,8 +72,8 @@
   ];
   var UI = {
     zh: { open: "题字释读", close: "关闭", glyph: "释", head: "白话" },
-    en: { open: "Translate this inscription", close: "Close", glyph: "譯", head: "English" },
-    ja: { open: "題字の読みと意味", close: "閉じる", glyph: "訳", head: "書き下し · 現代語訳" }
+    en: { open: "Translate this inscription", close: "Close", glyph: "Aa", head: "English", orig: "Original, as written" },
+    ja: { open: "題字の読みと意味", close: "閉じる", glyph: "訳", head: "書き下し · 現代語訳", orig: "原文（書かれたままの中国の簡体字）" }
   };
 
   /* —— hooks (installed before the bundle runs) —— */
@@ -240,7 +240,9 @@
     var o = document.createElement("p"); o.className = "xyi-orig"; o.lang = "zh-CN"; o.textContent = e.orig;
     var h = document.createElement("p"); h.className = "xyi-head"; h.textContent = u.head;
     var t = document.createElement("p"); t.className = "xyi-text"; t.lang = lang === "zh" ? "zh-CN" : lang; t.textContent = e[lang];
-    card.append(close, o, h, t);
+    // (EN / JA: the original is shown as it is written on the plaque — simplified Chinese — and says so)
+    if (u.orig) { var ol = document.createElement("p"); ol.className = "xyi-origlab"; ol.textContent = u.orig; card.append(close, ol, o, h, t); }
+    else card.append(close, o, h, t);
     card.setAttribute("aria-label", u.open);
     card.hidden = false;
     Object.keys(buttons).forEach(function (id) { buttons[id].setAttribute("aria-expanded", id === e.id ? "true" : "false"); });
@@ -253,6 +255,7 @@
     Object.keys(buttons).forEach(function (id) { buttons[id].setAttribute("aria-expanded", "false"); });
   }
 
+  var SEAL_HALF = window.matchMedia && matchMedia("(pointer: coarse)").matches ? 22 : 17; // the seal is 34 px, 44 px on touch screens (CSS)
   /* —— per-frame placement —— */
   var lastScan = 0;
   function tick(now) {
@@ -288,7 +291,8 @@
       if (!p || p.x < 24 || p.x > W - 24 || p.y < 64 || p.y > dockTop - 24) return;
       var b = button(s.e);
       var bx = Math.min(W - 40, p.x + 22), by = Math.max(56, p.y - 18);
-      b.style.transform = "translate(" + Math.round(bx - 17) + "px," + Math.round(by - 17) + "px)";
+      var half = SEAL_HALF;
+      b.style.transform = "translate(" + Math.round(bx - half) + "px," + Math.round(by - half) + "px)";
       b.classList.add("is-on");
       live[s.e.id] = { x: bx, y: by };
     });

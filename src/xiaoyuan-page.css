@@ -6,7 +6,7 @@
   inset: 0;
   z-index: var(--z-base);
   overflow: hidden;
-  background: #e7b07a;
+  background: #f3ede2;
 }
 
 .duomei-motion-root > .xiaoyuan-page {
@@ -17,11 +17,30 @@
 }
 
 .xiaoyuan-frame {
+  position: absolute;
+  inset: 0;
   display: block;
   inline-size: 100%;
   block-size: 100%;
   border: 0;
-  background: #e7b07a;
+  background: #f3ede2; /* the scenes' paper (their door veil and loading screen), not a colour of its own */
+}
+
+/* Walking between the two scenes: the next one loads in a second frame over the one being left (which is
+ * veiled in paper and keeps its music going), shows itself once its loading screen has painted, and the old
+ * frame is dropped when the music has been handed over. */
+.xiaoyuan-frame.is-loading {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.xiaoyuan-frame.is-live {
+  opacity: 1;
+  transition: opacity 0.6s ease;
+}
+
+.xiaoyuan-frame.is-leaving {
+  pointer-events: none;
 }
 
 .xiaoyuan-back {
@@ -82,56 +101,80 @@ body:has(.xiaoyuan-page) .duomei-music-player.is-minimized {
   }
 }
 
-/* 中 / EN / 日 switch: same paper pill as the back link, placed just after the minimized music orb.
+/* 中文 / EN / 日本語 switch: same paper pill as the back link, placed just after the minimized music orb, with a
+ * globe mark so it reads as "language" at a glance. Every choice is a 44 px target (judges on phones, 2026-10-15).
  * The top-right corner belongs to the scene's own info card (and its close button). */
 .duomei-lang-toggle {
   display: inline-flex;
   align-items: center;
-  gap: var(--space-3xs);
+  gap: 2px;
   min-block-size: var(--size-hit);
-  padding-inline: var(--space-xs);
+  padding-inline: 10px 4px;
   color: var(--color-ink);
-  background: color-mix(in oklch, var(--color-paper) 88%, transparent);
+  background: color-mix(in oklch, var(--color-paper) 92%, transparent);
   border: var(--rule-hairline) solid var(--color-rule);
   border-radius: var(--radius-pill);
   box-shadow: var(--shadow-book-soft);
-  font-size: var(--text-sm);
+  font-size: 15px;
   white-space: nowrap;
   backdrop-filter: blur(var(--space-sm));
 }
 
-.duomei-lang-toggle__item {
-  display: contents;
-}
-
-.duomei-lang-toggle__item > span {
-  opacity: 0.4;
+.duomei-lang-toggle__globe {
+  inline-size: 18px;
+  block-size: 18px;
+  margin-inline-end: 4px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  opacity: 0.8;
 }
 
 .duomei-lang-toggle button {
-  min-inline-size: 2rem;
-  padding: var(--space-3xs) var(--space-xs);
+  min-inline-size: 44px;
+  min-block-size: 44px;
+  padding: 0 10px;
   color: inherit;
   font: inherit;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.02em;
   background: transparent;
   border: 0;
   border-radius: var(--radius-pill);
-  opacity: 0.55;
+  opacity: 0.82;
   cursor: pointer;
   transition:
     background-color var(--dur-short) var(--ease-out),
+    color var(--dur-short) var(--ease-out),
     opacity var(--dur-short) var(--ease-out);
 }
 
 .duomei-lang-toggle button[aria-pressed="true"] {
   opacity: 1;
-  background: color-mix(in oklch, var(--color-ink) 9%, transparent);
+  color: var(--color-paper);
+  background: var(--color-ink);
+}
+
+/* first visit from a non-Chinese browser: a soft ring a few times, and the visitor's own language underlined */
+.duomei-lang-toggle.is-hint {
+  animation: duomei-lang-hint 1.4s ease-in-out 3;
+}
+
+.duomei-lang-toggle button.is-suggested {
+  opacity: 1;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  text-decoration-thickness: 2px;
+}
+
+@keyframes duomei-lang-hint {
+  0%, 100% { box-shadow: var(--shadow-book-soft), 0 0 0 0 color-mix(in oklch, var(--color-ink) 0%, transparent); }
+  50% { box-shadow: var(--shadow-book-soft), 0 0 0 6px color-mix(in oklch, var(--color-ink) 18%, transparent); }
 }
 
 @media (hover: hover) and (pointer: fine) {
-  .duomei-lang-toggle button:hover {
+  .duomei-lang-toggle button:not([aria-pressed="true"]):hover {
     opacity: 1;
+    background: color-mix(in oklch, var(--color-ink) 9%, transparent);
   }
 }
 
@@ -185,5 +228,90 @@ html.lang-ja .duomei-lang-toggle button[lang="en"] {
 @media (prefers-reduced-motion: reduce) {
   .duomei-lang-toggle button {
     transition: none;
+  }
+  .duomei-lang-toggle.is-hint {
+    animation: none;
+  }
+}
+
+/* Phones: the back link shortens to 「← 多美 / Duomei」, so back link, music orb and the language switch fit on
+ * one row at 390 px in every language (the English back link pushed the switch off screen). */
+.xiaoyuan-back__short {
+  display: none;
+}
+
+@media (max-width: 480px) {
+  .xiaoyuan-back__long {
+    display: none;
+  }
+
+  .xiaoyuan-back__short {
+    display: inline;
+  }
+
+  body:has(.xiaoyuan-page) .duomei-music-player.is-minimized,
+  html.lang-ja body:has(.xiaoyuan-page) .duomei-music-player.is-minimized {
+    inset-inline-start: calc(max(var(--space-md), env(safe-area-inset-left, 0px)) + 5.6rem);
+  }
+
+  html.lang-en body:has(.xiaoyuan-page) .duomei-music-player.is-minimized {
+    inset-inline-start: calc(max(var(--space-md), env(safe-area-inset-left, 0px)) + 6.9rem);
+  }
+
+  .xiaoyuan-lang,
+  html.lang-ja .xiaoyuan-lang {
+    inset-inline-start: calc(max(var(--space-md), env(safe-area-inset-left, 0px)) + 8.4rem);
+  }
+
+  html.lang-en .xiaoyuan-lang {
+    inset-inline-start: calc(max(var(--space-md), env(safe-area-inset-left, 0px)) + 9.7rem);
+  }
+}
+
+/* Narrow phones: short language labels (中 / EN / 日, still 44 px each); at 360 px and below also no globe and
+ * tighter pills, so all three stay whole and tappable at 320 / 360 / 390 px in every language. */
+.duomei-lang-toggle__short {
+  display: none;
+}
+
+@media (max-width: 420px) {
+  .duomei-lang-toggle__long {
+    display: none;
+  }
+
+  .duomei-lang-toggle__short {
+    display: inline;
+  }
+}
+
+@media (max-width: 360px) {
+  .duomei-lang-toggle {
+    padding-inline: 4px;
+  }
+
+  .duomei-lang-toggle__globe {
+    display: none;
+  }
+
+  .xiaoyuan-back {
+    padding-inline: 10px;
+  }
+
+  html.lang-en body:has(.xiaoyuan-page) .duomei-music-player.is-minimized {
+    inset-inline-start: calc(max(var(--space-md), env(safe-area-inset-left, 0px)) + 6.2rem);
+  }
+
+  html.lang-en .xiaoyuan-lang {
+    inset-inline-start: calc(max(var(--space-md), env(safe-area-inset-left, 0px)) + 8.9rem);
+  }
+
+  body:has(.xiaoyuan-page) .duomei-music-player.is-minimized,
+  html.lang-ja body:has(.xiaoyuan-page) .duomei-music-player.is-minimized {
+    inset-inline-start: calc(max(var(--space-md), env(safe-area-inset-left, 0px)) + 4.9rem);
+  }
+
+  .xiaoyuan-lang,
+  html.lang-ja .xiaoyuan-lang {
+    inset-inline-start: calc(max(var(--space-md), env(safe-area-inset-left, 0px)) + 7.6rem);
   }
 }

@@ -2,6 +2,7 @@
 export const zh = {
   "lang.switch": "切换语言",
   "scene.back": "返回多美",
+  "scene.backShort": "多美",
   "xiaoyuan.title": "多美的夏日小院",
   "xiaoyuan.docTitle": "多美的夏日小院 | DUOMEI",
   "xiaoyuan.frameTitle": "多美的夏日小院 · 3D 场景",
