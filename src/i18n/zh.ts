@@ -47,6 +47,13 @@ export const zh = {
   "music.playableCount": "{count} 首当前可播",
   "music.arranging": "正在把完整歌单排好…",
   "music.notFound": "没有找到这首歌。",
+  "music.originalsArtist": "多美 · 原创",
+  "music.originalsName": "多美原创",
+  "music.short.shuffle": "随机",
+  "music.short.one": "单曲",
+  "music.short.order": "顺序",
+  "music.muted": "已静音",
+  "music.trackCount": "{count} 首",
   "music.showMore": "再显示 {count} 首",
 } as const;
 

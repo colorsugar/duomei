@@ -49,5 +49,12 @@ export const en: Record<I18nKey, string> = {
   "music.playableCount": "{count} playable now",
   "music.arranging": "Laying out the full playlist…",
   "music.notFound": "No song by that name.",
+  "music.originalsArtist": "Duomei · originals",
+  "music.originalsName": "Duomei originals",
+  "music.short.shuffle": "Shuffle",
+  "music.short.one": "Repeat",
+  "music.short.order": "In order",
+  "music.muted": "Muted",
+  "music.trackCount": "{count} tracks",
   "music.showMore": "Show {count} more",
 };
