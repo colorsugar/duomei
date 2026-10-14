@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { useSceneNavigation } from "../lib/sceneNavigation";
 import { useI18n } from "../i18n/I18nProvider";
@@ -10,12 +10,10 @@ export function DuomeiJiangnanPage() {
   useSceneNavigation();
   const { lang, t } = useI18n();
   const frameRef = useRef<HTMLIFrameElement>(null);
-  // The scene reads its starting language from the URL once; later switches are posted to it,
-  // so toggling never reloads the 3D scene.
-  const [initialLang] = useState(lang);
-  useEffect(() => {
-    frameRef.current?.contentWindow?.postMessage({ type: "duomei-lang", lang }, window.location.origin);
-  }, [lang]);
+  // The scene picks up the saved language (localStorage "duomei-lang") on load; switches are
+  // posted to it, so toggling never reloads the 3D scene.
+  const postLang = () => frameRef.current?.contentWindow?.postMessage({ type: "duomei-lang", lang }, window.location.origin);
+  useEffect(postLang, [lang]);
   useEffect(() => {
     const previousTitle = document.title;
     document.title = t("jiangnan.docTitle");
@@ -34,7 +32,8 @@ export function DuomeiJiangnanPage() {
         ref={frameRef}
         key="jiangnan"
         className="xiaoyuan-frame"
-        src={`/xiaoyuan-scene/index.html?embed=1&scene=garden${initialLang === "en" ? "&lang=en" : ""}`}
+        src="/xiaoyuan-scene/index.html?embed=1&scene=garden"
+        onLoad={postLang}
         title={t("jiangnan.frameTitle")}
         loading="eager"
         allow="fullscreen; autoplay"
