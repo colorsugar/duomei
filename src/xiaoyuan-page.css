@@ -81,3 +81,86 @@ body:has(.xiaoyuan-page) .duomei-music-player.is-minimized {
     transition: none;
   }
 }
+
+/* 中 / EN switch: same paper pill as the back link, placed just after the minimized music orb.
+ * The top-right corner belongs to the scene's own info card (and its close button). */
+.duomei-lang-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3xs);
+  min-block-size: var(--size-hit);
+  padding-inline: var(--space-xs);
+  color: var(--color-ink);
+  background: color-mix(in oklch, var(--color-paper) 88%, transparent);
+  border: var(--rule-hairline) solid var(--color-rule);
+  border-radius: var(--radius-pill);
+  box-shadow: var(--shadow-book-soft);
+  font-size: var(--text-sm);
+  white-space: nowrap;
+  backdrop-filter: blur(var(--space-sm));
+}
+
+.duomei-lang-toggle > span {
+  opacity: 0.4;
+}
+
+.duomei-lang-toggle button {
+  min-inline-size: 2rem;
+  padding: var(--space-3xs) var(--space-xs);
+  color: inherit;
+  font: inherit;
+  letter-spacing: 0.04em;
+  background: transparent;
+  border: 0;
+  border-radius: var(--radius-pill);
+  opacity: 0.55;
+  cursor: pointer;
+  transition:
+    background-color var(--dur-short) var(--ease-out),
+    opacity var(--dur-short) var(--ease-out);
+}
+
+.duomei-lang-toggle button[aria-pressed="true"] {
+  opacity: 1;
+  background: color-mix(in oklch, var(--color-ink) 9%, transparent);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .duomei-lang-toggle button:hover {
+    opacity: 1;
+  }
+}
+
+.duomei-lang-toggle button:focus-visible {
+  outline: var(--rule-focus) solid var(--color-focus);
+  outline-offset: var(--space-3xs);
+}
+
+.xiaoyuan-lang {
+  position: fixed;
+  inset-block-start: max(var(--space-md), env(safe-area-inset-top, 0px));
+  inset-inline-start: calc(max(var(--space-md), env(safe-area-inset-left, 0px)) + 10.25rem);
+  z-index: var(--z-sticky);
+  transition: opacity var(--dur-short) var(--ease-out);
+}
+
+/* Hidden together with the back link while the full music player is open. */
+body:has(.duomei-music-player:not(.is-minimized)) .xiaoyuan-lang {
+  opacity: 0;
+  pointer-events: none;
+}
+
+html.lang-en .xiaoyuan-lang {
+  inset-inline-start: calc(max(var(--space-md), env(safe-area-inset-left, 0px)) + 13.25rem);
+}
+
+/* "← Back to Duomei" is wider than "← 返回多美": slide the minimized orb over to match. */
+html.lang-en body:has(.xiaoyuan-page) .duomei-music-player.is-minimized {
+  inset-inline-start: calc(max(var(--space-md), env(safe-area-inset-left, 0px)) + 10.5rem);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .duomei-lang-toggle button {
+    transition: none;
+  }
+}
