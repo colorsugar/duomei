@@ -1,0 +1,76 @@
+--- a/src/main.js	2026-10-14 17:15:58
++++ b/src/main.js	2026-10-14 17:15:58
+@@ -3156,6 +3156,26 @@
+     }
+   }
+   catch (err) { loadErrors.add('shader');showLoadError('材质准备失败，请重试');console.warn('[多美的夏日小院] 着色器预热失败', err); }
++  // Dry run of one real frame: every pass (pond mirror / refraction / composer targets) draws with its
++  // own render target and clipping state, which compileAsync(scene, camera) above does not see. Ask
++  // for those exact programs in the background now instead of linking ~140 of them in frame 1.
++  if (IS_GARDEN) {
++    const pend = [], realRender = renderer.render;
++    renderer.render = function (s, c) { pend.push(this.compileAsync(s, c).catch(() => {})); };
++    try { renderSceneFrame(0); } catch (e) { console.warn('[garden] dry frame', e); } finally { renderer.render = realRender; }
++    await Promise.all(pend);
++    if (globalThis.__loadT) console.info('[load] dry', pend.length, renderer.info.programs?.length, Math.round(performance.now()));
++  }
++  // First use of each linked program reads back all its uniform/attribute locations (~4 ms each,
++  // ~270 programs): done all at once in the first frame it froze the scroll for >1 s. Read them
++  // here a few at a time between frames instead; the results are cached, so drawing is unchanged.
++  try {
++    let t = performance.now();
++    for (const p of renderer.info.programs ?? []) {
++      p.getUniforms(); p.getAttributes();
++      if (performance.now() - t > 12) { await new Promise((r) => requestAnimationFrame(() => r())); t = performance.now(); }
++    }
++  } catch (e) { console.warn('[garden] program warm', e); }
+   // A scene preloaded behind another one hands its GPU uploads over a few
+   // milliseconds per frame, so the scene on screen keeps moving meanwhile.
+   // Every texture and buffer goes to the GPU before the garden is shown, so nothing pops in or
+--- a/src/scenes/garden.js	2026-10-14 17:15:58
++++ b/src/scenes/garden.js	2026-10-14 17:15:58
+@@ -947,6 +947,7 @@
+   };
+   // 太湖石 (procedural, src/scenes/taihuStone.js): pierced, wrinkled grey limestone peaks and bank stones.
+   // items: [variant, x, y, z, height, rotY, tilt]; variants 0–3 are slender peaks, 4–5 low bank stones.
++  await yieldBuild(); // split the long rock/tree stretch across frames
+   const taihuKit = makeTaihuKit({ seed: 11, variants: 6 });
+   taihuKit.material.color.set(0x7d7f7a); // weathered grey limestone, not plaster-white, under the warm sun
+   // bank stones (low, many, mostly seen from a distance) skip the per-pixel wrinkle bump
+@@ -974,6 +975,7 @@
+   // 云冈: a heaped rockery on the south bank — one main peak, flanking peaks, bank stones round its foot.
+   // Stones are placed with intent, never scattered: one rockery (云冈) on the south bank, one specimen
+   // peak facing the hall, one by the spring in 殿春簃. The pond edge is the stacked-stone bank.
++  await yieldBuild(); // split the long rock/tree stretch across frames
+   const rockeryG = taihu(taihuRockery(taihuKit, { x: RK.x - 0.2, z: RK.z + 0.2, y: GROUND - 0.25, count: 6, spread: 1.8, height: 3.2, seed: 5 }), { name: 'rockery' });
+   // 立峰: single specimen peaks in the courts, the way a Suzhou court frames one fine stone.
+   const peaks = [[1, 2.2, -11.0, 2.6, 0.8]]; // 立峰 in the hall forecourt, seen from the hall door
+@@ -1027,6 +1029,7 @@
+     }
+   }
+   void [boulder01, nb02, nb03, nb05, nbs01, nrocks01, rock09, stone01, toLimestone];
++  await yieldBuild(); // split the long rock/tree stretch across frames
+   // 荷塘: two stands of lotus — the north-west bay and the south-east corner by 槃涧; the middle stays open water.
+   {
+     const LOTUS_EDGE = +(globalThis.location?.search.match(/lotusedge=([-\d.]+)/)?.[1] ?? 0.3); // ?debug&lotusedge=0 = old layout
+@@ -1084,10 +1087,12 @@
+   // Old garden pines are big, spreading trees (the court's main tree), not poles: larger needle pads.
+   const PINE = { barkMat: pineBark, flowers: false, leafKind: 'pine', leafH: [0.36, 0.42], leafS: [0.3, 0.42], leafL: [0.1, 0.15], perTip: 46, leafSize: 1.7 }; // dense needle pads
+   const PT = (kind) => LAYOUT.planting.filter((p) => p.kind === kind);
++  await yieldBuild(); // split the long rock/tree stretch across frames
+   for (const [i, p] of PT('松').entries()) pTree({ x: p.x, z: p.z, height: p.r > 1.25 ? 11 : 12.5, maxDepth: 4, spreadK: 1.25, lean: [0.1, 0.35], ...PINE, v2: i ? 'lacebark' : undefined, lean2: i ? [0.05, 0.05] : undefined, umbrella: !i && PINE_UMBRELLA, height2: i ? undefined : PINE_UMBRELLA ? 8.5 : 9.5 }); // 古松, 白皮松: broad, layered crowns
+   for (const p of PT('柏')) pTree({ x: p.x, z: p.z, height: 12, maxDepth: 4, spreadK: 0.8, lean: [0.03, 0.05], ...PINE }); // 古柏
+   // 罗汉松 foliage from the scanned Podocarpus twig (CC0), baked to a card.
+   const yew = new THREE.TextureLoader(kit.manager).load(`${import.meta.env.BASE_URL}assets/garden/yew_card.png`); yew.colorSpace = THREE.SRGBColorSpace; yew.anisotropy = 8;
++  await yieldBuild(); // split the long rock/tree stretch across frames
+   pTree({ x: 1.4, z: 15.6, height: 5.5, maxDepth: 3, spreadK: 1.4, lean: [0.2, -0.3], flowers: false, barkMat: pbr('bark_brown_02', { roughness: 0.92 }), leafMap: yew, leafSize: 1.3, perTip: 30, leafH: [0.2, 0.3], leafS: [0.05, 0.15], leafL: [0.7, 0.85] }); // 罗汉松
+   for (const p of PT('枫')) pTree({ x: p.x, z: p.z, height: 6, maxDepth: 3, flowers: false, leafKind: 'maple', leafH: [0.985, 1.02], leafS: [0.72, 0.88], leafL: [0.34, 0.44] }); // 红枫
+   void pine;
+@@ -1137,6 +1142,7 @@
+   for (const [x, , z] of magnolias) bed(x, z, 2.0);
+   // The decimated scan has disconnected twig triangles and shredded foliage
+   // at walking distance. Use continuous tapered branches for these crowns.
++  await yieldBuild(); // split the long rock/tree stretch across frames
+   for(const [x,,z,h] of magnolias)pTree({x,z,height:h,maxDepth:4,spreadK:1.05,flowers:false,fallingPetals:false,leafSize:1.5,perTip:30,leafH:[.29,.36],leafS:[.3,.5],leafL:[.25,.36],barkMat:pbr('bark_brown_02',{roughness:.9})});
+   // 桂花: a small grove of rounded evergreen crowns in the SW court (小山丛桂) and two by the east walk.
+   const GUI = { flowers: false, maxDepth: 3, spreadK: 1.25, leafH: [0.24, 0.3], leafS: [0.4, 0.55], leafL: [0.2, 0.3], perTip: 30, barkMat: pbr('bark_brown_02', { roughness: 0.92 }) };
