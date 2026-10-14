@@ -1,20 +1,26 @@
-/* ZH/EN switch for the 多美的夏日小院 / 诗语江南 scene runtime (prebuilt bundle).
+/* ZH/EN/JA switch for the 多美的夏日小院 / 诗语江南 scene runtime (prebuilt bundle).
  * Chinese is the default and is never rewritten: in zh mode this script only listens.
  * In en mode it swaps visible text and accessible labels through xy-i18n-en.js, keeps classical
  * verse in Chinese with the English beneath, and restores every original on switching back.
- * Language: ?lang=en|zh, else localStorage "duomei-lang", else zh. The /xiaoyuan shell
+ * Other languages register a pack on window.__XY_I18N[lang] (xy-i18n-ja.js); en may also come from
+ * window.__XY_I18N_EN. Language: ?lang=zh|en|ja, else localStorage "duomei-lang", else zh. The /xiaoyuan shell
  * posts {type: "duomei-lang", lang} to switch live without reloading the scene. */
 (function () {
   var KEY = "duomei-lang";
   var ATTRS = ["aria-label", "title", "placeholder", "aria-valuetext", "alt"];
-  var pack = window.__XY_I18N_EN;
-  if (!pack) return;
-  var D = pack.dict, POEMS = pack.poems, RULES = pack.rules;
+  var PACKS = window.__XY_I18N || {};
+  if (!PACKS.en && window.__XY_I18N_EN) PACKS.en = window.__XY_I18N_EN;
+  function known(l) { return l === "zh" || (typeof l === "string" && Object.prototype.hasOwnProperty.call(PACKS, l)); }
+  var D = {}, POEMS = {}, RULES = [];
+  function use(l) { var p = PACKS[l]; if (p) { D = p.dict; POEMS = p.poems; RULES = p.rules; } }
+  function htmlLang(l) { return l === "zh" ? "zh-CN" : (PACKS[l] && PACKS[l].html) || l; }
   var lang = "zh";
   try {
     var q = new URLSearchParams(location.search).get("lang");
-    lang = q === "en" || q === "zh" ? q : (localStorage.getItem(KEY) === "en" ? "en" : "zh");
+    var saved = localStorage.getItem(KEY);
+    lang = known(q) ? q : (known(saved) ? saved : "zh");
   } catch (e) {}
+  use(lang);
 
   var textState = new WeakMap(); // node -> {orig, out}
   var attrState = new WeakMap(); // element -> {attr: {orig, out}}
@@ -33,9 +39,10 @@
     for (var i = 0; i < RULES.length; i++) {
       var m = s.match(RULES[i][0]);
       if (m) {
-        if (/^约/.test(s) && TAILS[m[2]]) return "about " + m[1] + "s to " + TAILS[m[2]];
+        if (lang === "en" && /^约/.test(s) && TAILS[m[2]]) return "about " + m[1] + "s to " + TAILS[m[2]];
         var r = RULES[i][1](m, function (x) { var y = trCore(x); return y == null ? x : y; });
-        if (!/[\u4e00-\u9fff]/.test(r)) return r;
+        // Japanese output is itself written in kanji, so only English results are screened for leftovers.
+        if (lang !== "en" || !/[\u4e00-\u9fff]/.test(r)) return r;
       }
     }
     if (s.indexOf(" · ") > 0) {
@@ -86,9 +93,10 @@
     var zh = el.textContent;
     var next = el.nextElementSibling;
     var holder = next && next.classList.contains("info-meaning-en") ? next : null;
-    var en = lang === "en" ? POEMS[zh.trim()] : null;
+    var en = lang !== "zh" ? POEMS[zh.trim()] : null;
     if (!en) { if (holder) holder.remove(); return; }
-    if (!holder) { holder = document.createElement("p"); holder.className = "info-meaning-en"; holder.setAttribute("lang", "en"); el.after(holder); }
+    if (!holder) { holder = document.createElement("p"); holder.className = "info-meaning-en"; el.after(holder); }
+    holder.setAttribute("lang", htmlLang(lang));
     if (holder.textContent !== en) holder.textContent = en;
     holder.hidden = el.hidden;
   }
@@ -96,7 +104,7 @@
     var card = document.getElementById("info-card");
     if (!card) return;
     var h2 = card.querySelector("h2"), sub = card.querySelector(".info-en");
-    if (h2 && sub && lang === "en") {
+    if (h2 && sub && lang !== "zh") {
       var st = h2.firstChild && textState.get(h2.firstChild);
       var zhTitle = st && h2.textContent === st.out ? st.orig : null;
       // English name as the heading; the Chinese name moves into the subtitle line.
@@ -146,7 +154,7 @@
   }
 
   function onMutations(list) {
-    if (busy || lang !== "en") return;
+    if (busy || lang === "zh") return;
     busy = true;
     for (var i = 0; i < list.length; i++) {
       var r = list[i];
@@ -159,23 +167,25 @@
   }
   var titleObs = null;
   function setLang(next, persist) {
-    if (next !== "en" && next !== "zh") return;
-    var prev = lang; lang = next;
+    if (!known(next)) return;
+    var prev = lang;
     if (persist) { try { localStorage.setItem(KEY, next); } catch (e) {} }
-    document.documentElement.lang = next === "en" ? "en" : "zh-CN";
-    document.documentElement.classList.toggle("lang-en", next === "en");
-    if (next === "en") {
+    document.documentElement.lang = htmlLang(next);
+    Object.keys(PACKS).forEach(function (l) { document.documentElement.classList.toggle("lang-" + l, next === l); });
+    if (prev !== "zh" && prev !== next) restoreAll(); // back to the Chinese originals before re-translating
+    lang = next; use(next);
+    if (next !== "zh") {
       if (!observer) {
         observer = new MutationObserver(onMutations);
         observer.observe(document.body, { subtree: true, childList: true, characterData: true, attributes: true, attributeFilter: ATTRS });
-        titleObs = new MutationObserver(function () { if (busy || lang !== "en") return; var t = tr(document.title); if (t) { titleOrig = document.title; busy = true; document.title = t; busy = false; } });
+        titleObs = new MutationObserver(function () { if (busy || lang === "zh") return; var t = tr(document.title); if (t) { titleOrig = document.title; busy = true; document.title = t; busy = false; } });
         var te = document.querySelector("title"); if (te) titleObs.observe(te, { childList: true, characterData: true, subtree: true });
       }
       applyAll();
-    } else if (prev === "en") {
+      observer.takeRecords(); // our own rewrites
+    } else {
       if (observer) { observer.disconnect(); observer = null; }
       if (titleObs) { titleObs.disconnect(); titleObs = null; }
-      restoreAll();
     }
   }
   window.addEventListener("message", function (e) {
@@ -184,10 +194,11 @@
     if (d && d.type === "duomei-lang") setLang(d.lang, false);
   });
   window.__xySetLang = setLang;
-  if (lang === "en") {
-    document.documentElement.lang = "en";
-    document.documentElement.classList.add("lang-en");
-    if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", function () { setLang("en", false); });
-    else setLang("en", false);
+  if (lang !== "zh") {
+    var first = lang; lang = "zh";
+    document.documentElement.lang = htmlLang(first);
+    document.documentElement.classList.add("lang-" + first);
+    if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", function () { setLang(first, false); });
+    else setLang(first, false);
   }
 })();

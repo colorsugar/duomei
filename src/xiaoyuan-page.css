@@ -82,7 +82,7 @@ body:has(.xiaoyuan-page) .duomei-music-player.is-minimized {
   }
 }
 
-/* 中 / EN switch: same paper pill as the back link, placed just after the minimized music orb.
+/* 中 / EN / 日 switch: same paper pill as the back link, placed just after the minimized music orb.
  * The top-right corner belongs to the scene's own info card (and its close button). */
 .duomei-lang-toggle {
   display: inline-flex;
@@ -100,7 +100,11 @@ body:has(.xiaoyuan-page) .duomei-music-player.is-minimized {
   backdrop-filter: blur(var(--space-sm));
 }
 
-.duomei-lang-toggle > span {
+.duomei-lang-toggle__item {
+  display: contents;
+}
+
+.duomei-lang-toggle__item > span {
   opacity: 0.4;
 }
 
@@ -157,6 +161,25 @@ html.lang-en .xiaoyuan-lang {
 /* "← Back to Duomei" is wider than "← 返回多美": slide the minimized orb over to match. */
 html.lang-en body:has(.xiaoyuan-page) .duomei-music-player.is-minimized {
   inset-inline-start: calc(max(var(--space-md), env(safe-area-inset-left, 0px)) + 10.5rem);
+}
+
+/* "← 多美へ戻る" is a little wider than "← 返回多美". */
+html.lang-ja .xiaoyuan-lang {
+  inset-inline-start: calc(max(var(--space-md), env(safe-area-inset-left, 0px)) + 11.25rem);
+}
+
+html.lang-ja body:has(.xiaoyuan-page) .duomei-music-player.is-minimized {
+  inset-inline-start: calc(max(var(--space-md), env(safe-area-inset-left, 0px)) + 8.5rem);
+}
+
+/* Japanese system fonts for the shell (no web-font download). */
+html.lang-ja .xiaoyuan-page,
+html.lang-ja body:has(.xiaoyuan-page) .duomei-music-player {
+  font-family: "Hiragino Mincho ProN", "Yu Mincho", YuMincho, "Noto Serif JP", "Noto Serif CJK JP", serif;
+}
+
+html.lang-ja .duomei-lang-toggle button[lang="en"] {
+  font-family: inherit;
 }
 
 @media (prefers-reduced-motion: reduce) {
