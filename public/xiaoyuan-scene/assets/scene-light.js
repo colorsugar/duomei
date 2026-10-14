@@ -103,6 +103,11 @@ function apply() {
   const prev = Scene.prototype.onBeforeRender;
   Scene.prototype.onBeforeRender = function (renderer, scene, camera, target) {
     if (!state.camera && camera && camera.isPerspectiveCamera && !camera.userData.refractor && camera.layers.isEnabled(0)) state.camera = camera; // 只认主镜头：池面倒影/折射的虚拟镜头不算
+    if (state.camera === camera && !camera.userData.xyPinHook) {
+      // 钉镜头要在每帧一开始（池面先拍倒影）就生效，否则同一帧倒影会按两个机位各拍一次，测出来的帧耗偏高
+      camera.userData.xyPinHook = true; const own = camera.updateMatrixWorld;
+      camera.updateMatrixWorld = function (force) { const p = window.__xyCam; if (p) { this.position.fromArray(p.p); this.lookAt(p.t[0], p.t[1], p.t[2]); } return own.call(this, force); };
+    }
     const pin = window.__xyCam;
     if (pin && camera === state.camera) {
       camera.position.fromArray(pin.p);
