@@ -102,7 +102,7 @@ function apply() {
 {
   const prev = Scene.prototype.onBeforeRender;
   Scene.prototype.onBeforeRender = function (renderer, scene, camera, target) {
-    if (!state.camera && camera && camera.isPerspectiveCamera) state.camera = camera;
+    if (!state.camera && camera && camera.isPerspectiveCamera && !camera.userData.refractor && camera.layers.isEnabled(0)) state.camera = camera; // 只认主镜头：池面倒影/折射的虚拟镜头不算
     const pin = window.__xyCam;
     if (pin && camera === state.camera) {
       camera.position.fromArray(pin.p);
