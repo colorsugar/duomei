@@ -1,0 +1,26 @@
+--- a/src/scenes/gardenLife.js	2026-10-14 16:49:37
++++ b/src/scenes/gardenLife.js	2026-10-14 16:49:37
+@@ -1,3 +1,4 @@
++import { computeBoundsTree, disposeBoundsTree, acceleratedRaycast } from 'three-mesh-bvh';
+ import * as THREE from 'three';
+ import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
+ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+@@ -755,6 +756,10 @@
+   const toePts = toes.filter((_, i) => i % Math.max(1, Math.ceil(toes.length / 40)) === 0);
+   const stones = []; garden.traverse((o) => { if (o.isMesh && /bank/.test(o.name)) stones.push(o); });
+   const rc = new THREE.Raycaster(), down = new THREE.Vector3(0, -1, 0), o3 = new THREE.Vector3();
++  // Load time: ~6 500 downward rays against the bank stones took ~9 s brute force. A temporary BVH on the
++  // stones gives the same hits (exact triangle tests, same nearest point) in a fraction; removed after the fit.
++  const bvhTemp = [];
++  for (const o of stones) if (o.geometry && !o.geometry.boundsTree) { computeBoundsTree.call(o.geometry); bvhTemp.push([o, o.raycast]); o.raycast = acceleratedRaycast; }
+   const CELL = 0.015, HALF = 0.42, NG = Math.round((2 * HALF) / CELL) + 1;
+   const heightGrid = (cx, cz) => {
+     const g = new Float32Array(NG * NG).fill(NaN);
+@@ -812,6 +817,7 @@
+     const yAt = (h) => { const u = Math.max(lo, Math.min(hi, (h - best.h) / 0.05 + 16)), i0 = Math.floor(u), i1 = Math.min(hi, i0 + 1); return Math.max(yaws[i0], yaws[i1]); };
+     return { p: new THREE.Vector3(best.x, best.f.y, best.z), face: best.h, hMin: best.h + (lo - 16) * 0.05, hMax: best.h + (hi - 16) * 0.05, yAt, gap: best.f.gap, mean: best.f.mean, top };
+   }).filter(Boolean);
++  for (const [o, rcFn] of bvhTemp) { o.raycast = rcFn; disposeBoundsTree.call(o.geometry); }
+   if (!SITES.length) return null;
+   const n = SITES.length;
+   const pose = new THREE.InstancedBufferAttribute(new Float32Array(n * 4), 4); geo.setAttribute('aEg', pose);
