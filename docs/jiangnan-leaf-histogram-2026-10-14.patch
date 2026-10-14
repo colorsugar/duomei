@@ -1,0 +1,17 @@
+--- a/src/tree.js	2026-10-14 17:30:33
++++ b/src/tree.js	2026-10-14 17:30:33
+@@ -691,8 +691,12 @@
+         w = Math.max(1, w >> 1); h = Math.max(1, h >> 1);
+         const c = document.createElement('canvas'); c.width = w; c.height = h; const g = c.getContext('2d');
+         g.imageSmoothingQuality = 'high'; g.drawImage(src, 0, 0, w, h);
+-        const d = g.getImageData(0, 0, w, h); const a = []; for (let i = 3; i < d.data.length; i += 4) a.push(d.data[i]);
+-        const sorted = a.slice().sort((x, y) => y - x), cut = sorted[Math.min(sorted.length - 1, Math.floor(cov * sorted.length))] || 1;
++        // same cut as sorting every alpha value high→low and reading index ⌊cov·n⌋, from a 256-bin histogram
++        const d = g.getImageData(0, 0, w, h), n = d.data.length / 4, hist = new Uint32Array(256);
++        for (let i = 3; i < d.data.length; i += 4) hist[d.data[i]]++;
++        const at = Math.min(n - 1, Math.floor(cov * n)); let cut = 0;
++        for (let v = 255, seen = 0; v >= 0; v--) { seen += hist[v]; if (seen > at) { cut = v; break; } }
++        cut = cut || 1;
+         const k = 100 / Math.max(cut, 1); for (let i = 3; i < d.data.length; i += 4) d.data[i] = Math.min(255, d.data[i] * k);
+         g.putImageData(d, 0, 0); mips.push(c); src = c;
+       }
