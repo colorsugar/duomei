@@ -270,7 +270,9 @@ test("keeps the full NetEase playlist native, fixed at the top of every scene, a
   assert.match(musicPlayerSource, /\/api\/music-stream\?id=/);
   assert.match(musicPlayerSource, /findPlayableIndex/);
   assert.match(musicPlayerSource, /track\.playable && !failedTrackIdsRef\.current\.has\(track\.id\)/);
-  assert.match(musicPlayerSource, /搜索 \$\{playableCount\} 首可播放歌曲/);
+  // Player copy now lives in the i18n tables (Chinese stays the default wording).
+  assert.match(musicPlayerSource, /t\("music\.searchCount", \{ count: playableCount \}\)/);
+  assert.match(readFileSync(new URL("../i18n/zh.ts", import.meta.url), "utf8"), /"music\.searchCount": "搜索 \{count\} 首可播放歌曲"/);
   assert.doesNotMatch(musicPlayerSource, /2_270|PLAYABLE \/|原歌单/);
   // The player cannot be dragged or placed: no long-press, pointer capture, stored position, or autoplay.
   assert.doesNotMatch(musicPlayerSource, /setPointerCapture|LONG_PRESS|beginOrbLongPress|dragRef|music-player-position|containFloatingWidget|长按|AUTOPLAY|tryAutoplay/);
@@ -302,7 +304,7 @@ test("keeps the full NetEase playlist native, fixed at the top of every scene, a
   assert.match(neteaseClientSource, /NETEASE_DEFAULT_TRACK_ID = "28568227"/);
   assert.match(musicPlayerSource, /--music-progress/);
   assert.match(musicPlayerSource, /if \(pointerFocusGuardRef\.current\) return/);
-  assert.match(musicPlayerSource, /className="duomei-music-cover"[\s\S]*aria-label="打开歌单"/);
+  assert.match(musicPlayerSource, /className="duomei-music-cover"[\s\S]*aria-label=\{t\("music\.openPlaylist"\)\}/);
   assert.match(musicPlayerSource, /onPointerDown=\{seekFromPointer\}/);
   assert.match(musicPlayerSource, /fetchNeteaseLyrics/);
   assert.match(musicPlayerSource, /className="duomei-music-label"/);

@@ -1,0 +1,5 @@
+/* 场景运行时补丁（预构建包之外）。
+ * 雨量控件从底栏移进了「烟雨」弹层（#142），但旧规则 .auto-touring / .manual-roaming #rain-controls{display:none}
+ * 仍在，导致自动游览或漫游时弹层只剩一条空白，雨也关不掉。弹层里的控件始终显示。 */
+.auto-touring #rain-pop #rain-controls:not([hidden]),
+.manual-roaming #rain-pop #rain-controls:not([hidden]) { display: flex; }

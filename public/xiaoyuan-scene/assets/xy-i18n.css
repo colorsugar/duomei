@@ -1,0 +1,19 @@
+/* English typography for the scene runtime; only applies under html.lang-en. */
+html.lang-en {
+  --serif: "Iowan Old Style", "Palatino", Georgia, "Times New Roman", "Songti SC", "Noto Serif SC", serif;
+  --sans: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Inter, "PingFang SC", "Noto Sans SC", sans-serif;
+}
+html.lang-en #app, html.lang-en #app * { letter-spacing: normal !important; }
+html.lang-en #hint { max-inline-size: min(46rem, 92vw); text-wrap: balance; }
+html.lang-en #info-card .info-en { font-family: var(--serif); letter-spacing: .08em; }
+html.lang-en #info-card .info-use { hyphens: auto; text-wrap: pretty; }
+html.lang-en #info-card .info-meaning { font-size: 13px; letter-spacing: .06em; }
+html.lang-en #info-card .info-meaning-en {
+  white-space: pre-line;
+  margin: 6px 0 0;
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--ink-soft);
+}
