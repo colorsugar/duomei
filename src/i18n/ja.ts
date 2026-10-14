@@ -4,6 +4,7 @@ import type { I18nKey } from "./zh";
 export const ja: Record<I18nKey, string> = {
   "lang.switch": "言語を切り替える",
   "scene.back": "多美へ戻る",
+  "scene.backShort": "多美",
   "xiaoyuan.title": "多美の夏の小庭",
   "xiaoyuan.docTitle": "多美の夏の小庭 | DUOMEI",
   "xiaoyuan.frameTitle": "多美の夏の小庭 · 3Dシーン",

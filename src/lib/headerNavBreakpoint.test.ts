@@ -85,7 +85,8 @@ test("keeps a reachable hamburger on phones and tablets without collapsing touch
 test("uses one reduced-motion-safe paper reveal across public route changes", () => {
   assert.match(appSource, /function PublicRoutePaperVeil/);
   assert.match(appSource, /if \(previousPathRef\.current === pathname\) return/);
-  assert.match(appSource, /disabled=\{isAdmin \|\| isGuyuReader\}/);
+  // the 3D scenes (/xiaoyuan, /jiangnan) bring their own paper loading screen: no section board over them
+  assert.match(appSource, /disabled=\{isAdmin \|\| isGuyuReader \|\| isXiaoyuan\}/);
   assert.match(appSource, /pathname\.startsWith\("\/note\/"\)/);
   assert.match(siteCss, /duomeiRoutePaperReveal 1300ms cubic-bezier/);
   assert.match(siteCss, /duomeiRouteNoteReveal[\s\S]*?animation-duration:\s*880ms/);
