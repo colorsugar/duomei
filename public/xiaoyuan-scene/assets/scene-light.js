@@ -10,6 +10,8 @@ const FOLIAGE = /foliage|needle|leaf|leaves|shrub|grass|calamus|lance|pinna|mond
 const FLOWER = /blossom|floret|lotus|petal|flower|lily|bloom|plum|peach|azalea|rose|violet/i;
 const SKIP = /stem|bed|gravel|pebble|mist|blob|pool|drop|bark|trunk/i;
 
+// 原始材质参数只记一次（场景切换重扫时不会把已调过的值当原值，避免叠加发白）。
+const ORIG = new WeakMap();
 const state = { scene: null, sun: null, fill: null, mats: new Map(), lastScan: 0 };
 window.__xyLight = state;
 
@@ -33,12 +35,13 @@ function scan(scene) {
     for (const mat of [].concat(obj.material || [])) {
       if (!mat || !mat.color || state.mats.has(mat)) continue;
       const kind = classify(obj, mat);
-      state.mats.set(mat, kind && {
+      if (kind && !ORIG.has(mat)) ORIG.set(mat, {
         kind,
         color: mat.color.clone(),
         emissive: mat.emissive ? mat.emissive.clone() : null,
         ei: mat.emissiveIntensity ?? 1,
       });
+      state.mats.set(mat, kind ? ORIG.get(mat) : null);
     }
   });
   if (!state.fill) {
@@ -72,10 +75,12 @@ function apply() {
       // 无贴图的纯色叶子：只轻提一点，免得发灰发白。
       mat.color.copy(info.color).multiplyScalar(1.1 + 0.12 * low);
     } else if (info.kind === "leaf") {
-      mat.color.copy(info.color).multiplyScalar(1.24 + 0.16 * low);
+      // 带贴图的白底叶片（蕨、苔、盆栽、灌木）提亮要克制，否则浅色叶会发黄发白。
+      const pale = mat.map && info.color.r > 0.9 && info.color.g > 0.9;
+      mat.color.copy(info.color).multiplyScalar(pale ? 1.1 + 0.1 * low : 1.24 + 0.16 * low);
       if (info.emissive) {
-        mat.emissive.setRGB(0.07, 0.1, 0.05).add(info.emissive);
-        mat.emissiveIntensity = Math.max(info.ei, 0.22 + 0.3 * low);
+        mat.emissive.copy(info.emissive).add(state.green ||= new mat.emissive.constructor(0.035, 0.06, 0.025));
+        mat.emissiveIntensity = Math.max(info.ei, (pale ? 0.2 : 0.3) + 0.3 * low);
       }
     } else if (info.kind === "flower") {
       mat.color.copy(info.color).multiplyScalar(1 - 0.24 * noon);
@@ -84,10 +89,18 @@ function apply() {
   if (state.fill) state.fill.intensity = 0.2 + 1.35 * low;
 }
 
-if (!off) {
+// 截图对比用：window.__xyCam = { p: [x,y,z], t: [x,y,z] } 时把镜头钉在固定位置（开/关光照都生效）。
+{
   const prev = Scene.prototype.onBeforeRender;
   Scene.prototype.onBeforeRender = function (renderer, scene, camera, target) {
-    if (scene === this) {
+    if (!state.camera && camera && camera.isPerspectiveCamera) state.camera = camera;
+    const pin = window.__xyCam;
+    if (pin && camera === state.camera) {
+      camera.position.fromArray(pin.p);
+      camera.lookAt(pin.t[0], pin.t[1], pin.t[2]);
+      camera.updateMatrixWorld();
+    }
+    if (!off && scene === this) {
       const now = performance.now();
       if (!state.scene || (scene !== state.scene && scene.children.length > state.scene.children.length)) {
         state.scene = scene; state.mats.clear(); state.fill = null; state.sun = null; state.lastScan = 0;
