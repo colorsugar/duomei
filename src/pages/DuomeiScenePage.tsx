@@ -53,28 +53,43 @@ export function DuomeiScenePage({ scene }: { scene: SceneId }) {
     });
   }, [scene]);
 
-  // Drop the frames being left once the new scene holds the music (or after the timeout).
-  const dropLeaving = () => {
-    for (const [id, el] of frameEls.current) {
-      if (frames.some((f) => f.id === id && f.state === "leaving")) el.contentWindow?.postMessage({ type: "duomei-bgm-fade" }, window.location.origin);
-    }
-    window.setTimeout(() => setFrames((list) => list.filter((f) => f.state !== "leaving")), 1600);
-  };
-  const leaving = frames.some((f) => f.state === "leaving");
+  // Frames being left are told at once to stop drawing and give their GPU back (their sound runs on until the
+  // hand-over). A door inside the scene already does this itself; the browser's back / forward does not.
+  const notified = useRef(new Set<number>());
+  const timers = useRef<number[]>([]);
+  useEffect(() => () => { for (const timer of timers.current) window.clearTimeout(timer); }, []);
   useEffect(() => {
-    if (!leaving) return;
+    for (const f of frames) {
+      if (f.state !== "leaving" || notified.current.has(f.id)) continue;
+      notified.current.add(f.id);
+      frameEls.current.get(f.id)?.contentWindow?.postMessage({ type: "duomei-scene-leave" }, window.location.origin);
+    }
+  }, [frames]);
+
+  // Drop exactly the frames this switch left (never ones a later switch has just started leaving), once the new
+  // scene holds the music, or after the timeout.
+  const dropLeaving = (ids: number[]) => {
+    for (const id of ids) frameEls.current.get(id)?.contentWindow?.postMessage({ type: "duomei-bgm-fade" }, window.location.origin);
+    timers.current.push(window.setTimeout(() => setFrames((list) => list.filter((f) => !ids.includes(f.id))), 1600));
+  };
+  const leavingKey = frames.filter((f) => f.state === "leaving").map((f) => f.id).join(",");
+  useEffect(() => {
+    if (!leavingKey) return;
+    const ids = leavingKey.split(",").map(Number);
+    const incoming = frames[frames.length - 1].id; // the frame this switch opened
+    let done = false;
+    const drop = () => { if (!done) { done = true; dropLeaving(ids); } };
     const onMessage = (event: MessageEvent) => {
       if (event.origin !== window.location.origin || (event.data as { type?: unknown } | null)?.type !== "duomei-bgm-took") return;
-      const live = frames.find((f) => f.state !== "leaving");
-      if (live && frameEls.current.get(live.id)?.contentWindow === event.source) dropLeaving();
+      if (frameEls.current.get(incoming)?.contentWindow === event.source) drop();
     };
     window.addEventListener("message", onMessage);
-    const timer = window.setTimeout(dropLeaving, LEAVE_TIMEOUT_MS);
+    const timer = window.setTimeout(drop, LEAVE_TIMEOUT_MS);
     return () => {
       window.removeEventListener("message", onMessage);
       window.clearTimeout(timer);
     };
-  }, [leaving, frames]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [leavingKey]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // A new frame shows itself after its loading screen has painted (two frames after load), never a blank frame.
   const onFrameLoad = (frame: SceneFrame) => {
@@ -88,7 +103,7 @@ export function DuomeiScenePage({ scene }: { scene: SceneId }) {
 
   return (
     <main className="xiaoyuan-page" aria-label={t(scene === "jiangnan" ? "jiangnan.title" : "xiaoyuan.title")}>
-      <Link className="xiaoyuan-back" to="/#yunyou">
+      <Link className="xiaoyuan-back" to="/#yunyou" aria-label={t("scene.back")}>
         <span aria-hidden="true">←</span> <span className="xiaoyuan-back__long">{t("scene.back")}</span>
         <span className="xiaoyuan-back__short" aria-hidden="true">{t("scene.backShort")}</span>
       </Link>

@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import { LANGS, LANG_STORAGE_KEY, useI18n, type Lang } from "./I18nProvider";
 
-const LABELS: Record<Lang, { text: string; lang: string; title: string }> = {
-  zh: { text: "中文", lang: "zh-CN", title: "中文" },
-  en: { text: "EN", lang: "en", title: "English" },
-  ja: { text: "日本語", lang: "ja", title: "日本語" },
+const LABELS: Record<Lang, { text: string; short: string; lang: string; title: string }> = {
+  zh: { text: "中文", short: "中", lang: "zh-CN", title: "中文" },
+  en: { text: "EN", short: "EN", lang: "en", title: "English" },
+  ja: { text: "日本語", short: "日", lang: "ja", title: "日本語" },
 };
 
 // A visitor whose browser is not set to Chinese and who has never picked a language: the switch draws the eye
@@ -46,11 +46,13 @@ export function LangToggle({ className = "" }: { className?: string }) {
           type="button"
           lang={LABELS[l].lang}
           title={LABELS[l].title}
+          aria-label={LABELS[l].title}
           aria-pressed={lang === l}
           className={hint === l ? "is-suggested" : undefined}
           onClick={() => { setHint(null); setLang(l); }}
         >
-          {LABELS[l].text}
+          <span className="duomei-lang-toggle__long">{LABELS[l].text}</span>
+          <span className="duomei-lang-toggle__short" aria-hidden="true">{LABELS[l].short}</span>
         </button>
       ))}
     </div>

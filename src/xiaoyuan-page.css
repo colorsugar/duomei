@@ -267,3 +267,51 @@ html.lang-ja .duomei-lang-toggle button[lang="en"] {
     inset-inline-start: calc(max(var(--space-md), env(safe-area-inset-left, 0px)) + 9.7rem);
   }
 }
+
+/* Narrow phones: short language labels (中 / EN / 日, still 44 px each); at 360 px and below also no globe and
+ * tighter pills, so all three stay whole and tappable at 320 / 360 / 390 px in every language. */
+.duomei-lang-toggle__short {
+  display: none;
+}
+
+@media (max-width: 420px) {
+  .duomei-lang-toggle__long {
+    display: none;
+  }
+
+  .duomei-lang-toggle__short {
+    display: inline;
+  }
+}
+
+@media (max-width: 360px) {
+  .duomei-lang-toggle {
+    padding-inline: 4px;
+  }
+
+  .duomei-lang-toggle__globe {
+    display: none;
+  }
+
+  .xiaoyuan-back {
+    padding-inline: 10px;
+  }
+
+  html.lang-en body:has(.xiaoyuan-page) .duomei-music-player.is-minimized {
+    inset-inline-start: calc(max(var(--space-md), env(safe-area-inset-left, 0px)) + 6.2rem);
+  }
+
+  html.lang-en .xiaoyuan-lang {
+    inset-inline-start: calc(max(var(--space-md), env(safe-area-inset-left, 0px)) + 8.9rem);
+  }
+
+  body:has(.xiaoyuan-page) .duomei-music-player.is-minimized,
+  html.lang-ja body:has(.xiaoyuan-page) .duomei-music-player.is-minimized {
+    inset-inline-start: calc(max(var(--space-md), env(safe-area-inset-left, 0px)) + 4.9rem);
+  }
+
+  .xiaoyuan-lang,
+  html.lang-ja .xiaoyuan-lang {
+    inset-inline-start: calc(max(var(--space-md), env(safe-area-inset-left, 0px)) + 7.6rem);
+  }
+}
