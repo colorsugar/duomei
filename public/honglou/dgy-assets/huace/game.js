@@ -8,8 +8,27 @@
   const ROOTP = '../../'; // 本页在 dgy-assets/huace/，albums.json 里的路径相对游戏根
   const context = document.createElement('details');
   context.className = 'album-context'; context.id = 'album-context';
-  context.innerHTML = '<summary>卷首提要</summary><p class="album-context-text"></p><p class="album-context-preface"></p>';
+  context.innerHTML = '<summary>卷首提要</summary><div class="ctx-body"><div class="ctx-in"><p class="album-context-text"></p><p class="album-context-preface"></p></div></div>';
   $('.notes-column').insertBefore(context, $('.narration-layer'));
+  // 卷首提要：点开平滑展开并滚进视野，收起平滑合上并滚回「卷首提要」条（用 grid 0fr→1fr 做高度动画，不受字号档 zoom 影响）
+  const ctxSum = context.querySelector('summary'), ctxBody = context.querySelector('.ctx-body');
+  let ctxBusy = false;
+  const smooth = () => (reduced() ? 'auto' : 'smooth');
+  async function toggleContext() {
+    if (ctxBusy) return; ctxBusy = true;
+    try {
+      if (!context.open) {
+        context.open = true;
+        if (!reduced()) { try { await ctxBody.animate([{ gridTemplateRows: '0fr', opacity: 0 }, { gridTemplateRows: '1fr', opacity: 1 }], { duration: 340, easing: 'cubic-bezier(.2,.8,.2,1)' }).finished; } catch (e) { /* */ } }
+        context.scrollIntoView({ behavior: smooth(), block: 'nearest' });
+      } else {
+        if (!reduced()) { try { await ctxBody.animate([{ gridTemplateRows: '1fr', opacity: 1 }, { gridTemplateRows: '0fr', opacity: 0 }], { duration: 280, easing: 'cubic-bezier(.4,0,1,1)' }).finished; } catch (e) { /* */ } }
+        context.open = false;
+        ctxSum.scrollIntoView({ behavior: smooth(), block: 'nearest' });
+      }
+    } finally { ctxBusy = false; }
+  }
+  ctxSum.addEventListener('click', (e) => { e.preventDefault(); toggleContext(); });
   let RAW = null, booted = null;
   const SEASON1 = (s) => (/春/.test(s) ? '春' : /夏|暑/.test(s) ? '夏' : /秋/.test(s) ? '秋' : /冬|雪/.test(s) ? '冬' : '');
   function load() {
@@ -73,7 +92,8 @@
     const v = document.createElement('video'); v.className = 'hz-loop'; v.muted = true; v.defaultMuted = true; v.loop = true; v.playsInline = true; v.setAttribute('playsinline', ''); v.setAttribute('muted', ''); v.setAttribute('aria-hidden', 'true'); v.disablePictureInPicture = true; v.preload = 'auto';
     v.src = p.loopWebm && !v.canPlayType('video/mp4') ? p.loopWebm : p.loop;
     v.addEventListener('playing', () => v.classList.add('on'), { once: true }); v.addEventListener('error', () => { if (vid === v) dropVid(); else v.remove(); }, { once: true });
-    $('#painting').insertBefore(v, $('#particles')); vid = v; v.play().catch(() => {});
+    try { v.poster = p.img; } catch (e) { /* */ }
+    $('#art').after(v); vid = v; v.play().catch(() => {});
     inView = true;
     if (typeof IntersectionObserver === 'function') { vio = new IntersectionObserver((es) => { for (const e of es) { if (vid !== v) return; inView = e.isIntersecting; syncVid(); } }, { threshold: 0.15 }); vio.observe(v); }
   }
@@ -86,7 +106,8 @@
     context.querySelector('.album-context-text').textContent = album.background;
     context.querySelector('.album-context-preface').textContent = album.preface;
     context.open = pageIndex === 0;
-    $('#visit').hidden = !p.placeId;
+    $('#visit').hidden = !p.placeId || DESK; // 书案模式（?desk）不进园：「到园中此处」不显示
+    paintCount(p, album); buildNav(); markNav(); applyMove(); shownAt = performance.now();
     // 只报告真实展到的分镜；后台预载和合上后的迟到渲染不记游记。
     if (parent !== window && current === readingAlbum && pageIndex === readingIndex && !$('#book').hidden && parent.document.querySelector('.dgy-huace.on')) {
       parent.document.dispatchEvent(new parent.CustomEvent('dgy-journal-read', {
@@ -108,6 +129,104 @@
     if (ovWatch || parent === window) return; ovWatch = true;
     try { const el = parent.document.querySelector('.dgy-huace'); if (el) new MutationObserver(() => { if (!vid && overlayOn() && !$('#book').hidden) startVid(pageData()); else syncVid(); }).observe(el, { attributes: true, attributeFilter: ['class'] }); } catch (e) { /* */ }
   }
+
+  // ===== 书案模式（?desk）：不进 3D，「到园中此处」隐藏 =====
+  const DESK = (() => { try { return /[?&]desk\b/.test(location.search) || (parent !== window && /[?&]desk\b/.test(parent.location.search)); } catch (e) { return false; } })();
+
+  // ===== 多幅提示：页码 / 圆点 / 缩略图带 / 左右箭头 / 自动轮换 =====
+  function paintCount(p, album) { $('#count').innerHTML = '<b>' + cn(p.no) + '</b><i>/</i><span>' + cn(album.pages.length) + '</span>'; $('#count').setAttribute('aria-label', '第' + cn(p.no) + '幅，共' + cn(album.pages.length) + '幅'); }
+  function buildNav() {
+    const album = ALBUMS[current], dots = $('#hz-dots'), strip = $('#hz-strip');
+    if (dots.dataset.album === current && dots.children.length === album.pages.length) return;
+    dots.dataset.album = current; dots.replaceChildren(); strip.replaceChildren();
+    $('#hz-nav').classList.toggle('many', album.pages.length > 9);
+    album.pages.forEach((p, i) => {
+      const label = '第' + cn(p.no) + '幅 · ' + p.title;
+      const d = document.createElement('button'); d.type = 'button'; d.className = 'hz-dot'; d.setAttribute('aria-label', label); d.title = label; d.onclick = () => userGo(i); dots.append(d);
+      const t = document.createElement('button'); t.type = 'button'; t.className = 'hz-th'; t.setAttribute('aria-label', label); t.title = label; t.onclick = () => userGo(i);
+      const im = new Image(); im.src = p.thumb || p.img; im.alt = ''; im.decoding = 'async'; im.draggable = false; t.append(im);
+      const n = document.createElement('span'); n.textContent = cn(p.no); t.append(n); strip.append(t);
+    });
+  }
+  function markNav() {
+    const dots = $('#hz-dots'), strip = $('#hz-strip');
+    [...dots.children].forEach((d, i) => d.setAttribute('aria-current', String(i === pageIndex)));
+    [...strip.children].forEach((t, i) => t.setAttribute('aria-current', String(i === pageIndex)));
+    const cur = strip.children[pageIndex];
+    if (cur) { const l = cur.offsetLeft - (strip.clientWidth - cur.offsetWidth) / 2; try { strip.scrollTo({ left: Math.max(0, l), behavior: reduced() ? 'auto' : 'smooth' }); } catch (e) { strip.scrollLeft = Math.max(0, l); } }
+  }
+  const userGo = (i) => { lastAct = performance.now(); return turn(i); };
+  $('#arrow-prev').onclick = () => userGo(pageIndex - 1); $('#arrow-next').onclick = () => userGo(pageIndex + 1);
+  $('#prev').onclick = () => userGo(pageIndex - 1); $('#next').onclick = () => userGo(pageIndex + 1);
+
+  // 每幅不同的推镜（起点、方向、放大 / 缩小各异）：Web Animations 驱动，来回往复；减少动态 / 动效关就不动
+  const MOVES = [
+    [{ s: 1.02, x: 0, y: 0 }, { s: 1.09, x: 0, y: 0 }],
+    [{ s: 1.07, x: 2.6, y: 0 }, { s: 1.07, x: -2.6, y: 0 }],
+    [{ s: 1.10, x: 0, y: 0 }, { s: 1.02, x: 0, y: 0 }],
+    [{ s: 1.07, x: -2.6, y: 1.6 }, { s: 1.07, x: 2.6, y: -1.6 }],
+    [{ s: 1.02, x: 0, y: 0 }, { s: 1.09, x: 2.8, y: 2 }],
+    [{ s: 1.07, x: 0, y: -2.6 }, { s: 1.07, x: 0, y: 2.6 }],
+  ];
+  const tf = (m) => 'translate(' + m.x + '%,' + m.y + '%) scale(' + m.s + ')';
+  let artAnim = null, artFrames = null, artTiming = null;
+  function applyMove() {
+    const art = $('#art'); try { artAnim && artAnim.cancel(); } catch (e) { /* */ } artAnim = null;
+    if (reduced() || !motionOK()) return;
+    const mv = MOVES[pageIndex % MOVES.length];
+    artFrames = [{ transform: tf(mv[0]) }, { transform: tf(mv[1]) }];
+    artTiming = { duration: 14000, direction: 'alternate', iterations: Infinity, easing: 'ease-in-out' };
+    try { artAnim = art.animate(artFrames, artTiming); } catch (e) { /* */ }
+  }
+
+  // 交叉淡化翻幅：旧画（连同在播的循环片）留在上层 0.8 秒淡出（手动 0.5 秒），新画在下层已解码好；不再有卷页
+  const ready = (src, ms = 1800) => new Promise((res) => {
+    if (!src) return res();
+    let done = false; const fin = () => { if (!done) { done = true; res(); } };
+    let im = imageCache.get(src); if (!im) { im = new Image(); im.src = src; imageCache.set(src, im); }
+    (im.decode ? im.decode() : Promise.reject()).then(fin, fin); setTimeout(fin, ms);
+  });
+  function detachVid() { const v = vid; if (vio) { try { vio.disconnect(); } catch (e) { /* */ } vio = null; } vid = null; return v; }
+  turn = async function (n, opts) {
+    const album = ALBUMS[current], len = album.pages.length;
+    if (busy || $('#book').hidden || len < 2) return;
+    n = ((n % len) + len) % len; if (n === pageIndex) return;
+    const auto = !!(opts && opts.auto), token = ++turnRequest;
+    $('#note-dialog').close(); finishNarration(); if (!auto) paperSound();
+    await ready(album.pages[n].img);
+    if (token !== turnRequest || busy) return;
+    const painting = $('#painting'), art = $('#art'); let box = null;
+    if (!reduced() && motionOK()) {
+      box = document.createElement('div'); box.className = 'hz-ghost'; box.setAttribute('aria-hidden', 'true');
+      const g = art.cloneNode(false); g.removeAttribute('id'); g.alt = ''; box.append(g);
+      const ov = detachVid(); if (ov) { ov.classList.add('on'); box.append(ov); }
+      painting.insertBefore(box, $('#art-loading'));
+      if (artAnim && artFrames) { try { const ga = g.animate(artFrames, artTiming); ga.currentTime = artAnim.currentTime; } catch (e) { /* */ } }
+    }
+    pageIndex = n; await renderPage(!auto);
+    if (box) {
+      try { await box.animate([{ opacity: 1 }, { opacity: 0 }], { duration: auto ? 800 : 520, easing: 'ease-in-out', fill: 'forwards' }).finished; } catch (e) { /* */ }
+      const ov = box.querySelector('video'); if (ov) { try { ov.pause(); ov.removeAttribute('src'); ov.load(); } catch (e) { /* */ } }
+      box.remove();
+    }
+  };
+
+  // 自动轮换：每幅停 6 秒；鼠标悬停在书上 / 有操作 / 开着弹层或原文 / 页面不可见 / 点了「暂停」都不转
+  const AUTO_MS = 6000;
+  let autoOn = true, hovering = false, lastAct = 0, shownAt = 0;
+  function setAuto(on) { autoOn = on; const b = $('#hz-auto'); b.setAttribute('aria-pressed', String(on)); b.querySelector('.hz-auto-label').textContent = on ? '轮换中' : '已暂停'; shownAt = performance.now(); }
+  $('#hz-auto').onclick = () => { lastAct = performance.now(); setAuto(!autoOn); };
+  const bookEl = $('#book');
+  bookEl.addEventListener('pointerenter', (e) => { if (e.pointerType === 'mouse') hovering = true; });
+  bookEl.addEventListener('pointerleave', () => { hovering = false; lastAct = performance.now(); });
+  ['pointerdown', 'keydown', 'wheel', 'touchstart'].forEach((ev) => document.addEventListener(ev, () => { lastAct = performance.now(); }, { passive: true, capture: true }));
+  addEventListener('scroll', () => { lastAct = performance.now(); }, { passive: true });
+  setInterval(() => {
+    if (!autoOn || reduced() || !motionOK() || document.hidden || !overlayOn() || bookEl.hidden || busy || hovering || originalOpen) return;
+    if (document.querySelector('dialog[open]') || !ALBUMS[current] || ALBUMS[current].pages.length < 2) return;
+    const now = performance.now(); if (now - Math.max(shownAt, lastAct) < AUTO_MS) return;
+    shownAt = now; turn(pageIndex + 1, { auto: true });
+  }, 400);
   window.HUACE = {
     async open(id, oldPage) {
       await load();

@@ -96,7 +96,7 @@
   // 10-15（界面督察：Chrome 按人第 3 组第 1 首点不开）：连续开合几首诗后再换组，Chrome 里新一组的诗笺整片点不到
   // （elementFromPoint 只落在 #workspace 上，鼠标点了没反应；Safari 没有）。换组渲染完后只在「确实点不到」时把栏重新挂一次版面。
   { const pf = $('#portfolio'); let tick = 0;
-    const stale = () => { const s = $('.slip'); if (!s) return false; const r = s.getBoundingClientRect(); const x = r.left + r.width / 2, y = r.top + r.height / 2;
+    const stale = () => { const s = $('.slip'); if (!s) return false; const r = window.GF && GF.vrect ? GF.vrect(s) : s.getBoundingClientRect(); /* Safari 整页 zoom：换成和 elementFromPoint 同一套坐标 */ const x =r.left + r.width / 2, y = r.top + r.height / 2;
       if (!r.width || x < 0 || y < 0 || x > innerWidth || y > innerHeight) return false; const t = document.elementFromPoint(x, y); return !!t && !s.contains(t) && !t.closest('dialog'); };
     if (pf && /Chrome\//.test(navigator.userAgent)) new MutationObserver(() => {
       const my = ++tick;
@@ -117,7 +117,7 @@
 
   // ——— 锦函：游戏里多一枚「閉」（函面状态也要有出口）；「閉」= 收起整套回到册，「收箋入匣」仍是倒放合函 ———
   const entry = $('#entry');
-  entry.insertAdjacentHTML('beforeend', '<button type="button" class="stamp-btn sg-entry-x" id="sg-entry-x" aria-label="合上詩稿，回到冊">閉</button>');
+  entry.insertAdjacentHTML('beforeend', '<button type="button" class="gf-btn is-seal sg-entry-x" id="sg-entry-x" aria-label="合上詩稿，回到冊">閉</button>');
   $('#sg-entry-x').onclick = () => emit('close');
   $('#close-box').onclick = () => emit('close');
   $('#close-box').setAttribute('aria-label', '合上詩稿，回到冊');

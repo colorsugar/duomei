@@ -1,0 +1,82 @@
+/* 红楼梦影·纸上游 全站共用古风样式（2026-10-16，老大：全站直角、字小、按钮没主次、弹层只能点「閉」）
+   书案主页面与 iframe 子页（畫中有話 huace / 詩稿 shigao / 关系图……）都引用这一份；字号档由 gf.js 写 html[data-fs]。
+   规矩：不许 0 圆角方框；任何文字 ≥ 16px（乘字号档之前）；动画只叠加，不许把内容藏起来。 */
+:root {
+  --gf-paper: #f3e6d0; --gf-paper-2: #e9d9bd; --gf-ink: #2b1a0c; --gf-ink-2: #5a4330;
+  --gf-cinnabar: #9a3b2c; --gf-cinnabar-2: #b8513f; --gf-indigo: #2f4a63; --gf-gold: #c9a063; --gf-ochre: #a9825a;
+  --gf-line: rgba(43, 26, 12, 0.18); --gf-shade: rgba(20, 14, 8, 0.55);
+  --r-sm: 6px; --r-md: 12px; --r-lg: 20px;
+  --tr-in: 220ms; --tr-out: 160ms; --gf-ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+  /* 字号档：用 CSS zoom 整体放大内容层（像浏览器缩放一样重排，不用逐个改写死的 px） */
+  --fs-scale: 1.25;
+}
+html[data-fs="1"] { --fs-scale: 1; }
+html[data-fs="2"] { --fs-scale: 1.12; }
+html[data-fs="3"] { --fs-scale: 1.25; }
+html[data-fs="4"] { --fs-scale: 1.4; }
+/* iframe 子页：整页按档放大 */
+html.gf-zoom-root { zoom: var(--fs-scale); }
+/* 主页面：只放大内容层（书案底图、3D、开函动画不放大） */
+.gf-zoom { zoom: var(--fs-scale); }
+/* 主页面里的册页与几个浮层：放大它们的内层（外框是 fixed 定位，放大外框会连位置一起挪） */
+body.dk-on #hud #panel:not(.pn-solo) > *, #dgyJournal .jnw-mount, #dgyCard > * { zoom: var(--fs-scale); }
+/* 院落 / 人物卡：字放大了，卡也跟着档加宽，免得一行只剩几个字 */
+html #dgyCard { width: min(calc(400px * var(--fs-scale)), calc(100vw - 32px)); max-height: calc(100vh - 150px); border-radius: var(--r-md); }
+/* 卡底按钮（第五回·閱 / 翻閱題記 / 判詞畫）：字放大后被挤成三行 → 按钮里不折行，放不下整颗换行 */
+html #dgyCard .cd-pbtns { flex-wrap: wrap; justify-content: flex-start; }
+html #dgyCard .cd-pbtns > * { white-space: nowrap; flex: 1 1 auto; justify-content: center; }
+
+/* ——— 三类按钮 ——— */
+.gf-btn { font: inherit; font-size: max(16px, 1em); line-height: 1.1; padding: 0.62em 1.35em; border-radius: var(--r-md); border: 1.5px solid var(--gf-cinnabar);
+  background: rgba(255, 250, 238, 0.7); color: var(--gf-cinnabar); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 0.45em;
+  transition: transform var(--tr-in) var(--gf-ease), background-color var(--tr-in), box-shadow var(--tr-in), color var(--tr-in); -webkit-tap-highlight-color: transparent; }
+.gf-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 14px rgba(43, 26, 12, 0.18), 0 0 0 3px rgba(201, 160, 99, 0.18); }
+.gf-btn:active { transform: translateY(0) scale(0.97); box-shadow: 0 1px 4px rgba(43, 26, 12, 0.2); }
+.gf-btn:focus-visible { outline: 2px solid var(--gf-gold); outline-offset: 2px; }
+.gf-btn[disabled], .gf-btn[aria-disabled="true"] { opacity: 0.42; cursor: default; transform: none; box-shadow: none; }
+/* 主按钮：如意云头（两端收成云头的朱砂实底） */
+.gf-btn.is-primary { background: linear-gradient(180deg, #a8432f, #8c3324); color: #fff6e8; border-color: #c9a063;
+  border-radius: 999px; padding-inline: 1.7em; box-shadow: inset 0 0 0 2px rgba(255, 230, 190, 0.22), 0 2px 6px rgba(80, 30, 15, 0.25); }
+.gf-btn.is-primary:hover { background: linear-gradient(180deg, #b8513f, #9a3b2c); box-shadow: inset 0 0 0 2px rgba(255, 230, 190, 0.3), 0 6px 18px rgba(120, 40, 20, 0.3), 0 0 0 3px rgba(201, 160, 99, 0.3); }
+/* 次按钮：海棠描边 */
+.gf-btn.is-secondary { background: rgba(255, 250, 238, 0.82); border-radius: 18px 18px 18px 18px / 22px 22px 22px 22px; }
+/* 印章小圆钮：閉 / 字 / 翻页 */
+.gf-btn.is-seal { width: 2.7em; height: 2.7em; padding: 0; border-radius: 50%; background: radial-gradient(circle at 40% 35%, #fbf1dc, #ecdcbc);
+  color: var(--gf-cinnabar); font-family: inherit; font-weight: 600; box-shadow: inset 0 0 0 3px rgba(154, 59, 44, 0.12), 0 2px 6px rgba(43, 26, 12, 0.2); }
+.gf-btn.is-seal.is-red { background: radial-gradient(circle at 40% 35%, #b8513f, #8c3324); color: #fff3e2; border-color: #c9a063; }
+
+/* ——— 状态印：方形小朱印，不进 flex 拉伸 ——— */
+.gf-seal { display: inline-grid; place-items: center; width: 2.4em; height: 2.4em; writing-mode: horizontal-tb; font-size: 16px; line-height: 1.05;
+  border: 1.5px solid var(--gf-cinnabar); border-radius: 5px; color: var(--gf-cinnabar); transform: rotate(-8deg); align-self: flex-start; flex: none;
+  background: rgba(255, 246, 232, 0.6); letter-spacing: 0; text-align: center; padding: 2px; }
+
+/* ——— 卡片：圆角 + 泥金包角 ——— */
+.gf-card { position: relative; background: var(--gf-paper); border: 1px solid var(--gf-line); border-radius: var(--r-md); }
+.gf-card::before, .gf-card::after { content: ""; position: absolute; width: 18px; height: 18px; border: 2px solid var(--gf-gold); pointer-events: none; }
+.gf-card::before { left: -1px; top: -1px; border-right: 0; border-bottom: 0; border-radius: var(--r-md) 0 0 0; }
+.gf-card::after { right: -1px; bottom: -1px; border-left: 0; border-top: 0; border-radius: 0 0 var(--r-md) 0; }
+
+/* ——— 统一弹层（gf.js 的 layer() / wireDialogs()）——— */
+dialog.gf-dlg { border: none; padding: 0; background: transparent; max-width: min(1120px, calc(100vw - 32px)); max-height: calc(100dvh - 32px); overflow: visible; }
+dialog.gf-dlg::backdrop { background: var(--gf-shade); }
+dialog.gf-dlg[open] { animation: gf-in var(--tr-in) var(--gf-ease); }
+dialog.gf-dlg[open]::backdrop { animation: gf-fade var(--tr-in) var(--gf-ease); }
+dialog.gf-dlg.gf-closing { animation: gf-out var(--tr-out) var(--gf-ease) forwards; }
+@keyframes gf-in { from { opacity: 0; transform: scale(0.96); } to { opacity: 1; transform: none; } }
+@keyframes gf-out { to { opacity: 0; transform: scale(0.97); } }
+@keyframes gf-fade { from { opacity: 0; } }
+.gf-x { position: absolute; top: 12px; right: 12px; z-index: 5; }
+
+/* ——— 字号钮：右上角印章「字」+ 四档 ——— */
+.gf-fs { position: fixed; z-index: 2147483000; top: 14px; right: 16px; font-family: inherit; }
+.gf-fs > .gf-btn { font-size: 18px; }
+.gf-fs-menu { position: absolute; top: calc(100% + 8px); right: 0; display: flex; gap: 6px; padding: 8px; border-radius: 14px; background: #f6ead2; border: 1px solid rgba(154, 59, 44, 0.35);
+  box-shadow: 0 10px 28px rgba(43, 26, 12, 0.28); opacity: 0; transform: translateY(-4px) scale(0.98); pointer-events: none; transition: opacity var(--tr-in) var(--gf-ease), transform var(--tr-in) var(--gf-ease); }
+.gf-fs.open .gf-fs-menu { opacity: 1; transform: none; pointer-events: auto; }
+.gf-fs-menu button { font: inherit; font-size: 17px; padding: 8px 14px; border-radius: 10px; border: 1px solid transparent; background: transparent; color: var(--gf-ink-2); cursor: pointer; white-space: nowrap; transition: background-color var(--tr-in); }
+.gf-fs-menu button:hover { background: rgba(201, 160, 99, 0.18); }
+.gf-fs-menu button[aria-pressed="true"] { background: var(--gf-cinnabar); color: #fff4e4; }
+
+@media (prefers-reduced-motion: reduce) {
+  .gf-btn, .gf-fs-menu, dialog.gf-dlg[open], dialog.gf-dlg[open]::backdrop, dialog.gf-dlg.gf-closing { transition: none; animation: none; }
+}

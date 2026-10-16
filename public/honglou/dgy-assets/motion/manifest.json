@@ -2,84 +2,127 @@
  "说明": "轻动效清单：静图相对路径 → 循环片（736 宽、≤400 KB、静音、无缝）。scripts/dgy-motion-install.py 生成，勿手改。",
  "条目": {
   "dgy-assets/huace/img/fengao-04.webp": {
-   "mp4": "dgy-assets/motion/huace/fengao-04.mp4",
-   "webm": "dgy-assets/motion/huace/fengao-04.webm"
+   "mp4": "dgy-assets/motion/huace/fengao-04.mp4"
   },
   "dgy-assets/huace/img/gexing-01.webp": {
-   "mp4": "dgy-assets/motion/huace/gexing-01.mp4",
-   "webm": "dgy-assets/motion/huace/gexing-01.webm"
+   "mp4": "dgy-assets/motion/huace/gexing-01.mp4"
   },
   "dgy-assets/huace/img/haitang-05.webp": {
-   "mp4": "dgy-assets/motion/huace/haitang-05.mp4",
-   "webm": "dgy-assets/motion/huace/haitang-05.webm"
+   "mp4": "dgy-assets/motion/huace/haitang-05.mp4"
   },
   "dgy-assets/huace/img/huaqiang-05.webp": {
-   "mp4": "dgy-assets/motion/huace/huaqiang-05.mp4",
-   "webm": "dgy-assets/motion/huace/huaqiang-05.webm"
+   "mp4": "dgy-assets/motion/huace/huaqiang-05.mp4"
   },
   "dgy-assets/huace/img/lianju-02.webp": {
-   "mp4": "dgy-assets/motion/huace/lianju-02.mp4",
-   "webm": "dgy-assets/motion/huace/lianju-02.webm"
+   "mp4": "dgy-assets/motion/huace/lianju-02.mp4"
   },
   "dgy-assets/huace/img/pinchamei-06.webp": {
-   "mp4": "dgy-assets/motion/huace/pinchamei-06.mp4",
-   "webm": "dgy-assets/motion/huace/pinchamei-06.webm"
+   "mp4": "dgy-assets/motion/huace/pinchamei-06.mp4"
   },
   "dgy-assets/huace/img/pudie-01.webp": {
-   "mp4": "dgy-assets/motion/huace/pudie-01.mp4",
-   "webm": "dgy-assets/motion/huace/pudie-01.webm"
+   "mp4": "dgy-assets/motion/huace/pudie-01.mp4"
   },
   "dgy-assets/huace/img/shengqin-02.webp": {
-   "mp4": "dgy-assets/motion/huace/shengqin-02.mp4",
-   "webm": "dgy-assets/motion/huace/shengqin-02.webm"
+   "mp4": "dgy-assets/motion/huace/shengqin-02.mp4"
   },
   "dgy-assets/huace/img/tianran-01.webp": {
-   "mp4": "dgy-assets/motion/huace/tianran-01.mp4",
-   "webm": "dgy-assets/motion/huace/tianran-01.webm"
+   "mp4": "dgy-assets/motion/huace/tianran-01.mp4"
   },
   "dgy-assets/huace/img/youyuan-02.webp": {
-   "mp4": "dgy-assets/motion/huace/youyuan-02.mp4",
-   "webm": "dgy-assets/motion/huace/youyuan-02.webm"
+   "mp4": "dgy-assets/motion/huace/youyuan-02.mp4"
   },
   "dgy-assets/huace/img/zhongqiu-01.webp": {
-   "mp4": "dgy-assets/motion/huace/zhongqiu-01.mp4",
-   "webm": "dgy-assets/motion/huace/zhongqiu-01.webm"
+   "mp4": "dgy-assets/motion/huace/zhongqiu-01.mp4"
   },
   "dgy-assets/huace/img/zuiyan-02.webp": {
-   "mp4": "dgy-assets/motion/huace/zuiyan-02.mp4",
-   "webm": "dgy-assets/motion/huace/zuiyan-02.webm"
+   "mp4": "dgy-assets/motion/huace/zuiyan-02.mp4"
   },
   "dgy-assets/codex/人物/xueyan.webp": {
-   "mp4": "dgy-assets/motion/people/xueyan.mp4",
-   "webm": "dgy-assets/motion/people/xueyan.webm"
+   "mp4": "dgy-assets/motion/people/xueyan.mp4"
   },
   "dgy-assets/codex/人物/zijuan.webp": {
-   "mp4": "dgy-assets/motion/people/zijuan.mp4",
-   "webm": "dgy-assets/motion/people/zijuan.webm"
+   "mp4": "dgy-assets/motion/people/zijuan.mp4"
   },
   "dgy-assets/codex/地点/backgate.webp": {
-   "mp4": "dgy-assets/motion/place/backgate.mp4",
-   "webm": "dgy-assets/motion/place/backgate.webm"
+   "mp4": "dgy-assets/motion/place/backgate.mp4"
   },
   "dgy-assets/codex/地点/kitchen.webp": {
-   "mp4": "dgy-assets/motion/place/kitchen.mp4",
-   "webm": "dgy-assets/motion/place/kitchen.webm"
+   "mp4": "dgy-assets/motion/place/kitchen.mp4"
   },
   "dgy-assets/codex/地点/longcui.webp": {
-   "mp4": "dgy-assets/motion/place/longcui.mp4",
-   "webm": "dgy-assets/motion/place/longcui.webm"
+   "mp4": "dgy-assets/motion/place/longcui.mp4"
   },
   "dgy-assets/codex/地点/qinfangzha.webp": {
-   "mp4": "dgy-assets/motion/place/qinfangzha.mp4",
-   "webm": "dgy-assets/motion/place/qinfangzha.webm"
+   "mp4": "dgy-assets/motion/place/qinfangzha.mp4"
   },
   "dgy-assets/codex/地点/taixu.webp": {
-   "mp4": "dgy-assets/motion/place/taixu.mp4",
-   "webm": "dgy-assets/motion/place/taixu.webm"
+   "mp4": "dgy-assets/motion/place/taixu.mp4"
   },
   "dgy-assets/codex/地点/xiaoxiang.webp": {
-   "mp4": "dgy-assets/motion/place/xiaoxiang.mp4",
-   "webm": "dgy-assets/motion/place/xiaoxiang.webm"
+   "mp4": "dgy-assets/motion/place/xiaoxiang.mp4"
+  },
+  "dgy-assets/huace/img/aida-01.webp": {
+   "mp4": "dgy-assets/motion/huace/aida-01.mp4"
+  },
+  "dgy-assets/huace/img/baiyue-01.webp": {
+   "mp4": "dgy-assets/motion/huace/baiyue-01.mp4"
+  },
+  "dgy-assets/huace/img/chixie-01.webp": {
+   "mp4": "dgy-assets/motion/huace/chixie-01.mp4"
+  },
+  "dgy-assets/huace/img/chufang-01.webp": {
+   "mp4": "dgy-assets/motion/huace/chufang-01.mp4"
+  },
+  "dgy-assets/huace/img/fengao-01.webp": {
+   "mp4": "dgy-assets/motion/huace/fengao-01.mp4"
+  },
+  "dgy-assets/huace/img/gongdu-01.webp": {
+   "mp4": "dgy-assets/motion/huace/gongdu-01.mp4"
+  },
+  "dgy-assets/huace/img/haitang-01.webp": {
+   "mp4": "dgy-assets/motion/huace/haitang-01.mp4"
+  },
+  "dgy-assets/huace/img/huaqiang-01.webp": {
+   "mp4": "dgy-assets/motion/huace/huaqiang-01.mp4"
+  },
+  "dgy-assets/huace/img/kanhua-01.webp": {
+   "mp4": "dgy-assets/motion/huace/kanhua-01.mp4"
+  },
+  "dgy-assets/huace/img/lianju-01.webp": {
+   "mp4": "dgy-assets/motion/huace/lianju-01.mp4"
+  },
+  "dgy-assets/huace/img/pinchamei-01.webp": {
+   "mp4": "dgy-assets/motion/huace/pinchamei-01.mp4"
+  },
+  "dgy-assets/huace/img/qujing-01.webp": {
+   "mp4": "dgy-assets/motion/huace/qujing-01.mp4"
+  },
+  "dgy-assets/huace/img/shengqin-01.webp": {
+   "mp4": "dgy-assets/motion/huace/shengqin-01.mp4"
+  },
+  "dgy-assets/huace/img/xuedong-01.webp": {
+   "mp4": "dgy-assets/motion/huace/xuedong-01.mp4"
+  },
+  "dgy-assets/huace/img/yeyan-01.webp": {
+   "mp4": "dgy-assets/motion/huace/yeyan-01.mp4"
+  },
+  "dgy-assets/huace/img/youyuan-01.webp": {
+   "mp4": "dgy-assets/motion/huace/youyuan-01.mp4"
+  },
+  "dgy-assets/huace/img/zanghua-01.webp": {
+   "mp4": "dgy-assets/motion/huace/zanghua-01.mp4"
+  },
+  "dgy-assets/huace/img/zhengmen-01.webp": {
+   "mp4": "dgy-assets/motion/huace/zhengmen-01.mp4"
+  },
+  "dgy-assets/huace/img/zhouru-01.webp": {
+   "mp4": "dgy-assets/motion/huace/zhouru-01.mp4"
+  },
+  "dgy-assets/huace/img/zilingge-01.webp": {
+   "mp4": "dgy-assets/motion/huace/zilingge-01.mp4"
+  },
+  "dgy-assets/huace/img/zuiyan-01.webp": {
+   "mp4": "dgy-assets/motion/huace/zuiyan-01.mp4"
   }
  }
 }

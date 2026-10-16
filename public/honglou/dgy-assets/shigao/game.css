@@ -2,7 +2,7 @@
 
 /* 单首展读：页面透明，只浮一张笺；背后是游戏（人物卡 / 园景，由游戏一侧压暗虚化） */
 html.sg-single, html.sg-single body, html.sg-club, html.sg-club body { background: transparent !important; }
-html.sg-single .scene, html.sg-single .collection, html.sg-single .petals { display: none !important; }
+html.sg-single .scene, html.sg-single .collection { display: none !important; }
 html.sg-single dialog::backdrop { background: transparent; }
 /* 诗会长卷（园中案上诗笺）：不出书案底画 */
 html.sg-club .scene { display: none !important; }
@@ -69,7 +69,7 @@ body[data-layout=mobile] span.sg-head-face { font-size: 20px; }
 }
 #poem-back { font-family: "Songti SC", serif !important; }
 /* 第 32 轮（巡检）：手机触点 44；桌面长卷不强制吸附（滚轮 / 拖动停在哪是哪） */
-#close-poem, .stamp-btn { min-width: 44px !important; min-height: 44px !important; }
+#close-poem, .gf-btn.is-seal { min-width: 44px !important; min-height: 44px !important; }
 .volume-picker button { min-width: 44px !important; min-height: 44px; }
 body[data-layout=mobile] #section-title { min-height: 44px; display: flex; align-items: center; }
 body[data-layout=desktop] .card-track, body[data-layout=desktop] .society-track { scroll-snap-type: none !important; }
@@ -138,11 +138,11 @@ body[data-layout=mobile] .entry[data-phase=ready] .entry-kicker { opacity: 0; tr
 
 /* ===== 10/16 返回键统一到左上角（与 dgy/backLeft.css 同一枚朱印：40×40、朱砂底、纸色字、2px 角、内描边）=====
    Esc / 点空白 / 手机返回的逻辑不动，只换位置和样子；点击热区用 ::after 外扩 4px，保住 44 的触控尺寸。 */
-.stamp-btn { width: 40px !important; height: 40px !important; min-width: 40px !important; min-height: 40px !important; border: 0 !important; border-radius: 2px !important; background: #a63d2a !important; color: #f5e7d2 !important; font: 400 21px/1 var(--xing, serif) !important; padding: 0 !important; filter: none !important; box-shadow: inset 0 0 0 1.5px rgba(245,231,210,.5), 0 3px 8px rgba(30,12,4,.32) !important; }
-.stamp-btn:not(.sg-entry-x) { position: relative; }
-.stamp-btn::before { display: none !important; }
-.stamp-btn::after { content: ''; position: absolute; inset: -4px; }
-body[data-layout=mobile] .detail-head .stamp-btn { width: 40px !important; height: 40px !important; }
+/* 10/16 全站界面施工：「閉」「字」「翻页」一律是印章圆钮 .gf-btn.is-seal（gf.css），不再是 2px 直角小方块；点击热区仍外扩 4px */
+.gf-btn.is-seal:not(.sg-entry-x):not(.mobile-back) { position: relative; }
+
+.gf-btn.is-seal::after { content: ''; position: absolute; inset: -4px; border-radius: 50%; }
+
 /* 入口层 */
 .sg-entry-x { position: absolute !important; left: max(12px, env(safe-area-inset-left)) !important; right: auto !important; top: max(10px, env(safe-area-inset-top)) !important; }
 body[data-layout=mobile] .sg-entry-x { left: 12px !important; right: auto !important; top: calc(10px + env(safe-area-inset-top)) !important; }
@@ -158,7 +158,7 @@ body[data-layout=mobile] .titlebar .brand { margin-left: 8px; grid-column: 2; gr
 .detail-head .controls { display: contents; }
 .detail-head { gap: 12px; }
 .detail-head #close-poem { order: -1; }
-.reader-head .stamp-btn, .play-head .stamp-btn { order: -1; }
+.reader-head .gf-btn.is-seal, .play-head .gf-btn.is-seal { order: -1; }
 .reader-head, .play-head { justify-content: flex-start; }
 .reader-head > div { flex: 1; }
 .play-head h2 { flex: 1; margin-left: 12px; }
