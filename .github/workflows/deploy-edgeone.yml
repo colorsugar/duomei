@@ -132,6 +132,18 @@ jobs:
           );
           NODE
 
+      - name: Explain a failed EdgeOne deployment
+        if: failure() && steps.edgeone.outcome == 'failure'
+        shell: bash
+        env:
+          EDGEONE_API_TOKEN: ${{ secrets.EDGEONE_API_TOKEN }}
+        run: |
+          # The CLI only says "Deployment failed with status: Failed"; print what the
+          # EdgeOne API records for the latest deployments (read-only, secrets redacted).
+          du -sm .edgeone 2>/dev/null || true
+          find .edgeone -type f 2>/dev/null | wc -l || true
+          node scripts/edgeone-deploy-diagnose.mjs 5 || true
+
       - name: Verify production commit and protected routes
         shell: bash
         run: |
