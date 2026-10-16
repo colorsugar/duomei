@@ -1,0 +1,38 @@
+name: EdgeOne deployment diagnostics
+
+# Manual, read-only: lists the EdgeOne Makers project's recent deployments and
+# project record (status, sizes, error fields) with secrets redacted.
+on:
+  workflow_dispatch:
+    inputs:
+      limit:
+        description: "How many recent deployments to list"
+        required: false
+        default: "8"
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      EDGEONE_PROJECT_ID: makers-brifmhu31vjf
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 22.17.1
+
+      - name: List recent EdgeOne deployments
+        env:
+          EDGEONE_API_TOKEN: ${{ secrets.EDGEONE_API_TOKEN }}
+          LIMIT: ${{ inputs.limit }}
+        run: node scripts/edgeone-deploy-diagnose.mjs "${LIMIT:-8}"
