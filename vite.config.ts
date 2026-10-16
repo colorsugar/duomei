@@ -7,6 +7,7 @@ import {
 } from "./server/neteaseMusic.mjs";
 import { handleZaobaoProxyRequest } from "./server/zaobaoProxy.mjs";
 import { handleXunjiProxyRequest } from "./server/xunjiProxy.mjs";
+import { handleNoteDataRequest, handleNoteMediaRequest } from "./server/noteProxy.mjs";
 
 function neteaseMusicDevApi() {
   return {
@@ -29,7 +30,11 @@ function neteaseMusicDevApi() {
                 ? handleZaobaoProxyRequest
                 : pathname === "/xunji-src" || pathname.startsWith("/xunji-src/")
                   ? handleXunjiProxyRequest
-                  : undefined;
+                  : pathname === "/note-data"
+                    ? handleNoteDataRequest
+                    : pathname.startsWith("/note-media/")
+                      ? handleNoteMediaRequest
+                      : undefined;
         if (!handler || !requestUrl) {
           next();
           return;
