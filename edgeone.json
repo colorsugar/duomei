@@ -4,12 +4,6 @@
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "nodeVersion": "22.17.1",
-  "redirects": [
-    { "source": "/honglou/dgy-assets/cutscene/*", "destination": "https://pub-a5518eab59124044896bde848cb28d8b.r2.dev/honglou/dgy-assets/cutscene/:splat", "statusCode": 302 },
-    { "source": "/honglou/dgy-assets/codex/*", "destination": "https://pub-a5518eab59124044896bde848cb28d8b.r2.dev/honglou/dgy-assets/codex/:splat", "statusCode": 302 },
-    { "source": "/honglou/dgy-assets/album/*", "destination": "https://pub-a5518eab59124044896bde848cb28d8b.r2.dev/honglou/dgy-assets/album/:splat", "statusCode": 302 },
-    { "source": "/honglou/dgy-assets/huace/img/*", "destination": "https://pub-a5518eab59124044896bde848cb28d8b.r2.dev/honglou/dgy-assets/huace/img/:splat", "statusCode": 302 }
-  ],
   "rewrites": [
     {
       "source": "/*",
