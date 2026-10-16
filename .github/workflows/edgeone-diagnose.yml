@@ -9,15 +9,27 @@ on:
         description: "How many recent deployments to list"
         required: false
         default: "8"
+      prune:
+        description: "Delete old deployment records (keep newest successes + production)"
+        required: false
+        default: "0"
+      prune_dry:
+        description: "Only list what prune would delete"
+        required: false
+        default: "1"
+      keep:
+        description: "How many newest successful deployments to keep"
+        required: false
+        default: "3"
 
 permissions:
   contents: read
 
 jobs:
   diagnose:
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/cursor/edgeone-')
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 15
     env:
       EDGEONE_PROJECT_ID: makers-brifmhu31vjf
     steps:
@@ -35,4 +47,7 @@ jobs:
         env:
           EDGEONE_API_TOKEN: ${{ secrets.EDGEONE_API_TOKEN }}
           LIMIT: ${{ inputs.limit }}
+          EDGEONE_PRUNE: ${{ inputs.prune }}
+          EDGEONE_PRUNE_DRY: ${{ inputs.prune_dry }}
+          EDGEONE_KEEP: ${{ inputs.keep }}
         run: node scripts/edgeone-deploy-diagnose.mjs "${LIMIT:-8}"
