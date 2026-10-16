@@ -35,7 +35,7 @@ permissions:
 
 jobs:
   diagnose:
-    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/cursor/edgeone-')
+    if: github.ref == 'refs/heads/main' || (startsWith(github.ref, 'refs/heads/cursor/edgeone-') || startsWith(github.ref, 'refs/heads/cursor/honglou-'))
     runs-on: ubuntu-latest
     timeout-minutes: 30
     env:
