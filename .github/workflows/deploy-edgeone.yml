@@ -94,7 +94,10 @@ jobs:
           # Official global install from a clean directory. `npx --yes edgeone@…`
           # from the repo root crashes npm arborist with
           # "Cannot read properties of null (reading 'edgesOut')".
-          ( cd "${RUNNER_TEMP}" && npm install -g "edgeone@${EDGEONE_CLI_VERSION}" )
+          # Since 2026-10-16 the global install hits the same npm 10 arborist crash
+          # while resolving optional peers of the CLI's vitest dependency
+          # (#loadPeerSet); --legacy-peer-deps skips that peer resolution.
+          ( cd "${RUNNER_TEMP}" && npm install -g --legacy-peer-deps "edgeone@${EDGEONE_CLI_VERSION}" )
           edgeone -v
 
           deploy_log="$(mktemp)"
