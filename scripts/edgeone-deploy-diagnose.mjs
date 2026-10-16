@@ -113,7 +113,7 @@ const proj = projects.body?.Data?.Response?.Projects?.[0];
 console.log(`## DescribePagesProjects keys: ${proj ? Object.keys(proj).join(",") : short(projects)}`);
 const allProjects = await call("DescribePagesProjects", { Offset: 0, Limit: 50 });
 for (const p of allProjects.body?.Data?.Response?.Projects || []) {
-  console.log(`  project ${p.ProjectId} ${p.Name} area=${p.Area} status=${p.Status} zone=${p.ZoneId}`);
+  console.log(`  project ${p.ProjectId} ${p.Name} area=${p.Area} status=${p.Status} zone=${p.ZoneId} created=${p.CreatedOn} modified=${p.ModifiedOn} repo=${p.RepoUrl || p.Provider || "-"} framework=${p.Framework || "-"} domains=${JSON.stringify(p.CustomDomains || [])} preset=${JSON.stringify(p.PresetDomain || p.PresetDomains || "")} deployment=${JSON.stringify(p.Deployment || "").slice(0, 300)}`);
 }
 const PROBES = [
   "DescribePagesUsage", "DescribePagesProjectUsage", "DescribePagesQuota", "DescribePagesQuotas",
