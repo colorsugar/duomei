@@ -41,6 +41,12 @@
       ]
     },
     {
+      "source": "/honglou/dgy-assets/cutscene/ch17/ch17.m3u8",
+      "headers": [
+        { "key": "Content-Type", "value": "application/vnd.apple.mpegurl" }
+      ]
+    },
+    {
       "source": "/atlas/v6/*",
       "headers": [
         { "key": "X-Frame-Options", "value": "SAMEORIGIN" },
