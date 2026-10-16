@@ -1,0 +1,236 @@
+{
+  "说明": "第 31 轮 移步換景（dgy/yibu.js）的底图配置。换底图只改这里：day / night 填图片路径（相对网站根），night 为 null 时夜里用昼图加滤镜。新底图要和 guide-4k 院落位置对齐；对不齐就改 fit（guide 坐标 0–2048 映射到图片的哪一块，单位是图片宽高的比例）。",
+  "day": {
+    "src": "dgy-assets/map/gongbi-day-4096.webp",
+    "small": "dgy-assets/map/gongbi-day-2048.webp",
+    "来源": "Grok 试版（dgy-assets/map/gongbi-day-grok.webp，scripts/dgy-r31-prep.py 转 webp），ChatGPT 正式工笔底图到了换掉"
+  },
+  "night": null,
+  "fallback": "dgy-assets/map/guide-4096.webp",
+  "fit": {
+    "x0": 0,
+    "y0": 0,
+    "x1": 1,
+    "y1": 1
+  },
+  "desk": "dgy-assets/ui/xz/r31/yibu-desk.webp",
+  "deskNote": "X1 效果图去字版（书案与案上器物）；舆图、菜单、地点卡都被游戏里的 HTML 盖住",
+  "court": {
+    "yihong": {
+      "src": "dgy-assets/ui/xz/r31/court-yihong.webp",
+      "w": 1675,
+      "h": 915,
+      "rooms": [
+        {
+          "名": "正房 · 五間抱廈",
+          "x": 820,
+          "y": 318,
+          "住": [
+            "baoyu"
+          ]
+        },
+        {
+          "名": "遊廊",
+          "x": 268,
+          "y": 430
+        },
+        {
+          "名": "遊廊",
+          "x": 1395,
+          "y": 430
+        },
+        {
+          "名": "西府海棠",
+          "x": 500,
+          "y": 250
+        },
+        {
+          "名": "芭蕉",
+          "x": 1120,
+          "y": 250
+        },
+        {
+          "名": "院門",
+          "x": 820,
+          "y": 700
+        },
+        {
+          "名": "襲人 · 晴雯 · 麝月",
+          "x": 1240,
+          "y": 560,
+          "住": [
+            "xiren",
+            "qingwen",
+            "sheyue"
+          ],
+          "小": true
+        }
+      ],
+      "依据": "第十七回「一入門，兩邊都是遊廊相接。院中點襯幾塊山石，一邊種著數本芭蕉，那一邊乃是一棵西府海棠」；第二十六回「上面小小五間抱廈，一色雕鏤新鮮花樣隔扇，上面懸著一個匾額，四個大字，題道是「怡紅快綠」」（均对本地 dgy-assets/text/hlm 逐字）；底图为 X3 效果图去字版，房屋形制只是示意"
+    },
+    "xiaoxiang": {
+      "src": "dgy-assets/map/courts/xiaoxiang.webp",
+      "w": 1672,
+      "h": 941,
+      "依据": "第十七、二十三、四十回；竹径、曲廊、正屋、后院梨花芭蕉及泉沟。院落图为工笔复原样稿。"
+    },
+    "hengwu": {
+      "src": "dgy-assets/map/courts/hengwu.webp",
+      "w": 1672,
+      "h": 940,
+      "依据": "第十七回；水边朱栏桥与云步石梯、入门插天玲珑山石、五间清厦连卷棚及藤蔓。院落图为工笔复原样稿。"
+    },
+    "qiushuang": {
+      "src": "dgy-assets/map/courts/qiushuang.webp",
+      "w": 1672,
+      "h": 941,
+      "依据": "第四十回；敞阔三间通屋、纱窗、晓翠堂、梧桐与芭蕉。院落图为工笔复原样稿。"
+    },
+    "daoxiang": {
+      "src": "dgy-assets/map/courts/daoxiang.webp",
+      "w": 1672,
+      "h": 941,
+      "依据": "第十七回；黄泥矮墙稻顶茅屋、杏花、土井桔槔及畦田。院落图为工笔复原样稿。"
+    },
+    "longcui": {
+      "src": "dgy-assets/map/courts/longcui.webp",
+      "w": 1672,
+      "h": 941,
+      "依据": "第四十九回雪中山脚尼庵，门前红梅。院景为工笔复原样稿。"
+    },
+    "luxue": {
+      "src": "dgy-assets/map/courts/luxue.webp",
+      "w": 1672,
+      "h": 941,
+      "依据": "第四十九回临水茅屋、芦苇、竹桥。院景为工笔复原样稿。"
+    },
+    "ouxiang": {
+      "src": "dgy-assets/map/courts/ouxiang.webp",
+      "w": 1672,
+      "h": 941,
+      "依据": "第三十八回池中水榭、曲廊与竹桥。院景为工笔复原样稿。"
+    },
+    "aojing": {
+      "src": "dgy-assets/map/courts/aojing.webp",
+      "w": 1672,
+      "h": 941,
+      "依据": "第七十六回中秋山坳溪馆与池沿竹栏。院景为工笔复原样稿。"
+    },
+    "tubi": {
+      "src": "dgy-assets/map/courts/tubi.webp",
+      "w": 1672,
+      "h": 941,
+      "依据": "第七十五回山脊敞厅与盘山路。院景为工笔复原样稿。"
+    },
+    "qinfang": {
+      "src": "dgy-assets/map/courts/qinfang.webp",
+      "w": 1672,
+      "h": 941,
+      "依据": "第十七回三孔桥、桥上亭、白石栏与溪流。院景为工笔复原样稿。"
+    },
+    "cuizhang": {
+      "src": "dgy-assets/map/courts/cuizhang.webp",
+      "w": 1672,
+      "h": 941,
+      "依据": "第十七回白石山嶂、苔藤与曲径。院景为工笔复原样稿。"
+    },
+    "ziling": {
+      "src": "dgy-assets/map/courts/ziling.webp",
+      "w": 1672,
+      "h": 941,
+      "依据": "第二十三、四十回临水紫菱洲与缀锦楼。院景为工笔复原样稿。"
+    },
+    "nuanxiang": {
+      "src": "dgy-assets/map/courts/nuanxiang.webp",
+      "w": 1672,
+      "h": 941,
+      "依据": "第五十回过街门夹道、南向正门及暖香坞。院景为工笔复原样稿。"
+    },
+    "jiayin": {
+      "src": "dgy-assets/map/courts/jiayin.webp",
+      "w": 1672,
+      "h": 941,
+      "依据": "第七十五回山脚嘉荫堂与月台。院景为工笔复原样稿。"
+    },
+    "dicui": {
+      "src": "dgy-assets/map/courts/dicui.webp",
+      "w": 1672,
+      "h": 941,
+      "依据": "第二十七回池中滴翠亭与环绕游廊曲栏。院景为工笔复原样稿。"
+    },
+    "flowers": {
+      "src": "dgy-assets/map/courts/flowers.webp",
+      "w": 1672,
+      "h": 941,
+      "依据": "第十七回花圃游线、荼蘼架木香棚与芍药圃。院景为工笔复原样稿。"
+    },
+    "hongxiang": {
+      "src": "dgy-assets/map/courts/hongxiang.webp",
+      "w": 1672,
+      "h": 941,
+      "依据": "第六十二回红香圃小敞厅与芍药栏。院景为工笔复原样稿。"
+    },
+    "huaxu": {
+      "src": "dgy-assets/map/courts/huaxu.webp",
+      "w": 1672,
+      "h": 941,
+      "依据": "第十七回蓼汀花溆水洞、落花与盘山路。院景为工笔复原样稿。"
+    },
+    "xingqin": {
+      "src": "dgy-assets/map/courts/xingqin.webp",
+      "w": 1672,
+      "h": 940,
+      "依据": "第十八回省亲别墅、正殿大观楼与东西阁。院景为工笔复原样稿。"
+    },
+    "qinfangzha": {
+      "src": "dgy-assets/map/courts/qinfangzha.webp",
+      "w": 1672,
+      "h": 941,
+      "依据": "第十七回沁芳闸引泉入园的水道。院景为工笔复原样稿。"
+    },
+    "kitchen": {
+      "src": "dgy-assets/map/courts/kitchen.webp",
+      "w": 1672,
+      "h": 941,
+      "依据": "园中厨房与后院生活场景，建筑细部据清代园林形制推定。院景为工笔复原样稿。"
+    },
+    "backgate": {
+      "src": "dgy-assets/map/courts/backgate.webp",
+      "w": 1672,
+      "h": 941,
+      "依据": "大观园后门、园墙与后院甬道，建筑细部为推定。院景为工笔复原样稿。"
+    }
+  },
+  "room": {
+    "yihong": {
+      "src": "dgy-assets/ui/xz/r31/room-yihong.webp",
+      "w": 1672,
+      "h": 564,
+      "依据": "设计图/yihong/gpt-正房.webp（第 24 轮按图施工所用平面），裁去标题与清单"
+    },
+    "xiaoxiang": {
+      "src": "dgy-assets/map/rooms/xiaoxiang.webp",
+      "w": 2144,
+      "h": 733,
+      "依据": "前八十回潇湘馆正房：湘帘、书案、窗边床榻及鹦哥架。平面为工笔复原样稿。"
+    },
+    "hengwu": {
+      "src": "dgy-assets/map/rooms/hengwu.webp",
+      "w": 2172,
+      "h": 724,
+      "依据": "第四十回蘅芜苑正房素净如雪洞，少量书、茶具与瓶花。平面为工笔复原样稿。"
+    },
+    "qiushuang": {
+      "src": "dgy-assets/map/rooms/qiushuang.webp",
+      "w": 2144,
+      "h": 733,
+      "依据": "第四十回秋爽斋三间通开，书画长案与后廊梧桐芭蕉。平面为工笔复原样稿。"
+    },
+    "daoxiang": {
+      "src": "dgy-assets/map/rooms/daoxiang.webp",
+      "w": 2172,
+      "h": 724,
+      "依据": "第十七回稻香村茅屋纸窗木榻、农家素陈。平面为工笔复原样稿。"
+    }
+  }
+}

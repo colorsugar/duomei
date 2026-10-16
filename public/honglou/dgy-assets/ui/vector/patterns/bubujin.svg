@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+<!-- 单元 32×32；要换色把 stroke/fill 的 #C39D75 换成规范里别的色值 -->
+<defs><pattern id="pat-bubujin" width="32" height="32" patternUnits="userSpaceOnUse"><path d="M0 0H32M0 0V32M5 5H27M5 27H27M5 9V23M27 9V23M10 10H22M10 22H22M10 13V19M22 13V19M16 0V5M16 27V32M0 16H5M27 16H32M16 5V10M16 22V27M5 16H10M22 16H27" fill="none" stroke="#C39D75" stroke-width="1.6" stroke-linecap="square"/></pattern></defs>
+<rect width="256" height="256" fill="#F5E7D2"/>
+<rect width="256" height="256" fill="url(#pat-bubujin)"/>
+</svg>

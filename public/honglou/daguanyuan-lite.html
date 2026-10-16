@@ -1,6 +1,7 @@
 <!doctype html>
 <html lang="zh-CN">
 <head>
+  <script src="dgy/mute.js"></script><!-- v22 全站静音钮 -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
   <title>大观园 · 纸上游</title>
@@ -136,12 +137,12 @@
   </script>
   <!--TITLECSS:END-->
 <!--TITLEXZ:START 第 31 轮手写（不归 dgy-title-build.py 管）-->
-  <link rel="preload" href="./dgy-build/HanWangShinSuMedium-ui-DnbssNOW.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="./dgy-build/HanWangShinSuMedium-ui-VxxL_EpE.woff2" as="font" type="font/woff2" crossorigin>
   <style id="title-xz-css">
     /* 第 31 轮（UI宣纸工笔-规范 §5.1 S1，效果图 设计图/UI效果图/宣纸工笔-S1.webp）：「紅樓」风格的标题页——去字版-S1 底画、行书「紅樓夢影」+ 小印、
        五入口宣纸签牌（B5a 玉牌底 + F1–F5 入口小景，悬停小景微亮、签牌上浮，按下 B5b + 落印）、宣纸进度条。「簡潔」风格（html 无 ts-xz）仍是旧标题页。
        只动 transform / opacity；字体 HanWangShinSuMedium-ui（界面行书子集）提前预载。 */
-    @font-face { font-family: "DGY XingUI"; src: url("./dgy-build/HanWangShinSuMedium-ui-DnbssNOW.woff2") format("woff2"); font-weight: 400; font-display: swap; }
+    @font-face { font-family: "DGY XingUI"; src: url("./dgy-build/HanWangShinSuMedium-ui-VxxL_EpE.woff2") format("woff2"); font-weight: 400; font-display: swap; }
     .ts-xz .ts { background: #efe3cc; color: #351f0a; }
     .ts-xz .ts-bg { inset: 0; background: #efe3cc url(./dgy-build/title-v0-DPTHU7Ct.webp) 50% 50% / cover no-repeat; animation: tsxPush 70s ease-in-out infinite alternate; transform-origin: 50% 40%; }
     @keyframes tsxPush { from { transform: scale(1); } to { transform: scale(1.05) translate3d(-.6%, -.4%, 0); } }
@@ -220,9 +221,10 @@
   </script>
 <!--TITLEXZ:END-->
   <!--LITE: 轻量版入口骨架（UI设计指导-3A §28）。上面的 <head> 与下面 TITLE 段从 daguanyuan.html 复制（dgy-title-build.py 改了标题页要同步一次）-->
-  <script type="module" crossorigin src="./dgy-build/daguanyuan-lite-Bm3ZkcLf.js"></script>
-  <link rel="modulepreload" crossorigin href="./dgy-build/three.core-CPZAz1wr.js">
-  <link rel="stylesheet" crossorigin href="./dgy-build/daguanyuan-lite-GelFFZVf.css">
+  <script type="module" crossorigin src="./dgy-build/daguanyuan-lite-CNDybvA7.js"></script>
+  <link rel="modulepreload" crossorigin href="./dgy-build/preload-helper-DMGCcr4D.js">
+  <link rel="modulepreload" crossorigin href="./dgy-build/three.core-3TnwmHjw.js">
+  <link rel="stylesheet" crossorigin href="./dgy-build/daguanyuan-lite-BPbXYefG.css">
 </head>
 <body class="lite">
 <!--TITLE:START 由 scripts/dgy-title-build.py 生成，别手改-->
@@ -255,7 +257,7 @@
     (function () { var ts = document.getElementById('title-screen'); if (!ts) return; var h = document.createElement('div'); h.className = 'tsx-head'; h.setAttribute('aria-hidden', 'true');
       h.innerHTML = '<p class="tsx-t">紅樓夢影</p><img class="tsx-seal" alt="" src="dgy-assets/ui/art-final/2x/E2.webp">'; ts.insertBefore(h, ts.querySelector('.ts-btns'));
       [['a', '18%', '0s'], ['b', '46%', '-4.2s'], ['a', '78%', '-7.6s']].forEach(function (p) { var i = document.createElement('i'); i.className = 'tsx-petal ' + p[0]; i.style.left = p[1]; i.style.animationDelay = p[2]; ts.querySelector('.ts-bg').after(i); });
-      if (!matchMedia('(prefers-reduced-motion: reduce)').matches && !/[?&]tier=(saver|min|phone)/.test(location.search) && !matchMedia('(hover: none)').matches && innerWidth > innerHeight) fetch('dgy-assets/ui/xz/title-video.json').then(function (r) { return r.ok ? r.json() : null; }).then(function (j) {
+      if (!document.documentElement.classList.contains('lt-desk') && !matchMedia('(prefers-reduced-motion: reduce)').matches && !/[?&]tier=(saver|min|phone)/.test(location.search) && !matchMedia('(hover: none)').matches && innerWidth > innerHeight) fetch('dgy-assets/ui/xz/title-video.json').then(function (r) { return r.ok ? r.json() : null; }).then(function (j) {
         if (!j || !(j.src || j.webm) || !document.documentElement.classList.contains('ts-xz')) return; var v = document.createElement('video'); v.className = 'tsx-vid'; v.muted = true; v.loop = true; v.playsInline = true; v.setAttribute('aria-hidden', 'true'); v.poster = j.poster || 'dgy-assets/ui/xz/r31/title-v0.webp';
         v.src = j.webm && v.canPlayType('video/webm') ? j.webm : j.src; v.addEventListener('playing', function () { v.classList.add('on'); }, { once: true }); ts.querySelector('.ts-bg').appendChild(v); v.play().catch(function () {});
         new MutationObserver(function () { if (ts.hidden) { v.pause(); v.removeAttribute('src'); v.load(); v.remove(); } }).observe(ts, { attributes: true, attributeFilter: ['hidden'] }); }).catch(function () {});
@@ -271,9 +273,10 @@
     <section id="ltScroll" class="lt-sheet lt-scroll" aria-label="长卷" hidden>
       <i class="lt-rod l" aria-hidden="true"></i><i class="lt-rod r" aria-hidden="true"></i>
       <div class="lt-scroll-in">
+        <div class="lt-scroll-art-frame"><img class="lt-scroll-art" alt="" hidden></div>
         <div class="lt-ph"><b class="lt-court"></b><b class="lt-ph-t" title="院落工笔长卷待素材（UI设计指导-3A §28）">长卷占位</b></div>
-        <div class="lt-hots"></div>
       </div>
+      <div class="lt-hots"></div>
     </section>
   </div>
   <div id="ltBar" class="lt-bar" aria-label="纸上游">
