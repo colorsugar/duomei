@@ -200,7 +200,8 @@ function AppRoutes() {
       </Routes>
       </Suspense>
       {/* The 3D scenes bring their own paper loading screen: no section board over them (it flashed 「云游」). */}
-      <PublicRoutePaperVeil pathname={location.pathname} disabled={isAdmin || isGuyuReader || isXiaoyuan} />
+      {/* 紅樓夢影整页跳到 /honglou/index.html，不盖「云游」绿板（10-16 老大：点进去绿色「云游」闪一下，和红楼的米色不搭） */}
+      <PublicRoutePaperVeil pathname={location.pathname} disabled={isAdmin || isGuyuReader || isXiaoyuan || isHongloumeng} />
       {!bareChrome ? <DuomeiFooter /> : null}
       {!isAdmin ? <DuomeiMusicPlayer compactContext={isGuyuReader || isZaobao || isXunji || isYunyouMap || isAtlasMap || isXiaoyuan} /> : null}
       {!bareChrome ? <BackToTopButton /> : null}
