@@ -21,6 +21,10 @@ on:
         description: "How many newest successful deployments to keep"
         required: false
         default: "3"
+      rotate:
+        description: "Tiny preview deploys to run so old artifacts get cleaned (0 = none)"
+        required: false
+        default: "0"
 
 permissions:
   contents: read
@@ -51,3 +55,22 @@ jobs:
           EDGEONE_PRUNE_DRY: ${{ inputs.prune_dry }}
           EDGEONE_KEEP: ${{ inputs.keep }}
         run: node scripts/edgeone-deploy-diagnose.mjs "${LIMIT:-8}"
+
+      # 10-16：账号存储 5 GiB 被「最近 3 次成功部署」的整站副本（各约 1.1 GB）占满。
+      # 部署几次只有一个小页面的 preview（不碰 production），让平台按规则清掉最早的旧副本。
+      - name: Rotate out old deployment artifacts with tiny preview deploys
+        if: inputs.rotate != '0' && inputs.rotate != ''
+        env:
+          EDGEONE_API_TOKEN: ${{ secrets.EDGEONE_API_TOKEN }}
+          ROTATE: ${{ inputs.rotate }}
+        run: |
+          set -euo pipefail
+          ( cd "${RUNNER_TEMP}" && npm install -g --legacy-peer-deps "edgeone@1.6.31-3" )
+          tiny="${RUNNER_TEMP}/tiny"
+          mkdir -p "$tiny"
+          for i in $(seq 1 "$ROTATE"); do
+            echo "<!doctype html><title>rotate $i</title>" > "$tiny/index.html"
+            edgeone makers deploy "$tiny" -n duomei-guyu -t "$EDGEONE_API_TOKEN" -e preview -a global --json | tail -n 1
+            sleep 20
+          done
+          node scripts/edgeone-deploy-diagnose.mjs 6
