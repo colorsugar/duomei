@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+<!-- 单元 16×16；要换色把 stroke/fill 的 #C39D75 换成规范里别的色值 -->
+<defs><pattern id="pat-huiwen" width="16" height="16" patternUnits="userSpaceOnUse"><path d="M0 13H16M13 13V3H3V10H10V6H6" fill="none" stroke="#C39D75" stroke-width="1.2" stroke-linecap="square"/></pattern></defs>
+<rect width="256" height="256" fill="#F5E7D2"/>
+<rect width="256" height="256" fill="url(#pat-huiwen)"/>
+</svg>

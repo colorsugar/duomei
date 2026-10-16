@@ -24,7 +24,7 @@
   const headURL = (id) => { if (PF) { const u = PF.faceOf(id, 160); return u ? new URL('../../' + u, location.href).href : null; } return HEAD[id] ? new URL('ui/xz/r31/head/' + HEAD[id] + '.webp', ASSET).href : null; };
   const SEAL1 = { xiuyan: '邢', liwen: '李', liqi: '李', baoqin: '薛', xiangling: '香' }; // 没有头像的人：宣纸圆印 + 姓氏字（行书字一律繁体）
   const faceHTML = (id, cls) => { const u = headURL(id), p = people[id]; return u ? '<img class="' + cls + '" src="' + u + '" alt="" loading="lazy" decoding="async">' : '<span class="' + cls + ' sg-face-ph" aria-hidden="true">' + esc(PF ? PF.sealChar(id) : SEAL1[id] || (p ? p.name : id).slice(-1)) + '</span>'; };
-  const PORDER = ['daiyu', 'baochai', 'baoyu', 'tanchun', 'xiangyun', 'liwan', 'yingchun', 'xichun', 'miaoyu', 'xifeng', 'baoqin', 'xiangling', 'xiuyan', 'liwen', 'liqi'];
+  const PORDER = ['daiyu', 'baochai', 'baoyu', 'tanchun', 'xiangyun', 'liwan', 'yingchun', 'xichun', 'miaoyu', 'xifeng', 'baoqin', 'xiangling', 'xiuyan', 'liwen', 'liqi', 'yuanchun', 'qinkeqing', 'jialan', 'jiazheng', 'jiahuan', 'jiayucun', 'zhenshiyin', 'bozudaoren', 'yiseng', 'laitouheshang', 'fengziying', 'yuner', 'jiangyuhan', 'zhenzhenguo', 'taixu'];
   const personIds = () => { const ks = Object.keys(db.人物); return PORDER.filter((k) => ks.includes(k)).concat(ks.filter((k) => !PORDER.includes(k))); };
 
   // 左栏人名索引：小像换成 87 版立绘头像（没有立绘的人仍是一字圆印）
@@ -73,6 +73,14 @@
       sec.innerHTML = '<h3>古人評點</h3>' + pd.map((t) => '<figure><blockquote>' + esc(t.文) + '</blockquote><figcaption>' + esc(t.出处) + '</figcaption></figure>').join('');
       box.appendChild(sec);
     }
+    // 异文（程乙本对照 / 底本存疑处的另一种读法）：条目带「异文」才出；仍存疑的在小标题后注明
+    const pp = db.作品[id], yw = pp && pp.异文 ? [].concat(pp.异文) : [];
+    if (!yw.length && pp && typeof pp.待核 === 'string') yw.push(pp.待核); // 只有「待核」说明、没有异文数组的条目（如 guihua-ci）也要让读者看见
+    if (yw.length) {
+      const sec = document.createElement('div'); sec.className = 'sg-extra sg-yw';
+      sec.innerHTML = '<h3>異文' + (pp.待核 ? ' · 仍存疑' : '') + '</h3><ul>' + yw.map((t) => '<li>' + esc(String(t)) + '</li>').join('') + '</ul>';
+      box.appendChild(sec);
+    }
   };
   const openPoem0 = openPoem;
   openPoem = function (index) {
@@ -85,6 +93,15 @@
     requestAnimationFrame(() => { const an = $('.annotation'); if (an) an.scrollTop = 0; const db2 = $('#detail-body'); if (db2) db2.scrollTop = 0; });
     emit('sfx', 'paper-set');
   };
+  // 10-15（界面督察：Chrome 按人第 3 组第 1 首点不开）：连续开合几首诗后再换组，Chrome 里新一组的诗笺整片点不到
+  // （elementFromPoint 只落在 #workspace 上，鼠标点了没反应；Safari 没有）。换组渲染完后只在「确实点不到」时把栏重新挂一次版面。
+  { const pf = $('#portfolio'); let tick = 0;
+    const stale = () => { const s = $('.slip'); if (!s) return false; const r = s.getBoundingClientRect(); const x = r.left + r.width / 2, y = r.top + r.height / 2;
+      if (!r.width || x < 0 || y < 0 || x > innerWidth || y > innerHeight) return false; const t = document.elementFromPoint(x, y); return !!t && !s.contains(t) && !t.closest('dialog'); };
+    if (pf && /Chrome\//.test(navigator.userAgent)) new MutationObserver(() => {
+      const my = ++tick;
+      requestAnimationFrame(() => requestAnimationFrame(() => { if (my !== tick || !stale()) return; const w = $('#workspace'); if (!w) return; const d = w.style.display; w.style.display = 'none'; void w.offsetHeight; w.style.display = d; }));
+    }).observe(pf, { childList: true }); }
   // 一笺写完（或被跳过）记一次「读过」
   let readId = null; const readDone = new Set();
   function readArm(id) { readId = id; }
@@ -142,10 +159,41 @@
       syncTabs(); render(); if (activeIds.indexOf(id) < 0) activeIds = [id];
       openPoem(activeIds.indexOf(id));
     },
+    // 退一层（游戏一侧的 Esc / 浏览器返回 / 书案「返」都走这里，和页内按 Esc 同一规则）：有对话框先关最上面那个，没有才收起整套回到册
+    back() {
+      const d = ($('#reader').open && $('#reader')) || ($('#poem-dialog').open && $('#poem-dialog')) || document.querySelector('dialog[open]');
+      if (d) { try { d.close(); } catch (e) { /* */ } return 'dialog'; }
+      emit('close'); return 'close';
+    },
     reset() { closeDialogs(); finishWriting(); },
     get state() { return { loaded, mode, selected, single: root.classList.contains('sg-single'), dialog: $('#poem-dialog').open, phase: boxPhase }; },
   };
   // 预载时先把三套行书字库解开、诗稿数据读好，第一次开函不卡
-  setTimeout(() => { try { ['28px V3Brush', '20px UIScript', '20px XingQuote'].forEach((f) => document.fonts.load(f, '詩稿彩箋').catch(() => {})); } catch (e) { /* */ } ready().catch(() => {}); }, 300);
+  setTimeout(() => { try { ['28px "DGY All"'].forEach((f) => document.fonts.load(f, '詩稿彩箋').catch(() => {})); } catch (e) { /* */ } ready().catch(() => {}); }, 300);
   emit('ready');
+
+  // ——— 10/15 书写体标签转繁体：行书字库是繁体字库，「笺 读 诗 讲 边 籤…」这些简体字取不到字形会回落楷体 / 宋体。
+  //     只处理用书写体的短标签（纸型、操作字、页码、批注来源）；正文白话仍是简体。表同 dgy/s2t.js。
+  const SG_S2T = {"万":"萬","与":"與","专":"專","东":"東","丝":"絲","丢":"丟","两":"兩","丧":"喪","个":"個","临":"臨","为":"爲","丽":"麗","举":"舉","么":"麼","义":"義","乌":"烏","乐":"樂","习":"習","书":"書","乱":"亂","于":"於","云":"雲","亲":"親","从":"從","仪":"儀","们":"們","众":"衆","优":"優","会":"會","传":"傳","体":"體","余":"餘","侧":"側","儿":"兒","兑":"兌","兰":"蘭","关":"關","兽":"獸","内":"內","册":"冊","写":"寫","农":"農","冲":"衝","决":"決","况":"況","冻":"凍","净":"淨","准":"準","凉":"涼","减":"減","几":"幾","凤":"鳳","击":"擊","凿":"鑿","划":"劃","刘":"劉","则":"則","刚":"剛","创":"創","删":"刪","别":"別","办":"辦","务":"務","动":"動","势":"勢","区":"區","单":"單","占":"佔","卧":"臥","厅":"廳","历":"歷","压":"壓","厢":"廂","厦":"廈","厨":"廚","厮":"廝","参":"參","双":"雙","发":"發","变":"變","叙":"敘","叠":"疊","台":"臺","叶":"葉","号":"號","吃":"喫","后":"後","听":"聽","启":"啓","响":"響","啰":"囉","嘱":"囑","团":"團","园":"園","围":"圍","国":"國","图":"圖","圣":"聖","场":"場","块":"塊","坛":"壇","坞":"塢","墙":"牆","声":"聲","壳":"殼","处":"處","备":"備","复":"復","够":"夠","头":"頭","夹":"夾","妇":"婦","妈":"媽","孙":"孫","宁":"寧","宝":"寶","实":"實","宫":"宮","宽":"寬","宾":"賓","对":"對","导":"導","寿":"壽","将":"將","尔":"爾","尘":"塵","尽":"盡","层":"層","属":"屬","峰":"峯","帘":"簾","带":"帶","帧":"幀","并":"並","广":"廣","庄":"莊","床":"牀","库":"庫","应":"應","废":"廢","开":"開","异":"異","弃":"棄","张":"張","弯":"彎","弹":"彈","强":"強","归":"歸","当":"當","录":"錄","径":"徑","怀":"懷","态":"態","总":"總","悬":"懸","惯":"慣","戏":"戲","户":"戶","扑":"撲","扩":"擴","扫":"掃","抚":"撫","抛":"拋","护":"護","报":"報","拟":"擬","拢":"攏","拦":"攔","挂":"掛","挡":"擋","挤":"擠","换":"換","据":"據","搂":"摟","摆":"擺","摇":"搖","数":"數","斋":"齋","斗":"鬥","断":"斷","无":"無","旧":"舊","时":"時","旷":"曠","显":"顯","晒":"曬","晓":"曉","晕":"暈","暂":"暫","机":"機","杂":"雜","条":"條","来":"來","极":"極","标":"標","栈":"棧","栊":"櫳","栋":"棟","栏":"欄","树":"樹","栗":"慄","样":"樣","档":"檔","桥":"橋","桨":"槳","梦":"夢","检":"檢","楼":"樓","横":"橫","橱":"櫥","毕":"畢","气":"氣","汇":"匯","沟":"溝","没":"沒","泻":"瀉","洼":"窪","浅":"淺","测":"測","浏":"瀏","涂":"塗","涨":"漲","渍":"漬","渐":"漸","游":"遊","湾":"灣","溆":"漵","滚":"滾","满":"滿","滩":"灘","潇":"瀟","灯":"燈","炉":"爐","点":"點","烛":"燭","烟":"煙","热":"熱","爷":"爺","状":"狀","犹":"猶","独":"獨","狮":"獅","环":"環","现":"現","珑":"瓏","画":"畫","盖":"蓋","盘":"盤","着":"著","矶":"磯","码":"碼","砖":"磚","确":"確","礼":"禮","离":"離","种":"種","称":"稱","稳":"穩","竖":"豎","笔":"筆","笼":"籠","筑":"築","签":"籤","简":"簡","篱":"籬","类":"類","紧":"緊","红":"紅","纤":"纖","约":"約","级":"級","纨":"紈","纬":"緯","纯":"純","纱":"紗","纵":"縱","纸":"紙","纹":"紋","线":"線","组":"組","细":"細","终":"終","经":"經","结":"結","绕":"繞","绘":"繪","给":"給","继":"繼","绫":"綾","续":"續","绰":"綽","维":"維","绿":"綠","缀":"綴","编":"編","缘":"緣","缩":"縮","网":"網","罢":"罷","群":"羣","耸":"聳","联":"聯","肠":"腸","脉":"脈","脚":"腳","脸":"臉","舆":"輿","艳":"豔","节":"節","芜":"蕪","芦":"蘆","苇":"葦","苍":"蒼","范":"範","茎":"莖","荡":"蕩","荣":"榮","荫":"蔭","药":"藥","获":"獲","萝":"蘿","蓝":"藍","蔷":"薔","藓":"蘚","虚":"虛","蜡":"蠟","衔":"銜","补":"補","见":"見","观":"觀","规":"規","视":"視","览":"覽","觉":"覺","触":"觸","计":"計","认":"認","让":"讓","记":"記","讲":"講","许":"許","论":"論","设":"設","证":"證","识":"識","诉":"訴","词":"詞","试":"試","诗":"詩","话":"話","该":"該","语":"語","说":"說","请":"請","诸":"諸","读":"讀","谁":"誰","调":"調","质":"質","贮":"貯","贴":"貼","贾":"賈","资":"資","赏":"賞","赐":"賜","赛":"賽","车":"車","轩":"軒","转":"轉","轮":"輪","轳":"轤","轴":"軸","轻":"輕","载":"載","轿":"轎","辘":"轆","边":"邊","过":"過","还":"還","这":"這","进":"進","远":"遠","连":"連","迹":"跡","选":"選","遗":"遺","遥":"遙","邻":"鄰","采":"採","释":"釋","里":"裡","鉴":"鑑","錾":"鏨","针":"針","钓":"釣","钗":"釵","钟":"鐘","钩":"鉤","钮":"鈕","铜":"銅","银":"銀","铺":"鋪","链":"鏈","锁":"鎖","错":"錯","锡":"錫","锦":"錦","键":"鍵","镂":"鏤","镜":"鏡","长":"長","门":"門","闭":"閉","问":"問","闲":"閒","间":"間","闷":"悶","闸":"閘","闻":"聞","阁":"閣","阔":"闊","阳":"陽","阴":"陰","阵":"陣","阶":"階","际":"際","陈":"陳","随":"隨","隐":"隱","霭":"靄","静":"靜","韵":"韻","页":"頁","顶":"頂","顺":"順","须":"須","顾":"顧","颂":"頌","预":"預","频":"頻","题":"題","颜":"顏","额":"額","颤":"顫","风":"風","飞":"飛","饭":"飯","饰":"飾","馆":"館","馈":"饋","骂":"罵","鲜":"鮮","鳅":"鰍","鸟":"鳥","鹉":"鵡","鹦":"鸚","黄":"黃","齐":"齊","龙":"龍","袭":"襲","岁":"歲","学":"學","兴":"興","鸳":"鴛","鸯":"鴦","苏":"蘇","琏":"璉","莲":"蓮","评":"評","劝":"勸","铰":"鉸","妆":"妝","冯":"馮","撵":"攆","灵":"靈","烧":"燒","鹃":"鵑","爱":"愛","诔":"誄","渊":"淵","员":"員","咏":"詠","业":"業","钏":"釧","讨":"討","扬":"揚","袄":"襖","卖":"賣","庙":"廟","权":"權","乡":"鄉","浑":"渾","伤":"傷","难":"難","钱":"錢","掷":"擲","养":"養","却":"卻","嬷":"嬤","坠":"墜","绝":"絕","绮":"綺","赠":"贈","买":"買","执":"執","罗":"羅","电":"電","败":"敗","验":"驗","账":"賬","领":"領","剧":"劇","谈":"談","战":"戰","递":"遞","担":"擔","钉":"釘","莺":"鶯","樯":"檣","协":"協","蒋":"蔣","脱":"脫","圆":"圓","荐":"薦","抢":"搶","雾":"霧","项":"項","谢":"謝","鸣":"鳴","较":"較","议":"議","监":"監","顿":"頓","夸":"誇","软":"軟","军":"軍","帮":"幫","闹":"鬧","赵":"趙","输":"輸","赖":"賴","纪":"紀","骑":"騎","赶":"趕","审":"審","浊":"濁","骗":"騙","虾":"蝦","镯":"鐲","虽":"雖","癞":"癩","织":"織","奁":"奩","泪":"淚","飘":"飄","炼":"煉","盐":"鹽","讳":"諱","龄":"齡","窑":"窯","谱":"譜","脑":"腦","锚":"錨","昼":"晝","络":"絡","统":"統","鲤":"鯉","虫":"蟲","扰":"擾","勋":"勳","呜":"嗚","唤":"喚","盏":"盞","尝":"嘗","谜":"謎","驳":"駁","奖":"獎","绍":"紹","贪":"貪","鲍":"鮑","攒":"攢","烫":"燙","营":"營","缮":"繕","温":"溫","寻":"尋","婶":"嬸","钥":"鑰","赎":"贖","霁":"霽","吓":"嚇","辈":"輩","泼":"潑","瞒":"瞞","凑":"湊","缎":"緞","鸭":"鴨","践":"踐","胆":"膽","马":"馬","谙":"諳","穷":"窮","饮":"飲","辞":"辭","剑":"劍","阊":"閶","禀":"稟","绛":"絳","肃":"肅","谦":"謙","殡":"殯","鹡":"鶺","鸰":"鴒","贺":"賀","凭":"憑","腾":"騰","费":"費","愿":"願","汤":"湯","钦":"欽","贯":"貫","殁":"歿","讯":"訊","夺":"奪","争":"爭","饼":"餅","衬":"襯","迁":"遷","娇":"嬌","恼":"惱","誊":"謄","笺":"箋","拥":"擁","罚":"罰","访":"訪","鹤":"鶴","闺":"閨","挥":"揮","诌":"謅"};
+  const SG_LABEL = '.signature small, .slip-head small, .card-actions, .detail-counter, .annotation-source, .sg-kind, .section-count, #section-count, .detail-kind, .index-item small, #total-label, #paper-name, #poem-form';
+  const sgFan = (s) => { let o = ''; for (const ch of s) o += SG_S2T[ch] || ch; return o; };
+  const sgText = (el) => {
+    const w = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+    for (let n = w.nextNode(); n; n = w.nextNode()) { const t = sgFan(n.nodeValue); if (t !== n.nodeValue) n.nodeValue = t; }
+  };
+  function sgConv(root) { root.querySelectorAll(SG_LABEL).forEach(sgText); }
+  // 只处理这一批变化涉及的节点（长诗逐字呈现时不再整页重扫）：新加的元素自己 / 子孙里的标签，和文字变了的那个标签
+  const sgPending = new Set(); let sgT = 0;
+  new MutationObserver((ms) => {
+    for (const m of ms) {
+      if (m.type === 'characterData') { const el = m.target.parentElement?.closest?.(SG_LABEL); if (el) sgPending.add(el); continue; }
+      for (const n of m.addedNodes) {
+        if (n.nodeType === 3) { const el = n.parentElement?.closest?.(SG_LABEL); if (el) sgPending.add(el); }
+        else if (n.nodeType === 1) { const up = n.closest?.(SG_LABEL); if (up) sgPending.add(up); else n.querySelectorAll?.(SG_LABEL).forEach((e) => sgPending.add(e)); }
+      }
+    }
+    if (!sgPending.size || sgT) return;
+    sgT = requestAnimationFrame(() => { sgT = 0; const els = [...sgPending]; sgPending.clear(); els.forEach((e) => e.isConnected && sgText(e)); });
+  }).observe(document.body, { childList: true, subtree: true, characterData: true });
+  sgConv(document);
 })();

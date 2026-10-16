@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+<!-- 单元 40×40；要换色把 stroke/fill 的 #C39D75 换成规范里别的色值 -->
+<defs><pattern id="pat-denglongjin" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M0 0H40M0 0V40M10 8H30V32H10ZM20 0V8M20 32V40M0 20H10M30 20H40" fill="none" stroke="#C39D75" stroke-width="1.6" stroke-linecap="square"/><g fill="#C39D75"><rect x="18.5" y="2.5" width="3" height="3"/><rect x="18.5" y="34.5" width="3" height="3"/><rect x="3.5" y="18.5" width="3" height="3"/><rect x="33.5" y="18.5" width="3" height="3"/></g></pattern></defs>
+<rect width="256" height="256" fill="#F5E7D2"/>
+<rect width="256" height="256" fill="url(#pat-denglongjin)"/>
+</svg>

@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+<!-- 单元 24×24；要换色把 stroke/fill 的 #C39D75 换成规范里别的色值 -->
+<defs><pattern id="pat-wanzi" width="24" height="24" patternUnits="userSpaceOnUse"><path d="M12 4V20M4 12H20M12 4H20V0M20 12V20H24M12 20H4V24M4 12V4H0" fill="none" stroke="#C39D75" stroke-width="1.6" stroke-linecap="square"/></pattern></defs>
+<rect width="256" height="256" fill="#F5E7D2"/>
+<rect width="256" height="256" fill="url(#pat-wanzi)"/>
+</svg>

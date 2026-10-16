@@ -1,0 +1,246 @@
+{
+ "baoyu": {
+  "cw": 274,
+  "ch": 480,
+  "aspect": 0.5708,
+  "crop": [
+   127,
+   137,
+   1073,
+   1800
+  ],
+  "face": 0.227
+ },
+ "xiren": {
+  "cw": 186,
+  "ch": 480,
+  "aspect": 0.3875,
+  "crop": [
+   278,
+   137,
+   924,
+   1800
+  ],
+  "face": 0.227
+ },
+ "qingwen": {
+  "cw": 264,
+  "ch": 480,
+  "aspect": 0.55,
+  "crop": [
+   145,
+   137,
+   1055,
+   1800
+  ],
+  "face": 0.227
+ },
+ "jiazheng": {
+  "cw": 276,
+  "ch": 480,
+  "aspect": 0.575,
+  "crop": [
+   132,
+   167,
+   1068,
+   1800
+  ],
+  "face": 0.213
+ },
+ "wangfuren": {
+  "cw": 218,
+  "ch": 480,
+  "aspect": 0.4542,
+  "crop": [
+   224,
+   138,
+   975,
+   1800
+  ],
+  "face": 0.227
+ },
+ "tanchun": {
+  "cw": 192,
+  "ch": 480,
+  "aspect": 0.4,
+  "crop": [
+   267,
+   139,
+   932,
+   1800
+  ],
+  "face": 0.226
+ },
+ "baochai": {
+  "cw": 230,
+  "ch": 480,
+  "aspect": 0.4792,
+  "crop": [
+   205,
+   139,
+   996,
+   1800
+  ],
+  "face": 0.226
+ },
+ "daiyu": {
+  "cw": 196,
+  "ch": 480,
+  "aspect": 0.4083,
+  "crop": [
+   262,
+   137,
+   938,
+   1800
+  ],
+  "face": 0.227
+ },
+ "liwan": {
+  "cw": 196,
+  "ch": 480,
+  "aspect": 0.4083,
+  "crop": [
+   262,
+   137,
+   938,
+   1800
+  ],
+  "face": 0.227
+ },
+ "xiren-full": {
+  "cw": 216,
+  "ch": 640,
+  "aspect": 0.3375,
+  "crop": [
+   268,
+   137,
+   940,
+   2130
+  ],
+  "full": true
+ },
+ "qingwen-full": {
+  "cw": 246,
+  "ch": 640,
+  "aspect": 0.3844,
+  "crop": [
+   145,
+   137,
+   1127,
+   2702
+  ],
+  "full": true
+ },
+ "jiazheng-full": {
+  "cw": 244,
+  "ch": 640,
+  "aspect": 0.3812,
+  "crop": [
+   132,
+   167,
+   1068,
+   2624
+  ],
+  "full": true
+ },
+ "wangfuren-full": {
+  "cw": 252,
+  "ch": 640,
+  "aspect": 0.3937,
+  "crop": [
+   116,
+   138,
+   1116,
+   2692
+  ],
+  "full": true
+ },
+ "liwan-full": {
+  "cw": 176,
+  "ch": 640,
+  "aspect": 0.275,
+  "crop": [
+   262,
+   137,
+   938,
+   2602
+  ],
+  "full": true
+ },
+ "sheyue-board": {
+  "w": 480,
+  "h": 640,
+  "src": "codex/人物/sheyue.webp",
+  "crop": [
+   330,
+   0,
+   1140,
+   1080
+  ]
+ },
+ "zijuan-board": {
+  "w": 480,
+  "h": 640,
+  "src": "codex/人物/zijuan.webp",
+  "crop": [
+   300,
+   0,
+   1110,
+   1080
+  ]
+ },
+ "xueyan-board": {
+  "w": 480,
+  "h": 640,
+  "src": "codex/人物/xueyan.webp",
+  "crop": [
+   555,
+   0,
+   1365,
+   1080
+  ],
+  "bg": "paper"
+ },
+ "daiyu-full": {
+  "cw": 418,
+  "ch": 800,
+  "aspect": 0.5225,
+  "crop": [
+   137,
+   41,
+   886,
+   1477
+  ],
+  "full": true,
+  "cells": 1,
+  "src": "sprites/87/daiyu-ping.webp"
+ },
+ "zijuan-full": {
+  "cw": 294,
+  "ch": 800,
+  "aspect": 0.3675,
+  "crop": [
+   249,
+   41,
+   775,
+   1477
+  ],
+  "full": true,
+  "cells": 1,
+  "src": "sprites/87/zijuan-ping.webp"
+ },
+ "baoyu87-full": {
+  "cw": 256,
+  "ch": 800,
+  "aspect": 0.32,
+  "crop": [
+   283,
+   41,
+   741,
+   1477
+  ],
+  "full": true,
+  "cells": 1,
+  "src": "sprites/87/baoyu-ping.webp"
+ }
+}
