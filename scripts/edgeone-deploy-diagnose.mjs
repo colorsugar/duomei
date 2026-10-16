@@ -44,6 +44,25 @@ const deployments = await call("DescribePagesDeployments", {
 console.log(`## DescribePagesDeployments (HTTP ${deployments.status})`);
 console.log(JSON.stringify(redact(deployments.body), null, 2));
 
+// The console shows a per-deployment log; the public docs do not name its API action,
+// so probe the likely ones for each failed deployment (unknown actions just return an error).
+const failed = (deployments.body?.Data?.Response?.Deployments || [])
+  .filter((d) => d.Status !== "Success" && d.Status !== "Process")
+  .map((d) => d.DeploymentId)
+  .slice(0, 2);
+const LOG_ACTIONS = [
+  "DescribePagesDeploymentLogs", "DescribePagesDeploymentLog", "DescribePagesBuildLogs",
+  "DescribePagesBuildLog", "DescribePagesDeploymentDetail", "DescribePagesDeployment",
+  "DescribePagesDeploymentEvents", "DescribePagesLogs",
+];
+for (const id of failed) {
+  for (const action of LOG_ACTIONS) {
+    const r = await call(action, { ProjectId: projectId, DeploymentId: id });
+    const text = JSON.stringify(redact(r.body));
+    console.log(`## ${action} ${id} (HTTP ${r.status}) ${text.length > 6000 ? text.slice(0, 6000) + "…" : text}`);
+  }
+}
+
 const projects = await call("DescribePagesProjects", {
   Filters: [{ Name: "ProjectId", Values: [projectId] }], Offset: 0, Limit: 1,
 });
