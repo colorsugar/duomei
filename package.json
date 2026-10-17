@@ -7,7 +7,8 @@
   "license": "UNLICENSED",
   "scripts": {
     "dev": "vite",
-    "build": "npm run typecheck:server && tsc -b && vite build",
+    "build": "npm run typecheck:server && tsc -b && vite build && node scripts/cos-assets.mjs strip",
+    "assets:plan": "node scripts/cos-assets.mjs plan",
     "typecheck": "tsc -b",
     "typecheck:server": "tsc -p tsconfig.server.json",
     "test:home-hold": "node --experimental-strip-types --test src/lib/homeSectionHold.test.ts src/lib/headerNavBreakpoint.test.ts src/lib/guyuCarousel.test.ts src/lib/xunjiEdition.test.ts && node --test server/xunjiProxy.test.mjs",

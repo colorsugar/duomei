@@ -29,3 +29,6 @@ Thumbs.db
 /public/downloads/fantasy-continent-artbook.pdf
 /output/
 /artifacts/zaobao-wechat/
+
+# COS 拆分清单：只在 CI 发布时由 scripts/cos-assets.mjs apply 生成
+/.cos-split.json

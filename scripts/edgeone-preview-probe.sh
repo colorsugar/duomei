@@ -17,3 +17,15 @@ for i in 1 2 3 4 5 6; do
   done
   sleep 20
 done
+# 闸门：首页、红楼梦影、小院、云游、图志的入口页必须 200，否则这次预览算失败。
+fail=0
+for p in / /honglou/ /xiaoyuan-scene/ /yunyou/index.html /atlas/v6/index.html /lingchuan/; do
+  code="$(curl -sS -m 30 -o /dev/null -w '%{http_code}' "${base%/}${p}?${query}" 2>/dev/null || echo 000)"
+  echo "gate ${p} ${code}"
+  [ "$code" = "200" ] || fail=1
+done
+[ "$fail" = "0" ] || { echo "preview gate failed"; exit 1; }
+# 大文件拆到 COS 时：预览站上被搬走的路径要 302 到 assets.duomei.site，跟过去能取到。
+if [ -f .cos-split.json ]; then
+  node scripts/cos-assets.mjs verify-site --site "${base%/}" --query "$query" || exit 1
+fi
