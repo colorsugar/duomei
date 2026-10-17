@@ -18,12 +18,16 @@
     listeners.forEach((f) => { try { f(v); } catch { /* */ } });
     if (from !== 'peer') {
       for (const f of document.querySelectorAll('iframe')) { try { f.contentWindow?.postMessage({ gfFs: v }, '*'); } catch { /* */ } }
-      if (window.parent !== window) { try { window.parent.postMessage({ gfFs: v }, '*'); } catch { /* */ } }
+      // 10-17 Fable：初始化（from='init'）的值只是本窗口按自己宽度猜的默认档，不能往上广播——书案里一个 ≤767 宽的小 iframe（畫中有話预览）
+      //   一载入就把整页从「大」拉成「中」，詩稿页开着开着版面会跳一下。子窗口初始化改为向父级问当前档位，父级有值就回它。
+      if (window.parent !== window) {
+        try { window.parent.postMessage(from === 'init' ? { gfFsQuery: 1 } : { gfFs: v }, '*'); } catch { /* */ }
+      }
     }
   }
   function set(v) { apply(v); try { localStorage.setItem(KEY, String(cur)); } catch { /* */ } }
   addEventListener('storage', (e) => { if (e.key === KEY && e.newValue) apply(+e.newValue, 'peer'); });
-  addEventListener('message', (e) => { const v = e.data && e.data.gfFs; if (v && v !== cur) { apply(v, 'peer'); for (const f of document.querySelectorAll('iframe')) { if (f.contentWindow !== e.source) try { f.contentWindow?.postMessage({ gfFs: v }, '*'); } catch { /* */ } } } });
+  addEventListener('message', (e) => { if (e.data && e.data.gfFsQuery && e.source && cur) { try { e.source.postMessage({ gfFs: cur }, '*'); } catch { /* */ } return; } const v = e.data && e.data.gfFs; if (v && v !== cur) { apply(v, 'peer'); for (const f of document.querySelectorAll('iframe')) { if (f.contentWindow !== e.source) try { f.contentWindow?.postMessage({ gfFs: v }, '*'); } catch { /* */ } } } });
 
   function fsButton() {
     if (document.querySelector('.gf-fs')) return;

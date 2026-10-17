@@ -43,7 +43,7 @@ html.gf-zoom-root body { min-height: calc(100svh / var(--fs-scale)); }
 .hz-arrow:active { transform: translateY(-50%) scale(0.94); }
 
 /* ===== 多幅提示：页码 + 圆点 + 缩略图带 ===== */
-.hz-nav { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: 10px; margin-top: 16px; }
+.hz-nav { display: grid; grid-template-columns: max-content minmax(0, 1fr) max-content; align-items: center; gap: 10px; margin-top: 16px; }
 .hz-count { justify-self: start; display: flex; align-items: baseline; gap: 7px; font: 400 24px/1 var(--song); color: var(--gf-ink-2); white-space: nowrap; }
 .hz-count b { font-size: 42px; font-weight: 700; color: var(--gf-cinnabar); line-height: 1; }
 .hz-count i { font-style: normal; opacity: 0.55; }
@@ -54,6 +54,9 @@ html.gf-zoom-root body { min-height: calc(100svh / var(--fs-scale)); }
 .hz-dot[aria-current="true"]::before { background: var(--gf-cinnabar); border-color: var(--gf-cinnabar); transform: scale(1.18); box-shadow: 0 0 0 4px rgba(154, 59, 44, 0.16); }
 .hz-nav.many .hz-dot { width: 24px; height: 32px; } .hz-nav.many .hz-dot::before { width: 13px; height: 13px; }
 .hz-nav.many .hz-auto-label { display: none; }
+/* 幅数多（>9）时圆点单独占一行，页码与轮换钮放下一行，免得圆点挤掉页码或折行 */
+.hz-nav.many { grid-template-columns: 1fr auto; grid-template-areas: "dots dots" "count auto"; row-gap: 6px; }
+.hz-nav.many .hz-dots { grid-area: dots; } .hz-nav.many .hz-count { grid-area: count; } .hz-nav.many .hz-auto { grid-area: auto; }
 .hz-auto { justify-self: end; min-height: 44px; font-size: 16px; padding: 0.4em 1em; gap: 0.4em; white-space: nowrap; }
 .hz-auto svg { width: 1.1em; height: 1.1em; fill: currentColor; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
 .hz-auto .ic-pause { fill: none; } .hz-auto .ic-play { display: none; }

@@ -82,9 +82,39 @@
       box.appendChild(sec);
     }
   };
+  // 10-17 Fable 第三轮（总指挥退回：读诗页右栏「賞析」最后一句被渐隐截掉，老大要的是右栏「一览无余」）：矮窗电脑里右栏只有 ~430px 高，串講 + 字裡尋意 + 賞析 + 難字 四节叠着怎么压字都放不下
+  //   → 布局高 ≤820 的电脑版面上右栏改成三页签「箋邊串講 / 字裡尋意 / 賞析」，一次只摊一节、每节整段看完；点诗里的朱字自动翻到「字裡尋意」。宽屏（1440×900）右栏够高，照旧整栏
+  const AN_TABS = [['talk', '箋邊串講'], ['note', '字裡尋意'], ['more', '賞析']];
+  function annTabbed() { const z = parseFloat(getComputedStyle(document.documentElement).zoom) || 1; return document.body.dataset.layout === 'desktop' && (matchMedia('(max-height: 820px)').matches || innerHeight / z < 820); }
+  function annTab(name) {
+    const an = $('.annotation'); if (!an) return; an.dataset.tab = name; an.querySelectorAll('.sg-atabs button').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.tab === name))); an.scrollTop = 0;
+    an.classList.toggle('sg-over', an.scrollHeight > an.clientHeight + 2); // 这一页放不下一屏（賞析常常近五屏）→ 页签条右端亮「往下翻」
+  }
+  function annSetup(reset) {
+    const an = $('.annotation'); if (!an) return;
+    const on = annTabbed(); an.classList.toggle('sg-tabbed', on);
+    if (!on) { delete an.dataset.tab; return; }
+    if (!an.querySelector('.sg-atabs')) {
+      const bar = document.createElement('div'); bar.className = 'sg-atabs'; bar.setAttribute('role', 'tablist'); bar.setAttribute('aria-label', '箋邊');
+      bar.innerHTML = AN_TABS.map(([k, t]) => '<button type="button" role="tab" data-tab="' + k + '">' + t + '</button>').join('') + '<span class="sg-more" aria-hidden="true">↓ 往下翻</span>';
+      bar.addEventListener('click', (e) => { const b = e.target.closest('button[data-tab]'); if (b) annTab(b.dataset.tab); });
+      // 第三轮审查 🟢4：页签上按左右键原来冒泡到读诗弹窗的处理器变成「上一首 / 下一首」→ 在页签条里左右键只切页签并把焦点带过去
+      bar.addEventListener('keydown', (e) => {
+        if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight' && e.key !== 'Home' && e.key !== 'End') return;
+        const bs = [...bar.querySelectorAll('button[data-tab]')], i = bs.findIndex((b) => b.getAttribute('aria-selected') === 'true');
+        const j = e.key === 'Home' ? 0 : e.key === 'End' ? bs.length - 1 : (i + (e.key === 'ArrowRight' ? 1 : -1) + bs.length) % bs.length;
+        e.preventDefault(); e.stopPropagation(); annTab(bs[j].dataset.tab); bs[j].focus();
+      });
+      const art = an.querySelector('.carrier-art'); an.insertBefore(bar, art ? art.nextSibling : an.firstChild);
+    }
+    if (reset || !an.dataset.tab) annTab('talk');
+  }
+  const showNote0 = showNote;
+  showNote = function (term, node) { showNote0(term, node); const an = $('.annotation'); if (an && an.classList.contains('sg-tabbed')) annTab('note'); };
   const openPoem0 = openPoem;
   openPoem = function (index) {
     openPoem0(index);
+    annSetup(true);
     const id = activeIds[currentPoem], p = db.作品[id]; if (!p) return;
     const by = $('#detail-byline');
     by.innerHTML = authorIds(p).map((a) => people[a] ? '<button type="button" class="sg-who" data-person="' + a + '">' + esc(people[a].name) + '</button>' : esc(a)).join('、') + ' · 第' + cn(p.回) + '回';
@@ -133,10 +163,77 @@
   $('#poem-dialog').addEventListener('close', () => { if (root.classList.contains('sg-single')) setTimeout(() => { if (!$('#poem-dialog').open && !$('#reader').open) emit('close'); }, 0); });
   $('#reader').addEventListener('close', () => { if (root.classList.contains('sg-single') && !$('#poem-dialog').open) emit('close'); });
 
+  // ——— 10-17 Fable：签卡上的竖排诗题（「詠白海棠（其二）」八字、「中秋夜大觀園即景聯句三十五韻」十五字）在限高里会折成第二列，括号压到诗句上 ———
+  // 办法：诗题一律不折列；按字数把字号缩到限高装得下为止（最小 13px）；真装不下的长题才允许两列，并让诗句多让出一列宽（game.css .sg-two-col）
+  // 诗句列同理：1000×600 里卡只剩 ~257 高，诗句列 115px 装不下七言一句（八字要 131px），尾字被切 → 先量实际可用高度，装不下就缩字（最小 12px）
+  // 样张里 font-size 多带 !important（html body .slip .verse-preview p {font-size:16px!important}），所以这里一律 setProperty(..., 'important')
+  const setI = (el, k, v) => el.style.setProperty(k, v, 'important');
+  // rect 坐标 ÷ 布局像素 的倍数：Chrome 整页 zoom 时 rect 含 zoom（GF.zk 回 1）→ 倍数 = zoom；Safari rect 不含（GF.zk 回 zoom）→ 1
+  const rectK = () => { const z = parseFloat(getComputedStyle(document.documentElement).zoom) || 1; if (Math.abs(z - 1) < 0.01) return 1; const k = (window.GF && GF.zk) ? GF.zk() : 1; return z / k; };
+  // 第四轮审查：竖排（vertical-rl）里 line-height 管的是列距不是字高，拿它估字高会过早缩字 → 改成实测：一列的真实高度 = p.scrollHeight，超出可用高度多少就按比例缩多少
+  function fitVerses() {
+    for (const v of document.querySelectorAll('.verse-preview')) {
+      const ps = [...v.querySelectorAll('p')]; if (!ps.length) continue;
+      v.style.removeProperty('font-size'); ps.forEach((p) => p.style.removeProperty('font-size'));
+      const cs = getComputedStyle(v), fs0 = parseFloat(cs.fontSize); if (!fs0) continue;
+      const avail = v.clientHeight - (parseFloat(cs.paddingTop) || 0) - (parseFloat(cs.paddingBottom) || 0) - 2;
+      const need = Math.max(...ps.map((p) => p.scrollHeight)); if (!need || avail <= 0 || need <= avail) continue;
+      const fs = Math.max(14, Math.floor(fs0 * avail / need)); // 第六轮审查 🟡3：下限 14px（核查单的小字下限）
+      setI(v, 'font-size', fs + 'px'); ps.forEach((p) => setI(p, 'font-size', fs + 'px'));
+    }
+  }
+  function fitTitles() {
+    const K = rectK(); // 第六轮审查 🟢4：GF.zk 要插测量节点，整轮算一次就够
+    for (const t of document.querySelectorAll('.slip-title')) {
+      t.style.removeProperty('font-size'); t.style.removeProperty('max-height'); setI(t, 'white-space', 'nowrap'); t.classList.remove('sg-two-col');
+      if (!t.textContent.length) continue;
+      const cs = getComputedStyle(t), fs0 = parseFloat(cs.fontSize); if (!fs0) continue;
+      let maxH = parseFloat(cs.maxHeight) || 1e9;
+      // 限高还要让开底下的署名 / 印章行：诗题是绝对定位的，卡矮时会一直伸到印章底下去
+      const v = t.parentElement && t.parentElement.querySelector('.verse-preview');
+      // 第五轮审查：整页 zoom≠1 时 Chrome 的 getBoundingClientRect 含 zoom、scrollHeight / max-height 不含，直接相减单位不一致 → 先换算回布局像素（Safari 的 rect 本来就不含 zoom，GF.zk 能分辨）
+      if (v) { const room = (v.getBoundingClientRect().bottom - t.getBoundingClientRect().top) / K - 4; if (room > 40 && room < maxH) { maxH = room; setI(t, 'max-height', Math.floor(room) + 'px'); } }
+      let need = t.scrollHeight; // 已禁折列，这就是整题一列的真实高度
+      if (need <= maxH) continue;
+      // 第六轮审查 🔴1：字距（letter-spacing 2px）不随字号缩，按比例缩一次可能还差几像素 → 缩完再量，最多补三轮；到 14px 下限还放不下才分两列
+      let fs = Math.floor(fs0 * maxH / need), fit = false;
+      for (let i = 0; i < 4 && fs >= 14; i++) {
+        setI(t, 'font-size', fs + 'px'); need = t.scrollHeight;
+        if (need <= maxH) { fit = true; break; }
+        fs = Math.min(fs - 1, Math.floor(fs * maxH / need));
+      }
+      if (fit) continue;
+      setI(t, 'font-size', '14px'); t.style.removeProperty('white-space'); t.classList.add('sg-two-col');
+    }
+  }
+  // 10-17 Fable 第三轮（总指挥退回：「按回」翻到后几张时最左那张签卡只露半截「全粉箋 / 字注 / 串講」）：卡轨滚到头时 scrollLeft 被夹在最大值，末尾几张永远贴不到左边、第一张可见的卡就被切半
+  //   → 卡轨尾部补一块占位（CSS #card-track::after 吃 --sg-tail），宽度 = 让末卡也能贴左对齐还差的那一截；手机是整屏一张、不需要
+  function fitTail() {
+    const t = $('#card-track'); if (!t) return;
+    t.style.setProperty('--sg-tail', '0px');
+    if (document.body.dataset.layout !== 'desktop') return;
+    const targets = cardTargets(), last = targets[targets.length - 1]; if (!last) return;
+    const want = last.offsetLeft - t.offsetLeft - 5, need = want - (t.scrollWidth - t.clientWidth);
+    if (need > 0) t.style.setProperty('--sg-tail', Math.ceil(need) + 'px');
+  }
+  const fitAll = () => { fitVerses(); fitTitles(); fitTail(); annSetup(false); };
+  { let raf = 0; const queue = () => { cancelAnimationFrame(raf); raf = requestAnimationFrame(fitAll); };
+    const pf = $('#portfolio'); if (pf) new MutationObserver(queue).observe(pf, { childList: true });
+    new MutationObserver(queue).observe(document.body, { attributes: true, attributeFilter: ['data-layout'] });
+    new MutationObserver(queue).observe(document.documentElement, { attributes: true, attributeFilter: ['data-fs'] });
+    addEventListener('resize', queue); if (document.fonts) document.fonts.ready.then(queue);
+    // 开册有一段放大过渡，首次渲染时卡还是小尺寸、会按小尺寸把字缩掉 → 工作区一变大小就重算
+    if (window.ResizeObserver) { const ro = new ResizeObserver(queue); const ws = $('#workspace'); if (ws) ro.observe(ws); ro.observe(document.body); }
+    // 只认会改变卡尺寸的那几层容器的过渡（开册放大 / 卷轴 / 卡轨），签卡自己的悬停 transform 过渡不触发全量重算（第五轮审查）
+    addEventListener('transitionend', (e) => { const el = e.target; if (el && el.matches && el.matches('#workspace, .entry, .portfolio, .scroll-wrap, .card-track')) queue(); }, true); }
+
   // ——— 对游戏的接口 ———
   const ready = () => (loaded ? Promise.resolve() : load());
   function setMode(m) { root.classList.toggle('sg-single', m === 'single'); root.classList.toggle('sg-club', m === 'club'); }
-  function syncTabs() { $$('.mode-tabs button').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.view === mode))); }
+  function syncTabs() { $$('.mode-tabs button').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.view === mode))); resetScroll(); }
+  // 10-17 Fable：切「按人 / 按社 / 按回」时 #workspace 的滚动位置原样留着（手机社页滚到底看四钮再切按人，段头就滚到页签条后面、人名被盖）→ 切视图一律回到顶
+  function resetScroll() { requestAnimationFrame(() => { const w = $('#workspace'); if (w) w.scrollTop = 0; }); }
+  addEventListener('click', (e) => { const t = e.target; if (t && t.closest && t.closest('.mode-tabs button')) resetScroll(); }, true);
   function showInside() { entry.hidden = true; $('#inside').inert = false; opening = false; setBoxPhase('ready'); entry.classList.remove('opening'); }
   function closeDialogs() { document.querySelectorAll('dialog[open]').forEach((d) => { try { d.close(); } catch (e) { /* */ } }); }
   const DEF = { person: 'daiyu', society: 'haitang', chapter: '37' };
