@@ -1,6 +1,8 @@
 // v22 全站静音钮（只开发版页面引入）：一键关/开所有声音——BGM、环境声、音效、册页 iframe、视频；记在 localStorage「dgy-mute」
 (function () {
   var KEY = 'dgy-mute', muted = false; try { muted = localStorage.getItem(KEY) === '1'; } catch (e) {}
+  // 10-16：本机直接打开文件（file://，编辑器预览面板会在后台自动打开刚改的页面）一律静音，免得老大突然听见配乐又找不到是哪个页面
+  if (location.protocol === 'file:') muted = true;
   var wins = [];
   function install(w) {
     if (!w || w.__dgyMute) return; w.__dgyMute = 1; wins.push(w);

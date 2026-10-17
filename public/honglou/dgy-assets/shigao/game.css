@@ -2,7 +2,7 @@
 
 /* 单首展读：页面透明，只浮一张笺；背后是游戏（人物卡 / 园景，由游戏一侧压暗虚化） */
 html.sg-single, html.sg-single body, html.sg-club, html.sg-club body { background: transparent !important; }
-html.sg-single .scene, html.sg-single .collection, html.sg-single .petals { display: none !important; }
+html.sg-single .scene, html.sg-single .collection { display: none !important; }
 html.sg-single dialog::backdrop { background: transparent; }
 /* 诗会长卷（园中案上诗笺）：不出书案底画 */
 html.sg-club .scene { display: none !important; }
@@ -58,6 +58,8 @@ body[data-layout=mobile] span.sg-head-face { font-size: 20px; }
 .chapter-btn b { font-size: 18px !important; }
 /* 第 32 轮（巡检字体回退）：样张里锦函、册名、赏析小标题这些界面字也用了诗文笔触字库（只收诗里的字），缺字退到同款行书界面字库，不落宋体 */
 .casket-label b, .casket-caption, .entry-instruction, .thread-book > span, .book-leaf > span, .desk-note, .poem-postscript h3, .lid-seal, .paperweight { font-family: V3Brush, UIScript, UIExtra, UIDgy, "Songti SC", serif !important; }
+/* 10-17 任务书 6「竖排里的《》没转成竖向」：实测锦函题字、签卡标题、签卡诗句三类竖排元素最终都走全站统一字体 "DGY All"（自带竖排标点变体），
+   往里塞「《詠菊》「問」，。」截图核过——都是竖排形态；没有再加字体规则 */
 /* 诗笺纸面统一用笔触字：作者、纸名、注释和赏析不再落到方正的界面字体。 */
 .poem-dialog { --song: "Kaiti SC", "STKaiti", "KaiTi", serif; font-family: var(--song); }
 .poem-dialog .writing-sheet { min-height: 0; max-height: 100%; overflow: hidden; }
@@ -69,7 +71,7 @@ body[data-layout=mobile] span.sg-head-face { font-size: 20px; }
 }
 #poem-back { font-family: "Songti SC", serif !important; }
 /* 第 32 轮（巡检）：手机触点 44；桌面长卷不强制吸附（滚轮 / 拖动停在哪是哪） */
-#close-poem, .stamp-btn { min-width: 44px !important; min-height: 44px !important; }
+#close-poem, .gf-btn.is-seal { min-width: 44px !important; min-height: 44px !important; }
 .volume-picker button { min-width: 44px !important; min-height: 44px; }
 body[data-layout=mobile] #section-title { min-height: 44px; display: flex; align-items: center; }
 body[data-layout=desktop] .card-track, body[data-layout=desktop] .society-track { scroll-snap-type: none !important; }
@@ -95,7 +97,7 @@ body[data-layout=desktop] .collection { left: 0 !important; top: 0 !important; w
 
 /* 10-15（册页修复）：手机宽度下启函后，盖子向左铺开、六册在右——桌面那条「右移 300px」把六册整个推出屏外。
    手机把整副锦函缩到 0.7、居中，盖与六册同屏；「六冊待選」回到函正下方。 */
-body[data-layout=mobile] .entry[data-phase=ready] .casket { transform: translateX(92px) scale(.7) rotate(-3deg); }
+body[data-layout=mobile] .entry[data-phase=ready] .casket { transform: translateX(65px) scale(.7) rotate(-3deg); } /* 10-17：390 宽实测右移 92 时第六册右侧出屏 19px，改 65 */
 body[data-layout=mobile] .entry[data-phase=ready] .entry-instruction { transform: none; }
 @media (max-width: 359px) { body[data-layout=mobile] .entry[data-phase=ready] .casket { transform: translateX(76px) scale(.58) rotate(-3deg); } } /* 320 宽：530×0.58 ≈ 307，仍在屏内 */
 
@@ -138,11 +140,11 @@ body[data-layout=mobile] .entry[data-phase=ready] .entry-kicker { opacity: 0; tr
 
 /* ===== 10/16 返回键统一到左上角（与 dgy/backLeft.css 同一枚朱印：40×40、朱砂底、纸色字、2px 角、内描边）=====
    Esc / 点空白 / 手机返回的逻辑不动，只换位置和样子；点击热区用 ::after 外扩 4px，保住 44 的触控尺寸。 */
-.stamp-btn { width: 40px !important; height: 40px !important; min-width: 40px !important; min-height: 40px !important; border: 0 !important; border-radius: 2px !important; background: #a63d2a !important; color: #f5e7d2 !important; font: 400 21px/1 var(--xing, serif) !important; padding: 0 !important; filter: none !important; box-shadow: inset 0 0 0 1.5px rgba(245,231,210,.5), 0 3px 8px rgba(30,12,4,.32) !important; }
-.stamp-btn:not(.sg-entry-x) { position: relative; }
-.stamp-btn::before { display: none !important; }
-.stamp-btn::after { content: ''; position: absolute; inset: -4px; }
-body[data-layout=mobile] .detail-head .stamp-btn { width: 40px !important; height: 40px !important; }
+/* 10/16 全站界面施工：「閉」「字」「翻页」一律是印章圆钮 .gf-btn.is-seal（gf.css），不再是 2px 直角小方块；点击热区仍外扩 4px */
+.gf-btn.is-seal:not(.sg-entry-x):not(.mobile-back) { position: relative; }
+
+.gf-btn.is-seal::after { content: ''; position: absolute; inset: -4px; border-radius: 50%; }
+
 /* 入口层 */
 .sg-entry-x { position: absolute !important; left: max(12px, env(safe-area-inset-left)) !important; right: auto !important; top: max(10px, env(safe-area-inset-top)) !important; }
 body[data-layout=mobile] .sg-entry-x { left: 12px !important; right: auto !important; top: calc(10px + env(safe-area-inset-top)) !important; }
@@ -158,7 +160,7 @@ body[data-layout=mobile] .titlebar .brand { margin-left: 8px; grid-column: 2; gr
 .detail-head .controls { display: contents; }
 .detail-head { gap: 12px; }
 .detail-head #close-poem { order: -1; }
-.reader-head .stamp-btn, .play-head .stamp-btn { order: -1; }
+.reader-head .gf-btn.is-seal, .play-head .gf-btn.is-seal { order: -1; }
 .reader-head, .play-head { justify-content: flex-start; }
 .reader-head > div { flex: 1; }
 .play-head h2 { flex: 1; margin-left: 12px; }
@@ -166,3 +168,158 @@ body[data-layout=mobile] .titlebar .brand { margin-left: 8px; grid-column: 2; gr
 
 /* 10/16 巡检「点击被遮挡 → span.casket-lid」：盖子只在合着时才接点击，开盖、取册的整段动画里都不挡下面的册 */
 .entry:not([data-phase=closed]) .casket-lid { pointer-events: none !important; }
+
+/* ===== 10-17 Fable · 书案小窗返修（老大 Chrome 内容区约 1000×600）=====
+   根因：样张里 @media(max-height:600px) 的矮屏规则排在前面，后面桌面规则（签卡 410 高、字格 32 宽、签条 65px 字）又把它们盖掉，
+   1000×600 下等于没有矮屏适配。这里按桌面 ≤700 高 / ≤1100 宽重写一套，特异性都带 body[data-layout=desktop]。 */
+/* 启函后函右移给左边六册 / 说明让位：原来小于 1360 宽一律推 300px，1000 宽时函右缘到 1080 出屏——位移不超过「函右缘贴屏」 */
+body[data-layout=desktop] .entry { --sg-shift: min(clamp(0px, calc((1800px - 100vw) * .68), 300px), calc((100vw - 560px) / 2 - 24px)); }
+body[data-layout=desktop] .entry[data-phase=ready] .casket { transform: translateX(var(--sg-shift)) rotate(-3deg); }
+body[data-layout=desktop] .entry[data-phase=ready] .entry-instruction { transform: translate(calc(var(--sg-shift) * .82), 46px); }
+@media (max-width: 1800px) { body[data-layout=desktop] .desk-note { display: none; } } /* 函被右推后，桌边竖排小字只剩半截露在函角下 */
+/* 开函组（翻开的盖 + 左页预览 + 六册函）展开约 1260px 宽：1440×900 按 1.25 倍排是 1152 宽的版面，放不下 → 缩 .88 并再右移 45 补居中（实测左页左缘 -105 → 约 0） */
+@media (max-width: 1500px) and (min-height: 821px) {
+  body[data-layout=desktop] .entry { --sg-shift: calc(min(clamp(0px, calc((1800px - 100vw) * .68), 300px), calc((100vw - 560px) / 2 - 24px)) + 45px); }
+  body[data-layout=desktop] .entry[data-phase=ready] .casket { transform: translateX(var(--sg-shift)) scale(.88) rotate(-3deg); }
+}
+/* 根因之二：字号档「大」给这页的 html 加了 zoom 1.25，1000×600 的窗等于按 800×480 排版——矮窗（≤700 高）里不再按字号档整体放大
+   （和书案里内容页同一规矩：小 .8 / 中 .9 / 大 1 / 特大 1.12） */
+/* 矮窗（≤700 高）：字号档以「大」为 1，小 / 中照缩；「特大」不再放大——1000×600 里开函页的左页预览 + 六册函横向要 1260px，放大 1.12 倍必出屏 */
+@media (max-height: 820px) { html:root { zoom: min(1, calc(var(--fs-scale, 1.25) / 1.25)) !important; --sg-z: calc(min(1, var(--fs-scale, 1.25) / 1.25) / var(--gf-vk, 1)); } } /* --sg-z 是样张里「100vw ÷ 放大倍数」的补偿系数（index.html :root），得跟着实际 zoom 走，否则整页缩在左上 800×480 */
+/* 读诗页标题行：閉 / 题名在左，「對照」「直接看全文（重新書寫）」并排靠右——原来 space-between 把两只钮拉开一大截 */
+.detail-head { justify-content: flex-start; } .detail-head .detail-heading { flex: 1 1 auto; min-width: 0; } #duizhao-toggle { margin-left: auto; }
+/* 封面签条「詩稿」两字永远一列（矮窗里函矮到 280，65px 字放不下换成两列、横着读成「稿 詩」） */
+body[data-layout=desktop] .casket-label b { white-space: nowrap; }
+/* 书案四角浮着宿主的「字」（右上）和「入園」（左下）钮；读诗页贴边时「直接看全文」被「字」压、「第 N 回 · 原著」被「入園」压——头尾两栏给它们让位 */
+html body[data-layout=desktop] .detail-head { padding-right: 76px; }
+html body[data-layout=desktop] .detail-footer { padding-left: 96px; }
+/* 「镇纸 · 留香」装饰条贴在卷轴右上，1440×900 下也正压在第二张签卡的署名上——电脑版一律不要 */
+html body[data-layout=desktop] .scroll-wrap:after { display: none; }
+/* 10-17 Fable：宿主左下角朱红「入園」钮（约 90×50）压在底栏「另擇一冊」的玉扣上 → 电脑版底栏左边让出 104px（手机版在下面 ≤700 块里另让） */
+html body[data-layout=desktop] .footer { padding-left: 104px !important; }
+/* 10-17 Fable：签卡诗题由 game.js fitTitles 按字数缩字、不折列；只有缩到 13px 还装不下的长题才标 .sg-two-col 允许两列，诗句右侧多让一列 */
+.slip .slip-title.sg-two-col { white-space: normal; }
+.slip .slip-title.sg-two-col ~ .verse-preview { padding-right: 66px !important; }
+/* 名次圈（海棠社评诗后的「一／二／三」）原来压在卡头右上的序号上，两个「一」叠着：圈挪到卡角，序号左移让开 */
+.slip .rank { top: 8px !important; right: 8px !important; }
+.slip:has(.rank) .slip-head .num { margin-right: 34px; }
+/* 读诗页署名、回目（「第三十八回」）「八」像两点：实测全站字体规则（fonts/dgy-all.css，三个 ID 权重 + !important）压过这里和样张的 V3Brush，署名回目实际走 "DGY All"，放大看「八」两撇清楚，不用再换字体；原来加的楷体规则从没生效过，已删 */
+@media (max-height: 820px) { /* 1280×720 实测同样装不下 1.25 倍：阈值和书案（desk.css）一致用 820 */
+  body[data-layout=desktop] .casket-label b { font-size: 54px; letter-spacing: 10px; margin-top: 8px; }
+  /* 盖面题字（彩箋一百四十九首）与「彩箋藏」小印原来同一列、下半截叠在一起：题字缩一档靠上，印挪到题字左边 */
+  body[data-layout=desktop] .casket-caption { font-size: 20px; line-height: 1.6; letter-spacing: 3px; top: 34px; right: 120px; }
+  body[data-layout=desktop] .lid-seal { right: 196px; bottom: 22px; }
+  /* 函底托盘向下伸 23px，把「啟函 · 赴一場雅集」盖住一半 */
+  body[data-layout=desktop] .entry-instruction { margin-top: 40px; position: relative; z-index: 3; }
+  /* 选册页：签卡 410 高装不进 ~370 高的工作区，叠放的签卡盖住下面「評詩 / 續句」和朱批行 */
+  body[data-layout=desktop] .workspace { padding-top: 12px; }
+  body[data-layout=desktop] .section-head { margin-bottom: 8px; } body[data-layout=desktop] .section-head h2 { font-size: 28px; margin-bottom: 2px; }
+  body[data-layout=desktop] .slip, body[data-layout=desktop] .social-item .slip { height: 300px; padding: 12px 12px 10px; flex-basis: 240px; }
+  body[data-layout=desktop] .verse-preview, body[data-layout=desktop] .social-item .verse-preview { height: 150px; font-size: 19px; line-height: 1.5; padding-top: 10px; padding-right: 40px; }
+  /* 长题（「詠白海棠（其二）」八字）：字缩一档、限高 168px；折列由 game.js fitTitles 兜住（不折列、按字数缩字），诗句右侧按一列标题让 46px */
+  body[data-layout=desktop] .slip-title, body[data-layout=desktop] .social-item .slip-title { max-height: 168px; font-size: 22px; line-height: 1.1; top: 44px !important; } /* 样张里有一条 top:64px !important，这里也要 !important 才压得过 */
+  body[data-layout=desktop] .verse-preview, body[data-layout=desktop] .social-item .verse-preview { padding-right: 46px; }
+  /* 10-17 Fable · 1000×600 实测：样张 html body .slip{height:auto!important;align-self:stretch} 让卡随卷轴高走，卡只剩 ~257 高，诗句列 115px 装不下七言一句（八字 131px），
+     尾字被切、印章行压到诗题尾巴上。→ 回目段头改单行（副题放不下省略号）、卡头 / 署名 / 展读行收紧、卷轴上下留白收窄，给诗句列腾到 ≥150px；再不够由 game.js fitVerses / fitTitles 按实际高度缩字 */
+  body[data-layout=desktop] .section-head { align-items: baseline; }
+  body[data-layout=desktop] .section-head > div:first-child { display: flex; align-items: baseline; gap: 12px; min-width: 0; }
+  body[data-layout=desktop] .section-head > div:first-child h2 { flex: none; margin-bottom: 0; }
+  body[data-layout=desktop] .section-head > div:first-child p { flex: 0 1 auto; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  body[data-layout=desktop] .section-head.sg-has-face > div:first-of-type { display: block; } /* 按人：头像 + 别号两行，保持原样 */
+  html body[data-layout=desktop] .card-track:not(.society-track) { padding-top: 4px !important; padding-bottom: 8px !important; }
+  html body[data-layout=desktop] .slip-head { padding-bottom: 6px !important; }
+  html body[data-layout=desktop] .slip-sign { padding-top: 4px !important; margin-top: auto !important; }
+  html body[data-layout=desktop] .slip .card-actions { margin-top: 4px !important; }
+  body[data-layout=desktop] .portfolio-note { display: none; }
+  /* 窄窗（≤1100 宽）启函后盖子向左翻开约 460px，函再右移也装不下：整副函缩到 .86，盖、六册、说明同屏 */
+  body[data-layout=desktop] .entry[data-phase=ready] .casket { transform: translateX(var(--sg-shift)) scale(.86) rotate(-3deg); }
+  /* 读诗页：对话框贴边、头脚压矮，右栏（箋邊串講 / 字裡尋意）加宽到 330 并压紧行距，争取一屏看全
+     （样张里这些是 `html body dialog.gf-dlg.poem-dialog` 和带 !important 的规则，权重照着压过去） */
+  html body[data-layout=desktop] dialog.gf-dlg.poem-dialog { height: calc((100dvh - 20px) / var(--sg-z, 1)); width: min(1080px, calc((100vw - 20px) / var(--sg-z, 1))); padding: 10px; }
+  html body[data-layout=desktop] dialog.gf-dlg.poem-dialog .detail-paper { grid-template-rows: 56px minmax(0, 1fr) 48px; }
+  html body[data-layout=desktop] .detail-head h2 { font-size: 26px; }
+  html body[data-layout=desktop] .detail-body { grid-template-columns: minmax(0, 1fr) 330px; gap: 18px; padding: 12px 18px 10px; }
+  html body[data-layout=desktop] .writing-sheet { padding: 12px 14px 10px; }
+  html body[data-layout=desktop] .poem-column { min-height: 0; }
+  html body[data-layout=desktop] .annotation h3, html body[data-layout=desktop] .poem-postscript h3 { font-size: 20px !important; margin-bottom: 8px; }
+  html body[data-layout=desktop] .annotation blockquote, html body[data-layout=desktop] #analysis { font-size: 16px !important; line-height: 1.75 !important; }
+  html body[data-layout=desktop] .annotation .note-box { margin-top: 12px; padding-top: 10px; }
+  html body[data-layout=desktop] .note-box h3, html body[data-layout=desktop] #note-title { font-size: 18px !important; margin-bottom: 4px; }
+  html body[data-layout=desktop] .note-box p, html body[data-layout=desktop] #note-content { font-size: 16px; line-height: 1.7; }
+  html body[data-layout=desktop] .annotation .poem-postscript { margin-top: 10px; padding-top: 8px; }
+  /* 社页（菊花詩等）：样张给长卷写死 min-height:320px，矮窗里卷轴只有 ~277 高，卷就溢出盖住「評詩 / 續一句」——卷高跟容器走，签卡随卷伸缩 */
+  html body[data-layout=desktop] .scroll-wrap { margin: 0 5px 8px !important; padding: 6px 12px !important; min-height: 0 !important; overflow: hidden; }
+  html body[data-layout=desktop] .society-track { min-height: 0 !important; height: 100% !important; padding: 4px 17px 6px !important; align-items: stretch !important; }
+  html body[data-layout=desktop] .social-item { padding: 0 0 2px !important; min-height: 0 !important; max-height: 100%; }
+  html body[data-layout=desktop] .social-item .slip { max-height: 100% !important; }
+  html body[data-layout=desktop] .society-intro { padding: 12px 10px !important; font-size: 24px; }
+  html body[data-layout=desktop] .section-head { margin-bottom: 4px !important; }
+  html body[data-layout=desktop] .play-actions { padding: 4px 0 2px !important; }
+  /* 读诗页页脚 54 高塞 48 的格子里切了 3px */
+  html body[data-layout=desktop] dialog.gf-dlg.poem-dialog .detail-paper { grid-template-rows: 56px minmax(0, 1fr) 60px; }
+}
+/* 1000×600：上面 .86 下开函组宽 1079 仍出屏（左页 -79、盖 -136）→ 缩 .76 并右移 40；放在最后压过 ≤820 的 .86 */
+@media (max-height: 700px) {
+  body[data-layout=desktop] .entry { --sg-shift: calc(min(clamp(0px, calc((1800px - 100vw) * .68), 300px), calc((100vw - 560px) / 2 - 24px)) + 40px); }
+  body[data-layout=desktop] .entry[data-phase=ready] .casket { transform: translateX(var(--sg-shift)) scale(.76) rotate(-3deg); }
+  /* 10-17 Fable 第二轮实测：默认「大」档在 1000×600 是 zoom 1（上面 ≤820 的规则把特大 / 大都收成 1），正好命中样张 @media(max-height:600px) 的矮屏规则，
+     签卡只剩 267 高、诗句列 129px、八字缩到 14px；而「中」档 zoom .896 时视口算 670 高不命中，签卡 318。两档版面还会在打开几秒后互跳（gf.js 已修）。
+     这里把 1000×600 当正式尺寸排：顶栏 72→62、底栏 64→54、段头单行（样张 flex-wrap:wrap 让回目副题折到第二行）、「回目·原著」钮和按钮行矮一档，诗句列随卡伸缩——签卡拿回约 60px。 */
+  html body[data-layout=desktop] .inside { grid-template-rows: 62px minmax(0, 1fr) 54px !important; }
+  html body[data-layout=desktop] .brand { height: 60px; border-width: 12px 16px; }
+  html body[data-layout=desktop] .brand h1 { font-size: 30px; line-height: 1.2; }
+  html body[data-layout=desktop] .workspace { padding-top: 8px !important; }
+  html body[data-layout=desktop] .section-head { margin-bottom: 2px !important; align-items: center; }
+  /* 样张内联 <style> 里同权重的 `html body[data-layout=desktop] .section-head > div:first-of-type{flex-wrap:wrap}` 排在后面，要 !important 才压得过 */
+  html body[data-layout=desktop] .section-head > div:first-of-type { display: flex !important; flex-wrap: nowrap !important; align-items: baseline; gap: 0 12px !important; min-width: 0; }
+  html body[data-layout=desktop] .section-head > div:first-of-type p { flex: 0 1 auto !important; min-width: 0 !important; white-space: nowrap !important; overflow: hidden; text-overflow: ellipsis; }
+  html body[data-layout=desktop] .section-head h2 { font-size: 26px; line-height: 1.25; margin-bottom: 0; }
+  html body[data-layout=desktop] .section-head .sg-head-face { width: 44px; height: 44px; flex-basis: 44px; padding: 2px; } /* 按人：头像 64→44，别号 + 本名同一行 */
+  html body[data-layout=desktop] .group-control, html body[data-layout=desktop] .group-control.is-chapter { min-height: 36px !important; padding-top: .15em !important; padding-bottom: .15em !important; }
+  html body[data-layout=desktop] .section-count .tiny-seal { width: 38px; height: 38px; }
+  html body[data-layout=desktop] .play-actions { padding: 2px 0 0 !important; }
+  html body[data-layout=desktop] .play-actions .gf-btn { min-height: 40px !important; }
+  html body[data-layout=desktop] .verse-preview { height: auto !important; flex: 1 1 auto; min-height: 0; } /* 样张矮屏规则写死 135px，卡再高诗句列也不长 */
+  /* 诗句列拿回到 190px 以上后，样张矮屏的 15px 字偏小：起步 17px（七言 + 标点八格 ≈ 171px），装不下的长句由 game.js fitVerses 再按实测缩 */
+  html body[data-layout=desktop] .slip .verse-preview, html body[data-layout=desktop] .slip .verse-preview p { font-size: 17px !important; }
+}
+
+/* 10-17 Fable · 手机 390×844：宿主悬浮钮（右上「字」、左下「入園」）压 iframe 内容 → 读诗页头尾栏、签卡页底部「冊」钮让位；「鎮紙·留香」装饰条手机也不要（叠在签卡上） */
+@media (max-width: 700px) {
+  /* 样张内联 <style> 排在 game.css 之后、权重相同，会把这几条压掉，所以要 !important */
+  html body[data-layout=mobile] .detail-head { padding-right: 62px !important; }
+  html body[data-layout=mobile] .detail-footer { padding-left: 88px !important; }
+  html body[data-layout=mobile] .scroll-wrap:after { display: none !important; }
+  html body[data-layout=mobile] .play-actions { padding-left: 92px !important; }
+  html body[data-layout=mobile] .footer { padding-left: 84px !important; } /* 社页底部「另擇一冊」钮 */
+  /* 让位后底栏净宽 236，原内容 261 会把「→」挤出屏：钮内边距、翻页组间距收一收 */
+  html body[data-layout=mobile] .footer .box-again { padding-left: 6px !important; padding-right: 6px !important; }
+  html body[data-layout=mobile] .footer-nav { gap: 0 !important; }
+  html body[data-layout=mobile] .footer-nav .gf-btn { min-width: 36px !important; }
+}
+/* 10-17 Fable 第二轮矩阵：手机 390 宽「特大」档（zoom 1.4）锦函两侧各出屏 4px，开函后书函右缘 425 > 390、第六册「社外拾遺」被裁一截
+   → 窄屏上特大档的詩稿按「大」档（1.25）放大，正好放得下；别的册页不受影响（和矮窗 ≤820 高的处理同一思路） */
+/* 同一问题在 1440×900（不是矮窗，zoom 1.4 全放）：开函后书函右缘 1482 > 1440，第六册被裁 → 1500 宽以内特大收到 1.3（右缘约 1376） */
+@media (min-height: 821px) and (max-width: 1500px) { html[data-fs="4"]:root { zoom: 1.3 !important; --sg-z: calc(1.3 / var(--gf-vk, 1)); } }
+@media (max-width: 600px) { html[data-fs="4"]:root { zoom: 1.25 !important; --sg-z: calc(1.25 / var(--gf-vk, 1)); } }
+
+/* ===== 10-17 Fable 第三轮（总指挥退回四处里詩稿的两处）===== */
+/* 「按回」翻到后几张时最左那张签卡被裁一半：卡轨尾部补占位（game.js fitTail 算 --sg-tail），末卡也能贴左对齐、左边不再露半张 */
+body[data-layout=desktop] #card-track::after { content: ''; flex: 0 0 var(--sg-tail, 0px); }
+/* 矮窗读诗页右栏三页签（game.js annSetup 在布局高 ≤820 的电脑版面上挂 .sg-tabbed）：一次只摊一节，整段看完，不再靠底部渐隐遮截断 */
+.annotation.sg-tabbed { -webkit-mask-image: none !important; mask-image: none !important; padding-bottom: 6px !important; }
+.annotation.sg-tabbed > :not(.sg-atabs):not(.carrier-art) { display: none !important; }
+.annotation.sg-tabbed[data-tab=talk] > :is(blockquote, .annotation-source), .annotation.sg-tabbed[data-tab=note] > .note-box, .annotation.sg-tabbed[data-tab=more] > .poem-postscript { display: block !important; }
+.annotation.sg-tabbed > .note-box, .annotation.sg-tabbed > .poem-postscript { margin-top: 0 !important; border-top: 0 !important; padding-top: 2px !important; }
+.annotation.sg-tabbed > .poem-postscript > h3:first-of-type { display: none !important; } /* 页签已写「賞析」，节里不再重复一行标题；「難字」那行留着 */
+/* 賞析一节实测近两千像素（多段赏析 + 難字 + 释义），矮窗怎么缩都放不下一屏 → 字收到 16/1.7，节内照常滚；页签条右端亮一行「往下翻」（game.js annTab 量到溢出时挂 .sg-over），不再用渐隐把末句遮掉 */
+.annotation.sg-tabbed > .poem-postscript, .annotation.sg-tabbed > .poem-postscript p, .annotation.sg-tabbed #appreciation, .annotation.sg-tabbed #word-meaning { font-size: 16px !important; line-height: 1.7 !important; }
+.annotation.sg-tabbed > .poem-postscript h3 { font-size: 18px !important; margin: 14px 0 6px !important; }
+.sg-atabs .sg-more { margin-left: auto; align-self: center; font: 400 14px/1 var(--sans, sans-serif); letter-spacing: .08em; color: var(--ink2, #4a4036); opacity: .75; padding-right: 2px; display: none; }
+.annotation.sg-tabbed.sg-over .sg-atabs .sg-more { display: block; }
+.sg-atabs { display: none; gap: 4px; margin: 0 0 10px; border-bottom: 1px solid rgba(166, 143, 108, .5); } /* 不吸顶：吸顶要垫底色，1280×720 实拍垫出一条比纸深的灰带 */
+.annotation.sg-tabbed .sg-atabs { display: flex; } /* 第三轮审查 🔴1：窗口从矮拉高、或切到手机版面后 .sg-tabbed 摘掉，页签条也要跟着藏，不能和整栏正文一起露着 */
+.sg-atabs button { all: unset; cursor: pointer; box-sizing: border-box; padding: 4px 10px 7px; font: 400 20px/1.2 var(--sg-brush, var(--brush, serif)); letter-spacing: .1em; color: var(--ink2, #4a4036); border-bottom: 2px solid transparent; margin-bottom: -1px; min-height: 36px; }
+.sg-atabs button[aria-selected=true] { color: var(--cinn, #a63d2a); border-bottom-color: var(--cinn, #a63d2a); }
+.sg-atabs button:hover { color: var(--cinn, #a63d2a); }
+.sg-atabs button:focus-visible { outline: 2px solid var(--cinn, #a63d2a); outline-offset: 2px; border-radius: 3px; }

@@ -1,6 +1,6 @@
 {
  "说明": "第 32 轮 scripts/dgy-r32-album-v4.mjs 生成，勿手改。畫中有話 v4（dgy-assets/huace/index.html）的画册数据。",
- "生成": "2026-10-15T11:07:08.659Z",
+ "生成": "2026-10-16T14:21:28.356Z",
  "册": [
   {
    "id": "zanghua",
@@ -3054,7 +3054,7 @@
      "place": "蘅芜苑",
      "placeId": "hengwu",
      "season": "秋天，案头瓶里供着菊花",
-     "loop": null,
+     "loop": "dgy-assets/album-motion/loop/xuedong-02.mp4",
      "src": "dgy-assets/album/xuedong/02.webp",
      "thumb": "dgy-assets/huace/img/xuedong-02-s.webp"
     },
