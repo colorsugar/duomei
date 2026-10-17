@@ -2,7 +2,7 @@
   "$comment": "大文件走腾讯云 COS（经 EdgeOne 加速域名 assets.duomei.site）。enabled=false 或 GitHub 仓库变量 DUOMEI_ASSETS_ON_COS=0 时全部回到 EdgeOne Pages。见 scripts/cos-assets.mjs。",
   "enabled": true,
   "base": "https://assets.duomei.site",
-  "bucket": "",
+  "bucket": "duomei-assets-1479371693",
   "region": "ap-hongkong",
   "minDepth": 2,
   "minDirBytes": 1048576,

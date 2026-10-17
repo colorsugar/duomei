@@ -23,6 +23,13 @@ enabled="$(node -p 'require("./deploy/cos-assets.json").enabled')"
 bucket="${COS_BUCKET:-$(node -p 'require("./deploy/cos-assets.json").bucket')}"
 [[ -z "$bucket" ]] && mode_edgeone "还不知道桶名（deploy/cos-assets.json bucket 或仓库变量 COS_BUCKET）"
 export COS_BUCKET="$bucket"
+# 资产根地址：仓库变量 COS_ASSETS_BASE 优先（如还没有加速域名时填桶默认域名），否则用 deploy/cos-assets.json 的 base。
+base="${COS_ASSETS_BASE:-$(node -p 'require("./deploy/cos-assets.json").base')}"
+base="${base%/}"
+# 域名还没配好（解析不到、连不上）时不拆，免得发出一个大文件全 404 的网站。
+code="$(curl -sS -m 20 -o /dev/null -w '%{http_code}' "${base}/" 2>/dev/null || true)"
+[[ -z "$code" || "$code" == "000" ]] && mode_edgeone "资产域名 ${base} 连不上"
+echo "资产根地址：${base}（探测 HTTP ${code}）"
 
 node scripts/cos-assets.mjs apply --dir dist
 
