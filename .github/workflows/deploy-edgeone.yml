@@ -79,6 +79,26 @@ jobs:
           mkdir -p public/.well-known
           printf '{"commit":"%s","run":"%s"}\n' "$GITHUB_SHA" "$GITHUB_RUN_ID" > public/.well-known/duomei-build.json
 
+      # 10-18：账号存储 5 GiB 只放得下约 4 份整站副本（正式版 + 最近 3 次部署，各约 1.1 GB），
+      # 一天发两三次就会满，部署报 "The account storage limit is 5 GiB" 失败。
+      # 部署前先发 3 次只有一个小页面的 preview（不碰正式站），让平台按规则挤掉最早的大副本。
+      # 这一步失败不拦部署：真满了下面的部署步骤会再清一轮重试。
+      - name: Free EdgeOne storage before deploying
+        continue-on-error: true
+        shell: bash
+        env:
+          EDGEONE_API_TOKEN: ${{ secrets.EDGEONE_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          ( cd "${RUNNER_TEMP}" && npm install -g --legacy-peer-deps "edgeone@${EDGEONE_CLI_VERSION}" )
+          tiny="${RUNNER_TEMP}/tiny"
+          mkdir -p "$tiny"
+          for i in 1 2 3; do
+            echo "<!doctype html><title>rotate $i</title>" > "$tiny/index.html"
+            edgeone makers deploy "$tiny" -n "$EDGEONE_PROJECT_NAME" -t "$EDGEONE_API_TOKEN" -e preview -a global --json | tail -n 1
+            sleep 20
+          done
+
       - name: Deploy production to EdgeOne Makers
         id: edgeone
         shell: bash
@@ -100,13 +120,31 @@ jobs:
           ( cd "${RUNNER_TEMP}" && npm install -g --legacy-peer-deps "edgeone@${EDGEONE_CLI_VERSION}" )
           edgeone -v
 
-          deploy_log="$(mktemp)"
-          edgeone makers deploy \
-            -n "$EDGEONE_PROJECT_NAME" \
-            -t "$EDGEONE_API_TOKEN" \
-            -e production \
-            -a global \
-            --json | tee "$deploy_log"
+          deploy_log="$(mktemp)"; deploy_err="$(mktemp)"
+          deploy() {
+            edgeone makers deploy \
+              -n "$EDGEONE_PROJECT_NAME" \
+              -t "$EDGEONE_API_TOKEN" \
+              -e production \
+              -a global \
+              --json 2>"$deploy_err" | tee "$deploy_log"; local rc=$?; cat "$deploy_err" >&2; return $rc
+          }
+          if ! deploy; then
+            # 存储满（上一步没清够，或期间别的部署又占了位置）：再挤 3 次旧副本，重试一次。
+            if cat "$deploy_log" "$deploy_err" | grep -qi "storage limit"; then
+              echo "::warning::EdgeOne storage full; rotating old artifacts and retrying once"
+              tiny="${RUNNER_TEMP}/tiny"
+              mkdir -p "$tiny"
+              for i in 4 5 6; do
+                echo "<!doctype html><title>rotate $i</title>" > "$tiny/index.html"
+                edgeone makers deploy "$tiny" -n "$EDGEONE_PROJECT_NAME" -t "$EDGEONE_API_TOKEN" -e preview -a global --json | tail -n 1 || true
+                sleep 20
+              done
+              deploy
+            else
+              exit 1
+            fi
+          fi
 
           DEPLOY_RESULT="$(tail -n 1 "$deploy_log")" node <<'NODE'
           const fs = require("node:fs");
