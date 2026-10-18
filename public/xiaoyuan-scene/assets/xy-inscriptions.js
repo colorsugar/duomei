@@ -23,7 +23,7 @@
     { id: "hall-couplet", keys: ["一窗新绿分茶色", "半榻清凉听竹声"], r: 11, orig: "一窗新绿分茶色\n半榻清凉听竹声",
       zh: "满窗新绿映进茶汤，连茶色都分了几分绿；半张卧榻清清凉凉，躺着听竹叶沙沙作响。",
       en: "A window of fresh green lends its colour to the tea;\nhalf a couch of coolness, listening to the bamboo.",
-      ja: "一窓の新緑 茶色を分かち　半榻の清涼 竹声を聴く\n窓いっぱいの若葉が茶に緑を映し、寝台に涼をとりながら竹の音に耳を澄ます。" },
+      ja: "一窓（いっそう）の新緑　茶色（ちゃしょく）を分かち\n半榻（はんとう）の清涼　竹声（ちくせい）を聴く\n【大意】窓いっぱいの若葉が茶の色にまで緑を映し、長椅子に涼をとりながら竹の葉ずれに耳を澄ます。清籟堂の楹聯（えいれん）です。" },
     { id: "south-plaque", keys: ["蕉月棠风"], r: 11, orig: "蕉月棠风",
       zh: "匾额「蕉月棠风」：芭蕉映着月色，海棠迎着清风。院门两侧正种着芭蕉和海棠。",
       en: "\u201cPlantain Moon, Crabapple Breeze\u201d — moonlight on the plantain, a breeze through the crabapple, the two plants that flank this gate.",
@@ -31,15 +31,15 @@
     { id: "south-couplet", keys: ["海棠雨后胭脂薄", "蕉叶风前翡翠长"], r: 11, orig: "海棠雨后胭脂薄\n蕉叶风前翡翠长",
       zh: "雨后的海棠，像胭脂被雨洗淡了；风里的芭蕉叶，像一片片翡翠舒展得更长。",
       en: "After rain the crabapple's rouge runs thin;\nbefore the wind the plantain's jade leaves grow long.",
-      ja: "海棠 雨後 臙脂薄く　蕉葉 風前 翡翠長し\n雨上がりの海棠は紅がうすれ、風に揺れる芭蕉の葉は翡翠のように長くのびる。" },
+      ja: "海棠（かいどう） 雨後（うご） 臙脂（えんじ）薄く\n蕉葉（しょうよう） 風前（ふうぜん） 翡翠（ひすい）長し\n【大意】雨上がりの海棠は紅の色が淡くなり、風を受ける芭蕉の葉は翡翠色に長くのびる。" },
     { id: "studio-plaque", keys: ["漱石"], r: 11, orig: "漱石",
       zh: "匾额「漱石」：出自「枕流漱石」的典故——以流水为枕、用山石漱口，比喻隐居山林、志趣高洁。",
       en: "\u201cRinsing with Stones\u201d — from the old saying \u201cpillow on the stream, rinse with stones,\u201d an emblem of a pure, reclusive life among hills and water.",
-      ja: "漱石（そうせき）\n「石に漱ぎ流れに枕す」の故事から。山水に隠れ住む清らかな暮らしを表します。夏目漱石の号もこの故事に由来します。" },
+      ja: "漱石（そうせき）\n『世説新語』排調篇の故事から。晋の孫楚は隠棲の志を語って「石に枕し流れに漱（くちすす）がん」と言うべきところを「石に漱ぎ流れに枕せん」と言い誤り、とがめられると「流れに枕するは耳を洗はんがため、石に漱ぐは歯を磨かんがため」と言い張りました。山水に隠れ住む清らかな暮らしの意に用いられ、夏目漱石の号もこの故事に由来します。" },
     { id: "studio-couplet", keys: ["石瘦留云住", "泉清照影闲"], r: 11, orig: "石瘦留云住\n泉清照影闲",
       zh: "瘦削的山石把云留住了；清澈的泉水悠闲地映出人影。",
       en: "Lean stones keep the clouds from leaving;\na clear spring mirrors shadows at their ease.",
-      ja: "石痩せて雲を留めて住ましめ　泉清くして影を照らして閑かなり\n痩せた石は雲を引きとめ、清らかな泉はのどかに人影を映す。" },
+      ja: "石 痩（や）せて　雲を留めて住ましめ\n泉 清くして　影を照らして閑（しず）かなり\n【大意】痩せた石は流れゆく雲を引きとめて住まわせ、澄んだ泉はのどかに影を映している。" },
     { id: "water-hall", keys: ["听荷"], r: 10, orig: "听荷",
       zh: "匾额「听荷」：听雨打荷叶的声音。这是池上的水榭听荷榭。",
       en: "\u201cListening to the Lotus\u201d — to the rain pattering on lotus leaves. The pavilion over the pond.",
@@ -55,7 +55,7 @@
     { id: "lantern", keys: ["清风明月听荷诗语江南"], r: 4.5, orig: "清风 · 明月 · 听荷\n诗语江南",
       zh: "灯笼上的题字：「清风」「明月」「听荷」，背面是园名「诗语江南」——用诗的语言写江南。",
       en: "Lantern mottoes: \u201cClear Breeze,\u201d \u201cBright Moon,\u201d \u201cListening to the Lotus\u201d — and on the back the garden's name, \u201cJiangnan in Verse.\u201d",
-      ja: "清風 · 明月 · 聴荷 ／ 詩語江南\n提灯の題字。「清らかな風」「明るい月」「蓮を聴く」、裏には庭の名「詩語江南（詩の言葉で描く江南）」。" },
+      ja: "清風（せいふう） · 明月（めいげつ） · 聴荷（ちょうか）\n裏面：詩語江南（しごこうなん）\n提灯の題字。清らかな風、明るい月、蓮に降る雨音を聴くこと。裏は庭の名で、「詩の言葉で描く江南」の意です。" },
     /* 多美的夏日小院 (courtyard) */
     { id: "yard-plaque", keys: ["多美小院"], r: 7, orig: "多美小院",
       zh: "门楣上的匾额「多美小院」：多美的夏日小院。",
@@ -64,16 +64,16 @@
     { id: "yard-couplet", keys: ["葡萄满架乐童心", "西瓜清甜消暑气"], r: 7, orig: "葡萄满架乐童心\n西瓜清甜消暑气",
       zh: "满架葡萄，让人像孩子一样开心；西瓜清甜，一口下去暑气全消。",
       en: "A trellis full of grapes delights the child at heart;\nsweet, cool watermelon chases off the summer heat.",
-      ja: "葡萄 架に満ちて童心を楽しませ　西瓜 清甜にして暑気を消す\n棚いっぱいのぶどうに童心がはずみ、甘く冷たいスイカが夏の暑さを払う。" },
+      ja: "葡萄（ぶどう） 架（か）に満ちて　童心を楽しましめ\n西瓜（すいか） 清甜（せいてん）にして　暑気を消す\n【大意】棚いっぱいのぶどうに子ども心がはずみ、甘く冷たいスイカが夏の暑さを払ってくれる。" },
     { id: "yard-sign", keys: ["清风徐来"], r: 8, orig: "清风徐来",
       zh: "「清风徐来」：清凉的风缓缓吹来。出自苏轼《赤壁赋》「清风徐来，水波不兴」。旁边的红印是「多美」。",
       en: "\u201cA cool breeze comes gently\u201d — from Su Shi's Red Cliff Rhapsody: \u201ca cool breeze comes gently, and the water stirs no wave.\u201d The red seal reads \u201cDuomei.\u201d",
-      ja: "清風 徐（おもむろ）に来たる\n涼しい風がゆるやかに吹いてくる。蘇軾『赤壁賦』の「清風徐に来たりて、水波興らず」から。赤い印は「多美」。" }
+      ja: "清風徐来（せいふうじょらい）\n清風 徐（おもむろ）に来たる\n【大意】涼しい風がゆるやかに吹いてくる。蘇軾（そしょく）「赤壁賦」の「清風徐に来たりて、水波興らず」から。赤い印は「多美」です。" }
   ];
   var UI = {
     zh: { open: "题字释读", close: "关闭", glyph: "释", head: "白话" },
     en: { open: "Translate this inscription", close: "Close", glyph: "Aa", head: "English", orig: "Original, as written" },
-    ja: { open: "題字の読みと意味", close: "閉じる", glyph: "訳", head: "書き下し · 現代語訳", orig: "原文（書かれたままの中国の簡体字）" }
+    ja: { open: "題字の読みと意味", close: "閉じる", glyph: "訳", head: "読み下し · 大意", orig: "原文（書かれたままの簡体字）" }
   };
 
   /* —— hooks (installed before the bundle runs) —— */
