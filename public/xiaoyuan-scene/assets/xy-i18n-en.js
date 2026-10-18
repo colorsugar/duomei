@@ -256,6 +256,8 @@
     "落瓣": "Fallen petal",
     "尚未展开的卷叶": "Furled young leaf",
     "荷叶": "Lotus leaf",
+    "竹林": "Bamboo grove", "松柏": "Pine and cypress", "枫树": "Maple", "绿树": "Tree", "花树": "Flowering tree",
+    "芭蕉": "Plantain", "玉兰": "Magnolia", "桂花": "Sweet osmanthus", "竹丛": "Bamboo clump", "荷花": "Lotus flower",
     "射鸭廊 · 空亭": "Duck-Shooting Corridor · Empty Pavilion",
     "平曲桥": "Flat Zigzag Bridge",
     "古柏 · 白皮松": "Ancient Cypress · Lacebark Pine",
@@ -334,10 +336,10 @@
   /* Classical verse and couplets: Chinese kept, English beneath. */
   var POEMS = {
     "一窗新绿分茶色　半榻清凉听竹声\n厅前楹联": "A window of fresh green lends its colour to the tea;\nhalf a couch of coolness, listening to the bamboo.\n— couplet before the hall",
-    "留得残荷听雨声\n—— 李商隐": "Leave the withered lotus, to hear the rain upon it.\n— Li Shangyin",
+    "留得残荷听雨声\n—— 李商隐": "Keep the withered lotus leaves,\nto hear the rain upon them.\n— Li Shangyin (as Lin Daiyu quotes him in Dream of the Red Chamber)",
     "海棠雨后胭脂薄　芭蕉风前翡翠长\n门前楹联": "After rain the crabapple's rouge runs thin;\nbefore the wind the plantain's jade grows long.\n— couplet by the gate",
     "石瘦留云住　泉清照影闲\n斋前楹联": "Lean stones keep the clouds from leaving;\na clear spring mirrors shadows at their ease.\n— couplet before the studio",
-    "出淤泥而不染\n—— 周敦颐《爱莲说》": "It rises from the mud, yet is not stained.\n— Zhou Dunyi, \"On Loving the Lotus\"",
+    "出淤泥而不染\n—— 周敦颐《爱莲说》": "From the mud it rises,\nyet takes no stain.\n— Zhou Dunyi, \"On Loving the Lotus\"",
     "小荷才露尖尖角　早有蜻蜓立上头\n—— 杨万里《小池》": "The young lotus has barely shown its pointed tip,\nand already a dragonfly stands upon it.\n— Yang Wanli, \"The Little Pond\"",
     "黄梅时节家家雨　青草池塘处处蛙\n—— 赵师秀《约客》": "Plum-rain season: rain on every house;\ngrassy ponds, and frogs in every one.\n— Zhao Shixiu, \"Expecting a Guest\"",
     "漠漠水田飞白鹭　阴阴夏木啭黄鹂\n—— 王维《积雨辋川庄作》": "Over wide, misty paddies white egrets fly;\nin the deep summer trees orioles sing.\n— Wang Wei, \"Wangchuan After Long Rain\"",
@@ -347,7 +349,12 @@
 
   var rules = [
     [/^载入 (\d+) \/ (\d+)$/, function (m) { return "Loading " + m[1] + " / " + m[2]; }],
+    [/^(\d+%) · (.+)$/, function (m, t) { return m[1] + " · " + t(m[2]); }],
+    [/^E · (.+)$/, function (m, t) { return "E · " + t(m[1]); }],
+    [/^(\d+|—) 帧\/秒$/, function (m) { return m[1] + " fps"; }],
+    [/^(\d+|—) fps · (T\d) (.+)$/, function (m, t) { return m[1] + " fps · " + m[2] + " " + m[3].replace(/辉光½|[一-鿿]+/g, function (w) { return t(w); }); }],
     [/^(\d+) 首$/, function (m) { return m[1] + (m[1] === "1" ? " track" : " tracks"); }],
+    [/^约(\d+)秒后到「(.+)」$/, function (m, t) { return "next in " + m[1] + "s: " + t(m[2]); }],
     [/^约(\d+)秒后(.+)$/, function (m, t) { return "about " + m[1] + "s to " + t(m[2]).replace(/^Next stop$/, "the next stop").replace(/^End$/, "the end"); }],
     [/^到「(.+)」$/, function (m, t) { return t(m[1]); }],
     [/^跟随(.+?) · 拖动可环视 · Esc 或点空处退出$/, function (m, t) { return "Following " + t(m[1]).replace(/^The /, "the ") + " · drag to look around · Esc or tap empty space to stop"; }],

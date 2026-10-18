@@ -36,7 +36,10 @@ if (location.protocol === 'file:') {
 html body .album-context p, html body #narration, html body .term { overflow-wrap: anywhere; max-width: 100%; }
 /* 10-16：独立打开时「字」钮原是右上角浮层，盖住「閉」和右上角文字 → 收进顶栏，与「閉」并排 */
 .topbar .top-grp { justify-self: end; display: flex; align-items: center; gap: 10px; }
-.topbar .top-grp .gf-fs { position: relative; top: auto; right: auto; }
+.topbar .top-grp .gf-fs { position: relative; top: auto; right: auto; left: auto; bottom: auto; } /* 10-18 gf.css 里「字」改到左下角（left / bottom 定位），这里照旧收进顶栏 */
+.topbar .top-grp .gf-fs .gf-btn.is-seal { width: 44px !important; height: 44px !important; min-width: 44px !important; min-height: 44px !important; border-radius: 50% !important; opacity: 1; font-size: 16px; } /* 顶栏里和「閉」同大同形 */
+.topbar .top-grp .gf-fs-menu { bottom: auto; left: auto; top: calc(100% + 8px); right: 0; transform: translateY(-4px) scale(0.98); } /* 顶栏里的四档菜单仍向下展开 */
+.topbar .top-grp .gf-fs.open .gf-fs-menu { transform: none; }
 .topbar .top-grp .top-back { justify-self: auto; }
 @media (max-width: 700px) {
   .topbar:has(.top-grp) { grid-template-columns: 96px 1fr 96px; padding-top: max(4px, env(safe-area-inset-top)); }
