@@ -1,0 +1,46 @@
+name: COS OIDC self-test
+
+# 只能手动跑：gh workflow run cos-oidc-test.yml --ref cos-split
+# 用 GitHub OIDC 换腾讯云 STS 临时凭证（不用任何长期密钥），往资产桶写 oidc-test/<时间戳>.txt，
+# 再 HeadObject / GetObject 读回、GetBucket 列前缀确认。不碰 EdgeOne、不碰正式站。
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cos-oidc-test
+  cancel-in-progress: false
+
+jobs:
+  selftest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 22.17.1
+
+      - name: Install COS SDK
+        shell: bash
+        run: |
+          set -euo pipefail
+          sdk_dir="${RUNNER_TEMP}/cos-sdk"
+          mkdir -p "$sdk_dir"
+          ( cd "$sdk_dir" && npm init -y >/dev/null && npm install --no-audit --no-fund --silent cos-nodejs-sdk-v5@2.15.4 )
+
+      - name: OIDC → STS temporary credentials → put / head / get
+        shell: bash
+        run: |
+          set -euo pipefail
+          source scripts/cos-oidc-credentials.sh
+          cos_oidc_assume
+          COS_SDK_DIR="${RUNNER_TEMP}/cos-sdk" node scripts/cos-oidc-selftest.mjs

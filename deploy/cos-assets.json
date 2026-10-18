@@ -4,6 +4,15 @@
   "base": "https://assets.duomei.site",
   "bucket": "duomei-assets-1479371693",
   "region": "ap-hongkong",
+  "oidc": {
+    "$comment": "CI 用 GitHub OIDC 换腾讯云 STS 临时凭证（不存长期密钥），见 scripts/cos-oidc-credentials.sh。这些都不是密钥。",
+    "roleArn": "qcs::cam::uin/450200516199:roleName/duomei-deploy-oidc",
+    "providerId": "github-actions",
+    "audience": "sts.tencentcloudapi.com",
+    "stsHost": "sts.tencentcloudapi.com",
+    "stsRegion": "ap-hongkong",
+    "durationSeconds": 7200
+  },
   "minDepth": 2,
   "minDirBytes": 1048576,
   "minLooseFileBytes": 4194304,

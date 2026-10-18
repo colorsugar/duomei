@@ -18,6 +18,10 @@ jobs:
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    # id-token: write 只用来向 GitHub 要 OIDC 身份令牌，换腾讯云 COS 临时凭证（见 scripts/cos-oidc-credentials.sh）。
+    permissions:
+      contents: read
+      id-token: write
     env:
       EDGEONE_CLI_VERSION: 1.6.31-3
       EDGEONE_PROJECT_NAME: duomei-guyu
@@ -81,13 +85,12 @@ jobs:
 
       # 大文件（模型、贴图、视频、音频…）增量同步到腾讯云 COS，经 assets.duomei.site（EdgeOne 加速）提供；
       # edgeone.json 加 302 跳转，下面 EdgeOne 自己重新构建时 npm run build 按 .cos-split.json 去掉这些文件。
-      # 没有 COS 密钥 / 仓库变量 DUOMEI_ASSETS_ON_COS=0 时不拆，整站照旧全部放 EdgeOne。见 scripts/cos-publish.sh。
+      # 凭证：GitHub OIDC 当场换腾讯云 STS 临时凭证（2 小时，只限资产桶读写），不存任何长期密钥。
+      # 换不到凭证 / 仓库变量 DUOMEI_ASSETS_ON_COS=0 时不拆，整站照旧全部放 EdgeOne。见 scripts/cos-publish.sh。
       - name: Move large files to Tencent COS
         id: cos
         shell: bash
         env:
-          COS_SECRET_ID: ${{ secrets.COS_SECRET_ID }}
-          COS_SECRET_KEY: ${{ secrets.COS_SECRET_KEY }}
           COS_BUCKET: ${{ vars.COS_BUCKET }}
           COS_ASSETS_BASE: ${{ vars.COS_ASSETS_BASE }}
           DUOMEI_ASSETS_ON_COS: ${{ vars.DUOMEI_ASSETS_ON_COS }}

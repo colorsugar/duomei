@@ -3,7 +3,8 @@
 # 在 CI 里、npm run build 之后、edgeone makers deploy 之前跑。需要 dist/ 已构建。
 #
 # 什么时候走 COS：deploy/cos-assets.json enabled=true、仓库变量 DUOMEI_ASSETS_ON_COS 不是 0、
-# Secrets 里有 COS_SECRET_ID / COS_SECRET_KEY、桶名已知（配置或仓库变量 COS_BUCKET）。
+# 用 GitHub OIDC 换到腾讯云临时凭证（job 要 permissions: id-token: write；不用任何长期密钥，
+# 见 scripts/cos-oidc-credentials.sh）、桶名已知（配置或仓库变量 COS_BUCKET）。
 # 任何一条不满足：不拆，整站照旧全部放 EdgeOne（mode=edgeone），并打一条警告。
 # 走 COS 时：先写跳转和清单 → 增量上传 → 抽查 assets 域名上能取到（不通就让整个发布失败，不会发出缺文件的网站）。
 set -euo pipefail
@@ -19,7 +20,10 @@ mode_edgeone() {
 enabled="$(node -p 'require("./deploy/cos-assets.json").enabled')"
 [[ "${DUOMEI_ASSETS_ON_COS:-}" == "0" || "${DUOMEI_ASSETS_ON_COS:-}" == "false" ]] && mode_edgeone "仓库变量 DUOMEI_ASSETS_ON_COS=0"
 [[ "$enabled" != "true" && "${DUOMEI_ASSETS_ON_COS:-}" != "1" ]] && mode_edgeone "deploy/cos-assets.json enabled=false"
-[[ -z "${COS_SECRET_ID:-}" || -z "${COS_SECRET_KEY:-}" ]] && mode_edgeone "仓库 Secrets 里还没有 COS_SECRET_ID / COS_SECRET_KEY"
+# 必须在 apply（改 edgeone.json）之前换好凭证：换不到就整站照旧，不留半拆的状态。
+# shellcheck source=scripts/cos-oidc-credentials.sh
+source scripts/cos-oidc-credentials.sh
+cos_oidc_assume || mode_edgeone "GitHub OIDC 换腾讯云临时凭证失败，原因见上一行"
 bucket="${COS_BUCKET:-$(node -p 'require("./deploy/cos-assets.json").bucket')}"
 [[ -z "$bucket" ]] && mode_edgeone "还不知道桶名（deploy/cos-assets.json bucket 或仓库变量 COS_BUCKET）"
 export COS_BUCKET="$bucket"

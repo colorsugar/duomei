@@ -16,7 +16,7 @@
 //   node scripts/cos-assets.mjs plan  [--dir dist] [--json]   列出会搬哪些目录、体积前后（只读）
 //   node scripts/cos-assets.mjs apply [--dir dist]            写 .cos-split.json 清单 + 往 edgeone.json 加跳转（只在 CI 里跑）
 //   node scripts/cos-assets.mjs strip [--dir dist]            按 .cos-split.json 从 dist 删掉已搬走的文件（npm run build 最后一步；没有清单就什么都不做）
-//   node scripts/cos-assets.mjs sync  [--dir dist] [--dry-run] [--force]  增量上传（--force 全部重传，改了类型/缓存规则时用）到 COS（要 COS_SECRET_ID / COS_SECRET_KEY / COS_SDK_DIR）
+//   node scripts/cos-assets.mjs sync  [--dir dist] [--dry-run] [--force]  增量上传（--force 全部重传，改了类型/缓存规则时用）到 COS（要 OIDC 换来的临时凭证 COS_TMP_SECRET_ID / COS_TMP_SECRET_KEY / COS_TMP_TOKEN 和 COS_SDK_DIR，见 scripts/cos-oidc-credentials.sh）
 //   node scripts/cos-assets.mjs check [--dir dist] [--base URL] [--origin URL]  抽查资产域名：Range 206、大小、跨域头、类型
 //   node scripts/cos-assets.mjs guard [--dir dist] [--max-mb 1000]          留在 EdgeOne 的体积超上限就失败（发布前）
 //   node scripts/cos-assets.mjs verify-site [--site URL] [--query q]        站点上被搬的路径 302 到资产域名且能取到（发布后）
@@ -279,25 +279,26 @@ async function cmdSync() {
   const totalBytes = local.reduce((s, f) => s + f.size, 0);
   console.log(`本地待同步：${local.length} 个文件，${fmtMB(totalBytes)} MB`);
 
-  if (dryRun && !process.env.COS_SECRET_ID) {
+  if (dryRun && !process.env.COS_TMP_SECRET_ID) {
     const byType = {};
     for (const f of local) {
       const t = contentTypeOf(f.rel);
       byType[t] = (byType[t] ?? 0) + 1;
     }
-    console.log("（演练：没有 COS 密钥，只列计划，不连 COS）");
+    console.log("（演练：没有 COS 临时凭证，只列计划，不连 COS）");
     for (const [t, n] of Object.entries(byType).sort((a, b) => b[1] - a[1])) console.log(`  ${String(n).padStart(5)}  ${t}`);
     const sample = local.slice(0, 5).map((f) => `  ${f.rel} → ${config.base}/${encodePath(f.rel)}  [${contentTypeOf(f.rel)}; ${looksHashed(f.rel) ? config.immutableCacheControl : config.cacheControl}]`);
     console.log(sample.join("\n"));
     return;
   }
 
-  const { COS_SECRET_ID, COS_SECRET_KEY, COS_SDK_DIR } = process.env;
-  if (!COS_SECRET_ID || !COS_SECRET_KEY) throw new Error("缺 COS_SECRET_ID / COS_SECRET_KEY（GitHub 仓库 Secrets）。");
+  // 只用 OIDC 换来的 STS 临时凭证（三件套缺一不可），不接受长期密钥。
+  const { COS_TMP_SECRET_ID, COS_TMP_SECRET_KEY, COS_TMP_TOKEN, COS_SDK_DIR } = process.env;
+  if (!COS_TMP_SECRET_ID || !COS_TMP_SECRET_KEY || !COS_TMP_TOKEN) throw new Error("缺 COS 临时凭证（CI 里先 source scripts/cos-oidc-credentials.sh 再 cos_oidc_assume）。");
   if (!config.bucket) throw new Error("deploy/cos-assets.json 里 bucket 还没填（要带 appid，如 duomei-assets-1250000000）。");
   const require = createRequire(path.join(path.resolve(COS_SDK_DIR || ROOT), "noop.js"));
   const COS = require("cos-nodejs-sdk-v5");
-  const cos = new COS({ SecretId: COS_SECRET_ID, SecretKey: COS_SECRET_KEY, Timeout: 120000 });
+  const cos = new COS({ SecretId: COS_TMP_SECRET_ID, SecretKey: COS_TMP_SECRET_KEY, SecurityToken: COS_TMP_TOKEN, Timeout: 120000 });
   const Bucket = config.bucket;
   const Region = config.region;
 
