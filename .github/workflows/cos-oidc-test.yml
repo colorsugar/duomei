@@ -5,10 +5,6 @@ name: COS OIDC self-test
 # 再 HeadObject / GetObject 读回、GetBucket 列前缀确认。不碰 EdgeOne、不碰正式站。
 on:
   workflow_dispatch:
-  # 临时：工作流只在 cos-split 上时 GitHub 不认 workflow_dispatch，先靠这次推送注册，下一次提交删掉。
-  push:
-    branches: [cos-split]
-    paths: [.github/workflows/cos-oidc-test.yml]
 
 permissions:
   contents: read
