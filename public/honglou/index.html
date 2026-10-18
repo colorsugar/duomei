@@ -57,6 +57,10 @@
     #stick { position: fixed; left: 24px; bottom: 90px; width: 110px; height: 110px; border-radius: 50%; background: rgba(243, 236, 220, .35); border: 1px solid rgba(90, 80, 60, .3); z-index: 6; display: none; touch-action: none; }
     #stick i { position: absolute; left: 35px; top: 35px; width: 40px; height: 40px; border-radius: 50%; background: rgba(243, 236, 220, .85); }
     body.walk.touch #stick { display: block; }
+    /* 10-18 老大：标题页点「翻冊」一淡出，底下露出右上旧「鸟瞰 / 游园」、右下旧操作提示、左上小「册」。
+       旧条、旧提示园里本来就一律藏着（dock.css / hud.css），这里直接藏；#hud 等园子启动（html.dgy-boot，见下面 boot）再见人 */
+    #modes, #help { display: none !important; }
+    html:not(.dgy-boot) #hud { visibility: hidden; }
     @media (max-width: 700px) {
       #hud { left: 8px; top: 8px; }
       #title b { font-size: 18px; }
@@ -272,10 +276,10 @@
   </style>
 <!--TITLEXZ:END-->
 <link rel="preload" href="./dgy-build/HanWangShinSuMedium-all-A-b-F-GHSI.woff2" as="font" type="font/woff2" crossorigin>
-  <script type="module" crossorigin src="./dgy-build/daguanyuan-Nz7UzNQo.js"></script>
-  <link rel="modulepreload" crossorigin href="./dgy-build/preload-helper-DMGCcr4D.js">
-  <link rel="stylesheet" crossorigin href="./dgy-build/daguanyuan-Yb9_Yj7u.css">
-<script>window.__dgyPreload=["./dgy-build/main-CmzPEnJS.js","./dgy-build/preload-helper-DMGCcr4D.js","./dgy-build/three.core-3TnwmHjw.js"];</script></head>
+  <script type="module" crossorigin src="./dgy-build/daguanyuan-BhjS1C4J.js"></script>
+  <link rel="modulepreload" crossorigin href="./dgy-build/preload-helper-YjiYE4uX.js">
+  <link rel="stylesheet" crossorigin href="./dgy-build/preload-helper-Yb9_Yj7u.css">
+<script>window.__dgyPreload=["./dgy-build/main-D8CBRykb.js","./dgy-build/preload-helper-YjiYE4uX.js","./dgy-build/three.core-3TnwmHjw.js"];</script></head>
 <body>
   <canvas id="view"></canvas>
 <!--TITLE:START 由 scripts/dgy-title-build.py 生成，别手改-->
