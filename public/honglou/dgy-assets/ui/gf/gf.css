@@ -67,16 +67,41 @@ dialog.gf-dlg.gf-closing { animation: gf-out var(--tr-out) var(--gf-ease) forwar
 @keyframes gf-fade { from { opacity: 0; } }
 .gf-x { position: absolute; top: 12px; right: 12px; z-index: 5; }
 
-/* ——— 字号钮：右上角印章「字」+ 四档 ——— */
-.gf-fs { position: fixed; z-index: 2147483000; top: 14px; right: 16px; font-family: inherit; }
-.gf-fs > .gf-btn { font-size: 18px; }
-.gf-fs-menu { position: absolute; top: calc(100% + 8px); right: 0; display: flex; gap: 6px; padding: 8px; border-radius: 14px; background: #f6ead2; border: 1px solid rgba(154, 59, 44, 0.35);
-  box-shadow: 0 10px 28px rgba(43, 26, 12, 0.28); opacity: 0; transform: translateY(-4px) scale(0.98); pointer-events: none; transition: opacity var(--tr-in) var(--gf-ease), transform var(--tr-in) var(--gf-ease); }
+/* ——— 字号钮：左下角一枚淡色小签「字」+ 四档（10-18 老大：「字为什么要放在右上角，又不是特别重要的东西，还占这么大比重」
+   → 不再是右上角 49px 的大圆朱印：缩成 36px 的淡纸色小签退到左下角（lite.css 里和「入園」签叠成一组），半透明、指上去才显；四档菜单向右展开。⌘ / Ctrl ± 照旧 ——— */
+.gf-fs { position: fixed; z-index: 2147483000; left: max(14px, env(safe-area-inset-left, 0px)); bottom: max(14px, env(safe-area-inset-bottom, 0px)); top: auto; right: auto; font-family: inherit; }
+/* html body … button.gf-btn.is-seal（0,3,3）：独立打开的詩稿页把所有 .is-seal 钉成 52px 圆印、手机分支钉成 44px（都带 !important，特异性 0,3,2），这里要压得过它；畫中有話顶栏自己的 44 圆（0,5,0）仍压得过这里 */
+html body .gf-fs > button.gf-btn.is-seal { width: 36px !important; height: 36px !important; min-width: 36px !important; min-height: 36px !important; font-size: 16px; font-weight: 400; border-radius: var(--r-sm) !important; border-color: rgba(154, 59, 44, 0.4);
+  background: rgba(246, 238, 222, 0.94); color: var(--gf-ink-2); box-shadow: 0 1px 4px rgba(43, 26, 12, 0.14); opacity: 0.82; }
+html body .gf-fs > button.gf-btn.is-seal:hover, html body .gf-fs > button.gf-btn.is-seal:focus-visible, html body .gf-fs.open > button.gf-btn.is-seal { opacity: 1; color: var(--gf-cinnabar); transform: none; box-shadow: 0 2px 8px rgba(43, 26, 12, 0.2); }
+.gf-fs-menu { position: absolute; bottom: 0; left: calc(100% + 8px); top: auto; right: auto; display: flex; gap: 6px; padding: 8px; border-radius: 14px; background: #f6ead2; border: 1px solid rgba(154, 59, 44, 0.35);
+  box-shadow: 0 10px 28px rgba(43, 26, 12, 0.28); opacity: 0; transform: translateX(-4px) scale(0.98); pointer-events: none; transition: opacity var(--tr-in) var(--gf-ease), transform var(--tr-in) var(--gf-ease); }
 .gf-fs.open .gf-fs-menu { opacity: 1; transform: none; pointer-events: auto; }
 .gf-fs-menu button { font: inherit; font-size: 17px; padding: 8px 14px; border-radius: 10px; border: 1px solid transparent; background: transparent; color: var(--gf-ink-2); cursor: pointer; white-space: nowrap; transition: background-color var(--tr-in); }
 .gf-fs-menu button:hover { background: rgba(201, 160, 99, 0.18); }
 .gf-fs-menu button[aria-pressed="true"] { background: var(--gf-cinnabar); color: #fff4e4; }
 
+/* ——— 滚动提示（gf.js GF.scrollHints，10-18 老大：博古通今「相關」被底边切半、列表首行被顶边切半）：
+   没到底 → 底边渐隐（默认 30px，各册用 --gf-sc-fade-b 调，比如底下浮着「入園」印的列表给 64px）；离开顶部 → 顶边渐隐（默认 24px，--gf-sc-fade-t）；
+   到底 / 在顶 → 那一边不渐隐，最后一行、第一行都看得全。!important：各册原先写死的「底边永远渐隐」要让位（到底了还淡着，最后一行像被切掉）——— */
+html body .gf-sc { --gf-sc-t: 0px; --gf-sc-b: 0px;
+  -webkit-mask-image: linear-gradient(transparent, #000 var(--gf-sc-t), #000 calc(100% - var(--gf-sc-b)), transparent) !important;
+  mask-image: linear-gradient(transparent, #000 var(--gf-sc-t), #000 calc(100% - var(--gf-sc-b)), transparent) !important; }
+html body .gf-sc.gf-sc-top { --gf-sc-t: var(--gf-sc-fade-t, 24px); }
+html body .gf-sc.gf-sc-more { --gf-sc-b: var(--gf-sc-fade-b, 30px); }
+/* 吸附对齐的卡片网格（--gf-sc-fade-t: 0）滚到底时停在边界、对不齐卡顶，首排必然半截 → 只在「到底且离顶」时顶边渐隐 --gf-sc-fade-t-end */
+html body .gf-sc.gf-sc-top:not(.gf-sc-more) { --gf-sc-t: var(--gf-sc-fade-t-end, var(--gf-sc-fade-t, 24px)); }
+.gf-sc-hint { margin-left: auto; align-self: center; font-size: 16px; letter-spacing: .06em; color: var(--gf-ink-2); opacity: .75; white-space: nowrap; pointer-events: none; animation: gf-sc-bob 1.6s ease-in-out infinite; }
+.gf-sc-hint[hidden] { display: none; }
+@keyframes gf-sc-bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(3px); } }
+
+/* ——— 图片淡入（gf.js imgFade，10-18 老大：「加载的时候完全是硬切」）：没载完先透明，载好 0.4 秒淡进来；缓存里现成的不动 ——— */
+img.gf-img-wait { opacity: 0; }
+/* 审查（03:34）：不写 fill-mode、不写 to——淡完回到元素自己的透明度（剪影图的 .3 / .65、时辰预览的显隐都不被锁成 1）；gf.js 在 animationend 把类摘掉 */
+img.gf-img-in { animation: gf-img-in .4s var(--gf-ease); }
+@keyframes gf-img-in { from { opacity: 0; } }
+
 @media (prefers-reduced-motion: reduce) {
-  .gf-btn, .gf-fs-menu, dialog.gf-dlg[open], dialog.gf-dlg[open]::backdrop, dialog.gf-dlg.gf-closing { transition: none; animation: none; }
+  .gf-btn, .gf-fs-menu, dialog.gf-dlg[open], dialog.gf-dlg[open]::backdrop, dialog.gf-dlg.gf-closing, .gf-sc-hint, img.gf-img-in { transition: none; animation: none; }
+  img.gf-img-wait { opacity: 1; }
 }

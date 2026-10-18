@@ -1,6 +1,6 @@
 // 红楼梦影·纸上游 全站共用小工具（2026-10-16）：字号四档 + 统一弹层。普通脚本（不是 module），主页面和 iframe 子页都能 <script src> 引。
 //   window.GF.fontScale({ root, button })：读 / 写 localStorage「dgy-fs」(1–4，默认 3「大」)，写到 html[data-fs]；
-//     同源 iframe 之间靠 storage 事件 + postMessage 同步；⌘/Ctrl + = / - 换档；button:true 时右上角放印章「字」钮。
+//     同源 iframe 之间靠 storage 事件 + postMessage 同步；⌘/Ctrl + = / - 换档；button:true 时放一枚「字」钮（10-18 起是左下角的淡色小签，位置样式见 gf.css / lite.css）。
 //   window.GF.wireDialogs(root)：所有 <dialog> 点遮罩 / Esc 关闭，关闭后焦点回到打开它的按钮、滚动位置不跳。
 //   window.GF.layer(el, close)：非 <dialog> 的浮层也接上「点外面 / Esc 关」（close 由调用方给）。
 (function () {
@@ -33,7 +33,7 @@
     if (document.querySelector('.gf-fs')) return;
     const box = document.createElement('div');
     box.className = 'gf-fs';
-    box.innerHTML = '<button class="gf-btn is-seal" type="button" aria-haspopup="true" aria-expanded="false" title="字號（⌘/Ctrl ＋ / －）">字</button><div class="gf-fs-menu" role="menu">' +
+    box.innerHTML = '<button class="gf-btn is-seal" type="button" aria-haspopup="true" aria-expanded="false" aria-label="字號" title="字號（⌘/Ctrl ＋ / －）">字</button><div class="gf-fs-menu" role="menu">' +
       NAMES.map((n, i) => `<button type="button" role="menuitemradio" data-v="${i + 1}">${n}</button>`).join('') + '</div>';
     const btn = box.firstElementChild, menu = box.lastElementChild;
     const mark = () => menu.querySelectorAll('button').forEach((b) => b.setAttribute('aria-pressed', String(+b.dataset.v === cur)));
@@ -102,9 +102,10 @@
   function wireDialogs(root) {
     root = root || document;
     root.querySelectorAll('dialog').forEach(wireDialog);
+    scrollHintsAll(root); imgFadeAll(root);
     if (!wireDialogs.mo) {
-      wireDialogs.mo = new MutationObserver((ms) => { for (const m of ms) for (const n of m.addedNodes) { if (n.nodeType !== 1) continue; if (n.tagName === 'DIALOG') wireDialog(n); else n.querySelectorAll?.('dialog').forEach(wireDialog); } });
-      wireDialogs.mo.observe(document.documentElement, { childList: true, subtree: true });
+      wireDialogs.mo = new MutationObserver((ms) => { for (const m of ms) { if (m.type === 'attributes') { if (m.target.tagName === 'IMG') imgFade(m.target); continue; } for (const n of m.addedNodes) { if (n.nodeType !== 1) continue; if (n.tagName === 'DIALOG') wireDialog(n); else n.querySelectorAll?.('dialog').forEach(wireDialog); scrollHintsAll(n); imgFadeAll(n); } } });
+      wireDialogs.mo.observe(document.documentElement, { childList: true, subtree: true, attributes: true, attributeFilter: ['src', 'srcset'] }); // 复用的 <img> 换图也重新淡入（审查 03:34）
     }
   }
   // 非 dialog 的浮层：点 el 自身（遮罩）或按 Esc 调 close
@@ -116,6 +117,68 @@
     el.addEventListener('click', (e) => { if (e.target === el && down && !el.hidden) close(e); });
     addEventListener('keydown', (e) => { if (e.key === 'Escape' && !el.hidden && el.isConnected && getComputedStyle(el).display !== 'none') { close(e); } });
   }
+
+  // ——— 滚动提示（10-18 老大：博古通今详情「相關」一节被底边切半、列表首行被顶边切半，「怎么还有这种显示不全的问题」）———
+  //   GF.scrollHints(el, { hint })：接管一个能滚的容器——没到底时加 .gf-sc-more（底边渐隐 + 「↓ 往下翻」提示），离开顶部后加 .gf-sc-top（顶边渐隐），
+  //   滚到底渐隐和提示一起消失，最后一行不再被淡掉；放不下才滚、放得下就什么都不加。hint 给一个父级元素时在里面放一枚 <span class="gf-sc-hint">。
+  //   GF.wireDialogs() 的观察器会自动接管新出现的 [data-gf-scroll]（詩稿 / 畫中有話 / 博古通今详情本来就标了）。
+  function scrollHints(el, opt) {
+    if (!el) return () => {};
+    opt = opt || {};
+    if (!el._gfSc) {
+      el.classList.add('gf-sc');
+      const update = () => {
+        if (!el.isConnected) return;
+        const more = el.scrollTop + el.clientHeight < el.scrollHeight - 2, top = el.scrollTop > 2;
+        el.classList.toggle('gf-sc-more', more); el.classList.toggle('gf-sc-top', top);
+        if (el._gfScHint) el._gfScHint.hidden = !more;
+      };
+      el._gfSc = update;
+      el.addEventListener('scroll', update, { passive: true });
+      // 多处变化合并成一帧一次量
+      let pending = false;
+      const schedule = () => { if (pending) return; pending = true; requestAnimationFrame(() => { pending = false; update(); }); };
+      // 盯容器 + 当前的直接子元素（图加载撑高、列表重排都会动到它们）；直接子元素换了就整组重盯，旧的不再持有（审查 🔴：只增不减会漏内存）
+      let ro = null;
+      if (typeof ResizeObserver === 'function') { ro = new ResizeObserver(schedule); const watch = () => { ro.disconnect(); ro.observe(el); for (const c of el.children) ro.observe(c); }; watch(); el._gfScWatch = watch; }
+      if (typeof MutationObserver === 'function') new MutationObserver((ms) => { if (ro && ms.some((m) => m.target === el)) el._gfScWatch(); schedule(); }).observe(el, { childList: true, subtree: true });
+      update(); schedule(); setTimeout(update, 300);
+    }
+    if (opt.hint && !el._gfScHint) {
+      let h = opt.hint.querySelector(':scope > .gf-sc-hint');
+      if (!h) { h = document.createElement('span'); h.className = 'gf-sc-hint'; h.setAttribute('aria-hidden', 'true'); h.textContent = '↓ 往下翻'; opt.hint.appendChild(h); }
+      el._gfScHint = h;
+    }
+    el._gfSc();
+    return el._gfSc;
+  }
+  // 书案各册的滚动容器（lite 页 / 詩稿页才引 gf.js，正式版 daguanyuan.html 不受影响）：院落 #places、畫中有話 #albumNav、十二釵 #peopleNav、石頭記 #readerNav、行藏 #questList、占花名 #achieveNav、詩稿 #poemsNav、
+  // 博古通今 .cxg-list、遊園記 .jn-page、锦函 / 图鉴 .dgy-cdx-main、詩稿页左栏 .index-list、注释 .annotation、手机版工作区 #workspace 与详情 #detail-body
+  const SC_SEL = '[data-gf-scroll], #places, #albumNav, #peopleNav, #readerNav, #questList, #achieveNav, #poemsNav, .cxg-list, .jn-page, .dgy-cdx-main, .dk-card-in, .index-list, .annotation, #workspace, #detail-body';
+  // 不接管手机博古通今的 #codexNav：它整页滚，详情栏 .cxg-detail 是它里面的 fixed 子元素，mask 会连详情栏底部一起淡掉（hud.css 那条 mask none !important 就是为此）
+  function scrollHintsAll(root) { root = root || document; if (root.matches?.(SC_SEL)) scrollHints(root); root.querySelectorAll?.(SC_SEL).forEach((el) => scrollHints(el)); }
+
+  // ——— 图片淡入（10-18 老大：「资源加载的时候，图片啊什么的，完全是硬切的感觉，一点啥也没有」）———
+  //   还没载完的 <img> 先透明，载好了 0.4 秒淡进来；已经在缓存里、一进来就 complete 的不动（不闪）。载坏的也放出来（交给各处自己的占位 / 剪影逻辑）。
+  //   审查（03:34）三条已改：同一个 <img> 换 src 再来一遍（詩稿 #carrier-image 反复换图）；8 秒兜底只是先放出来，之后真载好仍淡入；
+  //   懒加载还没滚进视口的不计时；淡完把 .gf-img-in 摘掉，透明度回到元素自己的值。
+  function imgFade(img) {
+    if (!img || img.tagName !== 'IMG') return;
+    const key = (img.getAttribute('src') || '') + '|' + (img.getAttribute('srcset') || '');
+    if (img._gfKey === key) return; img._gfKey = key;
+    img.classList.remove('gf-img-in'); clearTimeout(img._gfT);
+    if (img.complete && img.naturalWidth) { img.classList.remove('gf-img-wait'); return; } // 缓存里现成的：不闪
+    img.classList.add('gf-img-wait');
+    if (!img._gfOn) {
+      img._gfOn = true;
+      const done = () => { clearTimeout(img._gfT); img.classList.remove('gf-img-wait'); img.classList.add('gf-img-in'); setTimeout(() => img.classList.remove('gf-img-in'), 600); /* 不在渲染树里的图没有 animationend，这里兜底摘类 */ };
+      img.addEventListener('load', done); img.addEventListener('error', done);
+      img.addEventListener('animationend', (e) => { if (e.animationName === 'gf-img-in') img.classList.remove('gf-img-in'); });
+    }
+    const r = img.getBoundingClientRect(), lazyOut = img.loading === 'lazy' && (r.bottom < -200 || r.top > innerHeight + 200);
+    if (!lazyOut) img._gfT = setTimeout(() => img.classList.remove('gf-img-wait'), 8000); // 兜底：8 秒还没回就先放出来，不许一直空着；load 回来仍走淡入
+  }
+  function imgFadeAll(root) { root = root || document; if (root.tagName === 'IMG') imgFade(root); root.querySelectorAll?.('img').forEach(imgFade); }
 
   // 10-17 实测：Safari（WebKit）整页 zoom 时，getBoundingClientRect 给的是放大前的坐标，而鼠标 clientX / elementFromPoint 用放大后的坐标；
   // Chrome 两边一致。凡是拿元素矩形去和鼠标坐标、innerWidth、elementFromPoint 比的地方，改用 GF.vrect(el)（换成鼠标那一套坐标）。
@@ -138,5 +201,5 @@
     return k === 1 ? r : { left: r.left * k, top: r.top * k, right: r.right * k, bottom: r.bottom * k, width: r.width * k, height: r.height * k, x: r.x * k, y: r.y * k };
   }
 
-  window.GF = { fontScale, wireDialogs, closeDialog, layer, NAMES, vrect, zk };
+  window.GF = { fontScale, wireDialogs, closeDialog, layer, scrollHints, scrollHintsAll, NAMES, vrect, zk };
 })();

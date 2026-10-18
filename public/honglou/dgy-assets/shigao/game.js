@@ -111,6 +111,31 @@
   }
   const showNote0 = showNote;
   showNote = function (term, node) { showNote0(term, node); const an = $('.annotation'); if (an && an.classList.contains('sg-tabbed')) annTab('note'); };
+  // ——— 10-18 配画：每首诗详情右栏（箋邊串講上方）一幅清代工笔小画，点一下展开全幅、再点收回；没有配画的诗（判词 14 首另有画册大图）不留空框 ———
+  // 画放在 art/<诗 id>.webp（800×1000，每张 7–53KB，只在打开那首诗时才取，不进首包）；art/index.json 列出有画的 id。淡入交给 GF（gf.js 对新 <img> 和换 src 自动淡入）
+  let huaSet = null;
+  function showHua(id) {
+    const an = $('.annotation'); if (!an) return;
+    let fig = an.querySelector('.sg-hua');
+    // 题帕诗 / 葬花吟本来就带「载体图」场景画（#carrier-art），不叠第二幅
+    if (!huaSet || !huaSet.has(id) || $('#poem-dialog').dataset.carrier) { if (fig) { fig.hidden = true; fig.classList.remove('is-big'); } return; }
+    if (!fig) {
+      fig = document.createElement('figure'); fig.className = 'sg-hua';
+      fig.innerHTML = '<button type="button" class="sg-hua-b" aria-expanded="false"><img decoding="async" alt=""></button><figcaption>點畫展開</figcaption>';
+      const b = fig.querySelector('button');
+      b.onclick = () => { const big = fig.classList.toggle('is-big'); b.setAttribute('aria-expanded', String(big)); fig.querySelector('figcaption').textContent = big ? '點畫收起' : '點畫展開'; };
+      an.insertBefore(fig, an.querySelector('h3') || an.firstChild);
+    }
+    fig.hidden = false; fig.classList.remove('is-big');
+    fig.querySelector('button').setAttribute('aria-expanded', 'false'); fig.querySelector('figcaption').textContent = '點畫展開';
+    const img = fig.querySelector('img'), src = 'art/' + id + '.webp', p = db.作品[id];
+    if (img.getAttribute('src') !== src) img.setAttribute('src', src);
+    img.alt = '配畫：' + (p ? p.题 : '') + '（清代工筆風）';
+  }
+  fetch(new URL('art/index.json', location.href)).then((r) => (r.ok ? r.json() : [])).then((a) => {
+    huaSet = new Set(a);
+    if ($('#poem-dialog').open && typeof activeIds !== 'undefined') showHua(activeIds[currentPoem]); // 索引比第一首诗晚到：补上
+  }).catch(() => {});
   const openPoem0 = openPoem;
   openPoem = function (index) {
     openPoem0(index);
@@ -120,6 +145,7 @@
     by.innerHTML = authorIds(p).map((a) => people[a] ? '<button type="button" class="sg-who" data-person="' + a + '">' + esc(people[a].name) + '</button>' : esc(a)).join('、') + ' · 第' + cn(p.回) + '回';
     by.querySelectorAll('[data-person]').forEach((b) => { b.onclick = () => emit('person', b.dataset.person); });
     readArm(id);
+    showHua(id);
     requestAnimationFrame(() => { const an = $('.annotation'); if (an) an.scrollTop = 0; const db2 = $('#detail-body'); if (db2) db2.scrollTop = 0; });
     emit('sfx', 'paper-set');
   };

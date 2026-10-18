@@ -223,11 +223,14 @@
     (function () { var st = 'hlm'; try { st = (JSON.parse(localStorage.getItem('dgy-settings') || 'null') || {}).uiStyle || 'hlm'; } catch (e) {} if (st !== 'plain' && !/[?&]notsxz/.test(location.search)) document.documentElement.classList.add('ts-xz'); })();
   </script>
 <!--TITLEXZ:END-->
+<!-- 10-18 老大：「正楷字跟行书一起出现」——轻量版之前漏了 3D 版的这两行，书案 / 卡片里小子集没收的字全落了宋楷；和 daguanyuan.html 279 行一致 -->
+<link rel="preload" href="./dgy-build/HanWangShinSuMedium-all-A-b-F-GHSI.woff2" as="font" type="font/woff2" crossorigin>
   <!--LITE: 轻量版入口骨架（UI设计指导-3A §28）。上面的 <head> 与下面 TITLE 段从 daguanyuan.html 复制（dgy-title-build.py 改了标题页要同步一次）-->
-  <script type="module" crossorigin src="./dgy-build/daguanyuan-lite-g1UC3ze1.js"></script>
-  <link rel="modulepreload" crossorigin href="./dgy-build/preload-helper-DMGCcr4D.js">
+  <script type="module" crossorigin src="./dgy-build/daguanyuan-lite-4tsttEXH.js"></script>
+  <link rel="modulepreload" crossorigin href="./dgy-build/preload-helper-YjiYE4uX.js">
   <link rel="modulepreload" crossorigin href="./dgy-build/three.core-3TnwmHjw.js">
-  <link rel="stylesheet" crossorigin href="./dgy-build/daguanyuan-lite-D_wUplmM.css">
+  <link rel="stylesheet" crossorigin href="./dgy-build/preload-helper-Yb9_Yj7u.css">
+  <link rel="stylesheet" crossorigin href="./dgy-build/daguanyuan-lite-D-2zDfNq.css">
 </head>
 <body class="lite">
 <!--TITLE:START 由 scripts/dgy-title-build.py 生成，别手改-->

@@ -57,7 +57,7 @@ body[data-layout=mobile] span.sg-head-face { font-size: 20px; }
 .chapter-btn, .brand small, .index-item small, .index-foot, .society-intro small, .play-actions span, .portfolio-note small, .note-box small, .poem-postscript small, .detail-counter, .slip-head .num { font-size: 14px !important; }
 .chapter-btn b { font-size: 18px !important; }
 /* 第 32 轮（巡检字体回退）：样张里锦函、册名、赏析小标题这些界面字也用了诗文笔触字库（只收诗里的字），缺字退到同款行书界面字库，不落宋体 */
-.casket-label b, .casket-caption, .entry-instruction, .thread-book > span, .book-leaf > span, .desk-note, .poem-postscript h3, .lid-seal, .paperweight { font-family: V3Brush, UIScript, UIExtra, UIDgy, "Songti SC", serif !important; }
+.casket-label b, .casket-caption, .entry-instruction, .thread-book > span, .book-leaf > span, .desk-note, .poem-postscript h3, .lid-seal, .paperweight { font-family: V3Brush, UIScript, UIExtra, UIDgy, "DGY All", "Songti SC", serif !important; }
 /* 10-17 任务书 6「竖排里的《》没转成竖向」：实测锦函题字、签卡标题、签卡诗句三类竖排元素最终都走全站统一字体 "DGY All"（自带竖排标点变体），
    往里塞「《詠菊》「問」，。」截图核过——都是竖排形态；没有再加字体规则 */
 /* 诗笺纸面统一用笔触字：作者、纸名、注释和赏析不再落到方正的界面字体。 */
@@ -66,7 +66,7 @@ body[data-layout=mobile] span.sg-head-face { font-size: 20px; }
 .poem-dialog #detail-byline, .poem-dialog .sheet-top, .poem-dialog .annotation-source,
 .poem-dialog .detail-counter, .poem-dialog .chapter-btn,
 .slip .signature, .slip-head small, .slip-sign small, .slip .card-actions {
-  font-family: V3Brush, UIScript, UIExtra, UIDgy, "Kaiti SC", serif;
+  font-family: V3Brush, UIScript, UIExtra, UIDgy, "DGY All", "Kaiti SC", serif; /* 10-18：缺字先落全站行书字库 */
   font-size: 16px !important;
 }
 #poem-back { font-family: "Songti SC", serif !important; }
@@ -109,9 +109,9 @@ body[data-layout=mobile] .entry[data-phase=ready] .entry-instruction { transform
    右栏释义末行被切——底部留白并加淡出，滚到底能完整读到最后一行 */
 body[data-layout=desktop] .poem-area, body[data-layout=desktop] .poem-area.short { justify-content: safe center; }
 body[data-layout=desktop] .poem-area.short { gap: 22px; }
-body[data-layout=desktop] .annotation { padding-bottom: 28px; -webkit-mask-image: linear-gradient(180deg, #000 calc(100% - 22px), transparent); mask-image: linear-gradient(180deg, #000 calc(100% - 22px), transparent); }
+body[data-layout=desktop] .annotation { padding-bottom: 28px; --gf-sc-fade-b: 22px; } /* 10-18：渐隐交给 gf.js GF.scrollHints，没到底才淡 */
 /* 左栏索引：最后一项不再被栏底切半 */
-body[data-layout=desktop] .index-list { padding-bottom: 36px; -webkit-mask-image: linear-gradient(180deg, #000 calc(100% - 26px), transparent); mask-image: linear-gradient(180deg, #000 calc(100% - 26px), transparent); } /* 列表可滚：底边淡出，露半项不再像被切掉 */
+body[data-layout=desktop] .index-list { padding-bottom: 36px; --gf-sc-fade-b: 26px; } /* 列表可滚：底边淡出，露半项不再像被切掉 */
 
 /* 10-15（界面督察·手机）：按社 / 按人的分组简介（限韵、回目）一行放不下时折到第二行，被下面的笺架压住——栏头随内容长高，简介行高留足 */
 body[data-layout=mobile] .section-head { height: auto; min-height: 80px; flex: 0 0 auto; }
@@ -323,3 +323,16 @@ body[data-layout=desktop] #card-track::after { content: ''; flex: 0 0 var(--sg-t
 .sg-atabs button[aria-selected=true] { color: var(--cinn, #a63d2a); border-bottom-color: var(--cinn, #a63d2a); }
 .sg-atabs button:hover { color: var(--cinn, #a63d2a); }
 .sg-atabs button:focus-visible { outline: 2px solid var(--cinn, #a63d2a); outline-offset: 2px; border-radius: 3px; }
+
+/* ===== 10-18 配画：读诗页右栏的清代工笔小画（game.js showHua）；浮在右上，串講文字绕着走；点一下展开 ===== */
+.sg-hua { float: right; width: min(38%, 168px); margin: 2px 0 10px 16px; padding: 0; }
+.sg-hua[hidden] { display: none !important; }
+.sg-hua .sg-hua-b { all: unset; display: block; box-sizing: border-box; cursor: zoom-in; width: 100%; border: 1px solid rgba(169, 138, 78, .7); border-radius: 16px; overflow: hidden; background: #e6d8bd; box-shadow: 0 4px 10px rgba(53, 31, 10, .18); }
+.sg-hua .sg-hua-b:focus-visible { outline: 2px solid var(--cinn, #a63d2a); outline-offset: 2px; }
+.sg-hua img { display: block; width: 100%; aspect-ratio: 4 / 5; object-fit: cover; background: #e6d8bd; }
+.sg-hua figcaption { margin-top: 5px; text-align: center; font: 400 14px/1.3 var(--sg-brush, var(--brush, serif)); letter-spacing: .12em; color: var(--ink2, #4a4036); opacity: .75; }
+.sg-hua.is-big { float: none; width: min(100%, 340px); margin: 0 auto 14px; }
+.sg-hua.is-big .sg-hua-b { cursor: zoom-out; }
+@media (prefers-reduced-motion: no-preference) { .sg-hua { transition: width .28s ease, margin .28s ease; } }
+/* 右栏三页签（矮窗）：页签条以外本来一律藏，画要留着；放在页签条下面、各页都能看到 */
+.annotation.sg-tabbed > .sg-hua:not([hidden]) { display: block !important; }
