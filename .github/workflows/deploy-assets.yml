@@ -1,0 +1,54 @@
+name: Deploy DUOMEI large assets
+
+# 手动单独发布素材项目 duomei-assets（assets.duomei.site）。平时不用点：
+# deploy-edgeone.yml 每次发布主站前都会先跑同一个脚本，素材变了才部署。
+# 这里留给「只想重发素材」「素材域名刚绑好要补发」「改了缓存头要强制重发」这些情况。
+on:
+  workflow_dispatch:
+    inputs:
+      force:
+        description: "1 = 指纹没变也重新部署"
+        required: false
+        default: "0"
+      rotate:
+        description: "部署后挤掉素材项目旧副本的小 preview 次数"
+        required: false
+        default: "3"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: edgeone-assets-duomei
+  cancel-in-progress: false
+
+jobs:
+  assets:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      EDGEONE_CLI_VERSION: 1.6.31-3
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 22.17.1
+
+      - name: Publish large assets to the assets project
+        shell: bash
+        env:
+          EDGEONE_API_TOKEN: ${{ secrets.EDGEONE_API_TOKEN }}
+          DUOMEI_ASSETS_BASE: ${{ vars.DUOMEI_ASSETS_BASE }}
+          ASSETS_FORCE: ${{ inputs.force }}
+          ASSETS_ROTATE: ${{ inputs.rotate }}
+        run: |
+          set -euo pipefail
+          ( cd "${RUNNER_TEMP}" && npm install -g --legacy-peer-deps "edgeone@${EDGEONE_CLI_VERSION}" )
+          SRC_DIR=public bash scripts/assets-publish.sh
+          node scripts/assets-split.mjs check --dir public || echo "::warning::素材域名抽查没通过（域名还没绑好时正常）"

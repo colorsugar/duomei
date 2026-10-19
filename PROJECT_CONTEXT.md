@@ -304,3 +304,12 @@ Scene production builds must use `vite build --base=/xiaoyuan-scene/`. The root 
 用户明确要求手机/iPad不直接降低画质。共享场景现在固定完整纹理、模型、阴影、辉光与水面光学，不再按设备自动切轻水面/1K材质，也不自动降DPR或关闭AO/辉光。优化路径为GPU雨丝静态种子、后台动画暂停、已有视锥剔除及同步截图时再重绘（debug录像保留缓冲）。世界雨固定在实际围墙内，1200条保持原园内密度；近景雨只在园内附近启用并在围墙边界裁剪，禁止扩展到墙外浪费资源。水下上看保留岸景透射与动态雨圈，不能恢复镜像鱼/池底。
 
 手机/平板第一人称和飞行提供触屏摇杆、滑动转向、快走/互动及升降，复用既有碰撞；取消触摸/后台/失焦停止移动。加载显示真实已完成/已发现资源数和材质准备阶段，失败显示重试；仅实际资源/构建/材质与至少2帧完成才显示100%，没有8秒放行。声音默认关闭，需要明确点声音才能开启。真实手机网络等待与性能验收仍待真机；桌面触屏模拟不能声称真机通过。详见当前荷塘交接文件。
+
+## 大素材分包：第二个免费 EdgeOne 项目 — 2026-10-19（分支 assets-pages-split，未合并）
+
+EdgeOne 单次部署整站超过约 1.1GB 会整站 HTTPS 断开，主站已 1.09GB。小院、红楼梦影、云游里不含网页和脚本的大目录（约 731MB：模型、贴图、音乐、视频、大图）改由同账号第二个免费网页项目 `duomei-assets-overseas`（`makers-zui6b5ikmwdt`，区域「全球不含中国大陆」，与 `duomei-guyu` 相同；域名 `assets.duomei.site`，CNAME `assets.duomei.site.pages.dnsoe9.com`）提供。主站包约 360MB。规则在 `deploy/assets-split.json`，脚本 `scripts/assets-split.mjs`。
+
+- 页面代码不改：发布时 `scripts/assets-site.sh` 在主站 `edgeone.json` 写 302 跳转（每个大目录一条），`npm run build` 末尾按 `.assets-split.json` 去掉这些文件；本地开发与本地构建不受影响。
+- 素材项目回 `Access-Control-Allow-Origin: *`、缓存 1 小时。图片被画进 canvas 再上传贴图的目录必须留在主站（`exclude`，现有 `honglou/dgy-assets/map`），否则跨域污染画布。
+- `deploy-edgeone.yml` 的 `assets` 前置 job 只在素材指纹变化时部署素材项目，部署后挤掉其旧副本；主站发布前比对素材域名上的 `duomei-assets.json` 指纹，不一致、取不到或抽查不过就整站照旧（退路）。仓库变量 `DUOMEI_ASSETS_SPLIT=0` 一键关闭拆分。
+- 第一次建的 `duomei-assets`（`makers-srqzwxgm0oft`）是「含中国大陆」区域，未实名不能绑域名，已缩成一个小页面，不再使用。
