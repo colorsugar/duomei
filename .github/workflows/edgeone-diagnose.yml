@@ -29,17 +29,25 @@ on:
         description: "Deploy this ref's whole site as a preview (never production) and probe it"
         required: false
         default: "0"
+      assets:
+        description: "1 = publish large assets to the duomei-assets project when changed; force = always"
+        required: false
+        default: "0"
+      project_id:
+        description: "Project to list (default: main site makers-brifmhu31vjf)"
+        required: false
+        default: ""
 
 permissions:
   contents: read
 
 jobs:
   diagnose:
-    if: github.ref == 'refs/heads/main' || (startsWith(github.ref, 'refs/heads/cursor/edgeone-') || startsWith(github.ref, 'refs/heads/cursor/honglou-'))
+    if: github.ref == 'refs/heads/main' || (startsWith(github.ref, 'refs/heads/cursor/edgeone-') || startsWith(github.ref, 'refs/heads/cursor/honglou-')) || github.ref == 'refs/heads/assets-pages-split'
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 50
     env:
-      EDGEONE_PROJECT_ID: makers-brifmhu31vjf
+      EDGEONE_PROJECT_ID: ${{ inputs.project_id || 'makers-brifmhu31vjf' }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -79,11 +87,33 @@ jobs:
           done
           node scripts/edgeone-deploy-diagnose.mjs 6
 
+      # 大素材单独发到素材项目 duomei-assets（assets.duomei.site），指纹没变就不部署。见 scripts/assets-publish.sh。
+      - name: Publish large assets to the assets project
+        if: inputs.assets == '1' || inputs.assets == 'force'
+        env:
+          EDGEONE_API_TOKEN: ${{ secrets.EDGEONE_API_TOKEN }}
+          DUOMEI_ASSETS_BASE: ${{ vars.DUOMEI_ASSETS_BASE }}
+          ASSETS_FORCE: ${{ inputs.assets == 'force' && '1' || '0' }}
+        run: |
+          set -euo pipefail
+          ( cd "${RUNNER_TEMP}" && npm install -g --legacy-peer-deps "edgeone@1.6.31-3" )
+          SRC_DIR=public bash scripts/assets-publish.sh
+          node scripts/assets-split.mjs check --dir public || echo "::warning::素材域名抽查没通过（域名还没绑好时正常）"
+          node scripts/edgeone-deploy-diagnose.mjs 6 | grep -E "^  project |^## Deployments" || true
+
       # 大包上线前先部署成预览版（不碰正式站）并探测能否正常访问。
+      # 和正式发布一样先判断拆不拆大素材：素材域名上已是本次素材就拆，预览站就是拆分后的小网站。
       - name: Deploy whole site as preview and probe it
         if: inputs.preview_site == '1'
         env:
           EDGEONE_API_TOKEN: ${{ secrets.EDGEONE_API_TOKEN }}
+          DUOMEI_ASSETS_SPLIT: ${{ vars.DUOMEI_ASSETS_SPLIT }}
+          DUOMEI_ASSETS_BASE: ${{ vars.DUOMEI_ASSETS_BASE }}
         run: |
+          set -euo pipefail
+          npm ci
+          npm run build
+          bash scripts/assets-site.sh
+          node scripts/assets-split.mjs guard --dir dist
           ( cd "${RUNNER_TEMP}" && npm install -g --legacy-peer-deps "edgeone@1.6.31-3" )
           bash scripts/edgeone-preview-probe.sh

@@ -14,8 +14,44 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  verify-and-deploy:
+  # 大素材（小院、红楼梦影、云游的模型、贴图、音乐、视频、大图）单独放在同账号第二个免费网页项目
+  # duomei-assets（assets.duomei.site），主站包只留网页和脚本，避开单次部署约 1.1GB 断站线。
+  # 素材只在指纹变了时才部署（不占存储）；部署后挤掉素材项目的旧副本。见 scripts/assets-publish.sh。
+  # 这一步失败不拦主站：主站发布时发现素材域名上不是本次素材，会自动不拆（整站照旧）。
+  assets:
     if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    concurrency:
+      group: edgeone-assets-duomei
+      cancel-in-progress: false
+    env:
+      EDGEONE_CLI_VERSION: 1.6.31-3
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 22.17.1
+
+      - name: Publish large assets to the assets project (only when changed)
+        id: publish
+        shell: bash
+        env:
+          EDGEONE_API_TOKEN: ${{ secrets.EDGEONE_API_TOKEN }}
+          DUOMEI_ASSETS_BASE: ${{ vars.DUOMEI_ASSETS_BASE }}
+        run: |
+          set -euo pipefail
+          ( cd "${RUNNER_TEMP}" && npm install -g --legacy-peer-deps "edgeone@${EDGEONE_CLI_VERSION}" )
+          SRC_DIR=public bash scripts/assets-publish.sh
+
+  verify-and-deploy:
+    needs: assets
+    if: github.ref == 'refs/heads/main' && !cancelled()
     runs-on: ubuntu-latest
     timeout-minutes: 30
     env:
@@ -78,6 +114,21 @@ jobs:
           set -euo pipefail
           mkdir -p public/.well-known
           printf '{"commit":"%s","run":"%s"}\n' "$GITHUB_SHA" "$GITHUB_RUN_ID" > public/.well-known/duomei-build.json
+
+      # 素材域名上已是本次素材时：edgeone.json 加 302 跳转到 assets.duomei.site，下面 CLI 重新构建时
+      # npm run build 按 .assets-split.json 去掉这些文件。素材域名取不到 / 版本不对 / 抽查不过 → 不拆（退路）。
+      - name: Split large assets out of the site package
+        id: split
+        shell: bash
+        env:
+          DUOMEI_ASSETS_SPLIT: ${{ vars.DUOMEI_ASSETS_SPLIT }}
+          DUOMEI_ASSETS_BASE: ${{ vars.DUOMEI_ASSETS_BASE }}
+        run: bash scripts/assets-site.sh
+
+      # EdgeOne 单次部署超过约 1.1GB 会整站 HTTPS 断开（10-16 实测 1118MB 断开；10-18 1112MB 断、1099MB 正常）。
+      # 拆了：主站包要 ≤ 700MB；没拆：要 ≤ 1095MB。
+      - name: Check EdgeOne package size
+        run: node scripts/assets-split.mjs guard --dir dist
 
       # 10-18：账号存储 5 GiB 只放得下约 4 份整站副本（正式版 + 最近 3 次部署，各约 1.1 GB），
       # 一天发两三次就会满，部署报 "The account storage limit is 5 GiB" 失败。
@@ -304,3 +355,7 @@ jobs:
 
       - name: Verify published campus assets
         run: node scripts/verify-lingchuan.mjs --production
+
+      - name: Verify large assets are served from the assets project
+        if: steps.split.outputs.mode == 'split'
+        run: node scripts/assets-split.mjs verify-site --site https://duomei.site

@@ -29,3 +29,6 @@ Thumbs.db
 /public/downloads/fantasy-continent-artbook.pdf
 /output/
 /artifacts/zaobao-wechat/
+
+# 大素材拆分清单：只在 CI 发布时由 scripts/assets-split.mjs apply 生成
+/.assets-split.json

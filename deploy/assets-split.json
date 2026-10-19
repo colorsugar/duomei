@@ -1,0 +1,21 @@
+{
+  "$comment": "大素材（3D 场景的模型、贴图、音乐、视频、大图）放进同一 EdgeOne 账号下的第二个免费网页项目 duomei-assets（域名 assets.duomei.site），主站包只留网页和脚本。主站 edgeone.json 由 scripts/assets-split.mjs apply 在 CI 里加 302 跳转，页面代码不用改。enabled=false 或仓库变量 DUOMEI_ASSETS_SPLIT=0 时全部回到主站。见 scripts/assets-split.mjs。",
+  "enabled": true,
+  "base": "https://assets.duomei.site",
+  "project": "duomei-assets",
+  "include": ["honglou", "xiaoyuan-scene", "yunyou"],
+  "minDepth": 2,
+  "minDirBytes": 1048576,
+  "minLooseFileBytes": 4194304,
+  "codeExtensions": ["html", "htm", "js", "mjs", "cjs", "css", "map", "wasm", "webmanifest", "xml"],
+  "exclude": [],
+  "maxSiteMB": 700,
+  "maxAssetsMB": 1000,
+  "cacheControl": "public, max-age=3600, stale-while-revalidate=86400",
+  "extraHeaders": [
+    {
+      "source": "/honglou/dgy-assets/cutscene/ch17/ch17.m3u8",
+      "headers": [{ "key": "Content-Type", "value": "application/vnd.apple.mpegurl" }]
+    }
+  ]
+}
