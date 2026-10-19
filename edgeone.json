@@ -4,6 +4,23 @@
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "nodeVersion": "22.17.1",
+  "redirects": [
+    {
+      "source": "/dgy-build/*",
+      "destination": "/honglou/dgy-build/:splat",
+      "statusCode": 302
+    },
+    {
+      "source": "/dgy/*",
+      "destination": "/honglou/dgy/:splat",
+      "statusCode": 302
+    },
+    {
+      "source": "/dgy-assets/*",
+      "destination": "/honglou/dgy-assets/:splat",
+      "statusCode": 302
+    }
+  ],
   "rewrites": [
     {
       "source": "/*",
