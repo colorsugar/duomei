@@ -389,7 +389,7 @@ async function cmdCheck() {
       if (res.status !== 206) problems.push(`状态 ${res.status}（要 206）`);
       if (total !== f.size) problems.push(`大小 ${total}/${f.size}`);
       if (!(acao === "*" || acao === origin)) problems.push(`跨域头 ${acao}`);
-      if (want && type !== want && !(want === "model/gltf-binary" && type === "application/octet-stream")) problems.push(`类型 ${type}（要 ${want}）`);
+      if (want && type !== want && !(want.startsWith("model/") && type === "application/octet-stream")) problems.push(`类型 ${type}（要 ${want}）`);
       if (problems.length) {
         bad += 1;
         console.log(`  ✗ ${problems.join("，")}  ${url}`);

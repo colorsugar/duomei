@@ -37,6 +37,10 @@ on:
         description: "Project to list (default: main site makers-brifmhu31vjf)"
         required: false
         default: ""
+      assets_base:
+        description: "Assets origin override for this run (e.g. the project preset domain before assets.duomei.site is bound)"
+        required: false
+        default: ""
 
 permissions:
   contents: read
@@ -92,7 +96,7 @@ jobs:
         if: inputs.assets == '1' || inputs.assets == 'force'
         env:
           EDGEONE_API_TOKEN: ${{ secrets.EDGEONE_API_TOKEN }}
-          DUOMEI_ASSETS_BASE: ${{ vars.DUOMEI_ASSETS_BASE }}
+          DUOMEI_ASSETS_BASE: ${{ inputs.assets_base || vars.DUOMEI_ASSETS_BASE }}
           ASSETS_FORCE: ${{ inputs.assets == 'force' && '1' || '0' }}
         run: |
           set -euo pipefail
@@ -108,7 +112,7 @@ jobs:
         env:
           EDGEONE_API_TOKEN: ${{ secrets.EDGEONE_API_TOKEN }}
           DUOMEI_ASSETS_SPLIT: ${{ vars.DUOMEI_ASSETS_SPLIT }}
-          DUOMEI_ASSETS_BASE: ${{ vars.DUOMEI_ASSETS_BASE }}
+          DUOMEI_ASSETS_BASE: ${{ inputs.assets_base || vars.DUOMEI_ASSETS_BASE }}
         run: |
           set -euo pipefail
           npm ci
