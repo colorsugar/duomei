@@ -13,6 +13,7 @@ project="$(node -p 'require("./deploy/assets-split.json").project')"
 base="${DUOMEI_ASSETS_BASE:-$(node -p 'require("./deploy/assets-split.json").base')}"
 base="${base%/}"
 rotate="${ASSETS_ROTATE:-3}"
+area="$(node -p 'require("./deploy/assets-split.json").area || "overseas"')"
 
 local_hash="$(GITHUB_OUTPUT= node scripts/assets-split.mjs hash --dir "$src")"
 remote_hash="$(GITHUB_OUTPUT= node scripts/assets-split.mjs remote --base "$base" || true)"
@@ -37,15 +38,15 @@ du -sm "$pack/public" || true
 
 deploy_log="$(mktemp)"
 deploy_assets() {
-  ( cd "$pack" && edgeone makers deploy -n "$project" -t "$EDGEONE_API_TOKEN" -e production -a global --json ) 2>&1 | tee "$deploy_log"
+  ( cd "$pack" && edgeone makers deploy -n "$project" -t "$EDGEONE_API_TOKEN" -e production -a "$area" --json ) 2>&1 | tee "$deploy_log"
   return "${PIPESTATUS[0]}"
 }
-tiny_rotate() { # $1 = 项目名，$2 = 次数
+tiny_rotate() { # $1 = 项目名，$2 = 次数，$3 = 区域（默认 global，和主站发布一致）
   local tiny="${RUNNER_TEMP:-/tmp}/tiny-$1"
   mkdir -p "$tiny"
   for i in $(seq 1 "$2"); do
     echo "<!doctype html><title>rotate $i</title>" > "$tiny/index.html"
-    edgeone makers deploy "$tiny" -n "$1" -t "$EDGEONE_API_TOKEN" -e preview -a global --json | tail -n 1 || true
+    edgeone makers deploy "$tiny" -n "$1" -t "$EDGEONE_API_TOKEN" -e preview -a "${3:-global}" --json | tail -n 1 || true
     sleep 20
   done
 }
@@ -55,7 +56,7 @@ if ! deploy_assets; then
     # 账号 5GiB 满了：先挤主站的旧整站副本（每份约 1.1GB，切换前最占地方），再挤素材项目自己的，重试一次。
     echo "::warning::EdgeOne 账号存储满，挤掉主站和素材项目的旧副本后重试一次"
     tiny_rotate duomei-guyu 3
-    tiny_rotate "$project" 3 || true
+    tiny_rotate "$project" 3 "$area" || true
     deploy_assets
   else
     exit 1
@@ -65,7 +66,7 @@ echo "deployed=1" >> "$out"
 tail -n 1 "$deploy_log" | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{try{const j=JSON.parse(s);console.log("素材项目部署结果：",JSON.stringify({status:j.status,projectId:j.projectId||j.ProjectId,deploymentId:j.deploymentId||j.DeploymentId,url:String(j.url||"").replace(/eo_token=[^&]+/,"eo_token=[redacted]")}))}catch{console.log("（CLI 最后一行不是 JSON）")}})'
 
 # 部署成功后挤掉素材项目里旧的大副本：平台保留「正式版 + 最近 3 次」，3 次小 preview 后只剩正式版这一份大的。
-[[ "$rotate" != "0" ]] && tiny_rotate "$project" "$rotate"
+[[ "$rotate" != "0" ]] && tiny_rotate "$project" "$rotate" "$area"
 
 # 等素材域名切到本次版本（域名还没绑好时取不到，live=0，主站发布会自动不拆）。
 for attempt in $(seq 1 12); do
