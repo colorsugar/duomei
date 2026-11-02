@@ -42,10 +42,34 @@ export function RouteScrollManager() {
       };
     }
 
-    const frameId = requestAnimationFrame(() => scrollHashTarget(location.hash));
+    // 首次进站时，目标板块上方的板块还在载图、量高度（驻留轨道高度按内容溢出算），
+    // 只滚一次会落到错位处，手机上甚至落到页底。所以在 2.4 秒内跟着布局变化反复对准，
+    // 读者自己一动（触摸、滚轮、按键）就停手，不跟人抢。
+    const hash = location.hash;
+    let stopped = false;
+    let frameId = requestAnimationFrame(() => scrollHashTarget(hash));
+    const align = () => {
+      if (stopped) return;
+      cancelAnimationFrame(frameId);
+      frameId = requestAnimationFrame(() => scrollHashTarget(hash));
+    };
+    const observer = typeof ResizeObserver === "undefined" ? null : new ResizeObserver(align);
+    observer?.observe(document.body);
+    const timers = [120, 400, 900, 1600].map((ms) => window.setTimeout(align, ms));
+    const stop = () => {
+      stopped = true;
+      observer?.disconnect();
+    };
+    const stopTimer = window.setTimeout(stop, 2400);
+    const userEvents = ["wheel", "touchstart", "keydown", "pointerdown"] as const;
+    userEvents.forEach((type) => window.addEventListener(type, stop, { passive: true, once: true }));
 
     return () => {
+      stop();
       cancelAnimationFrame(frameId);
+      timers.forEach((timer) => window.clearTimeout(timer));
+      window.clearTimeout(stopTimer);
+      userEvents.forEach((type) => window.removeEventListener(type, stop));
     };
   }, [location.pathname, location.search, location.hash]);
 
