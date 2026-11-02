@@ -58,5 +58,9 @@ test("root EdgeOne config keeps Cloud Functions outside mainland and SPA fallbac
   assert.equal("mainland" in config.cloudFunctions.regions, false);
   assert.equal(config.nodeVersion, "22.17.1");
   assert.equal(config.outputDirectory, "dist");
-  assert.deepEqual(config.rewrites, [{ source: "/*", destination: "/index.html" }]);
+  // 子站（掌上红楼网页版 /honglou/ce）有自己的单页回退，必须排在站点回退之前；站点回退始终最后一条
+  assert.deepEqual(config.rewrites, [
+    { source: "/honglou/ce/*", destination: "/honglou/ce/index.html" },
+    { source: "/*", destination: "/index.html" },
+  ]);
 });
