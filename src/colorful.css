@@ -2058,7 +2058,8 @@ html[data-current-section="skills"] .duomei-header nav a[href="/skills"] {
 }
 
 @media (max-width: 48rem) {
-  .home-section-watermark { font-size: 22vw; inset-inline-end: 1rem; }
+  /* 手机上板块内容一屏放不下，描边大字会压在卡片和文字上，收起 */
+  .home-section-watermark { display: none; }
 }
 
 /* ---------- 故语 shelf page: books stand on a shelf (big cover, title under it), not info cards ---------- */

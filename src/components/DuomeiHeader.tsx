@@ -13,6 +13,8 @@ export function DuomeiHeader() {
   const [scrollRevealed, setScrollRevealed] = useState(true);
   const headerRef = useRef<HTMLElement>(null);
   const lastScrollYRef = useRef(typeof window === "undefined" ? 0 : window.scrollY);
+  // 跳到板块后 RouteScrollManager 会跟着布局反复对准，往回挪的那几下不算读者上滑，不放出页头（手机 Safari 上曾压住板块小标题）
+  const quietUntilRef = useRef(0);
   const scrollFrameRef = useRef(0);
   const menuTouchStartRef = useRef<{ x: number; y: number } | null>(null);
   const lastTouchActivationRef = useRef(Number.NEGATIVE_INFINITY);
@@ -39,7 +41,7 @@ export function DuomeiHeader() {
         setMenuOpen(false);
         setHoverRevealed(false);
         setScrollRevealed(false);
-      } else if (lastScrollYRef.current - currentScrollY > 6) {
+      } else if (lastScrollYRef.current - currentScrollY > 6 && Date.now() > quietUntilRef.current) {
         setScrollRevealed(true);
       }
       lastScrollYRef.current = currentScrollY;
@@ -48,9 +50,13 @@ export function DuomeiHeader() {
       if (scrollFrameRef.current) return;
       scrollFrameRef.current = window.requestAnimationFrame(update);
     };
+    const userMoved = () => { quietUntilRef.current = 0; };
+    const userEvents = ["wheel", "touchstart", "keydown"] as const;
     update();
     window.addEventListener("scroll", onScroll, { passive: true });
+    userEvents.forEach((type) => window.addEventListener(type, userMoved, { passive: true }));
     return () => {
+      userEvents.forEach((type) => window.removeEventListener(type, userMoved));
       if (scrollFrameRef.current) window.cancelAnimationFrame(scrollFrameRef.current);
       window.removeEventListener("scroll", onScroll);
     };
@@ -60,7 +66,9 @@ export function DuomeiHeader() {
     setMenuOpen(false);
     setHoverRevealed(false);
     // 从导航跳到首页某个板块（/#yunyou 等）时先收起页头，不压住板块顶上的小标题；往上一滑页头照旧出来
-    setScrollRevealed(!(location.pathname === "/" && location.hash));
+    const toSection = location.pathname === "/" && !!location.hash;
+    setScrollRevealed(!toSection);
+    quietUntilRef.current = toSection ? Date.now() + 2600 : 0;
   }, [location.hash, location.key, location.pathname, location.search]);
 
   useEffect(() => {
