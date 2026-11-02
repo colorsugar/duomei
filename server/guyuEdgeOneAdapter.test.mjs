@@ -58,9 +58,24 @@ test("root EdgeOne config keeps Cloud Functions outside mainland and SPA fallbac
   assert.equal("mainland" in config.cloudFunctions.regions, false);
   assert.equal(config.nodeVersion, "22.17.1");
   assert.equal(config.outputDirectory, "dist");
-  // 子站（掌上红楼网页版 /honglou/ce）有自己的单页回退，必须排在站点回退之前；站点回退始终最后一条
+  // 子站（掌上红楼网页版 /honglou/ce）逐条列出页面路由回退到 ce/index.html（不能用 /honglou/ce/* 通配，会把真实脚本和数据也改写成网页），必须排在站点回退之前；站点回退始终最后一条
   assert.deepEqual(config.rewrites, [
-    { source: "/honglou/ce/*", destination: "/honglou/ce/index.html" },
+    { source: "/honglou/ce/stone", destination: "/honglou/ce/index.html" },
+    { source: "/honglou/ce/people", destination: "/honglou/ce/index.html" },
+    { source: "/honglou/ce/map", destination: "/honglou/ce/index.html" },
+    { source: "/honglou/ce/me", destination: "/honglou/ce/index.html" },
+    { source: "/honglou/ce/about", destination: "/honglou/ce/index.html" },
+    { source: "/honglou/ce/notes", destination: "/honglou/ce/index.html" },
+    { source: "/honglou/ce/search", destination: "/honglou/ce/index.html" },
+    { source: "/honglou/ce/quote-share", destination: "/honglou/ce/index.html" },
+    { source: "/honglou/ce/save-image", destination: "/honglou/ce/index.html" },
+    { source: "/honglou/ce/poem", destination: "/honglou/ce/index.html" },
+    { source: "/honglou/ce/poem/*", destination: "/honglou/ce/index.html" },
+    { source: "/honglou/ce/read/*", destination: "/honglou/ce/index.html" },
+    { source: "/honglou/ce/person/*", destination: "/honglou/ce/index.html" },
+    { source: "/honglou/ce/place/*", destination: "/honglou/ce/index.html" },
+    { source: "/honglou/ce/album/*", destination: "/honglou/ce/index.html" },
+    { source: "/honglou/ce/codex/*", destination: "/honglou/ce/index.html" },
     { source: "/*", destination: "/index.html" },
   ]);
 });
