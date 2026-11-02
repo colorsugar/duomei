@@ -23,7 +23,67 @@
   ],
   "rewrites": [
     {
-      "source": "/honglou/ce/*",
+      "source": "/honglou/ce/stone",
+      "destination": "/honglou/ce/index.html"
+    },
+    {
+      "source": "/honglou/ce/people",
+      "destination": "/honglou/ce/index.html"
+    },
+    {
+      "source": "/honglou/ce/map",
+      "destination": "/honglou/ce/index.html"
+    },
+    {
+      "source": "/honglou/ce/me",
+      "destination": "/honglou/ce/index.html"
+    },
+    {
+      "source": "/honglou/ce/about",
+      "destination": "/honglou/ce/index.html"
+    },
+    {
+      "source": "/honglou/ce/notes",
+      "destination": "/honglou/ce/index.html"
+    },
+    {
+      "source": "/honglou/ce/search",
+      "destination": "/honglou/ce/index.html"
+    },
+    {
+      "source": "/honglou/ce/quote-share",
+      "destination": "/honglou/ce/index.html"
+    },
+    {
+      "source": "/honglou/ce/save-image",
+      "destination": "/honglou/ce/index.html"
+    },
+    {
+      "source": "/honglou/ce/poem",
+      "destination": "/honglou/ce/index.html"
+    },
+    {
+      "source": "/honglou/ce/poem/*",
+      "destination": "/honglou/ce/index.html"
+    },
+    {
+      "source": "/honglou/ce/read/*",
+      "destination": "/honglou/ce/index.html"
+    },
+    {
+      "source": "/honglou/ce/person/*",
+      "destination": "/honglou/ce/index.html"
+    },
+    {
+      "source": "/honglou/ce/place/*",
+      "destination": "/honglou/ce/index.html"
+    },
+    {
+      "source": "/honglou/ce/album/*",
+      "destination": "/honglou/ce/index.html"
+    },
+    {
+      "source": "/honglou/ce/codex/*",
       "destination": "/honglou/ce/index.html"
     },
     {
