@@ -59,7 +59,8 @@ export function DuomeiHeader() {
   useEffect(() => {
     setMenuOpen(false);
     setHoverRevealed(false);
-    setScrollRevealed(true);
+    // 从导航跳到首页某个板块（/#yunyou 等）时先收起页头，不压住板块顶上的小标题；往上一滑页头照旧出来
+    setScrollRevealed(!(location.pathname === "/" && location.hash));
   }, [location.hash, location.key, location.pathname, location.search]);
 
   useEffect(() => {
