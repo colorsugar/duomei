@@ -23,6 +23,10 @@
   ],
   "rewrites": [
     {
+      "source": "/honglou/ce/*",
+      "destination": "/honglou/ce/index.html"
+    },
+    {
       "source": "/*",
       "destination": "/index.html"
     }
