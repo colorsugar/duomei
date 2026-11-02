@@ -150,6 +150,8 @@ function listMovedFiles(dir, manifest) {
   return out;
 }
 
+// 同一种文件的旧式类型名，浏览器照常认（EdgeOne 给 .ttf 回 application/x-font-ttf，11-02 掌上红楼网页版字体实测）
+const SAME_TYPE = { "font/ttf": ["application/x-font-ttf", "font/sfnt"], "font/otf": ["application/x-font-opentype", "font/sfnt"] };
 const CONTENT_TYPES = {
   webp: "image/webp", png: "image/png", jpg: "image/jpeg", jpeg: "image/jpeg", gif: "image/gif", avif: "image/avif",
   svg: "image/svg+xml", ktx2: "image/ktx2", glb: "model/gltf-binary", gltf: "model/gltf+json",
@@ -389,7 +391,7 @@ async function cmdCheck() {
       if (res.status !== 206) problems.push(`状态 ${res.status}（要 206）`);
       if (total !== f.size) problems.push(`大小 ${total}/${f.size}`);
       if (!(acao === "*" || acao === origin)) problems.push(`跨域头 ${acao}`);
-      if (want && type !== want && !(want.startsWith("model/") && type === "application/octet-stream")) problems.push(`类型 ${type}（要 ${want}）`);
+      if (want && type !== want && !(want.startsWith("model/") && type === "application/octet-stream") && !(SAME_TYPE[want] ?? []).includes(type)) problems.push(`类型 ${type}（要 ${want}）`);
       if (problems.length) {
         bad += 1;
         console.log(`  ✗ ${problems.join("，")}  ${url}`);
