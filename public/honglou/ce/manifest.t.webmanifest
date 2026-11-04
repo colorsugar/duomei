@@ -1,0 +1,38 @@
+{
+ "id": "/honglou/ce/",
+ "name": "掌上紅樓",
+ "short_name": "掌上紅樓",
+ "description": "紅樓夢一百二十回，逐段讀得懂",
+ "lang": "zh-Hant",
+ "dir": "ltr",
+ "start_url": "/honglou/ce/",
+ "scope": "/honglou/ce/",
+ "display": "standalone",
+ "orientation": "any",
+ "background_color": "#F3ECE0",
+ "theme_color": "#F3ECE0",
+ "categories": [
+  "books",
+  "education"
+ ],
+ "icons": [
+  {
+   "src": "/honglou/ce/icons/icon-192.png",
+   "sizes": "192x192",
+   "type": "image/png",
+   "purpose": "any"
+  },
+  {
+   "src": "/honglou/ce/icons/icon-512.png",
+   "sizes": "512x512",
+   "type": "image/png",
+   "purpose": "any"
+  },
+  {
+   "src": "/honglou/ce/icons/maskable-512.png",
+   "sizes": "512x512",
+   "type": "image/png",
+   "purpose": "maskable"
+  }
+ ]
+}
