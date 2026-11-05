@@ -87,6 +87,14 @@
       "destination": "/honglou/ce/index.html"
     },
     {
+      "source": "/honglou/c",
+      "destination": "/honglou/c/index.html"
+    },
+    {
+      "source": "/honglou/c/*",
+      "destination": "/honglou/c/index.html"
+    },
+    {
       "source": "/*",
       "destination": "/index.html"
     }
@@ -119,6 +127,12 @@
       "headers": [
         { "key": "X-Frame-Options", "value": "SAMEORIGIN" },
         { "key": "Content-Security-Policy", "value": "frame-ancestors 'self'" }
+      ]
+    },
+    {
+      "source": "/.well-known/apple-app-site-association",
+      "headers": [
+        { "key": "Content-Type", "value": "application/json" }
       ]
     },
     {

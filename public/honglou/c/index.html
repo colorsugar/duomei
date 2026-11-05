@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="zh-Hans">
+<head>
+<meta charset="utf-8">
+<script>
+// 安卓没有轻 App，直接进网页版的同一页
+(function () {
+  var rest = location.pathname.replace(/^\/honglou\/c\/?/, '');
+  window.__ZS_WEB__ = '/honglou/ce/' + rest + location.search + location.hash;
+  if (/Android/i.test(navigator.userAgent)) location.replace(window.__ZS_WEB__);
+})();
+</script>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>掌上红楼</title>
+<meta name="description" content="红楼梦一百二十回，逐段读得懂">
+<meta name="apple-itunes-app" content="app-id=6829200783, app-clip-bundle-id=com.colorsugar.honglou.Clip, app-clip-display=card">
+<meta name="theme-color" content="#F3ECE0" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#15120F" media="(prefers-color-scheme: dark)">
+<meta property="og:site_name" content="掌上红楼">
+<meta property="og:title" content="掌上红楼">
+<meta property="og:description" content="红楼梦一百二十回，逐段读得懂">
+<meta property="og:image" content="https://duomei.site/honglou/c/taixu.jpg">
+<meta property="og:url" content="https://duomei.site/honglou/c/">
+<link rel="apple-touch-icon" href="/honglou/ce/icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="/honglou/ce/icons/icon-192.png">
+<style>
+  :root { color-scheme: light dark; --paper: #F3ECE0; --ink: #2B2520; --ink2: #6B6157; --zhu: #B03A2E; }
+  @media (prefers-color-scheme: dark) { :root { --paper: #15120F; --ink: #EAE1D2; --ink2: #B3A898; } }
+  * { box-sizing: border-box; margin: 0; }
+  body { min-height: 100svh; background: var(--paper); color: var(--ink); font-family: "Kaiti SC", "STKaiti", "KaiTi", serif; display: flex; flex-direction: column; align-items: center; }
+  img { display: block; width: 100%; max-width: 640px; aspect-ratio: 3 / 2; object-fit: cover; }
+  main { flex: 1; display: flex; flex-direction: column; align-items: center; padding: 34px 24px calc(40px + env(safe-area-inset-bottom)); text-align: center; }
+  h1 { font-size: 40px; font-weight: 400; letter-spacing: .12em; text-indent: .12em; }
+  p { margin-top: 12px; font-size: 17px; line-height: 1.7; color: var(--ink2); }
+  a { margin-top: 30px; padding: 11px 28px; border-radius: 12px; background: var(--zhu); color: #F3ECE0; font-size: 17px; text-decoration: none; }
+</style>
+</head>
+<body>
+<img src="/honglou/c/taixu.jpg" alt="" width="1024" height="683">
+<main>
+  <h1 id="t">掌上红楼</h1>
+  <p id="d">红楼梦一百二十回，逐段读得懂</p>
+  <a id="go" href="/honglou/ce/">在网页上读</a>
+</main>
+<script>
+  document.getElementById('go').href = window.__ZS_WEB__;
+  if (/zh-(tw|hk|mo|hant)/i.test(navigator.language || '')) {
+    document.documentElement.lang = 'zh-Hant';
+    document.title = '掌上紅樓';
+    document.getElementById('t').textContent = '掌上紅樓';
+    document.getElementById('d').textContent = '紅樓夢一百二十回，逐段讀得懂';
+    document.getElementById('go').textContent = '在網頁上讀';
+  }
+</script>
+</body>
+</html>

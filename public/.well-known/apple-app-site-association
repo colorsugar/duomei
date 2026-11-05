@@ -1,0 +1,18 @@
+{
+  "applinks": {
+    "details": [
+      {
+        "appIDs": ["88HHFD76UJ.com.colorsugar.honglou"],
+        "components": [
+          { "/": "/honglou/c" },
+          { "/": "/honglou/c/*" },
+          { "/": "/honglou/ce/read/*" },
+          { "/": "/honglou/ce/person/*" }
+        ]
+      }
+    ]
+  },
+  "appclips": {
+    "apps": ["88HHFD76UJ.com.colorsugar.honglou.Clip"]
+  }
+}
