@@ -45,6 +45,10 @@ on:
         description: "1 = shrink the abandoned first assets project duomei-assets (global area, cannot bind domains) to a tiny page so its 730MB copy leaves storage"
         required: false
         default: "0"
+      isolated_preview:
+        description: "1 = deploy this ref to isolated preview projects (never production duomei.site / assets.duomei.site) and probe it"
+        required: false
+        default: "0"
 
 permissions:
   contents: read
@@ -53,7 +57,7 @@ jobs:
   diagnose:
     if: github.ref == 'refs/heads/main' || (startsWith(github.ref, 'refs/heads/cursor/edgeone-') || startsWith(github.ref, 'refs/heads/cursor/honglou-')) || github.ref == 'refs/heads/assets-pages-split'
     runs-on: ubuntu-latest
-    timeout-minutes: 50
+    timeout-minutes: 70
     env:
       EDGEONE_PROJECT_ID: ${{ inputs.project_id || 'makers-brifmhu31vjf' }}
     steps:
@@ -144,3 +148,14 @@ jobs:
           node scripts/assets-split.mjs guard --dir dist
           ( cd "${RUNNER_TEMP}" && npm install -g --legacy-peer-deps "edgeone@1.6.31-3" )
           bash scripts/edgeone-preview-probe.sh
+
+      # 瘦身分支预览：素材发到独立项目，主站发到 duomei-guyu 的 preview 环境。
+      # 绝不把 -e production 打到 duomei-guyu 或 duomei-assets-overseas。
+      - name: Deploy isolated slim preview (production untouched)
+        if: inputs.isolated_preview == '1'
+        env:
+          EDGEONE_API_TOKEN: ${{ secrets.EDGEONE_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          ( cd "${RUNNER_TEMP}" && npm install -g --legacy-peer-deps "edgeone@1.6.31-3" )
+          bash scripts/edgeone-isolated-preview.sh
