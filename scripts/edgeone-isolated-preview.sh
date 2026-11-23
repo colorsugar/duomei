@@ -107,6 +107,14 @@ cp -a dist "$site_pack/dist"
 if [[ -d cloud-functions ]]; then
   cp -a cloud-functions "$site_pack/cloud-functions"
 fi
+# 云函数要编译 ../../server 与 ../../deploy/guyu-edgeone/server，缺了会 BUILD_ERROR。
+if [[ -d server ]]; then
+  cp -a server "$site_pack/server"
+fi
+if [[ -d deploy/guyu-edgeone ]]; then
+  mkdir -p "$site_pack/deploy"
+  cp -a deploy/guyu-edgeone "$site_pack/deploy/guyu-edgeone"
+fi
 node -e '
   const fs=require("fs");
   const name=process.argv[1];
