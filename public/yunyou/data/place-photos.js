@@ -231,7 +231,7 @@ export const PLACE_PHOTOS = {
     "official": true
   },
   "huaqiao": {
-    "src": "./assets/photos/places/huaqiao.jpg",
+    "src": "./assets/photos/places/huaqiao.webp",
     "alt": "桂林七星公园花桥晨雾",
     "caption": "桂林七星公园花桥晨雾",
     "source": "https://www.glqxjq.cn/post/01kg1n2e4amb0mgz07nmea76wj.html",
