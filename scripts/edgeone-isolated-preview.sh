@@ -124,9 +124,18 @@ node -e '
   eo.buildCommand="echo skip-build";
   eo.outputDirectory="dist";
   fs.writeFileSync(process.argv[2]+"/edgeone.json", JSON.stringify(eo,null,2)+"\n");
-  fs.writeFileSync(process.argv[2]+"/package.json", JSON.stringify({name, private:true, version:"1.0.0", scripts:{build:"echo skip-build"}}, null, 2)+"\n");
+  fs.writeFileSync(process.argv[2]+"/package.json", JSON.stringify({
+    name, private:true, version:"1.0.0",
+    scripts:{build:"echo skip-build"},
+    dependencies:{"@edgeone/pages-blob":"0.0.16"},
+  }, null, 2)+"\n");
 ' "$SITE_PROJECT" "$site_pack"
-du -sm "$site_pack/dist" || true
+# 云函数编译需要 @edgeone/pages-blob。用仓库里已经 npm ci 好的副本，避免云端再装。
+if [[ -d node_modules/@edgeone/pages-blob ]]; then
+  mkdir -p "$site_pack/node_modules/@edgeone"
+  cp -a node_modules/@edgeone/pages-blob "$site_pack/node_modules/@edgeone/"
+fi
+du -sm "$site_pack/dist" "$site_pack/node_modules" || true
 
 site_log="$(mktemp)"
 site_err="$(mktemp)"
