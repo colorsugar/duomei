@@ -149,6 +149,8 @@ if [[ -d node_modules/@edgeone/pages-blob ]]; then
 fi
 du -sm "$site_pack/dist" "$site_pack/node_modules" || true
 
+HOME_ONLY=0
+
 dump_preview_fail_log() {
   echo "== 预览项目平台构建日志（只读，正式站不改） =="
   node scripts/edgeone-preview-fail-log.mjs "$SITE_PROJECT" || true
@@ -182,10 +184,21 @@ if ! deploy_site_pack; then
   du -sm "$site_pack" "$site_pack/dist" || true
   if ! deploy_site_pack; then
     dump_preview_fail_log
-    echo "::error::独立主站预览项目部署失败（正式站 duomei.site 未改）。原文：$(tail -n 1 "$site_log" | redact)"
-    exit 1
+    echo "== 整包超账户 5 GiB 额度；改发仅含新首页+绘本的小包（正式站不改） =="
+    SITE_PROJECT="${PREVIEW_HOME_PROJECT:-duomei-motion-preview}"
+    home_pack="${RUNNER_TEMP:-/tmp}/duomei-home-only-pack"
+    bash scripts/edgeone-preview-home-pack.sh "$home_pack" "$SITE_PROJECT" "https://duomei-slim-preview.edgeone.dev"
+    site_pack="$home_pack"
+    HOME_ONLY=1
+    if ! deploy_site_pack; then
+      dump_preview_fail_log
+      echo "::error::独立主站预览项目部署失败（正式站 duomei.site 未改）。原文：$(tail -n 1 "$site_log" | redact)"
+      exit 1
+    fi
+    echo "小包新首页预览部署成功（旧页请走 slim-preview 链接）。"
+  else
+    echo "静态预览部署成功（无云函数）。"
   fi
-  echo "静态预览部署成功（无云函数）。"
 fi
 url="$(tail -n 1 "$site_log" | json_field url)"
 if [[ -z "$url" ]]; then
@@ -202,14 +215,19 @@ q() {
 }
 
 fail=0
-for p in / /honglou/ /xiaoyuan-scene/ /yunyou/index.html /atlas/v6/index.html /atlas/chaoji/ /lingchuan/ /.well-known/duomei-build.json; do
+if [[ "${HOME_ONLY:-0}" = "1" ]]; then
+  gate_paths="/ /storybook/ /huiben/ /popup.html /carousel.html /yunyou-flow.html /storybook.html /.well-known/duomei-build.json"
+else
+  gate_paths="/ /honglou/ /xiaoyuan-scene/ /yunyou/index.html /atlas/v6/index.html /atlas/chaoji/ /lingchuan/ /storybook/ /.well-known/duomei-build.json"
+fi
+for p in $gate_paths; do
   code="$(curl -sS -m 30 -o /dev/null -w '%{http_code}' "$(q "${base%/}${p}")" 2>/dev/null || echo 000)"
   echo "gate ${p} ${code}"
   [ "$code" = "200" ] || fail=1
 done
 [ "$fail" = "0" ] || { echo "preview gate failed"; exit 1; }
 
-if [ -f .assets-split.json ]; then
+if [[ "${HOME_ONLY:-0}" != "1" && -f .assets-split.json ]]; then
   node scripts/assets-split.mjs verify-site --site "${base%/}" --query "$query" || exit 1
 fi
 

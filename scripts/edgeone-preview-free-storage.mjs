@@ -79,8 +79,8 @@ for (const p of projects) {
         if (ok(r)) { deleteAction = action; deleted += 1; break; }
       }
       if (!deleteAction) {
-        console.log("## no delete action accepted; stopping.");
-        process.exit(1);
+        console.log("## no deployment-delete action accepted; will try deleting empty preview projects instead.");
+        break;
       }
       continue;
     }
@@ -94,7 +94,24 @@ for (const p of projects) {
     }
   }
 }
-console.log(`## preview free-storage done action=${deleteAction || "none"} deleted=${deleted} failed=${failed} skipped-projects=${skipped}`);
-if (!deleteAction && deleted === 0) {
-  console.log("## nothing deleted (no failed preview deployments, or delete API unavailable)");
+
+const DELETABLE_PROJECTS = new Set(["duomei-new-preview", "duomei-home-preview"]);
+const PROJECT_DELETE_ACTIONS = ["DeletePagesProject", "DeleteProject", "DeletePagesProjects"];
+for (const p of projects) {
+  const name = p.Name || "";
+  const id = p.ProjectId || "";
+  if (!DELETABLE_PROJECTS.has(name)) continue;
+  if (PROTECTED_NAMES.has(name) || PROTECTED_IDS.has(id)) continue;
+  for (const action of PROJECT_DELETE_ACTIONS) {
+    const r = await call(action, { ProjectId: id, ZoneId: p.ZoneId, Name: name });
+    console.log(`  try ${action} on project ${name} ${id}: HTTP ${r.status} ${short(r, 400)}`);
+    if (ok(r)) {
+      console.log(`  deleted project ${name} ${id}`);
+      deleted += 1;
+      break;
+    }
+  }
 }
+
+console.log(`## preview free-storage done action=${deleteAction || "none"} deleted=${deleted} failed=${failed} skipped-projects=${skipped}`);
+console.log("## free-storage finished (delete may be partial; deploy will still be attempted)");
