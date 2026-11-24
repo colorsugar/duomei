@@ -595,7 +595,7 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}button
 #cnav button:active{background:rgba(239,226,207,.28)}
 #cdots{display:flex;gap:6px}#cdots b{width:7px;height:7px;border-radius:50%;background:rgba(239,226,207,.35);cursor:pointer;display:block}
 #cdots b.on{background:#efe2cf}
-#hbpost{position:absolute;inset:0;z-index:3;display:flex;flex-direction:column;justify-content:flex-end;padding:0 6vw 12vh;color:#efe6d6;cursor:default}
+#hbpost{position:absolute;inset:0;z-index:3;display:flex;flex-direction:column;justify-content:flex-end;padding:0 6vw 22vh;color:#efe6d6;cursor:default}
 #hbpost .cover{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 30%;filter:saturate(1.05);pointer-events:none}
 #hbpost .veil{position:absolute;inset:0;background:linear-gradient(to top,rgba(12,10,16,.82) 0%,rgba(12,10,16,.28) 46%,rgba(12,10,16,.15) 100%);pointer-events:none}
 #hbpost .copy{position:relative;z-index:2;max-width:22em;pointer-events:none}
@@ -610,7 +610,7 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}button
 #hbfs iframe{position:absolute;inset:0;width:100%;height:100%;border:0;background:#141016}
 #hbfs #hbload{z-index:2}
 body.hb-open #UI,body.hb-open #HUD,body.hb-open #grain,body.hb-open #fx,body.hb-open #cur{visibility:hidden}
-@media (max-width:760px){#hbopen{padding:14px 22px;font-size:14px}#hbpost{padding:0 20px 11vh}}
+@media (max-width:760px){#hbopen{padding:14px 22px;font-size:14px}#hbpost{padding:0 20px 22vh}#hbpost .copy h2{font-size:40px!important}#hbpost .copy p{display:none}#cnav{bottom:9vh}}
 @media (max-width:700px){
   #fx, #grain{opacity:.12!important}
   .mq,.kbig,#glw span,#glr span{filter:none!important;text-shadow:none!important}

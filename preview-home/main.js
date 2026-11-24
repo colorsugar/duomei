@@ -165,8 +165,8 @@ addEventListener('message',e=>{const d=e.data||{};if(e.source!==HB.f.contentWind
  if(d.sb==='theme'&&d.id!=='cover'){HB.th=d.id;const L=!['guilin','towers','rita','yueta','shuiyue'].includes(d.id);DARK.huiben=L?0:1;HB.el.classList.toggle('light',L);HB.el.style.backgroundColor=L?({jiangnan:'#e4dccf',xiaoyuan:'#e7dfcf'}[d.id]||'#ece4d3'):'#141b2a'}});
 function hb(U0c){
   const a=SBA_C,on=!HB.fs&&U0c>a-0.2&&U0c<a+POST+0.5;
-  vis('huiben',on||!!HB.fs);HBC=0;
-  if(on){const e=io(seg(U0c,a,a+.35));HB.el.style.transform=e<1?`translate3d(0,${((1-e)*28).toFixed(3)}%,0)`:'none'}
+  vis('huiben',on||!!HB.fs);HBC=0;if(on||HB.fs)vis('yunyou',false);
+  if(on){const e=io(seg(U0c,a,a+.35));HB.el.style.transform=e<1?`translate3d(0,${((1-e)*18).toFixed(3)}%,0)`:'none'}
   const post=$('hbpost');if(post)post.style.opacity=HB.fs?0:1;
 }
 HB.fs=0;HB.savedY=0;
