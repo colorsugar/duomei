@@ -1,0 +1,153 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>多美 · 云游 · 纸上山河（立体绘本提案）</title>
+<style>
+@font-face{font-family:FrL;src:url(f/fr-light.woff) format("woff")}
+:root{--ink:#1C1916;--paper:#F3EEE6;--mat:#FAF6EF;--red:#B3261E;--bg:#1d2723}
+*{box-sizing:border-box;margin:0;padding:0}html,body{height:100%}
+body{background:var(--bg);color:var(--paper);font-family:"Noto Serif CJK SC","Songti SC",serif;overflow:hidden;-webkit-font-smoothing:antialiased}
+#stage{position:fixed;inset:0;overflow:hidden;perspective:1700px;perspective-origin:50% 30%;background:radial-gradient(80% 70% at 50% 55%,#2c3a34 0%,#1d2723 60%,#151c19 100%);touch-action:pan-y;cursor:grab}
+#rig{position:absolute;left:50%;top:53%;width:0;height:0;transform-style:preserve-3d}
+#book{position:absolute;transform-style:preserve-3d}
+.cover{position:absolute;border-radius:10px;background:linear-gradient(#6b1f18,#521610);box-shadow:0 0 0 2px #3c0f0b}
+.cover:after{content:"";position:absolute;inset:8px;border:1px solid rgba(201,149,63,.45);border-radius:6px}
+.edge{position:absolute;border-radius:3px;background:#e6dbc4}
+.shade{position:absolute;border-radius:50%;background:radial-gradient(closest-side,rgba(0,0,0,.55),rgba(0,0,0,0));pointer-events:none}
+.half,.leaf{position:absolute;top:0;transform-style:preserve-3d}
+.leaf{transform-origin:0 50%}
+.face{position:absolute;inset:0;transform-style:preserve-3d;backface-visibility:hidden;-webkit-backface-visibility:hidden}
+.face .pg{position:absolute;inset:0;background:#f4ecdc;overflow:hidden}
+.face .art{position:absolute;inset:5% 6% 9%;background-repeat:no-repeat;border-radius:4px;opacity:.9}
+.face.L .pg{border-radius:6px 0 0 6px}.face.R .pg{border-radius:0 6px 6px 0}
+.face.L .pg:after,.face.R .pg:after{content:"";position:absolute;top:0;bottom:0;width:22%;pointer-events:none}
+.face.L .pg:after{right:0;background:linear-gradient(90deg,rgba(60,40,20,0),rgba(60,40,20,.22))}.face.R .pg:after{left:0;background:linear-gradient(90deg,rgba(60,40,20,.24),rgba(60,40,20,0))}
+.face .cap{position:absolute;bottom:3.2%;font-family:FrL;font-size:10px;letter-spacing:.3em;color:#7d6a4f}.face.L .cap{left:7%}.face.R .cap{right:7%}
+.face .lit{position:absolute;inset:0;background:#000;opacity:0;pointer-events:none}
+.pc{position:absolute;transform-origin:50% 100%;transform-style:preserve-3d}
+.pc img{position:absolute;inset:0;width:100%;height:100%;display:block;backface-visibility:hidden;-webkit-backface-visibility:hidden}
+.sh{position:absolute;border-radius:50%;background:radial-gradient(closest-side,rgba(40,28,14,.38),rgba(40,28,14,.12) 60%,transparent);transform-origin:50% 50%}
+.glint{position:absolute;height:2px;border-radius:2px;background:rgba(255,255,255,.75)}
+.bird{position:absolute;width:26px;height:12px;margin:-6px 0 0 -13px;transform-style:preserve-3d}
+.bird svg{width:100%;height:100%;display:block;overflow:visible}
+/* ui */
+.hd{position:fixed;left:5vw;top:5.5vh;z-index:5;pointer-events:none}.k{font-family:FrL;font-size:11px;letter-spacing:.32em;color:#e0a59c}
+.hd h2{font-weight:400;font-size:clamp(22px,2.2vw,32px);letter-spacing:.24em;margin-top:10px}.hd p{font-size:12px;letter-spacing:.2em;opacity:.55;margin-top:8px}
+.cap2{position:fixed;left:5vw;bottom:6vh;z-index:5;max-width:30em;pointer-events:none}
+.cap2 .no{font-family:FrL;font-size:12px;letter-spacing:.3em;color:#e0a59c}.cap2 b{display:block;font-weight:400;font-size:20px;letter-spacing:.26em;margin-top:8px}
+.cap2 q{display:block;font-size:13px;letter-spacing:.2em;opacity:.7;margin-top:8px;quotes:"「" "」"}
+.cap2.sw{animation:cin .7s cubic-bezier(.2,1,.3,1)}@keyframes cin{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.ctl{position:fixed;right:4vw;bottom:5vh;z-index:6;width:min(380px,40vw);padding:14px 16px 12px;border-radius:14px;background:rgba(20,28,25,.72);border:1px solid rgba(243,238,230,.14);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+.ctl .row{display:flex;align-items:center;justify-content:space-between;font-family:FrL;font-size:11px;letter-spacing:.24em;color:rgba(243,238,230,.7)}
+.ctl .bar{display:flex;align-items:center;gap:12px;margin-top:12px}
+.ctl button.ar{width:34px;height:34px;border-radius:50%;border:1px solid rgba(243,238,230,.3);background:none;color:var(--paper);font-size:15px;cursor:pointer;flex:none;transition:background .25s,transform .2s}
+.ctl button.ar:hover{background:rgba(243,238,230,.12)}.ctl button.ar:active{transform:scale(.92)}
+.trk{position:relative;flex:1;height:30px}
+.trk .ln{position:absolute;left:0;right:0;top:14px;height:2px;background:rgba(243,238,230,.18);border-radius:2px}.trk .fl{position:absolute;left:0;top:14px;height:2px;background:var(--red);border-radius:2px}
+.trk .kn{position:absolute;top:8px;width:14px;height:14px;margin-left:-7px;border-radius:50%;background:#f0c9a0;box-shadow:0 0 0 4px rgba(240,201,160,.18)}
+.chs{display:flex;gap:8px;margin-top:10px}
+.chs button{flex:1;font:inherit;font-size:13px;letter-spacing:.24em;padding:7px 0 6px;border-radius:6px;border:0;cursor:pointer;background:#f3eee6;color:var(--ink);box-shadow:1px 1px 0 #d7c9ae,2px 2px 0 #b9a888;transition:background .3s,color .3s,transform .3s cubic-bezier(.2,1.5,.4,1)}
+.chs button:hover{transform:translateY(-2px)}.chs button.on{background:var(--red);color:var(--paper);box-shadow:1px 1px 0 #8f1d17,2px 2px 0 #661410}
+@media(max-width:700px){#stage{perspective:1000px;perspective-origin:50% 22%}#rig{top:44%}.hd{left:20px;top:3.6vh}.hd p{display:none}.hd h2{font-size:22px}
+ .cap2{left:20px;right:20px;bottom:calc(19vh + env(safe-area-inset-bottom))}.cap2 b{font-size:17px}.cap2 q{font-size:12px}
+ .ctl{left:14px;right:14px;width:auto;bottom:calc(2.2vh + env(safe-area-inset-bottom));padding:10px 12px 10px}.chs button{font-size:12px}}
+.emb .hd .k{opacity:0}.home .hd .k{opacity:1}.home .ctl{bottom:12vh}.home .cap2{bottom:12vh}@media(max-width:700px){.home .ctl{bottom:calc(8.5vh + env(safe-area-inset-bottom))}.home .cap2{bottom:calc(26vh + env(safe-area-inset-bottom))}}
+</style></head><body>
+<div id="stage"><div id="rig"><div id="book"></div></div></div>
+<div class="hd"><span class="k">07 · 云游 · 立体绘本</span><h2>纸上山河</h2><p>翻开一页，景物一件件从书缝里立起来</p></div>
+<div class="cap2"><span class="no">01 / 03</span><b>沿水看桂林</b><q>江作青罗带，山如碧玉篸</q></div>
+<div class="ctl"><div class="row"><span class="pct">翻页 · 0%</span><span class="pgn">01 — 02</span></div><div class="bar"><button class="ar" data-d="-1" aria-label="上一页">←</button><div class="trk"><div class="ln"></div><div class="fl"></div><div class="kn"></div></div><button class="ar" data-d="1" aria-label="下一页">→</button></div><div class="chs"></div></div>
+<script src="js/book-art.js"></script>
+<script>
+(()=>{
+const now=()=>window.__clock!=null?window.__clock*1000:performance.now();
+const cl=(v,a=0,b=1)=>Math.min(b,Math.max(a,v)),sm=t=>t*t*(3-2*t),io=t=>t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;
+const MOB=innerWidth<700,EMB=/embed/.test(location.search);if(EMB)document.documentElement.classList.add('emb');if(/home/.test(location.search))document.documentElement.classList.add('home');
+const PW=MOB?Math.min(innerWidth*.435,210):Math.min(innerWidth*.315,520),PH=PW*(MOB?1.55:.98),SC=MOB?1.4:1.08;
+const TILT=MOB?54:58;
+const SP=[
+ {n:'沿水看桂林',t:'桂林',q:'江作青罗带，山如碧玉篸',cap:['LI RIVER','GUILIN'],img:'img/pop2/g-guilin.webp',
+  L:[['karst',0,.24,.30,.36],['karst',2,.62,.26,.32],['pine',0,.86,.52,.26,{sway:1}],['karst',1,.40,.58,.30],['boat',0,.52,.86,.36,{bob:1,drift:1}]],
+  R:[['cloud',0,.70,.10,.34,{cloud:1}],['karst',1,.80,.34,.30,{flip:1}],['pagoda',0,.36,.52,.26],['pagoda',1,.62,.56,.24],['pine',0,.16,.80,.22,{sway:1}]],
+  glint:[[.2,.72,.22],[.55,.78,.16],[.32,.66,.12]]},
+ {n:'诗语江南',t:'江南',q:'人人尽说江南好，游人只合江南老',cap:['JIANGNAN','GARDEN'],img:'img/pop2/g-jiangnan.webp',
+  L:[['willow',0,.18,.34,.30,{sway:1}],['house',0,.58,.32,.52],['bridge',0,.48,.70,.62],['boat',0,.30,.90,.30,{bob:1,drift:1,flip:1}]],
+  R:[['house',1,.40,.30,.48],['pavilion',0,.74,.56,.34],['plum',0,.22,.66,.32,{sway:1}],['rock',0,.56,.84,.20],['cloud',0,.30,.08,.30,{cloud:1}]],
+  glint:[[.3,.8,.2],[.6,.86,.14]]},
+ {n:'多美的夏日小院',t:'小院',q:'绿树阴浓夏日长，楼台倒影入池塘',cap:['SUMMER','COURTYARD'],img:'img/pop2/g-wander.webp',
+  L:[['bamboo',0,.20,.34,.34,{sway:1}],['cottage',0,.56,.42,.46],['lantern',0,.86,.60,.10,{sway:1}],['rock',0,.30,.82,.20]],
+  R:[['sakura',0,.36,.36,.40,{sway:1}],['pavilion',0,.74,.44,.30],['plum',0,.56,.80,.30,{sway:1}],['pine',0,.16,.66,.26,{sway:1}],['cloud',0,.62,.08,.30,{cloud:1}]],
+  glint:[[.5,.9,.16]]}];
+if(MOB)SP[2].n='夏日小院';
+// ---- build book
+const book=document.getElementById('book');book.style.cssText=`left:${-PW}px;top:${-PH/2}px;width:${PW*2}px;height:${PH}px`;
+const mk=(c,css,par=book)=>{const d=document.createElement('div');d.className=c;if(css)d.style.cssText=css;par.append(d);return d};
+mk('shade',`left:${-PW*.2}px;top:${PH*.1}px;width:${PW*2.4}px;height:${PH*1.1}px;transform:translateZ(-14px)`);
+mk('cover',`left:-12px;top:-12px;width:${PW*2+24}px;height:${PH+24}px;transform:translateZ(-10px)`);
+for(let k=0;k<4;k++)mk('edge',`left:${-2+k*.3}px;top:${-2+k*.6}px;width:${PW*2+4-k*.6}px;height:${PH+4}px;transform:translateZ(${-8+k*2}px);background:${['#cfc1a6','#ddd0b7','#e7dcc6','#efe6d3'][k]}`);
+const PCS=[],GL=[];
+function face(par,s,side,cls){const f=mk('face '+side+(cls?' '+cls:''),'',par);const pg=mk('pg','',f);const S=SP[s];
+ const art=mk('art',`background-image:url(${S.img});background-size:200% 100%;background-position:${side==='L'?'0':'100%'} 50%`,pg);
+ mk('cap','',pg).textContent=S.cap[side==='L'?0:1];const lit=mk('lit','',f);
+ (S.glint||[]).forEach(([gx,gy,gw],i)=>{const sx=side==='L'?gx:1-gx*.8;const g=mk('glint',`left:${sx*100}%;top:${gy*100}%;width:${gw*PW}px`,pg);GL.push({el:g,ph:i*1.7+s})});
+ const items=S[side];
+ items.forEach(([k,v,x,y,w,ex={}])=>{const a=BOOKART(k,v);const W=w*PW*SC,H=W*a.h/a.w;const el=mk('pc',`left:${x*PW-W/2}px;top:${y*PH-H}px;width:${W}px;height:${H}px`,f);
+  const fl=ex.flip?'scaleX(-1)':'';el.innerHTML=`<img src="${a.ply}" style="transform:translateZ(-4px) ${fl}"><img src="${a.ply}" style="transform:translateZ(-2px) ${fl}"><img src="${a.face}" style="transform:${fl}">`;
+  const sh=mk('sh',`left:${x*PW-W*.55}px;top:${y*PH-Math.max(10,H*.1)}px;width:${W*1.1}px;height:${Math.max(16,H*.2)}px`,f);f.insertBefore(sh,el);
+  PCS.push({im:[...el.querySelectorAll('img')],op:-1,el,sh,s,side,x,y,W,H,a:0,v:0,ph:Math.random()*0+PCS.length*1.37,...ex})});
+ return {f,lit}}
+// base pages + 2 leaves
+const baseL=mk('half',`left:0;width:${PW}px;height:${PH}px`),baseR=mk('half',`left:${PW}px;width:${PW}px;height:${PH}px`);
+face(baseL,0,'L');face(baseR,2,'R');
+const LV=[0,1].map(k=>{const l=mk('leaf',`left:${PW}px;width:${PW}px;height:${PH}px`);const fr=face(l,k,'R','front');const bk=mk('half',`left:0;width:${PW}px;height:${PH}px;transform:rotateY(180deg)`,l);const b=face(bk,k+1,'L','back');return {el:l,fr,b,th:0}});
+// rise order: per spread, L then R interleaved by depth
+const PMAX=2.8;SP.forEach((S,s)=>{const list=PCS.filter(p=>p.s===s).sort((a,b)=>a.y-b.y);const n=list.length;list.forEach((p,i)=>{p.thr=s+.05+.5*i/(n-1)})});
+// birds
+const rig=document.getElementById('rig');const BD=[0,1,2,3].map(i=>{const b=mk('bird','',book);b.innerHTML=`<svg viewBox="-13 -6 26 12"><path d="M-12,-2 Q-6,-7 0,0 Q6,-7 12,-2" stroke="#2a2622" stroke-width="2.2" fill="none" stroke-linecap="round"/></svg>`;return {el:b,p:b.querySelector('path'),ph:i*1.9,y:.1+i*.07,z:PH*(.42+i*.06),sp:.05+i*.012}});
+// ---- ui
+const CH=document.querySelector('.chs'),CAP=document.querySelector('.cap2'),PCT=document.querySelector('.pct'),PGN=document.querySelector('.pgn'),FL=document.querySelector('.fl'),KN=document.querySelector('.kn');
+const STOP=[.58,1.58,2.62];
+const BT=SP.map((S,i)=>{const b=document.createElement('button');b.textContent=S.t;b.onclick=()=>{go(i);if(parent!==window)parent.postMessage({yunyou:i},'*')};CH.append(b);return b});
+let P=0,PV=0,PT=0,ext=null,ptr={x:0,y:0},sp={x:0,y:0},last=now(),drag=null,auto=!EMB,lastS=-1,vN=0,vNp=0;
+const go=i=>{PT=STOP[i];auto=false};
+document.querySelectorAll('.ar').forEach(b=>b.onclick=()=>{const s=curS();go(cl(s+(+b.dataset.d),0,2))});
+const curS=()=>P<.81?0:P<1.81?1:2;
+const st=document.getElementById('stage');
+st.addEventListener('pointerdown',e=>{drag={x:e.clientX,p:PT};auto=false;st.setPointerCapture(e.pointerId)});
+st.addEventListener('pointermove',e=>{ptr.x=e.clientX/innerWidth-.5;ptr.y=e.clientY/innerHeight-.5;if(drag)PT=cl(drag.p-(e.clientX-drag.x)/(PW*1.6),0,PMAX)});
+st.addEventListener('pointerup',()=>{drag=null});
+addEventListener('wheel',e=>{if(EMB){try{parent.scrollBy(0,e.deltaY)}catch(_){}return}PT=cl(PT+e.deltaY/1400,0,PMAX);auto=false},{passive:true});
+addEventListener('keydown',e=>{if(e.key==='ArrowRight')go(Math.min(2,curS()+1));if(e.key==='ArrowLeft')go(Math.max(0,curS()-1))});
+window.__ptr=(x,y)=>{ptr.x=x;ptr.y=y};window.__go=go;window.__jump=go;window.__setT=f=>{ext=f==null?null:f*PMAX};window.__hover=()=>{};
+window.__reset=()=>{P=PV=PT=0;auto=!EMB;PCS.forEach(p=>{p.a=p.v=0});last=now()};
+function frame(){const T=now(),dt=Math.min(.1,Math.max(0,(T-last)/1000));last=T;const clk=T/1000;
+ if(ext!=null)PT=ext;else if(auto)PT=Math.min(PMAX,PT+dt*.115);
+ for(let q=0;q<4;q++){const h=dt/4,ac=60*(PT-P)-13*PV;PV+=ac*h;P+=PV*h}
+ vN=PV;const aN=dt>0?(vN-vNp)/dt:0;vNp=vN;
+ sp.x+=(ptr.x-sp.x)*(1-Math.exp(-dt*3));sp.y+=(ptr.y-sp.y)*(1-Math.exp(-dt*3));
+ // leaves
+ LV.forEach((L,k)=>{const th=180*io(cl((P-(k+.6))/.4));L.th=th;const dz=th<90?(2-k)*.6:-(k+1)*.6;
+  const bend=Math.sin(th*Math.PI/180);L.el.style.transform=`rotateY(${(-th).toFixed(2)}deg) translateZ(${dz}px)`;
+  L.fr.lit.style.opacity=(bend*.28*(th<90?1:0)).toFixed(3);L.b.lit.style.opacity=(bend*.22*(th>=90?1:0)).toFixed(3)});
+ const th=k=>k<0?180:k>1?0:LV[k].th;
+ // camera: slow breathing + pointer + motion lean
+ const rz=sp.x*-6+Math.sin(clk*.27)*1.6-vN*3,tx=TILT+sp.y*-5+Math.sin(clk*.4)*1.2+vN*4;
+ book.style.transform=`rotateX(${tx.toFixed(2)}deg) rotateZ(${rz.toFixed(2)}deg) translateY(${(Math.sin(clk*.6)*4).toFixed(1)}px)`;
+ // pieces: spring pop + fold with page
+ PCS.forEach(p=>{const tg=P>p.thr?1:0;for(let q=0;q<6;q++){const h=dt/6,ac=170*(tg-p.a)-(tg?7:16)*p.v;p.v+=ac*h;p.a+=p.v*h}
+  let fold;if(p.side==='R')fold=(1-sm(cl(th(p.s)/110)))*sm(cl((th(p.s-1)-70)/110));else fold=sm(cl((th(p.s-1)-70)/110))*(1-sm(cl((th(p.s)-50)/110)));
+  const u=Math.max(0,p.a)*fold;const op=cl(u*4);if(op!==p.op){p.op=op;for(const im of p.im)im.style.opacity=op.toFixed(3)}const vis=fold>.002;p.el.style.visibility=p.sh.style.visibility=vis?'visible':'hidden';if(!vis)return;
+  const lean=cl(-aN*.25,-8,8)+Math.sin(clk*1.8+p.ph)*1.6*Math.min(1,u);
+  const sway=p.sway?Math.sin(clk*1.4+p.ph)*2.4:0,bob=p.bob?Math.sin(clk*1.6+p.ph)*3:0,dx=p.drift?Math.sin(clk*.35+p.ph)*PW*.06:0,dxc=p.cloud?Math.sin(clk*.22+p.ph)*PW*.08:0;
+  const sq=1+cl(p.v*.01,-.12,.15);
+  p.el.style.transform=`translate3d(${(dx+dxc).toFixed(1)}px,0,${(2+Math.max(0,bob)).toFixed(1)}px) rotateX(${(-90*u+lean*Math.min(1,u)).toFixed(2)}deg) rotateZ(${(sway*Math.min(1,u)+(p.bob?Math.sin(clk*1.3+p.ph)*2:0)).toFixed(2)}deg) scaleY(${sq.toFixed(3)})`;
+  const uc=Math.min(1.1,u);p.sh.style.transform=`translate3d(${(dx+dxc).toFixed(1)}px,0,1px) scale(${(.3+.7*uc).toFixed(3)},${(.5+.8*uc).toFixed(3)})`;p.sh.style.opacity=(.9*Math.min(1,uc)).toFixed(3)});
+ GL.forEach(g=>{g.el.style.opacity=(.15+.6*Math.max(0,Math.sin(clk*2.1+g.ph))).toFixed(3);g.el.style.transform=`translateX(${(Math.sin(clk*.9+g.ph)*8).toFixed(1)}px)`});
+ const s=curS(),bOn=P>.03;
+ BD.forEach((b,i)=>{const t=(clk*b.sp+b.ph*.1)%1.3;const x=-PW*.3+t*PW*2.6,y=PH*(b.y+Math.sin(clk*.8+b.ph)*.03);const fl=Math.sin(clk*9+b.ph*3);
+  b.el.style.opacity=bOn?(t<1.2?1:0):0;b.el.style.transform=`translate3d(${x.toFixed(1)}px,${y.toFixed(1)}px,${b.z.toFixed(1)}px) rotateX(${-tx}deg) scale(${MOB?.8:1})`;
+  b.p.setAttribute('d',`M-12,${(-2-fl*3).toFixed(1)} Q-6,${(-6+fl*5).toFixed(1)} 0,0 Q6,${(-6+fl*5).toFixed(1)} 12,${(-2-fl*3).toFixed(1)}`)});
+ // ui
+ const f=cl(P/PMAX);PCT.textContent=`翻页 · ${Math.round(f*100)}%`;FL.style.width=(f*100)+'%';KN.style.left=(f*100)+'%';
+ if(s!==lastS){lastS=s;const S=SP[s];CAP.querySelector('.no').textContent=`0${s+1} / 03`;CAP.querySelector('b').textContent=S.n;CAP.querySelector('q').textContent=S.q;CAP.classList.remove('sw');void CAP.offsetWidth;CAP.classList.add('sw');PGN.textContent=`0${s*2+1} — 0${s*2+2}`;BT.forEach((b,i)=>b.classList.toggle('on',i===s))}}
+window.__frame=frame;const loop=()=>{if(window.__clock==null)frame();requestAnimationFrame(loop)};
+Promise.all([...document.images].map(i=>i.decode().catch(()=>0))).then(()=>{loop();window.__ready=1});
+})();
+</script></body></html>

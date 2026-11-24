@@ -49,6 +49,14 @@ on:
         description: "1 = deploy this ref to isolated preview projects (never production duomei.site / assets.duomei.site) and probe it"
         required: false
         default: "0"
+      preview_site_project:
+        description: "Isolated EdgeOne project name for the site preview (never duomei-guyu)"
+        required: false
+        default: "duomei-slim-preview"
+      preview_assets_project:
+        description: "Isolated EdgeOne project name for preview assets (never duomei-assets-overseas)"
+        required: false
+        default: "duomei-slim-preview-assets"
 
 permissions:
   contents: read
@@ -155,6 +163,8 @@ jobs:
         if: inputs.isolated_preview == '1'
         env:
           EDGEONE_API_TOKEN: ${{ secrets.EDGEONE_API_TOKEN }}
+          PREVIEW_SITE_PROJECT: ${{ inputs.preview_site_project || 'duomei-slim-preview' }}
+          PREVIEW_ASSETS_PROJECT: ${{ inputs.preview_assets_project || 'duomei-slim-preview-assets' }}
         run: |
           set -euo pipefail
           ok=0

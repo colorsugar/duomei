@@ -98,6 +98,18 @@ node scripts/assets-split.mjs guard --dir dist
 node scripts/assets-split.mjs strip --dir dist
 du -sm dist || true
 
+# Optional: drop a new homepage (and /storybook, /huiben) onto the slim dist.
+# Old Vite index is kept at /legacy/. Does not change production.
+if [[ -d preview-home ]]; then
+  echo "== 叠上新首页 overlay（正式站不改） =="
+  mkdir -p dist/legacy
+  if [[ -f dist/index.html ]]; then
+    cp -a dist/index.html dist/legacy/index.html
+  fi
+  cp -a preview-home/. dist/
+  du -sm dist dist/huiben dist/storybook dist/img || true
+fi
+
 echo "== 打主站静态包（skip-build，发到新项目 ${SITE_PROJECT}，不碰 duomei-guyu） =="
 site_pack="${RUNNER_TEMP:-/tmp}/duomei-slim-preview-site-pack"
 rm -rf "$site_pack"
