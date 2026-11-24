@@ -427,17 +427,11 @@ export async function loadCampusGLB(url, { signal, onProgress } = {}) {
   }
   checkAbort(signal);
   // Static hosts may serve gzip assets without Content-Encoding; decode explicitly.
-  // Always ship .glb.gz (not the raw .glb) and decode here, including a fflate
-  // fallback for browsers without DecompressionStream.
   const header = new Uint8Array(buffer, 0, Math.min(2, buffer.byteLength));
   if (header[0] === 0x1f && header[1] === 0x8b) {
-    if (typeof DecompressionStream !== 'undefined') {
-      const decodedStream = new Blob([buffer]).stream().pipeThrough(new DecompressionStream('gzip'), { signal });
-      buffer = await abortable(new Response(decodedStream).arrayBuffer(), signal);
-    } else {
-      const { gunzipSync } = await import('./vendor/fflate.browser.js');
-      buffer = gunzipSync(new Uint8Array(buffer)).buffer;
-    }
+    if (typeof DecompressionStream === 'undefined') throw new Error('GLB: gzip decompression unavailable.');
+    const decodedStream = new Blob([buffer]).stream().pipeThrough(new DecompressionStream('gzip'), { signal });
+    buffer = await abortable(new Response(decodedStream).arrayBuffer(), signal);
     checkAbort(signal);
   }
   return parseCampusGLB(buffer, { signal });

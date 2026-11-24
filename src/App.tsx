@@ -34,19 +34,6 @@ const pageLoaders = {
   DuomeiTimePage: () => import("./pages/DuomeiTimePage"),
 };
 
-// "/" is the static homepage (preview-home → dist/index.html); this SPA ships as app.html for every
-// other path. Client-side visits to "/" reload into it. If the SPA itself was served at "/" (no static
-// homepage in the build), keep rendering the React homepage instead of reloading in a loop.
-const shellServedAtRoot = window.location.pathname === "/";
-
-function StaticHomeRoute() {
-  const location = useLocation();
-  useEffect(() => {
-    if (!shellServedAtRoot) window.location.assign(`/${location.search}${location.hash}`);
-  }, [location.search, location.hash]);
-  return shellServedAtRoot ? <DuomeiHomePage /> : null;
-}
-
 // Inner pages carry their section's hue the same way the home sections do (src/colorful.css reads
 // html[data-current-section]); the home page sets it from scroll position instead.
 function routeSectionOf(pathname: string): SectionAccentId {
@@ -180,7 +167,7 @@ function AppRoutes() {
       {!bareChrome ? <DuomeiHeader /> : null}
       <Suspense fallback={null}>
       <Routes>
-        <Route path="/" element={<StaticHomeRoute />} />
+        <Route path="/" element={<DuomeiHomePage />} />
         <Route path="/zaobao" element={<DuomeiZaobaoPage />} />
         <Route path="/zaobao/archive" element={<DuomeiZaobaoArchivePage />} />
         <Route path="/zaobao/i/:storyId" element={<DuomeiZaobaoPage />} />

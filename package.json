@@ -7,7 +7,7 @@
   "license": "UNLICENSED",
   "scripts": {
     "dev": "vite",
-    "build": "npm run typecheck:server && tsc -b && vite build && node scripts/assets-split.mjs strip && node scripts/home-static.mjs",
+    "build": "npm run typecheck:server && tsc -b && vite build && node scripts/assets-split.mjs strip",
     "assets:plan": "node scripts/assets-split.mjs plan",
     "typecheck": "tsc -b",
     "typecheck:server": "tsc -p tsconfig.server.json",

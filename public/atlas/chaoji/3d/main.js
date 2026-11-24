@@ -2282,7 +2282,7 @@ async function boot() {
       console.warn("立体地图：高程贴图不可用，回退到底图亮度推高度。", error);
       return null;
     }),
-    loadLinearMap(`${TERRAIN_BASE}.normal.webp`).catch((error) => {
+    loadLinearMap(`${TERRAIN_BASE}.normal.png`).catch((error) => {
       console.warn("立体地图：法线贴图不可用，只用顶点法线。", error);
       return null;
     }),

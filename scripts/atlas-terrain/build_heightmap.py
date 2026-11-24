@@ -981,7 +981,7 @@ def process_one(name: str) -> tuple[np.ndarray, np.ndarray]:
     PREVIEW_DIR.mkdir(parents=True, exist_ok=True)
 
     (OUT_DIR / f"{name}.height.bin").write_bytes(encode_u16(h_bin).tobytes())
-    Image.fromarray(normal, mode="RGB").save(OUT_DIR / f"{name}.normal.webp", lossless=True, quality=100)
+    Image.fromarray(normal, mode="RGB").save(OUT_DIR / f"{name}.normal.png")
     Image.fromarray(mask, mode="L").save(OUT_DIR / f"{name}.mask.png")
     write_preview(h, PREVIEW_DIR / f"preview-{name}.png")
     write_erosion_preview(h_bin, PREVIEW_DIR / f"erosion-{name}.png")

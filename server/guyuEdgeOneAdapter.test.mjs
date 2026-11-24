@@ -78,7 +78,6 @@ test("root EdgeOne config keeps Cloud Functions outside mainland and SPA fallbac
     { source: "/honglou/ce/codex/*", destination: "/honglou/ce/index.html" },
     { source: "/honglou/c", destination: "/honglou/c/index.html" },
     { source: "/honglou/c/*", destination: "/honglou/c/index.html" },
-    { source: "/", destination: "/index.html" },
-    { source: "/*", destination: "/app.html" },
+    { source: "/*", destination: "/index.html" },
   ]);
 });

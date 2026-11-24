@@ -28,8 +28,8 @@
     },
     {
       "path": "load-glb.js",
-      "size": 21857,
-      "sha256": "5b6b7a743d630df17e4a02beb03d86d0ec7ece086c2718b526afa6e6f9f90f17"
+      "size": 21622,
+      "sha256": "693948e0c55f16783071fe3abad160bdabdc555ccf7392136c0e387594cf07de"
     },
     {
       "path": "main.js",
@@ -37,37 +37,49 @@
       "sha256": "efd54cc9e052870f65ff8c9e1ddd5c183f115060cbefbbe1b4ee5907598d78bc"
     },
     {
+      "path": "models/lingchuan-academic.glb",
+      "size": 2163756,
+      "sha256": "905adf7e36c744f4ea0e690529941db653cf33ce6c0bf1fee02273fc6739b40c"
+    },
+    {
       "path": "models/lingchuan-academic.glb.gz",
       "size": 1415596,
-      "sha256": "3f62f17315452cb09c26c4da14786286032f37854f577200509cd1640d4be14b",
-      "uncompressedSize": 2163756,
-      "uncompressedSha256": "905adf7e36c744f4ea0e690529941db653cf33ce6c0bf1fee02273fc6739b40c"
+      "sha256": "3f62f17315452cb09c26c4da14786286032f37854f577200509cd1640d4be14b"
+    },
+    {
+      "path": "models/lingchuan-athletics.glb",
+      "size": 3547844,
+      "sha256": "b3a7a5be488fc9b51aa23dcbd467cd040f816e72c616b726c2f0bb1c49791193"
     },
     {
       "path": "models/lingchuan-athletics.glb.gz",
       "size": 2242238,
-      "sha256": "7ba2b776d0fc669b20be0d822a5ac4f2f1e9642663f0204a282458dde77fd453",
-      "uncompressedSize": 3547844,
-      "uncompressedSha256": "b3a7a5be488fc9b51aa23dcbd467cd040f816e72c616b726c2f0bb1c49791193"
+      "sha256": "7ba2b776d0fc669b20be0d822a5ac4f2f1e9642663f0204a282458dde77fd453"
+    },
+    {
+      "path": "models/lingchuan-courtyard.glb",
+      "size": 10723260,
+      "sha256": "70f10b0f9ff105c2bdbe38788614ab755e179df4b3ade0fcb9851fc15e33a4f4"
     },
     {
       "path": "models/lingchuan-courtyard.glb.gz",
       "size": 5501395,
-      "sha256": "b108f94544a7b2ca3fbeeb297a40e408fac0a33c17bfadc0fa7eba9ea1d0086e",
-      "uncompressedSize": 10723260,
-      "uncompressedSha256": "70f10b0f9ff105c2bdbe38788614ab755e179df4b3ade0fcb9851fc15e33a4f4"
+      "sha256": "b108f94544a7b2ca3fbeeb297a40e408fac0a33c17bfadc0fa7eba9ea1d0086e"
+    },
+    {
+      "path": "models/lingchuan-whole.glb",
+      "size": 23067232,
+      "sha256": "d32878571905ad79ed7949f8dede849654755c1560f366ef517e7ae7ffa65b7e"
     },
     {
       "path": "models/lingchuan-whole.glb.gz",
       "size": 9900842,
-      "sha256": "bcc1ad58522186e3616f619007cc1be29eb9fc6a2149781f2c15ae0adb80dc60",
-      "uncompressedSize": 23067232,
-      "uncompressedSha256": "d32878571905ad79ed7949f8dede849654755c1560f366ef517e7ae7ffa65b7e"
+      "sha256": "bcc1ad58522186e3616f619007cc1be29eb9fc6a2149781f2c15ae0adb80dc60"
     },
     {
       "path": "models/stats.json",
-      "size": 1022,
-      "sha256": "2173b036d6492e44da4cecbe1b2ced01b22dfa85c7f6830ced5cf1f53003c862"
+      "size": 1009,
+      "sha256": "fa0afd09d49896b8c1387167e0bd2155861d30e3145785a711e895940a95a33a"
     },
     {
       "path": "photo-details.js",
@@ -205,24 +217,14 @@
       "sha256": "0c41a3d2a33d1068eee0cf958403c9312c964615b869ac2ea704e957a04538a6"
     },
     {
-      "path": "vendor/fflate.LICENSE.txt",
-      "size": 146,
-      "sha256": "f323212e3d6ef19c2c9a900d35e089cfa7b9f003f94e9b84eb6786816ee89a2e"
-    },
-    {
-      "path": "vendor/fflate.browser.js",
-      "size": 89198,
-      "sha256": "8cc1f687e0159e977addb6b85e274dbd11e622cf151f4fcb7b85d49622ea43e7"
-    },
-    {
       "path": "vendor/three.module.js",
       "size": 691648,
       "sha256": "08fd7545d13d2c7fb65ab691530a802dafefd638596501854f267d0fb13c39e7"
     },
     {
       "path": "viewer.js",
-      "size": 12222,
-      "sha256": "50b20c3fdb535bd112dba0378ad018fd845709f9c755d472d165c6774be395ae"
+      "size": 12281,
+      "sha256": "e4a6469d336383f61018ad130c94dc279c15c3a7f191b2671b9c37b459387ba2"
     }
   ]
 }
