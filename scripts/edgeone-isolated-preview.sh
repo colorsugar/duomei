@@ -149,18 +149,40 @@ if [[ -d node_modules/@edgeone/pages-blob ]]; then
 fi
 du -sm "$site_pack/dist" "$site_pack/node_modules" || true
 
-site_log="$(mktemp)"
-site_err="$(mktemp)"
-set +e
-( cd "$site_pack" && edgeone makers deploy -n "$SITE_PROJECT" -t "$EDGEONE_API_TOKEN" -e production -a "$AREA" --json ) \
-  >"$site_log" 2>"$site_err"
-site_rc=$?
-set -e
-redact < "$site_err" >&2 || true
-redact < "$site_log" | tail -n 12
-if [[ "$site_rc" -ne 0 ]]; then
-  echo "::error::独立主站预览项目部署失败（正式站 duomei.site 未改）。原文：$(tail -n 1 "$site_log" | redact)"
-  exit "$site_rc"
+dump_preview_fail_log() {
+  echo "== 预览项目平台构建日志（只读，正式站不改） =="
+  node scripts/edgeone-preview-fail-log.mjs "$SITE_PROJECT" || true
+}
+
+deploy_site_pack() {
+  site_log="$(mktemp)"
+  site_err="$(mktemp)"
+  set +e
+  ( cd "$site_pack" && edgeone makers deploy -n "$SITE_PROJECT" -t "$EDGEONE_API_TOKEN" -e production -a "$AREA" --json ) \
+    >"$site_log" 2>"$site_err"
+  site_rc=$?
+  set -e
+  redact < "$site_err" >&2 || true
+  redact < "$site_log" | tail -n 12
+  return "$site_rc"
+}
+
+echo "== 如有上次失败，先打印平台日志 =="
+node scripts/edgeone-preview-fail-log.mjs duomei-new-preview || true
+node scripts/edgeone-preview-fail-log.mjs duomei-slim-preview || true
+node scripts/edgeone-preview-fail-log.mjs duomei-home-preview || true
+
+if ! deploy_site_pack; then
+  dump_preview_fail_log
+  echo "== 去掉云函数后再发一版静态预览（新首页/绘本不靠云函数；正式站不改） =="
+  rm -rf "$site_pack/cloud-functions" "$site_pack/server" "$site_pack/deploy" "$site_pack/node_modules"
+  du -sm "$site_pack" "$site_pack/dist" || true
+  if ! deploy_site_pack; then
+    dump_preview_fail_log
+    echo "::error::独立主站预览项目部署失败（正式站 duomei.site 未改）。原文：$(tail -n 1 "$site_log" | redact)"
+    exit 1
+  fi
+  echo "静态预览部署成功（无云函数）。"
 fi
 url="$(tail -n 1 "$site_log" | json_field url)"
 if [[ -z "$url" ]]; then
