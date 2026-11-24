@@ -4,6 +4,8 @@ const cl=(x,a=0,b=1)=>Math.min(b,Math.max(a,x)),seg=(u,a,b)=>cl((u-a)/(b-a)),ler
 const io=t=>t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2,oc=t=>1-Math.pow(1-t,3),qo=t=>1-Math.pow(1-t,4),ic=t=>t*t*t;
 const back=t=>{const c=1.7;return 1+(c+1)*Math.pow(t-1,3)+c*Math.pow(t-1,2)};
 const MOB=innerWidth<innerHeight,TOUCH=matchMedia('(pointer:coarse)').matches||'ontouchstart' in window;
+// phone section slides track the finger at a constant rate; an eased scrub runs 3-5x finger speed mid-slide and stalls at both ends
+const ez=(f,t)=>MOB?t:f(t);
 let W=innerWidth,H=innerHeight,VH=innerHeight,lastResizeW=0;
 window.__VH=()=>VH;
 const split=el=>{el.innerHTML=[...el.textContent].map(c=>c===' '?'<span class="ch">&nbsp;</span>':`<span class="ch">${c}</span>`).join('');return Q('.ch',el)};
@@ -359,9 +361,9 @@ function render(clk){
   zbCols.forEach((c,i)=>{const t=oc(seg(u,2.0+i*.25,3.2+i*.2));c.style.transform=`translate3d(0,${(1-t)*(40+i*25)}vh,0)`;c.style.opacity=t});
   zbMeta.forEach(e=>e.style.opacity=seg(u,1.1,1.6));
   $('tick').style.transform=`translate3d(${-((u*260)%1400)}px,0,0)`;zbTicker.style.transform=`translate3d(0,${(1-oc(seg(u,1.0,1.6)))*100}%,0)`;
-  const toss=io(seg(u,4.3,5.2));
+  const toss=ez(io,seg(u,4.3,5.2));
   if(MOB){
-   const eIn=io(seg(u,.1,.78));
+   const eIn=seg(u,.1,.78);
    $('zaobao').style.transform=toss>0?`translate3d(0,${(-toss*100).toFixed(2)}vh,0) scale(${(1-toss*.06).toFixed(4)})`:(u<1?`translate3d(0,${((1-eIn)*100).toFixed(2)}vh,0) scale(${(.95+.05*eIn).toFixed(4)})`:'none');
    $('zaobao').style.opacity=toss>0?(1-seg(toss,.45,1)).toFixed(3):'1';
   }else{
@@ -403,7 +405,7 @@ function render(clk){
 
  // GUYU 12.4-18.2 (embedded #ifD handles covers; #book & #shelf are display:none)
  if(secOn('guyu',u>12.4&&u<18.2)){
-  const sl=io(seg(u,12.4,13.4));
+  const sl=ez(io,seg(u,12.4,13.4));
   if(MOB){
    $('guyu').style.clipPath='none';
    $('guyu').style.transform=sl<1?`translate3d(0,${((1-sl)*92).toFixed(2)}vh,0) scale(${(.95+.05*sl).toFixed(4)})`:'none';
@@ -416,7 +418,7 @@ function render(clk){
 
  // XUNJI 17.2-21.2
  if(secOn('xunji',u>17.2&&u<21.2)){
-  const pt=io(seg(u,17.2,18.0));
+  const pt=ez(io,seg(u,17.2,18.0));
   if(MOB){
    $('xunji').style.transform=pt<1?`translate3d(0,${((1-pt)*92).toFixed(2)}vh,0) scale(${(.95+.05*pt).toFixed(4)})`:'none';
    $('xunji').style.opacity=cl(pt*1.6).toFixed(3);
@@ -438,7 +440,7 @@ function render(clk){
 
  // DALU 20.2-24.7
  if(secOn('dalu',u>20.2&&u<24.7)){
-  const ir=io(seg(u,20.2,21.0)),ta=io(seg(u,23.6,24.6)),lp=window.__wpLast||[W/2,H/2];
+  const ir=ez(io,seg(u,20.2,21.0)),ta=ez(io,seg(u,23.6,24.6)),lp=window.__wpLast||[W/2,H/2];
   if(MOB){
    $('dalu').style.clipPath='none';
    $('dalu').style.transform=ir<1?`translate3d(0,${((1-ir)*92).toFixed(2)}vh,0) scale(${(.95+.05*ir).toFixed(4)})`:(ta>0?`translate3d(0,${(-ta*14).toFixed(2)}vh,0) scale(${(1-ta*.08).toFixed(4)})`:'none');
@@ -474,14 +476,14 @@ function render(clk){
    BLO.forEach((b,k)=>{const L=34.95+k*.16,t=seg(u,L,L+.75),e=io(t),r=bm[k],R=Math.hypot(r.w,r.h)*.62*e,ox=r.w*(k?.5:.3),oy=r.h*(k?.42:.4);
     b.style.clipPath=t<1?`circle(${R}px at ${ox}px ${oy}px)`:'none';b.style.filter=t<1?`url(#bloomf) blur(${(1-e)*5}px)`:'none';b.style.opacity=t>0?1:0});
   }
-  fade($('cstkh'),seg(u,35.9,36.3));const cx2=seg(u,38.3,38.75),cIn=io(seg(u,34.4,34.85));
+  fade($('cstkh'),seg(u,35.9,36.3));const cx2=seg(u,38.3,38.75),cIn=ez(io,seg(u,34.4,34.85));
   $('color').style.opacity=((1-cx2)*cIn).toFixed(3);
   if(MOB)$('color').style.transform=cIn<1?`translate3d(0,${((1-cIn)*40).toFixed(1)}vh,0)`:'none';
  }
 
  // WEIYAN 38.3-42.7
  if(secOn('weiyan',u>38.3&&u<42.7)){
-  const e=oc(seg(u,38.35,38.95));
+  const e=ez(oc,seg(u,38.35,38.95));
   $('wbook').style.transform=MOB?`translate3d(0,${((1-e)*76).toFixed(2)}vh,0) scale(${(.95+.05*e).toFixed(4)})`:`translate3d(0,${(1-e)*95}vh,0) rotateX(${(1-e)*24}deg) rotateZ(${(1-e)*-3}deg)`;
   fade($('whd'),seg(u,38.6,38.95));fade($('wnav'),seg(u,38.8,39.1));
   let pg=1;wsMeta.forEach((w,i)=>{const W0=38.95+i*.8,tt=i<3?seg(u,W0+.62,W0+.98):0,te=io(tt);if(i<3&&te>.5)pg=i+2;
@@ -496,7 +498,7 @@ function render(clk){
 
  // SKILL 42.3-44.95
  if(secOn('skill',u>42.3&&u<44.95)){
-  const w=io(seg(u,42.3,42.8)),x=io(seg(u,44.35,44.9));
+  const w=MOB?seg(u,42.3,42.95):io(seg(u,42.3,42.8)),x=ez(io,seg(u,44.35,44.9));
   if(MOB){
    $('skill').style.clipPath='none';
    $('skill').style.transform=w<1?`translate3d(0,${((1-w)*92).toFixed(2)}vh,0) scale(${(.95+.05*w).toFixed(4)})`:(x>0?`translate3d(0,${(-x*88).toFixed(2)}vh,0) scale(${(1-x*.06).toFixed(4)})`:'none');
@@ -569,7 +571,7 @@ if(matchMedia('(pointer:fine)').matches){const C=document.createElement('div');C
  (function cl2(){cx2+=(mx-cx2)*.18;cy2+=(my-cy2)*.18;C.style.transform=`translate(${cx2}px,${cy2}px)`;const el=document.elementFromPoint(mx,my);const tt=el&&el.closest('#totop'),tg=!tt&&el&&el.closest('[data-cur],a,.card,.leaf,.mag');C.style.opacity=tt?'0':'';C.classList.toggle('big',!!tg);C.querySelector('b').textContent=tg&&tg.dataset.cur?tg.dataset.cur:'VIEW';
   MAG.forEach(m=>{const r=m.getBoundingClientRect();if(!r.width){return}const cxm=r.left+r.width/2,cym=r.top+r.height/2;const dx=mx-cxm,dy=my-cym,lim=Math.max(r.width,r.height)*.6+50;const on=Math.hypot(dx,dy)<lim;
    m._x=(m._x||0)+(((on?dx*.22:0))-(m._x||0))*.16;m._y=(m._y||0)+(((on?dy*.28:0))-(m._y||0))*.16;m.style.translate=`${m._x.toFixed(2)}px ${m._y.toFixed(2)}px`});requestAnimationFrame(cl2)})()}
-{const bar=Q('#HUD .bar')[0];let dn=false;const go=e=>{window.__stopEmbFling();const r=bar.getBoundingClientRect();const f=cl((e.clientX-r.left)/r.width);scrollTo(0,f*(document.documentElement.scrollHeight-innerHeight))};bar.addEventListener('pointerdown',e=>{dn=true;bar.setPointerCapture(e.pointerId);go(e)});bar.addEventListener('pointermove',e=>{if(dn)go(e)});bar.addEventListener('pointerup',()=>dn=false)}
+{const bar=Q('#HUD .bar')[0];let dn=false;const go=e=>{window.__stopEmbFling();const r=bar.getBoundingClientRect();const f=cl((e.clientX-r.left)/r.width);scrollTo(0,f*(document.documentElement.scrollHeight-innerHeight))};bar.addEventListener('pointerdown',e=>{if(e.pointerType==='touch')return;dn=true;bar.setPointerCapture(e.pointerId);go(e)});bar.addEventListener('pointermove',e=>{if(dn)go(e)});bar.addEventListener('pointerup',()=>dn=false)}
 WD.forEach((d,i)=>d.addEventListener('click',()=>{window.__stopEmbFling();scrollTo({top:window.__U2Y(38.95+i*.8+.55)*VH,behavior:'smooth'})}));
 function stepEmbFling(now){
  if(!embFling.on)return;

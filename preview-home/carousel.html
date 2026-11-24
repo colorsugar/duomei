@@ -178,8 +178,7 @@ const EMB=/emb=1/.test(location.search);if(EMB){document.documentElement.classLi
   const t=e.touches[0],ts=performance.now();
   const dx=t.clientX-vt.x,dy=t.clientY-vt.y;
   if(!axis&&Math.hypot(dx,dy)>7){
-   const onStrip=e.target&&e.target.closest&&e.target.closest('.strip');
-   axis=onStrip?(Math.abs(dx)>=Math.abs(dy)*0.55?'x':'y'):(Math.abs(dx)>=Math.abs(dy)*0.95?'x':'y');
+   axis=Math.abs(dx)>=Math.abs(dy)*0.95?'x':'y';
   }
   if(axis==='y'){
    if(e.cancelable)e.preventDefault();
