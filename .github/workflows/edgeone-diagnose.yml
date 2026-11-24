@@ -181,7 +181,7 @@ jobs:
           origin="${url%%|*}" q="${url##*|}"
           sleep 20
           for p in / /index.html /home.html /main.js /.well-known/b.json /sub/ /some/route /guyu; do
-            body=$(curl -s "$origin$p$q" | head -c 40 | tr '\n' ' ')
+            body=$(curl -s "$origin$p$q&cb=$RANDOM$RANDOM" | head -c 40 | tr '\n' ' ')
             echo "PROBE $p => $body"
           done
 
