@@ -174,7 +174,6 @@ window.__scrollToSec=(key,behavior='smooth')=>{
  if(window.__onSecJump)window.__onSecJump(key);
  scrollTo({top:Math.round(y),behavior});
 };
-{const k=decodeURIComponent(location.hash.slice(1)),key=k==='notes'?'xiaoji':k;if(key&&(SEC_U[key]!=null||key==='huiben'))addEventListener('load',()=>requestAnimationFrame(()=>window.__scrollToSec(key,'instant')),{once:true})}
 const OVI=Q('#ovix .ix');let OVS=null;function ovRect(){}
 OVI.forEach(t=>t.addEventListener('click',()=>window.__scrollToSec(t.dataset.go)));
 // canvas & layout metrics cache
@@ -458,7 +457,7 @@ function render(clk){
  // YUNYOU 23.6-34.95 (clouds + yhead in #stage, #ifE in #yunyou)
  secOn('yunyou',u>23.6&&u<34.95);
  clouds(u,clk);
- if(u>23.7&&u<25.2){VIS._yh=true;const yh=seg(u,23.9,24.4)*(1-seg(u,24.7,25.0));fade($('yhead'),yh);$('yhead').style.visibility=yh>0.002?'visible':'hidden'}else if(VIS._yh!==false){VIS._yh=false;$('yhead').style.opacity=0;$('yhead').style.visibility='hidden'}
+ if(u>23.7&&u<25.2){const yh=seg(u,23.9,24.4)*(1-seg(u,24.7,25.0));fade($('yhead'),yh);$('yhead').style.visibility=yh>0.002?'visible':'hidden'}else if(VIS._yh!==false){VIS._yh=false;$('yhead').style.opacity=0;$('yhead').style.visibility='hidden'}
 
  // COLOR 34.4-38.9
  if(secOn('color',u>34.4&&u<38.9)){
