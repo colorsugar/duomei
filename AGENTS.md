@@ -11,6 +11,15 @@ Then read any task-specific document referenced there, including `docs/note-card
 
 `PROJECT_CONTEXT.md` is the cross-AI source for current production architecture, routes, platform boundaries, user preferences, verification requirements, and known audit findings. Do not follow a historical candidate document when it conflicts with that file.
 
+## EdgeOne Rewrite And Storage Rules (2026-11-25 outage)
+
+On 2026-11-25 production went blank for about 40 minutes: the site fallback was changed to `/* → /app.html`, and EdgeOne rewrote every JS, iframe page and `/.well-known/duomei-build.json` into the SPA shell. It was rolled back by #222.
+
+- EdgeOne treats a wildcard rewrite as "only when no file exists" **only** when its destination is `/index.html`. Any other wildcard destination rewrites real files too. The site fallback must stay `{ "source": "/*", "destination": "/index.html" }`, last in the list, and `dist/index.html` must stay the Vite SPA shell. Pages that need their own entry at an exact path use exact rewrites (`/ → /home.html` serves the static homepage). `server/guyuEdgeOneAdapter.test.mjs` enforces this; never update that test to allow another fallback destination.
+- `vite preview`, a local static server or the patrol emulator do not prove EdgeOne behavior. Any change to `edgeone.json` rewrites must first be measured on a throwaway project with `edgeone-diagnose.yml` (`rewrite_probe=1`): real files, exact routes and SPA routes must all return what you expect.
+- The production workflow verifies only after the new version is live. After a production deploy, immediately check that `/.well-known/duomei-build.json` is JSON with the new commit and that the homepage JS loads; if not, roll back at once by reverting the merge on `main` through a `cursor/*` PR (direct pushes to `main` are rejected).
+- Account storage is 5 GiB. EdgeOne keeps each project's current production, its previous production (as rollback copy) and the latest previews. "Build artifacts size exceeds the limit" means throwaway projects are holding big copies: shrink them with `edgeone-diagnose.yml` `retire_previews=1` (two tiny production deploys per project). Never point that at `duomei-guyu` or `duomei-assets-overseas`.
+
 ## Mandatory Latest-Version Rule
 
 The current workspace is the source of truth when it contains uncommitted work. Never assume that `HEAD`, `origin/main`, or the production website is newer than the working tree. Never replace, omit, or partially publish existing workspace work just because it is not committed yet.

@@ -41,6 +41,14 @@ on:
         description: "Assets origin override for this run (e.g. the project preset domain before assets.duomei.site is bound)"
         required: false
         default: ""
+      retire_previews:
+        description: "1 = shrink the throwaway isolated preview projects (duomei-slim-preview, duomei-slim-preview-assets, duomei-motion-preview) to a tiny page so their copies leave account storage"
+        required: false
+        default: "0"
+      rewrite_probe:
+        description: "1 = deploy a tiny site to duomei-slim-preview and probe how rewrites treat real files"
+        required: false
+        default: "0"
       retire_assets_v1:
         description: "1 = shrink the abandoned first assets project duomei-assets (global area, cannot bind domains) to a tiny page so its 730MB copy leaves storage"
         required: false
@@ -124,6 +132,57 @@ jobs:
             sleep 20
             echo "<!doctype html><title>rotate $i</title>" > "$tiny/index.html"
             edgeone makers deploy "$tiny" -n duomei-assets -t "$EDGEONE_API_TOKEN" -e preview -a global --json | tail -n 1
+          done
+
+      # 11-25：11-23/24 建的三个独立预览项目占满账号存储，正式素材站部署报 "Build artifacts size exceeds the limit"。
+      # 同 retire_assets_v1：正式版换成小页面，再做 3 次小 preview，让大副本出存储。永不碰正式项目。
+      - name: Shrink throwaway isolated preview projects
+        if: inputs.retire_previews == '1'
+        env:
+          EDGEONE_API_TOKEN: ${{ secrets.EDGEONE_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          ( cd "${RUNNER_TEMP}" && npm install -g --legacy-peer-deps "edgeone@1.6.31-3" )
+          tiny="${RUNNER_TEMP}/retire-previews"
+          mkdir -p "$tiny"
+          # 平台会把「上一个正式版」留作回滚副本，所以正式版要连发两次小页面，大副本才会出存储。
+          for spec in duomei-slim-preview:overseas duomei-slim-preview-assets:overseas duomei-motion-preview:overseas duomei-assets:global; do
+            name="${spec%%:*}" area="${spec##*:}"
+            case "$name" in duomei-guyu|duomei-assets-overseas) echo "refuse $name"; exit 1;; esac
+            for j in 1 2; do
+              echo "<!doctype html><meta charset=\"utf-8\"><title>retired $j</title><p>预览已下线，正式站见 duomei.site。</p>" > "$tiny/index.html"
+              edgeone makers deploy "$tiny" -n "$name" -t "$EDGEONE_API_TOKEN" -e production -a "$area" --json | tail -n 1 || true
+              sleep 20
+            done
+            for i in 1 2; do
+              sleep 20
+              echo "<!doctype html><title>rotate $i</title>" > "$tiny/index.html"
+              edgeone makers deploy "$tiny" -n "$name" -t "$EDGEONE_API_TOKEN" -e preview -a "$area" --json | tail -n 1 || true
+            done
+          done
+
+      - name: Probe rewrite semantics on a throwaway project
+        if: inputs.rewrite_probe == '1'
+        env:
+          EDGEONE_API_TOKEN: ${{ secrets.EDGEONE_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          ( cd "${RUNNER_TEMP}" && npm install -g --legacy-peer-deps "edgeone@1.6.31-3" )
+          site="${RUNNER_TEMP}/probe"
+          mkdir -p "$site/.well-known" "$site/sub"
+          echo 'SPA-SHELL' > "$site/index.html"
+          echo 'STATIC-HOME' > "$site/home.html"
+          echo 'console.log("REAL-JS")' > "$site/main.js"
+          echo '{"real":true}' > "$site/.well-known/b.json"
+          echo 'SUB-INDEX' > "$site/sub/index.html"
+          echo '{"rewrites":[{"source":"/","destination":"/home.html"},{"source":"/*","destination":"/index.html"}]}' > "$site/edgeone.json"
+          out=$(edgeone makers deploy "$site" -n duomei-slim-preview -t "$EDGEONE_API_TOKEN" -e production -a overseas --json | tail -n 1)
+          url=$(node -e 'const u=new URL(JSON.parse(process.argv[1]).url);console.log(u.origin+"|"+u.search)' "$out")
+          origin="${url%%|*}" q="${url##*|}"
+          sleep 20
+          for p in / /index.html /home.html /main.js /.well-known/b.json /sub/ /some/route /guyu; do
+            body=$(curl -s "$origin$p$q&cb=$RANDOM$RANDOM" | head -c 40 | tr '\n' ' ')
+            echo "PROBE $p => $body"
           done
 
       # 大素材单独发到素材项目 duomei-assets（assets.duomei.site），指纹没变就不部署。见 scripts/assets-publish.sh。

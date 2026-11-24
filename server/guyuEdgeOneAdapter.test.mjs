@@ -54,6 +54,8 @@ test("full EdgeOne site reads Makers variables from process.env", async () => {
 
 test("root EdgeOne config keeps Cloud Functions outside mainland and SPA fallback last", async () => {
   const config = JSON.parse(await readFile(new URL("../edgeone.json", import.meta.url), "utf8"));
+  assert.deepEqual(config.rewrites.at(-1), { source: "/*", destination: "/index.html" },
+    "EdgeOne only skips real files for /* → /index.html; any other destination blanks the site (AGENTS.md, 2026-11-25)");
   assert.deepEqual(config.cloudFunctions.regions.overseas, ["ap-singapore"]);
   assert.equal("mainland" in config.cloudFunctions.regions, false);
   assert.equal(config.nodeVersion, "22.17.1");
@@ -78,7 +80,7 @@ test("root EdgeOne config keeps Cloud Functions outside mainland and SPA fallbac
     { source: "/honglou/ce/codex/*", destination: "/honglou/ce/index.html" },
     { source: "/honglou/c", destination: "/honglou/c/index.html" },
     { source: "/honglou/c/*", destination: "/honglou/c/index.html" },
-    { source: "/", destination: "/index.html" },
-    { source: "/*", destination: "/app.html" },
+    { source: "/", destination: "/home.html" },
+    { source: "/*", destination: "/index.html" },
   ]);
 });

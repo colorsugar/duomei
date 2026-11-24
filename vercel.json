@@ -7,7 +7,7 @@
     },
     {
       "source": "/((?!api(?:/|$)|src(?:/|$)|@vite(?:/|$)|@id(?:/|$)|@fs(?:/|$)|@react-refresh(?:/|$)|node_modules(?:/|$)).*)",
-      "destination": "/app.html"
+      "destination": "/index.html"
     }
   ]
 }

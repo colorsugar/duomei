@@ -96,11 +96,11 @@
     },
     {
       "source": "/",
-      "destination": "/index.html"
+      "destination": "/home.html"
     },
     {
       "source": "/*",
-      "destination": "/app.html"
+      "destination": "/index.html"
     }
   ],
   "headers": [

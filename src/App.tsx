@@ -34,8 +34,7 @@ const pageLoaders = {
   DuomeiTimePage: () => import("./pages/DuomeiTimePage"),
 };
 
-// "/" is the static homepage (preview-home → dist/index.html); this SPA ships as app.html for every
-// other path. Client-side visits to "/" reload into it. If the SPA itself was served at "/" (no static
+// "/" is the static homepage (preview-home → dist/home.html); this SPA shell serves every other path. Client-side visits to "/" reload into it. If the SPA itself was served at "/" (no static
 // homepage in the build), keep rendering the React homepage instead of reloading in a loop.
 const shellServedAtRoot = window.location.pathname === "/";
 
@@ -57,7 +56,7 @@ function StaticHomeRoute() {
   useEffect(() => {
     if (shellServedAtRoot) return;
     const target = `/${window.location.search}${window.location.hash}`;
-    window.history.replaceState(null, "", "/app.html");
+    window.history.replaceState(null, "", "/index.html");
     window.location.replace(target);
   }, []);
   return shellServedAtRoot ? <DuomeiHomePage /> : null;
