@@ -48,16 +48,16 @@ function paintDiner(P) { P.fill('#3d5a72'); P.layer((g) => { g.beginPath(); g.ar
 function lampPts() { return shape.fromDrawing((g) => { g.beginPath(); g.ellipse(0, 0.9, 0.55, 0.7, 0, 0, 6.28); g.fill(); g.fillRect(-0.3, 1.5, 0.6, 0.18); g.fillRect(-0.3, 0.1, 0.6, 0.15); g.fillRect(-0.04, 1.6, 0.08, 0.6); g.fillRect(-0.05, -0.5, 0.1, 0.6); }, { w: 1.4, h: 2.8, res: 70 }); }
 function paintLamp(P) { P.fill(VERM); P.layer((g) => { g.fillRect(-0.3, 1.5, 0.6, 0.18); g.fillRect(-0.3, 0.1, 0.6, 0.15); }, '#2a1d12', { depth: 0.3 }); P.glow((g) => { g.globalAlpha = 0.7; g.fillStyle = '#ffb060'; g.beginPath(); g.ellipse(0, 0.9, 0.4, 0.5, 0, 0, 6.28); g.fill(); }); P.draw((g) => { g.save(); g.scale(1, -1); g.fillStyle = '#f2d48a'; g.font = '400 0.5px ZMX, KaiTi, serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('粉', 0, -0.9); g.restore(); }); }
 export async function build({ paper, yieldFn = async () => {}, progress = () => {} }) {
-  await loadArt(['cut-shop-wall', 'cut-mifen-bowl', 'gr-mifen', 'cut-cook', 'cut-diners', 'cut-cook2', 'cut-stools', 'cut-sidebowls']); const DINERS = !!IMGS['cut-diners'];
+  await loadArt(['cut-shop-wall', 'cut-mifen-bowl', 'cut-mifen-stove', 'cut-mifen-condiments', 'gr-mifen', 'cut-cook', 'cut-diners', 'cut-stools', 'cut-sidebowls']); const DINERS = !!IMGS['cut-diners'];
   const group = new THREE.Group();
   const K = (m, k) => { m.scale.setScalar(k); return m; };
   const { pieces, add, card, r, updatePieces } = rig({ group, paper, seed: 71, contact: '#5a4030' });
   const steps = [
     () => { const W = cutCard(card, 'cut-shop-wall', 36, { ppu: 26 }); add(W || K(card(wallPts(), paintWall, { ppu: 30 }), 1.8), { x: 0, z: -11.4, size: 0.75 }).hot = { act: 'poke', title: '价目牌', line: '红底金字的价目牌：素粉、卤菜粉、牛腩粉、马肉米粉……桂林人按“两”点，二两、三两。' }; },
-    () => { add(K(card(stovePts(), paintStove, { ppu: 34 }), 2.1), { x: -15.4, z: -4.6, size: 0.6 }).hot = { act: 'light', food: true, title: '卤水', line: '米粉的魂是卤水：猪骨、牛骨加罗汉果、草果、八角等香料慢熬，每家的方子都不外传。' }; },
-    () => { add(cutCard(card, 'cut-cook2', 6.4, { back: 'mirror' }) || cutCard(card, 'cut-cook', 6.2, { back: 'mirror' }) || K(card(cookPts(), paintCook, { ppu: 36 }), 2.0), { x: -5.4, z: -5.2, size: 0.5 }).hot = { act: 'poke', title: '烫粉师傅', line: '米粉在竹篓里烫几秒就捞起，倒进碗里，浇卤、加料，一碗不到半分钟。' }; },
+    () => { add(cutCard(card, 'cut-mifen-stove', 9.2, { back: 'mirror' }) || K(card(stovePts(), paintStove, { ppu: 34 }), 2.1), { x: -14.8, z: -4.6, size: 0.6 }).hot = { act: 'light', food: true, title: '卤水', line: '米粉的魂是卤水：猪骨、牛骨加罗汉果、草果、八角等香料慢熬，每家的方子都不外传。' }; },
+    () => { add(cutCard(card, 'cut-cook', 6.2, { back: 'mirror' }) || K(card(cookPts(), paintCook, { ppu: 36 }), 2.0), { x: -5.4, z: -5.2, size: 0.5 }).hot = { act: 'poke', title: '烫粉师傅', line: '米粉在竹篓里烫几秒就捞起，倒进碗里，浇卤、加料，一碗不到半分钟。' }; },
     () => { add(K(card(counterPts(), paintCounter, { ppu: 32 }), 1.9), { x: -7.6, z: -1.6, size: 0.55 }).hot = { act: 'poke', title: '出粉台', line: '先在台前点粉付钱，师傅叫号，自己端走——这是桂林米粉店的老规矩。' }; },
-    () => { add(K(card(condPts(), paintCond, { ppu: 40 }), 2.2), { x: 10.0, z: -5.0, size: 0.4 }).hot = { act: 'poke', food: true, title: '调料台', line: '酸豆角、辣椒、葱花、炒黄豆、酸笋随便加，这是桂林米粉店最让外地人惊喜的地方。' }; },
+    () => { add(cutCard(card, 'cut-mifen-condiments', 10.6, { back: 'mirror' }) || K(card(condPts(), paintCond, { ppu: 40 }), 2.2), { x: 10.0, z: -5.0, size: 0.4 }).hot = { act: 'poke', food: true, title: '调料台', line: '酸豆角、辣椒、葱花、炒黄豆、酸笋随便加，这是桂林米粉店最让外地人惊喜的地方。' }; },
     () => { add(K(card(tablePts(), (P) => { P.fill(WOOD); }, { ppu: 34 }), 2.4), { x: 7.0, z: 3.2, size: 0.4 }).hot = { act: 'poke', title: '方桌', line: '老店的木方桌擦得发亮，大家拼桌吃，谁也不等谁。' }; },
   ];
   for (const [x, z] of [[2.6, 5.6], [11.4, 5.6], [7.0, 7.4], [-14.0, 5.6], [-9.0, 6.6], [-11.5, 7.8]].slice(0, IMGS['cut-stools'] ? 0 : DINERS ? 3 : 6)) steps.push(() => { add(K(card(stoolPts(), (P) => { P.fill(VERM); }, { ppu: 40 }), 2.4), { x, z, size: 0.25 }).hot = { act: 'poke', title: '红塑料凳', line: '矮矮的红凳子，几乎是每家米粉店的标配。' }; });

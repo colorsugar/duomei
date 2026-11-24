@@ -9,10 +9,11 @@ export async function build({ paper, yieldFn = async () => {}, progress = () => 
   const group = new THREE.Group();
   const { pieces, add, card, r, updatePieces } = rig({ group, paper, seed: 9, contact: '#6a5840' });
 
-  const hang = (parent, text, baseY) => {
+  const hang = (parent, text, baseY, offsetX = 0) => {
     const spr = makeTag(text);
     spr.userData.baseY = baseY;
-    spr.position.set(0, baseY, 0.15);
+    spr.userData.baseX = offsetX;
+    spr.position.set(offsetX, baseY, 0.15);
     parent.h.group.add(spr);
     return spr;
   };
@@ -37,13 +38,18 @@ export async function build({ paper, yieldFn = async () => {}, progress = () => 
   pin('灵川', 10.2, -5.2, { dive: 'lingchuan', title: '灵川海洋乡', line: '灵川海洋乡以古银杏林闻名，深秋满山金黄。点进去，走进村子。' });
   await yieldFn();
 
-  const cut = (name, w, h, x, z, hot, tint) => {
+  const cut = (name, w, h, x, z, hot, tint, tag = {}) => {
     const img = IMGS[name]; if (!img) return null;
     const p = add(card(imgOutline(img, w, h), paintImg(img, w, h, { t: tint }), { ppu: 56 }), { x, z, size: 0.5 });
-    p.hot = hot; if (hot && hot.title) hang(p, hot.title, Math.max(2.0, h * 0.48)); return p;
+    p.hot = hot;
+    if (hot && hot.title) {
+      const baseY = tag.baseY != null ? tag.baseY : Math.max(2.0, h * 0.48);
+      hang(p, hot.title, baseY, tag.offsetX || 0);
+    }
+    return p;
   };
-  cut('pagoda-gold', 2.4, 6.6, -1.2, -1.6, { dive: 'towers', title: '日月双塔', line: '杉湖中的日塔与月塔隔水相望。点进去，走进塔的近景。', act: 'light' }, null);
-  cut('pagoda-silver', 2.3, 6.4, 1.4, -1.8, { dive: 'towers', title: '月塔在湖心', line: '月塔是琉璃塔。点进去，和日塔一起看。', act: 'light' }, null);
+  cut('pagoda-gold', 2.4, 6.6, -1.2, -1.6, { dive: 'towers', title: '日月双塔', line: '杉湖中的日塔与月塔隔水相望。点进去，走进塔的近景。', act: 'light' }, null, { baseY: Math.max(2.0, 6.6 * 0.56), offsetX: -0.85 });
+  cut('pagoda-silver', 2.3, 6.4, 1.4, -1.8, { dive: 'towers', title: '月塔在湖心', line: '月塔是琉璃塔。点进去，和日塔一起看。', act: 'light' }, null, { baseY: Math.max(2.0, 6.4 * 0.42), offsetX: 0.95 });
   cut('hero-karst', 7.5, 5.2, 0.4, 8.2, { dive: 'guilin', title: '山水入口', line: '这张工笔山石是多美的原作，印在立卡上。点进去，便是漓江夜游。', act: 'poke' }, null);
 
   const bowl = add(card([[-1.3, 0], [1.3, 0], [1.15, 1.05], [0, 1.35], [-1.15, 1.05]], (P) => {

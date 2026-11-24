@@ -62,7 +62,7 @@ function paintPerson(kind) { return (P) => {
 }; }
 
 export async function build({ paper, yieldFn = async () => {}, progress = () => {} }) {
-  await loadArt(['ridge', 'karst', 'bd-longji', 'gr-longji', 'cut-stilthouse', 'cut-zhutongfan', 'cut-yaowoman', 'cut-stilthouse2']);
+  await loadArt(['ridge', 'karst', 'bd-longji', 'gr-longji', 'cut-stilthouse', 'cut-zhutongfan', 'cut-yaowoman']);
   const group = new THREE.Group();
   const { pieces, add, card, r, updatePieces } = rig({ group, paper, seed: 13, contact: '#4a4a30' });
   const steps = [];
@@ -80,7 +80,7 @@ export async function build({ paper, yieldFn = async () => {}, progress = () => 
   const yAt = (x, z) => { let best = null; for (let k = 0; k < ROWS; k++) { const zk = 7.6 - k * 1.75; if (zk > z && (best === null || zk < best[0])) best = [zk, k]; } return best ? Math.max(0, tierTop(best[1], best[1] * 1.7 + 0.4)(x) - 0.25) : 0; };
   // a Zhuang stilt-house village on the left slope, Yao women on the path
   const houses = [[-14.6, -4.0, 4.4, 2.4], [-9.6, -5.8, 4.0, 2.2], [-16.0, 1.2, 3.8, 2.2], [14.8, -2.4, 4.2, 2.4], [9.8, -7.6, 3.6, 2.0]];
-  houses.forEach(([x, z, w, h], i) => steps.push(() => { const hero = i === 0 ? cutCard(card, 'cut-stilthouse', 7.2, { back: 'mirror' }) : cutCard(card, 'cut-stilthouse2', w * 1.25, { back: 'mirror' }); const p = add(hero || card(stiltPts({ w, h }), (P) => paintStilt(P, { w, h, lit: 0.5 }), { ppu: 46, back: 'mirror' }), { x, z: hero ? z + 0.6 : z, y: yAt(x, z), size: 0.55, rest: (r() - 0.5) * 0.04 });
+  houses.forEach(([x, z, w, h], i) => steps.push(() => { const hero = cutCard(card, 'cut-stilthouse', i === 0 ? 7.2 : w * 1.15, { back: 'mirror', flipX: i % 2 === 1 }); const p = add(hero || card(stiltPts({ w, h }), (P) => paintStilt(P, { w, h, lit: 0.5 }), { ppu: 46, back: 'mirror' }), { x, z: hero ? z + 0.6 : z, y: yAt(x, z), size: 0.55, rest: (r() - 0.5) * 0.04 });
     p.hot = i === 0 ? { dive: 'cabin', act: 'light', title: '壮家吊脚楼', line: '龙脊壮寨的木楼全是杉木榫卯，楼下养牲口、堆柴，楼上住人，屋檐下挂着晒干的玉米和辣椒。点进去，上楼坐坐。' } : { act: 'light', title: '木楼人家', line: '一座寨子几十户木楼挤在山腰上，晚饭时屋顶冒烟，窗里一盏盏亮起来。' }; }));
   for (const [x, z, h] of [[-18.6, -2.2, 6.2], [-12.0, 2.0, 5.0], [18.2, 0.2, 5.6], [17.0, 9.2, 4.4]]) steps.push(() => { add(card(bambooPts(r, { h }), (P) => paintBamboo(P), { ppu: 46, back: 'mirror' }), { x, z, y: yAt(x, z), size: 0.5, sway: 1.3 }).hot = { act: 'leaves', color: '#7fae64', title: '寨边竹林', line: '寨子边上种着竹子，竹子能盖房、做水管，也能装饭。' }; });
   steps.push(() => { add(cutCard(card, 'cut-yaowoman', 2.8, { back: 'mirror' }) || card(personPts('yao'), paintPerson('yao'), { ppu: 70, back: 'mirror' }), { x: -6.2, z: 3.4, y: yAt(-6.2, 3.4), size: 0.35 }).hot = { act: 'poke', title: '红瑶长发', line: '龙脊黄洛瑶寨的红瑶妇女一生只剪一次头发，长发盘在头上，放下来能拖到地，被叫作“长发村”。' }; });

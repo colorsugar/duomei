@@ -17,7 +17,7 @@ const ui = {
   stage: document.getElementById('stage'), frame: document.getElementById('frame'), nav: document.getElementById('nav'),
   cap: document.getElementById('cap'), open: document.getElementById('open'),
 };
-const setProgress = (v) => { ui.bar.style.transform = `scaleX(${v})`; ui.pct.textContent = String(Math.round(v * 100)).padStart(2, '0'); if (EMBED) parent.postMessage({ sb: 'progress', v }, '*'); };
+const setProgress = (v) => { ui.bar.style.transform = `scaleX(${v})`; ui.pct.textContent = String(Math.round(v * 100)).padStart(2, '0'); if (window.parent && window.parent !== window) { try { parent.postMessage({ sb: 'progress', v }, '*'); } catch {} } };
 const nextFrame = () => new Promise((res) => (CAPTURE ? setTimeout(res, 0) : requestAnimationFrame(() => res())));
 
 // ---------- renderer ----------
@@ -349,7 +349,7 @@ function pick(cx, cy) {
 function tap(cx, cy) {
   const hit = pick(cx, cy);
   if (!hit) { hideCard(); return false; }
-  act(hit.p, hit.p.hot); showCard(hit.p.hot, cx, cy); lastHit = hit; return true;
+  lastHit = hit; act(hit.p, hit.p.hot); showCard(hit.p.hot, cx, cy); return true;
 }
 let lastHit = null;
 // ---- the dive: the camera falls into a picture, the picture becomes the page ----
@@ -458,7 +458,9 @@ function crumbs() {
   const cb = document.getElementById('crumbs');
   if (!stack.length) { cb.classList.remove('on'); ui.nav.classList.toggle('show', cur >= 0); return; }
   const names = [...stack, cur].map((i) => SPREADS[i] && SPREADS[i].title);
-  cb.querySelector('span').innerHTML = names.map((n, i) => `<i>${i ? '画中 · ' : ''}${n}</i>`).join('<b>›</b>') + (names.length > 2 ? `<b>·</b><i>${names.length} 层</i>` : '');
+  cb.querySelector('span').innerHTML = names.length > 2
+    ? names.map((n) => `<i>${n}</i>`).join('<b>›</b>')
+    : names.map((n, i) => `<i>${i ? '画中 · ' : ''}${n}</i>`).join('<b>›</b>');
   cb.classList.add('on'); ui.nav.classList.remove('show');
 }
 document.getElementById('back').addEventListener('click', () => back());
@@ -568,39 +570,58 @@ async function turn(dir) {
 // ---------- camera, framing, orbit ----------
 const orbit = { yaw: 0, pitch: 0, ty: 0, tp: 0 };
 const pan = { x: 0, y: 0, vx: 0, vy: 0 };
+const userZoom = { val: 1, target: 1, min: 0.62, max: 1.75 };
+const clOrbit = (v, a, b) => Math.max(a, Math.min(b, v));
 const PANX = 11.6, PANY = 3.6;
 function clampPan() {
-  if (pan.x > PANX) { pan.x = PANX; if (pan.vx > 0) pan.vx = 0; }
-  if (pan.x < -PANX) { pan.x = -PANX; if (pan.vx < 0) pan.vx = 0; }
-  if (pan.y > PANY) { pan.y = PANY; if (pan.vy > 0) pan.vy = 0; }
-  if (pan.y < -PANY) { pan.y = -PANY; if (pan.vy < 0) pan.vy = 0; }
+  const extra = Math.max(0, userZoom.val - 1);
+  const mx = PANX + extra * 9.5;
+  const my = PANY + extra * 5.2;
+  if (pan.x > mx) { pan.x = mx; if (pan.vx > 0) pan.vx = 0; }
+  if (pan.x < -mx) { pan.x = -mx; if (pan.vx < 0) pan.vx = 0; }
+  if (pan.y > my) { pan.y = my; if (pan.vy > 0) pan.vy = 0; }
+  if (pan.y < -my) { pan.y = -my; if (pan.vy < 0) pan.vy = 0; }
 }
-function resetPan() { pan.x = pan.y = pan.vx = pan.vy = 0; }
-const gyro = { on: false, sb: 0, sg: 0, baseB: null };
+function resetPan() { pan.x = pan.y = pan.vx = pan.vy = 0; userZoom.target = 1; }
+const gyro = { on: false, sb: 0, sg: 0, baseB: null, baseG: null, got: false, timer: 0 };
 function onOrientation(e) {
   if (e.beta == null || e.gamma == null) return;
+  gyro.got = true;
   if (gyro.baseB == null) gyro.baseB = e.beta;
-  const db = Math.max(-16, Math.min(16, e.beta - gyro.baseB));
-  const dg = Math.max(-16, Math.min(16, e.gamma));
-  gyro.sb += (db - gyro.sb) * 0.14;
-  gyro.sg += (dg - gyro.sg) * 0.14;
+  if (gyro.baseG == null) gyro.baseG = e.gamma;
+  const db = Math.max(-20, Math.min(20, e.beta - gyro.baseB));
+  const dg = Math.max(-20, Math.min(20, e.gamma - gyro.baseG));
+  gyro.sb += (db - gyro.sb) * 0.16;
+  gyro.sg += (dg - gyro.sg) * 0.16;
 }
 async function setTilt(on) {
   const btn = document.getElementById('tilt');
+  clearTimeout(gyro.timer);
   if (!on) {
-    gyro.on = false; gyro.baseB = null;
+    gyro.on = false; gyro.baseB = null; gyro.baseG = null; gyro.sb = 0; gyro.sg = 0; gyro.got = false;
     window.removeEventListener('deviceorientation', onOrientation, true);
     if (btn) { btn.classList.remove('on'); btn.textContent = '开启体感'; }
     return;
   }
+  if (typeof DeviceOrientationEvent === 'undefined') {
+    if (btn) btn.hidden = true;
+    return;
+  }
   try {
-    if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+    if (typeof DeviceOrientationEvent.requestPermission === 'function') {
       const r = await DeviceOrientationEvent.requestPermission();
       if (r !== 'granted') { if (btn) btn.textContent = '未允许体感'; return; }
     }
+    gyro.baseB = null; gyro.baseG = null; gyro.sb = 0; gyro.sg = 0; gyro.got = false;
     window.addEventListener('deviceorientation', onOrientation, true);
-    gyro.on = true; gyro.baseB = null;
+    gyro.on = true;
     if (btn) { btn.classList.add('on'); btn.textContent = '体感已开'; }
+    gyro.timer = setTimeout(() => {
+      if (gyro.on && !gyro.got) {
+        setTilt(false);
+        if (btn) btn.textContent = '无传感器';
+      }
+    }, 1800);
   } catch (_) { if (btn) btn.textContent = '无法开启'; }
 }
 function frame() {
@@ -611,6 +632,7 @@ function frame() {
 }
 let view = frame();
 window.addEventListener('resize', () => { view = frame(); });
+const _lblW = new THREE.Vector3(), _lblC = new THREE.Vector3(), _camRight = new THREE.Vector3(), _camUp = new THREE.Vector3();
 function avoidLabelOverlap() {
   const labels = [];
   for (const s of spreads) {
@@ -618,48 +640,94 @@ function avoidLabelOverlap() {
     s.api.group.traverse((o) => { if (o.isSprite && o.userData && o.userData.tag) labels.push(o); });
   }
   if (!labels.length) return;
-  labels.forEach((o) => { if (o.userData.baseY != null) o.position.y = o.userData.baseY; });
-  const W = innerWidth, H = innerHeight, items = [];
-  for (const o of labels) {
-    const w = o.getWorldPosition(new THREE.Vector3());
-    const v = w.clone().project(camera);
-    if (v.z > 1 || v.z < -1) continue;
-    const sx = (v.x + 1) / 2 * W, sy = (1 - v.y) / 2 * H;
-    const bw = Math.max(72, (o.scale.x / 2.4) * 86), bh = 34;
-    items.push({ o, sx, sy, bw, bh });
-  }
-  items.sort((a, b) => a.sx - b.sx);
-  for (let i = 0; i < items.length; i++) {
-    for (let j = i + 1; j < items.length; j++) {
-      const a = items[i], b = items[j];
-      if (b.sx - a.sx > (a.bw + b.bw) * 0.55) continue;
-      if (Math.abs(a.sy - b.sy) > (a.bh + b.bh) * 0.6) continue;
-      // lift the lower (larger sy) tag up in world space
-      const lo = a.sy > b.sy ? a : b;
-      lo.o.position.y += 0.42;
-      const w = lo.o.getWorldPosition(new THREE.Vector3()).project(camera);
-      lo.sy = (1 - w.y) / 2 * H;
+  camera.updateMatrixWorld();
+  _camRight.setFromMatrixColumn(camera.matrixWorld, 0).normalize();
+  _camUp.setFromMatrixColumn(camera.matrixWorld, 1).normalize();
+  const upProj = Math.max(0.35, Math.abs(_camUp.y));
+  const rightProj = Math.max(0.35, Math.abs(_camRight.x));
+  const W = renderer.domElement.clientWidth || innerWidth;
+  const H = renderer.domElement.clientHeight || innerHeight;
+  const halfTan = Math.tan((camera.fov * Math.PI / 180) * 0.5);
+
+  labels.forEach((o) => {
+    o.position.x = o.userData.baseX ?? 0;
+    if (o.userData.baseY != null) o.position.y = o.userData.baseY;
+    o.updateMatrixWorld(true);
+  });
+
+  const measure = (item) => {
+    const o = item.o;
+    o.updateMatrixWorld(true);
+    o.getWorldPosition(_lblW);
+    const dist = Math.max(1, -_lblW.clone().applyMatrix4(camera.matrixWorldInverse).z);
+    const worldPerPx = (2 * dist * halfTan) / Math.max(1, H);
+    _lblC.copy(_lblW).addScaledVector(_camUp, o.scale.y * 0.5);
+    const v = _lblC.project(camera);
+    item.visible = v.z >= -1 && v.z <= 1;
+    item.cx = (v.x + 1) * 0.5 * W;
+    item.cy = (1 - v.y) * 0.5 * H;
+    item.bw = (o.scale.x / worldPerPx) + 8;
+    item.bh = (o.scale.y / worldPerPx) + 8;
+    item.worldPerPx = worldPerPx;
+  };
+
+  const items = labels.map((o) => {
+    const it = { o, visible: true, cx: 0, cy: 0, bw: 0, bh: 0, worldPerPx: 0.05 };
+    measure(it);
+    return it;
+  }).filter((it) => it.visible);
+  if (items.length < 2) return;
+
+  const signX = _camRight.x >= 0 ? 1 : -1;
+  for (let pass = 0; pass < 8; pass++) {
+    let any = false;
+    items.sort((a, b) => a.cy - b.cy || a.cx - b.cx);
+    for (let i = 0; i < items.length; i++) {
+      for (let j = i + 1; j < items.length; j++) {
+        const a = items[i], b = items[j];
+        const ox = (a.bw + b.bw) * 0.5 - Math.abs(a.cx - b.cx);
+        const oy = (a.bh + b.bh) * 0.5 - Math.abs(a.cy - b.cy);
+        if (ox <= 0 || oy <= 0) continue;
+        any = true;
+        // Separate cleanly without crossing: lift upper label further up in world +Y, or the second if nearly level
+        const lift = (b.cy - a.cy) < 6 ? b : a;
+        const dyWorld = ((oy + 2) * lift.worldPerPx) / upProj;
+        const maxY = (lift.o.userData.baseY ?? 2) + 4.8;
+        lift.o.position.y = Math.min(maxY, lift.o.position.y + dyWorld);
+        const dir = a.cx <= b.cx ? -1 : 1;
+        const nudgePx = Math.min(ox * 0.28, 16);
+        const baseXA = a.o.userData.baseX ?? 0, baseXB = b.o.userData.baseX ?? 0;
+        a.o.position.x = Math.max(baseXA - 2.2, Math.min(baseXA + 2.2, a.o.position.x + (nudgePx * a.worldPerPx) / rightProj * dir * signX));
+        b.o.position.x = Math.max(baseXB - 2.2, Math.min(baseXB + 2.2, b.o.position.x - (nudgePx * b.worldPerPx) / rightProj * dir * signX));
+        measure(a);
+        measure(b);
+      }
     }
+    if (!any) break;
   }
 }
 function placeCamera() {
   const { portrait, asp } = view;
   const open = cur >= 0 || anim.coverT > 0.02 ? 1 : 0;
   const tx = (1 - anim.coverT) * PW / 2;                      // closed book sits on the right half
-  const pitch = (portrait ? 58 + 5 * anim.coverT : 46) * Math.PI / 180 + orbit.pitch;
+  const gOn = gyro.on && !down && !pinch;
+  const gyroYaw = gyro.on ? clOrbit((gyro.sg / 20) * 0.26, -0.26, 0.26) : 0;
+  const gyroPitch = gyro.on ? clOrbit((gyro.sb / 20) * 0.14, -0.14, 0.14) : 0;
+  const pitch = clOrbit((portrait ? 58 + 5 * anim.coverT : 46) * Math.PI / 180 + orbit.pitch + gyroPitch, 0.32, 1.42);
   // fit: open spread (42 wide) or closed book (22 wide) in the frame's width, plus room for the pop-up height
   // portrait: the open book is cropped to ~20 of its 42 units so it fills the tall screen; panning shows the rest
   const spanW = portrait ? 22 - 2 * anim.coverT : 22 + 17.5 * anim.coverT;
   const vf = camera.fov * Math.PI / 180, hf = 2 * Math.atan(Math.tan(vf / 2) * asp);
   let dist = (spanW / 2) / Math.tan(hf / 2) * (portrait ? 1.04 : 1.0);
   const dH = (PD + 10) / 2 / Math.tan(vf / 2) * 0.78; dist = Math.max(dist, dH * (portrait ? 0.62 : 1.0));
-  // free pan stays where released; gyro is a small offset on top, never recenters
-  const gx = (!down && gyro.on) ? Math.max(-2.2, Math.min(2.2, gyro.sg / 16 * 2.2)) : 0;
-  const gy = (!down && gyro.on) ? Math.max(-1.2, Math.min(1.2, -gyro.sb / 16 * 1.2)) : 0;
+  dist /= userZoom.val;
+  // free pan stays where released; gyro adds subtle pan + real 3D camera yaw/pitch parallax
+  const gx = gOn ? clOrbit((gyro.sg / 20) * 1.35, -1.35, 1.35) : 0;
+  const gy = gOn ? clOrbit((-gyro.sb / 20) * 0.85, -0.85, 0.85) : 0;
   const panX = anim.coverT * (pan.x + gx);
   const panY = anim.coverT * (pan.y + gy);
   const target = new THREE.Vector3(tx + panX, (portrait ? 4.2 - 1.4 * anim.coverT : 1.6) + panY, portrait ? 0.2 + 0.6 * anim.coverT : 1.2);
-  const yaw = portrait ? orbit.yaw * 0.15 : orbit.yaw;
+  const yaw = (portrait ? orbit.yaw * 0.15 : orbit.yaw) + gyroYaw;
   if (anim.zoom > 0) { target.lerp(anim.focus, anim.zoom); dist *= 1 - 0.84 * anim.zoom; }
   dist *= 1 + anim.shift / Math.max(1, innerWidth) * 1.1;
   camera.position.set(target.x + Math.sin(yaw) * Math.cos(pitch) * dist, target.y + Math.sin(pitch) * dist, target.z + Math.cos(yaw) * Math.cos(pitch) * dist);
@@ -669,27 +737,55 @@ function placeCamera() {
   if (anim.shift > 0.5) camera.setViewOffset(vw, vh, anim.shift, 0, vw, vh); else if (camera.view && camera.view.enabled) camera.clearViewOffset();
 }
 
-// pointer: drag = free pan with inertia, stays where released. Page change only via nav / prev-next.
+// pointer: 1-finger free pan with inertia (stays where released); 2-finger pinch zoom + midpoint pan; desktop wheel zoom.
 let down = null;
+let pinch = null;
+let pinchUsed = false;
+const activePointers = new Map();
 const lastPtr = { x: innerWidth / 2, y: innerHeight / 2 };
 const el = renderer.domElement;
-const clOrbit = (v, a, b) => Math.max(a, Math.min(b, v));
 const DRAG_MIN = 8;
 el.addEventListener('pointerdown', (e) => {
   lastPtr.x = e.clientX; lastPtr.y = e.clientY;
-  if (card.classList.contains('on') && !card.contains(e.target)) { hideCard(); }
-  down = { x: e.clientX, y: e.clientY, t: performance.now(), panX: pan.x, panY: pan.y, yaw: orbit.ty, pitch: orbit.tp, hid: card.classList.contains('on'), moved: false, lt: performance.now() };
-  pan.vx = pan.vy = 0;
-  el.setPointerCapture(e.pointerId); el.classList.add('drag');
+  activePointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+  try { el.setPointerCapture(e.pointerId); } catch {}
+  if (activePointers.size === 1) {
+    pinch = null; pinchUsed = false;
+    const wasOn = card.classList.contains('on');
+    if (wasOn && !card.contains(e.target)) { hideCard(); }
+    down = { id: e.pointerId, x: e.clientX, y: e.clientY, t: performance.now(), panX: pan.x, panY: pan.y, yaw: orbit.ty, pitch: orbit.tp, hid: wasOn, moved: false, lt: performance.now() };
+    pan.vx = pan.vy = 0;
+    el.classList.add('drag');
+  } else if (activePointers.size === 2) {
+    pinchUsed = true; down = null; pan.vx = pan.vy = 0;
+    const pts = [...activePointers.values()];
+    const dist0 = Math.max(10, Math.hypot(pts[1].x - pts[0].x, pts[1].y - pts[0].y));
+    pinch = { dist0, zoom0: userZoom.target, midX0: (pts[0].x + pts[1].x) * 0.5, midY0: (pts[0].y + pts[1].y) * 0.5, panX0: pan.x, panY0: pan.y };
+  }
 });
 el.addEventListener('pointermove', (e) => {
   lastPtr.x = e.clientX; lastPtr.y = e.clientY;
-  if (!down) return;
+  if (activePointers.has(e.pointerId)) activePointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+  if (activePointers.size >= 2 && pinch) {
+    const pts = [...activePointers.values()];
+    const dist = Math.max(10, Math.hypot(pts[1].x - pts[0].x, pts[1].y - pts[0].y));
+    const midX = (pts[0].x + pts[1].x) * 0.5, midY = (pts[0].y + pts[1].y) * 0.5;
+    const nextZ = clOrbit(pinch.zoom0 * (dist / pinch.dist0), userZoom.min, userZoom.max);
+    userZoom.target = nextZ;
+    userZoom.val += (nextZ - userZoom.val) * 0.45;
+    const w = Math.max(1, el.clientWidth), h = Math.max(1, el.clientHeight);
+    const worldW = (view.portrait ? 22 : 34) / userZoom.val, worldH = worldW * (h / w);
+    pan.x = pinch.panX0 - ((midX - pinch.midX0) / w) * worldW;
+    pan.y = pinch.panY0 + ((midY - pinch.midY0) / h) * worldH * 0.5;
+    clampPan();
+    return;
+  }
+  if (!down || down.id !== e.pointerId) return;
   const dxPx = e.clientX - down.x, dyPx = e.clientY - down.y;
   if (Math.hypot(dxPx, dyPx) > DRAG_MIN) down.moved = true;
   if (!down.moved) return;
   const w = Math.max(1, el.clientWidth), h = Math.max(1, el.clientHeight);
-  const worldW = view.portrait ? 22 : 34, worldH = worldW * (h / w);
+  const worldW = (view.portrait ? 22 : 34) / userZoom.val, worldH = worldW * (h / w);
   // content moves with the finger
   const nx = down.panX - (dxPx / w) * worldW;
   const ny = down.panY + (dyPx / h) * worldH * 0.5;
@@ -703,19 +799,44 @@ el.addEventListener('pointermove', (e) => {
     orbit.tp = clOrbit(down.pitch - (dyPx / h) * 0.25, -0.16, 0.14);
   }
 });
-el.addEventListener('pointerup', (e) => { if (!down) return; const dx = e.clientX - down.x, dy = e.clientY - down.y; el.classList.remove('drag');
-  const touch = e.pointerType === 'touch'; const hid = down.hid; const moved = down.moved || Math.hypot(dx, dy) >= DRAG_MIN;
-  if (!moved) {
-    if (cur === -1) openBook();
-    else {
-      const wasCard = card.classList.contains('on') || hid;
-      const hit = tap(e.clientX, e.clientY);
-      if (!wasCard && !hit && !stack.length && !EMBED && !touch) turn(e.clientX > el.clientWidth / 2 ? 1 : -1);
+function endPointer(e, isCancel) {
+  activePointers.delete(e.pointerId);
+  try { el.releasePointerCapture(e.pointerId); } catch {}
+  if (activePointers.size === 1) {
+    // Seamlessly transition back to 1-finger pan without jump
+    pinch = null;
+    const [[remId, remPos]] = activePointers.entries();
+    down = { id: remId, x: remPos.x, y: remPos.y, t: performance.now(), panX: pan.x, panY: pan.y, yaw: orbit.ty, pitch: orbit.tp, hid: false, moved: true, lt: performance.now() };
+    pan.vx = pan.vy = 0;
+    return;
+  }
+  if (activePointers.size > 1) return;
+  pinch = null;
+  el.classList.remove('drag');
+  if (!isCancel && down && !pinchUsed) {
+    const dx = e.clientX - down.x, dy = e.clientY - down.y;
+    const touch = e.pointerType === 'touch'; const hid = down.hid; const moved = down.moved || Math.hypot(dx, dy) >= DRAG_MIN;
+    if (!moved) {
+      if (cur === -1) openBook();
+      else {
+        const wasCard = card.classList.contains('on') || hid;
+        const hit = tap(e.clientX, e.clientY);
+        if (!wasCard && !hit && !stack.length && !EMBED && !touch) turn(e.clientX > el.clientWidth / 2 ? 1 : -1);
+      }
     }
   }
   down = null;
-});
-el.addEventListener('pointercancel', () => { down = null; el.classList.remove('drag'); });
+  pinchUsed = false;
+}
+el.addEventListener('pointerup', (e) => endPointer(e, false));
+el.addEventListener('pointercancel', (e) => endPointer(e, true));
+el.addEventListener('wheel', (e) => {
+  if (EMBED || cur < 0) return;
+  e.preventDefault();
+  const stepZ = Math.max(-0.18, Math.min(0.18, -e.deltaY * 0.0014));
+  userZoom.target = clOrbit(userZoom.target * Math.exp(stepZ), userZoom.min, userZoom.max);
+  clampPan();
+}, { passive: false });
 window.addEventListener('keydown', (e) => { if (e.key === 'ArrowRight' || e.key === ' ') turn(1); if (e.key === 'ArrowLeft') turn(-1); });
 window.addEventListener('message', (e) => { if (e.data && e.data.type === 'storybook:turn') turn(e.data.dir > 0 ? 1 : -1); });
 ui.open.addEventListener('click', () => openBook());
@@ -756,7 +877,9 @@ function step(dt) {
   if (moodK < 1) { moodK = Math.min(1, moodK + dt / 1.4); }
   const m = lerpMood(moodFrom, moodTo, ease(moodK)); applyMood(m); scene.background.set(m.bg);
   // keep orbit / pan where the user left them; inertia then clamp; no auto-recenter
-  if (!down) {
+  userZoom.val += (userZoom.target - userZoom.val) * Math.min(1, dt * 10);
+  if (Math.abs(userZoom.target - userZoom.val) < 0.0005) userZoom.val = userZoom.target;
+  if (!down && !pinch) {
     pan.x += pan.vx * dt; pan.y += pan.vy * dt;
     pan.vx *= Math.exp(-dt * 4.4); pan.vy *= Math.exp(-dt * 4.4);
     if (Math.abs(pan.vx) < 0.15) pan.vx = 0;
@@ -766,10 +889,11 @@ function step(dt) {
   orbit.yaw += (orbit.ty - orbit.yaw) * Math.min(1, dt * 8);
   orbit.pitch += (orbit.tp - orbit.pitch) * Math.min(1, dt * 8);
   for (const s of spreads) if (s && s.api && s.api.group.visible) { s.api.update(clock.t, dt); if (s.api.sheen) { s.api.sheen.material.uniforms.uT.value = clock.t; s.api.sheen.material.uniforms.uK.value = s.rev || 0; } }
-  updateRings(clock.t); updateCue(clock.t); updateBurst(dt); updateGlows(); avoidLabelOverlap();
+  updateRings(clock.t); updateCue(clock.t); updateBurst(dt); updateGlows();
   { const deep = stack.length > 0 && !view.portrait && innerWidth >= 760; const want = deep ? Math.min(300, innerWidth * 0.23) * 0.6 : 0;
     anim.shift += (want - anim.shift) * Math.min(1, dt * 2.5); }
   placeCamera();
+  avoidLabelOverlap();
   renderer.render(scene, camera);
   if (snapWant >= 0 && clock.t >= snapAt && !diving && !busy) takeSnap();
 }
@@ -803,13 +927,13 @@ function loop(now) { const dt = Math.min(0.05, (now - last) / 1000); last = now;
   if (card) {
     let swipeY = null;
     card.addEventListener('pointerdown', (e) => { if (e.target.closest('button.go')) return; swipeY = e.clientY; });
-    card.addEventListener('pointermove', (e) => { if (swipeY != null && e.clientY - swipeY > 56) { hideCard(); swipeY = null; } });
+    card.addEventListener('pointermove', (e) => { if (swipeY != null && Math.abs(e.clientY - swipeY) > 48) { hideCard(); swipeY = null; } });
     card.addEventListener('pointerup', () => { swipeY = null; });
     card.addEventListener('pointercancel', () => { swipeY = null; });
   }
   const tiltBtn = document.getElementById('tilt');
   if (tiltBtn) {
-    tiltBtn.hidden = !MOBILE;
+    tiltBtn.hidden = !(MOBILE && typeof DeviceOrientationEvent !== 'undefined');
     tiltBtn.addEventListener('click', (e) => { e.stopPropagation(); setTilt(!gyro.on); });
   }
   const skip = document.getElementById('guideSkip'); if (skip) skip.addEventListener('click', (e) => { e.stopPropagation(); setGuide(false); });

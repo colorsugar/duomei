@@ -235,7 +235,7 @@ export function riverAt(u) {
 
 // ---------- build ----------
 export async function build({ paper, yieldFn = async () => {}, progress = () => {} }) {
-  await loadArt(); await artLoad(['bd-guilin', 'gr-guilin']);
+  await loadArt(); await artLoad(['bd-guilin', 'gr-guilin', 'cut-raft', 'cut-mifen-bowl']);
   const group = new THREE.Group();
   const pieces = [];   // { h, x, z, side, sway }
   const animated = [];
@@ -275,7 +275,7 @@ export async function build({ paper, yieldFn = async () => {}, progress = () => 
       g.lineWidth = 0.14; g.beginPath(); g.moveTo(bx, 0); g.quadraticCurveTo(bx + 0.1, hh * 0.6, bx + 0.25 * Math.sin(i), hh); g.stroke(); } g.fillRect(-1.3, 0, 2.6, 0.25); }, { w: 4, h: 3, res: 60 });
     return hotAll(add(card(pts, paintReeds, { ppu: 48 }), { x, z, size: 0.3, sway: 2.2 }), { act: 'poke', title: '江边芦苇', line: '漓江两岸的浅滩上长满芦苇，秋天开白花。' });
   });
-  steps.push(() => hotAll(add(card(shape.fromDrawing((g) => { g.beginPath(); g.moveTo(-1.1, 0.9); g.quadraticCurveTo(-1.0, 0, 0, 0); g.quadraticCurveTo(1.0, 0, 1.1, 0.9); g.closePath(); g.fill(); g.beginPath(); g.ellipse(0, 1.0, 1.0, 0.45, 0, 0, 6.28); g.fill(); g.lineWidth = 0.08; g.beginPath(); g.moveTo(0.3, 1.2); g.lineTo(1.3, 2.3); g.stroke(); g.beginPath(); g.moveTo(0.5, 1.2); g.lineTo(1.45, 2.2); g.stroke(); }, { w: 3.2, h: 2.6, res: 60 }),
+  steps.push(() => hotAll(add(cutCard(card, 'cut-mifen-bowl', 3.4, { back: 'mirror' }) || card(shape.fromDrawing((g) => { g.beginPath(); g.moveTo(-1.1, 0.9); g.quadraticCurveTo(-1.0, 0, 0, 0); g.quadraticCurveTo(1.0, 0, 1.1, 0.9); g.closePath(); g.fill(); g.beginPath(); g.ellipse(0, 1.0, 1.0, 0.45, 0, 0, 6.28); g.fill(); g.lineWidth = 0.08; g.beginPath(); g.moveTo(0.3, 1.2); g.lineTo(1.3, 2.3); g.stroke(); g.beginPath(); g.moveTo(0.5, 1.2); g.lineTo(1.45, 2.2); g.stroke(); }, { w: 3.2, h: 2.6, res: 60 }),
     (P) => { P.fill('#6b4a2e'); P.layer((g) => { g.beginPath(); g.moveTo(-1.1, 0.9); g.quadraticCurveTo(-1.0, 0, 0, 0); g.quadraticCurveTo(1.0, 0, 1.1, 0.9); g.closePath(); g.fill(); }, '#f1ede4', { depth: 0.5 });
       P.draw((g) => { g.strokeStyle = '#3d5878'; g.lineWidth = 0.05; g.beginPath(); g.moveTo(-0.95, 0.6); g.quadraticCurveTo(0, 0.75, 0.95, 0.6); g.stroke(); g.beginPath(); g.moveTo(-0.7, 0.25); g.quadraticCurveTo(0, 0.35, 0.7, 0.25); g.stroke(); });
       P.layer((g) => { g.beginPath(); g.ellipse(0, 1.0, 0.95, 0.4, 0, 0, 6.28); g.fill(); }, '#c98a4a', { depth: 0.4 });
@@ -288,7 +288,7 @@ export async function build({ paper, yieldFn = async () => {}, progress = () => 
   // lantern boats: float on the river, bob; they pop up too
   const boats = [];
   for (const [u, s] of [[-11, 1.15], [1.5, 1.0], [11.5, 1.2]]) {
-    const m = card(raftPts({ len: 4.4, cormorants: 1 }), (P) => paintRaft(P, { night: 1, len: 4.4, cormorants: 1 }), { ppu: 64, back: 'mirror' });
+    const m = cutCard(card, 'cut-raft', 5.2, { back: 'mirror', flipX: u > 0 }) || card(raftPts({ len: 4.4, cormorants: 1 }), (P) => paintRaft(P, { night: 1, len: 4.4, cormorants: 1 }), { ppu: 64, back: 'mirror' });
     const p = add(m, { x: 0, z: 0, size: 0.35 }); p.hot = { act: 'sail', title: '竹筏渔火', line: '漓江上的渔人夜里撑竹筏，筏头挂一盏马灯，鸬鹚蹲在竹篙边，灯影一路晃过江面。' };
     const lamp = new THREE.PointLight('#ff9a4a', 0, 7, 1.6); lamp.position.set(0, 1, 0.4); m.add(lamp);
     boats.push({ p, u, s, lamp, phase: r() * 6.28 });

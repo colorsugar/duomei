@@ -188,7 +188,11 @@ body:not(.embed) #trail .up{top:62px}
  body:not(.embed) #trail .up{top:auto}
 }
 @media (max-width:760px){
- #intro{left:12px!important;right:12px;width:auto!important;top:auto!important;bottom:max(86px,calc(env(safe-area-inset-bottom) + 78px))}
+ #intro{top:calc(max(12px,env(safe-area-inset-top)) + 52px)!important;bottom:auto!important;left:12px!important;right:12px!important;width:auto!important;padding:12px 14px 12px;max-height:30vh;overflow-y:auto;background:color-mix(in srgb,var(--cardbg) 93%,transparent);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+ #intro h4{font-size:20px;margin:0 0 6px;padding-right:52px}
+ #intro p{font-size:13px;line-height:1.55}
+ #intro .grab{display:none}
+ #tilt{top:max(16px,env(safe-area-inset-top));right:max(14px,env(safe-area-inset-right));bottom:auto;padding:9px 12px;font-size:12px}
  #toast{top:150px;font-size:16px}
  #quest{top:58px}.embed #quest{top:64px}
 }

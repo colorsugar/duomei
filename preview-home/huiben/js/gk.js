@@ -193,7 +193,16 @@ export function paintPagoda(P, { tiers = 7, bh = 0.78, eh = 0.26, body = '#c8902
 // cutCard(card, 'cut-elephant', 12) -> mesh or null when the art is missing (pages still build with their procedural pieces)
 export function cutCard(card, name, w, o = {}) {
   const im = IMGS[name]; if (!im) return null; const h = w * im.height / im.width;
-  return card(imgOutline(im, w, h), (P) => { P.fill('#efe8dc'); P.draw((g) => { g.save(); g.scale(1, -1); g.drawImage(im, -w / 2, -h, w, h); g.restore(); }); if (o.tint) P.draw((g) => { g.globalCompositeOperation = 'multiply'; g.fillStyle = o.tint; g.fillRect(-w, -1, w * 2, h + 2); }); if (o.glow) P.glow((g) => { g.globalAlpha = o.glow; g.save(); g.scale(1, -1); g.drawImage(im, -w / 2, -h, w, h); g.restore(); }); }, { ppu: o.ppu || Math.max(18, Math.min(60, 900 / w)), back: o.back || 'kraft' });
+  const sx = o.flipX ? -1 : 1;
+  const pts = o.flipX
+    ? shape.fromDrawing((g) => { g.save(); g.scale(-1, -1); g.drawImage(im, -w / 2, -h, w, h); g.restore(); }, { w, h, res: 36, simplify: 0.6 })
+    : imgOutline(im, w, h);
+  return card(pts, (P) => {
+    P.fill('#efe8dc');
+    P.draw((g) => { g.save(); g.scale(sx, -1); g.drawImage(im, -w / 2, -h, w, h); g.restore(); });
+    if (o.tint) P.draw((g) => { g.save(); g.globalCompositeOperation = 'multiply'; if (o.tintAlpha != null) g.globalAlpha = o.tintAlpha; g.fillStyle = o.tint; g.fillRect(-w, -1, w * 2, h + 2); g.restore(); });
+    if (o.glow) P.glow((g) => { g.globalAlpha = o.glow; g.save(); g.scale(sx, -1); g.drawImage(im, -w / 2, -h, w, h); g.restore(); });
+  }, { ppu: o.ppu || Math.max(18, Math.min(60, 900 / w)), back: o.back || 'kraft' });
 }
 // the painted ground: draw the top-down painting over the page canvas (cover), blended so the page's own marks still read
 export function paintGround(g, c, name, { alpha = 0.9, mode = 'source-over' } = {}) {

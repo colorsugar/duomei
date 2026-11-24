@@ -205,3 +205,7 @@ If any bundle file is still modified, staged, or untracked after the commit, the
 首页在故语之后、云游之前先是 `#xunji` 寻迹，再是 `#dalu` 大陆专题，沿用 HomeSectionHold 与全局分段进度。`/dalu` 收纳地图模块、完整艺术图集 PDF 与既有地理风物原册；更新地图的正式专题路径为 `/dalu/map`，`/atlas-v6` 继续兼容已有深链接。两条地图路径均保留全局音乐，同源 iframe 上方提供返回大陆与 PDF 入口。全局页头仅按授权增加「寻迹」→ `/xunji`，其余冻结合同不改。
 
 `public/downloads/fantasy-continent-artbook.pdf` 在构建前从 `artifacts/dalu/` 的公开分片逐个校验并重组（`scripts/prepare-dalu-artbook.mjs`）；为81页、74幅图版、11章的扩充艺术图集，包含原60幅及14幅新增宫堡庄园图。纸面目录有逐幅内部跳转、章节书签，每幅有返回目录与带 entry 的地图定位外链。`src/content/daluArtbook.json` 固定 PDF 哈希、大小和章节页码。既有64页故语原册继续保留，页面明确标为原册。
+
+## 静态新首页 — 2026-11-25
+
+`/` 改为 `preview-home/` 静态新首页（含 `/lingchuan-walk/` 灵川六境 32 景、`/huiben/` 与 `/storybook/` 立体绘本）。`npm run build` 末尾的 `scripts/home-static.mjs` 把 Vite 的 SPA 壳改名为 `dist/app.html`，再把 `preview-home/` 拷进 `dist/`；`edgeone.json` 与 `vercel.json` 的兜底改写目标随之改为 `/app.html`，`server/shareMeta.mjs` 也从 `/app.html` 取壳。React 内部跳到 `/` 会整页加载静态首页。首页内嵌的 `carousel.html`、`storybook.html`、`popup.html`、`yunyou-flow.html`、`/huiben/*`、`/storybook/*`、`/lingchuan-walk/*` 用 SAMEORIGIN，其他页面仍 DENY。上线前的正式版是 `b85b3a30`（标签 `prod-rollback-b85b3a30`）；回退＝在 `main` 上 revert 本次合并提交并推送，工作流自动重发。
