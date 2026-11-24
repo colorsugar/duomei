@@ -63,7 +63,7 @@ permissions:
 
 jobs:
   diagnose:
-    if: github.ref == 'refs/heads/main' || (startsWith(github.ref, 'refs/heads/cursor/edgeone-') || startsWith(github.ref, 'refs/heads/cursor/honglou-')) || github.ref == 'refs/heads/assets-pages-split'
+    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/cursor/edgeone-') || startsWith(github.ref, 'refs/heads/cursor/honglou-') || github.ref == 'refs/heads/assets-pages-split' || startsWith(github.ref, 'refs/heads/preview/')
     runs-on: ubuntu-latest
     timeout-minutes: 70
     env:
