@@ -255,7 +255,7 @@ export async function rewriteShellResponse(request, response, options = {}) {
 export async function handleShellRequest(request, options = {}) {
   const fetchImpl = options.fetchImpl ?? fetch;
   try {
-    const shellUrl = new URL("/index.html", request.url);
+    const shellUrl = new URL("/app.html", request.url);
     const shell = await fetchImpl(shellUrl.href, { headers: { accept: "text/html" } });
     if (!shell.ok) return shell;
     const rewritten = await rewriteShellResponse(request, shell, options);

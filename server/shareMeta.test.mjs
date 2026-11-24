@@ -207,13 +207,13 @@ test("handleShellRequest fetches the site's own shell and tags the response", as
   const fetchImpl = async (input) => {
     const url = new URL(typeof input === "string" ? input : input.url);
     seen.push(url.href);
-    if (url.pathname === "/index.html") {
+    if (url.pathname === "/app.html") {
       return new Response(shell, { status: 200, headers: { "content-type": "text/html", "content-length": "9" } });
     }
     return fetchSource(input);
   };
   const bot = await handleShellRequest(new Request("https://duomei.site/zaobao", { headers: { "user-agent": "Twitterbot/1.0" } }), { fetchImpl });
-  assert.equal(seen[0], "https://duomei.site/index.html");
+  assert.equal(seen[0], "https://duomei.site/app.html");
   assert.equal(bot.headers.get("x-duomei-share"), "rewritten");
   assert.equal(bot.headers.get("content-length"), null);
   assert.equal(metaContent(await bot.text(), "property", "og:title"), "小米今晚发18 Fold，伊萨尔火箭入轨 · 今日早报");
