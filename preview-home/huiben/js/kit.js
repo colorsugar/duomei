@@ -20,6 +20,7 @@ export function rig({ group, paper, seed = 1, contact = '#5a4630' }) {
 
 // flapping paper flyers (swallows, egrets) on looping paths
 export function flyers(group, { n = 4, color = '#2a2622', span = 1.1, rad = 10, h = 8, sp = 0.18, fork = false, cz = -3 } = {}) {
+  if (SMALL) n = Math.max(1, Math.round(n * 0.4));
   const mat = new THREE.MeshLambertMaterial({ color, side: THREE.DoubleSide });
   const list = [];
   for (let i = 0; i < n; i++) {
@@ -31,7 +32,7 @@ export function flyers(group, { n = 4, color = '#2a2622', span = 1.1, rad = 10, 
     const body = new THREE.Mesh(new THREE.CapsuleGeometry(0.08, 0.42, 3, 6), mat); body.rotation.x = Math.PI / 2;
     b.add(Lp, Rp, body);
     if (fork) { const tail = new THREE.Mesh(new THREE.ConeGeometry(0.12, 0.5, 3), mat); tail.rotation.x = -Math.PI / 2; tail.position.z = -0.4; tail.scale.x = 1.6; tail.scale.y = 0.3; b.add(tail); }
-    L.castShadow = R.castShadow = body.castShadow = true;
+    L.castShadow = R.castShadow = body.castShadow = !SMALL;
     b.userData = { Lp, Rp, ph: i * 1.7, rad: rad + i * 1.4, h: h + i * 0.6, sp: sp + i * 0.03 };
     b.visible = false; group.add(b); list.push(b);
   }
@@ -41,8 +42,10 @@ export function flyers(group, { n = 4, color = '#2a2622', span = 1.1, rad = 10, 
 }
 
 export function mist(group, r, list, rgb = '236,232,224', a = 0.3) {
-  const c = document.createElement('canvas'); c.width = 512; c.height = 256; const g = c.getContext('2d');
-  for (let i = 0; i < 14; i++) { const x = 60 + r() * 392, y = 90 + r() * 80, rx = 70 + r() * 120, ry = 26 + r() * 30;
+  if (SMALL) list = list.slice(0, Math.min(2, list.length));
+  const c = document.createElement('canvas'); c.width = SMALL ? 256 : 512; c.height = SMALL ? 128 : 256; const g = c.getContext('2d');
+  const nBlob = SMALL ? 8 : 14, xSpan = SMALL ? 196 : 392, y0 = SMALL ? 45 : 90, rx0 = SMALL ? 35 : 70, rw = SMALL ? 60 : 120;
+  for (let i = 0; i < nBlob; i++) { const x = 30 + r() * xSpan, y = y0 + r() * (SMALL ? 40 : 80), rx = rx0 + r() * rw, ry = (SMALL ? 13 : 26) + r() * (SMALL ? 15 : 30);
     const rg = g.createRadialGradient(x, y, 0, x, y, rx); rg.addColorStop(0, `rgba(${rgb},${a})`); rg.addColorStop(1, `rgba(${rgb},0)`);
     g.save(); g.translate(x, y); g.scale(1, ry / rx); g.translate(-x, -y); g.fillStyle = rg; g.fillRect(x - rx, y - rx, rx * 2, rx * 2); g.restore(); }
   const tex = new THREE.CanvasTexture(c); tex.colorSpace = THREE.SRGBColorSpace;

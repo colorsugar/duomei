@@ -9,7 +9,7 @@ export async function loadArt(names) {
     if (IMGS[n]) return res();
     const im = new Image();
     im.onload = () => { IMGS[n] = im; res(); };
-    const small = typeof innerWidth !== 'undefined' && Math.min(innerWidth, innerHeight) < 760 && /^(bd|gr|cut)-/.test(n);
+    const small = typeof matchMedia === 'function' && (matchMedia('(pointer: coarse)').matches || Math.min(innerWidth, innerHeight) < 900);
     im.onerror = () => { if (small && !im.dataset.full) { im.dataset.full = 1; im.src = `img/${n}.webp`; } else res(); };
     im.src = small ? `img/m/${n}.webp` : `img/${n}.webp`;
   })));

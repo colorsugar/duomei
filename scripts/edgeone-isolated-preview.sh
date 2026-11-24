@@ -177,6 +177,14 @@ node scripts/edgeone-preview-fail-log.mjs duomei-new-preview || true
 node scripts/edgeone-preview-fail-log.mjs duomei-slim-preview || true
 node scripts/edgeone-preview-fail-log.mjs duomei-home-preview || true
 
+if [[ "$SITE_PROJECT" == "duomei-motion-preview" || "${PREVIEW_HOME_ONLY:-0}" == "1" ]]; then
+  echo "== 该预览项目直接发新首页小包（不打 438MB 整包，正式站不改） =="
+  home_pack="${RUNNER_TEMP:-/tmp}/duomei-home-only-pack"
+  bash scripts/edgeone-preview-home-pack.sh "$home_pack" "$SITE_PROJECT" "https://duomei-slim-preview.edgeone.dev"
+  site_pack="$home_pack"
+  HOME_ONLY=1
+fi
+
 if ! deploy_site_pack; then
   dump_preview_fail_log
   echo "== 去掉云函数后再发一版静态预览（新首页/绘本不靠云函数；正式站不改） =="

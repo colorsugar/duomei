@@ -21,9 +21,9 @@ const setProgress = (v) => { ui.bar.style.transform = `scaleX(${v})`; ui.pct.tex
 const nextFrame = () => new Promise((res) => (CAPTURE ? setTimeout(res, 0) : requestAnimationFrame(() => res())));
 
 // ---------- renderer ----------
-const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: 'high-performance' });
-const MOBILE = matchMedia('(pointer: coarse)').matches || Math.min(innerWidth, innerHeight) < 600;
-renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, CAPTURE ? 1.5 : MOBILE ? 1.75 : 2));
+const MOBILE = matchMedia('(pointer: coarse)').matches || Math.min(innerWidth, innerHeight) < 700;
+const renderer = new THREE.WebGLRenderer({ antialias: !MOBILE, alpha: false, powerPreference: MOBILE ? 'low-power' : 'high-performance' });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, CAPTURE ? 1.5 : MOBILE ? 1.25 : 2));
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 1.0;
@@ -36,7 +36,7 @@ const camera = new THREE.PerspectiveCamera(30, 1, 0.5, 400);
 
 // lights (mood lerps per spread)
 const key = new THREE.DirectionalLight('#fff', 2.6), fill = new THREE.DirectionalLight('#fff', 0.8), sky = new THREE.HemisphereLight('#fff', '#888', 0.5);
-key.castShadow = true; key.shadow.mapSize.set(MOBILE && (navigator.hardwareConcurrency || 8) <= 4 ? 1024 : 2048, MOBILE && (navigator.hardwareConcurrency || 8) <= 4 ? 1024 : 2048);
+key.castShadow = true; const SHADOW = MOBILE ? 1024 : 2048; key.shadow.mapSize.set(SHADOW, SHADOW);
 Object.assign(key.shadow.camera, { left: -26, right: 26, top: 26, bottom: -26, near: 10, far: 110 });
 key.shadow.bias = -0.0005; key.shadow.normalBias = 0.03; key.shadow.radius = 4;
 scene.add(key, key.target, fill, fill.target, sky);
@@ -230,7 +230,7 @@ function questUI(pop) {
   const id = SPREADS[cur] && SPREADS[cur].id; if (!id || !QUEST[id]) { qEl.classList.remove('on'); return; }
   const tot = Object.values(QUEST).reduce((a, q) => a + q.size, 0), got = Object.values(FOUND).reduce((a, f) => a + f.size, 0);
   const here = QUEST[id].size, hf = (FOUND[id] || new Set()).size;
-  qEl.innerHTML = `<b>寻景</b><span>${hf}<i>/${here}</i></span><u style="--k:${(hf / here).toFixed(3)}"></u><small>全书 ${got}/${tot}</small>`;
+  qEl.innerHTML = `<b>寻景</b><span>${hf}<i>/${here}</i></span><u style="--k:${(hf / here).toFixed(3)}"></u><small>全书 ${got}/${tot}</small>` + (guideOn ? `<button type="button" class="skip" id="guideSkip">退出导览</button>` : '');
   qEl.classList.add('on'); if (pop) { qEl.classList.remove('pop'); void qEl.offsetWidth; qEl.classList.add('pop'); }
 }
 let toastT = 0;
@@ -259,7 +259,7 @@ function paintAlbum() {
     rows.push(`<h5>${s.title}<small>${[...q].filter((t) => f.has(t)).length}/${q.size}</small></h5>`);
     rows.push('<p>' + [...q].map((title) => `<i class="${f.has(title) ? 'got' : ''}">${title}</i>`).join('') + '</p>');
   }
-  box.innerHTML = '<div class="sheet"><em>图鉴</em>' + (rows.join('') || '<p>翻开绘本，点景物开始寻。一层层走进去。</p>') + '</div>';
+  box.innerHTML = '<div class="sheet"><button type="button" class="x" aria-label="关闭图鉴">关闭</button><em>图鉴</em>' + (rows.join('') || '<p>翻开绘本，靠近发光处看看景物，一层层走进去。</p>') + '</div>';
 }
 function toggleAlbum() {
   const box = document.getElementById('album'); if (!box) return;
@@ -267,17 +267,18 @@ function toggleAlbum() {
   if (on) paintAlbum();
   box.classList.toggle('on', on);
 }
+let guideOn = true;
+function setGuide(on) {
+  guideOn = !!on; cueTarget = null; if (cueEl) cueEl.classList.remove('on');
+  document.body.classList.toggle('guide-off', !guideOn);
+  const skip = document.getElementById('guideSkip'); if (skip) skip.hidden = !guideOn;
+}
 function updateCue(t) {
   if (toastEl.classList.contains('on') && t - toastT > 2.2) toastEl.classList.remove('on');
-  const id = SPREADS[cur] && SPREADS[cur].id; const open = id && !diving && !busy && !card.classList.contains('on') && t - lastTapT > 3.2 && (spreads[cur] && spreads[cur].rev > 0.95);
-  if (!open) { cueEl.classList.remove('on'); cueTarget = null; return; }
-  if (!cueTarget || (FOUND[id] && FOUND[id].has(cueTarget.hot.title))) {
-    const f = FOUND[id] || new Set(); const cand = rings.filter((r) => r.api === spreads[cur].api && r.hot && !f.has(r.hot.title));
-    cueTarget = cand.find((r) => r.dive) || cand[0] || null; if (!cueTarget) { cueEl.classList.remove('on'); return; }
-    cueEl.querySelector('span').textContent = cueTarget.dive ? '点这里 · 入画' : cueTarget.hot.food ? '点这里 · 尝一口' : '点这里';
-  }
-  const v = cueTarget.posFn().project(camera); if (v.z > 1) return;
-  cueEl.style.transform = `translate(${((v.x + 1) / 2 * innerWidth).toFixed(1)}px, ${((1 - v.y) / 2 * innerHeight).toFixed(1)}px)`; cueEl.classList.add('on');
+  // 导览不再强行指路或弹出「点这里」；光圈只在靠近时由 updateRings 亮起
+  if (!guideOn || !cueEl) { if (cueEl) cueEl.classList.remove('on'); cueTarget = null; return; }
+  cueEl.classList.remove('on');
+  cueTarget = null;
 }
 function addRing(api, hot, posFn, obj) {
   if (!hot) return; const dive = !!hot.dive;
@@ -286,29 +287,42 @@ function addRing(api, hot, posFn, obj) {
   const sp = new THREE.Sprite(m); sp.renderOrder = 20; sp.scale.setScalar(dive ? 1.5 : 0.9); scene.add(sp); rings.push({ api, sp, posFn, dive, obj, hot, ph: Math.random() * 6 });
 }
 function updateRings(t) {
-  for (const r of rings) { const s = spreads.find((x) => x && x.api === r.api); const on = s && s.api.group.visible && (s.rev || 0) > 0.9 && !diving;
-    r.sp.visible = on; if (!on) continue; r.sp.position.copy(r.posFn()); const k = 0.5 + 0.5 * Math.sin(t * 2.2 + r.ph);
+  const px = lastPtr.x, py = lastPtr.y, cx = innerWidth / 2, cy = innerHeight * 0.46;
+  for (const r of rings) { const s = spreads.find((x) => x && x.api === r.api); const on = s && s.api.group.visible && (s.rev || 0) > 0.9 && !diving && !card.classList.contains('on');
+    if (!on) { r.sp.visible = false; r.near = 0; continue; }
+    r.sp.position.copy(r.posFn());
+    const v = r.sp.position.clone().project(camera);
+    const sx = (v.x + 1) / 2 * innerWidth, sy = (1 - v.y) / 2 * innerHeight;
+    const behind = v.z > 1;
+    const dPtr = Math.hypot(sx - px, sy - py), dCam = Math.hypot(sx - cx, sy - cy);
+    const dist = Math.min(dPtr, dCam);
+    const want = behind ? 0 : Math.max(0, Math.min(1, (220 - dist) / 140));
+    r.near = (r.near || 0) + (want - (r.near || 0)) * 0.16;
+    if (r.near < 0.04) { r.sp.visible = false; continue; }
+    r.sp.visible = true;
+    const pulse = 0.5 + 0.5 * Math.sin(t * 2.4 + r.ph);
+    const zoom = 0.82 + 0.22 * Math.sin(t * 1.6 + r.ph * 0.7);
     const fd = FOUND[s.meta ? s.meta.id : ''] || FOUND[SPREADS[cur] && SPREADS[cur].id];
-    const seen = fd && r.hot && fd.has(r.hot.title) ? 0.4 : 1;
-    const cue = (r === cueTarget) ? 1.35 + 0.35 * Math.sin(t * 5) : 1;
-    r.sp.material.opacity = Math.min(1, (r.dive ? 0.55 + 0.35 * k : 0.22 + 0.2 * k) * seen * (r === cueTarget ? 1.15 : 1));
-    r.sp.scale.setScalar((r.dive ? 1.3 : 0.7) * (0.9 + 0.2 * k) * cue); }
+    const seen = fd && r.hot && fd.has(r.hot.title) ? 0.45 : 1;
+    r.sp.material.opacity = Math.min(1, r.near * seen * (r.dive ? 0.7 + 0.3 * pulse : 0.4 + 0.25 * pulse));
+    r.sp.scale.setScalar((r.dive ? 1.35 : 0.78) * zoom); }
 }
 const card = document.getElementById('intro');
 let cardTimer = 0;
 function showCard(hot, x, y) {
   discover(hot); if (lastHit && lastHit.point) panGoal = lastHit.point.x; card.querySelector('h4').textContent = hot.title; card.querySelector('p').textContent = hot.line;
-  card.querySelector('em').textContent = hot.dive ? '入画 · 点「走进去」' : hot.food ? '风物 · 吃食' : '景物';
-  const go = card.querySelector('button'); go.hidden = !hot.dive; go.onclick = (e) => { e.stopPropagation(); hideCard(); dive(hot); };
+  card.querySelector('em').textContent = hot.dive ? '入画' : hot.food ? '风物 · 吃食' : '景物';
+  const go = card.querySelector('button.go'); if (go) { go.hidden = !hot.dive; go.onclick = (e) => { e.stopPropagation(); hideCard(); dive(hot); }; }
   const W = innerWidth, H = innerHeight, cw = Math.min(300, W - 32);
   card.style.left = Math.max(16, Math.min(W - cw - 16, x - cw / 2)) + 'px'; card.style.top = Math.max(70, Math.min(H - 230, y - 190)) + 'px'; card.style.width = cw + 'px';
-  card.classList.add('on'); clearTimeout(cardTimer); if (!CAPTURE) cardTimer = setTimeout(hideCard, hot.dive ? 9000 : 6500);
+  card.classList.add('on'); clearTimeout(cardTimer); cardTimer = 0;
 }
-function hideCard() { card.classList.remove('on'); panGoal = null; }
+function hideCard() { card.classList.remove('on'); panGoal = null; clearTimeout(cardTimer); }
 const burst = [];
 function leaves(p, color = '#b8432c') {
   const at = ringPos(p); const mat = new THREE.MeshLambertMaterial({ color, side: THREE.DoubleSide, transparent: true });
-  for (let i = 0; i < 26; i++) { const m = new THREE.Mesh(leafShapeGeo, mat.clone()); m.position.copy(at).add(new THREE.Vector3((Math.random() - 0.5) * 2.4, (Math.random() - 0.3) * 1.2, (Math.random() - 0.5) * 1.2));
+  const nLeaf = MOBILE ? 10 : 26;
+  for (let i = 0; i < nLeaf; i++) { const m = new THREE.Mesh(leafShapeGeo, mat.clone()); m.position.copy(at).add(new THREE.Vector3((Math.random() - 0.5) * 2.4, (Math.random() - 0.3) * 1.2, (Math.random() - 0.5) * 1.2));
     m.userData = { v: new THREE.Vector3((Math.random() - 0.5) * 1.2, -0.6 - Math.random() * 0.8, (Math.random() - 0.2) * 0.8), w: Math.random() * 6, life: 2.6 + Math.random() }; scene.add(m); burst.push(m); }
 }
 const leafShapeGeo = (() => { const s = new THREE.Shape(); s.moveTo(0, 0); s.quadraticCurveTo(0.14, 0.12, 0, 0.32); s.quadraticCurveTo(-0.14, 0.12, 0, 0); return new THREE.ShapeGeometry(s); })();
@@ -553,6 +567,33 @@ async function turn(dir) {
 
 // ---------- camera, framing, orbit ----------
 const orbit = { yaw: 0, pitch: 0, ty: 0, tp: 0 };
+const gyro = { on: false, sb: 0, sg: 0, baseB: null };
+function onOrientation(e) {
+  if (e.beta == null || e.gamma == null) return;
+  if (gyro.baseB == null) gyro.baseB = e.beta;
+  const db = Math.max(-16, Math.min(16, e.beta - gyro.baseB));
+  const dg = Math.max(-16, Math.min(16, e.gamma));
+  gyro.sb += (db - gyro.sb) * 0.14;
+  gyro.sg += (dg - gyro.sg) * 0.14;
+}
+async function setTilt(on) {
+  const btn = document.getElementById('tilt');
+  if (!on) {
+    gyro.on = false; gyro.baseB = null;
+    window.removeEventListener('deviceorientation', onOrientation, true);
+    if (btn) { btn.classList.remove('on'); btn.textContent = '开启体感'; }
+    return;
+  }
+  try {
+    if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+      const r = await DeviceOrientationEvent.requestPermission();
+      if (r !== 'granted') { if (btn) btn.textContent = '未允许体感'; return; }
+    }
+    window.addEventListener('deviceorientation', onOrientation, true);
+    gyro.on = true; gyro.baseB = null;
+    if (btn) { btn.classList.add('on'); btn.textContent = '体感已开'; }
+  } catch (_) { if (btn) btn.textContent = '无法开启'; }
+}
 function frame() {
   const w = ui.stage.clientWidth, h = ui.stage.clientHeight; const asp = w / h; const portrait = asp < 0.9;
   renderer.setSize(w, h, false); camera.aspect = asp;
@@ -573,7 +614,7 @@ function placeCamera() {
   let dist = (spanW / 2) / Math.tan(hf / 2) * (portrait ? 1.04 : 1.0);
   const dH = (PD + 10) / 2 / Math.tan(vf / 2) * 0.78; dist = Math.max(dist, dH * (portrait ? 0.62 : 1.0));
   // portrait: frame part of the spread and glide across it (drag pans; idle drifts page to page)
-  const pan = portrait ? anim.coverT * (anim.panX - orbit.yaw * 30) : 0;
+  const pan = portrait ? anim.coverT * (anim.panX + orbit.yaw * 30) : 0;
   const target = new THREE.Vector3(tx + pan, portrait ? 4.2 - 1.4 * anim.coverT : 1.6, portrait ? 0.2 + 0.6 * anim.coverT : 1.2);
   const yaw = portrait ? orbit.yaw * 0.3 : orbit.yaw;
   if (anim.zoom > 0) { target.lerp(anim.focus, anim.zoom); dist *= 1 - 0.84 * anim.zoom; }
@@ -585,16 +626,35 @@ function placeCamera() {
   if (anim.shift > 0.5) camera.setViewOffset(vw, vh, anim.shift, 0, vw, vh); else if (camera.view && camera.view.enabled) camera.clearViewOffset();
 }
 
-// pointer: drag = gentle orbit; quick horizontal swipe or click = turn
+// pointer: drag follows the finger (content moves with it); quick horizontal swipe = turn
 let down = null;
+const lastPtr = { x: innerWidth / 2, y: innerHeight / 2 };
 const el = renderer.domElement;
-el.addEventListener('pointerdown', (e) => { down = { x: e.clientX, y: e.clientY, t: performance.now(), yaw: orbit.ty, pitch: orbit.tp }; el.setPointerCapture(e.pointerId); el.classList.add('drag'); });
-el.addEventListener('pointermove', (e) => { if (!down) return; const dx = (e.clientX - down.x) / el.clientWidth, dy = (e.clientY - down.y) / el.clientHeight;
-  orbit.ty = Math.max(-0.26, Math.min(0.26, down.yaw - dx * 0.6)); orbit.tp = Math.max(-0.12, Math.min(0.1, down.pitch + dy * 0.3)); });
+const clOrbit = (v, a, b) => Math.max(a, Math.min(b, v));
+el.addEventListener('pointerdown', (e) => {
+  lastPtr.x = e.clientX; lastPtr.y = e.clientY;
+  if (card.classList.contains('on') && !card.contains(e.target)) { hideCard(); }
+  down = { x: e.clientX, y: e.clientY, t: performance.now(), yaw: orbit.ty, pitch: orbit.tp, hid: card.classList.contains('on') }; el.setPointerCapture(e.pointerId); el.classList.add('drag');
+});
+el.addEventListener('pointermove', (e) => {
+  lastPtr.x = e.clientX; lastPtr.y = e.clientY;
+  if (!down) return; const dx = (e.clientX - down.x) / el.clientWidth, dy = (e.clientY - down.y) / el.clientHeight;
+  // portrait pan + landscape orbit: finger right => content moves right
+  if (view.portrait) { orbit.ty = clOrbit(down.yaw - dx * 0.6, -0.26, 0.26); }
+  else { orbit.ty = clOrbit(down.yaw + dx * 0.6, -0.26, 0.26); }
+  orbit.tp = clOrbit(down.pitch - dy * 0.3, -0.12, 0.1);
+});
 el.addEventListener('pointerup', (e) => { if (!down) return; const dx = e.clientX - down.x, dy = e.clientY - down.y, dt = performance.now() - down.t; el.classList.remove('drag');
-  const touch = e.pointerType === 'touch';
-  if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.4 && dt < 450 && touch) turn(dx < 0 ? 1 : -1);
-  else if (Math.hypot(dx, dy) < 6) { if (cur === -1) openBook(); else if (!tap(e.clientX, e.clientY) && !stack.length && !EMBED) turn(e.clientX > el.clientWidth / 2 ? 1 : -1); }
+  const touch = e.pointerType === 'touch'; const hid = down.hid;
+  if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.4 && dt < 450 && touch && !hid) turn(dx < 0 ? 1 : -1);
+  else if (Math.hypot(dx, dy) < 6) {
+    if (cur === -1) openBook();
+    else {
+      const wasCard = card.classList.contains('on') || hid;
+      const hit = tap(e.clientX, e.clientY);
+      if (!wasCard && !hit && !stack.length && !EMBED && !touch) turn(e.clientX > el.clientWidth / 2 ? 1 : -1);
+    }
+  }
   down = null; orbit.ty = 0; orbit.tp = 0; });
 el.addEventListener('pointercancel', () => { down = null; orbit.ty = 0; orbit.tp = 0; el.classList.remove('drag'); });
 window.addEventListener('keydown', (e) => { if (e.key === 'ArrowRight' || e.key === ' ') turn(1); if (e.key === 'ArrowLeft') turn(-1); });
@@ -636,13 +696,15 @@ function step(dt) {
   coverPivot.rotation.z = anim.coverT * Math.PI;
   if (moodK < 1) { moodK = Math.min(1, moodK + dt / 1.4); }
   const m = lerpMood(moodFrom, moodTo, ease(moodK)); applyMood(m); scene.background.set(m.bg);
-  // idle orbit drift + damped drag
-  const idle = 1;
-  orbit.yaw += ((orbit.ty + Math.sin(clock.t * 0.13) * 0.035 * idle) - orbit.yaw) * Math.min(1, dt * 4);
-  orbit.pitch += ((orbit.tp + Math.sin(clock.t * 0.09) * 0.012 * idle) - orbit.pitch) * Math.min(1, dt * 4);
+  // idle orbit drift + damped drag + optional gyro
+  const idle = down || gyro.on ? 0.15 : 1;
+  const gy = (!down && gyro.on) ? clOrbit(gyro.sg / 16 * 0.16, -0.18, 0.18) : 0;
+  const gp = (!down && gyro.on) ? clOrbit(-gyro.sb / 16 * 0.1, -0.1, 0.1) : 0;
+  orbit.yaw += ((orbit.ty + gy + Math.sin(clock.t * 0.13) * 0.035 * idle) - orbit.yaw) * Math.min(1, dt * 4);
+  orbit.pitch += ((orbit.tp + gp + Math.sin(clock.t * 0.09) * 0.012 * idle) - orbit.pitch) * Math.min(1, dt * 4);
   for (const s of spreads) if (s && s.api && s.api.group.visible) { s.api.update(clock.t, dt); if (s.api.sheen) { s.api.sheen.material.uniforms.uT.value = clock.t; s.api.sheen.material.uniforms.uK.value = s.rev || 0; } }
   updateRings(clock.t); updateCue(clock.t); updateBurst(dt); updateGlows();
-  { const portrait = view.portrait; const g = panGoal != null ? Math.max(-10.5, Math.min(10.5, panGoal)) : (cueTarget ? Math.max(-10, Math.min(10, cueTarget.posFn().x)) : Math.sin(clock.t * 0.16) * 5);
+  { const portrait = view.portrait; const g = panGoal != null ? Math.max(-10.5, Math.min(10.5, panGoal)) : Math.sin(clock.t * 0.16) * 5;
     anim.panX += ((portrait ? g : 0) - anim.panX) * Math.min(1, dt * 2.4);
     const deep = stack.length > 0 && !portrait && innerWidth >= 760; const want = deep ? Math.min(300, innerWidth * 0.23) * 0.6 : 0;
     anim.shift += (want - anim.shift) * Math.min(1, dt * 2.5); }
@@ -672,11 +734,28 @@ function loop(now) { const dt = Math.min(0.05, (now - last) / 1000); last = now;
   setProgress(1); await nextFrame();
   ui.loader.classList.add('done');
   mountNav(); restoreFinds();
-  qEl.addEventListener('click', () => toggleAlbum());
-  const album = document.getElementById('album'); if (album) album.addEventListener('click', (e) => { if (e.target.id === 'album') toggleAlbum(); });
-  setTimeout(() => { SPREADS.map((m, i) => (m.chapter && i > 0 ? i : -1)).filter((i) => i > 0).reduce((p, i) => p.then(() => ensure(i)), Promise.resolve()); }, 400);   // chapters one by one; dive pages load when entered
+  qEl.addEventListener('click', (e) => { if (e.target.closest('.skip')) { e.stopPropagation(); setGuide(false); return; } toggleAlbum(); });
+  const album = document.getElementById('album'); if (album) {
+    album.addEventListener('click', (e) => { if (e.target.id === 'album' || e.target.closest('.x')) toggleAlbum(); });
+  }
+  const introX = card && card.querySelector('.x'); if (introX) introX.addEventListener('click', (e) => { e.stopPropagation(); hideCard(); });
+  if (card) {
+    let swipeY = null;
+    card.addEventListener('pointerdown', (e) => { if (e.target.closest('button.go')) return; swipeY = e.clientY; });
+    card.addEventListener('pointermove', (e) => { if (swipeY != null && e.clientY - swipeY > 56) { hideCard(); swipeY = null; } });
+    card.addEventListener('pointerup', () => { swipeY = null; });
+    card.addEventListener('pointercancel', () => { swipeY = null; });
+  }
+  const tiltBtn = document.getElementById('tilt');
+  if (tiltBtn) {
+    tiltBtn.hidden = !MOBILE;
+    tiltBtn.addEventListener('click', (e) => { e.stopPropagation(); setTilt(!gyro.on); });
+  }
+  const skip = document.getElementById('guideSkip'); if (skip) skip.addEventListener('click', (e) => { e.stopPropagation(); setGuide(false); });
+  // phones: don't prefetch every chapter up front (that was a multi-MB hitch)
+  if (!MOBILE) setTimeout(() => { SPREADS.map((m, i) => (m.chapter && i > 0 ? i : -1)).filter((i) => i > 0).reduce((p, i) => p.then(() => ensure(i)), Promise.resolve()); }, 800);
   const FX = [];
-  window.__book = { mem() { return JSON.stringify(renderer.info.memory) + " built=" + spreads.filter((s) => s && s.api).length; }, snaps() { return Object.keys(SNAP).map((i) => [SPREADS[i].id, SNAP[i].url]); }, tapAt(x, y) { return tap(x, y); }, tapHot(id, title) { const s = spreads[cur]; const p = s.api.pieces.find((q) => q.hot && q.hot.title === title) || (s.api.extraHots || []).map((m) => m.userData.piece).find((q) => q.hot.title === title); if (!p) return 'none'; const w = p.extra ? p.mesh.getWorldPosition(new THREE.Vector3()) : ringPos(p); const v = w.clone().project(camera); const x = (v.x + 1) / 2 * innerWidth, y = (1 - v.y) / 2 * innerHeight; lastHit = { p, point: w }; act(p, p.hot); showCard(p.hot, x, y); const fx = document.createElement('i'); fx.className = 'tapfx'; fx.style.left = x + 'px'; fx.style.top = y + 'px'; document.body.appendChild(fx); FX.push({ el: fx, t: 0, w }); return [x, y]; }, dive() { const c = card.querySelector('button'); if (!c.hidden) c.click(); }, back, cam: () => [camera.position.x.toFixed(3), camera.position.y.toFixed(3), camera.position.z.toFixed(3), anim.coverT.toFixed(3), orbit.yaw.toFixed(4)], turn, openBook, step, orbit(y, p) { orbit.ty = y; orbit.tp = p; }, get cur() { return cur; }, get busy() { return busy; } };
+  window.__book = { mem() { return JSON.stringify(renderer.info.memory) + " built=" + spreads.filter((s) => s && s.api).length; }, snaps() { return Object.keys(SNAP).map((i) => [SPREADS[i].id, SNAP[i].url]); }, tapAt(x, y) { return tap(x, y); }, tapHot(id, title) { const s = spreads[cur]; const p = s.api.pieces.find((q) => q.hot && q.hot.title === title) || (s.api.extraHots || []).map((m) => m.userData.piece).find((q) => q.hot.title === title); if (!p) return 'none'; const w = p.extra ? p.mesh.getWorldPosition(new THREE.Vector3()) : ringPos(p); const v = w.clone().project(camera); const x = (v.x + 1) / 2 * innerWidth, y = (1 - v.y) / 2 * innerHeight; lastHit = { p, point: w }; act(p, p.hot); showCard(p.hot, x, y); const fx = document.createElement('i'); fx.className = 'tapfx'; fx.style.left = x + 'px'; fx.style.top = y + 'px'; document.body.appendChild(fx); FX.push({ el: fx, t: 0, w }); return [x, y]; }, dive() { const c = card.querySelector('button.go'); if (c && !c.hidden) c.click(); }, back, cam: () => [camera.position.x.toFixed(3), camera.position.y.toFixed(3), camera.position.z.toFixed(3), anim.coverT.toFixed(3), orbit.yaw.toFixed(4)], turn, openBook, step, orbit(y, p) { orbit.ty = y; orbit.tp = p; }, get cur() { return cur; }, get busy() { return busy; } };
   { const b = window.__book; if (b) { const st = b.step; b.step = (dt) => { st(dt); for (let i = FX.length - 1; i >= 0; i--) { const f = FX[i]; f.t += dt; const k = Math.min(1, f.t / 0.8); if (f.w) { const v = f.w.clone().project(camera); f.el.style.left = ((v.x + 1) / 2 * innerWidth) + 'px'; f.el.style.top = ((1 - v.y) / 2 * innerHeight) + 'px'; } f.el.style.transform = `scale(${0.35 + k * 1.3})`; f.el.style.opacity = String(1 - k); if (k >= 1) { f.el.remove(); FX.splice(i, 1); } } }; } }
   window.__book.jumpLevel = jumpLevel; window.__book.mmBig = (v) => { trailEl.classList.toggle('open', !!v); trail(); };
   window.__ready = true;

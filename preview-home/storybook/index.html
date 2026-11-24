@@ -66,8 +66,18 @@ header *{transition:color .6s}
 #intro em{font:normal 11px/1 var(--uifont);letter-spacing:.3em;color:var(--accent);display:block;margin-bottom:8px}
 #intro h4{margin:0 0 8px;font:400 26px/1.1 var(--headfont);letter-spacing:.08em}
 #intro p{margin:0;font:14px/1.75 var(--uifont);opacity:.86}
-#intro button{margin-top:12px;appearance:none;border:0;border-radius:999px;padding:9px 16px;background:var(--accent);color:var(--cardbg);font:14px/1 var(--uifont);letter-spacing:.3em;cursor:pointer}
+#intro{padding-top:20px;touch-action:pan-y}
+#intro .grab{position:absolute;left:50%;top:8px;width:36px;height:4px;margin-left:-18px;border-radius:4px;background:var(--cardline)}
+#intro button.go{margin-top:12px;appearance:none;border:0;border-radius:999px;padding:9px 16px;background:var(--accent);color:var(--cardbg);font:14px/1 var(--uifont);letter-spacing:.3em;cursor:pointer}
+#intro button.x,#album .x{appearance:none;border:0;cursor:pointer;position:absolute;top:10px;right:10px;z-index:2;min-width:44px;height:32px;padding:0 10px;border-radius:999px;background:rgba(28,25,22,.08);color:var(--cardink);font:13px/32px var(--uifont);letter-spacing:.12em}
+#intro button.x:active,#album .x:active{background:rgba(28,25,22,.16)}
 #intro::before{content:"";position:absolute;left:18px;right:18px;top:0;height:3px;border-radius:0 0 3px 3px;background:var(--accent);opacity:.9}
+#tilt{position:fixed;right:max(16px,env(safe-area-inset-right));bottom:max(34px,env(safe-area-inset-bottom));z-index:6;appearance:none;border:0;cursor:pointer;background:rgba(243,238,230,.14);color:var(--paper);font:13px/1 MSZ,KaiTi,serif;letter-spacing:.2em;padding:12px 14px;border-radius:999px;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);box-shadow:inset 0 0 0 1px rgba(243,238,230,.2)}
+#tilt.on{background:var(--paper);color:var(--ink)}
+body.light #tilt{color:var(--ink);background:rgba(243,238,230,.7)}
+#quest .skip{appearance:none;border:0;cursor:pointer;margin-left:4px;padding:6px 8px;border-radius:999px;background:transparent;color:inherit;font:12px/1 var(--uifont);letter-spacing:.08em;opacity:.8}
+#quest .skip:active{opacity:1}
+#album .sheet{position:relative}
 #iris{position:fixed;inset:0;z-index:11;pointer-events:none;opacity:0;background:var(--irisbg);
   -webkit-mask:radial-gradient(circle at var(--x,50%) var(--y,50%),transparent calc(var(--r,0px) - 40px),#000 var(--r,0px));mask:radial-gradient(circle at var(--x,50%) var(--y,50%),transparent calc(var(--r,0px) - 40px),#000 var(--r,0px))}
 #crumbs{position:fixed;left:50%;bottom:max(22px,env(safe-area-inset-bottom));transform:translate(-50%,18px);opacity:0;z-index:7;display:flex;align-items:center;gap:10px;padding:6px 6px 6px 16px;border-radius:999px;
@@ -124,11 +134,12 @@ body[data-theme=map] header,body[data-theme=yangshuo] header,body[data-theme=moo
 #toast i{font-style:normal;color:var(--accent);font-size:15px}
 #cue{position:fixed;left:0;top:0;z-index:10;pointer-events:none;opacity:0;transition:opacity .4s}
 #cue.on{opacity:1}
-#cue:before{content:'';position:absolute;left:-17px;top:-17px;width:34px;height:34px;border-radius:50%;border:2px solid var(--accent);animation:cuering 1.4s ease-out infinite}
-#cue span{position:absolute;left:50%;bottom:24px;transform:translateX(-50%);white-space:nowrap;padding:6px 11px 5px;border-radius:999px;background:var(--accent);color:#fff;font:400 14px/1 var(--uifont);box-shadow:0 6px 18px rgba(0,0,0,.3);animation:cuebob 1.4s ease-in-out infinite}
-#cue span:after{content:'';position:absolute;left:50%;bottom:-5px;margin-left:-5px;border:5px solid transparent;border-bottom:0;border-top-color:var(--accent)}
-@keyframes cuering{from{transform:scale(.5);opacity:1}to{transform:scale(1.7);opacity:0}}
-@keyframes cuebob{50%{transform:translate(-50%,-5px)}}
+#cue:before,#cue:after{content:'';position:absolute;left:-22px;top:-22px;width:44px;height:44px;border-radius:50%;border:2px solid var(--accent);box-sizing:border-box}
+#cue:before{animation:cuering 1.6s ease-out infinite}
+#cue:after{border-width:1.5px;opacity:.85;animation:cuezoom 1.6s ease-in-out infinite}
+#cue span{display:none}
+@keyframes cuering{from{transform:scale(.55);opacity:.9}to{transform:scale(1.85);opacity:0}}
+@keyframes cuezoom{50%{transform:scale(1.18);opacity:.35}}
 
 #album{position:fixed;inset:0;z-index:14;background:rgba(16,12,10,.48);display:grid;place-items:center;opacity:0;pointer-events:none;transition:opacity .35s;padding:24px}
 #album.on{opacity:1;pointer-events:auto}
@@ -192,11 +203,12 @@ body:not(.embed) #trail .up{top:62px}
 <header><div class="seal">多美</div><div><h1>云游绘本</h1><small>POP-UP · 立体书</small></div></header>
 <div id="cap"></div>
 <div id="iris"></div>
-<div id="quest"></div><div id="trail" aria-label="画中画层级"></div><div id="album"></div><div id="toast"></div><div id="cue"><span>点这里</span></div>
-<div id="intro"><em></em><h4></h4><p></p><button hidden>走进去</button></div>
+<div id="quest"></div><div id="trail" aria-label="画中画层级"></div><div id="album"></div><div id="toast"></div><div id="cue"><span></span></div>
+<div id="intro"><i class="grab" aria-hidden="true"></i><button type="button" class="x" aria-label="关闭">关闭</button><em></em><h4></h4><p></p><button type="button" class="go" hidden>走进去</button></div>
 <div id="crumbs"><span></span><button id="back">‹ 回上一层</button></div>
-<div id="hint">点光圈寻景 · 发光门可一层层入画 · 拖动看立体</div>
+<div id="hint">靠近发光处看看 · 拖动看立体</div>
 <button id="open"><i></i>翻开绘本</button>
+<button type="button" id="tilt" hidden>开启体感</button>
 <nav id="nav">
   <button class="ar" id="prev" aria-label="上一页">‹</button>
   <button class="ar" id="next" aria-label="下一页">›</button>
