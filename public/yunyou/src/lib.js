@@ -32,8 +32,8 @@ export function canvasTex(w, h, draw, repeat = [1, 1]) {
 export const TEX = {};
 // 位图贴图（assets/tex/*.jpg，1024² 无缝）：喀斯特岩壁、青瓦、黄铜板、琉璃面砖、料石城墙、青砖
 const loader = new THREE.TextureLoader();
-function imgTex(name) {
-  const t = loader.load(new URL(`../assets/tex/${name}.jpg`, import.meta.url).href);
+function imgTex(name, ext = 'jpg') {
+  const t = loader.load(new URL(`../assets/tex/${name}.${ext}`, import.meta.url).href);
   t.wrapS = t.wrapT = THREE.RepeatWrapping;
   t.colorSpace = THREE.SRGBColorSpace;
   t.anisotropy = 8;
@@ -42,7 +42,7 @@ function imgTex(name) {
 export function makeTextures() {
   TEX.pbr = loadSurfaceTextures();
   for (const n of ['stone', 'tile', 'copper', 'glaze', 'brick', 'karst']) TEX[n] = imgTex(n);
-  TEX.leafColor=imgTex('foliage/leaves-color');TEX.leafAlpha=imgTex('foliage/leaves-opacity');TEX.leafNormal=imgTex('foliage/leaves-normal');
+  TEX.leafColor=imgTex('foliage/leaves-color');TEX.leafAlpha=imgTex('foliage/leaves-opacity');TEX.leafNormal=imgTex('foliage/leaves-normal', 'webp');
   TEX.leafAlpha.colorSpace=THREE.NoColorSpace;TEX.leafNormal.colorSpace=THREE.NoColorSpace;
   TEX.karst.wrapS = TEX.karst.wrapT = THREE.MirroredRepeatWrapping; // 岩壁图非无缝：镜像平铺消接缝
   // 水面：淡涟漪（偏翡翠绿，贴桂林实景）

@@ -122,7 +122,7 @@ test("uses a real local morning illustration for the Zaobao magazine cover", () 
   assert.match(zaobaoSource, /className="zaobao-cover-image"/);
   assert.match(zaobaoCss, /\.zaobao-cover-image\s*\{/);
   assert.equal(
-    existsSync(join(dirname(fileURLToPath(import.meta.url)), "../../public/images/note-default-covers/duomei-default-cover-02.png")),
+    existsSync(join(dirname(fileURLToPath(import.meta.url)), "../../public/images/note-default-covers/duomei-default-cover-02.webp")),
     true,
   );
 });

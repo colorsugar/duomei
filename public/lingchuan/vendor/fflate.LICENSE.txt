@@ -1,0 +1,5 @@
+fflate v0.8.2 (MIT License)
+https://github.com/101arrowz/fflate
+
+Copyright 2020 101arrowz
+https://github.com/101arrowz/fflate/blob/master/LICENSE

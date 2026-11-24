@@ -34,6 +34,34 @@ const pageLoaders = {
   DuomeiTimePage: () => import("./pages/DuomeiTimePage"),
 };
 
+// "/" is the static homepage (preview-home → dist/home.html); this SPA shell serves every other path. Client-side visits to "/" reload into it. If the SPA itself was served at "/" (no static
+// homepage in the build), keep rendering the React homepage instead of reloading in a loop.
+const shellServedAtRoot = window.location.pathname === "/";
+
+// Links to "/…" bypass React Router and load the static homepage natively. Reloading after the router
+// has already pushed "/" crashes WebKit on the next navigation, so StaticHomeRoute is only the fallback
+// for programmatic navigate("/").
+if (!shellServedAtRoot) {
+  document.addEventListener("click", (event) => {
+    const anchor = (event.target as Element | null)?.closest?.("a[href]");
+    if (!(anchor instanceof HTMLAnchorElement) || anchor.target || event.defaultPrevented) return;
+    if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    if (anchor.origin === window.location.origin && anchor.pathname === "/") event.stopPropagation();
+  }, true);
+}
+
+function StaticHomeRoute() {
+  // The router has already pushed "/…": assign() to it would only be a hash jump, and reload() crashes
+  // WebKit on the next navigation. Step the entry off "/" so replace() is a real document load.
+  useEffect(() => {
+    if (shellServedAtRoot) return;
+    const target = `/${window.location.search}${window.location.hash}`;
+    window.history.replaceState(null, "", "/index.html");
+    window.location.replace(target);
+  }, []);
+  return shellServedAtRoot ? <DuomeiHomePage /> : null;
+}
+
 // Inner pages carry their section's hue the same way the home sections do (src/colorful.css reads
 // html[data-current-section]); the home page sets it from scroll position instead.
 function routeSectionOf(pathname: string): SectionAccentId {
@@ -167,7 +195,7 @@ function AppRoutes() {
       {!bareChrome ? <DuomeiHeader /> : null}
       <Suspense fallback={null}>
       <Routes>
-        <Route path="/" element={<DuomeiHomePage />} />
+        <Route path="/" element={<StaticHomeRoute />} />
         <Route path="/zaobao" element={<DuomeiZaobaoPage />} />
         <Route path="/zaobao/archive" element={<DuomeiZaobaoArchivePage />} />
         <Route path="/zaobao/i/:storyId" element={<DuomeiZaobaoPage />} />
