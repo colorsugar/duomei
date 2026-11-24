@@ -988,7 +988,7 @@ def main() -> int:
         PREVIEW_DIR.mkdir(parents=True, exist_ok=True)
 
         (OUT_DIR / "basemap.height.bin").write_bytes(encode_u16(h_bin).tobytes())
-        Image.fromarray(normal, mode="RGB").save(OUT_DIR / "basemap.normal.png")
+        Image.fromarray(normal, mode="RGB").save(OUT_DIR / "basemap.normal.webp", lossless=True, quality=100)
         Image.fromarray(mask, mode="L").save(OUT_DIR / "basemap.mask.png")
         write_preview(h_full, PREVIEW_DIR / "preview-chaoji.png")
         bh.write_erosion_preview(h_bin, PREVIEW_DIR / "erosion-chaoji.png")

@@ -421,7 +421,7 @@ async function buildTile(tile) {
   let normalMap = null;
   if (!hf.fallback) {
     try {
-      normalMap = await new THREE.TextureLoader().loadAsync(`${terrainBase(tile)}.normal.png`);
+      normalMap = await new THREE.TextureLoader().loadAsync(`${terrainBase(tile)}.normal.webp`);
       normalMap.anisotropy = texture.anisotropy;
     } catch (error) {
       console.warn("立体地图：法线贴图不可用，只用顶点法线。", error);

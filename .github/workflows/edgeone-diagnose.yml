@@ -45,15 +45,27 @@ on:
         description: "1 = shrink the abandoned first assets project duomei-assets (global area, cannot bind domains) to a tiny page so its 730MB copy leaves storage"
         required: false
         default: "0"
+      isolated_preview:
+        description: "1 = deploy this ref to isolated preview projects (never production duomei.site / assets.duomei.site) and probe it"
+        required: false
+        default: "0"
+      preview_site_project:
+        description: "Isolated EdgeOne project name for the site preview (never duomei-guyu)"
+        required: false
+        default: "duomei-slim-preview"
+      preview_assets_project:
+        description: "Isolated EdgeOne project name for preview assets (never duomei-assets-overseas)"
+        required: false
+        default: "duomei-slim-preview-assets"
 
 permissions:
   contents: read
 
 jobs:
   diagnose:
-    if: github.ref == 'refs/heads/main' || (startsWith(github.ref, 'refs/heads/cursor/edgeone-') || startsWith(github.ref, 'refs/heads/cursor/honglou-')) || github.ref == 'refs/heads/assets-pages-split'
+    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/cursor/edgeone-') || startsWith(github.ref, 'refs/heads/cursor/honglou-') || github.ref == 'refs/heads/assets-pages-split' || startsWith(github.ref, 'refs/heads/preview/')
     runs-on: ubuntu-latest
-    timeout-minutes: 50
+    timeout-minutes: 70
     env:
       EDGEONE_PROJECT_ID: ${{ inputs.project_id || 'makers-brifmhu31vjf' }}
     steps:
@@ -144,3 +156,25 @@ jobs:
           node scripts/assets-split.mjs guard --dir dist
           ( cd "${RUNNER_TEMP}" && npm install -g --legacy-peer-deps "edgeone@1.6.31-3" )
           bash scripts/edgeone-preview-probe.sh
+
+      # 瘦身分支预览：素材发到独立项目，主站发到 duomei-guyu 的 preview 环境。
+      # 绝不把 -e production 打到 duomei-guyu 或 duomei-assets-overseas。
+      - name: Deploy isolated slim preview (production untouched)
+        if: inputs.isolated_preview == '1'
+        env:
+          EDGEONE_API_TOKEN: ${{ secrets.EDGEONE_API_TOKEN }}
+          PREVIEW_SITE_PROJECT: ${{ inputs.preview_site_project || 'duomei-slim-preview' }}
+          PREVIEW_ASSETS_PROJECT: ${{ inputs.preview_assets_project || 'duomei-slim-preview-assets' }}
+        run: |
+          set -euo pipefail
+          ok=0
+          for i in 1 2 3 4; do
+            if ( cd "${RUNNER_TEMP}" && npm install -g --legacy-peer-deps "edgeone@1.6.31-3" ); then
+              ok=1
+              break
+            fi
+            echo "edgeone CLI 安装失败（${i}/4），20 秒后重试"
+            sleep 20
+          done
+          [[ "$ok" = "1" ]]
+          bash scripts/edgeone-isolated-preview.sh

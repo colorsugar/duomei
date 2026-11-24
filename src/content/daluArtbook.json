@@ -5,8 +5,8 @@
   "chapterCount": 11,
   "buildingCount": 13,
   "pdf": "/downloads/fantasy-continent-artbook.pdf",
-  "sha256": "19cc3ccf49e461cfa47482d5d187f82c2cc9852620a985ba06e3ca5926797f1b",
-  "bytes": 23059003,
+  "sha256": "6fed827118b811af0e5e193edf813945c5c32786048f59577eb4bfab122b87c9",
+  "bytes": 20620891,
   "chapters": [
     {
       "title": "双庭之间",
@@ -503,67 +503,62 @@
     {
       "file": "part-001.bin",
       "bytes": 1800000,
-      "sha256": "2f442c025005e75f69c5f72d38847cb692613dfc2b997fc96fde4f81892134cb"
+      "sha256": "83259af9eb5e7784b9b3bd0f86958e69b5c49ccc4808c90f251d5581466e511e"
     },
     {
       "file": "part-002.bin",
       "bytes": 1800000,
-      "sha256": "3c9a5ad45ef8e03f244c02b929e3d3141cd6d123644ce791a0dead2bda2fa1e2"
+      "sha256": "1f6b70ab3d984fef83aedefcb76184bc3f9ddb8c5671fce4f3d787103bf4a882"
     },
     {
       "file": "part-003.bin",
       "bytes": 1800000,
-      "sha256": "ecda70a211b34f2e6de434aaaabb66cbd5fa00ab968b886088a6469ebf06ee22"
+      "sha256": "b1a84f56a5b9b5208f0833cfa3292f4deeff8042845022cab30693c5d70b3c00"
     },
     {
       "file": "part-004.bin",
       "bytes": 1800000,
-      "sha256": "9296f8090931b1bcde75b297fef069d56d03ec167e2ed44f0eb002324c46f846"
+      "sha256": "fe18390bb12360dfb64c207e2f51d04761f42a650d952ac9a46c0247f4fdbd45"
     },
     {
       "file": "part-005.bin",
       "bytes": 1800000,
-      "sha256": "07d8952d97b2328ed20f85000b442bb2491590681c83827c299dddf6e3496c58"
+      "sha256": "51b02148def04bf6bc9df1ddc74083499d0b515cb12ae1b3c24c7591f53f76e6"
     },
     {
       "file": "part-006.bin",
       "bytes": 1800000,
-      "sha256": "b32371a7e4e85210d5d211e4cc496fc1948cbc26146094232f2c6d3d758528ef"
+      "sha256": "80b12897822e2dbfd6ec4981bab31edcb420e22ad0b3ebcef7aaeb935050e056"
     },
     {
       "file": "part-007.bin",
       "bytes": 1800000,
-      "sha256": "85c19af091d27f3ec7a44c5157bd7915f204e6e0a88a24f1dffdb5c5655ea9ff"
+      "sha256": "f8a1502eee3d5e2844769c0865376cb308c8f34497b01ef05b72ae92bcce1eb5"
     },
     {
       "file": "part-008.bin",
       "bytes": 1800000,
-      "sha256": "ffb036696b5b582ebfca8b65bc2684eb0789424386a52351a37159a93ea9b6fc"
+      "sha256": "9107826efbb2987d6cb7e4b310bbb513845422d0fc2456376e71379b56a0e4be"
     },
     {
       "file": "part-009.bin",
       "bytes": 1800000,
-      "sha256": "cdb1769247c4fbb942a1ac3a5d74376ad4af8031e5fbdc281c7ae8b273a16af9"
+      "sha256": "f9637224daf0f3da91d71405c57946021c2176de50062fa48bae87da69555f64"
     },
     {
       "file": "part-010.bin",
       "bytes": 1800000,
-      "sha256": "4b712ab37bf2e4596a7354aee289179b8e27b87ab00bbe4c3b88b300c0f2a6ea"
+      "sha256": "7ec27a9c630cb5f3ee2cba7c86907e752bac8c284337850db72c9f3d3f3dc9c3"
     },
     {
       "file": "part-011.bin",
       "bytes": 1800000,
-      "sha256": "7a3d816b3126e338a8a89a85b10664a99ad7d8e585cc4a77b31f86ad8bfcd842"
+      "sha256": "45fe69b2e3ed06e6ac37e28d0eace272b9af16d8421fcb1f1efd1909075192b8"
     },
     {
       "file": "part-012.bin",
-      "bytes": 1800000,
-      "sha256": "73099a845d68c0c72689a3b40f1e6fc6f7da04f05afcc6ee6131082868a3f457"
-    },
-    {
-      "file": "part-013.bin",
-      "bytes": 1459003,
-      "sha256": "e0cde6ba55b3612317468f8d30c5aa184f9df0d0fb0fd475ceb19c28e5ce541a"
+      "bytes": 820891,
+      "sha256": "fb26ef1bbf7a1f921887f33cdf9d02aa47d031b4f03cd3b502380b5fb3717666"
     }
   ]
 }
