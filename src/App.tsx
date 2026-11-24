@@ -39,11 +39,27 @@ const pageLoaders = {
 // homepage in the build), keep rendering the React homepage instead of reloading in a loop.
 const shellServedAtRoot = window.location.pathname === "/";
 
+// Links to "/…" bypass React Router and load the static homepage natively. Reloading after the router
+// has already pushed "/" crashes WebKit on the next navigation, so StaticHomeRoute is only the fallback
+// for programmatic navigate("/").
+if (!shellServedAtRoot) {
+  document.addEventListener("click", (event) => {
+    const anchor = (event.target as Element | null)?.closest?.("a[href]");
+    if (!(anchor instanceof HTMLAnchorElement) || anchor.target || event.defaultPrevented) return;
+    if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    if (anchor.origin === window.location.origin && anchor.pathname === "/") event.stopPropagation();
+  }, true);
+}
+
 function StaticHomeRoute() {
-  const location = useLocation();
+  // The router has already pushed "/…": assign() to it would only be a hash jump, and reload() crashes
+  // WebKit on the next navigation. Step the entry off "/" so replace() is a real document load.
   useEffect(() => {
-    if (!shellServedAtRoot) window.location.assign(`/${location.search}${location.hash}`);
-  }, [location.search, location.hash]);
+    if (shellServedAtRoot) return;
+    const target = `/${window.location.search}${window.location.hash}`;
+    window.history.replaceState(null, "", "/app.html");
+    window.location.replace(target);
+  }, []);
   return shellServedAtRoot ? <DuomeiHomePage /> : null;
 }
 
