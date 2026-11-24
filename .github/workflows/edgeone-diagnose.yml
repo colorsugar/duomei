@@ -141,14 +141,19 @@ jobs:
           ( cd "${RUNNER_TEMP}" && npm install -g --legacy-peer-deps "edgeone@1.6.31-3" )
           tiny="${RUNNER_TEMP}/retire-previews"
           mkdir -p "$tiny"
-          for name in duomei-slim-preview duomei-slim-preview-assets duomei-motion-preview; do
+          # 平台会把「上一个正式版」留作回滚副本，所以正式版要连发两次小页面，大副本才会出存储。
+          for spec in duomei-slim-preview:overseas duomei-slim-preview-assets:overseas duomei-motion-preview:overseas duomei-assets:global; do
+            name="${spec%%:*}" area="${spec##*:}"
             case "$name" in duomei-guyu|duomei-assets-overseas) echo "refuse $name"; exit 1;; esac
-            echo '<!doctype html><meta charset="utf-8"><title>retired preview</title><p>预览已下线，正式站见 duomei.site。</p>' > "$tiny/index.html"
-            edgeone makers deploy "$tiny" -n "$name" -t "$EDGEONE_API_TOKEN" -e production -a overseas --json | tail -n 1 || true
-            for i in 1 2 3; do
+            for j in 1 2; do
+              echo "<!doctype html><meta charset=\"utf-8\"><title>retired $j</title><p>预览已下线，正式站见 duomei.site。</p>" > "$tiny/index.html"
+              edgeone makers deploy "$tiny" -n "$name" -t "$EDGEONE_API_TOKEN" -e production -a "$area" --json | tail -n 1 || true
+              sleep 20
+            done
+            for i in 1 2; do
               sleep 20
               echo "<!doctype html><title>rotate $i</title>" > "$tiny/index.html"
-              edgeone makers deploy "$tiny" -n "$name" -t "$EDGEONE_API_TOKEN" -e preview -a overseas --json | tail -n 1 || true
+              edgeone makers deploy "$tiny" -n "$name" -t "$EDGEONE_API_TOKEN" -e preview -a "$area" --json | tail -n 1 || true
             done
           done
 
