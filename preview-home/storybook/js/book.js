@@ -22,8 +22,8 @@ const nextFrame = () => new Promise((res) => (CAPTURE ? setTimeout(res, 0) : req
 
 // ---------- renderer ----------
 const MOBILE = matchMedia('(pointer: coarse)').matches || Math.min(innerWidth, innerHeight) < 700;
-const renderer = new THREE.WebGLRenderer({ antialias: !MOBILE, alpha: false, powerPreference: MOBILE ? 'low-power' : 'high-performance' });
-renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, CAPTURE ? 1.5 : MOBILE ? 1.25 : 2));
+const renderer = new THREE.WebGLRenderer({ antialias: !MOBILE, alpha: false, powerPreference: MOBILE ? 'default' : 'high-performance' });
+renderer.setPixelRatio(Math.min(Math.max(1, window.devicePixelRatio || 1), 2));
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 1.0;
@@ -222,7 +222,7 @@ const ringTex = (() => { const c = document.createElement('canvas'); c.width = c
   const rg = g.createRadialGradient(64, 64, 30, 64, 64, 62); rg.addColorStop(0, 'rgba(255,255,255,0)'); rg.addColorStop(0.55, 'rgba(255,255,255,0.9)'); rg.addColorStop(0.7, 'rgba(255,255,255,0.35)'); rg.addColorStop(1, 'rgba(255,255,255,0)');
   g.fillStyle = rg; g.fillRect(0, 0, 128, 128); g.fillStyle = 'rgba(255,255,255,0.9)'; g.beginPath(); g.arc(64, 64, 9, 0, 6.28); g.fill(); return new THREE.CanvasTexture(c); })();
 const rings = [];
-function ringPos(p) { const c = p.mesh.userData.card; const top = c ? c.box.y1 : 2; const w = new THREE.Vector3(); p.h.group.getWorldPosition(w); w.y += top * 0.62 * Math.max(0, p.h.p); w.z += 0.35; return w; }
+function ringPos(p) { const w = new THREE.Vector3(); p.h.group.getWorldPosition(w); w.y += 0.28 * Math.max(0.35, p.h.p || 0); w.z += 0.22; return w; }
 // ---- game layer: discoveries, cues, feedback ----
 const QUEST = {}; const FOUND = {}; let lastTapT = 0; let cueTarget = null;
 const qEl = document.getElementById('quest'), toastEl = document.getElementById('toast'), cueEl = document.getElementById('cue');
@@ -267,7 +267,7 @@ function toggleAlbum() {
   if (on) paintAlbum();
   box.classList.toggle('on', on);
 }
-let guideOn = true;
+let guideOn = false;
 function setGuide(on) {
   guideOn = !!on; cueTarget = null; if (cueEl) cueEl.classList.remove('on');
   document.body.classList.toggle('guide-off', !guideOn);
@@ -415,11 +415,11 @@ function trail() {
       const nx = g.x0 + (k + 1) * g.dx, ny = g.y0 + (k + 1) * g.dy;   // guide lines: rect corners -> child frame corners
       svg += `<line x1="${x + rx}" y1="${y + ry + rh}" x2="${nx}" y2="${ny}"/><line x1="${x + rx + rw}" y1="${y + ry + rh}" x2="${nx + g.fw}" y2="${ny}"/>`; }
     const q = QUEST[m.id]; const prog = q && q.size ? `<u>${f.size}/${q.size}</u>` : '';
-    html += `<div class="fr${isCur ? ' cur' : ''}" data-k="${k}" style="left:${x.toFixed(1)}px;top:${y.toFixed(1)}px;width:${g.fw.toFixed(1)}px;height:${g.fh.toFixed(1)}px;z-index:${k + 1}">${inner}<em>第${'一二三四五六七八九'[k] || k + 1}层 · ${m.title}</em>${prog}${isCur ? '<strong>你在这里</strong>' : ''}</div>`;
+    html += `<div class="fr${isCur ? ' cur' : ''}" data-k="${k}" style="left:${x.toFixed(1)}px;top:${y.toFixed(1)}px;width:${g.fw.toFixed(1)}px;height:${g.fh.toFixed(1)}px;z-index:${k + 1}">${inner}<em>${m.title}</em>${prog}${isCur ? '<strong>你在这里</strong>' : ''}</div>`;
   });
   const chipSn = SNAP[cur];
-  trailEl.innerHTML = `<svg class="guides">${svg}</svg>${html}<button class="up"${stack.length ? '' : ' hidden'}>↶ 回上一层</button>`
-    + `<button class="chip"><img src="${chipSn ? chipSn.url : `img/thumb/${here.id}.webp`}" alt=""><span>第${'一二三四五六七八九'[n - 1] || n}层</span><b>${here.title}</b><i>▾</i></button>`;
+  trailEl.innerHTML = `<svg class="guides">${svg}</svg>${html}<button class="up"${stack.length ? '' : ' hidden'}>↶ 返回</button>`
+    + `<button class="chip"><img src="${chipSn ? chipSn.url : `img/thumb/${here.id}.webp`}" alt=""><b>${here.title}</b><i>▾</i></button>`;
   if (mob && !trailEl.classList.contains('open')) trailEl.classList.add('chiponly'); else trailEl.classList.remove('chiponly');
 }
 async function jumpLevel(k) {
@@ -435,7 +435,7 @@ if (trailEl) {
   addEventListener('resize', () => trail());
 }
 async function swapTo(next, focus, sx, sy) {
-  diving = true; hideCard(); iris.style.background = getComputedStyle(iris).backgroundColor;   // hold the old paper colour while closed: no theme flash
+  diving = true; resetPan(); hideCard(); iris.style.background = getComputedStyle(iris).backgroundColor;   // hold the old paper colour while closed: no theme flash
   const a = spreads[cur]; const b = await ensure(next);
   const f0 = anim.focus.clone(); const tgt = focus || new THREE.Vector3();
   await tween(1.1, (k) => { const e = ease(k); anim.zoom = e; anim.focus.copy(f0).lerp(tgt, e); setIris(Math.max(0, (k - 0.45) / 0.55) ** 1.4, sx, sy); });
@@ -528,7 +528,7 @@ function showFrame(s) {
 }
 
 async function openBook() {
-  if (busy || cur !== -1) return; busy = true;
+  if (busy || cur !== -1) return; busy = true; resetPan();
   const s = await ensure(0);
   ui.open.classList.add('gone');
   // inside of the cover is the first spread's left page
@@ -545,7 +545,7 @@ function raiseLater(i, at) { wait(at).then(() => { raise(i); revealTo(i, 1, 2.2)
 async function turn(dir) {
   if (busy || diving) return; if (stack.length) { stack.length = 0; crumbs(); } if (cur === -1) { if (dir > 0) openBook(); return; }
   const nxt = turnTarget(cur, dir); if (nxt === cur) return;
-  busy = true; hideFrame(); hideCard();
+  busy = true; resetPan(); hideFrame(); hideCard();
   const a = await ensure(cur), b = await ensure(nxt);
   if (a.api) { revealTo(cur, 0, 0.6); await lower(cur); }
   // leaf: forward = current right page lifts and lands on the left showing next's left; back = mirror
@@ -567,6 +567,15 @@ async function turn(dir) {
 
 // ---------- camera, framing, orbit ----------
 const orbit = { yaw: 0, pitch: 0, ty: 0, tp: 0 };
+const pan = { x: 0, y: 0, vx: 0, vy: 0 };
+const PANX = 11.6, PANY = 3.6;
+function clampPan() {
+  if (pan.x > PANX) { pan.x = PANX; if (pan.vx > 0) pan.vx = 0; }
+  if (pan.x < -PANX) { pan.x = -PANX; if (pan.vx < 0) pan.vx = 0; }
+  if (pan.y > PANY) { pan.y = PANY; if (pan.vy > 0) pan.vy = 0; }
+  if (pan.y < -PANY) { pan.y = -PANY; if (pan.vy < 0) pan.vy = 0; }
+}
+function resetPan() { pan.x = pan.y = pan.vx = pan.vy = 0; }
 const gyro = { on: false, sb: 0, sg: 0, baseB: null };
 function onOrientation(e) {
   if (e.beta == null || e.gamma == null) return;
@@ -602,6 +611,37 @@ function frame() {
 }
 let view = frame();
 window.addEventListener('resize', () => { view = frame(); });
+function avoidLabelOverlap() {
+  const labels = [];
+  for (const s of spreads) {
+    if (!s || !s.api || !s.api.group || !s.api.group.visible) continue;
+    s.api.group.traverse((o) => { if (o.isSprite && o.userData && o.userData.tag) labels.push(o); });
+  }
+  if (!labels.length) return;
+  labels.forEach((o) => { if (o.userData.baseY != null) o.position.y = o.userData.baseY; });
+  const W = innerWidth, H = innerHeight, items = [];
+  for (const o of labels) {
+    const w = o.getWorldPosition(new THREE.Vector3());
+    const v = w.clone().project(camera);
+    if (v.z > 1 || v.z < -1) continue;
+    const sx = (v.x + 1) / 2 * W, sy = (1 - v.y) / 2 * H;
+    const bw = Math.max(72, (o.scale.x / 2.4) * 86), bh = 34;
+    items.push({ o, sx, sy, bw, bh });
+  }
+  items.sort((a, b) => a.sx - b.sx);
+  for (let i = 0; i < items.length; i++) {
+    for (let j = i + 1; j < items.length; j++) {
+      const a = items[i], b = items[j];
+      if (b.sx - a.sx > (a.bw + b.bw) * 0.55) continue;
+      if (Math.abs(a.sy - b.sy) > (a.bh + b.bh) * 0.6) continue;
+      // lift the lower (larger sy) tag up in world space
+      const lo = a.sy > b.sy ? a : b;
+      lo.o.position.y += 0.42;
+      const w = lo.o.getWorldPosition(new THREE.Vector3()).project(camera);
+      lo.sy = (1 - w.y) / 2 * H;
+    }
+  }
+}
 function placeCamera() {
   const { portrait, asp } = view;
   const open = cur >= 0 || anim.coverT > 0.02 ? 1 : 0;
@@ -613,10 +653,13 @@ function placeCamera() {
   const vf = camera.fov * Math.PI / 180, hf = 2 * Math.atan(Math.tan(vf / 2) * asp);
   let dist = (spanW / 2) / Math.tan(hf / 2) * (portrait ? 1.04 : 1.0);
   const dH = (PD + 10) / 2 / Math.tan(vf / 2) * 0.78; dist = Math.max(dist, dH * (portrait ? 0.62 : 1.0));
-  // portrait: frame part of the spread and glide across it (drag pans; idle drifts page to page)
-  const pan = portrait ? anim.coverT * (anim.panX + orbit.yaw * 30) : 0;
-  const target = new THREE.Vector3(tx + pan, portrait ? 4.2 - 1.4 * anim.coverT : 1.6, portrait ? 0.2 + 0.6 * anim.coverT : 1.2);
-  const yaw = portrait ? orbit.yaw * 0.3 : orbit.yaw;
+  // free pan stays where released; gyro is a small offset on top, never recenters
+  const gx = (!down && gyro.on) ? Math.max(-2.2, Math.min(2.2, gyro.sg / 16 * 2.2)) : 0;
+  const gy = (!down && gyro.on) ? Math.max(-1.2, Math.min(1.2, -gyro.sb / 16 * 1.2)) : 0;
+  const panX = anim.coverT * (pan.x + gx);
+  const panY = anim.coverT * (pan.y + gy);
+  const target = new THREE.Vector3(tx + panX, (portrait ? 4.2 - 1.4 * anim.coverT : 1.6) + panY, portrait ? 0.2 + 0.6 * anim.coverT : 1.2);
+  const yaw = portrait ? orbit.yaw * 0.15 : orbit.yaw;
   if (anim.zoom > 0) { target.lerp(anim.focus, anim.zoom); dist *= 1 - 0.84 * anim.zoom; }
   dist *= 1 + anim.shift / Math.max(1, innerWidth) * 1.1;
   camera.position.set(target.x + Math.sin(yaw) * Math.cos(pitch) * dist, target.y + Math.sin(pitch) * dist, target.z + Math.cos(yaw) * Math.cos(pitch) * dist);
@@ -626,28 +669,43 @@ function placeCamera() {
   if (anim.shift > 0.5) camera.setViewOffset(vw, vh, anim.shift, 0, vw, vh); else if (camera.view && camera.view.enabled) camera.clearViewOffset();
 }
 
-// pointer: drag follows the finger (content moves with it); quick horizontal swipe = turn
+// pointer: drag = free pan with inertia, stays where released. Page change only via nav / prev-next.
 let down = null;
 const lastPtr = { x: innerWidth / 2, y: innerHeight / 2 };
 const el = renderer.domElement;
 const clOrbit = (v, a, b) => Math.max(a, Math.min(b, v));
+const DRAG_MIN = 8;
 el.addEventListener('pointerdown', (e) => {
   lastPtr.x = e.clientX; lastPtr.y = e.clientY;
   if (card.classList.contains('on') && !card.contains(e.target)) { hideCard(); }
-  down = { x: e.clientX, y: e.clientY, t: performance.now(), yaw: orbit.ty, pitch: orbit.tp, hid: card.classList.contains('on') }; el.setPointerCapture(e.pointerId); el.classList.add('drag');
+  down = { x: e.clientX, y: e.clientY, t: performance.now(), panX: pan.x, panY: pan.y, yaw: orbit.ty, pitch: orbit.tp, hid: card.classList.contains('on'), moved: false, lt: performance.now() };
+  pan.vx = pan.vy = 0;
+  el.setPointerCapture(e.pointerId); el.classList.add('drag');
 });
 el.addEventListener('pointermove', (e) => {
   lastPtr.x = e.clientX; lastPtr.y = e.clientY;
-  if (!down) return; const dx = (e.clientX - down.x) / el.clientWidth, dy = (e.clientY - down.y) / el.clientHeight;
-  // portrait pan + landscape orbit: finger right => content moves right
-  if (view.portrait) { orbit.ty = clOrbit(down.yaw - dx * 0.6, -0.26, 0.26); }
-  else { orbit.ty = clOrbit(down.yaw + dx * 0.6, -0.26, 0.26); }
-  orbit.tp = clOrbit(down.pitch - dy * 0.3, -0.12, 0.1);
+  if (!down) return;
+  const dxPx = e.clientX - down.x, dyPx = e.clientY - down.y;
+  if (Math.hypot(dxPx, dyPx) > DRAG_MIN) down.moved = true;
+  if (!down.moved) return;
+  const w = Math.max(1, el.clientWidth), h = Math.max(1, el.clientHeight);
+  const worldW = view.portrait ? 22 : 34, worldH = worldW * (h / w);
+  // content moves with the finger
+  const nx = down.panX - (dxPx / w) * worldW;
+  const ny = down.panY + (dyPx / h) * worldH * 0.5;
+  const now = performance.now(), dt = Math.max(8, now - down.lt);
+  pan.vx = (nx - pan.x) / (dt / 1000);
+  pan.vy = (ny - pan.y) / (dt / 1000);
+  down.lt = now;
+  pan.x = nx; pan.y = ny; clampPan();
+  if (!view.portrait) {
+    orbit.ty = clOrbit(down.yaw + (dxPx / w) * 0.35, -0.45, 0.45);
+    orbit.tp = clOrbit(down.pitch - (dyPx / h) * 0.25, -0.16, 0.14);
+  }
 });
-el.addEventListener('pointerup', (e) => { if (!down) return; const dx = e.clientX - down.x, dy = e.clientY - down.y, dt = performance.now() - down.t; el.classList.remove('drag');
-  const touch = e.pointerType === 'touch'; const hid = down.hid;
-  if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.4 && dt < 450 && touch && !hid) turn(dx < 0 ? 1 : -1);
-  else if (Math.hypot(dx, dy) < 6) {
+el.addEventListener('pointerup', (e) => { if (!down) return; const dx = e.clientX - down.x, dy = e.clientY - down.y; el.classList.remove('drag');
+  const touch = e.pointerType === 'touch'; const hid = down.hid; const moved = down.moved || Math.hypot(dx, dy) >= DRAG_MIN;
+  if (!moved) {
     if (cur === -1) openBook();
     else {
       const wasCard = card.classList.contains('on') || hid;
@@ -655,8 +713,9 @@ el.addEventListener('pointerup', (e) => { if (!down) return; const dx = e.client
       if (!wasCard && !hit && !stack.length && !EMBED && !touch) turn(e.clientX > el.clientWidth / 2 ? 1 : -1);
     }
   }
-  down = null; orbit.ty = 0; orbit.tp = 0; });
-el.addEventListener('pointercancel', () => { down = null; orbit.ty = 0; orbit.tp = 0; el.classList.remove('drag'); });
+  down = null;
+});
+el.addEventListener('pointercancel', () => { down = null; el.classList.remove('drag'); });
 window.addEventListener('keydown', (e) => { if (e.key === 'ArrowRight' || e.key === ' ') turn(1); if (e.key === 'ArrowLeft') turn(-1); });
 window.addEventListener('message', (e) => { if (e.data && e.data.type === 'storybook:turn') turn(e.data.dir > 0 ? 1 : -1); });
 ui.open.addEventListener('click', () => openBook());
@@ -696,17 +755,19 @@ function step(dt) {
   coverPivot.rotation.z = anim.coverT * Math.PI;
   if (moodK < 1) { moodK = Math.min(1, moodK + dt / 1.4); }
   const m = lerpMood(moodFrom, moodTo, ease(moodK)); applyMood(m); scene.background.set(m.bg);
-  // idle orbit drift + damped drag + optional gyro
-  const idle = down || gyro.on ? 0.15 : 1;
-  const gy = (!down && gyro.on) ? clOrbit(gyro.sg / 16 * 0.16, -0.18, 0.18) : 0;
-  const gp = (!down && gyro.on) ? clOrbit(-gyro.sb / 16 * 0.1, -0.1, 0.1) : 0;
-  orbit.yaw += ((orbit.ty + gy + Math.sin(clock.t * 0.13) * 0.035 * idle) - orbit.yaw) * Math.min(1, dt * 4);
-  orbit.pitch += ((orbit.tp + gp + Math.sin(clock.t * 0.09) * 0.012 * idle) - orbit.pitch) * Math.min(1, dt * 4);
+  // keep orbit / pan where the user left them; inertia then clamp; no auto-recenter
+  if (!down) {
+    pan.x += pan.vx * dt; pan.y += pan.vy * dt;
+    pan.vx *= Math.exp(-dt * 4.4); pan.vy *= Math.exp(-dt * 4.4);
+    if (Math.abs(pan.vx) < 0.15) pan.vx = 0;
+    if (Math.abs(pan.vy) < 0.15) pan.vy = 0;
+    clampPan();
+  }
+  orbit.yaw += (orbit.ty - orbit.yaw) * Math.min(1, dt * 8);
+  orbit.pitch += (orbit.tp - orbit.pitch) * Math.min(1, dt * 8);
   for (const s of spreads) if (s && s.api && s.api.group.visible) { s.api.update(clock.t, dt); if (s.api.sheen) { s.api.sheen.material.uniforms.uT.value = clock.t; s.api.sheen.material.uniforms.uK.value = s.rev || 0; } }
-  updateRings(clock.t); updateCue(clock.t); updateBurst(dt); updateGlows();
-  { const portrait = view.portrait; const g = panGoal != null ? Math.max(-10.5, Math.min(10.5, panGoal)) : Math.sin(clock.t * 0.16) * 5;
-    anim.panX += ((portrait ? g : 0) - anim.panX) * Math.min(1, dt * 2.4);
-    const deep = stack.length > 0 && !portrait && innerWidth >= 760; const want = deep ? Math.min(300, innerWidth * 0.23) * 0.6 : 0;
+  updateRings(clock.t); updateCue(clock.t); updateBurst(dt); updateGlows(); avoidLabelOverlap();
+  { const deep = stack.length > 0 && !view.portrait && innerWidth >= 760; const want = deep ? Math.min(300, innerWidth * 0.23) * 0.6 : 0;
     anim.shift += (want - anim.shift) * Math.min(1, dt * 2.5); }
   placeCamera();
   renderer.render(scene, camera);

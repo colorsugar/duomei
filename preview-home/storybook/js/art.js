@@ -8,10 +8,10 @@ export async function loadArt(names) {
   await Promise.all(names.map((n) => new Promise((res) => {
     if (IMGS[n]) return res();
     const im = new Image();
+    im.decoding = 'async';
     im.onload = () => { IMGS[n] = im; res(); };
-    const small = typeof matchMedia === 'function' && (matchMedia('(pointer: coarse)').matches || Math.min(innerWidth, innerHeight) < 900);
-    im.onerror = () => { if (small && !im.dataset.full) { im.dataset.full = 1; im.src = `img/${n}.webp`; } else res(); };
-    im.src = small ? `img/m/${n}.webp` : `img/${n}.webp`;
+    im.onerror = () => res();
+    im.src = `img/${n}.webp`;
   })));
 }
 

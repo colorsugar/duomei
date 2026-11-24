@@ -80,9 +80,12 @@ const io=t=>t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2,cl=(v,a=0,b=1)=>Math.min(b,Math.
 const local=s=>'img/car/'+s.split('/').pop();const MOBQ=()=>innerWidth<700;
 function driver(el,n,dur,trans,draw){let i=0,t0=now(),tr=null,drag=null;
  const go=to=>{to=((to%n)+n)%n;if(tr||to===i)return;const f=(to-i+n)%n;tr={from:i,to,s:now(),d:f<=n/2?1:-1,steps:f<=n/2?f:n-f}};
- el.addEventListener('pointerdown',e=>{drag={x:e.clientX,dx:0};el.setPointerCapture(e.pointerId)});
- el.addEventListener('pointermove',e=>{if(drag)drag.dx=e.clientX-drag.x});
- el.addEventListener('pointerup',()=>{if(drag&&Math.abs(drag.dx)>40)go(i+(drag.dx<0?1:-1));drag=null;t0=now()});
+ el.addEventListener('pointerdown',e=>{drag={x:e.clientX,y:e.clientY,dx:0,dy:0,axis:null,id:e.pointerId}});
+ el.addEventListener('pointermove',e=>{if(!drag)return;drag.dx=e.clientX-drag.x;drag.dy=e.clientY-drag.y;
+  if(!drag.axis&&Math.hypot(drag.dx,drag.dy)>8){drag.axis=Math.abs(drag.dx)>Math.abs(drag.dy)*1.15?'x':'y';if(drag.axis==='x')try{el.setPointerCapture(drag.id)}catch(_){}}
+ });
+ el.addEventListener('pointerup',()=>{if(drag&&drag.axis==='x'&&Math.abs(drag.dx)>40)go(i+(drag.dx<0?1:-1));drag=null;t0=now()});
+ el.addEventListener('wheel',e=>{const horiz=e.shiftKey||Math.abs(e.deltaX)>Math.abs(e.deltaY);if(!horiz)return;e.preventDefault();if(Math.abs(e.deltaX||e.deltaY)>8)go(i+((e.deltaX||e.deltaY)>0?1:-1))},{passive:false});
  return{go,get i(){return i},reset(){i=0;tr=null;t0=now()},frame(){const T=now();let p=0;if(tr){p=cl((T-tr.s)/(trans*(1+.18*(tr.steps-1))));if(p>=1){i=tr.to;tr=null;t0=T;p=0}}else if(T-t0>dur&&!drag)go(i+1);
   draw(i,tr,p,tr?1:cl((T-t0)/dur),drag?drag.dx:0)}}}
 const ov=document.getElementById('ov');let ovGo=null;
@@ -109,7 +112,13 @@ function composePlate(im,d,k,ar){const CW=1280,CH=Math.round(CW/ar),c=document.c
  x.fillStyle='#B3261E';x.font='34px FrL';x.fillText(P(k+1),40,CH-38);x.fillStyle='#1C1916';x.font='38px "Noto Serif CJK SC",serif';x.fillText(d.title,100,CH-38);x.globalAlpha=.5;x.font='24px "Noto Serif CJK SC",serif';x.textAlign='right';x.fillText(d.kicker,CW-40,CH-40);return c}
 const VAR={A:{n:'墨晕',p:'下一幅像墨滴落在宣纸上，从几处同时洇开'},D:{n:'环廊',p:'书封围成一圈 · 拖动 / 滑动旋转，松手停在一本'},E:{n:'百叶',p:'画面裂成竖条依次在空中翻面，背面就是下一幅，拼回完整一张'}};
 const MAP=[{v:'D',g:'故语'},{v:'A',g:'大陆'},{v:'E',g:'云游'}].filter(m=>{const o=new URLSearchParams(location.search).get('only');return !o||o===m.v});
-const EMB=/emb=1/.test(location.search);if(EMB){document.documentElement.classList.add('emb');addEventListener('wheel',e=>{try{parent.scrollBy(0,e.deltaY)}catch(_){}},{passive:true})}
+const EMB=/emb=1/.test(location.search);if(EMB){document.documentElement.classList.add('emb');
+ addEventListener('wheel',e=>{if(e.shiftKey||Math.abs(e.deltaX)>Math.abs(e.deltaY))return;try{parent.scrollBy(0,e.deltaY)}catch(_){}},{passive:true});
+ let vt=null,axis=null;
+ addEventListener('touchstart',e=>{vt={x:e.touches[0].clientX,y:e.touches[0].clientY};axis=null},{passive:true});
+ addEventListener('touchmove',e=>{if(!vt||!e.touches[0])return;const dx=e.touches[0].clientX-vt.x,dy=e.touches[0].clientY-vt.y;if(!axis&&Math.hypot(dx,dy)>8)axis=Math.abs(dx)>Math.abs(dy)*1.15?'x':'y';if(axis==='y'){try{parent.scrollBy(0,-dy)}catch(_){} vt={x:e.touches[0].clientX,y:e.touches[0].clientY}}},{passive:true});
+ addEventListener('touchend',()=>{vt=null;axis=null},{passive:true});
+}
 (async()=>{
  const ALLD=await (await fetch('car-data.json')).json();await document.fonts.load('34px FrL');await document.fonts.load('40px "Noto Serif CJK SC"');
  const GRP=['故语','大陆','云游'].map(n=>({name:n,kind:n==='故语'?'book':'plate',items:ALLD.filter(d=>d.section===n)}));
@@ -145,12 +154,15 @@ function mkD(sec,G){const N=G.items.length,sd=sec.querySelector('.st');sd.innerH
  const RC=cards(ring,G);let RAD=600;
  const size=()=>{const b=box(sd,G.ca,.84);let w=MOBQ()?Math.min(b.w,innerWidth*(G.kind==='plate'?.74:.5)):Math.min(b.w,innerWidth*(G.kind==='plate'?.36:.2)),h=w/G.ca;RAD=w*(G.kind==='plate'?1.0:1.12)*N/(2*Math.PI)/ (N<8?.82:1);sd.style.perspective=(MOBQ()?900:1700)+'px';RC.forEach((c,k)=>{c.style.width=w+'px';c.style.height=h+'px';c.style.margin=`${-h/2}px 0 0 ${-w/2}px`;c.style.transform=`rotateY(${k*360/N}deg) translateZ(${RAD}px)`})};size();addEventListener('resize',size);
  let pos=0,tgt=0,last=now(),idle=now(),drag=null,vel=0,tilt=0,ty=0;
- sd.addEventListener('pointerdown',e=>{drag={x:e.clientX,p0:pos,lx:e.clientX,lt:now(),dx:0,k:e.target.closest('.uc')?.dataset.k};sd.setPointerCapture(e.pointerId)});
- sd.addEventListener('pointermove',e=>{const r=sd.getBoundingClientRect();ty=(e.clientY-r.top)/r.height-.5;if(!drag)return;const T=now();drag.dx=e.clientX-drag.x;vel=(e.clientX-drag.lx)/Math.max(8,T-drag.lt);drag.lx=e.clientX;drag.lt=T});
- sd.addEventListener('pointerup',()=>{if(!drag)return;const step=RAD*2*Math.PI/N;if(Math.abs(drag.dx)<6&&drag.k!=null){go(+drag.k)}else{tgt=Math.round(pos-vel*260/step)}drag=null;idle=now()});
+ sd.addEventListener('pointerdown',e=>{drag={x:e.clientX,y:e.clientY,p0:pos,lx:e.clientX,lt:now(),dx:0,dy:0,axis:null,k:e.target.closest('.uc')?.dataset.k,id:e.pointerId}});
+ sd.addEventListener('pointermove',e=>{const r=sd.getBoundingClientRect();ty=(e.clientY-r.top)/r.height-.5;if(!drag)return;drag.dx=e.clientX-drag.x;drag.dy=e.clientY-drag.y;
+  if(!drag.axis&&Math.hypot(drag.dx,drag.dy)>8){drag.axis=Math.abs(drag.dx)>Math.abs(drag.dy)*1.15?'x':'y';if(drag.axis==='x')try{sd.setPointerCapture(drag.id)}catch(_){}}
+  if(drag.axis!=='x')return;const T=now();vel=(e.clientX-drag.lx)/Math.max(8,T-drag.lt);drag.lx=e.clientX;drag.lt=T});
+ sd.addEventListener('pointerup',()=>{if(!drag)return;const step=RAD*2*Math.PI/N;if((!drag.axis||drag.axis==='x')&&Math.abs(drag.dx)<8&&drag.k!=null){go(+drag.k)}else if(drag.axis==='x'){tgt=Math.round(pos-vel*260/step)}drag=null;idle=now()});
+ sd.addEventListener('wheel',e=>{const horiz=e.shiftKey||Math.abs(e.deltaX)>Math.abs(e.deltaY);if(!horiz)return;e.preventDefault();tgt+=(e.deltaX||e.deltaY)>0?1:-1;idle=now()},{passive:false});
  const go=k=>{const c=((Math.round(pos)%N)+N)%N;let f=(k-c+N)%N;if(f>N/2)f-=N;tgt=Math.round(pos)+f;idle=now()};
  return{go,reset(){pos=tgt=0;idle=last=now()},frame(){const T=now(),dt=Math.min(.1,(T-last)/1000);last=T;const step=RAD*2*Math.PI/N;
-  if(drag)pos=drag.p0-drag.dx/step;else{if(T-idle>3200&&Math.abs(tgt-pos)<.002){tgt=Math.round(pos)+1;idle=T}pos+=(tgt-pos)*(1-Math.exp(-dt*4.2))}
+  if(drag&&drag.axis==='x')pos=drag.p0-drag.dx/step;else if(!drag){if(T-idle>3200&&Math.abs(tgt-pos)<.002){tgt=Math.round(pos)+1;idle=T}pos+=(tgt-pos)*(1-Math.exp(-dt*4.2))}
   tilt+=((-5-ty*6)-tilt)*(1-Math.exp(-dt*3));ring.style.transform=`translateZ(${-RAD}px) rotateX(${tilt}deg) rotateY(${-pos*360/N}deg)`;
   RC.forEach((c,k)=>{let a=((k-pos)%N+N)%N;if(a>N/2)a-=N;const f=cl(1-Math.abs(a)/2.2);c.style.filter=`brightness(${.55+.45*f}) saturate(${.6+.4*f})`});
   U(((Math.round(pos)%N)+N)%N,drag?0:cl((T-idle)/3200))}}}

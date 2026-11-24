@@ -64,8 +64,8 @@ img{transition:opacity .5s}
 #xiaoji .head h2{font-size:clamp(40px,5vw,72px);font-weight:400;letter-spacing:.15em;margin:8px 0}
 #xiaoji .head p{font-size:15px;letter-spacing:.3em;opacity:.8}
 .card{position:absolute;left:0;top:0;width:clamp(230px,22vw,320px);background:#fbf8f1;padding:12px 12px 16px;box-shadow:0 18px 40px rgba(0,0,0,.45);will-change:transform}
-.card .im{width:100%;aspect-ratio:4/3;overflow:hidden}
-.card img{width:100%;height:100%;object-fit:cover;display:block}
+.card .im{width:100%;aspect-ratio:4/3;overflow:hidden;background:#efe6d4;border:0;outline:0;line-height:0}
+.card img{width:100%;height:100%;object-fit:cover;object-position:center;display:block;transform:scale(1.04);transform-origin:center center;filter:none}
 .card small{display:flex;justify-content:space-between;font-size:11px;color:#8a7b6a;letter-spacing:.15em;margin-top:12px}
 .card h4{font-size:19px;margin:6px 0 4px;color:#2a211b}
 .card p{font-size:12.5px;line-height:1.7;color:#6f6255}
@@ -288,6 +288,8 @@ html,body{background:var(--paper)!important}
  .ticker{font-size:12px}
  #xiaoji .head{left:20px;top:9vh}#xiaoji .head p{font-size:12px;letter-spacing:.15em}
  .card{width:66vw}
+ #cards{touch-action:pan-y}
+ #cnav{left:20px;right:20px;width:auto;transform:none;bottom:5.2vh}
  .kside{font-size:15px;right:18px;top:12vh}.ksig{left:20px}
  #guyu .head{left:20px;right:20px;top:9vh;max-width:none}#guyu .head p{font-size:13px}
  #book{--bw:min(40vw,30vh);top:56%}
@@ -311,7 +313,7 @@ html,body{background:var(--paper)!important}
 .ticker{background:var(--paper)!important;color:var(--ink)!important;border-top:1px solid rgba(28,25,22,.18);font-size:12px;letter-spacing:.35em;height:4.4vh}
 .drift{color:#E9E1D3!important}
 /* ===================== m4 · 老大 12 fixes ===================== */
-#track{height:4700vh!important}
+#track{height:3695vh!important}
 #fx{position:fixed;inset:0;width:100vw;height:100vh;z-index:80;pointer-events:none}
 /* 1 seal */
 #ovseal{left:calc(3.4vw + min(46vh,30vw)*1.02)!important;top:calc(17vh + min(46vh,30vw)*.97)!important;width:74px!important;height:74px!important;padding:0!important;display:flex!important;align-items:center;justify-content:center;background:var(--red);border-radius:4px;box-shadow:inset 0 0 0 3px var(--red),inset 0 0 0 5px rgba(243,238,230,.9);filter:url(#sealf);opacity:0;z-index:3;will-change:transform,opacity}
@@ -587,6 +589,32 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}button
 @keyframes hbp{50%{transform:rotate(-6deg) scale(.94)}}
 @media (max-width:760px){#hbhd{top:64px;left:20px}#hbhd p{display:none}#hbhd h2{font-size:40px}}
 @font-face{font-family:'ZMX';src:url(huiben/f/zmx-sub.woff2) format('woff2');font-display:swap}
+#cards{position:absolute;inset:28vh 0 10vh;z-index:4;touch-action:pan-y;pointer-events:auto}
+#cnav{position:absolute;left:50%;bottom:6.2vh;transform:translateX(-50%);z-index:5;display:flex;align-items:center;gap:10px;pointer-events:auto}
+#cnav button{appearance:none;width:36px;height:36px;border:0;border-radius:50%;background:rgba(239,226,207,.14);color:#efe2cf;font:22px/1 serif;cursor:pointer}
+#cnav button:active{background:rgba(239,226,207,.28)}
+#cdots{display:flex;gap:6px}#cdots b{width:7px;height:7px;border-radius:50%;background:rgba(239,226,207,.35);cursor:pointer;display:block}
+#cdots b.on{background:#efe2cf}
+#hbpost{position:absolute;inset:0;z-index:3;display:flex;flex-direction:column;justify-content:flex-end;padding:0 6vw 12vh;color:#efe6d6;cursor:default}
+#hbpost .cover{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 30%;filter:saturate(1.05);pointer-events:none}
+#hbpost .veil{position:absolute;inset:0;background:linear-gradient(to top,rgba(12,10,16,.82) 0%,rgba(12,10,16,.28) 46%,rgba(12,10,16,.15) 100%);pointer-events:none}
+#hbpost .copy{position:relative;z-index:2;max-width:22em;pointer-events:none}
+#hbopen{position:relative;z-index:3;margin-top:22px;align-self:flex-start;appearance:none;border:0;cursor:pointer;color:#F3EEE6;background:#B3261E;font:15px/1 "Noto Serif CJK SC",serif;letter-spacing:.28em;padding:16px 28px;border-radius:999px;box-shadow:0 12px 28px rgba(179,38,30,.35)}
+#hbopen i{display:inline-block;width:8px;height:8px;margin-right:12px;background:#F3EEE6;border-radius:2px;transform:rotate(45deg);vertical-align:middle;animation:hbpulse 1.8s ease-in-out infinite}
+@keyframes hbpulse{50%{transform:rotate(45deg) scale(.62);opacity:.65}}
+#hbfs{position:fixed;inset:0;z-index:200;background:#141016;display:flex;flex-direction:column;opacity:0;pointer-events:none;transition:opacity .28s}
+#hbfs.on{opacity:1;pointer-events:auto}
+#hbfs[hidden]{display:none!important}
+#hbbar{position:absolute;left:0;right:0;top:0;z-index:3;height:calc(52px + env(safe-area-inset-top));padding:calc(10px + env(safe-area-inset-top)) 16px 8px;display:flex;align-items:center;background:linear-gradient(to bottom,rgba(10,8,10,.72),transparent)}
+#hbback{appearance:none;border:0;background:rgba(243,238,230,.12);color:#F3EEE6;width:40px;height:40px;border-radius:50%;font:22px/40px serif;cursor:pointer}
+#hbfs iframe{position:absolute;inset:0;width:100%;height:100%;border:0;background:#141016}
+#hbfs #hbload{z-index:2}
+body.hb-open #UI,body.hb-open #HUD,body.hb-open #grain,body.hb-open #fx,body.hb-open #cur{visibility:hidden}
+@media (max-width:760px){#hbopen{padding:14px 22px;font-size:14px}#hbpost{padding:0 20px 11vh}}
+@media (max-width:700px){
+  #fx, #grain{opacity:.12!important}
+  .mq,.kbig,#glw span,#glr span{filter:none!important;text-shadow:none!important}
+}
 </style><style id="tagfix">@media(min-width:701px){#ovtag{writing-mode:horizontal-tb!important;display:flex!important;flex-direction:column;right:auto!important;left:calc(3.4vw + min(46vh,30vw)*.06)!important;top:calc(17vh + min(46vh,30vw)*1.13)!important;font-size:clamp(24px,2.25vw,34px)!important;letter-spacing:.14em!important;line-height:1.6!important;text-shadow:none!important;color:#1c1916}
 #ovtag .tg:nth-child(2){margin-top:0!important;padding-left:2.2em}}</style>
 <style id="m12">
@@ -602,7 +630,7 @@ iframe.emb.on{opacity:1}
 #ifB,#ifE{inset:0;width:100%;height:100%}
 #ifE{background:#201b17}
 @media (max-aspect-ratio:1/1){#ifD{top:30vh;height:68vh}#ifA{left:0;width:100%;top:7vh;height:54vh}#dalu .dshade{background:linear-gradient(rgba(10,16,20,.8),rgba(10,16,20,.55) 60%,rgba(10,16,20,.2))}
- iframe.emb{pointer-events:none}}
+ iframe.emb{pointer-events:none}iframe.emb.on{pointer-events:auto}}
 .head h2,#yhead h2,#whd h2,#khd h2{text-wrap:balance}.head p,#yhead p,#whd p,#khd p,.ycap p,#cme .cb{text-wrap:pretty}
 a,button,.mag{-webkit-tap-highlight-color:transparent}
 #NAV a:active,.ix:active,.go:active,#xmore:active,.flinks a:active,#totop:active,.xi:active,.kr:active{opacity:.7;transition:opacity .08s}
@@ -641,7 +669,7 @@ a,button,.mag{-webkit-tap-highlight-color:transparent}
  <div class="c3"><ul><li>国际<i>I</i></li><li>科技<i>II</i></li><li>AI<i>III</i></li><li>日常小事<i>IV</i></li><li>堺 · 大阪 本周展和祭<i>V</i></li></ul></div></div>
  </div><div class="ticker"><div id="tick"></div></div></section>
 
-<section class="sec" id="xiaoji"><div class="head"><span class="kick">02 · NOTES · 旅途小记</span><h2>小记</h2><p>记录旅途，遇见生活，也遇见自己。 · 共 8 篇</p></div><div id="cards"></div></section>
+<section class="sec" id="xiaoji"><div class="head"><span class="kick">02 · NOTES · 旅途小记</span><h2>小记</h2><p>记录旅途，遇见生活，也遇见自己。 · 共 8 篇</p></div><div id="cards"></div><div id="cnav"><button type="button" id="cprev" aria-label="上一篇">‹</button><div id="cdots"></div><button type="button" id="cnext" aria-label="下一篇">›</button></div></section>
 
 <section class="sec" id="kuaihuo"><div class="bg" id="kbg"></div>
  <div class="mq" id="mq0" style="top:6vh"></div><div class="mq" id="mq1" style="top:40vh"></div><div class="mq" id="mq2" style="top:74vh"></div>
@@ -677,7 +705,8 @@ a,button,.mag{-webkit-tap-highlight-color:transparent}
  <div class="fold" id="fold1" style="position:absolute;inset:0;display:flex;visibility:hidden"></div>
  <div class="fold" id="fold2" style="position:absolute;inset:0;display:flex;flex-direction:column;visibility:hidden"><i style="flex:1;transform-origin:50% 0"></i><i style="flex:1;transform-origin:50% 100%"></i></div></section>
 
-<section class="sec" id="huiben"><iframe id="ifH" title="纸上绘本 · 立体书"></iframe><div id="hbhd"><div class="kick">08 · POP-UP BOOK</div><h2>纸上<b>绘本</b></h2><p>三处山水，折进一本书。<br>点景物听它介绍，发光的地方，可以走进画里。</p></div><div id="hbload"><i>绘</i><u></u><span>正在裁纸</span></div></section>
+<section class="sec" id="huiben"><div id="hbpost"><img class="cover" src="huiben/img/bd-xiangbi.webp" alt="" width="1536" height="655" decoding="async" loading="lazy"><div class="veil"></div><div class="copy"><div class="kick" style="letter-spacing:.24em;opacity:.7;font:12px/1.4 ui-monospace,Menlo,monospace">08 · POP-UP BOOK</div><h2 style="font-family:'ZMX','Zhi Mang Xing',serif;font-weight:400;font-size:clamp(44px,6vw,86px);line-height:1;margin:.18em 0 .2em">纸上<b style="color:#B3261E;font-weight:400">绘本</b></h2><p style="font-size:14px;line-height:1.8;opacity:.78;margin:0">三处山水，折进一本书。点开后再进入立体页。</p></div><button type="button" id="hbopen"><i></i>打开绘本</button></div></section>
+<div id="hbfs" hidden><div id="hbbar"><button type="button" id="hbback" aria-label="关闭绘本">×</button></div><iframe id="ifH" title="纸上绘本 · 立体书"></iframe><div id="hbload"><i>绘</i><u></u><span>正在裁纸</span></div></div>
 <section class="sec" id="color"><canvas id="pcv"></canvas>
  <div id="cme" class="blo"><span class="kick">08 · COLOR · 关于我</span><h2 id="cname">Color</h2>
   <p class="cz">多美 · DUOMEI 的作者<span>现居 大阪 · 堺</span><span>故乡 桂林</span></p>
@@ -698,15 +727,7 @@ a,button,.mag{-webkit-tap-highlight-color:transparent}
 <section class="sec" id="foot">
  <div class="word" id="W"><div class="row"><span data-bg="img/L-hong.webp">D</span><span data-bg="img/L-jiangnan.webp">U</span><span data-bg="img/L-xiaoyuan.webp">O</span></div><div class="row"><span data-bg="img/L-guilin.webp">M</span><span data-bg="img/L-hong.webp">E</span><span data-bg="img/L-jiangnan.webp">I</span></div></div>
  <div class="fcn" id="FC">多美</div><div class="ftag" id="FT">记录旅途，遇见生活，也遇见自己。</div>
- <div class="flinks" id="FL"><a>首页</a><a>早报</a><a>小记</a><a>故语</a><a>寻迹</a><a>云游</a><a>Color</a><a>微言</a><a>Skill</a></div><div class="fcopy" id="FCP">© 2026 · DUOMEI · 多美</div>
-<nav id="foldpages" style="position:relative;z-index:2;margin-top:18px;display:flex;flex-wrap:wrap;gap:10px 18px;justify-content:center;font-family:FrL,serif;font-size:11px;letter-spacing:.18em;opacity:.75">
-<a href="/xiaoyuan-scene/" style="color:inherit">小院</a>
-<a href="/honglou/" style="color:inherit">红楼</a>
-<a href="/yunyou/" style="color:inherit">云游全页</a>
-<a href="/lingchuan/" style="color:inherit">灵川</a>
-<a href="/atlas/v6/" style="color:inherit">图志</a>
-<a href="/storybook/" style="color:inherit">绘本全页</a>
-</nav></section>
+ <div class="flinks" id="FL"><a>首页</a><a>早报</a><a>小记</a><a>故语</a><a>寻迹</a><a>云游</a><a>Color</a><a>微言</a><a>Skill</a></div><div class="fcopy" id="FCP">© 2026 · DUOMEI · 多美</div></section>
 </div>
 <header class="ui" id="UI"><span class="logo">DUOMEI</span><nav id="NAV"><a>早报</a><a>小记</a><a>快活</a><a>故语</a><a>寻迹</a><a>大陆</a><a>云游</a><a>Color</a><a>微言</a><a>Skill</a></nav></header>
 <div class="hud" id="HUD"><span id="HN">00</span><span class="bar"><i id="PG"></i></span><span class="cn" id="HC">多美</span><button id="totop" class="mag" data-cur="回顶部" aria-label="回到顶部" type="button"><svg viewBox="0 0 40 40" aria-hidden="true"><circle class="trk" cx="20" cy="20" r="18"/><circle class="prg" id="ttp" cx="20" cy="20" r="18"/><path class="ar" d="M20 27.5V13.2M14.6 18.4 20 13l5.4 5.4"/></svg><em>TOP</em></button></div>

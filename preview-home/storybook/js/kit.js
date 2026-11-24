@@ -57,7 +57,8 @@ export function mist(group, r, list, rgb = '236,232,224', a = 0.3) {
 // phones get a lighter ground canvas: two GPU copies of a 3200px canvas per spread is too much memory there
 export const SMALL = typeof innerWidth !== 'undefined' && Math.min(innerWidth, innerHeight) < 760;
 export function groundBase(S = 80, seed = 11) {
-  S = Math.min(S, SMALL ? 46 : 64);
+  // Keep the map sharp on phones: ~2560px is enough at DPR 2, without the old 46px/unit downscale.
+  S = Math.min(S, SMALL ? 64 : 80);
   const c = document.createElement('canvas'); c.width = W * S; c.height = D * S; const g = c.getContext('2d');
   g.fillStyle = g.createPattern(paperSheet({ size: 512, color: PAPER, seed }), 'repeat'); g.fillRect(0, 0, c.width, c.height);
   return { c, g, X: (x) => (x + W / 2) * S, Z: (z) => (z + D / 2) * S, S };
@@ -78,4 +79,34 @@ export function sheenFrom(drawMask) {
   const S = 24, c = document.createElement('canvas'); c.width = W * S; c.height = D * S; const g = c.getContext('2d');
   g.fillStyle = '#000'; g.fillRect(0, 0, c.width, c.height); g.fillStyle = '#fff'; g.strokeStyle = '#fff'; g.filter = 'blur(5px)';
   drawMask(g, (x) => (x + W / 2) * S, (z) => (z + D / 2) * S, S); return c;
+}
+
+/** Paper-tag billboard: always faces the camera, upright, never baked into the standee. */
+export function makeTag(text) {
+  const dpr = Math.min(2, (typeof devicePixelRatio === 'number' && devicePixelRatio) || 1);
+  const fontPx = 36, padX = 22, padY = 13;
+  const probe = document.createElement('canvas').getContext('2d');
+  probe.font = `600 ${fontPx}px "Noto Serif CJK SC","Songti SC",KaiTi,serif`;
+  const tw = Math.ceil(probe.measureText(text).width);
+  const w = Math.max(86, tw + padX * 2), h = fontPx + padY * 2, sh = 10;
+  const c = document.createElement('canvas'); c.width = Math.ceil(w * dpr); c.height = Math.ceil((h + sh) * dpr);
+  const g = c.getContext('2d'); g.setTransform(dpr, 0, 0, dpr, 0, 0);
+  g.fillStyle = 'rgba(28,25,22,0.30)'; rr(g, 5, 6, w - 10, h - 4, 9); g.fill();
+  g.fillStyle = '#F7F1E6'; g.strokeStyle = '#1C1916'; g.lineWidth = 1.6;
+  rr(g, 2, 1, w - 6, h - 6, 8); g.fill(); g.stroke();
+  g.strokeStyle = 'rgba(255,255,255,0.75)'; g.lineWidth = 1.1;
+  rr(g, 3.6, 2.6, w - 9.2, h - 9.2, 6.5); g.stroke();
+  g.fillStyle = '#1C1916';
+  g.font = `600 ${fontPx}px "Noto Serif CJK SC","Songti SC",KaiTi,serif`;
+  g.textAlign = 'center'; g.textBaseline = 'middle';
+  g.fillText(text, w / 2, (h - 5) / 2 + 1);
+  const tex = new THREE.CanvasTexture(c); tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = 8; tex.needsUpdate = true;
+  const mat = new THREE.SpriteMaterial({ map: tex, transparent: true, depthTest: false, depthWrite: false });
+  const spr = new THREE.Sprite(mat);
+  const worldW = Math.max(2.15, text.length * 0.78);
+  spr.scale.set(worldW, worldW * ((h + sh) / w), 1);
+  spr.center.set(0.5, 0);
+  spr.renderOrder = 30;
+  spr.userData.tag = text;
+  return spr;
 }
