@@ -167,6 +167,9 @@ deploy_site_pack() {
   return "$site_rc"
 }
 
+echo "== 清掉预览项目里失败的部署包，给这次腾出额度（正式站一律跳过） =="
+node scripts/edgeone-preview-free-storage.mjs
+
 echo "== 如有上次失败，先打印平台日志 =="
 node scripts/edgeone-preview-fail-log.mjs duomei-new-preview || true
 node scripts/edgeone-preview-fail-log.mjs duomei-slim-preview || true
