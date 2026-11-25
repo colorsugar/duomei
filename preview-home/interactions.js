@@ -390,8 +390,8 @@ Q('.stk-dl').forEach(a=>{
 /* ===== Modal Preview & Real Route CTAs ===== */
 const m=document.createElement('div');m.id='modal';m.innerHTML=`<div class="mbg"></div><article role="dialog" aria-modal="true" aria-label="内容预览"><button id="mclose" type="button" aria-label="关闭">返回 ×</button><div id="mcontent"></div><nav id="mnav"><button type="button" id="mprev" aria-label="上一项">←</button><span id="midx"></span><button type="button" id="mnext" aria-label="下一项">→</button></nav></article>`;document.body.appendChild(m);
 let kind='',idx=0,prevf=null,oldY='',xj=null;
-function show(k,i){if(!m.classList.contains('on')){prevf=document.activeElement;oldY=document.body.style.overflow;document.body.style.overflow='hidden'}kind=k;idx=i;m.classList.add('on');$('mcontent').innerHTML='';$('mnav').style.display=k==='book'||k==='sticker'||k==='note'?'flex':'none';$('mclose').focus();draw()}
-function close(){m.classList.remove('on');document.body.style.overflow=oldY;prevf&&prevf.focus();setTimeout(()=>{if(!m.classList.contains('on'))$('mcontent').innerHTML=''},500)}
+function show(k,i){if(!m.classList.contains('on')){prevf=document.activeElement;oldY=document.body.style.overflow;document.body.style.overflow='hidden';window.__lenis&&window.__lenis.stop()}kind=k;idx=i;m.classList.add('on');$('mcontent').innerHTML='';$('mnav').style.display=k==='book'||k==='sticker'||k==='note'?'flex':'none';$('mclose').focus();draw()}
+function close(){m.classList.remove('on');document.body.style.overflow=oldY;window.__lenis&&window.__lenis.start();prevf&&prevf.focus();setTimeout(()=>{if(!m.classList.contains('on'))$('mcontent').innerHTML=''},500)}
 function draw(){const c=$('mcontent');c.className=kind;
  if(kind==='book'){
   const rt=GUYU_ROUTES[idx]||'/guyu';
@@ -447,26 +447,4 @@ Q('.flinks a').forEach(a=>{
 });
 })();
 
-/* back to top: progress ring, idle bob, eased inertial return, footer clearance */
-(()=>{const b=document.getElementById('totop');if(!b)return;const ring=document.getElementById('ttp'),ar=b.querySelector('.ar'),hud=document.getElementById('HUD');let anim=null;
- window.__cancelToTop=()=>{if(anim){cancelAnimationFrame(anim);anim=null}};
- function tick(){
-  const vh=window.__VH?window.__VH():innerHeight,u0=scrollY/vh,curU=window.__curU!=null?window.__curU:u0;
-  const max=(document.documentElement.scrollHeight-innerHeight)/vh||1,footIn=curU>44.3,on=u0>0.9&&!footIn;
-  const t=footIn?0:Math.min(1,Math.max(0,(u0-.9)/.35)),e=1-Math.pow(1-t,3);
-  b.classList.toggle('foot-hide',footIn);
-  b.style.opacity=e;b.style.transform=`scale(${.6+.4*e})`;b.classList.toggle('show',on);
-  ring.style.strokeDashoffset=(113.1*(1-Math.min(1,u0/max))).toFixed(2);
-  const idle=typeof IDLE==='number'?IDLE:0,c=(window.__clock!=null?window.__clock:performance.now()/1000);ar.style.transform=`translateY(${(Math.sin(c*2.4)*1.6*idle).toFixed(2)}px)`;
-  hud.classList.toggle('dk',typeof DKF!=='undefined'&&!!DKF);requestAnimationFrame(tick);
- }
- requestAnimationFrame(tick);
- b.addEventListener('click',()=>{
-  window.__stopEmbFling&&window.__stopEmbFling();
-  if(anim)cancelAnimationFrame(anim);const y0=scrollY,vh=innerHeight,dur=Math.min(2400,1000+y0/vh*32),t0=performance.now();
-  const ease=t=>t<.5?8*t*t*t*t:1-Math.pow(-2*t+2,4)/2;
-  const step=now=>{const t=Math.min(1,(now-t0)/dur);window.scrollTo(0,y0*(1-ease(t)));if(t<1)anim=requestAnimationFrame(step);else anim=null};anim=requestAnimationFrame(step);
- });
- addEventListener('wheel',window.__cancelToTop,{passive:true});addEventListener('touchstart',window.__cancelToTop,{passive:true});
-})();
 ;(()=>{const A=document.getElementById('acards');if(!A)return;let t;A.addEventListener('touchstart',()=>{A._touch=1;clearTimeout(t)},{passive:true});A.addEventListener('touchend',()=>{t=setTimeout(()=>A._touch=0,1500)},{passive:true})})();

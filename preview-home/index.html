@@ -553,8 +553,9 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}button
 }
 
 #ovwm span svg{display:block;width:.98em;height:.98em;overflow:visible}
+#ovwm{opacity:0}#ovwm.ink-live{opacity:1}
 #ovwm .sk{fill:none;stroke:#fff;stroke-width:150;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:1 1;stroke-dashoffset:1}
-#ovwm .gm,#ovwm .gf{fill:var(--ink)}#ovwm .gf{opacity:0}
+#ovwm .gm,#ovwm .gf{fill:var(--ink)}#ovwm .gm{opacity:0;visibility:hidden}#ovwm .gf{opacity:0}
 #ovwm .bl{fill:var(--ink);opacity:0;filter:blur(10px);transform-origin:500px 480px}
 #ovwm .tip{fill:#1C1916;opacity:0}
 #ovtag i{display:inline-block;transform-origin:50% 90%;will-change:transform}
@@ -658,15 +659,17 @@ a,button,.mag{-webkit-tap-highlight-color:transparent}
 .dm-brand{display:inline-flex;flex-direction:column;text-decoration:none;color:inherit;line-height:1.05;cursor:pointer;padding:2px 0}
 .dm-brand strong{font-family:FrB,Georgia,"Times New Roman",serif;font-size:18px;font-weight:600;letter-spacing:.05em}
 .dm-brand span{font-size:11px;letter-spacing:.14em;opacity:.78;margin-top:3px}
-#dm-orb{position:relative;width:40px;height:40px;flex:0 0 40px;border-radius:50%;border:0;padding:0;cursor:pointer;touch-action:manipulation;
- background:radial-gradient(circle,#c44b31 0 11.5%,transparent 12.5%),radial-gradient(circle,transparent 0 23%,#fbf7ef 24% 35%,transparent 36%),repeating-radial-gradient(circle,rgba(255,255,255,.06) 0 1.5px,transparent 1.5px 4px),radial-gradient(circle at 36% 32%,#3b3530,#191614 72%);
- box-shadow:0 0 0 1.2px rgba(255,253,247,.78),0 8px 20px rgba(28,25,22,.22);transition:transform .3s cubic-bezier(.22,1,.36,1),box-shadow .4s ease}
-#dm-orb::before{content:"";position:absolute;inset:2px;border-radius:50%;background:conic-gradient(from 210deg,rgba(255,255,255,.18),transparent 22%,transparent 55%,rgba(255,255,255,.1) 70%,transparent 84%);pointer-events:none}
+#dm-orb{position:relative;width:40px;height:40px;flex:0 0 40px;border-radius:50%;border:0;padding:0;cursor:pointer;touch-action:manipulation;background:transparent;box-shadow:none;transition:transform .3s cubic-bezier(.22,1,.36,1),box-shadow .4s ease;display:inline-flex;align-items:center;justify-content:center;color:#1C1916}
+#dm-orb svg{display:block;width:40px;height:40px;overflow:visible;pointer-events:none}
+#dm-orb .orb-disk{fill:#F6F0E6;stroke:currentColor;stroke-width:1.15}
+#dm-orb .orb-ring{fill:none;stroke:#B3261E;stroke-width:1.05;opacity:.72}
+#dm-orb .orb-ink{fill:none;stroke:currentColor;stroke-width:1.85;stroke-linecap:round;stroke-linejoin:round}
+#dm-orb .orb-dot{fill:#B3261E}
 #dm-orb:hover{transform:scale(1.07)}
-#dm-orb.is-playing::before{animation:dmSpin 5.5s linear infinite}
 #dm-orb.is-playing{animation:dmOrbPulse 2.8s ease-in-out infinite}
+#dm-orb.is-playing .orb-ring{animation:dmSpin 5.5s linear infinite;transform-origin:20px 20px}
 @keyframes dmSpin{to{transform:rotate(1turn)}}
-@keyframes dmOrbPulse{0%,100%{box-shadow:0 0 0 1.2px rgba(255,253,247,.78),0 8px 20px rgba(28,25,22,.22),0 0 0 0 rgba(196,75,49,.36)}50%{box-shadow:0 0 0 1.2px rgba(255,253,247,.78),0 8px 20px rgba(28,25,22,.22),0 0 0 8px rgba(196,75,49,0)}}
+@keyframes dmOrbPulse{0%,100%{filter:drop-shadow(0 6px 14px rgba(28,25,22,.18))}50%{filter:drop-shadow(0 6px 14px rgba(28,25,22,.18)) drop-shadow(0 0 0 rgba(179,38,30,0))}}
 
 /* Three-dot menu button -> X */
 #dm-menu-btn{position:relative;width:42px;height:42px;flex:0 0 42px;border-radius:50%;background:rgba(255,253,247,.86);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid rgba(28,25,22,.1);box-shadow:0 4px 16px rgba(28,25,22,.09);color:#1C1916;cursor:pointer;touch-action:manipulation;display:inline-flex;align-items:center;justify-content:center;transition:transform .25s ease,background .25s ease,box-shadow .25s ease}
@@ -816,31 +819,203 @@ body.hb-open #dm-music-card,body.hb-open #dm-hover-zone{visibility:hidden}
  #klist .kr p{max-height:none!important;margin-top:2px!important;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden;font-size:11px!important;line-height:1.5!important}
  #klist .kr .tg{display:none!important}
 }
-</style></head><body>
-<div id="track"></div>
+</style>
+<style id="motion-v2">
+/* ===== Motion v2 · one native document; compositor-only motion =====
+   Sections stack in normal flow and scroll 1:1 with the finger. Entrances are timed transitions started by
+   IntersectionObserver (main.js adds .in / .vis); the only scroll-linked motion is CSS scroll-driven animation. */
+:root{--e-out:cubic-bezier(.22,1,.36,1);--e-expo:cubic-bezier(.16,1,.3,1);--e-io:cubic-bezier(.65,0,.35,1);--e-spring:cubic-bezier(.34,1.42,.64,1)}
+html{scroll-behavior:auto}
+html.lenis,html.lenis body{height:auto}.lenis.lenis-stopped{overflow:clip}
+#stage{position:relative!important;inset:auto!important;overflow:visible!important;perspective:none!important}
+#stage>.sec{position:relative!important;inset:auto!important;width:100%;height:100vh;visibility:visible!important;will-change:auto!important;z-index:1!important;overflow:hidden;overflow:clip;view-timeline:--sec block}
+#stage>.sec.tall{height:auto}
+.sx{position:absolute;inset:0;transform-origin:50% 0}
+#stage *{will-change:auto!important}
+#stage #ovwm span{will-change:transform!important}
+.ph{animation:none!important}
+#foot .sx{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 5vw}
+@media(min-width:761px) and (min-aspect-ratio:1/1){#weiyan .sx{perspective:1600px}}
+/* the section that is leaving drifts behind the next one and dims: depth without moving anything by script */
+.sec::after{content:"";position:absolute;inset:0;z-index:300;pointer-events:none;background:#0d0b09;opacity:0}
+@supports (animation-timeline:view()){
+ .sx{animation:sxOut linear both;animation-timeline:--sec;animation-range:exit 0% exit 100%}
+ .sec::after{animation:secDim linear both;animation-timeline:--sec;animation-range:exit 0% exit 100%}
+ #ovwm{animation:ovUp linear both;animation-timeline:scroll(root);animation-range:0 100vh}
+ #ovimg{animation:ovImg linear both;animation-timeline:scroll(root);animation-range:0 100vh}
+}
+@keyframes sxOut{to{translate:0 46vh;scale:.93}}
+@keyframes secDim{to{opacity:.62}}
+@keyframes ovUp{to{translate:0 -16vh}}
+@keyframes ovImg{to{translate:0 10vh}}
+/* ---------- generic reveals ---------- */
+html.mv .rv{opacity:0!important;translate:0 28px!important;transition:opacity .8s var(--e-out),translate 1.1s var(--e-expo)!important;transition-delay:var(--rd,0s)!important}
+html.mv .in .rv{opacity:1!important;translate:none!important}
+html.mv .ch{display:inline-block;opacity:0;transform:translate3d(0,.72em,0) rotate(5deg);transition:opacity .55s var(--e-out),transform 1s var(--e-expo);transition-delay:calc(var(--i)*40ms + .12s)}
+html.mv .in .ch{opacity:1!important;transform:none!important}
+html.mv .head p.lm .lmi{transform:translate3d(0,115%,0);transition:transform 1.1s var(--e-expo) .35s}
+html.mv .in .head p.lm .lmi{transform:none}
+/* ---------- 00 opening ---------- */
+#ov.alive #ovwm span{animation:breathe 6s ease-in-out infinite alternate;animation-play-state:paused}
+#ov.alive.vis #ovwm span{animation-play-state:running}
+#ov.alive #ovwm span+span{animation-delay:-2.4s}
+@keyframes breathe{0%{scale:1 1;rotate:0deg}50%{scale:1.014 .99;rotate:.6deg}100%{scale:.992 1.01;rotate:-.5deg}}
+.tpet{left:0;top:0;opacity:0;animation:tpet 15s linear infinite;animation-delay:calc(var(--k)*-3s);animation-play-state:paused}
+#ov.alive.vis .tpet{animation-play-state:running}
+@keyframes tpet{0%{transform:translate3d(-8vw,calc(52vh + var(--k)*3vh),0) rotate(0deg);opacity:0}12%{opacity:.7}60%{opacity:.6}100%{transform:translate3d(104vw,calc(36vh + var(--k)*4vh),0) rotate(420deg);opacity:0}}
+@media(max-width:760px){@keyframes tpet{0%{transform:translate3d(-10vw,calc(60vh + var(--k)*2vh),0) rotate(0deg);opacity:0}12%{opacity:.7}60%{opacity:.6}100%{transform:translate3d(108vw,calc(48vh + var(--k)*3vh),0) rotate(420deg);opacity:0}}}
+/* ---------- 01 早报 ---------- */
+html.mv #masth .ch{transform:scale(2.3) translate3d(0,-.25em,0);transition:opacity .4s var(--e-out),transform .95s var(--e-spring);transition-delay:calc(var(--i)*42ms + .15s)}
+html.mv #rule{transform:scaleX(0);transform-origin:0 50%;transition:transform 1.1s var(--e-io) .45s}
+html.mv #zaobao.in #rule{transform:none}
+html.mv #hl .ch{transform:translate3d(0,-.45em,0);transition-delay:calc(var(--i)*14ms + .6s)}
+html.mv #hlbar{transform:scaleX(0);transition:transform .9s var(--e-io) 1.15s}
+html.mv #zaobao.in #hlbar{transform:scaleX(1)}
+html.mv #zaobao .ticker{transform:translate3d(0,100%,0);transition:transform 1s var(--e-expo) .35s}
+html.mv #zaobao.in .ticker{transform:none}
+#kbg{background:radial-gradient(120% 90% at 48% 40%,#BF2D23 0,#A8221B 55%,#8E1C16 100%)}
+#tick{animation:mqL 46s linear infinite;animation-play-state:paused}
+.sec.vis #tick{animation-play-state:running}
+.c2 .go,.c2 .go-sub{transition:background .25s,color .25s,border-color .25s,scale .5s var(--e-spring)}
+/* ---------- 02 小记 · native horizontal scroller ---------- */
+#cards{--cw:clamp(230px,22vw,320px);display:flex;align-items:center;gap:max(18px,3.4vw);overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;padding:0 calc(50% - var(--cw)/2);scrollbar-width:none;overscroll-behavior-x:contain;touch-action:pan-x pan-y;cursor:grab}
+#cards::-webkit-scrollbar{display:none}
+#cards.drag{scroll-snap-type:none;cursor:grabbing}
+#cards .card{position:relative!important;left:auto;top:auto;flex:none;width:var(--cw);scroll-snap-align:center;cursor:inherit}
+@media(max-width:700px){#cards{--cw:66vw}}
+html.mv #cards .card{opacity:0;translate:34vw 0;rotate:9deg;transition:opacity .7s var(--e-out),translate 1.15s var(--e-expo),rotate 1.15s var(--e-expo),box-shadow .4s;transition-delay:calc(var(--i)*70ms + .22s)}
+html.mv #xiaoji.in #cards .card{opacity:1;translate:none;rotate:none}
+.card .im img{transition:opacity .5s,transform 1s var(--e-out)!important}
+@media(hover:hover){.card:hover .im img{transform:scale(1.1)!important}}
+@supports (animation-timeline:view()){#cards .card{animation:cardF linear both;animation-timeline:view(inline)}}
+@keyframes cardF{0%{scale:.86}50%{scale:1}100%{scale:.86}}
+#cdots b{transition:background .3s,transform .4s var(--e-spring)}#cdots b.on{transform:scale(1.35)}
+#cnav button{transition:background .2s,scale .45s var(--e-spring)}
+/* ---------- 03 快活 ---------- */
+html.mv #k1{opacity:0}
+html.mv #kuaihuo.in #k1{animation:kStamp 1.15s var(--e-out) .12s both}
+@keyframes kStamp{0%{opacity:0;transform:scale(3.2) rotate(-12deg)}42%{opacity:1;transform:scale(.97) rotate(.6deg)}56%{transform:translate3d(-8px,0,0)}68%{transform:translate3d(7px,0,0)}80%{transform:translate3d(-3px,0,0)}100%{opacity:1;transform:none}}
+html.mv #k2{opacity:0;transform:rotate(-24deg) translate3d(-60vw,0,0);transition:opacity .6s var(--e-out) .55s,transform 1.2s var(--e-expo) .45s}
+html.mv #kuaihuo.in #k2{opacity:1;transform:none}
+html.mv #kside .ch{transform:translate3d(.6em,0,0);transition-delay:calc(var(--i)*45ms + .8s)}
+.mq{animation:mqL 40s linear infinite;animation-play-state:paused}#mq1{animation-name:mqR;animation-duration:52s}
+.sec.vis .mq{animation-play-state:running}
+html.mv .mq{opacity:0;transition:opacity 1.2s var(--e-out) .2s}html.mv #kuaihuo.in .mq{opacity:1}
+@keyframes mqL{from{transform:translate3d(0,0,0)}to{transform:translate3d(-50%,0,0)}}
+@keyframes mqR{from{transform:translate3d(-50%,0,0)}to{transform:translate3d(0,0,0)}}
+/* ---------- 05 寻迹 ---------- */
+html.mv #xbar .xs i{transform:scaleX(0);transition:transform .9s var(--e-io) calc(.35s + var(--i)*.09s)}
+html.mv #xunji.in #xbar .xs i{transform:scaleX(1)}
+#xbar .xs{cursor:pointer}
+.xi::before{transition:transform .45s var(--e-spring)}.xi.on{--d:1}
+.xf{opacity:0;visibility:hidden;translate:0 16px;transition:opacity .45s var(--e-out),translate .8s var(--e-expo),visibility 0s .45s}
+.xf.cur{opacity:1;visibility:visible;translate:none;transition-delay:.08s,.08s,0s}
+.xf .xr{opacity:0;translate:0 10px;transition:opacity .5s var(--e-out),translate .7s var(--e-expo)}
+.xf.cur .xr{opacity:1;translate:none;transition-delay:calc(var(--i)*60ms + .18s)}
+#xfeat{touch-action:pan-y}
+/* ---------- 06 大陆 · pinned panorama, two panels slide over it ---------- */
+.dl-bg{position:sticky;top:0;height:100vh;overflow:hidden}
+.pnl{position:relative;height:100vh}
+.dl-p1{margin-top:-100vh}
+#dalu .dshade{transition:opacity 1s var(--e-out)}#dalu.p2on .dshade{opacity:1}
+#dpan{transform-origin:0 50%;width:auto!important;min-width:100vw}#dpan img{min-width:100vw;object-fit:cover}
+@supports (animation-timeline:view()){#dpan{animation:dPan linear both;animation-timeline:--sec;animation-range:contain 0% contain 100%}}
+@supports not (animation-timeline:view()){#dpan{animation:dPan 26s ease-in-out infinite alternate;animation-play-state:paused}#dalu.vis #dpan{animation-play-state:running}}
+@keyframes dPan{from{translate:0 0;scale:1.14}to{translate:calc(100vw - 100%) 0;scale:1.04}}
+.mist{animation:mist 16s ease-in-out infinite alternate;animation-play-state:paused}#m2{animation-duration:21s;animation-direction:alternate-reverse}
+.sec.vis .mist{animation-play-state:running}
+@keyframes mist{from{transform:translate3d(-12vw,0,0)}to{transform:translate3d(12vw,0,0)}}
+#flare{opacity:.35;animation:flare 10s ease-in-out infinite alternate;animation-play-state:paused}#dalu.vis #flare{animation-play-state:running}
+@keyframes flare{from{opacity:.15}to{opacity:.7}}
+/* ---------- 07 云游 · misty intro, then the plates ---------- */
+.yy-p1{overflow:hidden;background:#efe6dc}
+.yy-bg{position:absolute;inset:-7vh 0}.yy-bg img{width:100%;height:100%;object-fit:cover;display:block;opacity:0;transition:opacity 1.2s}
+@supports (animation-timeline:view()){.yy-bg{animation:yyBg linear both;animation-timeline:view();animation-range:cover}}
+@keyframes yyBg{from{translate:0 -6vh;scale:1.14}to{translate:0 6vh;scale:1}}
+.yy-mist{position:absolute;left:-40%;right:-40%;bottom:-6%;height:46%;background:radial-gradient(ellipse at 50% 60%,rgba(255,255,255,.9),rgba(255,255,255,0) 64%);pointer-events:none;animation:mist 18s ease-in-out infinite alternate;animation-play-state:paused}
+#yunyou.vis .yy-mist{animation-play-state:running}
+html.mv #yhead{opacity:0;translate:0 34px;transition:opacity 1.1s var(--e-out) .15s,translate 1.3s var(--e-expo) .1s}
+html.mv .yy-p1.in #yhead{opacity:1;translate:none}
+/* ---------- 08 绘本 ---------- */
+#hbpost .cover{transform-origin:50% 40%}
+html.mv #huiben.in #hbpost .cover{animation:hbZoom 9s var(--e-out) both}
+@keyframes hbZoom{from{scale:1.12}to{scale:1}}
+#hbopen{transition:background .25s,box-shadow .3s,scale .5s var(--e-spring)}
+#lcwalk{transition:background .25s,border-color .25s,scale .5s var(--e-spring)}
+/* ---------- 09 Color ---------- */
+#pcv{pointer-events:none}
+.stk-copy{transition:background .25s,scale .45s var(--e-spring)}
+/* ---------- 10 微言 · a book that turns by itself, or by tap / swipe ---------- */
+html.mv #wbook{opacity:0;transform:translate3d(0,34vh,0) rotateX(20deg);transition:opacity .8s var(--e-out) .1s,transform 1.4s var(--e-expo) .05s}
+@media(max-width:760px),(max-aspect-ratio:1/1){html.mv #wbook{transform:translate3d(0,24vh,0) scale(.96)}}
+html.mv #weiyan.in #wbook{opacity:1;transform:none}
+#wbook{cursor:pointer;touch-action:pan-y}
+.ws{transition:transform 1.15s var(--e-io),visibility 0s 0s}
+.ws.flip{transform:rotateY(168deg);visibility:hidden;transition:transform 1.15s var(--e-io),visibility 0s 1.15s}
+.ws.flip .wsh{animation:wsh 1.15s var(--e-io)}
+@keyframes wsh{50%{opacity:.95}to{opacity:0}}
+.wc span{transition:clip-path 1s var(--e-io)}
+.ws.cur .wc span{clip-path:inset(-4% -10% -4% -10%);transition-delay:calc(var(--j)*.38s + .25s)}
+@media(max-width:760px),(max-aspect-ratio:1/1){.wc span{clip-path:none!important;opacity:0;transform:translate3d(0,14px,0);transition:opacity .8s var(--e-out),transform 1s var(--e-expo)}.ws.cur .wc span{opacity:1;transform:none;transition-delay:calc(var(--j)*.3s + .2s)}}
+#wdots i{transition:background .4s,transform .45s var(--e-spring)}#wdots i.on{transform:scaleX(1.4)}
+/* ---------- 11 Skill ---------- */
+.kr{--o:0}.kr.on{--o:1}
+.kr::before{transition:transform .55s var(--e-out)}
+.kr b{transition:color .4s}.kr.on b{color:#fff}
+.kr>div{transition:transform .55s var(--e-out)}
+@media(min-width:761px) and (min-aspect-ratio:1/1){.kr p{transition:max-height .6s var(--e-out),opacity .45s,margin-top .6s var(--e-out)}.kr.on p{max-height:56px;opacity:1;margin-top:8px}}
+@media(max-width:760px),(max-aspect-ratio:1/1){#klist .kr p{opacity:.42;transition:opacity .45s}#klist .kr.on p{opacity:1}.kr.on>div{transform:translate3d(5px,0,0)}}
+.sk-go{transition:background .25s,border-color .25s,scale .45s var(--e-spring)}
+/* ---------- 12 footer ---------- */
+html.mv #W span{opacity:0;transform:translate3d(calc(var(--dx)*40vw),calc(var(--dy)*40vh),0) rotate(calc(var(--dx)*40deg)) scale(2.4);transition:opacity .9s var(--e-out),transform 1.4s var(--e-expo);transition-delay:calc(var(--i)*80ms + .1s)}
+html.mv #foot.in #W span{opacity:1;transform:none}
+/* ---------- chrome: HUD, back-to-top, menu, press states, page curtain ---------- */
+#HUD{opacity:0;transition:opacity .5s var(--e-out),color .45s ease,bottom .45s var(--e-out)}#HUD.on{opacity:1}
+#HUD.zb{bottom:calc(4.4vh + 12px + env(safe-area-inset-bottom))!important}
+@media(max-width:760px){#HUD.zb{bottom:calc(4.4vh + 8px + env(safe-area-inset-bottom))!important}}
+#HN,#HC{display:inline-block}
+#PG{width:100%!important;transform-origin:0 50%;transform:scaleX(0)}
+@supports (animation-timeline:scroll()){#PG{animation:pg linear both;animation-timeline:scroll(root)}}
+@keyframes pg{to{transform:scaleX(1)}}
+#totop{transition:background .35s,box-shadow .35s,opacity .45s var(--e-out),transform .55s var(--e-spring),scale .45s var(--e-spring)!important}
+body:not(.dm-music-open) #totop.show:not(.foot-hide){opacity:1!important;transform:scale(1)!important}
+#UI{transition:transform .5s var(--e-out),opacity .3s ease,color .45s ease!important}
+#UI.is-menu-open #dm-menu{transition:opacity .2s ease,transform .55s var(--e-spring),visibility 0s}
+#dm-menu a{opacity:0;translate:0 -6px;transition:background .18s,color .18s,opacity .18s ease,translate .3s var(--e-out)}
+#UI.is-menu-open #dm-menu a{opacity:1;translate:none;transition:background .18s,color .18s,opacity .32s var(--e-out) calc(var(--i)*22ms + 50ms),translate .55s var(--e-spring) calc(var(--i)*22ms + 50ms)}
+#dm-menu-btn,#dm-orb{transition:transform .3s var(--e-out),background .25s ease,box-shadow .25s ease,scale .5s var(--e-spring)!important}
+.magon{transition:translate .2s var(--e-out)!important}
+#ovix .ix,.flinks a,.wy-go,.xj-acts a{transition:color .2s,translate .6s var(--e-spring)}
+:is(#dm-menu-btn,#dm-orb,#totop,#hbopen,#lcwalk,.c2 .go,.c2 .go-sub,.xj-acts a,.sk-go,.wy-go,.stk-copy,#cnav button,.mbtn,#mclose,#hbback,.flinks a,#ovix .ix,.dm-mctrl button,#dm-menu a):active{scale:.95;transition-duration:.08s!important}
+#dm-menu a:active{scale:.98}
+#pt{position:fixed;inset:0;z-index:500;background:#1C1916;display:grid;place-items:center;transform:translate3d(0,101%,0);border-radius:32px 32px 0 0;transition:transform .5s var(--e-io),border-radius .5s var(--e-io);pointer-events:none}
+#pt.go{transform:none;border-radius:0;pointer-events:auto}
+#pt b{font-family:BrushH;font-weight:400;font-size:64px;color:#F3EEE6;opacity:0;transform:translate3d(0,14px,0);transition:opacity .35s var(--e-out) .2s,transform .6s var(--e-expo) .15s}
+#pt.go b{opacity:1;transform:none}
+#cur{transition:opacity .25s}
+@media (prefers-reduced-motion:reduce){
+ html.mv *,html.mv *::before,html.mv *::after{animation-duration:.001ms!important;animation-delay:0s!important;animation-iteration-count:1!important;transition-duration:.001ms!important;transition-delay:0s!important}
+ .sx,.sec::after,#ovwm,#ovimg,#dpan,.yy-bg,#cards .card,#PG{animation:none!important}
+}
+</style>
+</head><body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
 <filter id="inkf" x="-8%" y="-8%" width="116%" height="116%"><feTurbulence id="inkT" type="fractalNoise" baseFrequency="0.011 0.016" numOctaves="2" seed="4" result="n"/><feDisplacementMap id="inkD" in="SourceGraphic" in2="n" scale="6" xChannelSelector="R" yChannelSelector="G"/></filter>
 <filter id="ripf" x="-5%" y="-5%" width="110%" height="110%"><feTurbulence id="ripT" type="fractalNoise" baseFrequency="0.004 0.11" numOctaves="2" seed="4" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="56" xChannelSelector="R" yChannelSelector="G"/></filter><filter id="inkf2" x="-8%" y="-8%" width="116%" height="116%"><feTurbulence id="inkT2" type="fractalNoise" baseFrequency="0.02 0.03" numOctaves="2" seed="9" result="n"/><feDisplacementMap id="inkD2" in="SourceGraphic" in2="n" scale="3" xChannelSelector="R" yChannelSelector="G"/></filter>
 <filter id="sealf" x="-5%" y="-5%" width="110%" height="110%"><feTurbulence type="fractalNoise" baseFrequency="0.08" numOctaves="2" seed="7" result="e"/><feDisplacementMap in="SourceGraphic" in2="e" scale="2.6" xChannelSelector="R" yChannelSelector="G"/></filter>
 <filter id="bloomf" x="-20%" y="-20%" width="140%" height="140%"><feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="5" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="26" xChannelSelector="R" yChannelSelector="G"/></filter>
-</defs></svg><canvas id="fx"></canvas>
+</defs></svg>
 <div id="loader"><div class="half t"></div><div class="half b"></div>
  <svg id="lsvg"><text id="ltx" x="50%" y="46%" text-anchor="middle" dominant-baseline="central">多美</text></svg>
  <div id="lmeta"><div class="w"><span>D</span><span>U</span><span>O</span><span>M</span><span>E</span><span>I</span></div><div id="lbar"><i></i></div><div id="lpct">LOADING 0%</div></div></div>
 <div id="stage">
-<section class="sec" id="ov"><div id="ovimg" data-ovbg="img/t/jn.webp"></div>
+<section class="sec" id="ov"><div class="sx"><div id="ovimg" data-ovbg="img/t/jn.webp"></div>
 <div id="ovk"><span>2026 · 11 · 23</span><span>记录旅途，遇见生活，也遇见自己</span></div>
 <h1 id="ovwm" aria-label="多美"><span><svg viewBox="0 -20 1000 1000" aria-hidden="true"><defs><mask id="wm0" maskUnits="userSpaceOnUse" x="-100" y="-120" width="1200" height="1200"><polyline class="sk" pathLength="1" points="512,60 529,104 490,166 411,251 384,273 316,310"/><polyline class="sk" pathLength="1" points="520,177 654,169 687,187 668,227 632,278 529,393 400,496 305,550"/><polyline class="sk" pathLength="1" points="404,283 449,312 462,327 472,354"/><polyline class="sk" pathLength="1" points="623,437 596,443 539,521 441,617 379,660 346,676"/><polyline class="sk" pathLength="1" points="563,536 693,507 738,516 750,535 702,629 644,723 544,839 468,901 385,950 323,977 249,993"/><polyline class="sk" pathLength="1" points="426,651 444,658 498,706 522,750"/></mask></defs><path class="bl" d="M557 396Q564 387 568.0 386.0Q572 385 575 388Q581 393 589 393Q596 393 609.5 399.5Q623 406 625 410Q627 416 614.5 429.0Q602 442 604.5 444.0Q607 446 631.0 449.0Q655 452 659.0 457.0Q663 462 695.0 478.5Q727 495 739 507Q748 515 749.0 518.5Q750 522 747 527Q741 534 746.5 542.0Q752 550 747.5 560.0Q743 570 734 577Q725 582 713.0 593.5Q701 605 701 609Q701 611 687.5 628.0Q674 645 666 650Q657 657 642 676Q602 725 501 829Q442 888 404 910Q384 920 361 939Q342 954 319.5 966.5Q297 979 290 979Q282 979 269.0 986.5Q256 994 250.0 993.0Q244 992 303 937Q424 822 451 794Q517 726 516 720Q516 718 486.5 699.0Q457 680 453 680Q449 680 447.5 666.5Q446 653 450 640Q458 610 485 610Q501 610 501.0 613.5Q501 617 518 617Q551 617 562 634Q568 642 572.0 640.0Q576 638 595 603Q630 539 633 521Q634 512 631.5 508.5Q629 505 618 498Q602 488 596.5 488.0Q591 488 570 509Q537 540 506 561Q490 572 488.5 574.5Q487 577 465.0 592.5Q443 608 437 614Q375 673 343 685Q331 689 340 667Q342 663 344 657Q353 635 416 578Q450 547 477 511Q490 494 509 474Q538 443 542.0 437.0Q546 431 545 421Q544 409 557 396ZM576 146Q599 140 609 149Q614 155 644 174Q668 190 677.0 200.5Q686 211 683 222Q676 244 659 244Q649 244 642.0 252.5Q635 261 622.5 273.0Q610 285 610.0 290.0Q610 295 598.5 304.0Q587 313 587.0 320.0Q587 327 583.0 327.0Q579 327 569.0 342.0Q559 357 535.0 376.5Q511 396 477 428Q445 460 380.0 503.0Q315 546 292 550Q278 554 269 557Q262 558 262.5 557.0Q263 556 273 546Q347 477 399 433Q432 405 440.0 397.0Q448 389 452 381Q457 370 453.5 362.0Q450 354 450.0 345.5Q450 337 444.0 331.0Q438 325 437 301L436 278L454 277Q473 276 488 287Q502 298 507.0 299.0Q512 300 519 293Q527 281 545.0 253.5Q563 226 570 213L578 196L571 175Q563 153 563.0 152.0Q563 151 576 146ZM483 108Q489 96 489.0 85.5Q489 75 497.5 67.5Q506 60 508.5 60.0Q511 60 535 78Q568 104 558 124Q555 131 559.0 136.0Q563 141 558.0 145.5Q553 150 550.5 161.5Q548 173 538.5 175.5Q529 178 522.0 190.0Q515 202 503.0 210.5Q491 219 473.5 234.0Q456 249 439.5 259.0Q423 269 422 272Q417 278 395.5 294.5Q374 311 370 311Q365 311 353 319Q345 325 330.5 331.5Q316 338 313 338Q312 338 312 324Q312 313 320.0 303.5Q328 294 367 257Q422 205 422.0 199.5Q422 194 427 191Q431 188 452.5 156.0Q474 124 483 108Z"/><path class="gf" d="M557 396Q564 387 568.0 386.0Q572 385 575 388Q581 393 589 393Q596 393 609.5 399.5Q623 406 625 410Q627 416 614.5 429.0Q602 442 604.5 444.0Q607 446 631.0 449.0Q655 452 659.0 457.0Q663 462 695.0 478.5Q727 495 739 507Q748 515 749.0 518.5Q750 522 747 527Q741 534 746.5 542.0Q752 550 747.5 560.0Q743 570 734 577Q725 582 713.0 593.5Q701 605 701 609Q701 611 687.5 628.0Q674 645 666 650Q657 657 642 676Q602 725 501 829Q442 888 404 910Q384 920 361 939Q342 954 319.5 966.5Q297 979 290 979Q282 979 269.0 986.5Q256 994 250.0 993.0Q244 992 303 937Q424 822 451 794Q517 726 516 720Q516 718 486.5 699.0Q457 680 453 680Q449 680 447.5 666.5Q446 653 450 640Q458 610 485 610Q501 610 501.0 613.5Q501 617 518 617Q551 617 562 634Q568 642 572.0 640.0Q576 638 595 603Q630 539 633 521Q634 512 631.5 508.5Q629 505 618 498Q602 488 596.5 488.0Q591 488 570 509Q537 540 506 561Q490 572 488.5 574.5Q487 577 465.0 592.5Q443 608 437 614Q375 673 343 685Q331 689 340 667Q342 663 344 657Q353 635 416 578Q450 547 477 511Q490 494 509 474Q538 443 542.0 437.0Q546 431 545 421Q544 409 557 396ZM576 146Q599 140 609 149Q614 155 644 174Q668 190 677.0 200.5Q686 211 683 222Q676 244 659 244Q649 244 642.0 252.5Q635 261 622.5 273.0Q610 285 610.0 290.0Q610 295 598.5 304.0Q587 313 587.0 320.0Q587 327 583.0 327.0Q579 327 569.0 342.0Q559 357 535.0 376.5Q511 396 477 428Q445 460 380.0 503.0Q315 546 292 550Q278 554 269 557Q262 558 262.5 557.0Q263 556 273 546Q347 477 399 433Q432 405 440.0 397.0Q448 389 452 381Q457 370 453.5 362.0Q450 354 450.0 345.5Q450 337 444.0 331.0Q438 325 437 301L436 278L454 277Q473 276 488 287Q502 298 507.0 299.0Q512 300 519 293Q527 281 545.0 253.5Q563 226 570 213L578 196L571 175Q563 153 563.0 152.0Q563 151 576 146ZM483 108Q489 96 489.0 85.5Q489 75 497.5 67.5Q506 60 508.5 60.0Q511 60 535 78Q568 104 558 124Q555 131 559.0 136.0Q563 141 558.0 145.5Q553 150 550.5 161.5Q548 173 538.5 175.5Q529 178 522.0 190.0Q515 202 503.0 210.5Q491 219 473.5 234.0Q456 249 439.5 259.0Q423 269 422 272Q417 278 395.5 294.5Q374 311 370 311Q365 311 353 319Q345 325 330.5 331.5Q316 338 313 338Q312 338 312 324Q312 313 320.0 303.5Q328 294 367 257Q422 205 422.0 199.5Q422 194 427 191Q431 188 452.5 156.0Q474 124 483 108Z"/><path class="gm" d="M557 396Q564 387 568.0 386.0Q572 385 575 388Q581 393 589 393Q596 393 609.5 399.5Q623 406 625 410Q627 416 614.5 429.0Q602 442 604.5 444.0Q607 446 631.0 449.0Q655 452 659.0 457.0Q663 462 695.0 478.5Q727 495 739 507Q748 515 749.0 518.5Q750 522 747 527Q741 534 746.5 542.0Q752 550 747.5 560.0Q743 570 734 577Q725 582 713.0 593.5Q701 605 701 609Q701 611 687.5 628.0Q674 645 666 650Q657 657 642 676Q602 725 501 829Q442 888 404 910Q384 920 361 939Q342 954 319.5 966.5Q297 979 290 979Q282 979 269.0 986.5Q256 994 250.0 993.0Q244 992 303 937Q424 822 451 794Q517 726 516 720Q516 718 486.5 699.0Q457 680 453 680Q449 680 447.5 666.5Q446 653 450 640Q458 610 485 610Q501 610 501.0 613.5Q501 617 518 617Q551 617 562 634Q568 642 572.0 640.0Q576 638 595 603Q630 539 633 521Q634 512 631.5 508.5Q629 505 618 498Q602 488 596.5 488.0Q591 488 570 509Q537 540 506 561Q490 572 488.5 574.5Q487 577 465.0 592.5Q443 608 437 614Q375 673 343 685Q331 689 340 667Q342 663 344 657Q353 635 416 578Q450 547 477 511Q490 494 509 474Q538 443 542.0 437.0Q546 431 545 421Q544 409 557 396ZM576 146Q599 140 609 149Q614 155 644 174Q668 190 677.0 200.5Q686 211 683 222Q676 244 659 244Q649 244 642.0 252.5Q635 261 622.5 273.0Q610 285 610.0 290.0Q610 295 598.5 304.0Q587 313 587.0 320.0Q587 327 583.0 327.0Q579 327 569.0 342.0Q559 357 535.0 376.5Q511 396 477 428Q445 460 380.0 503.0Q315 546 292 550Q278 554 269 557Q262 558 262.5 557.0Q263 556 273 546Q347 477 399 433Q432 405 440.0 397.0Q448 389 452 381Q457 370 453.5 362.0Q450 354 450.0 345.5Q450 337 444.0 331.0Q438 325 437 301L436 278L454 277Q473 276 488 287Q502 298 507.0 299.0Q512 300 519 293Q527 281 545.0 253.5Q563 226 570 213L578 196L571 175Q563 153 563.0 152.0Q563 151 576 146ZM483 108Q489 96 489.0 85.5Q489 75 497.5 67.5Q506 60 508.5 60.0Q511 60 535 78Q568 104 558 124Q555 131 559.0 136.0Q563 141 558.0 145.5Q553 150 550.5 161.5Q548 173 538.5 175.5Q529 178 522.0 190.0Q515 202 503.0 210.5Q491 219 473.5 234.0Q456 249 439.5 259.0Q423 269 422 272Q417 278 395.5 294.5Q374 311 370 311Q365 311 353 319Q345 325 330.5 331.5Q316 338 313 338Q312 338 312 324Q312 313 320.0 303.5Q328 294 367 257Q422 205 422.0 199.5Q422 194 427 191Q431 188 452.5 156.0Q474 124 483 108Z" mask="url(#wm0)"/><circle class="tip" r="46" cx="-200" cy="-200"/></svg></span><span><svg viewBox="0 -20 1000 1000" aria-hidden="true"><defs><mask id="wm1" maskUnits="userSpaceOnUse" x="-100" y="-120" width="1200" height="1200"><polyline class="sk" pathLength="1" points="291,119 357,161 382,200"/><polyline class="sk" pathLength="1" points="547,67 566,87 575,107 470,229"/><polyline class="sk" pathLength="1" points="218,315 280,323 626,258 658,260"/><polyline class="sk" pathLength="1" points="287,439 313,444 389,440 535,404 594,403"/><polyline class="sk" pathLength="1" points="408,325 438,352 442,372 438,500 420,524"/><polyline class="sk" pathLength="1" points="143,569 196,581 400,556 651,515 692,514 737,523"/><polyline class="sk" pathLength="1" points="197,712 217,718 268,717 465,684 622,666 700,686"/><polyline class="sk" pathLength="1" points="375,581 406,603 421,626 406,738 371,826 340,873 294,918 202,967 136,986"/><polyline class="sk" pathLength="1" points="446,719 451,734 553,836 681,947 715,957 865,971"/></mask></defs><path class="bl" d="M509 786Q512 780 516.5 779.5Q521 779 539 782Q621 801 680 838Q702 852 726 865Q742 875 747.0 880.5Q752 886 755 899Q760 919 756.0 923.5Q752 928 755 930Q763 939 741.5 962.5Q720 986 704 986Q692 986 673.5 975.0Q655 964 655 955Q655 951 620 916L581 877Q569 864 542.0 840.5Q515 817 513 817Q510 817 512.5 812.5Q515 808 509.5 802.0Q504 796 509 786ZM324 104Q326 102 330.0 103.5Q334 105 357.5 115.5Q381 126 394 136Q415 153 437 140Q448 135 450 135Q452 135 453.0 138.5Q454 142 453.0 146.5Q452 151 450 152Q446 155 439.5 170.0Q433 185 437 195Q448 216 433 229Q413 247 400 247Q395 247 379.5 228.5Q364 210 354 192Q309 118 324 104ZM615 69Q623 66 627.5 68.0Q632 70 646 86Q666 106 669.0 114.5Q672 123 665 130Q656 138 651 146Q646 152 627.0 165.0Q608 178 598 180Q592 183 557.0 204.5Q522 226 516 233Q514 235 525 235Q573 236 608 226Q611 225 612 225Q620 221 626.5 221.5Q633 222 652 227Q680 236 684 244Q690 256 681 288Q677 305 646 293Q634 288 586.5 286.0Q539 284 531 287Q526 289 534.5 297.0Q543 305 540 316Q536 342 535.5 349.0Q535 356 540 360Q546 366 551.5 362.0Q557 358 575.5 353.0Q594 348 601 348Q611 348 619.5 357.5Q628 367 628 378Q628 392 613.0 403.0Q598 414 589 411L562 405Q544 400 537.5 404.0Q531 408 531 425Q531 440 524 455Q519 469 524.5 471.5Q530 474 557 470Q585 466 633 464Q720 459 724 480Q725 489 730 494Q736 498 736.5 510.0Q737 522 732 524Q728 527 724 537Q717 555 689 541Q651 522 579 524Q540 525 531.0 527.0Q522 529 522 538Q522 544 513 556Q507 564 507.0 567.5Q507 571 512 580Q520 595 516 612Q513 639 523 638Q524 638 525 637Q532 634 690 629Q742 628 755 621Q765 616 770.0 616.0Q775 616 791 623Q813 631 822.0 631.0Q831 631 848.0 645.5Q865 660 865 673Q865 686 852.0 701.0Q839 716 829 716Q821 716 793 701Q764 687 726.0 684.0Q688 681 583 685Q509 687 505.5 692.0Q502 697 491.0 727.5Q480 758 475.0 761.5Q470 765 470 773Q470 793 399 856Q328 919 313 926Q298 930 288 938Q270 950 232.0 962.0Q194 974 188 968Q188 968 190.5 965.5Q193 963 196.5 959.5Q200 956 206 952Q260 912 290 882Q351 821 379 760Q406 704 404 701Q400 697 334.5 709.5Q269 722 250 730Q237 735 226.5 744.0Q216 753 216 758Q216 762 205.0 767.0Q194 772 171 759Q141 744 136.5 732.5Q132 721 150 708Q169 695 230.0 679.5Q291 664 354 658Q377 655 379.0 651.0Q381 647 401 647Q417 647 420.5 642.5Q424 638 431 604Q443 555 436 537Q434 530 417.0 529.5Q400 529 391 536Q382 541 354.5 550.0Q327 559 322 563Q312 573 292.0 560.0Q272 547 278 532Q283 519 329.5 503.0Q376 487 416 483Q446 480 450.0 475.0Q454 470 453 441Q452 420 450.5 415.0Q449 410 442 409Q434 408 404 422Q379 434 368.5 436.0Q358 438 351 430Q345 425 347.0 416.0Q349 407 356 402Q362 397 400.0 384.5Q438 372 447 372Q453 372 455.5 363.5Q458 355 459 325L460 296H447Q426 296 396.0 306.0Q366 316 347 329Q341 334 327 328Q296 312 305 288Q309 275 328 270Q363 259 414 250Q434 247 442.5 241.0Q451 235 480 207L547 144Q573 122 580 111Q604 73 615 69Z"/><path class="gf" d="M509 786Q512 780 516.5 779.5Q521 779 539 782Q621 801 680 838Q702 852 726 865Q742 875 747.0 880.5Q752 886 755 899Q760 919 756.0 923.5Q752 928 755 930Q763 939 741.5 962.5Q720 986 704 986Q692 986 673.5 975.0Q655 964 655 955Q655 951 620 916L581 877Q569 864 542.0 840.5Q515 817 513 817Q510 817 512.5 812.5Q515 808 509.5 802.0Q504 796 509 786ZM324 104Q326 102 330.0 103.5Q334 105 357.5 115.5Q381 126 394 136Q415 153 437 140Q448 135 450 135Q452 135 453.0 138.5Q454 142 453.0 146.5Q452 151 450 152Q446 155 439.5 170.0Q433 185 437 195Q448 216 433 229Q413 247 400 247Q395 247 379.5 228.5Q364 210 354 192Q309 118 324 104ZM615 69Q623 66 627.5 68.0Q632 70 646 86Q666 106 669.0 114.5Q672 123 665 130Q656 138 651 146Q646 152 627.0 165.0Q608 178 598 180Q592 183 557.0 204.5Q522 226 516 233Q514 235 525 235Q573 236 608 226Q611 225 612 225Q620 221 626.5 221.5Q633 222 652 227Q680 236 684 244Q690 256 681 288Q677 305 646 293Q634 288 586.5 286.0Q539 284 531 287Q526 289 534.5 297.0Q543 305 540 316Q536 342 535.5 349.0Q535 356 540 360Q546 366 551.5 362.0Q557 358 575.5 353.0Q594 348 601 348Q611 348 619.5 357.5Q628 367 628 378Q628 392 613.0 403.0Q598 414 589 411L562 405Q544 400 537.5 404.0Q531 408 531 425Q531 440 524 455Q519 469 524.5 471.5Q530 474 557 470Q585 466 633 464Q720 459 724 480Q725 489 730 494Q736 498 736.5 510.0Q737 522 732 524Q728 527 724 537Q717 555 689 541Q651 522 579 524Q540 525 531.0 527.0Q522 529 522 538Q522 544 513 556Q507 564 507.0 567.5Q507 571 512 580Q520 595 516 612Q513 639 523 638Q524 638 525 637Q532 634 690 629Q742 628 755 621Q765 616 770.0 616.0Q775 616 791 623Q813 631 822.0 631.0Q831 631 848.0 645.5Q865 660 865 673Q865 686 852.0 701.0Q839 716 829 716Q821 716 793 701Q764 687 726.0 684.0Q688 681 583 685Q509 687 505.5 692.0Q502 697 491.0 727.5Q480 758 475.0 761.5Q470 765 470 773Q470 793 399 856Q328 919 313 926Q298 930 288 938Q270 950 232.0 962.0Q194 974 188 968Q188 968 190.5 965.5Q193 963 196.5 959.5Q200 956 206 952Q260 912 290 882Q351 821 379 760Q406 704 404 701Q400 697 334.5 709.5Q269 722 250 730Q237 735 226.5 744.0Q216 753 216 758Q216 762 205.0 767.0Q194 772 171 759Q141 744 136.5 732.5Q132 721 150 708Q169 695 230.0 679.5Q291 664 354 658Q377 655 379.0 651.0Q381 647 401 647Q417 647 420.5 642.5Q424 638 431 604Q443 555 436 537Q434 530 417.0 529.5Q400 529 391 536Q382 541 354.5 550.0Q327 559 322 563Q312 573 292.0 560.0Q272 547 278 532Q283 519 329.5 503.0Q376 487 416 483Q446 480 450.0 475.0Q454 470 453 441Q452 420 450.5 415.0Q449 410 442 409Q434 408 404 422Q379 434 368.5 436.0Q358 438 351 430Q345 425 347.0 416.0Q349 407 356 402Q362 397 400.0 384.5Q438 372 447 372Q453 372 455.5 363.5Q458 355 459 325L460 296H447Q426 296 396.0 306.0Q366 316 347 329Q341 334 327 328Q296 312 305 288Q309 275 328 270Q363 259 414 250Q434 247 442.5 241.0Q451 235 480 207L547 144Q573 122 580 111Q604 73 615 69Z"/><path class="gm" d="M509 786Q512 780 516.5 779.5Q521 779 539 782Q621 801 680 838Q702 852 726 865Q742 875 747.0 880.5Q752 886 755 899Q760 919 756.0 923.5Q752 928 755 930Q763 939 741.5 962.5Q720 986 704 986Q692 986 673.5 975.0Q655 964 655 955Q655 951 620 916L581 877Q569 864 542.0 840.5Q515 817 513 817Q510 817 512.5 812.5Q515 808 509.5 802.0Q504 796 509 786ZM324 104Q326 102 330.0 103.5Q334 105 357.5 115.5Q381 126 394 136Q415 153 437 140Q448 135 450 135Q452 135 453.0 138.5Q454 142 453.0 146.5Q452 151 450 152Q446 155 439.5 170.0Q433 185 437 195Q448 216 433 229Q413 247 400 247Q395 247 379.5 228.5Q364 210 354 192Q309 118 324 104ZM615 69Q623 66 627.5 68.0Q632 70 646 86Q666 106 669.0 114.5Q672 123 665 130Q656 138 651 146Q646 152 627.0 165.0Q608 178 598 180Q592 183 557.0 204.5Q522 226 516 233Q514 235 525 235Q573 236 608 226Q611 225 612 225Q620 221 626.5 221.5Q633 222 652 227Q680 236 684 244Q690 256 681 288Q677 305 646 293Q634 288 586.5 286.0Q539 284 531 287Q526 289 534.5 297.0Q543 305 540 316Q536 342 535.5 349.0Q535 356 540 360Q546 366 551.5 362.0Q557 358 575.5 353.0Q594 348 601 348Q611 348 619.5 357.5Q628 367 628 378Q628 392 613.0 403.0Q598 414 589 411L562 405Q544 400 537.5 404.0Q531 408 531 425Q531 440 524 455Q519 469 524.5 471.5Q530 474 557 470Q585 466 633 464Q720 459 724 480Q725 489 730 494Q736 498 736.5 510.0Q737 522 732 524Q728 527 724 537Q717 555 689 541Q651 522 579 524Q540 525 531.0 527.0Q522 529 522 538Q522 544 513 556Q507 564 507.0 567.5Q507 571 512 580Q520 595 516 612Q513 639 523 638Q524 638 525 637Q532 634 690 629Q742 628 755 621Q765 616 770.0 616.0Q775 616 791 623Q813 631 822.0 631.0Q831 631 848.0 645.5Q865 660 865 673Q865 686 852.0 701.0Q839 716 829 716Q821 716 793 701Q764 687 726.0 684.0Q688 681 583 685Q509 687 505.5 692.0Q502 697 491.0 727.5Q480 758 475.0 761.5Q470 765 470 773Q470 793 399 856Q328 919 313 926Q298 930 288 938Q270 950 232.0 962.0Q194 974 188 968Q188 968 190.5 965.5Q193 963 196.5 959.5Q200 956 206 952Q260 912 290 882Q351 821 379 760Q406 704 404 701Q400 697 334.5 709.5Q269 722 250 730Q237 735 226.5 744.0Q216 753 216 758Q216 762 205.0 767.0Q194 772 171 759Q141 744 136.5 732.5Q132 721 150 708Q169 695 230.0 679.5Q291 664 354 658Q377 655 379.0 651.0Q381 647 401 647Q417 647 420.5 642.5Q424 638 431 604Q443 555 436 537Q434 530 417.0 529.5Q400 529 391 536Q382 541 354.5 550.0Q327 559 322 563Q312 573 292.0 560.0Q272 547 278 532Q283 519 329.5 503.0Q376 487 416 483Q446 480 450.0 475.0Q454 470 453 441Q452 420 450.5 415.0Q449 410 442 409Q434 408 404 422Q379 434 368.5 436.0Q358 438 351 430Q345 425 347.0 416.0Q349 407 356 402Q362 397 400.0 384.5Q438 372 447 372Q453 372 455.5 363.5Q458 355 459 325L460 296H447Q426 296 396.0 306.0Q366 316 347 329Q341 334 327 328Q296 312 305 288Q309 275 328 270Q363 259 414 250Q434 247 442.5 241.0Q451 235 480 207L547 144Q573 122 580 111Q604 73 615 69Z" mask="url(#wm1)"/><circle class="tip" r="46" cx="-200" cy="-200"/></svg></span></h1><i id="ovseal"><span>多美</span></i><i id="ovring"></i>
 <p id="ovtag" aria-label="奈何他西风肆虐，余唯恋花枝春野"><span class="tg">奈何他西风肆虐，</span><span class="tg">余唯恋花枝春野</span></p>
 <div id="ovcap"><em>今日</em>江南 · 园林一隅</div>
-<nav id="ovix"><a class="ix" data-go="zaobao"><em>01</em>早报</a><a class="ix" data-go="xiaoji"><em>02</em>小记</a><a class="ix" data-go="kuaihuo"><em>03</em>快活</a><a class="ix" data-go="guyu"><em>04</em>故语</a><a class="ix" data-go="xunji"><em>05</em>寻迹</a><a class="ix" data-go="dalu"><em>06</em>大陆</a><a class="ix" data-go="yunyou"><em>07</em>云游</a><a class="ix" data-go="huiben"><em>08</em>绘本</a><a class="ix" data-go="color"><em>09</em>颜色</a><a class="ix" data-go="weiyan"><em>10</em>微言</a><a class="ix" data-go="skill"><em>11</em>Skill</a><span class="sc">SCROLL ↓</span><span class="m-hint">向下翻阅 · 右上角菜单直达各卷</span></nav></section>
-<section class="sec" id="herobgs"><div class="bg" id="herobg"></div></section>
-<section class="sec" id="hero">
- <svg id="hsvg" preserveAspectRatio="xMidYMid slice"><defs><mask id="hm" maskUnits="userSpaceOnUse" x="-300%" y="-300%" width="700%" height="700%"><rect x="-300%" y="-300%" width="700%" height="700%" fill="#fff"/><text id="htx" x="50%" y="46%" text-anchor="middle" dominant-baseline="central" font-family="BrushH" fill="#000">多美</text></mask></defs><rect x="-300%" y="-300%" width="700%" height="700%" fill="#efe7da" mask="url(#hm)"/></svg>
- <div class="idx"><span>早报</span><span>小记</span><span>快活</span><span>故语</span><span>寻迹</span><span>大陆</span><span>云游</span><span>颜色</span><span>微言</span><span>Skill</span></div>
- <div class="meta"><b>DUOMEI</b>奈何他西风肆虐，余唯恋花枝春野</div></section>
-
-<section class="sec" id="zaobao"><div class="paper" id="paper">
+<nav id="ovix"><a class="ix" data-go="zaobao"><em>01</em>早报</a><a class="ix" data-go="xiaoji"><em>02</em>小记</a><a class="ix" data-go="kuaihuo"><em>03</em>快活</a><a class="ix" data-go="guyu"><em>04</em>故语</a><a class="ix" data-go="xunji"><em>05</em>寻迹</a><a class="ix" data-go="dalu"><em>06</em>大陆</a><a class="ix" data-go="yunyou"><em>07</em>云游</a><a class="ix" data-go="huiben"><em>08</em>绘本</a><a class="ix" data-go="color"><em>09</em>颜色</a><a class="ix" data-go="weiyan"><em>10</em>微言</a><a class="ix" data-go="skill"><em>11</em>Skill</a><span class="sc">SCROLL ↓</span><span class="m-hint">向下翻阅 · 右上角菜单直达各卷</span></nav></div></section>
+<section class="sec" id="zaobao"><div class="sx"><div class="paper" id="paper">
  <div class="mast"><span class="l ear"><b>早报</b>今日读本<br>MORNING EDITION</span><h1 id="masth">The Duomei Daily</h1><span class="r ear"><b>每日一纸</b>把世界摊在<br>早餐桌上</span></div>
  <div class="rule" id="rule"></div>
  <div class="dateline"><span>VOL. I · 大阪 · 堺 版</span><span>2026年11月23日 星期一 · MONDAY, NOVEMBER 23, 2026</span><span>01 · 早报</span></div><div class="rule2"></div>
@@ -848,34 +1023,34 @@ body.hb-open #dm-music-card,body.hb-open #dm-hover-zone{visibility:hidden}
  <div class="cols"><div class="c1"><div class="ph-z ph" data-sec="zaobao"><img data-src="img/zb.webp" alt=""></div><div class="cap">DAILY · 今日 — 每天早上，换一版</div></div>
  <div class="c2"><h3>今日早报</h3><p>国际、科技、AI 和日常小事，加上堺与大阪本周值得去的展和祭。每天早上，换一版。</p><div class="zb-acts"><a class="go" href="https://duomei.site/zaobao">翻开今早 →</a><a class="go-sub" href="https://duomei.site/zaobao/archive">往期早报 →</a></div></div>
  <div class="c3"><ul><li>国际<i>I</i></li><li>科技<i>II</i></li><li>AI<i>III</i></li><li>日常小事<i>IV</i></li><li>堺 · 大阪 本周展和祭<i>V</i></li></ul></div></div>
- </div><div class="ticker"><div id="tick"></div></div></section>
+ </div><div class="ticker"><div id="tick"></div></div></div></section>
 
-<section class="sec" id="xiaoji"><div class="head"><span class="kick">02 · NOTES · 旅途小记</span><h2>小记</h2><p>记录旅途，遇见生活，也遇见自己。 · 共 8 篇</p></div><div id="cards"></div><div id="cnav"><button type="button" id="cprev" aria-label="上一篇">‹</button><div id="cdots"></div><button type="button" id="cnext" aria-label="下一篇">›</button></div></section>
+<section class="sec" id="xiaoji"><div class="sx"><div class="head"><span class="kick">02 · NOTES · 旅途小记</span><h2>小记</h2><p>记录旅途，遇见生活，也遇见自己。 · 共 8 篇</p></div><div id="cards"></div><div id="cnav"><button type="button" id="cprev" aria-label="上一篇">‹</button><div id="cdots"></div><button type="button" id="cnext" aria-label="下一篇">›</button></div></div></section>
 
-<section class="sec" id="kuaihuo"><div class="bg" id="kbg"></div>
+<section class="sec" id="kuaihuo"><div class="sx"><div class="bg" id="kbg"></div>
  <div class="mq" id="mq0" style="top:6vh"></div><div class="mq" id="mq1" style="top:40vh"></div><div class="mq" id="mq2" style="top:74vh"></div>
  <div class="kbig" id="k1">来啊</div><div class="kbig" id="k2">快活啊</div>
  <div class="kside" id="kside">奈何他西风肆虐，余唯恋花枝春野</div>
- <div class="ksig" id="ksig">03 · JOY · 快活<b>反正有大把时光</b></div></section>
+ <div class="ksig" id="ksig">03 · JOY · 快活<b>反正有大把时光</b></div></div></section>
 
-<section class="sec" id="guyu"><div class="head"><span class="kick">04 · OLD WORDS · 旧日书页</span><h2>故语</h2><p>把旧日收好，等后来的人翻阅。<br>有些话，只适合留在纸页之间。</p></div>
- <div id="book"><div class="bk-baseL" id="bkl"></div><div class="bk-base"></div></div><iframe class="emb" id="ifD" title="故语 · 书封环廊"></iframe><div id="gnow">第 1 本，共 6 本：没有遇见 何来艳遇</div><div id="shelf"><figure class="bk mag" data-cur="翻开"><div class="cv ph dark" data-sec="guyu"><img data-src="img/book0.webp" alt="没有遇见 何来艳遇"></div><figcaption><em>01</em>没有遇见 何来艳遇</figcaption></figure><figure class="bk mag" data-cur="翻开"><div class="cv ph dark" data-sec="guyu"><img data-src="img/book1.webp" alt="纸上飞檐"></div><figcaption><em>02</em>纸上飞檐</figcaption></figure><figure class="bk mag" data-cur="翻开"><div class="cv ph dark" data-sec="guyu"><img data-src="img/book2.webp" alt="想象画本"></div><figcaption><em>03</em>想象画本</figcaption></figure><figure class="bk mag" data-cur="翻开"><div class="cv ph dark" data-sec="guyu"><img data-src="img/book3.webp" alt="月亮下的童梦"></div><figcaption><em>04</em>月亮下的童梦</figcaption></figure><figure class="bk mag" data-cur="翻开"><div class="cv ph dark" data-sec="guyu"><img data-src="img/book4.webp" alt="桂巷还香"></div><figcaption><em>05</em>桂巷还香</figcaption></figure><figure class="bk mag" data-cur="翻开"><div class="cv ph dark" data-sec="guyu"><img data-src="img/book5.webp" alt="七国 · 地理与风物设定集"></div><figcaption><em>06</em>七国 · 地理与风物设定集</figcaption></figure><div id="shcap"><span class="kick">全套 · 六本</span><p>六本故语，一次摊开；点开任何一本，从第一页读起。</p></div></div></section>
+<section class="sec" id="guyu"><div class="sx"><div class="head"><span class="kick">04 · OLD WORDS · 旧日书页</span><h2>故语</h2><p>把旧日收好，等后来的人翻阅。<br>有些话，只适合留在纸页之间。</p></div>
+ <div id="book"><div class="bk-baseL" id="bkl"></div><div class="bk-base"></div></div><iframe class="emb" id="ifD" title="故语 · 书封环廊"></iframe><div id="gnow">第 1 本，共 6 本：没有遇见 何来艳遇</div><div id="shelf"><figure class="bk mag" data-cur="翻开"><div class="cv ph dark" data-sec="guyu"><img data-src="img/book0.webp" alt="没有遇见 何来艳遇"></div><figcaption><em>01</em>没有遇见 何来艳遇</figcaption></figure><figure class="bk mag" data-cur="翻开"><div class="cv ph dark" data-sec="guyu"><img data-src="img/book1.webp" alt="纸上飞檐"></div><figcaption><em>02</em>纸上飞檐</figcaption></figure><figure class="bk mag" data-cur="翻开"><div class="cv ph dark" data-sec="guyu"><img data-src="img/book2.webp" alt="想象画本"></div><figcaption><em>03</em>想象画本</figcaption></figure><figure class="bk mag" data-cur="翻开"><div class="cv ph dark" data-sec="guyu"><img data-src="img/book3.webp" alt="月亮下的童梦"></div><figcaption><em>04</em>月亮下的童梦</figcaption></figure><figure class="bk mag" data-cur="翻开"><div class="cv ph dark" data-sec="guyu"><img data-src="img/book4.webp" alt="桂巷还香"></div><figcaption><em>05</em>桂巷还香</figcaption></figure><figure class="bk mag" data-cur="翻开"><div class="cv ph dark" data-sec="guyu"><img data-src="img/book5.webp" alt="七国 · 地理与风物设定集"></div><figcaption><em>06</em>七国 · 地理与风物设定集</figcaption></figure><div id="shcap"><span class="kick">全套 · 六本</span><p>六本故语，一次摊开；点开任何一本，从第一页读起。</p></div></div></div></section>
 
-<section class="sec" id="xunji">
+<section class="sec" id="xunji"><div class="sx">
  <div class="head"><span class="kick">05 · TRACES · 西幻写作素材</span><h2>寻迹</h2><p>从日常琐事里，摘出一副可以直接开写的西幻故事骨架。</p></div>
  <div id="xbig"><div><b id="xnum">0</b><span>故事骨架</span></div><div><b>05</b><span>分类</span></div><div><b>11.23</b><span>今日更新</span></div></div>
  <div id="xbar"><div class="xs" style="flex:7"><i></i><span>X琐事<em>7</em></span></div><div class="xs" style="flex:8"><i></i><span>作品日常<em>8</em></span></div><div class="xs" style="flex:5"><i></i><span>影视日常<em>5</em></span></div><div class="xs" style="flex:5"><i></i><span>学院校园<em>5</em></span></div><div class="xs" style="flex:5"><i></i><span>情感瞬间<em>5</em></span></div></div>
  <ol id="xlist"><li class="xi mag" data-cur="开写"><em>01</em><small>X琐事</small><p>客人进店说「我问了 AI，它说你们开到半夜」，营业时间明明就贴在门上</p></li><li class="xi mag" data-cur="开写"><em>02</em><small>作品日常</small><p>两个九厘米高的小人住在树洞里，一个会做饭，一个爱到处修东西</p></li><li class="xi mag" data-cur="开写"><em>03</em><small>影视日常</small><p>被牧羊犬养大的小猪想学赶羊，它不吼也不咬，只是很有礼貌地请羊走</p></li><li class="xi mag" data-cur="开写"><em>04</em><small>学院校园</small><p>京都大学：「东大生只会争论，京大生会直接在电车上铺被子」</p></li><li class="xi mag" data-cur="开写"><em>05</em><small>情感瞬间</small><p>下夜班赶去店里，商品在眼前卖完了，不认识的同好把两个让给了她</p></li></ol>
  <div id="xfeat"><div class="xfk"><span>故事骨架</span><i>STORY SKELETON</i></div><article class="xf"><header><em>01 / 05</em><span>X琐事</span><small>来源：X @daxhaunts</small></header><h3>客人进店说「我问了 AI，它说你们开到半夜」，营业时间明明就贴在门上</h3><dl><div class="xr"><dt>人物</dt><dd>镇上面包铺的年轻学徒；一位相信占卜胜过一切的贵妇</dd></div><div class="xr"><dt>触发</dt><dd>傍晚铺子快关门，贵妇推门进来要买刚出炉的面包</dd></div><div class="xr"><dt>冲突</dt><dd>学徒说已经收炉了，贵妇不高兴：「我今早问过水晶球，它说你们开到午夜！」</dd></div><div class="xr"><dt>喜剧点</dt><dd>学徒指着门上钉着的木牌，上面写着「日落关门」：「夫人，您进来的时候它就在您眼前。」</dd></div><div class="xr"><dt>收束</dt><dd>贵妇板着脸买走了最后两个冷面包；第二天，面包铺门口多了一块更大的木牌，底下还加了一行小字：「水晶球说的不算」</dd></div></dl></article><article class="xf"><header><em>02 / 05</em><span>作品日常</span><small>来源：哈库梅与美蔻莎</small></header><h3>两个九厘米高的小人住在树洞里，一个会做饭，一个爱到处修东西</h3><dl><div class="xr"><dt>人物</dt><dd>住在橡树树洞里的两个小人：会做饭、爱干净的那个，和爱到处跑、什么都敢修的那个</dd></div><div class="xr"><dt>触发</dt><dd>爱乱跑的那个接了个活，去帮甲虫马车行修车轮，说好傍晚回家吃饭</dd></div><div class="xr"><dt>冲突</dt><dd>她修到天黑才回来，满身油污，还带回来一只「车行老板送的」受伤小鸟</dd></div><div class="xr"><dt>喜或泪点</dt><dd>做饭的那个嘴上骂她「你又给我找事」，转身就去熬了一锅米汤喂小鸟</dd></div><div class="xr"><dt>收束</dt><dd>小鸟伤好那天飞走了，第二天树洞门口放着一颗橡子，做饭的那个把它腌成了一罐小菜</dd></div></dl></article><article class="xf"><header><em>03 / 05</em><span>影视日常</span><small>来源：小猪宝贝（Babe，1995，澳大利亚/美国真人家庭电影）</small></header><h3>被牧羊犬养大的小猪想学赶羊，它不吼也不咬，只是很有礼貌地请羊走</h3><dl><div class="xr"><dt>人物</dt><dd>被狼骑兵营地的老母狼收养的一只小野猪；营地里冷着脸的驯兽官</dd></div><div class="xr"><dt>触发</dt><dd>营地要把一群倔脾气的山羊赶进新羊圈，狼都上了也赶不动</dd></div><div class="xr"><dt>冲突</dt><dd>狼一龇牙，羊就四散乱跑；小野猪凑上去，被狼嫌弃「你连叫都不会叫」</dd></div><div class="xr"><dt>喜剧点</dt><dd>小野猪走到领头老山羊面前，客客气气说：「麻烦你们往左边走一点，那边的草更嫩」，老山羊想了想，真的带着羊群走了</dd></div><div class="xr"><dt>收束</dt><dd>驯兽官后来带它去参加王国的牧兽大赛，被所有人笑话，最后它靠老山羊教的一句「羊群暗号」赢了冠军</dd></div></dl></article><article class="xf"><header><em>04 / 05</em><span>学院校园</span><small>来源：X @towa49666</small></header><h3>京都大学：女儿问「东大生只会争论，京大生会直接在电车上铺被子」是真的吗，京大毕业的爸爸说「京大干得出来」</h3><dl><div class="xr"><dt>人物</dt><dd>已经退休、年轻时在「自由学院」读书的父亲；爱打听学院传说的女儿</dd></div><div class="xr"><dt>触发</dt><dd>女儿听来一个段子：说起「马车颠簸让人犯困」，王立学院的学生会写三篇论文争论原因，自由学院的学生会直接在马车里铺床</dd></div><div class="xr"><dt>冲突</dt><dd>她拿去问父亲是不是真的，以为他会替母校辩解</dd></div><div class="xr"><dt>喜剧点</dt><dd>父亲想了想，认真地说：「王立学院我不知道，我们那儿的人确实干得出来。」然后补了一句：「我当年铺过」</dd></div><div class="xr"><dt>收束</dt><dd>女儿追问细节，父亲讲了一晚上当年在马车里铺床被车夫赶下去的事，越讲越得意</dd></div></dl></article><article class="xf"><header><em>05 / 05</em><span>情感瞬间</span><small>来源：X @iiicccyyyuuu</small></header><h3>感动｜下夜班赶去店里，商品在眼前卖完了，旁边不认识的同好问「你推谁？」，把两个让给了她</h3><dl><div class="xr"><dt>人物</dt><dd>在城门值夜班的女守卫；集市上同样喜欢某位吟游诗人的陌生姑娘</dd></div><div class="xr"><dt>触发</dt><dd>守卫听说诗人的签名木牌今早到了集市，下了夜班连盔甲都没脱就跑过去</dd></div><div class="xr"><dt>冲突</dt><dd>她刚挤到摊前，最后一块木牌被人买走了，她站在原地，累得想哭</dd></div><div class="xr"><dt>泪点</dt><dd>买走木牌的姑娘回头看了她一眼，问：「你喜欢的是哪一首？」听完她的回答，把手里两块木牌都塞给了她：「我家里还有，你拿去」</dd></div><div class="xr"><dt>收束</dt><dd>守卫回到宿舍，把木牌挂在床头，第一次没换衣服就睡着了，睡着时还在笑</dd></div></dl></article></div>
- <div id="xmore" class="xj-acts"><a class="xj-primary mag" data-cur="今日寻迹" href="https://duomei.site/xunji">进入今日寻迹 →</a><a class="xj-sub mag" data-cur="往期" href="https://duomei.site/xunji/archive">往期寻迹 →</a></div></section>
+ <div id="xmore" class="xj-acts"><a class="xj-primary mag" data-cur="今日寻迹" href="https://duomei.site/xunji">进入今日寻迹 →</a><a class="xj-sub mag" data-cur="往期" href="https://duomei.site/xunji/archive">往期寻迹 →</a></div></div></section>
 
-<section class="sec" id="dalu"><div class="pan ph dark" id="dpan" data-sec="dalu"><img data-src="img/dalu.webp" alt="奇幻大陆"></div>
- <div class="dshade" id="dsh"></div><iframe class="emb" id="ifA" title="大陆 · 作品"></iframe><div id="flare"></div><div class="mist" id="m1" style="top:20%"></div><div class="mist" id="m2" style="top:55%"></div>
- <div class="head" id="dhead"><span class="kick">06 · THE CONTINENT · 山海 · 城邦 · 想象</span><h2 id="dh">让想象，落在山河之间</h2><p id="dp">沿粮河走进王城，越过雪岭，去远海听一个尚未讲完的故事。</p></div></section>
+<section class="sec tall" id="dalu"><div class="dl-bg"><div class="pan ph dark" id="dpan" data-sec="dalu"><img data-src="img/dalu.webp" alt="奇幻大陆"></div><div id="flare"></div><div class="mist" id="m1" style="top:20%"></div><div class="mist" id="m2" style="top:55%"></div><div class="dshade" id="dsh"></div></div>
+ <div class="pnl dl-p1" data-k="dalu"><div class="head" id="dhead"><span class="kick">06 · THE CONTINENT · 山海 · 城邦 · 想象</span><h2 id="dh">让想象，落在山河之间</h2><p id="dp">沿粮河走进王城，越过雪岭，去远海听一个尚未讲完的故事。</p></div></div>
+ <div class="pnl dl-p2" data-k="dalu"><iframe class="emb" id="ifA" title="大陆 · 作品"></iframe></div></section>
 
-<section class="sec" id="yunyou"><iframe class="emb" id="ifB" title="云游 · 纸上山河 立体绘本"></iframe><iframe class="emb" id="ifE" title="云游 · 四件作品"></iframe><canvas id="cv"></canvas>
+<section class="sec tall" id="yunyou"><div class="pnl yy-p1" data-k="yunyou" data-dk="0"><div class="yy-bg"><img data-sec="yunyou" data-src="img/wander-m.webp" alt=""></div><i class="yy-mist"></i><div id="yhead"><span class="kick">07 · WANDER · 四处可以停留的风景</span><h2>云游</h2><p>先翻一本纸上山河：桂林、江南、小院，<br>一页一页，景物一件件立起来；<br>再一幅幅翻看四件云游作品。</p></div></div><div class="pnl yy-p2" data-k="yunyou"><iframe class="emb" id="ifE" title="云游 · 四件作品"></iframe></div><canvas id="cv"></canvas>
 <div id="gl"><img id="glb" alt="桂林 日月双塔 夜景" data-sec="gl"><div id="glw" aria-hidden="true"><span>桂</span><span>林</span></div><img id="glf" alt="" data-sec="gl"><div id="glsc"></div><div id="glr" aria-hidden="true"><span>桂</span><span>林</span></div><div id="glmeta"><span class="kick">07 · 云游 · 04 / 06</span><h4>沿水看桂林</h4><p>杉湖之上，日月双塔<br>夜里，灯一层层亮起</p></div><div id="glgeo"><b>GUILIN</b>两江四湖 · 25.27°N 110.29°E</div><div id="glcr">Photo: King of Hearts · CC BY-SA 4.0</div></div>
- <div id="yhead"><span class="kick">07 · WANDER · 四处可以停留的风景</span><h2>云游</h2><p>先翻一本纸上山河：桂林、江南、小院，<br>一页一页，景物一件件立起来；<br>再一幅幅翻看四件云游作品。</p></div>
+ 
  <div class="ycap" id="Y0"><span class="kick">大观园 · 3D 游园</span><h2>紅樓夢影</h2><p>依《红楼梦》原文复原的大观园。</p></div>
  <div class="ycap" id="Y1"><span class="kick">江南 · 园林一隅</span><h2>诗语江南</h2><p>绕池走一圈，听雨落在荷叶上。</p></div>
  <div class="ycap" id="Y2"><span class="kick">云上 · 夏日小院</span><h2>夏日小院</h2><p>院外是晚霞。</p></div>
@@ -886,9 +1061,9 @@ body.hb-open #dm-music-card,body.hb-open #dm-hover-zone{visibility:hidden}
  <div class="fold" id="fold1" style="position:absolute;inset:0;display:flex;visibility:hidden"></div>
  <div class="fold" id="fold2" style="position:absolute;inset:0;display:flex;flex-direction:column;visibility:hidden"><i style="flex:1;transform-origin:50% 0"></i><i style="flex:1;transform-origin:50% 100%"></i></div></section>
 
-<section class="sec" id="huiben"><div id="hbpost"><img class="cover" src="huiben/img/bd-xiangbi.webp" alt="" width="1536" height="655" decoding="async" loading="lazy"><div class="veil"></div><div class="copy"><div class="kick" style="letter-spacing:.24em;opacity:.7;font:12px/1.4 ui-monospace,Menlo,monospace">08 · POP-UP BOOK</div><h2 style="font-family:'ZMX','Zhi Mang Xing',serif;font-weight:400;font-size:clamp(44px,6vw,86px);line-height:1;margin:.18em 0 .2em">纸上<b style="color:#B3261E;font-weight:400">绘本</b></h2><p style="font-size:14px;line-height:1.8;opacity:.78;margin:0">三处山水，折进一本书。点开后再进入立体页。</p></div><div class="hb-actions"><button type="button" id="hbopen"><i></i>打开绘本</button><a href="lingchuan-walk/" id="lcwalk">灵川行卷 · 32景画中画</a></div></div></section>
+<section class="sec" id="huiben"><div class="sx"><div id="hbpost"><img class="cover" src="huiben/img/bd-xiangbi.webp" alt="" width="1536" height="655" decoding="async" loading="lazy"><div class="veil"></div><div class="copy"><div class="kick" style="letter-spacing:.24em;opacity:.7;font:12px/1.4 ui-monospace,Menlo,monospace">08 · POP-UP BOOK</div><h2 style="font-family:'ZMX','Zhi Mang Xing',serif;font-weight:400;font-size:clamp(44px,6vw,86px);line-height:1;margin:.18em 0 .2em">纸上<b style="color:#B3261E;font-weight:400">绘本</b></h2><p style="font-size:14px;line-height:1.8;opacity:.78;margin:0">三处山水，折进一本书。点开后再进入立体页。</p></div><div class="hb-actions"><button type="button" id="hbopen"><i></i>打开绘本</button><a href="lingchuan-walk/" id="lcwalk">灵川行卷 · 32景画中画</a></div></div></div></section>
 <div id="hbfs" hidden><div id="hbbar"><button type="button" id="hbback" aria-label="关闭绘本">×</button></div><iframe id="ifH" title="纸上绘本 · 立体书" allow="gyroscope; accelerometer"></iframe><div id="hbload"><i>绘</i><u></u><span>正在裁纸</span></div></div>
-<section class="sec" id="color"><canvas id="pcv"></canvas>
+<section class="sec" id="color"><div class="sx"><canvas id="pcv"></canvas>
  <div id="cme" class="blo"><span class="kick">08 · COLOR · 关于我</span><h2 id="cname">Color</h2>
   <p class="cz">多美 · DUOMEI 的作者<span>现居 大阪 · 堺</span><span>故乡 桂林</span></p>
   <p class="cb">多美是一个很小的个人记录空间。它不区分复杂栏目，只保存旅途记录、生活记录、旅行照片和心情文字。<br>希望每一次打开，都像翻到一页安静的旅行手账。</p>
@@ -896,26 +1071,26 @@ body.hb-open #dm-music-card,body.hb-open #dm-hover-zone{visibility:hidden}
  <div id="cstk" data-sec="color">
   <figure class="stk blo mag" data-cur="扫码"><div class="sp"><img data-src="img/st/duomei-banner.webp" alt="多美 微信表情包"></div><div class="tl"><img data-src="img/st/duomei-t0.webp" alt=""><img data-src="img/st/duomei-t1.webp" alt=""><img data-src="img/st/duomei-t2.webp" alt=""><img data-src="img/st/duomei-t3.webp" alt=""><img data-src="img/st/duomei-t4.webp" alt=""><img data-src="img/st/duomei-t5.webp" alt=""><img data-src="img/st/duomei-t6.webp" alt=""><img data-src="img/st/duomei-t7.webp" alt=""></div><figcaption><em>01</em><b>多美</b><small>几多美 · 扫码添加</small><img class="qr" data-src="img/st/qr-duomei.webp" alt=""></figcaption><div class="stk-acts"><button type="button" class="stk-copy" data-name="多美" data-url="https://w.url.cn/s/ANJIS6e#wechat_redirect">复制微信链接</button><a class="stk-dl" href="img/st/qr-duomei.webp" download="duomei-wechat-qr.webp">保存码</a></div></figure>
   <figure class="stk blo mag" data-cur="扫码"><div class="sp"><img data-src="img/st/zhu-banner.webp" alt="多美猪猪 微信表情包"></div><div class="tl"><img data-src="img/st/zhu-t0.webp" alt=""><img data-src="img/st/zhu-t1.webp" alt=""><img data-src="img/st/zhu-t2.webp" alt=""><img data-src="img/st/zhu-t3.webp" alt=""><img data-src="img/st/zhu-t4.webp" alt=""><img data-src="img/st/zhu-t5.webp" alt=""><img data-src="img/st/zhu-t6.webp" alt=""><img data-src="img/st/zhu-t7.webp" alt=""></div><figcaption><em>02</em><b>多美猪猪</b><small>快乐日常 · 扫码添加</small><img class="qr" data-src="img/st/qr-zhu.webp" alt=""></figcaption><div class="stk-acts"><button type="button" class="stk-copy" data-name="多美猪猪" data-url="https://w.url.cn/s/A5vPMKw#wechat_redirect">复制微信链接</button><a class="stk-dl" href="img/st/qr-zhu.webp" download="duomei-zhu-zhu-wechat-qr.webp">保存码</a></div></figure>
- </div><div id="cstkh"><span class="kick">表情包 · STICKERS</span>两套微信表情，多美的两副面孔。</div></section>
+ </div><div id="cstkh"><span class="kick">表情包 · STICKERS</span>两套微信表情，多美的两副面孔。</div></div></section>
 
-<section class="sec" id="weiyan"><div id="whd"><span class="kick">09 · FEW WORDS · 诗与手记</span><h2>微言</h2><p>几句短话，写在本子里，一页一页慢慢翻。</p></div>
+<section class="sec" id="weiyan"><div class="sx"><div id="whd"><span class="kick">09 · FEW WORDS · 诗与手记</span><h2>微言</h2><p>几句短话，写在本子里，一页一页慢慢翻。</p></div>
  <div id="wbook"><div class="ws" data-n="7" data-c="2"><div class="wf"><div class="wt">折花映柳<i>多美</i></div><div class="wc"><span>折花映柳狂风后</span><span>灿烂千阳又归来</span></div><div class="wsrc">选自《没有遇见 何来艳遇》 · 手记 第 3 页</div><span class="wn">01</span><div class="wsh"></div></div><div class="wbk"></div></div><div class="ws" data-n="7" data-c="2"><div class="wf"><div class="wt">酒不解渴<i>多美</i></div><div class="wc"><span>酒不解渴润平生</span><span>诗不果腹养心肺</span></div><div class="wsrc">选自《没有遇见 何来艳遇》 · 手记 第 26 页</div><span class="wn">02</span><div class="wsh"></div></div><div class="wbk"></div></div><div class="ws" data-n="10" data-c="3"><div class="wf"><div class="wt">青春<i>多美</i></div><div class="wc"><span>所有的结局都已写好</span><span>所有的泪水也都已启程</span><span>青春是一本太仓促的书</span></div><div class="wsrc">选自《没有遇见 何来艳遇》 · 手记 第 35 页</div><span class="wn">03</span><div class="wsh"></div></div><div class="wbk"></div></div><div class="ws" data-n="7" data-c="4"><div class="wf"><div class="wt">夏至<i>多美</i></div><div class="wc"><span>冬啸暑人叹日长</span><span>夏至伏天万丈光</span><span>不尽滴露盈似豆</span><span>吞江饮水口如斗</span></div><div class="wsrc">选自《没有遇见 何来艳遇》 · 手记 第 41 页</div><span class="wn">04</span><div class="wsh"></div></div><div class="wbk"></div></div></div>
- <div id="wnav"><span id="wpg">01 / 04</span><span id="wdots"><i class="mag"></i><i class="mag"></i><i class="mag"></i><i class="mag"></i></span><a class="wy-go mag" data-cur="诗笺" href="https://duomei.site/time">时光诗笺 →</a></div></section>
+ <div id="wnav"><span id="wpg">01 / 04</span><span id="wdots"><i class="mag"></i><i class="mag"></i><i class="mag"></i><i class="mag"></i></span><a class="wy-go mag" data-cur="诗笺" href="https://duomei.site/time">时光诗笺 →</a></div></div></section>
 
-<section class="sec" id="skill"><div id="khd"><span class="kick">10 · SKILL · 走过的流程</span><h2>Skill</h2><p>真正走过一遍的流程，<br>整理成下次还能用的 Skill。</p><a class="sk-go mag" data-cur="全部 Skill" href="https://duomei.site/skills">查看全部 Skill →</a></div><b id="kcount">07</b>
- <ol id="klist"><li class="kr mag" data-cur="展开"><em>01</em><div><b>AI 短剧出片标准</b><p>从立项、生成、剪辑、声音到逐帧验收，一套稳定出高质量成片的流程。</p><span class="tg"><i>短剧</i><i>流程</i><i>逐帧验收</i></span></div></li><li class="kr mag" data-cur="展开"><em>02</em><div><b>短剧成片验收</b><p>修改意见先整理成编号改单；交片前按硬清单逐条自检，有一项不过就不交。</p><span class="tg"><i>改单</i><i>自检</i><i>交付</i></span></div></li><li class="kr mag" data-cur="展开"><em>03</em><div><b>Imagine 图生视频</b><p>先锁脸、只动局部、包不融、收得回第一帧——九个版本迭代出的提示词公式。</p><span class="tg"><i>图生视频</i><i>锁脸</i><i>可循环</i></span></div></li><li class="kr mag" data-cur="展开"><em>04</em><div><b>表情包动作库</b><p>斗图动作只从表里选：握拳抖、扶额、飞踢、连打，有起势、有收势，画面不闪字。</p><span class="tg"><i>表情包</i><i>动作</i><i>GIF</i></span></div></li><li class="kr mag" data-cur="展开"><em>05</em><div><b>电子画册</b><p>把扫描 PDF 映射成正确的逻辑书页，翻页、触摸、预加载、隐私与真机验收收进同一套流程。</p><span class="tg"><i>PDF</i><i>翻页</i><i>隐私交付</i></span></div></li><li class="kr mag" data-cur="展开"><em>06</em><div><b>研究后再做</b><p>复杂功能开工前，先核对现有能力、官方资料与成熟方案，再选成本最低、可回退的实现。</p><span class="tg"><i>研究</i><i>技术选型</i><i>兼容性</i></span></div></li><li class="kr mag" data-cur="展开"><em>07</em><div><b>角色提示词包</b><p>为角色图片、表情包网格、图生视频和无缝循环短片生成可复用的中文提示词与一致性规则。</p><span class="tg"><i>角色一致性</i><i>图片</i><i>视频</i></span></div></li></ol></section>
+<section class="sec" id="skill"><div class="sx"><div id="khd"><span class="kick">10 · SKILL · 走过的流程</span><h2>Skill</h2><p>真正走过一遍的流程，<br>整理成下次还能用的 Skill。</p><a class="sk-go mag" data-cur="全部 Skill" href="https://duomei.site/skills">查看全部 Skill →</a></div><b id="kcount">07</b>
+ <ol id="klist"><li class="kr mag" data-cur="展开"><em>01</em><div><b>AI 短剧出片标准</b><p>从立项、生成、剪辑、声音到逐帧验收，一套稳定出高质量成片的流程。</p><span class="tg"><i>短剧</i><i>流程</i><i>逐帧验收</i></span></div></li><li class="kr mag" data-cur="展开"><em>02</em><div><b>短剧成片验收</b><p>修改意见先整理成编号改单；交片前按硬清单逐条自检，有一项不过就不交。</p><span class="tg"><i>改单</i><i>自检</i><i>交付</i></span></div></li><li class="kr mag" data-cur="展开"><em>03</em><div><b>Imagine 图生视频</b><p>先锁脸、只动局部、包不融、收得回第一帧——九个版本迭代出的提示词公式。</p><span class="tg"><i>图生视频</i><i>锁脸</i><i>可循环</i></span></div></li><li class="kr mag" data-cur="展开"><em>04</em><div><b>表情包动作库</b><p>斗图动作只从表里选：握拳抖、扶额、飞踢、连打，有起势、有收势，画面不闪字。</p><span class="tg"><i>表情包</i><i>动作</i><i>GIF</i></span></div></li><li class="kr mag" data-cur="展开"><em>05</em><div><b>电子画册</b><p>把扫描 PDF 映射成正确的逻辑书页，翻页、触摸、预加载、隐私与真机验收收进同一套流程。</p><span class="tg"><i>PDF</i><i>翻页</i><i>隐私交付</i></span></div></li><li class="kr mag" data-cur="展开"><em>06</em><div><b>研究后再做</b><p>复杂功能开工前，先核对现有能力、官方资料与成熟方案，再选成本最低、可回退的实现。</p><span class="tg"><i>研究</i><i>技术选型</i><i>兼容性</i></span></div></li><li class="kr mag" data-cur="展开"><em>07</em><div><b>角色提示词包</b><p>为角色图片、表情包网格、图生视频和无缝循环短片生成可复用的中文提示词与一致性规则。</p><span class="tg"><i>角色一致性</i><i>图片</i><i>视频</i></span></div></li></ol></div></section>
 
-<section class="sec" id="foot">
+<section class="sec" id="foot"><div class="sx">
  <div class="word" id="W"><div class="row"><span data-bg="img/L-hong.webp">D</span><span data-bg="img/L-jiangnan.webp">U</span><span data-bg="img/L-xiaoyuan.webp">O</span></div><div class="row"><span data-bg="img/L-guilin.webp">M</span><span data-bg="img/L-hong.webp">E</span><span data-bg="img/L-jiangnan.webp">I</span></div></div>
  <div class="fcn" id="FC">多美</div><div class="ftag" id="FT">记录旅途，遇见生活，也遇见自己。</div>
  <nav class="flinks" id="FL" aria-label="全站快捷导航"><a data-go="hero">首页</a><a data-go="zaobao">早报</a><a data-go="xiaoji">小记</a><a data-go="guyu">故语</a><a href="https://duomei.site/xunji">寻迹</a><a data-go="yunyou">云游</a><a data-go="color">颜色</a><a data-go="weiyan">微言</a><a data-go="skill">Skill</a></nav>
- <div class="fcopy" id="FCP">© 2026 多美 · 记录旅途，遇见生活，也遇见自己。</div></section>
+ <div class="fcopy" id="FCP">© 2026 多美 · 记录旅途，遇见生活，也遇见自己。</div></div></section>
 </div>
 <div id="dm-hover-zone" aria-hidden="true"></div>
 <header class="ui" id="UI">
  <div class="dm-head-left">
   <a class="dm-brand" id="dm-brand" href="#top" aria-label="回到首页顶部"><strong>DUOMEI</strong><span>多美</span></a>
-  <div id="dm-music" class="dm-music-wrap"><button type="button" id="dm-orb" aria-label="展开多美原创音乐" aria-expanded="false"></button></div>
+  <div id="dm-music" class="dm-music-wrap"><button type="button" id="dm-orb" aria-label="展开多美原创音乐" aria-expanded="false"><svg viewBox="0 0 40 40" aria-hidden="true"><circle class="orb-disk" cx="20" cy="20" r="18.2"/><circle class="orb-ring" cx="20" cy="20" r="13.4"/><path class="orb-ink" d="M11.8 23.2c2.6-7.4 7.6-9.8 12.2-6.2 2.2 1.7 3.1 4.6 1.2 6.8-2.6 3-7.4 2.2-9.8-.6"/><circle class="orb-dot" cx="25.2" cy="13.6" r="2.15"/></svg></button></div>
  </div>
  <button type="button" id="dm-menu-btn" aria-label="打开导航" aria-expanded="false"><span></span><span></span><span></span></button>
  <nav id="dm-menu" aria-label="主导航">
