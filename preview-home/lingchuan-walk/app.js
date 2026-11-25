@@ -3895,11 +3895,12 @@ async function init() {
     onShareNote: showInlineCardNote,
   });
 
-  // Start in map mode (map-first IA); docks stay hidden until walk/depth
-  document.body.dataset.mode = 'map';
-  dom.walkDock.hidden = true;
+  // Default to paper scroll; map is opt-in until the atlas is strong enough
+  document.body.dataset.mode = 'walk';
+  state.mode = 'walk';
+  dom.walkDock.hidden = false;
   dom.depthDock.hidden = true;
-  dom.chapterSub.textContent = '乡镇地图 · 按区划展卷';
+  dom.chapterSub.textContent = SEGMENTS[state.segmentIdx]?.sub || '纸艺长卷';
 
   dom.loader.classList.add('done');
   animate();

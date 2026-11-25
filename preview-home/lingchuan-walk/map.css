@@ -94,61 +94,86 @@ body[data-mode="map"] .mode-pill-bg {
   min-height: 0;
   display: grid;
   place-items: center;
-  padding: 8px 12px 24px;
+  padding: 8px 12px 20px;
+}
+
+.lc-map-frame {
+  position: relative;
+  width: min(100%, 560px);
+  aspect-ratio: 1000 / 1200;
+  max-height: calc(100dvh - 150px);
+  border-radius: 22px;
+  overflow: hidden;
+  box-shadow:
+    0 18px 40px rgba(40, 28, 12, 0.22),
+    inset 0 0 0 1px rgba(255, 248, 230, 0.35);
 }
 
 .lc-map-base {
   position: absolute;
-  inset: 8% 6% 12%;
-  width: auto;
-  height: auto;
-  max-width: 92%;
-  max-height: 88%;
-  margin: auto;
-  object-fit: cover;
-  border-radius: 28px;
-  box-shadow:
-    0 18px 40px rgba(40, 28, 12, 0.22),
-    inset 0 0 0 1px rgba(255, 248, 230, 0.35);
-  filter: saturate(0.92) contrast(0.98);
-  opacity: 0.92;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+  background: #efe4d0;
+  filter: saturate(0.95) contrast(1.02);
 }
 
 .lc-map-svg {
-  position: relative;
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
   z-index: 2;
-  width: min(92vw, 560px);
-  height: auto;
-  max-height: calc(100dvh - 140px);
   touch-action: manipulation;
 }
 
-.lc-town-disk {
-  fill: rgba(247, 241, 228, 0.82);
-  stroke: rgba(91, 70, 54, 0.45);
-  stroke-width: 2.5;
-  transition: fill 0.25s ease, stroke 0.25s ease, transform 0.25s ease;
+.lc-town-hit {
+  fill: transparent;
+  stroke: none;
+  pointer-events: all;
+}
+
+.lc-town-pin {
+  fill: rgba(255, 248, 234, 0.96);
+  stroke: rgba(91, 70, 54, 0.55);
+  stroke-width: 2;
+  transition: fill 0.2s ease, stroke 0.2s ease;
+}
+
+.lc-town-core {
+  fill: #b3261e;
+  stroke: none;
+  pointer-events: none;
 }
 
 .lc-town-halo {
-  fill: rgba(179, 38, 30, 0.05);
+  fill: rgba(179, 38, 30, 0.12);
   stroke: none;
   opacity: 0;
-  transition: opacity 0.3s ease;
+  transition: opacity 0.25s ease;
 }
 
 .lc-town-label {
-  font-family: "Songti SC", "STSong", serif;
-  font-size: 28px;
+  font-family: "Songti SC", "STSong", "Noto Serif SC", serif;
+  font-size: 26px;
   font-weight: 700;
   fill: #2a2218;
+  paint-order: stroke;
+  stroke: rgba(247, 241, 228, 0.92);
+  stroke-width: 6px;
   pointer-events: none;
 }
 
 .lc-town-badge {
-  font-size: 18px;
+  font-size: 16px;
   fill: #b3261e;
   font-family: "PingFang SC", sans-serif;
+  font-weight: 600;
+  paint-order: stroke;
+  stroke: rgba(247, 241, 228, 0.92);
+  stroke-width: 5px;
   pointer-events: none;
 }
 
@@ -158,13 +183,13 @@ body[data-mode="map"] .mode-pill-bg {
   transform-origin: center;
 }
 
-.lc-town-node.is-featured .lc-town-disk {
-  fill: rgba(255, 244, 220, 0.92);
-  stroke: rgba(179, 38, 30, 0.55);
+.lc-town-node.is-featured .lc-town-pin {
+  stroke: rgba(179, 38, 30, 0.7);
+  stroke-width: 2.5;
 }
 
-.lc-town-node.is-active .lc-town-disk,
-.lc-town-node:hover .lc-town-disk {
+.lc-town-node.is-active .lc-town-pin,
+.lc-town-node:hover .lc-town-pin {
   fill: #fff8ea;
   stroke: #b3261e;
 }
@@ -174,33 +199,25 @@ body[data-mode="map"] .mode-pill-bg {
   opacity: 1;
 }
 
-.lc-map[data-focus="chaotian"] .lc-town-node[data-town="chaotian"] .lc-town-disk {
+.lc-map[data-focus="chaotian"] .lc-town-node[data-town="chaotian"] .lc-town-halo {
+  opacity: 1;
   animation: lcPulse 2.4s ease-in-out infinite;
 }
 
 @keyframes lcPulse {
-  0%, 100% { filter: url(#lcSoft); }
-  50% { stroke-width: 4; }
+  0%, 100% { opacity: 0.35; r: 18; }
+  50% { opacity: 0.7; r: 24; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .lc-map[data-focus="chaotian"] .lc-town-node[data-town="chaotian"] .lc-town-disk {
+  .lc-map[data-focus="chaotian"] .lc-town-node[data-town="chaotian"] .lc-town-halo {
     animation: none;
   }
   .lc-map-layer { transition: none; }
 }
 
 .lc-map-guide {
-  position: absolute;
-  right: 2%;
-  bottom: 4%;
-  width: min(28vw, 140px);
-  height: auto;
-  z-index: 3;
-  pointer-events: none;
-  filter: drop-shadow(0 10px 18px rgba(40, 24, 8, 0.25));
-  opacity: 0.95;
-  animation: lcGuideBob 4.5s ease-in-out infinite;
+  display: none;
 }
 
 @keyframes lcGuideBob {
@@ -587,15 +604,9 @@ body[data-mode="map"] .mode-pill-bg {
     max-height: 38dvh;
   }
 
-  .lc-map-guide {
-    width: 96px;
-    right: 4%;
-    bottom: 40%;
-  }
-
-  .lc-map-svg {
+  .lc-map-frame {
     width: min(96vw, 520px);
-    max-height: calc(62dvh - 80px);
+    max-height: calc(58dvh - 72px);
   }
 
   .lc-zoom-sheet {
