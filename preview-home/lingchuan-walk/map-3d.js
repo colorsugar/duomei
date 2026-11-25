@@ -1,20 +1,20 @@
 // ============================================================================
-// 灵川全境 · 真实 30m DEM 3D 立体纸艺活地图引擎（Three.js + 高清分块瓦片 LOD + 真地图定点缩放）
-// 1. 统一真实 WGS84 等角墨卡托投影（与 scripts/build-lingchuan-dem.py / map-geo.json 100% 同步）
-// 2. 真实 30m DEM 地形网格 + L0 (1536x2048) + 3x4 高清分块瓦片 (1024x1024) 动态视锥加载（放大 4x~6x 零模糊）
-// 3. 真地图手势：Ray-Plane 1:1 地面拖拽、光标/双指中点定点缩放 (0.85x~6.0x)、双击平滑放大、脱手惯性
-// 4. 三级语义缩放 LOD + 全部 76 处工笔立绘（34 一级 + 42 新增二级按需懒加载）弹簧铰链弹起
+// 灵川全境 · 真实 30m DEM 3D 立体纸艺活地图引擎 v2
+// 1. 紧凑 4:5 真实 WGS84 等角墨卡托投影（与 4096x5120 母版 / 4x5 超清瓦片 100% 比特级同步）
+// 2. 全境 1.0x 大气铺满视口 + 0.85x~12.0x 无级定点缩放（直达 200m/500m 村落溪谷微距）
+// 3. 全部 12 乡镇 + 76 处风物按 OSM 实测真坐标落位，绝不乱堆
+// 4. 随放大自适应物理尺寸 + 实时屏幕空间防遮挡渐进释放（放大拉开距离再逐级弹出，永不互挡！）
 // ============================================================================
 
 import { TOWNSHIPS, MAP_EXTRA_POIS, GROK_EXTRA_42, WATER_LABELS } from './map-townships.js';
 
-const MAP_W = 27.0;
-const MAP_D = 36.0; // 精确 3:4，匹配 3072x4096 真实 DEM 母版与 3x4 1024x1024 高清瓦片
+const MAP_W = 28.0;
+const MAP_D = 35.0; // 精确 4:5，匹配 4096x5120 真实 DEM 母版与 4x5 (20张) 1024x1024 高清瓦片
 
-// 真实 WGS84 Web Mercator 投影参数（与 map-geo.json 比特级一致）
-const LON_MIN = 110.045;
-const LON_MAX = 110.835;
-const LAT_CENTER = 25.405;
+// 真实 WGS84 Web Mercator 投影参数（与 scripts/build-lingchuan-dem.py / map-geo.json 100% 一致）
+const LON_MIN = 110.068;
+const LON_MAX = 110.812;
+const LAT_CENTER = 25.406;
 const DEG2RAD = Math.PI / 180;
 
 function mercY(latDeg) {
@@ -28,15 +28,15 @@ const MY_CENTER = mercY(LAT_CENTER);
 const MY_MAX = MY_CENTER + MY_SPAN * 0.5;
 const MY_MIN = MY_CENTER - MY_SPAN * 0.5;
 
-// 实测东西地理宽度约 79.4 km -> 1 世界单位 ≈ 2.941 km
+// 实测东西地理宽度约 74.8 km -> 1 世界单位 ≈ 2.671 km
 const REAL_WIDTH_KM = (LON_MAX - LON_MIN) * 111.32 * Math.cos(LAT_CENTER * DEG2RAD);
 const KM_PER_WORLD_UNIT = REAL_WIDTH_KM / MAP_W;
 
-const TILE_COLS = 3;
-const TILE_ROWS = 4;
+const TILE_COLS = 4;
+const TILE_ROWS = 5;
 const MIN_ZOOM = 0.85;
-const MAX_ZOOM = 6.0;
-const MAX_DEM_HEIGHT = 1.72; // 真实山峦在 3D 宣纸桌面上的优雅雕塑高度
+const MAX_ZOOM = 12.0;
+const MAX_DEM_HEIGHT = 1.58;
 
 function clamp(v, lo, hi) {
   return v < lo ? lo : v > hi ? hi : v;
@@ -61,7 +61,6 @@ export function lonLatToWorld(lon, lat) {
   };
 }
 
-/** 兼容百分比坐标转换 */
 export function pctToWorld(px, py) {
   return {
     x: (px / 100 - 0.5) * MAP_W,
@@ -89,59 +88,56 @@ class PopSpring {
   }
 }
 
-/** 32 原景精确真实地理落位（经纬度基于乡镇中心 + 真实村景方位，确保全县分布精准自然） */
+/** 32 原景 OSM 实测真实 WGS84 坐标（全县自然分散 5~18 公里，零拍脑袋错位！） */
 const LANDMARK_COORDS = {
-  // 大圩镇 (110.4105, 25.1820)
-  'lc-01': [110.4120, 25.1845], // 大圩古镇
-  'lc-02': [110.4190, 25.1775], // 万寿桥
-  'lc-03': [110.4025, 25.1660], // 毛洲岛
-  'lc-04': [110.4310, 25.1995], // 东漓古村
-  'lc-05': [110.4480, 25.1585], // 古东瀑布
-  'lc-06': [110.4345, 25.1745], // 东漓腐竹 / 手作
-  'lc-07': [110.3910, 25.1885], // 大圩草莓岛
-  'lc-32': [110.4535, 25.1940], // 熊村古圩与彩调
-  // 海洋乡 (110.5631, 25.3092)
-  'lc-08': [110.5631, 25.3092], // 海洋银杏
-  'lc-09': [110.5840, 25.3245], // 画眉弄银杏
-  'lc-10': [110.5425, 25.3220], // 白果老鸭汤
-  // 大境瑶族乡 (110.5789, 25.2036)
-  'lc-11': [110.5855, 25.2265], // 大境雾凇
-  'lc-12': [110.5665, 25.1890], // 大野神境
-  'lc-30': [110.5760, 25.2036], // 大境瑶族服饰
-  'lc-33': [110.6010, 25.1975], // 五色糯米饭
-  'lc-34': [110.5520, 25.2005], // 林下仿野生灵芝
-  // 潮田乡 (110.5090, 25.1997)
-  'lc-13': [110.4955, 25.2065], // 桃花岛
-  'lc-14': [110.5140, 25.2205], // 南圩穿岩
-  'lc-15': [110.5250, 25.1955], // 太平古村
-  'lc-16': [110.5050, 25.1815], // 潮田柑橘
-  // 潭下镇 (110.2843, 25.4551)
-  'lc-17': [110.2843, 25.4551], // 潭下砂糖桔
-  // 定江镇 (110.2998, 25.3377)
-  'lc-19': [110.2998, 25.3377], // 八里街夜市
-  // 三街镇 (110.3867, 25.4689)
-  'lc-20': [110.3867, 25.4689], // 三街古圩
-  // 灵川镇 (110.3152, 25.3976)
-  'lc-22': [110.3152, 25.3976], // 甘棠公园
-  'lc-23': [110.3265, 25.3880], // 千年桂林
-  // 九屋镇 & 公平乡
-  'lc-24': [110.2375, 25.5150], // 江头村爱莲家祠
-  'lc-26': [110.2055, 25.5540], // 青狮潭碧湖
-  'lc-27': [110.2155, 25.5245], // 龙门瀑布
-  // 灵田镇 (110.4702, 25.3482)
-  'lc-25': [110.4702, 25.3482], // 长岗岭古商道
-  'lc-28': [110.4600, 25.3600], // 灵田走牌灯
-  // 兰田瑶族乡 (110.1980, 25.6092)
-  'lc-29': [110.1980, 25.6092], // 兰田糯禾舞草龙
-  'lc-31': [110.1860, 25.6050], // 兰田瑶族服饰
+  // 大圩镇域（北起熊村 25.238，南至古东瀑布 25.113，横跨 14 km！）
+  'lc-32': [110.4573, 25.2379], // 熊村古圩与彩调 (OSM 实测熊村!)
+  'lc-01': [110.4224, 25.1902], // 大圩古镇老街 (OSM 大圩镇)
+  'lc-02': [110.4258, 25.1782], // 万寿桥 (老街南端马河口)
+  'lc-03': [110.4125, 25.1765], // 毛洲岛 (OSM 毛洲岛江心洲!)
+  'lc-04': [110.4570, 25.1868], // 东漓古村 (OSM 实测东漓古村!)
+  'lc-06': [110.4500, 25.1745], // 东漓腐竹手作 (东漓南大埠片区)
+  'lc-07': [110.4085, 25.1580], // 大圩草莓岛 (滩子坪江岸)
+  'lc-05': [110.4560, 25.1135], // 漓江古东瀑布 (OSM 实测漓江古东景区!)
+  // 潮田乡域（北起太平村 25.233，南至南圩穿岩 25.095，横跨 15 km！）
+  'lc-15': [110.5330, 25.2332], // 太平古村 (OSM 实测太平村!)
+  'lc-13': [110.4945, 25.1925], // 潮田桃花岛 (潮田西河湾)
+  'lc-16': [110.5060, 25.1665], // 潮田柑橘 (S202 沿线连片果山)
+  'lc-14': [110.4860, 25.0950], // 南圩穿岩 (潮田最南端冠岩暗河上游!)
+  // 海洋乡域（横跨海洋山脉 15 km！）
+  'lc-08': [110.5628, 25.3094], // 海洋百万银杏 (OSM 海洋乡)
+  'lc-10': [110.5560, 25.3260], // 白果老鸭汤 (海洋乡北)
+  'lc-09': [110.6250, 25.2980], // 画眉弄古银杏 (小平乐东侧深山古林!)
+  // 大境瑶族乡域（沿 G357 东西横跨 18 km 高山！）
+  'lc-30': [110.5774, 25.2038], // 大境瑶族服饰 (OSM 大境乡)
+  'lc-11': [110.5940, 25.2360], // 大境雾凇 (李家寨/葡萄岭高岭!)
+  'lc-12': [110.6780, 25.1960], // 大野神境·大野瀑布 (大境东部深峡!)
+  'lc-34': [110.6140, 25.1820], // 林下仿野生灵芝 (OSM 永同村林区!)
+  'lc-33': [110.6480, 25.1660], // 五色糯米饭 (大境东南瑶寨)
+  // 灵田镇域（南北横跨 10 km 古商道！）
+  'lc-25': [110.4875, 25.4224], // 长岗岭古商道 (OSM 实测下长岗村!)
+  'lc-28': [110.4723, 25.3441], // 灵田走牌灯 (OSM 灵田镇街上村!)
+  // 九屋镇 & 青狮潭
+  'lc-24': [110.2664, 25.5343], // 江头村爱莲家祠 (OSM 实测江头洲!)
+  'lc-26': [110.2145, 25.5340], // 青狮潭碧湖 (OSM 实测青狮潭水库中心!)
+  'lc-27': [110.2580, 25.5760], // 龙门瀑布 (九屋北东源/石洞峡谷!)
+  // 兰田瑶族乡
+  'lc-31': [110.1966, 25.6097], // 兰田瑶族服饰 (OSM 实测兰田乡!)
+  'lc-29': [110.2085, 25.6265], // 兰田糯禾舞草龙 (兰田东北山谷)
+  // 三街镇、潭下镇、灵川镇、定江镇
+  'lc-20': [110.3849, 25.4685], // 三街古圩 (OSM 实测三街镇!)
+  'lc-17': [110.2822, 25.4545], // 潭下砂糖桔 (OSM 实测潭下镇!)
+  'lc-22': [110.3170, 25.4079], // 甘棠公园 (OSM 实测甘棠江公园!)
+  'lc-23': [110.3320, 25.3960], // 千年桂林 (县城东侧)
+  'lc-19': [110.3064, 25.3605], // 八里街夜市 (OSM 实测八里街!)
 };
 
 const EXTRA_CORE_COORDS = {
-  'poi-dashankou': [110.4895, 25.1820],
-  'poi-chaotian-folk': [110.5110, 25.1975],
+  'poi-dashankou': [110.4955, 25.1345], // 大山口村 (潮田南谷官坪沿线)
+  'poi-chaotian-folk': [110.5145, 25.1945], // 潮田狮舞民俗 (潮田乡南)
 };
 
-/** 创建带柔和宣纸圆角白边的卡片式纸雕纹理（用于大山口村、舞狮等插画卡立绘） */
+/** 创建带柔和宣纸圆角白边的卡片式纸雕纹理 */
 function buildFramedPaperTexture(THREE, img, maxAniso) {
   const c = document.createElement('canvas');
   c.width = 512;
@@ -193,7 +189,7 @@ function buildFramedPaperTexture(THREE, img, maxAniso) {
   return tex;
 }
 
-/** 从动态懒加载的透明工笔 PNG/WebP 生成手裁宣纸白边纸雕纹理（与 app.js buildDieCutTexture 风格 100% 统一） */
+/** 从动态懒加载的透明工笔 WebP 生成手裁宣纸白边纸雕纹理 */
 function buildLazyDieCutTexture(THREE, img, { rim = true, kraftBack = false, flipX = false } = {}, maxAniso = 4) {
   const maxDim = 512;
   const scale = Math.min(1, maxDim / Math.max(img.width || 1, img.height || 1));
@@ -210,7 +206,6 @@ function buildLazyDieCutTexture(THREE, img, { rim = true, kraftBack = false, fli
   g.clearRect(0, 0, cw, ch);
 
   if (rim) {
-    // Draw crisp warm xuan-paper die-cut silhouette rim
     const off = document.createElement('canvas');
     off.width = cw;
     off.height = ch;
@@ -274,13 +269,12 @@ export function createInteractive3DMap({
   const scene = new THREE.Scene();
   const PAPER_HEX = '#F5F0E3';
   scene.background = new THREE.Color(PAPER_HEX);
-  scene.fog = new THREE.FogExp2(PAPER_HEX, 0.0068);
+  scene.fog = new THREE.FogExp2(PAPER_HEX, 0.0058);
 
   const initView = getViewport();
-  const camera = new THREE.PerspectiveCamera(40, initView.w / Math.max(1, initView.h), 0.35, 260);
-  const simCamera = new THREE.PerspectiveCamera(40, initView.w / Math.max(1, initView.h), 0.35, 260);
+  const camera = new THREE.PerspectiveCamera(40, initView.w / Math.max(1, initView.h), 0.2, 240);
+  const simCamera = new THREE.PerspectiveCamera(40, initView.w / Math.max(1, initView.h), 0.2, 240);
 
-  // 柔和晨光 + 宣纸天光（与真实 DEM 左上受光 100% 同向）
   const hemi = new THREE.HemisphereLight('#FFFDF8', '#DDD1BC', 1.24);
   scene.add(hemi);
 
@@ -288,7 +282,7 @@ export function createInteractive3DMap({
   keyLight.position.set(-18, 30, 14);
   keyLight.castShadow = true;
   keyLight.shadow.mapSize.set(isMobile ? 1024 : 2048, isMobile ? 1024 : 2048);
-  keyLight.shadow.camera.near = 6;
+  keyLight.shadow.camera.near = 4;
   keyLight.shadow.camera.far = 85;
   keyLight.shadow.camera.left = -22;
   keyLight.shadow.camera.right = 22;
@@ -302,7 +296,7 @@ export function createInteractive3DMap({
   scene.add(fillLight);
 
   // --------------------------------------------------------------------------
-  // 1) 真实 30m DEM 高度采样器（加载 lingchuan-dem-height.png 后无缝升级全部网格高度）
+  // 1) 真实 30m DEM 高度采样器
   // --------------------------------------------------------------------------
   let demGrid = null;
   let demW = 0;
@@ -327,23 +321,22 @@ export function createInteractive3DMap({
       const h = lerp(lerp(h00, h10, tx), lerp(h01, h11, tx), ty);
       return h * MAX_DEM_HEIGHT;
     }
-    // 加载前 100ms 内的温和默认地形过渡
     const edge = smoothstep(0.02, 0.14, u) * smoothstep(0.02, 0.14, 1 - u) *
                  smoothstep(0.02, 0.14, v) * smoothstep(0.02, 0.14, 1 - v);
-    return 0.18 * edge;
+    return 0.14 * edge;
   }
 
   // --------------------------------------------------------------------------
-  // 2) 无限无缝宣纸桌底 + 真实 DEM 3D 主沙盘 (L0 1536x2048)
+  // 2) 无缝宣纸桌底 + 真实 DEM 3D 沙盘 (L0 1600x2000)
   // --------------------------------------------------------------------------
-  const tableGeo = new THREE.PlaneGeometry(420, 420);
+  const tableGeo = new THREE.PlaneGeometry(440, 440);
   tableGeo.rotateX(-Math.PI / 2);
   const tableMat = new THREE.MeshBasicMaterial({ color: PAPER_HEX, fog: false });
   const tableMesh = new THREE.Mesh(tableGeo, tableMat);
   tableMesh.position.y = -0.06;
   scene.add(tableMesh);
 
-  // 程序化四边柔边 alphaMap：让 3D 沙盘边缘 100% 柔和融进无限 #F5F0E3 宣纸桌底，零矩形接缝
+  // 程序化四边柔边 alphaMap：彻底隐去沙盘边缘，融进无限宣纸桌面
   const alphaCanvas = document.createElement('canvas');
   alphaCanvas.width = 128;
   alphaCanvas.height = 128;
@@ -357,17 +350,16 @@ export function createInteractive3DMap({
   };
   const ax = ag.createLinearGradient(0, 0, 128, 0);
   ax.addColorStop(0, 'rgba(0,0,0,0)');
-  ax.addColorStop(0.10, 'rgba(0,0,0,1)');
-  ax.addColorStop(0.90, 'rgba(0,0,0,1)');
+  ax.addColorStop(0.08, 'rgba(0,0,0,1)');
+  ax.addColorStop(0.92, 'rgba(0,0,0,1)');
   ax.addColorStop(1, 'rgba(0,0,0,0)');
   fadeSide(ax);
   const ay = ag.createLinearGradient(0, 0, 0, 128);
   ay.addColorStop(0, 'rgba(0,0,0,0)');
-  ay.addColorStop(0.10, 'rgba(0,0,0,1)');
-  ay.addColorStop(0.90, 'rgba(0,0,0,1)');
+  ay.addColorStop(0.08, 'rgba(0,0,0,1)');
+  ay.addColorStop(0.92, 'rgba(0,0,0,1)');
   ay.addColorStop(1, 'rgba(0,0,0,0)');
   fadeSide(ay);
-  // AlphaMap in Three.js reads green channel, so flatten transparent pixels onto black
   const alphaFlat = document.createElement('canvas');
   alphaFlat.width = 128;
   alphaFlat.height = 128;
@@ -377,7 +369,7 @@ export function createInteractive3DMap({
   afg.drawImage(alphaCanvas, 0, 0);
   const terrainAlphaMap = new THREE.CanvasTexture(alphaFlat);
 
-  const terrainGeo = new THREE.PlaneGeometry(MAP_W, MAP_D, 112, 148);
+  const terrainGeo = new THREE.PlaneGeometry(MAP_W, MAP_D, 120, 150);
   terrainGeo.rotateX(-Math.PI / 2);
 
   function applyDemToPlaneGeo(geo, yOffset = 0) {
@@ -392,7 +384,6 @@ export function createInteractive3DMap({
   }
   applyDemToPlaneGeo(terrainGeo, 0);
 
-  // L0 全境高清纹理（优先使用真实 30m DEM 渲染的 lingchuan-dem-l0.webp）
   const texLoader = new THREE.TextureLoader();
   const baseImg = images['map/lingchuan-dem-l0'] || images['map/lingchuan-map-base'];
   let l0Tex;
@@ -418,7 +409,7 @@ export function createInteractive3DMap({
   scene.add(terrainMesh);
 
   // --------------------------------------------------------------------------
-  // 3) 3x4 高清分块瓦片 LOD 子网格系统 (每片 1024x1024，放大 4x~6x 刀锋锐利零模糊！)
+  // 3) 4x5 (20张) 1024x1024 超清分块瓦片 LOD（4096x5120 2097万像素，放大 10x~12x 锐利！）
   // --------------------------------------------------------------------------
   const tileGroup = new THREE.Group();
   scene.add(tileGroup);
@@ -437,7 +428,7 @@ export function createInteractive3DMap({
         cx,
         cz,
         url: `./img/map/tiles/tile-${r}-${c}.webp`,
-        state: 'idle', // idle | loading | ready | error
+        state: 'idle',
         mesh: null,
         mat: null,
         geo: null,
@@ -458,9 +449,8 @@ export function createInteractive3DMap({
         tex.wrapS = THREE.ClampToEdgeWrapping;
         tex.wrapT = THREE.ClampToEdgeWrapping;
 
-        const geo = new THREE.PlaneGeometry(tileW, tileD, 28, 28);
+        const geo = new THREE.PlaneGeometry(tileW, tileD, 24, 24);
         geo.rotateX(-Math.PI / 2);
-        // Shift vertices into exact world coordinates so sampleElevation aligns 100% with base mesh
         const pos = geo.attributes.position;
         for (let i = 0; i < pos.count; i++) {
           const wx = pos.getX(i) + tile.cx;
@@ -498,32 +488,35 @@ export function createInteractive3DMap({
   }
 
   // --------------------------------------------------------------------------
-  // 4) 放置全部 76 处工笔纸艺立体弹起立绘（32 原景 + 2 潮田专志 + 42 Grok 新增）
-  //    一级立绘 (34 处) 首屏就绪；二级立绘 (42 处) 在靠近放大或筛亮时按需懒加载！
+  // 4) 全部 76 处真实地理工笔立绘 + 未展开时的轻雅纸面圆点标记
   // --------------------------------------------------------------------------
   const standees = [];
   const pickMeshes = [];
   const placedIds = new Set();
 
-  // 防重叠最小间距微调（防止同镇多个立绘在 3D 沙盘上互相穿插）
-  function resolveNonOverlap(wx, wz, minDist = 0.72) {
-    let x = clamp(wx, -MAP_W * 0.45, MAP_W * 0.45);
-    let z = clamp(wz, -MAP_D * 0.45, MAP_D * 0.45);
-    for (let iter = 0; iter < 5; iter++) {
-      let pushed = false;
+  // 共享轻巧纸面待展开圆点几何（当某点因当前缩放尚近而退让时，提示此处有更多风物，放大即立起！）
+  const dotGeo = new THREE.CircleGeometry(0.11, 14);
+  dotGeo.rotateX(-Math.PI / 2);
+
+  // 仅对完全重合坐标做极微小 0.14 单位 (~370m) 避重，100% 忠实于真实地理位置！
+  function microDeOverlap(wx, wz, minDist = 0.14) {
+    let x = clamp(wx, -MAP_W * 0.47, MAP_W * 0.47);
+    let z = clamp(wz, -MAP_D * 0.47, MAP_D * 0.47);
+    for (let iter = 0; iter < 3; iter++) {
+      let moved = false;
       for (const s of standees) {
         const dx = x - s.wx;
         const dz = z - s.wz;
         const d = Math.hypot(dx, dz);
         if (d < minDist) {
           const ang = d > 0.001 ? Math.atan2(dz, dx) : (standees.length * 2.39996);
-          const push = (minDist - d) * 0.65 + 0.06;
-          x = clamp(x + Math.cos(ang) * push, -MAP_W * 0.45, MAP_W * 0.45);
-          z = clamp(z + Math.sin(ang) * push, -MAP_D * 0.45, MAP_D * 0.45);
-          pushed = true;
+          const push = (minDist - d) * 0.6 + 0.02;
+          x = clamp(x + Math.cos(ang) * push, -MAP_W * 0.47, MAP_W * 0.47);
+          z = clamp(z + Math.sin(ang) * push, -MAP_D * 0.47, MAP_D * 0.47);
+          moved = true;
         }
       }
-      if (!pushed) break;
+      if (!moved) break;
     }
     return { wx: x, wz: z };
   }
@@ -531,6 +524,7 @@ export function createInteractive3DMap({
   function attachStandeeMeshes(item, frontTex, backTex, aspect) {
     const baseH = item.baseH;
     const baseW = baseH * clamp(aspect, 0.72, 1.38);
+    item.baseW = baseW; // 供屏幕空间防遮挡按真实宽度判碰撞
 
     const frontGeo = new THREE.PlaneGeometry(baseW, baseH);
     frontGeo.translate(0, baseH * 0.5, 0);
@@ -549,7 +543,7 @@ export function createInteractive3DMap({
 
     const backGeo = new THREE.PlaneGeometry(baseW, baseH);
     backGeo.rotateY(Math.PI);
-    backGeo.translate(0, baseH * 0.5, -0.03);
+    backGeo.translate(0, baseH * 0.5, -0.025);
     const backMat = makePaperMaterial({
       map: backTex,
       transparent: true,
@@ -591,13 +585,13 @@ export function createInteractive3DMap({
     if (placedIds.has(id)) return;
     placedIds.add(id);
 
-    const pos = resolveNonOverlap(wx, wz, tier === 1 ? 0.68 : 0.62);
+    const pos = microDeOverlap(wx, wz, 0.14);
     const wy = sampleElevation(pos.wx, pos.wz);
     const root = new THREE.Group();
     root.position.set(pos.wx, wy, pos.wz);
 
     // 宣纸折叠小底座片
-    const tabGeo = new THREE.PlaneGeometry(0.92 * heightScale, 0.28 * heightScale);
+    const tabGeo = new THREE.PlaneGeometry(0.88 * heightScale, 0.26 * heightScale);
     tabGeo.rotateX(-Math.PI / 2);
     const tabMat = new THREE.MeshLambertMaterial({
       color: '#F7F1E5',
@@ -605,19 +599,32 @@ export function createInteractive3DMap({
       opacity: 0.72,
     });
     const tabMesh = new THREE.Mesh(tabGeo, tabMat);
-    tabMesh.position.set(0, 0.025, 0.06);
+    tabMesh.position.set(0, 0.02, 0.04);
     tabMesh.receiveShadow = true;
-    root.add(tabMesh);
+
+    // 纸面待展开轻巧圆点（当被防遮挡算法暂时退让时浮现，告诉用户继续放大即可看到更多风物！）
+    const dotMat = new THREE.MeshBasicMaterial({
+      color: tier === 1 ? '#B3261E' : '#1F5E5B',
+      transparent: true,
+      opacity: 0.48,
+      depthWrite: false,
+    });
+    const dotMesh = new THREE.Mesh(dotGeo, dotMat);
+    dotMesh.position.set(pos.wx, wy + 0.035, pos.wz);
+    dotMesh.visible = false;
+    scene.add(dotMesh);
 
     const hingeGroup = new THREE.Group();
     hingeGroup.rotation.x = -Math.PI * 0.48;
     root.add(hingeGroup);
 
     const scaleGroup = new THREE.Group();
+    scaleGroup.add(tabMesh);
     hingeGroup.add(scaleGroup);
     scene.add(root);
 
-    const baseH = (featured ? 2.15 : tier === 1 ? 1.85 : 1.55) * heightScale;
+    // 基础标称高度（渲染时会乘以随放大动态收缩的 worldScale，彻底消除巨牌遮挡！）
+    const baseH = (featured ? 1.85 : tier === 1 ? 1.65 : 1.48) * heightScale;
     const item = {
       id,
       kind,
@@ -637,10 +644,12 @@ export function createInteractive3DMap({
       hingeGroup,
       scaleGroup,
       tabMesh,
+      dotMesh,
       frontMesh: null,
       frontMat: null,
       texState: lazy ? 'lazy' : 'ready',
       flap: new PopSpring(155, 16.5),
+      isShown: false,
       hop: 0,
       phase: Math.random() * Math.PI * 2,
     };
@@ -659,7 +668,7 @@ export function createInteractive3DMap({
     standees.push(item);
   }
 
-  // A) 潮田核心两处专志卡片立绘（大山口村 + 潮田狮舞）
+  // A) 潮田核心两处专志卡片立绘
   for (const poiId of ['poi-dashankou', 'poi-chaotian-folk']) {
     const poi = MAP_EXTRA_POIS.find((p) => p.id === poiId);
     if (!poi) continue;
@@ -677,12 +686,12 @@ export function createInteractive3DMap({
       poi,
       featured: true,
       tier: 1,
-      heightScale: 0.96,
+      heightScale: 0.94,
       lazy: false,
     });
   }
 
-  // B) 全部 32 处一级行卷核心立绘（真实地理 WGS84 坐标）
+  // B) 全部 32 处一级行卷核心立绘（OSM 实测真实 WGS84 坐标）
   for (const town of TOWNSHIPS) {
     const lids = town.landmarks || [];
     lids.forEach((lid, idx) => {
@@ -702,13 +711,13 @@ export function createInteractive3DMap({
         entry,
         featured: idx === 0 || town.featured,
         tier: 1,
-        heightScale: idx === 0 ? 1.0 : 0.90,
+        heightScale: idx === 0 ? 1.0 : 0.92,
         lazy: false,
       });
     });
   }
 
-  // C) 全部 42 处 Grok 新增工笔风物立绘（二级精游立绘，按需懒加载，零首屏卡顿！）
+  // C) 全部 42 处 Grok 新增工笔风物立绘（按真实分布随放大逐步唤醒，绝不遮挡！）
   for (const extra of GROK_EXTRA_42) {
     const w = lonLatToWorld(extra.lon, extra.lat);
     addMapStandee({
@@ -729,7 +738,7 @@ export function createInteractive3DMap({
   }
 
   // --------------------------------------------------------------------------
-  // 5) 真实 12 乡镇与 4 条水脉世界坐标 + 异步加载真实 30m DEM 高度图同步刷新高度
+  // 5) 真实 12 乡镇与 4 条水脉世界坐标 + 异步加载真实 30m DEM 高度图
   // --------------------------------------------------------------------------
   const townWorlds = TOWNSHIPS.map((t) => {
     const w = lonLatToWorld(t.lon, t.lat);
@@ -757,6 +766,7 @@ export function createInteractive3DMap({
     for (const st of standees) {
       st.wy = sampleElevation(st.wx, st.wz);
       st.root.position.y = st.wy;
+      st.dotMesh.position.y = st.wy + 0.035;
     }
     for (const tw of townWorlds) {
       tw.wy = sampleElevation(tw.wx, tw.wz);
@@ -766,7 +776,6 @@ export function createInteractive3DMap({
     }
   }
 
-  // 异步载入 33KB 真实 30m DEM 高度图
   const demImg = new Image();
   demImg.crossOrigin = 'anonymous';
   demImg.onload = () => {
@@ -787,19 +796,19 @@ export function createInteractive3DMap({
   demImg.src = './img/map/lingchuan-dem-height.png';
 
   // --------------------------------------------------------------------------
-  // 6) 地域氛围飘飞粒子（桃花瓣 / 海洋银杏叶 / 大境雾凇 / 漓江青岚）
+  // 6) 地域氛围飘飞粒子
   // --------------------------------------------------------------------------
-  const PARTICLE_N = isMobile ? 70 : 120;
+  const PARTICLE_N = isMobile ? 65 : 110;
   const pPos = new Float32Array(PARTICLE_N * 3);
   const pVel = new Float32Array(PARTICLE_N * 3);
   const pSeed = new Float32Array(PARTICLE_N);
   for (let i = 0; i < PARTICLE_N; i++) {
     pPos[i * 3] = (Math.random() - 0.5) * MAP_W * 0.85;
-    pPos[i * 3 + 1] = 0.8 + Math.random() * 6.5;
+    pPos[i * 3 + 1] = 0.8 + Math.random() * 6.0;
     pPos[i * 3 + 2] = (Math.random() - 0.5) * MAP_D * 0.85;
-    pVel[i * 3] = (Math.random() - 0.5) * 0.35;
-    pVel[i * 3 + 1] = -(0.18 + Math.random() * 0.28);
-    pVel[i * 3 + 2] = 0.12 + Math.random() * 0.28;
+    pVel[i * 3] = (Math.random() - 0.5) * 0.30;
+    pVel[i * 3 + 1] = -(0.16 + Math.random() * 0.25);
+    pVel[i * 3 + 2] = 0.10 + Math.random() * 0.24;
     pSeed[i] = Math.random() * 6.28;
   }
   const pGeo = new THREE.BufferGeometry();
@@ -820,9 +829,9 @@ export function createInteractive3DMap({
 
   const pMat = new THREE.PointsMaterial({
     map: new THREE.CanvasTexture(pTexCanvas),
-    size: 0.36,
+    size: 0.30,
     transparent: true,
-    opacity: 0.58,
+    opacity: 0.52,
     depthWrite: false,
     color: new THREE.Color('#97BEB5'),
   });
@@ -839,11 +848,10 @@ export function createInteractive3DMap({
   const curParticleCol = REGION_COLORS.default.clone();
 
   // --------------------------------------------------------------------------
-  // 7) 相机数学与真地图定点缩放引擎 (0.85x ~ 6.0x)
+  // 7) 大气全境相机数学 + 真地图定点缩放引擎 (0.85x ~ 12.0x)
   // --------------------------------------------------------------------------
-  // 灵川县真实重心微偏西（县城灵川镇附近）
   const HOME_TX = -0.35;
-  const HOME_TZ = 0.85;
+  const HOME_TZ = 0.60;
 
   const camState = {
     tx: HOME_TX,
@@ -863,41 +871,45 @@ export function createInteractive3DMap({
   };
 
   function getPanBounds(z) {
-    const factor = clamp((z - 0.72) / 1.15, 0.25, 1.08);
+    const factor = clamp((z - 0.70) / 1.1, 0.30, 1.12);
     return {
-      maxX: MAP_W * 0.48 * factor,
-      maxZ: MAP_D * 0.48 * factor,
+      maxX: MAP_W * 0.49 * factor,
+      maxZ: MAP_D * 0.49 * factor,
     };
   }
 
   function computeCamPose(tx, tz, zoom, view, panelFactor = camState.panelShiftFactor) {
     const aspect = view.w / Math.max(1, view.h);
-    const fov = aspect < 0.75 ? 45 : 38;
+    const fov = aspect < 0.75 ? 43 : 37;
     const vTan = Math.tan(fov * DEG2RAD * 0.5);
     const hTan = vTan * aspect;
 
-    // 1.0x 全境时保底完整容纳全部 12 乡镇（最西公平/兰田到最东海洋/大境，最北兰田到最南大圩）
-    const fitWidthDist = 14.5 / Math.max(0.16, hTan);
-    const fitHeightDist = 18.6 / Math.max(0.28, vTan);
-    const baseDist = Math.max(41.5, fitWidthDist, fitHeightDist * 0.90);
+    // 紧致大气全境视距：1.0x 时整块灵川全境雄浑铺满 76%~84% 可用视口，不再显小！
+    const fitWidthDist = 11.4 / Math.max(0.16, hTan);
+    const fitHeightDist = 14.6 / Math.max(0.26, vTan);
+    // 手机竖屏：按县域真实东西宽度（约 27 世界单位）铺满屏宽，西端公平/兰田、东端大境都要在 1.0× 全境里看得见；
+    // 原先 44 的封顶在 390px 竖屏上只露出中间约六成县域。
+    const baseDist = aspect < 0.75
+      ? clamp(13.4 / Math.max(0.12, hTan), 30.2, 80.0)
+      : Math.max(30.2, Math.min(44.0, Math.max(fitWidthDist, fitHeightDist * 0.90)));
 
-    // 连续平滑对数型缩放距离曲线：0.85x(超全境) -> 1.0x(全境) -> 2.4x(乡镇长卷) -> 6.0x(村落微距高清瓦片!)
-    const dist = baseDist / Math.pow(clamp(zoom, MIN_ZOOM, MAX_ZOOM), 1.08);
+    // 0.85x(超全境) -> 1.0x(大气全境) -> 3.0x(乡镇近览) -> 6.0x(村落深游) -> 12.0x(200m微距!)
+    const dist = baseDist / Math.pow(clamp(zoom, MIN_ZOOM, MAX_ZOOM), 1.06);
 
-    // 俯角随缩放平滑过渡：远观 64° 清晰真地图俯瞰 -> 中近景 36° 纸艺长卷 -> 5x~6x 保持 31° 既见立绘又见锐利地面
-    const zoomT = smoothstep(1.02, 2.75, zoom);
-    const pitchDeg = lerp(64, 31, zoomT);
+    // 俯角随缩放过渡：全境 66° 清朗真地图俯瞰 -> 中近景 38° 立体纸艺长卷 -> 深度微距保持 34° 让地理空间清晰展开！
+    const zoomT = smoothstep(1.06, 3.2, zoom);
+    const pitchDeg = lerp(66, 34, zoomT);
     const pitchRad = pitchDeg * DEG2RAD;
 
-    const deskShiftX = view.w >= 920 ? (4.1 * panelFactor / Math.pow(Math.max(0.85, zoom), 0.85)) : 0;
+    const deskShiftX = view.w >= 920 ? (3.5 * panelFactor / Math.pow(Math.max(0.85, zoom), 0.90)) : 0;
     const lookX = tx + deskShiftX;
     const lookZ = tz;
-    const lookY = sampleElevation(tx, tz) * 0.45 + lerp(0.05, 0.35, zoomT);
+    const lookY = sampleElevation(tx, tz) * 0.42 + lerp(0.04, 0.24, zoomT);
 
     const posX = lookX;
     const posY = lookY + Math.sin(pitchRad) * dist;
     const posZ = lookZ + Math.cos(pitchRad) * dist;
-    const aimZ = lookZ - lerp(0, 0.55, zoomT);
+    const aimZ = lookZ - lerp(0, 0.35, zoomT);
 
     return { fov, aspect, dist, pitchRad, zoomT, posX, posY, posZ, lookX, lookY, aimZ };
   }
@@ -919,7 +931,6 @@ export function createInteractive3DMap({
   const groundPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
   const hitPt = new THREE.Vector3();
 
-  /** 精确计算屏幕像素 (clientX, clientY) 射线落在地面 y=0 平面上的世界坐标 */
   function screenToGround(clientX, clientY, cam = camera) {
     const { w, h } = getViewport();
     ndc.set((clientX / Math.max(1, w)) * 2 - 1, -(clientY / Math.max(1, h)) * 2 + 1);
@@ -928,15 +939,10 @@ export function createInteractive3DMap({
     return ok ? { x: hitPt.x, z: hitPt.z } : null;
   }
 
-  /**
-   * 真地图核心：围绕屏幕锚点 (clientX, clientY) 定点缩放！
-   * 缩放前后锚点对应的真实地理点纹丝不动，零漂移。
-   */
   function zoomAtScreenPoint(clientX, clientY, newZoom) {
     const clampedZ = clamp(newZoom, MIN_ZOOM, MAX_ZOOM);
     const view = getViewport();
 
-    // 1) 在当前目标姿态下求锚点对应的真实地面坐标 P0
     const curPose = computeCamPose(camState.targetTx, camState.targetTz, camState.targetZoom, view);
     applyPoseToCamera(simCamera, curPose);
     const p0 = screenToGround(clientX, clientY, simCamera);
@@ -945,7 +951,6 @@ export function createInteractive3DMap({
     camState.lockedTownId = null;
 
     if (p0) {
-      // 2) 在新缩放倍数下求同一屏幕像素对应的新地面坐标 P1，精准补偿差值！
       const nextPose = computeCamPose(camState.targetTx, camState.targetTz, clampedZ, view);
       applyPoseToCamera(simCamera, nextPose);
       const p1 = screenToGround(clientX, clientY, simCamera);
@@ -962,7 +967,7 @@ export function createInteractive3DMap({
     }
   }
 
-  function flyToTown(townId, zoomLevel = 2.65) {
+  function flyToTown(townId, zoomLevel = 2.85) {
     const tw = townWorlds.find((x) => x.town.id === townId);
     if (!tw) return;
     camState.vx = 0;
@@ -980,7 +985,7 @@ export function createInteractive3DMap({
   function resetOverview() {
     camState.vx = 0;
     camState.vz = 0;
-    camState.lockedTownId = null;
+    camState.lockedTownId = 'chaotian';
     camState.targetTx = HOME_TX;
     camState.targetTz = HOME_TZ;
     camState.targetZoom = 1.0;
@@ -990,10 +995,9 @@ export function createInteractive3DMap({
     const view = getViewport();
     const cx = view.w >= 920 && camState.desktopPanelOpen ? (view.w - 380) * 0.5 : view.w * 0.5;
     const cy = view.h * 0.5;
-    // 兼容 +/- 按钮按倍数缩放（更符合真地图手感）
     const nextZ = factorOrDelta > 0
-      ? camState.targetZoom * 1.48
-      : camState.targetZoom / 1.48;
+      ? camState.targetZoom * 1.55
+      : camState.targetZoom / 1.55;
     zoomAtScreenPoint(cx, cy, nextZ);
   }
 
@@ -1006,7 +1010,7 @@ export function createInteractive3DMap({
   }
 
   // --------------------------------------------------------------------------
-  // 8) 1:1 Ray-Plane 地面拖曳 + 双指捏合中点定点缩放 + 滚轮定点缩放 + 双击放大 + 立绘点选
+  // 8) 1:1 Ray-Plane 地面拖曳 + 双指中点定点缩放 + 滚轮定点缩放 + 双击放大 + 立绘点选
   // --------------------------------------------------------------------------
   const pointers = new Map();
   let dragMoved = false;
@@ -1049,7 +1053,6 @@ export function createInteractive3DMap({
     prev.x = e.clientX;
     prev.y = e.clientY;
 
-    // 双指捏合：同时支持中点定点缩放 + 双指平移！
     if (pointers.size === 2) {
       const pts = Array.from(pointers.values());
       const dist = Math.max(12, Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y));
@@ -1084,7 +1087,6 @@ export function createInteractive3DMap({
     const moveDt = clamp((now - lastMoveTime) / 1000, 0.006, 0.08);
     lastMoveTime = now;
 
-    // 精确 Ray-Plane 1:1 地面拖曳（绝不漂移，任何俯角与缩放倍率下都粘在指尖！）
     const gPrev = screenToGround(prevX, prevY, camera);
     const gCurr = screenToGround(e.clientX, e.clientY, camera);
     if (gPrev && gCurr) {
@@ -1109,7 +1111,6 @@ export function createInteractive3DMap({
     if (pointers.size === 0 && isModeActive() && !isBlockingOverlayOpen()) {
       const since = (performance.now() - lastMoveTime) / 1000;
       if (!dragMoved) {
-        // 1) 优先 3D Raycaster 精准点选立起来的纸雕立绘！
         const { w, h } = getViewport();
         ndc.set((e.clientX / w) * 2 - 1, -(e.clientY / h) * 2 + 1);
         raycaster.setFromCamera(ndc, camera);
@@ -1117,7 +1118,7 @@ export function createInteractive3DMap({
         let picked = null;
         for (const hit of hits) {
           const st = hit.object.userData.mapStandee;
-          if (!st || st.flap.p < 0.22) continue;
+          if (!st || st.flap.p < 0.24) continue;
           picked = st;
           break;
         }
@@ -1125,7 +1126,7 @@ export function createInteractive3DMap({
           picked.hop = 1.0;
           camState.targetTx = picked.wx;
           camState.targetTz = picked.wz;
-          if (camState.targetZoom < 2.3) camState.targetZoom = 2.65;
+          if (camState.targetZoom < 2.8) camState.targetZoom = 3.2;
           if (picked.kind === 'landmark' && picked.entry) {
             onSelectLandmark?.(picked.entry);
           } else if (picked.kind === 'extra' && picked.poi) {
@@ -1135,10 +1136,9 @@ export function createInteractive3DMap({
           return;
         }
 
-        // 2) 未点中立绘时，检测双击地图 -> 平滑定点放大！
         const now = performance.now();
         if (now - lastTapTime < 320 && Math.hypot(e.clientX - lastTapX, e.clientY - lastTapY) < 28) {
-          const nextZ = camState.targetZoom < 4.5 ? camState.targetZoom * 1.85 : 1.0;
+          const nextZ = camState.targetZoom < 8.5 ? camState.targetZoom * 1.9 : 1.0;
           if (nextZ <= 1.05) {
             resetOverview();
           } else {
@@ -1151,7 +1151,7 @@ export function createInteractive3DMap({
           lastTapY = e.clientY;
         }
       } else if (since < 0.09) {
-        const maxSpeed = 30 / Math.max(0.9, Math.sqrt(camState.zoom));
+        const maxSpeed = 28 / Math.max(0.9, Math.sqrt(camState.zoom));
         camState.vx = clamp(camState.vx, -maxSpeed, maxSpeed);
         camState.vz = clamp(camState.vz, -maxSpeed, maxSpeed);
       } else {
@@ -1163,23 +1163,34 @@ export function createInteractive3DMap({
   canvas.addEventListener('pointerup', onPointerFinish);
   canvas.addEventListener('pointercancel', onPointerFinish);
 
+  // 滚轮落在地图上方的乡镇签 / 立绘浮签上时同样定点缩放（这些签可点击，会挡住 canvas 的 wheel）
+  const WHEEL_PASSTHROUGH = '.lc-atlas-hud .lc-pin, .lc-atlas-hud .lc-standee-tag';
+  window.addEventListener('wheel', (e) => {
+    if (e.target === canvas) return;
+    const el = e.target instanceof Element ? e.target : null;
+    if (!el || !el.closest(WHEEL_PASSTHROUGH) || el.closest('.lc-zoom-panel')) return;
+    if (!isModeActive() || isBlockingOverlayOpen()) return;
+    e.preventDefault();
+    const rawDelta = clamp(e.deltaY, -160, 160);
+    zoomAtScreenPoint(e.clientX, e.clientY, camState.targetZoom * Math.exp(-rawDelta * 0.0024));
+  }, { passive: false });
+
   canvas.addEventListener('wheel', (e) => {
     if (!isModeActive() || isBlockingOverlayOpen()) return;
     e.preventDefault();
-    // 兼顾触控板精细双指滚轮与鼠标滚轮刻度
     const rawDelta = clamp(e.deltaY, -160, 160);
-    const factor = Math.exp(-rawDelta * 0.0022);
+    const factor = Math.exp(-rawDelta * 0.0024);
     zoomAtScreenPoint(e.clientX, e.clientY, camState.targetZoom * factor);
   }, { passive: false });
 
   function resize(w, h) {
     camera.aspect = w / Math.max(1, h);
-    camera.fov = w / Math.max(1, h) < 0.75 ? 45 : 38;
+    camera.fov = w / Math.max(1, h) < 0.75 ? 43 : 37;
     camera.updateProjectionMatrix();
   }
 
   // --------------------------------------------------------------------------
-  // 9) 每帧更新与渲染：分块高清瓦片 LOD + 三级语义立绘弹起 + 实时地理比例尺 + 3D->2D 标签
+  // 9) 每帧更新：4x5 超清瓦片 LOD + 屏幕空间实时防遮挡逐级释放立绘！
   // --------------------------------------------------------------------------
   const projectedTowns = [];
   const projectedWaters = [];
@@ -1187,11 +1198,9 @@ export function createInteractive3DMap({
 
   function updateTileLod() {
     const z = camState.zoom;
-    const wantTiles = z > 1.38;
-    const tileAlpha = smoothstep(1.42, 1.92, z);
-
-    // 视野在地面上的大致覆盖半径（世界单位）
-    const viewRad = (15.5 / Math.max(1.0, z)) + 5.8;
+    const wantTiles = z > 1.32;
+    const tileAlpha = smoothstep(1.36, 1.82, z);
+    const viewRad = (14.0 / Math.max(1.0, z)) + 4.8;
 
     for (const tile of tiles) {
       const dx = Math.abs(tile.cx - camState.tx);
@@ -1216,7 +1225,6 @@ export function createInteractive3DMap({
     const desiredAspect = view.w / Math.max(1, view.h);
     if (Math.abs(camera.aspect - desiredAspect) > 0.01) resize(view.w, view.h);
 
-    // 脱手柔和惯性滑行
     if (pointers.size === 0 && (Math.abs(camState.vx) > 0.03 || Math.abs(camState.vz) > 0.03)) {
       const bounds = getPanBounds(camState.targetZoom);
       camState.targetTx = clamp(camState.targetTx + camState.vx * dt, -bounds.maxX, bounds.maxX);
@@ -1235,10 +1243,9 @@ export function createInteractive3DMap({
     const pose = computeCamPose(camState.tx, camState.tz, camState.zoom, view, camState.panelShiftFactor);
     applyPoseToCamera(camera, pose);
 
-    // 更新 3x4 高清瓦片分块 LOD（放大 4x~6x 始终清晰！）
     updateTileLod();
 
-    // 查找当前焦点最近的乡镇
+    // 查找焦点最近乡镇
     let bestTown = townWorlds[0];
     let bestDistSq = Infinity;
     for (const tw of townWorlds) {
@@ -1261,77 +1268,148 @@ export function createInteractive3DMap({
       onCameraZoomChange?.(camState.zoom);
     }
 
-    // 三级语义缩放 LOD + 全部 76 处立绘铰链弹起！
-    // Level 1 (0.85~1.50x): 全境清雅，仅焦点乡主立绘轻启（或筛亮分类代表立绘）
-    // Level 2 (1.50~2.60x): 乡镇近览，一级核心立绘全部优雅立起
-    // Level 3 (2.60~6.00x): 村落深游，全部 42 枚 Grok 新增二级立绘按需懒加载并如立体画册层层绽放！
+    // ========================================================================
+    // 核心真地图渐进释放引擎（屏幕空间防遮挡消隐 + 随放大自适应物理尺度）
+    // 放大越深，真实地理距离越宽，原本因近而退让的风物才逐级优雅站起，永不互挡！
+    // ========================================================================
     const z = camState.zoom;
-    const tier1Radius = clamp(12.0 / Math.pow(z, 0.55), 3.8, 9.2);
-    const tier2Radius = clamp(10.5 / Math.pow(z, 0.65), 2.8, 6.2);
     const cat = camState.category;
+    const rightBound = (view.w >= 920 && camState.desktopPanelOpen) ? (view.w - 388) : view.w;
 
-    // 极近微距下（z > 3.2）微缩立绘高度，避免糊屏，呈现精致纸艺微缩沙盘感！
-    const closeSizeDamp = z > 2.8 ? clamp(1.0 - (z - 2.8) * 0.11, 0.56, 1.0) : 1.0;
+    // 随缩放自适应收缩立绘物理高度：屏幕尺寸舒适一致，地面占地随放大急剧缩小，彻底拉开真实山川间隔！
+    const worldScale = clamp(1.36 / Math.pow(Math.max(1.0, z), 0.78), 0.16, 0.86);
 
-    projectedStandees.length = 0;
+    // 屏幕空间最小防挡间距（像素）：确保每幅工笔立绘完整露脸不叠压
+    const minGapX = isMobile ? 86 : 116;
+    const minGapY = isMobile ? 76 : 98;
+    const maxActiveStandees = isMobile ? 7 : 13;
+
+    // Step 1: 收集当前倍率与视野内有资格登场的候选立绘，并投影屏幕坐标
+    const candidates = [];
+    const wakeAllTier1 = z > 1.32 || cat !== 'all';
+    const wakeTier2 = z > 2.15 || (cat !== 'all' && z > 1.45);
 
     for (const st of standees) {
+      const catMatch = cat === 'all' || st.category === cat;
+      if (!catMatch) {
+        st.isShown = false;
+        st.dotMesh.visible = false;
+        continue;
+      }
+
+      const eligibleZoom = st.tier === 1 ? wakeAllTier1 : wakeTier2;
+      if (!eligibleZoom) {
+        st.isShown = false;
+        st.dotMesh.visible = false;
+        continue;
+      }
+
       const dx = st.wx - camState.tx;
       const dz = st.wz - camState.tz;
       const d = Math.hypot(dx, dz);
-      const catMatch = cat === 'all' || st.category === cat;
 
-      let targetPop = 0;
-      if (!catMatch) {
-        targetPop = 0;
-      } else if (st.tier === 1) {
-        if (z > 1.24) {
-          if (d < tier1Radius) targetPop = 1.0;
-          else if (d < tier1Radius + 2.6) targetPop = 0.35 * (1 - (d - tier1Radius) / 2.6);
-        } else if (cat !== 'all') {
-          targetPop = st.featured ? 0.72 : 0.40;
-        }
-      } else {
-        // 二级 42 枚 Grok 新增风物立绘：推近到 z > 2.35（或筛选到该分类且 z > 1.55）时按需懒加载并优雅弹起！
-        const wakeZoom = cat !== 'all' ? 1.55 : 2.35;
-        if (z > wakeZoom && d < tier2Radius) {
-          if (st.texState === 'lazy') ensureStandeeTexture(st);
-          if (st.texState === 'ready') {
-            targetPop = smoothstep(wakeZoom, wakeZoom + 0.65, z);
+      projV.set(st.wx, st.wy + st.baseH * worldScale * 0.45, st.wz).project(camera);
+      const inScreen = projV.z > 0.02 && projV.z < 1;
+      const sx = (projV.x * 0.5 + 0.5) * view.w;
+      const sy = (-projV.y * 0.5 + 0.5) * view.h;
+      const inSafeBox = inScreen && sx > 24 && sx < rightBound - 24 && sy > 76 && sy < view.h - 94;
+
+      if (!inSafeBox) {
+        st.isShown = false;
+        st.dotMesh.visible = false;
+        continue;
+      }
+
+      // 优先级分数：已站起(防抖) + 一级核心地标 + 焦点乡镇 + 离屏中心近
+      const priority =
+        (st.tier === 1 ? 40 : 0) +
+        (st.featured ? 18 : 0) +
+        (st.townId === focusTownId ? 10 : 0) +
+        (st.isShown ? 12 : 0) -
+        d * 4.5;
+
+      // 立绘在屏幕上的真实尺寸（底边到顶边投影）+ 顶部浮签约 34px，用于防遮挡
+      projV.set(st.wx, st.wy, st.wz).project(camera);
+      const syBase = (-projV.y * 0.5 + 0.5) * view.h;
+      projV.set(st.wx, st.wy + st.baseH * worldScale, st.wz).project(camera);
+      const syTop = (-projV.y * 0.5 + 0.5) * view.h;
+      const hPx = Math.max(0, syBase - syTop) + 34;
+      const wPx = Math.max(0, syBase - syTop) * ((st.baseW || st.baseH * 1.15) / st.baseH) * 1.15;
+
+      candidates.push({ st, sx, sy, d, priority, hPx, wPx });
+    }
+
+    candidates.sort((a, b) => b.priority - a.priority);
+
+    // Step 2: 屏幕空间防遮挡贪心放行（挡脸者退让并化为纸面微点，继续放大拉开距离即自动站起！）
+    const accepted = [];
+    const acceptedSet = new Set();
+
+    for (const c of candidates) {
+      // 已站起者给予 15% 滞回宽容，避免临界缩放抖动
+      const hyst = c.st.isShown ? 0.85 : 1.0;
+      let collides = accepted.length >= maxActiveStandees;
+      if (!collides) {
+        for (const prev of accepted) {
+          const gx = Math.max(minGapX, (c.wPx + prev.wPx) * 0.5 + 8) * hyst;
+          const gy = Math.max(minGapY, (c.hPx + prev.hPx) * 0.5 + 4) * hyst;
+          if (Math.abs(c.sx - prev.sx) < gx && Math.abs(c.sy - prev.sy) < gy) {
+            collides = true;
+            break;
           }
         }
       }
 
-      st.flap.target = targetPop;
+      if (!collides) {
+        // 获准站起！若为二级懒加载立绘，立刻触发加载
+        if (c.st.texState === 'lazy') ensureStandeeTexture(c.st);
+        accepted.push(c);
+        acceptedSet.add(c.st.id);
+        c.st.isShown = true;
+        c.st.dotMesh.visible = false;
+      } else {
+        // 被更高优先级立绘在当前倍率下挡住 -> 优雅退让，只在纸面亮一颗极小微点提示「放大可现」
+        c.st.isShown = false;
+        c.st.dotMesh.visible = z > 1.55;
+        c.st.dotMesh.scale.setScalar(clamp(1.2 / Math.pow(z, 0.72), 0.18, 0.95));
+      }
+    }
+
+    // Step 3: 驱动 76 处立绘弹簧物理 + 收集已站起立绘的防重叠浮签
+    projectedStandees.length = 0;
+
+    for (const st of standees) {
+      const wantPop = acceptedSet.has(st.id) && st.texState === 'ready';
+      st.flap.target = wantPop ? 1.0 : 0.0;
       const p = clamp(st.flap.step(dt), 0, 1.15);
 
       const vis = p > 0.03 && st.texState === 'ready';
       st.root.visible = vis;
       if (!vis) continue;
 
-      const breath = Math.sin(time * 1.85 + st.phase) * 0.022 * p;
+      const breath = Math.sin(time * 1.85 + st.phase) * 0.02 * p;
       st.hingeGroup.rotation.x = lerp(-Math.PI * 0.48, 0, clamp(p, 0, 1)) + breath;
 
-      const faceYaw = Math.atan2(camera.position.x - st.wx, Math.max(3.0, camera.position.z - st.wz));
-      st.root.rotation.y = clamp(faceYaw * 0.36, -0.34, 0.34);
+      const faceYaw = Math.atan2(camera.position.x - st.wx, Math.max(2.0, camera.position.z - st.wz));
+      st.root.rotation.y = clamp(faceYaw * 0.34, -0.32, 0.32);
 
       if (st.hop > 0.005) {
         st.hop *= Math.exp(-7.5 * dt);
       } else {
         st.hop = 0;
       }
-      const sc = lerp(0.52, 1.0, smoothstep(0.05, 0.85, p)) * closeSizeDamp * (1 + st.hop * 0.14);
+      const sc = lerp(0.50, 1.0, smoothstep(0.05, 0.85, p)) * worldScale * (1 + st.hop * 0.14);
       st.scaleGroup.scale.setScalar(sc);
-      st.root.position.y = st.wy + st.hop * 0.32;
-      st.tabMesh.material.opacity = clamp(p * 0.80, 0, 0.78);
+      st.root.position.y = st.wy + st.hop * 0.24 * worldScale;
+      st.tabMesh.material.opacity = clamp(p * 0.78, 0, 0.76);
 
-      // 收集完全立起的立绘用于屏幕防重叠纸签投影
-      if (p > 0.56 && (z > 1.35 || cat !== 'all')) {
-        projV.set(st.wx, st.wy + st.baseH * sc + 0.22, st.wz).project(camera);
-        if (projV.z > 0.04 && projV.z < 0.992) {
+      if (p > 0.56) {
+        projV.set(st.wx, st.wy + st.baseH * sc + 0.14 * worldScale, st.wz).project(camera);
+        if (projV.z > 0.02 && projV.z < 1) {
           const sx = (projV.x * 0.5 + 0.5) * view.w;
           const sy = (-projV.y * 0.5 + 0.5) * view.h;
-          if (sx > 28 && sx < view.w - 28 && sy > 84 && sy < view.h - 112) {
+          if (sx > 28 && sx < rightBound - 28 && sy > 84 && sy < view.h - 110) {
+            const d = Math.hypot(st.wx - camState.tx, st.wz - camState.tz);
             projectedStandees.push({
               id: st.id,
               kind: st.kind,
@@ -1351,36 +1429,34 @@ export function createInteractive3DMap({
     const targetCol = REGION_COLORS[focusTownId] || REGION_COLORS.default;
     curParticleCol.lerp(targetCol, 1 - Math.exp(-3.0 * dt));
     pMat.color.copy(curParticleCol);
-    pMat.opacity = lerp(0.24, 0.65, pose.zoomT);
+    pMat.opacity = lerp(0.20, 0.55, pose.zoomT);
 
     const posArr = pGeo.attributes.position.array;
-    const pSpread = clamp(18 / Math.sqrt(Math.max(1, z)), 6, 18);
+    const pSpread = clamp(16 / Math.sqrt(Math.max(1, z)), 3.5, 16);
     for (let i = 0; i < PARTICLE_N; i++) {
       const ix = i * 3;
-      posArr[ix] += (pVel[ix] + Math.sin(time * 0.9 + pSeed[i]) * 0.24) * dt;
+      posArr[ix] += (pVel[ix] + Math.sin(time * 0.9 + pSeed[i]) * 0.20) * dt;
       posArr[ix + 1] += pVel[ix + 1] * dt;
-      posArr[ix + 2] += (pVel[ix + 2] + Math.cos(time * 0.75 + pSeed[i]) * 0.18) * dt;
-      if (posArr[ix + 1] < 0.25) {
+      posArr[ix + 2] += (pVel[ix + 2] + Math.cos(time * 0.75 + pSeed[i]) * 0.16) * dt;
+      if (posArr[ix + 1] < 0.20) {
         posArr[ix] = camState.tx + (Math.random() - 0.5) * pSpread;
-        posArr[ix + 1] = 4.5 + Math.random() * 4.0;
+        posArr[ix + 1] = 3.8 + Math.random() * 3.5;
         posArr[ix + 2] = camState.tz + (Math.random() - 0.5) * pSpread;
       }
     }
     pGeo.attributes.position.needsUpdate = true;
 
-    // 渲染 3D 真实 DEM 宣纸立雕沙盘
     renderer.render(scene, camera);
 
-    // 实时精准地理比例尺（屏幕中心水平 100px 对应的真实公里数）
+    // 实时精准地理比例尺
     const visH = 2 * Math.tan(camera.fov * DEG2RAD * 0.5) * pose.dist;
     const worldPerPx = visH / Math.max(300, view.h);
     const kmPer100Px = worldPerPx * 100 * KM_PER_WORLD_UNIT;
 
-    // 投影 12 个乡镇与 4 条真实水系题字到屏幕 2D
     projectedTowns.length = 0;
     for (const tw of townWorlds) {
-      projV.set(tw.wx, tw.wy + 0.22, tw.wz).project(camera);
-      const visible = projV.z > 0.04 && projV.z < 0.995;
+      projV.set(tw.wx, tw.wy + 0.20, tw.wz).project(camera);
+      const visible = projV.z > 0.02 && projV.z < 1;
       projectedTowns.push({
         id: tw.town.id,
         sx: (projV.x * 0.5 + 0.5) * view.w,
@@ -1396,11 +1472,10 @@ export function createInteractive3DMap({
         sx: (projV.x * 0.5 + 0.5) * view.w,
         sy: (-projV.y * 0.5 + 0.5) * view.h,
         rot: w.rot || 0,
-        visible: projV.z > 0.04 && projV.z < 0.995 && z < 2.9,
+        visible: projV.z > 0.02 && projV.z < 1 && z < 3.6,
       });
     }
 
-    // 排序：靠近中心且一级优先，但在 z > 2.8 深游时让最近的二级精游立绘也充分展示浮签
     projectedStandees.sort((a, b) => a.dist - b.dist);
 
     onProjectUI?.({
@@ -1421,15 +1496,14 @@ export function createInteractive3DMap({
       st.hop = 1.0;
       camState.targetTx = st.wx;
       camState.targetTz = st.wz;
-      if (camState.targetZoom < (st.tier === 2 ? 3.2 : 2.5)) {
-        camState.targetZoom = st.tier === 2 ? 3.45 : 2.65;
+      if (camState.targetZoom < (st.tier === 2 ? 4.2 : 3.0)) {
+        camState.targetZoom = st.tier === 2 ? 4.8 : 3.2;
       }
       if (st.kind === 'landmark' && st.entry) onSelectLandmark?.(st.entry);
       else if (st.kind === 'extra' && st.poi) onSelectExtra?.(st.poi);
     }
   }
 
-  /** 供自动化巡检脚本或深链直接飞往任意经纬度与倍率（含 4x~6x 高清瓦片验证） */
   function setCameraView({ lon, lat, zoom, townId } = {}) {
     camState.vx = 0;
     camState.vz = 0;
@@ -1466,6 +1540,7 @@ export function createInteractive3DMap({
       loadedTiles: tiles.filter((t) => t.state === 'ready').length,
       totalStandees: standees.length,
       readyStandees: standees.filter((s) => s.texState === 'ready').length,
+      activeStandees: standees.filter((s) => s.isShown).length,
     }),
   };
 }

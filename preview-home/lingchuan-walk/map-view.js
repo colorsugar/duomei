@@ -43,6 +43,7 @@ function formatScaleBar(kmPer100Px) {
 }
 
 function zoomTierLabel(z) {
+  if (z >= 5.2) return `山水微距 · ${z.toFixed(1)}×`;
   if (z >= 2.75) return `村落深游 · ${z.toFixed(1)}×`;
   if (z >= 1.48) return `乡镇近览 · ${z.toFixed(1)}×`;
   return `灵川全境 · ${z.toFixed(1)}×`;
@@ -380,17 +381,17 @@ export function createMapView({
       }
     }
 
-    // 3) Collision-free floating paper tags above popped-up 3D standees (phone max 4, desktop max 6 so artwork breathes!)
-    const maxTags = vw < 720 ? 4 : 6;
+    // 3) Collision-free floating paper tags above popped-up 3D standees (phone max 5, desktop max 7 — standees themselves are already decluttered!)
+    const maxTags = vw < 720 ? 5 : 7;
     const chosen = [];
-    if (!state.overlayOpen && (zoom > 1.38 || state.category !== 'all')) {
+    if (!state.overlayOpen && (zoom > 1.32 || state.category !== 'all')) {
       for (const s of standees) {
         if (chosen.length >= maxTags) break;
         if (s.sx < 44 || s.sx > rightLimit - 38 || s.sy < 92 || s.sy > vh - 134) continue;
         const estW = s.title.length * 11.5 + 26;
         let blocked = false;
         for (const prev of chosen) {
-          if (Math.abs(s.sx - prev.sx) < (estW + prev.w) * 0.5 + 10 && Math.abs(s.sy - prev.sy) < 34) {
+          if (Math.abs(s.sx - prev.sx) < (estW + prev.w) * 0.5 + 10 && Math.abs(s.sy - prev.sy) < 32) {
             blocked = true;
             break;
           }
