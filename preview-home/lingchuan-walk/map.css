@@ -423,7 +423,86 @@ body[data-mode="map"] #vignette {
   color: var(--lc-verm);
   border-color: rgba(179, 38, 30, 0.32);
 }
+.lc-zctrl-btn.is-folio-toggle {
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: var(--lc-celadon);
+  border-color: rgba(31, 94, 91, 0.28);
+}
 .lc-zctrl-btn[hidden] { display: none !important; }
+
+/* 桌面端侧笺丝滑折叠：一键全屏畅游 3D 真实地形纸雕沙盘 */
+.lc-zoom-ctrls {
+  transition: right 0.34s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.lc-atlas-hud[data-folio-collapsed="1"] .lc-folio {
+  transform: translateX(102%);
+  pointer-events: none;
+}
+.lc-atlas-hud[data-folio-collapsed="1"] .lc-zoom-ctrls {
+  right: 22px;
+}
+
+/* 实时真实地理比例尺与语义缩放倍率标尺 */
+.lc-scale-bar {
+  position: fixed;
+  left: max(22px, env(safe-area-inset-left));
+  bottom: 24px;
+  z-index: 6;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 5px 11px;
+  border-radius: 999px;
+  background: rgba(252, 248, 240, 0.84);
+  border: 0.8px solid rgba(28, 25, 22, 0.12);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 3px 12px rgba(28, 25, 22, 0.07);
+  pointer-events: none;
+  font-family: "Songti SC", "STSong", "Noto Serif CJK SC", serif;
+}
+.lc-scale-tier {
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  color: var(--lc-celadon);
+  font-weight: 600;
+}
+.lc-scale-rule {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.lc-scale-rule i {
+  display: inline-block;
+  width: 64px;
+  height: 5px;
+  border-bottom: 1.5px solid var(--lc-ink-soft);
+  border-left: 1.5px solid var(--lc-ink-soft);
+  border-right: 1.5px solid var(--lc-ink-soft);
+  transition: width 0.16s ease;
+}
+.lc-scale-rule em {
+  font-style: normal;
+  font-size: 10.5px;
+  letter-spacing: 0.04em;
+  color: var(--lc-ink-soft);
+}
+@media (max-width: 919px) {
+  .lc-zctrl-btn.is-folio-toggle { display: none; }
+  .lc-pin-tag { font-size: 10.5px; padding: 2.5px 6.5px; }
+  .lc-pin.is-featured .lc-pin-tag { font-size: 11px; padding: 2.5px 7.5px; }
+  .lc-standee-tag { font-size: 11px; padding: 3px 9px 3px 7px; }
+  .lc-scale-bar {
+    left: max(12px, env(safe-area-inset-left));
+    bottom: auto;
+    top: calc(max(10px, env(safe-area-inset-top)) + 98px);
+    padding: 3.5px 9px;
+    gap: 7px;
+  }
+  .lc-scale-tier { font-size: 10px; }
+  .lc-scale-rule em { font-size: 10px; }
+}
 
 /* ==================== 桌面宽屏右侧：随 3D 沙盘实时联动的宣纸风物侧笺 ==================== */
 .lc-folio {
@@ -444,6 +523,7 @@ body[data-mode="map"] #vignette {
   background: rgba(248, 243, 233, 0.88);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
+  transition: transform 0.34s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .lc-folio-cats,

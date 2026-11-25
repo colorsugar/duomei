@@ -24,7 +24,7 @@ function getAssetUrl(name, forceFull = false) {
 
 // Collect all unique image keys from 32 lc-* cutouts + backdrops + companion props
 const STORYBOOK_ASSETS = [
-  'map/lingchuan-map-base', 'map/lingchuan-dashankou', 'map/lingchuan-lion-dance',
+  'map/lingchuan-dem-l0', 'map/lingchuan-dashankou', 'map/lingchuan-lion-dance',
   'gr-guilin', 'gr-lingchuan',
   'bd-guilin', 'bd-lingchuan', 'hero-karst', 'karst', 'ridge',
   'cut-raft', 'cut-banyan', 'cut-yulongbridge', 'cut-beerfish',
@@ -3932,6 +3932,7 @@ async function init() {
     isBlockingOverlayOpen: () => Boolean(state.selectedLandmark || mapViewApi?.isOverlayOpen?.()),
   });
   mapViewApi.attach3D(map3dApi);
+  window.__LINGCHUAN_MAP3D = map3dApi;
 
   // Default to full-county sculpted paper atlas (allow ?mode=walk|depth deep links)
   const urlMode = new URLSearchParams(window.location.search).get('mode');

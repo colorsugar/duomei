@@ -93,12 +93,28 @@ async function runMobileSuite(engineName) {
   await page.waitForTimeout(1100);
   await page.screenshot({ path: path.join(OUT, `${engineName}-05-haiyang-3d.png`) });
 
-  // 6) Fly into Daxu (Wanshou Bridge / ancient town / waterfall standees pop up!)
+  // 6) Fly into Daxu then deep-zoom 4.8x into Qingshitan / Jiuwu to verify crisp high-res tiles + lazy Grok standees!
   await page.locator('#lc-z-reset').click();
   await page.waitForTimeout(650);
   await page.locator('.lc-proj-layer .lc-pin[data-town="daxu"]').click();
   await page.waitForTimeout(1100);
   await page.screenshot({ path: path.join(OUT, `${engineName}-06-daxu-3d.png`) });
+
+  await page.evaluate(() => {
+    window.__LINGCHUAN_MAP3D?.setCameraView({ townId: 'jiuwu', zoom: 4.8 });
+  });
+  await page.waitForTimeout(1300);
+  const deepStats = await page.evaluate(() => ({
+    st: window.__LINGCHUAN_MAP3D?.getState(),
+    scaleTier: document.getElementById('lc-scale-tier')?.textContent,
+    scaleLbl: document.getElementById('lc-scale-lbl')?.textContent,
+    tags: document.querySelectorAll('.lc-standee-tag:not([hidden])').length,
+  }));
+  console.log(`[${engineName}] 4.8x deep zoom stats:`, JSON.stringify(deepStats));
+  if (!deepStats.st || deepStats.st.totalStandees < 74) bad(`${engineName} expected >=74 standees got ${deepStats.st?.totalStandees}`);
+  if ((deepStats.st?.loadedTiles || 0) < 1) bad(`${engineName} high-res DEM tiles did not load at 4.8x`);
+  if ((deepStats.st?.readyStandees || 0) <= 34) bad(`${engineName} lazy Grok standees did not wake at 4.8x`);
+  await page.screenshot({ path: path.join(OUT, `${engineName}-07-jiuwu-4.8x-hires.png`) });
 
   if (pageErrors.length) bad(`${engineName} pageErrors: ${pageErrors.join(' | ')}`);
   if (bad404.length) bad(`${engineName} HTTP>=400: ${bad404.join(' | ')}`);
@@ -111,18 +127,37 @@ async function runDesktopSuite() {
   const ctx = await browser.newContext({ viewport: { width: 1440, height: 860 }, deviceScaleFactor: 1.5 });
   const page = await ctx.newPage();
   const pageErrors = [];
+  const bad404 = [];
   page.on('pageerror', (e) => pageErrors.push(e.message));
+  page.on('response', (res) => {
+    if (res.status() >= 400 && !res.url().includes('favicon')) bad404.push(`${res.status()} ${res.url()}`);
+  });
 
   await page.goto(`${BASE}/lingchuan-walk/index.html?t=${Date.now()}`, { waitUntil: 'networkidle', timeout: 60000 });
   await page.waitForSelector('#map-stage .lc-atlas-hud', { timeout: 30000 });
   await page.waitForFunction(() => document.getElementById('loader')?.classList.contains('done'), null, { timeout: 60000 }).catch(() => {});
-  await page.waitForTimeout(800);
+  await page.waitForTimeout(850);
   await page.screenshot({ path: path.join(OUT, 'desktop-01-overview.png') });
 
-  await page.locator('.lc-proj-layer .lc-pin[data-town="chaotian"]').click();
-  await page.waitForTimeout(1150);
-  await page.screenshot({ path: path.join(OUT, 'desktop-02-chaotian-3d.png') });
+  // Test focal-point wheel zoom over NW Qingshitan / Jiuwu region
+  await page.mouse.move(420, 340);
+  for (let i = 0; i < 6; i++) {
+    await page.mouse.wheel(0, -120);
+    await page.waitForTimeout(60);
+  }
+  await page.waitForTimeout(800);
+  const wheelState = await page.evaluate(() => window.__LINGCHUAN_MAP3D?.getState());
+  console.log('[desktop] after wheel focal zoom:', JSON.stringify({ zoom: wheelState?.zoom, tx: wheelState?.tx, tz: wheelState?.tz, tiles: wheelState?.loadedTiles }));
+  if (!wheelState || wheelState.zoom < 1.5) bad('desktop wheel focal zoom failed');
 
+  // Collapse desktop folio to verify fullscreen mode + deep zoom 4.6x Chaotian
+  await page.locator('#lc-folio-toggle').click();
+  await page.evaluate(() => window.__LINGCHUAN_MAP3D?.setCameraView({ townId: 'chaotian', zoom: 4.6 }));
+  await page.waitForTimeout(1300);
+  await page.screenshot({ path: path.join(OUT, 'desktop-02-chaotian-fullscreen-4.6x.png') });
+
+  // Re-open folio & fly to Haiyang
+  await page.locator('#lc-folio-toggle').click();
   await page.locator('#lc-z-reset').click();
   await page.waitForTimeout(700);
   await page.locator('.lc-proj-layer .lc-pin[data-town="haiyang"]').click();
@@ -130,6 +165,7 @@ async function runDesktopSuite() {
   await page.screenshot({ path: path.join(OUT, 'desktop-03-haiyang-3d.png') });
 
   if (pageErrors.length) bad(`desktop pageErrors: ${pageErrors.join(' | ')}`);
+  if (bad404.length) bad(`desktop HTTP>=400: ${bad404.join(' | ')}`);
   await browser.close();
 }
 
