@@ -3037,7 +3037,7 @@ function setMode(nextMode) {
       dom.chapterSub.textContent = DEPTH_SCENE_TITLES[state.depthScene];
       applyDepthSceneAtmosphere(state.depthScene);
     } else if (nextMode === 'map') {
-      dom.chapterSub.textContent = '乡镇地图 · 按区划展卷';
+      dom.chapterSub.textContent = '七镇五乡 · 一脉青绿';
     } else {
       dom.chapterSub.textContent = SEGMENTS[state.segmentIdx].sub;
     }
@@ -3893,14 +3893,34 @@ async function init() {
     onOpenLandmark: (entry) => openDetailCard(entry),
     onOpenExtra: (poi) => openDetailCard({ spec: extraPoiToCardSpec(poi) }),
     onShareNote: showInlineCardNote,
+    onJumpToSegment: (segId) => {
+      const targetSeg = SEGMENTS.find((s) => s.id === segId);
+      if (targetSeg) {
+        state.velT = 0;
+        state.panXTarget = 0;
+        state.flyToTarget = clamp(targetSeg.start + 0.02, 0, 1);
+      }
+      setMode('walk');
+    },
   });
 
-  // Default to paper scroll; map is opt-in until the atlas is strong enough
-  document.body.dataset.mode = 'walk';
-  state.mode = 'walk';
-  dom.walkDock.hidden = false;
-  dom.depthDock.hidden = true;
-  dom.chapterSub.textContent = SEGMENTS[state.segmentIdx]?.sub || '纸艺长卷';
+  // Default to full-county sculpted paper atlas (allow ?mode=walk|depth deep links)
+  const urlMode = new URLSearchParams(window.location.search).get('mode');
+  const initialMode = (urlMode === 'walk' || urlMode === 'depth') ? urlMode : 'map';
+  document.body.dataset.mode = initialMode;
+  state.mode = initialMode;
+  dom.modeBtns.forEach((b) => {
+    const on = b.dataset.mode === initialMode;
+    b.classList.toggle('active', on);
+    b.setAttribute('aria-selected', String(on));
+  });
+  dom.walkDock.hidden = initialMode !== 'walk';
+  dom.depthDock.hidden = initialMode !== 'depth';
+  dom.chapterSub.textContent = initialMode === 'map'
+    ? '七镇五乡 · 一脉青绿'
+    : initialMode === 'depth'
+      ? DEPTH_SCENE_TITLES[state.depthScene]
+      : (SEGMENTS[state.segmentIdx]?.sub || '纸艺长卷');
 
   dom.loader.classList.add('done');
   animate();

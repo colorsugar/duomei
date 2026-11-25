@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-  <title>灵川行卷 · 乡镇地图与六境三十二景</title>
+  <title>灵川全境 · 十二乡镇立雕地图与六境长卷</title>
   <link rel="icon" href="data:,">
   <link rel="stylesheet" href="./style.css">
   <link rel="stylesheet" href="./map.css">
@@ -15,9 +15,9 @@
     }
   </script>
 </head>
-<body data-mode="walk" data-segment="lijiang">
+<body data-mode="map" data-segment="lijiang">
   <div id="stage" aria-label="灵川六境三十二景立体山水长卷"></div>
-  <div id="map-stage" aria-label="灵川乡镇地图"></div>
+  <div id="map-stage" aria-label="灵川全境立雕地图"></div>
   <div id="vignette" aria-hidden="true"></div>
 
   <!-- Screen-space collision-avoided rice-paper landmark & portal slips (pool of 4, zero layout reflow) -->
@@ -33,21 +33,24 @@
 
   <div id="mode-veil" aria-hidden="true"></div>
 
-  <!-- Top Header Bar: Seal + Mode Switch + Gyro & 0/32 Stamp Pill -->
+  <!-- Top Header Bar: Duomei Back Brand + 3-Mode Switch + Gyro & 0/32 Stamp Pill -->
   <header class="top-bar">
     <div class="brand">
-      <a class="home-back" href="/" aria-label="返回多美主站">‹ 返回多美</a>
+      <a class="dm-home-back" href="/" aria-label="返回多美主站">
+        <span class="dm-hb-arrow" aria-hidden="true">‹</span>
+        <span class="dm-hb-stack"><strong>DUOMEI</strong><em>多美</em></span>
+      </a>
       <span class="brand-seal" aria-hidden="true">灵川</span>
       <div class="brand-text">
-        <h1>灵川行卷</h1>
-        <span id="chapter-sub" class="chapter-sub">漓江洲渚 · 古圩水驿</span>
+        <h1>灵川全境</h1>
+        <span id="chapter-sub" class="chapter-sub">七镇五乡 · 一脉青绿</span>
       </div>
     </div>
 
     <div class="mode-switch" role="tablist" aria-label="观看模式">
       <span class="mode-pill-bg" aria-hidden="true"></span>
-      <button type="button" class="mode-btn" data-mode="map" role="tab" aria-selected="false">乡镇地图</button>
-      <button type="button" class="mode-btn active" data-mode="walk" role="tab" aria-selected="true">纸艺长卷</button>
+      <button type="button" class="mode-btn active" data-mode="map" role="tab" aria-selected="true">全境地图</button>
+      <button type="button" class="mode-btn" data-mode="walk" role="tab" aria-selected="false">纸艺长卷</button>
       <button type="button" class="mode-btn" data-mode="depth" role="tab" aria-selected="false">2.5D 画境</button>
     </div>
 
