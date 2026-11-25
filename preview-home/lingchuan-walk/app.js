@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { SEGMENTS, PORTAL_SPECS, LANDMARK_SPECS, COMPANION_SPECS } from './landmarks-data.js';
 import { createMapView, extraPoiToCardSpec } from './map-view.js';
+import { createInteractive3DMap } from './map-3d.js';
 import { sharePayload } from './share-card.js';
 
 // ============================================================================
@@ -23,6 +24,7 @@ function getAssetUrl(name, forceFull = false) {
 
 // Collect all unique image keys from 32 lc-* cutouts + backdrops + companion props
 const STORYBOOK_ASSETS = [
+  'map/lingchuan-map-base', 'map/lingchuan-dashankou', 'map/lingchuan-lion-dance',
   'gr-guilin', 'gr-lingchuan',
   'bd-guilin', 'bd-lingchuan', 'hero-karst', 'karst', 'ridge',
   'cut-raft', 'cut-banyan', 'cut-yulongbridge', 'cut-beerfish',
@@ -575,6 +577,7 @@ const dom = {
 };
 
 let mapViewApi = null;
+let map3dApi = null;
 
 // ============================================================================
 // Preloader (60 Assets Loaded Cleanly from Local ./img & ../storybook/img)
@@ -3387,6 +3390,7 @@ function bindInteractions() {
 
   // Wheel / Trackpad with smooth momentum calibrated for 240m scroll
   window.addEventListener('wheel', (e) => {
+    if (state.mode === 'map') return;
     if (e.target.closest('.detail-card') || e.target.closest('.chapter-pills') || e.target.closest('.filter-bar')) return;
     e.preventDefault();
     if (e.ctrlKey) {
@@ -3417,6 +3421,7 @@ function bindInteractions() {
   let pinchStartZoom = 1;
 
   canvas.addEventListener('pointerdown', (e) => {
+    if (state.mode === 'map') return;
     pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
     canvas.setPointerCapture(e.pointerId);
     canvas.classList.add('dragging');
@@ -3443,6 +3448,7 @@ function bindInteractions() {
   });
 
   canvas.addEventListener('pointermove', (e) => {
+    if (state.mode === 'map') return;
     const nx = (e.clientX / viewW) * 2 - 1;
     const ny = -(e.clientY / viewH) * 2 + 1;
     pointerNDC.set(nx, ny);
@@ -3498,6 +3504,7 @@ function bindInteractions() {
   });
 
   const onPointerEnd = (e) => {
+    if (state.mode === 'map') return;
     if (!pointers.has(e.pointerId)) return;
     pointers.delete(e.pointerId);
 
@@ -3571,6 +3578,7 @@ function bindInteractions() {
     viewW = window.innerWidth || 390;
     viewH = Math.max(1, window.innerHeight || 700);
     viewAspect = viewW / viewH;
+    map3dApi?.resize(viewW, viewH);
 
     walkCamera.fov = computeWalkFov(viewAspect);
     walkCamera.aspect = viewAspect;
@@ -3837,6 +3845,7 @@ function animate() {
   updateFanDiorama(time, dt);
 
   if (state.mode === 'map') {
+    map3dApi?.updateAndRender(dt, time);
     return;
   }
   if (state.mode === 'walk') {
@@ -3903,6 +3912,26 @@ async function init() {
       setMode('walk');
     },
   });
+
+  map3dApi = createInteractive3DMap({
+    THREE,
+    renderer,
+    canvas: renderer.domElement,
+    getViewport: () => ({ w: viewW, h: viewH }),
+    images: IMAGES,
+    landmarksById: landmarkById,
+    makePaperMaterial,
+    buildDieCutTexture,
+    maxAniso: MAX_ANISO,
+    isMobile: IS_MOBILE,
+    onSelectLandmark: (entry) => openDetailCard(entry),
+    onSelectExtra: (poi) => openDetailCard({ spec: extraPoiToCardSpec(poi) }),
+    onFocusTownChange: (townId) => mapViewApi?.setFocusTown(townId),
+    onProjectUI: (proj) => mapViewApi?.syncProjection(proj),
+    isModeActive: () => state.mode === 'map',
+    isBlockingOverlayOpen: () => Boolean(state.selectedLandmark || mapViewApi?.isOverlayOpen?.()),
+  });
+  mapViewApi.attach3D(map3dApi);
 
   // Default to full-county sculpted paper atlas (allow ?mode=walk|depth deep links)
   const urlMode = new URLSearchParams(window.location.search).get('mode');

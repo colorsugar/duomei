@@ -1,5 +1,5 @@
 /* ============================================================================
-   灵川全境地图 · 多美现网宣纸立雕美学样式（全量重写，零旧版圆点堆残留）
+   灵川全境 · 3D 立体纸艺活地图样式（透明叠加在 Three.js 宣纸立雕沙盘之上）
    ============================================================================ */
 
 @font-face {
@@ -26,7 +26,7 @@
   --lc-line: rgba(28, 25, 22, 0.11);
 }
 
-/* ==================== 重做顶栏与多美返回键（零撞字、现网同款气质） ==================== */
+/* ==================== 现网同款清爽顶栏与返回键 ==================== */
 .top-bar {
   display: grid !important;
   grid-template-columns: 1fr auto 1fr !important;
@@ -78,12 +78,11 @@
   margin-top: 2px;
 }
 
-/* 地图模式下顶栏保持宣纸墨色清透 */
 body[data-mode="map"] .dm-home-back {
   color: var(--lc-ink);
 }
 body[data-mode="map"] .mode-switch {
-  background: rgba(255, 252, 245, 0.86);
+  background: rgba(255, 252, 245, 0.88);
   box-shadow: inset 0 0 0 1px rgba(28, 25, 22, 0.10), 0 4px 16px rgba(28, 25, 22, 0.06);
 }
 body[data-mode="map"] .mode-btn {
@@ -105,22 +104,15 @@ body[data-mode="map"] .gyro-btn {
   display: none;
 }
 
-/* 三模式胶囊切换 */
 .mode-switch {
   grid-template-columns: 1fr 1fr 1fr !important;
 }
 .mode-pill-bg {
   width: calc(33.333% - 3px) !important;
 }
-body[data-mode="map"] .mode-pill-bg {
-  transform: translateX(0) !important;
-}
-body[data-mode="walk"] .mode-pill-bg {
-  transform: translateX(100%) !important;
-}
-body[data-mode="depth"] .mode-pill-bg {
-  transform: translateX(200%) !important;
-}
+body[data-mode="map"] .mode-pill-bg { transform: translateX(0) !important; }
+body[data-mode="walk"] .mode-pill-bg { transform: translateX(100%) !important; }
+body[data-mode="depth"] .mode-pill-bg { transform: translateX(200%) !important; }
 .mode-btn {
   padding: 7px 14px !important;
   font-size: 12px !important;
@@ -128,7 +120,6 @@ body[data-mode="depth"] .mode-pill-bg {
   white-space: nowrap;
 }
 
-/* 手机端清爽双行顶栏：第1行返回多美 + 印章，第2行居中切页胶囊，彻底零撞字 */
 @media (max-width: 720px) {
   .top-bar {
     grid-template-columns: 1fr auto !important;
@@ -139,35 +130,22 @@ body[data-mode="depth"] .mode-pill-bg {
     left: max(14px, env(safe-area-inset-left)) !important;
     right: max(14px, env(safe-area-inset-right)) !important;
   }
-  .top-bar .brand {
-    grid-column: 1;
-    grid-row: 1;
-    gap: 6px !important;
-  }
+  .top-bar .brand { grid-column: 1; grid-row: 1; gap: 6px !important; }
   .top-bar .brand-seal,
-  .top-bar .brand-text {
-    display: none !important;
-  }
-  .top-bar .top-right {
-    grid-column: 2;
-    grid-row: 1;
-  }
+  .top-bar .brand-text { display: none !important; }
+  .top-bar .top-right { grid-column: 2; grid-row: 1; }
   .top-bar .mode-switch {
     grid-column: 1 / -1;
     grid-row: 2;
     justify-self: center;
     width: min(312px, 100%);
   }
-  .mode-btn {
-    padding: 6.5px 10px !important;
-    font-size: 12px !important;
-  }
-  #sub-bar {
-    top: calc(max(10px, env(safe-area-inset-top)) + 92px) !important;
-  }
+  .mode-btn { padding: 6.5px 10px !important; font-size: 12px !important; }
+  #sub-bar { top: calc(max(10px, env(safe-area-inset-top)) + 92px) !important; }
 }
 
-/* ==================== 地图舞台可见性切换 ==================== */
+/* ==================== 3D 沙盘舞台与透明 HUD 叠层 ==================== */
+/* 关键：map 模式下 #stage 保持完全可见可触，承载 Three.js 3D 宣纸立雕沙盘！ */
 #map-stage {
   position: fixed;
   inset: 0;
@@ -177,7 +155,11 @@ body[data-mode="depth"] .mode-pill-bg {
 }
 body[data-mode="map"] #map-stage {
   display: block;
-  pointer-events: auto;
+  pointer-events: none;
+}
+body[data-mode="map"] #stage {
+  visibility: visible !important;
+  pointer-events: auto !important;
 }
 body.lc-zoom-open #map-stage {
   z-index: 14;
@@ -187,7 +169,6 @@ body.lc-zoom-open .top-bar {
   visibility: hidden !important;
   pointer-events: none !important;
 }
-body[data-mode="map"] #stage,
 body[data-mode="map"] #tag-layer,
 body[data-mode="map"] #walk-dock,
 body[data-mode="map"] #depth-dock,
@@ -197,132 +178,180 @@ body[data-mode="map"] #vignette {
   pointer-events: none !important;
 }
 
-/* ==================== 全境宣纸立雕主体 ==================== */
-.lc-atlas {
+.lc-atlas-hud {
   position: absolute;
   inset: 0;
-  background: radial-gradient(125% 95% at 48% 45%, #F6F1E5 0%, #F4EFE2 66%, #EEE7D7 100%);
-  color: var(--lc-ink);
+  pointer-events: none;
   font-family: "Songti SC", "STSong", "Noto Serif CJK SC", "PingFang SC", serif;
-  overflow: hidden;
+  color: var(--lc-ink);
   -webkit-font-smoothing: antialiased;
 }
 
-.lc-atlas-shell {
+/* ==================== 实时 3D->2D 投影层（12 乡镇 + 弹起立绘纸签） ==================== */
+.lc-proj-layer {
   position: absolute;
   inset: 0;
-  padding-top: calc(max(12px, env(safe-area-inset-top)) + 56px);
-  display: grid;
-  grid-template-columns: minmax(0, 1.45fr) minmax(320px, 0.95fr);
-}
-
-.lc-atlas-stage {
-  position: relative;
-  min-width: 0;
-  min-height: 0;
-  display: flex;
-  flex-direction: column;
-}
-
-.lc-atlas-viewport {
-  position: relative;
-  flex: 1 1 auto;
-  min-height: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  pointer-events: none;
   overflow: hidden;
-  touch-action: none;
-  cursor: grab;
-  padding: 6px 14px 14px;
-}
-.lc-atlas-viewport:active {
-  cursor: grabbing;
-}
-
-.lc-atlas-transform {
-  position: relative;
-  transform-origin: center center;
-  will-change: transform;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-/* 严格锁定 3:4 比例容器，确保 12 个乡镇真实经纬度坐标与底图雕塑 100% 对准 */
-.lc-atlas-plate {
-  position: relative;
-  aspect-ratio: 896 / 1200;
-  height: min(calc(100dvh - 108px), 780px);
-  width: auto;
-  max-width: min(94vw, 620px);
-  user-select: none;
-}
-
-.lc-relief-img {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-  pointer-events: none;
-  mix-blend-mode: multiply;
-  filter: brightness(1.035) contrast(1.04) saturate(1.04);
-  -webkit-mask-image:
-    linear-gradient(90deg, transparent 0%, #000 7%, #000 93%, transparent 100%),
-    linear-gradient(180deg, transparent 0%, #000 7%, #000 93%, transparent 100%);
-  -webkit-mask-composite: source-in;
-  mask-composite: intersect;
-}
-
-.lc-compass {
-  position: absolute;
-  right: 5%;
-  top: 3%;
-  z-index: 6;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2px;
-  opacity: 0.52;
-  pointer-events: none;
-}
-.lc-compass span {
-  font-size: 10px;
-  letter-spacing: 0.1em;
-  color: var(--lc-ink-soft);
-}
-.lc-compass i {
-  width: 1px;
-  height: 14px;
-  background: var(--lc-ink-soft);
-  display: block;
+  z-index: 2;
 }
 
 .lc-water-lbl {
   position: absolute;
-  transform: translate(-50%, -50%);
+  left: 0;
+  top: 0;
   font-size: 11px;
   letter-spacing: 0.24em;
-  color: rgba(31, 94, 91, 0.72);
+  color: rgba(31, 94, 91, 0.74);
   font-style: italic;
-  text-shadow: 0 0 6px rgba(245, 240, 227, 0.95);
-  z-index: 7;
+  text-shadow: 0 0 6px rgba(245, 240, 227, 0.96);
   pointer-events: none;
   white-space: nowrap;
+  will-change: transform, opacity;
 }
 
-/* 左下桂林天然弧湾竖排落款 */
-.lc-colophon {
+.lc-pin {
+  appearance: none;
+  border: 0;
+  background: none;
+  padding: 5px;
   position: absolute;
-  left: 4.5%;
-  bottom: 5.5%;
-  z-index: 8;
+  left: 0;
+  top: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+  cursor: pointer;
+  pointer-events: auto;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  will-change: transform, opacity;
+  transition: opacity 0.24s ease;
+}
+.lc-pin.dir-left { flex-direction: row-reverse; }
+.lc-pin.dir-top { flex-direction: column-reverse; gap: 3px; }
+.lc-pin.dir-bottom { flex-direction: column; gap: 3px; }
+.lc-pin.is-active { z-index: 8; }
+
+.lc-pin-dot {
+  width: 6.5px;
+  height: 6.5px;
+  border-radius: 50%;
+  flex: none;
+  background: var(--lc-celadon);
+  box-shadow: 0 0 0 2.5px rgba(252, 248, 240, 0.94), 0 1px 4px rgba(28, 25, 22, 0.24);
+}
+.lc-pin.is-matched .lc-pin-dot {
+  background: var(--lc-verm);
+  box-shadow: 0 0 0 2.5px rgba(252, 248, 240, 0.96), 0 0 0 6px rgba(179, 38, 30, 0.16);
+}
+.lc-pin-tag {
+  padding: 3px 8px;
+  border-radius: 5px;
+  background: rgba(252, 248, 240, 0.90);
+  border: 0.8px solid rgba(28, 25, 22, 0.16);
+  box-shadow: 0 2px 9px rgba(28, 25, 22, 0.08);
+  font-family: "Songti SC", "STSong", "Noto Serif CJK SC", serif;
+  font-size: 11.5px;
+  letter-spacing: 0.08em;
+  color: var(--lc-ink);
+  line-height: 1.25;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.lc-pin.is-county .lc-pin-dot { background: #2C251F; width: 7.5px; height: 7.5px; }
+.lc-pin.is-county .lc-pin-tag { border-color: rgba(28, 25, 22, 0.28); font-weight: 600; }
+.lc-pin.is-county .lc-pin-tag em {
+  font-style: normal; font-size: 9.5px; font-weight: 400; color: var(--lc-ink-mute);
+}
+.lc-pin.is-featured { z-index: 6; }
+.lc-pin.is-featured .lc-pin-dot {
+  width: 9px; height: 9px; background: var(--lc-verm);
+  box-shadow: 0 0 0 3px rgba(252, 248, 240, 0.96), 0 0 0 7px rgba(179, 38, 30, 0.16);
+  animation: lcSealPulse 2.6s ease-in-out infinite;
+}
+.lc-pin.is-featured .lc-pin-tag {
+  background: rgba(254, 249, 242, 0.97);
+  border: 1px solid rgba(179, 38, 30, 0.44);
+  color: var(--lc-verm);
+  font-weight: 600;
+  font-size: 12px;
+  padding: 3.5px 9px;
+  box-shadow: 0 4px 14px rgba(179, 38, 30, 0.15);
+}
+.lc-pin-seal {
+  font-style: normal;
+  display: inline-grid;
+  place-items: center;
+  padding: 0 4px;
+  height: 16px;
+  border-radius: 2.5px;
+  background: var(--lc-verm);
+  color: #FAF5EC;
+  font-size: 9.5px;
+  font-weight: 400;
+  letter-spacing: 0.05em;
+}
+
+@keyframes lcSealPulse {
+  0%, 100% { box-shadow: 0 0 0 3px rgba(252, 248, 240, 0.96), 0 0 0 6px rgba(179, 38, 30, 0.14); }
+  50% { box-shadow: 0 0 0 3px rgba(252, 248, 240, 0.96), 0 0 0 11px rgba(179, 38, 30, 0.05); }
+}
+
+/* 弹起 3D 纸雕立绘头顶的防重叠宣纸浮签（纸艺长卷同款韵味） */
+.lc-standee-tag {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 12;
+  appearance: none;
+  border: 0.9px solid rgba(31, 94, 91, 0.28);
+  background: rgba(253, 250, 243, 0.95);
+  color: var(--lc-ink);
+  border-radius: 999px;
+  padding: 4px 11px 4px 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: "Songti SC", "STSong", "Noto Serif CJK SC", serif;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  box-shadow: 0 4px 14px rgba(28, 25, 22, 0.14);
+  cursor: pointer;
+  pointer-events: auto;
+  touch-action: manipulation;
+  white-space: nowrap;
+  will-change: transform, opacity;
+  transition: opacity 0.2s ease;
+}
+.lc-standee-tag[hidden] { display: none !important; }
+.lc-standee-tag.is-featured {
+  border-color: rgba(179, 38, 30, 0.42);
+}
+.lc-st-tick {
+  width: 3px;
+  height: 11px;
+  border-radius: 2px;
+  background: var(--lc-celadon);
+}
+.lc-standee-tag.is-featured .lc-st-tick {
+  background: var(--lc-verm);
+}
+
+/* ==================== 左下书法落款（全境俯瞰可见，推近自动淡出） ==================== */
+.lc-colophon-float {
+  position: fixed;
+  left: max(22px, env(safe-area-inset-left));
+  bottom: 108px;
+  z-index: 5;
   display: flex;
   align-items: flex-end;
   gap: 9px;
   pointer-events: none;
+  transition: opacity 0.25s ease;
 }
 .lc-col-title {
   writing-mode: vertical-rl;
@@ -356,160 +385,65 @@ body[data-mode="map"] #vignette {
   margin-bottom: 2px;
 }
 
-/* ==================== 精致宣纸微签（绝无圆点堆！） ==================== */
-.lc-pins-layer {
-  position: absolute;
-  inset: 0;
-  z-index: 10;
+/* ==================== 轻巧 3D 缩放与复位钮 ==================== */
+.lc-zoom-ctrls {
+  position: fixed;
+  right: 406px;
+  bottom: 28px;
+  z-index: 9;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  pointer-events: auto;
 }
-
-.lc-pin {
+.lc-zctrl-btn {
   appearance: none;
-  border: 0;
-  background: none;
-  padding: 5px;
-  position: absolute;
-  transform: translate(-50%, -50%);
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  white-space: nowrap;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid rgba(28, 25, 22, 0.14);
+  background: rgba(252, 248, 240, 0.90);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  color: var(--lc-ink);
+  font-family: inherit;
+  font-size: 17px;
+  line-height: 1;
+  display: grid;
+  place-items: center;
+  box-shadow: 0 4px 14px rgba(28, 25, 22, 0.09);
   cursor: pointer;
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
-  transition: opacity 0.26s ease, transform 0.24s cubic-bezier(0.22, 1, 0.36, 1);
 }
-.lc-pin.dir-left { flex-direction: row-reverse; }
-.lc-pin.dir-top { flex-direction: column-reverse; gap: 3px; }
-.lc-pin.dir-bottom { flex-direction: column; gap: 3px; }
-
-.lc-pin:hover,
-.lc-pin.is-active {
-  z-index: 16;
-  transform: translate(-50%, -50%) scale(1.06);
-}
-.lc-pin.is-dimmed {
-  opacity: 0.28;
-}
-.lc-pin.is-matched .lc-pin-dot {
-  background: var(--lc-verm);
-  box-shadow: 0 0 0 2.5px rgba(252, 248, 240, 0.95), 0 0 0 6px rgba(179, 38, 30, 0.16);
-}
-
-.lc-pin-dot {
-  width: 6.5px;
-  height: 6.5px;
-  border-radius: 50%;
-  flex: none;
-  background: var(--lc-celadon);
-  box-shadow: 0 0 0 2.5px rgba(252, 248, 240, 0.94), 0 1px 4px rgba(28, 25, 22, 0.24);
-  transition: transform 0.2s ease, background 0.2s ease;
-}
-
-.lc-pin-tag {
-  padding: 3px 8px;
-  border-radius: 5px;
-  background: rgba(252, 248, 240, 0.91);
-  border: 0.8px solid rgba(28, 25, 22, 0.16);
-  box-shadow: 0 2px 9px rgba(28, 25, 22, 0.08);
-  font-family: "Songti SC", "STSong", "Noto Serif CJK SC", serif;
-  font-size: 11.5px;
-  letter-spacing: 0.08em;
-  color: var(--lc-ink);
-  line-height: 1.25;
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.lc-pin.is-county .lc-pin-dot {
-  background: #2C251F;
-  width: 7.5px;
-  height: 7.5px;
-}
-.lc-pin.is-county .lc-pin-tag {
-  border-color: rgba(28, 25, 22, 0.28);
-  font-weight: 600;
-}
-.lc-pin.is-county .lc-pin-tag em {
-  font-style: normal;
-  font-size: 9.5px;
-  font-weight: 400;
-  color: var(--lc-ink-mute);
-}
-
-.lc-pin.is-featured {
-  z-index: 14;
-}
-.lc-pin.is-featured .lc-pin-dot {
-  width: 9px;
-  height: 9px;
-  background: var(--lc-verm);
-  box-shadow: 0 0 0 3px rgba(252, 248, 240, 0.96), 0 0 0 7px rgba(179, 38, 30, 0.16);
-  animation: lcSealPulse 2.6s ease-in-out infinite;
-}
-.lc-pin.is-featured .lc-pin-tag {
-  background: rgba(254, 249, 242, 0.97);
-  border: 1px solid rgba(179, 38, 30, 0.44);
+.lc-zctrl-btn:active { transform: scale(0.94); }
+.lc-zctrl-btn.is-reset {
+  font-size: 11px;
+  letter-spacing: 0.04em;
   color: var(--lc-verm);
-  font-weight: 600;
-  font-size: 12.5px;
-  padding: 3.5px 9px;
-  box-shadow: 0 4px 14px rgba(179, 38, 30, 0.15);
+  border-color: rgba(179, 38, 30, 0.32);
 }
-.lc-pin-seal {
-  font-style: normal;
-  display: inline-grid;
-  place-items: center;
-  padding: 0 4px;
-  height: 16px;
-  border-radius: 2.5px;
-  background: var(--lc-verm);
-  color: #FAF5EC;
-  font-size: 9.5px;
-  font-weight: 400;
-  letter-spacing: 0.05em;
-}
+.lc-zctrl-btn[hidden] { display: none !important; }
 
-@keyframes lcSealPulse {
-  0%, 100% { box-shadow: 0 0 0 3px rgba(252, 248, 240, 0.96), 0 0 0 6px rgba(179, 38, 30, 0.14); }
-  50% { box-shadow: 0 0 0 3px rgba(252, 248, 240, 0.96), 0 0 0 11px rgba(179, 38, 30, 0.05); }
-}
-
-.lc-reset-btn {
-  position: absolute;
-  right: 16px;
-  bottom: 16px;
-  z-index: 18;
-  appearance: none;
-  border: 1px solid rgba(28, 25, 22, 0.16);
-  background: rgba(252, 248, 240, 0.94);
-  color: var(--lc-ink);
-  border-radius: 999px;
-  padding: 7px 14px;
-  font-family: inherit;
-  font-size: 11.5px;
-  letter-spacing: 0.12em;
-  box-shadow: 0 4px 14px rgba(28, 25, 22, 0.10);
-  cursor: pointer;
-}
-
-/* ==================== 手机端底部克制发丝提示栏 ==================== */
-.lc-mobile-bar {
-  display: none;
-}
-
-/* ==================== 桌面宽屏右侧宣纸风物侧笺 ==================== */
+/* ==================== 桌面宽屏右侧：随 3D 沙盘实时联动的宣纸风物侧笺 ==================== */
 .lc-folio {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 386px;
+  z-index: 8;
+  pointer-events: auto;
   border-left: 1px solid var(--lc-line);
-  padding: 12px 32px 20px 28px;
+  padding: calc(max(12px, env(safe-area-inset-top)) + 60px) 28px 20px 26px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  gap: 14px;
+  gap: 12px;
   overflow-y: auto;
-  min-height: 0;
-  background: rgba(248, 243, 233, 0.55);
+  background: rgba(248, 243, 233, 0.88);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
 }
 
 .lc-folio-cats,
@@ -522,7 +456,7 @@ body[data-mode="map"] #vignette {
 .lc-cat-btn {
   appearance: none;
   border: 1px solid rgba(28, 25, 22, 0.12);
-  background: rgba(252, 248, 240, 0.82);
+  background: rgba(252, 248, 240, 0.86);
   color: var(--lc-ink-soft);
   border-radius: 999px;
   padding: 5px 12px;
@@ -554,58 +488,49 @@ body[data-mode="map"] #vignette {
 }
 .lc-folio-head h2 {
   font-family: var(--font-title, "Songti SC", "STSong", serif);
-  font-size: 30px;
+  font-size: 29px;
   font-weight: 500;
   letter-spacing: 0.14em;
   margin: 0;
 }
 .lc-folio-region {
-  font-size: 11.5px;
-  letter-spacing: 0.1em;
+  font-size: 11px;
+  letter-spacing: 0.08em;
   color: var(--lc-celadon);
   background: var(--lc-celadon-soft);
-  padding: 3px 10px;
+  padding: 3px 9px;
   border-radius: 999px;
 }
 .lc-folio-tagline {
-  margin: 10px 0 6px;
-  font-size: 13.5px;
+  margin: 9px 0 6px;
+  font-size: 13px;
   color: var(--lc-ink);
-  letter-spacing: 0.08em;
-  line-height: 1.65;
+  letter-spacing: 0.06em;
+  line-height: 1.62;
 }
 .lc-folio-blurb {
   margin: 0;
-  font-size: 12.5px;
-  line-height: 1.82;
-  letter-spacing: 0.05em;
+  font-size: 12px;
+  line-height: 1.78;
+  letter-spacing: 0.04em;
   color: var(--lc-ink-soft);
 }
 .lc-folio-season {
-  margin-top: 10px;
+  margin-top: 9px;
   display: flex;
   gap: 8px;
   font-size: 11.5px;
   color: var(--lc-ink-soft);
   padding: 7px 10px;
   border-radius: 8px;
-  background: rgba(244, 238, 226, 0.82);
+  background: rgba(244, 238, 226, 0.85);
   border: 0.8px solid rgba(28, 25, 22, 0.08);
 }
-.lc-folio-season strong {
-  color: var(--lc-celadon);
-  flex: none;
-  font-weight: 600;
-}
+.lc-folio-season strong { color: var(--lc-celadon); flex: none; font-weight: 600; }
 
-.lc-folio-villages {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin-top: 10px;
-}
+.lc-folio-villages { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 9px; }
 .lc-fchip {
-  padding: 3.5px 9px;
+  padding: 3.5px 8.5px;
   border-radius: 6px;
   font-size: 11px;
   letter-spacing: 0.06em;
@@ -619,103 +544,214 @@ body[data-mode="map"] #vignette {
   color: var(--lc-verm);
   font-weight: 600;
 }
-.lc-fchip.is-pending {
-  border-style: dashed;
-  color: var(--lc-ink-mute);
-}
+.lc-fchip.is-pending { border-style: dashed; color: var(--lc-ink-mute); }
 
-.lc-folio-cards {
-  margin-top: 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.lc-folio-acts {
-  margin-top: 14px;
-  display: flex;
-  gap: 10px;
-}
+.lc-folio-cards { margin-top: 10px; display: flex; flex-direction: column; gap: 8px; }
+.lc-folio-acts { margin-top: 12px; display: flex; flex-wrap: wrap; gap: 7px; }
 .lc-folio-primary,
 .lc-folio-sec {
   appearance: none;
   border-radius: 999px;
-  min-height: 40px;
-  padding: 0 18px;
+  min-height: 38px;
+  padding: 0 14px;
   font-family: inherit;
-  font-size: 12.5px;
-  letter-spacing: 0.12em;
+  font-size: 12px;
+  letter-spacing: 0.08em;
   cursor: pointer;
   touch-action: manipulation;
-  transition: transform 0.18s ease, background 0.2s ease;
 }
 .lc-folio-primary {
   border: 0;
   background: var(--lc-celadon);
   color: #FAF6EE;
-  box-shadow: 0 4px 14px rgba(31, 94, 91, 0.22);
+  box-shadow: 0 4px 12px rgba(31, 94, 91, 0.22);
 }
 .lc-folio-sec {
   border: 1px solid rgba(28, 25, 22, 0.18);
-  background: rgba(252, 248, 240, 0.88);
+  background: rgba(252, 248, 240, 0.90);
   color: var(--lc-ink);
-}
-.lc-folio-primary:active,
-.lc-folio-sec:active {
-  transform: scale(0.97);
 }
 
-.lc-folio-share {
-  padding-top: 12px;
-  border-top: 1px solid var(--lc-line);
-}
+.lc-folio-share { padding-top: 10px; border-top: 1px solid var(--lc-line); }
 .lc-folio-share-hd {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  margin-bottom: 8px;
+  display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 8px;
 }
-.lc-folio-share-hd strong {
-  font-size: 12.5px;
-  letter-spacing: 0.14em;
-  color: var(--lc-ink);
-}
-.lc-folio-share-hd span {
-  font-size: 11px;
-  color: var(--lc-ink-mute);
-}
-.lc-tpl-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-}
+.lc-folio-share-hd strong { font-size: 12px; letter-spacing: 0.14em; color: var(--lc-ink); }
+.lc-folio-share-hd span { font-size: 10.5px; color: var(--lc-ink-mute); }
+.lc-tpl-row { display: flex; flex-wrap: wrap; gap: 6px; }
 .lc-share-tpl {
   appearance: none;
   border: 1px solid rgba(28, 25, 22, 0.14);
   background: rgba(252, 248, 240, 0.9);
   color: var(--lc-ink-soft);
   border-radius: 999px;
-  padding: 6px 11px;
+  padding: 5.5px 10px;
   font-family: inherit;
-  font-size: 11.5px;
-  letter-spacing: 0.08em;
-  cursor: pointer;
-  touch-action: manipulation;
-}
-.lc-share-tpl:hover {
-  border-color: var(--lc-verm);
-  color: var(--lc-verm);
-}
-
-.lc-folio-foot {
-  padding-top: 10px;
-  border-top: 1px solid var(--lc-line);
   font-size: 11px;
   letter-spacing: 0.08em;
+  cursor: pointer;
+}
+.lc-share-tpl:hover { border-color: var(--lc-verm); color: var(--lc-verm); }
+.lc-folio-foot {
+  padding-top: 8px;
+  border-top: 1px solid var(--lc-line);
+  font-size: 10.5px;
+  letter-spacing: 0.06em;
   color: var(--lc-ink-mute);
 }
 
-/* ==================== 乡镇放大详卷（潮田专属画卷 + 其余11乡聚焦） ==================== */
+/* ==================== 手机端轻透底栏 + 焦点乡镇风物浮条 ==================== */
+.lc-mobile-dock {
+  display: none;
+}
+
+@media (max-width: 919px) {
+  .lc-folio { display: none; }
+  .lc-colophon-float { left: 16px; bottom: 106px; }
+  .lc-col-title { font-size: 25px; }
+
+  .lc-zoom-ctrls {
+    right: 14px;
+    bottom: 126px;
+  }
+  .lc-atlas-hud[data-zoomed="1"] .lc-zoom-ctrls {
+    bottom: 158px;
+  }
+
+  .lc-mobile-dock {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 9;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 8px 14px calc(12px + env(safe-area-inset-bottom, 0px));
+    background: linear-gradient(180deg, rgba(245, 240, 227, 0) 0%, rgba(245, 240, 227, 0.88) 28%, rgba(245, 240, 227, 0.97) 100%);
+    pointer-events: auto;
+  }
+
+  /* 推近或点击某乡镇时轻柔浮出的焦点乡镇小条（绝不遮挡立起来的 3D 纸雕！） */
+  .lc-focus-ribbon {
+    display: none;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 9px 12px;
+    border-radius: 16px;
+    background: rgba(252, 248, 240, 0.94);
+    border: 1px solid rgba(28, 25, 22, 0.12);
+    box-shadow: 0 6px 20px rgba(28, 25, 22, 0.10);
+  }
+  .lc-atlas-hud[data-zoomed="1"] .lc-focus-ribbon {
+    display: flex;
+  }
+  .lc-fr-info {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+  }
+  .lc-fr-info strong {
+    font-size: 15px;
+    letter-spacing: 0.1em;
+    color: var(--lc-ink);
+  }
+  .lc-fr-info span {
+    font-size: 11px;
+    color: var(--lc-ink-mute);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .lc-fr-acts {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    flex: none;
+  }
+  .lc-fr-open,
+  .lc-fr-share {
+    appearance: none;
+    border-radius: 999px;
+    min-height: 34px;
+    padding: 0 12px;
+    font-family: inherit;
+    font-size: 11.5px;
+    letter-spacing: 0.08em;
+    cursor: pointer;
+    touch-action: manipulation;
+    white-space: nowrap;
+  }
+  .lc-fr-open {
+    border: 0;
+    background: var(--lc-celadon);
+    color: #FAF6EE;
+    font-weight: 600;
+  }
+  .lc-fr-share {
+    border: 1px solid rgba(179, 38, 30, 0.34);
+    background: rgba(179, 38, 30, 0.08);
+    color: var(--lc-verm);
+  }
+
+  .lc-cat-strip {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+    padding-bottom: 2px;
+  }
+  .lc-cat-strip::-webkit-scrollbar { display: none; }
+  .lc-atlas-hud[data-zoomed="1"] .lc-cat-strip {
+    display: none;
+  }
+
+  .lc-whisper-row {
+    border-top: 1px solid var(--lc-line);
+    padding-top: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+  .lc-whisper-hint {
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    color: var(--lc-ink-mute);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .lc-whisper-acts {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    flex: none;
+  }
+  .lc-whisper-share,
+  .lc-whisper-go {
+    appearance: none;
+    border: 0;
+    background: none;
+    padding: 4px 2px;
+    font-family: inherit;
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .lc-whisper-share { color: var(--lc-celadon); }
+  .lc-whisper-go { color: var(--lc-verm); font-weight: 600; }
+}
+
+/* ==================== 按需展开的乡镇完整风物志详卷 ==================== */
+.lc-zoom-panel[hidden],
+.lc-share-studio[hidden] {
+  display: none !important;
+  pointer-events: none !important;
+}
+
 .lc-zoom-panel {
   position: fixed;
   inset: 0;
@@ -735,11 +771,10 @@ body[data-mode="map"] #vignette {
 .lc-zoom-top {
   position: relative;
   height: 44dvh;
-  min-height: 240px;
+  min-height: 235px;
   flex: none;
   overflow: hidden;
 }
-
 .lc-zoom-chrome {
   position: absolute;
   top: max(12px, env(safe-area-inset-top));
@@ -751,7 +786,6 @@ body[data-mode="map"] #vignette {
   justify-content: space-between;
   gap: 10px;
 }
-
 .lc-zoom-crumb {
   display: inline-flex;
   align-items: center;
@@ -765,12 +799,8 @@ body[data-mode="map"] #vignette {
   letter-spacing: 0.1em;
   color: var(--lc-ink-soft);
 }
-.lc-zoom-crumb b {
-  color: var(--lc-ink);
-  font-weight: 600;
-}
+.lc-zoom-crumb b { color: var(--lc-ink); font-weight: 600; }
 
-/* 醒目易点大号返回全境关闭钮（44px+） */
 .lc-zoom-close {
   appearance: none;
   display: inline-flex;
@@ -779,23 +809,18 @@ body[data-mode="map"] #vignette {
   min-height: 44px;
   padding: 0 16px;
   border-radius: 999px;
-  background: rgba(252, 248, 240, 0.95);
+  background: rgba(252, 248, 240, 0.96);
   border: 1px solid rgba(28, 25, 22, 0.18);
   box-shadow: 0 4px 16px rgba(28, 25, 22, 0.11);
   color: var(--lc-ink);
   font-family: inherit;
   font-size: 13px;
   font-weight: 600;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.08em;
   cursor: pointer;
   touch-action: manipulation;
-  -webkit-tap-highlight-color: transparent;
 }
-.lc-zoom-close span {
-  font-size: 19px;
-  line-height: 1;
-  color: var(--lc-ink-soft);
-}
+.lc-zoom-close span { font-size: 19px; line-height: 1; color: var(--lc-ink-soft); }
 
 .lc-zoom-stage {
   position: absolute;
@@ -814,10 +839,7 @@ body[data-mode="map"] #vignette {
   -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 10%, #000 88%, transparent 100%);
   transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
 }
-.lc-zoom-stage.is-bespoke .lc-zoom-art {
-  max-width: 760px;
-  object-fit: cover;
-}
+.lc-zoom-stage.is-bespoke .lc-zoom-art { max-width: 760px; object-fit: cover; }
 .lc-zoom-pins {
   position: absolute;
   inset: 0;
@@ -825,9 +847,7 @@ body[data-mode="map"] #vignette {
   max-width: 760px;
   pointer-events: none;
 }
-.lc-zoom-pins .lc-pin {
-  pointer-events: auto;
-}
+.lc-zoom-pins .lc-pin { pointer-events: auto; transform: translate(-50%, -50%); }
 .lc-focus-pin {
   position: absolute;
   transform: translate(-50%, -50%);
@@ -838,27 +858,15 @@ body[data-mode="map"] #vignette {
   pointer-events: none;
 }
 .lc-focus-pin .lc-pin-dot {
-  width: 10px;
-  height: 10px;
-  background: var(--lc-verm);
+  width: 10px; height: 10px; background: var(--lc-verm);
   box-shadow: 0 0 0 3px rgba(252, 248, 240, 0.96), 0 0 0 9px rgba(179, 38, 30, 0.18);
 }
 .lc-focus-pin .lc-pin-tag {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--lc-verm);
-  border-color: rgba(179, 38, 30, 0.38);
-  padding: 4px 11px;
+  font-size: 13px; font-weight: 600; color: var(--lc-verm);
+  border-color: rgba(179, 38, 30, 0.38); padding: 4px 11px;
 }
-.lc-focus-pin .lc-pin-tag em {
-  font-style: normal;
-  font-size: 10px;
-  color: var(--lc-ink-mute);
-  font-weight: 400;
-  margin-left: 4px;
-}
+.lc-focus-pin .lc-pin-tag em { font-style: normal; font-size: 10px; color: var(--lc-ink-mute); font-weight: 400; margin-left: 4px; }
 
-/* 下半屏温润宣纸详笺 */
 .lc-zoom-sheet {
   flex: 1 1 auto;
   min-height: 0;
@@ -875,23 +883,10 @@ body[data-mode="map"] #vignette {
   transform: translate3d(0, 26px, 0);
   transition: transform 0.34s cubic-bezier(0.22, 1, 0.36, 1);
 }
-.lc-zoom-panel.open .lc-zoom-sheet {
-  transform: translate3d(0, 0, 0);
-}
+.lc-zoom-panel.open .lc-zoom-sheet { transform: translate3d(0, 0, 0); }
 
-.lc-zoom-grab {
-  flex: none;
-  height: 22px;
-  display: grid;
-  place-items: center;
-  touch-action: none;
-}
-.lc-zoom-grab i {
-  width: 40px;
-  height: 4px;
-  border-radius: 99px;
-  background: rgba(28, 25, 22, 0.16);
-}
+.lc-zoom-grab { flex: none; height: 22px; display: grid; place-items: center; touch-action: none; }
+.lc-zoom-grab i { width: 40px; height: 4px; border-radius: 99px; background: rgba(28, 25, 22, 0.16); }
 
 .lc-zoom-head {
   flex: none;
@@ -903,15 +898,8 @@ body[data-mode="map"] #vignette {
   border-bottom: 1px solid var(--lc-line);
   touch-action: none;
 }
-.lc-zoom-title-group {
-  min-width: 0;
-}
-.lc-zoom-title-line {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px;
-}
+.lc-zoom-title-group { min-width: 0; }
+.lc-zoom-title-line { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
 #lc-zoom-title {
   margin: 0;
   font-family: var(--font-title, "Songti SC", "STSong", serif);
@@ -921,55 +909,20 @@ body[data-mode="map"] #vignette {
   color: var(--lc-ink);
 }
 .lc-zoom-badge {
-  font-size: 11px;
-  letter-spacing: 0.1em;
-  color: var(--lc-verm);
-  background: var(--lc-verm-soft);
-  padding: 2.5px 9px;
-  border-radius: 4px;
+  font-size: 11px; letter-spacing: 0.1em; color: var(--lc-verm);
+  background: var(--lc-verm-soft); padding: 2.5px 9px; border-radius: 4px;
 }
-.lc-zoom-tagline {
-  margin: 5px 0 0;
-  font-size: 12.5px;
-  line-height: 1.55;
-  color: var(--lc-ink-soft);
-}
-
-.lc-zoom-head-acts {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex: none;
-}
+.lc-zoom-tagline { margin: 5px 0 0; font-size: 12.5px; line-height: 1.55; color: var(--lc-ink-soft); }
+.lc-zoom-head-acts { display: flex; align-items: center; gap: 8px; flex: none; }
 .lc-zoom-share-pill {
-  appearance: none;
-  border: 0;
-  min-height: 38px;
-  padding: 0 14px;
-  border-radius: 999px;
-  background: var(--lc-celadon);
-  color: #FAF6EE;
-  font-family: inherit;
-  font-size: 12px;
-  letter-spacing: 0.1em;
-  cursor: pointer;
-  touch-action: manipulation;
-  box-shadow: 0 3px 10px rgba(31, 94, 91, 0.22);
+  appearance: none; border: 0; min-height: 38px; padding: 0 14px; border-radius: 999px;
+  background: var(--lc-celadon); color: #FAF6EE; font-family: inherit; font-size: 12px;
+  letter-spacing: 0.1em; cursor: pointer;
 }
 .lc-zoom-x {
-  appearance: none;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  border: 1px solid rgba(28, 25, 22, 0.16);
-  background: #FAF5EC;
-  color: var(--lc-ink);
-  font-size: 20px;
-  line-height: 1;
-  display: grid;
-  place-items: center;
-  cursor: pointer;
-  touch-action: manipulation;
+  appearance: none; width: 40px; height: 40px; border-radius: 50%;
+  border: 1px solid rgba(28, 25, 22, 0.16); background: #FAF5EC; color: var(--lc-ink);
+  font-size: 20px; display: grid; place-items: center; cursor: pointer;
 }
 
 .lc-zoom-scroll {
@@ -982,234 +935,65 @@ body[data-mode="map"] #vignette {
   flex-direction: column;
   gap: 14px;
 }
-
-.lc-zoom-meta {
-  display: grid;
-  grid-template-columns: 1fr 1.35fr;
-  gap: 8px;
-}
+.lc-zoom-meta { display: grid; grid-template-columns: 1fr 1.35fr; gap: 8px; }
 .lc-meta-item {
-  padding: 8px 11px;
-  border-radius: 10px;
-  background: rgba(244, 238, 226, 0.72);
-  border: 0.8px solid rgba(28, 25, 22, 0.08);
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
+  padding: 8px 11px; border-radius: 10px;
+  background: rgba(244, 238, 226, 0.72); border: 0.8px solid rgba(28, 25, 22, 0.08);
+  display: flex; flex-direction: column; gap: 2px;
 }
-.lc-meta-item em {
-  font-style: normal;
-  font-size: 10.5px;
-  letter-spacing: 0.14em;
-  color: var(--lc-ink-mute);
-}
-.lc-meta-item span {
-  font-size: 12px;
-  line-height: 1.45;
-  color: var(--lc-ink);
-}
-
-.lc-zoom-blurb {
-  margin: 0;
-  font-size: 13px;
-  line-height: 1.82;
-  letter-spacing: 0.04em;
-  color: var(--lc-ink-soft);
-}
-
-.lc-zoom-specs {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-}
+.lc-meta-item em { font-style: normal; font-size: 10.5px; letter-spacing: 0.14em; color: var(--lc-ink-mute); }
+.lc-meta-item span { font-size: 12px; line-height: 1.45; color: var(--lc-ink); }
+.lc-zoom-blurb { margin: 0; font-size: 13px; line-height: 1.82; letter-spacing: 0.04em; color: var(--lc-ink-soft); }
+.lc-zoom-specs { display: flex; flex-wrap: wrap; gap: 6px; }
 .lc-spec-tag {
-  padding: 3px 9px;
-  border-radius: 999px;
-  background: var(--lc-celadon-soft);
-  color: var(--lc-celadon);
-  font-size: 11px;
-  letter-spacing: 0.08em;
+  padding: 3px 9px; border-radius: 999px; background: var(--lc-celadon-soft);
+  color: var(--lc-celadon); font-size: 11px; letter-spacing: 0.08em;
 }
+.lc-zoom-block { display: flex; flex-direction: column; gap: 8px; }
+.lc-block-hd { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+.lc-block-hd h3 { margin: 0; font-size: 13px; font-weight: 600; letter-spacing: 0.14em; color: var(--lc-ink); }
+.lc-block-hd span { font-size: 11px; color: var(--lc-ink-mute); }
 
-.lc-zoom-block {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-.lc-block-hd {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 8px;
-}
-.lc-block-hd h3 {
-  margin: 0;
-  font-size: 13px;
-  font-weight: 600;
-  letter-spacing: 0.14em;
-  color: var(--lc-ink);
-}
-.lc-block-hd span {
-  font-size: 11px;
-  color: var(--lc-ink-mute);
-}
-
-/* 可点村落名录芯片 + 展开风物小注 */
-.lc-village-chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 7px;
-}
+.lc-village-chips { display: flex; flex-wrap: wrap; gap: 7px; }
 .lc-vchip {
-  appearance: none;
-  padding: 5.5px 11px;
-  border-radius: 8px;
-  background: rgba(244, 238, 226, 0.85);
-  border: 0.9px solid rgba(28, 25, 22, 0.13);
-  font-family: inherit;
-  font-size: 12px;
-  letter-spacing: 0.06em;
-  color: var(--lc-ink-soft);
-  cursor: pointer;
-  touch-action: manipulation;
-  transition: background 0.18s ease, border-color 0.18s ease, color 0.18s ease;
+  appearance: none; padding: 5.5px 11px; border-radius: 8px;
+  background: rgba(244, 238, 226, 0.85); border: 0.9px solid rgba(28, 25, 22, 0.13);
+  font-family: inherit; font-size: 12px; letter-spacing: 0.06em; color: var(--lc-ink-soft);
+  cursor: pointer; touch-action: manipulation;
 }
-.lc-vchip.is-hi {
-  border-color: rgba(179, 38, 30, 0.36);
-  color: var(--lc-verm);
-  background: rgba(179, 38, 30, 0.07);
-}
-.lc-vchip.is-pending {
-  border-style: dashed;
-  color: var(--lc-ink-mute);
-  background: transparent;
-}
-.lc-vchip.is-active {
-  background: var(--lc-celadon);
-  border-color: var(--lc-celadon);
-  color: #FAF6EE;
-  font-weight: 600;
-}
-.lc-vchip.is-hi.is-active {
-  background: var(--lc-verm);
-  border-color: var(--lc-verm);
-  color: #FAF6EE;
-}
+.lc-vchip.is-hi { border-color: rgba(179, 38, 30, 0.36); color: var(--lc-verm); background: rgba(179, 38, 30, 0.07); }
+.lc-vchip.is-pending { border-style: dashed; color: var(--lc-ink-mute); background: transparent; }
+.lc-vchip.is-active { background: var(--lc-celadon); border-color: var(--lc-celadon); color: #FAF6EE; font-weight: 600; }
+.lc-vchip.is-hi.is-active { background: var(--lc-verm); border-color: var(--lc-verm); color: #FAF6EE; }
 
 .lc-village-note {
-  padding: 10px 13px;
-  border-radius: 12px;
-  background: rgba(244, 238, 226, 0.86);
-  border: 0.9px solid rgba(28, 25, 22, 0.10);
+  padding: 10px 13px; border-radius: 12px;
+  background: rgba(244, 238, 226, 0.86); border: 0.9px solid rgba(28, 25, 22, 0.10);
 }
-.lc-vn-top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  margin-bottom: 4px;
-}
-.lc-vn-top strong {
-  font-size: 13px;
-  color: var(--lc-ink);
-}
+.lc-vn-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 4px; }
+.lc-vn-top strong { font-size: 13px; color: var(--lc-ink); }
 .lc-vn-go {
-  appearance: none;
-  border: 0;
-  background: none;
-  padding: 2px 4px;
-  font-family: inherit;
-  font-size: 11.5px;
-  letter-spacing: 0.08em;
-  color: var(--lc-verm);
-  font-weight: 600;
-  cursor: pointer;
+  appearance: none; border: 0; background: none; padding: 2px 4px;
+  font-family: inherit; font-size: 11.5px; color: var(--lc-verm); font-weight: 600; cursor: pointer;
 }
-.lc-village-note p {
-  margin: 0;
-  font-size: 12px;
-  line-height: 1.65;
-  color: var(--lc-ink-soft);
-}
+.lc-village-note p { margin: 0; font-size: 12px; line-height: 1.65; color: var(--lc-ink-soft); }
 
-/* 风物专志与关联32景卡片 */
-.lc-zoom-cards {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
-  gap: 10px;
-}
+.lc-zoom-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 10px; }
 .lc-zoom-card {
-  appearance: none;
-  border: 0.9px solid rgba(28, 25, 22, 0.12);
-  background: #FAF6EE;
-  border-radius: 14px;
-  overflow: hidden;
-  display: grid;
-  grid-template-columns: 78px 1fr;
-  text-align: left;
-  padding: 0;
-  min-height: 78px;
-  cursor: pointer;
-  touch-action: manipulation;
-  -webkit-tap-highlight-color: transparent;
-  transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+  appearance: none; border: 0.9px solid rgba(28, 25, 22, 0.12); background: #FAF6EE;
+  border-radius: 14px; overflow: hidden; display: grid; grid-template-columns: 78px 1fr;
+  text-align: left; padding: 0; min-height: 78px; cursor: pointer; touch-action: manipulation;
 }
-.lc-zoom-card:hover {
-  border-color: rgba(179, 38, 30, 0.34);
-  box-shadow: 0 6px 18px rgba(28, 25, 22, 0.08);
-}
-.lc-zoom-card:active {
-  transform: scale(0.985);
-}
-.lc-zc-thumb {
-  width: 78px;
-  height: 100%;
-  background: #F1E9D9;
-  display: block;
-  overflow: hidden;
-}
-.lc-zc-thumb img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-}
-.lc-zc-body {
-  padding: 9px 11px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 4px;
-  min-width: 0;
-}
-.lc-zc-top {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 6px;
-}
-.lc-zc-top strong {
-  font-size: 13px;
-  color: var(--lc-ink);
-  font-weight: 600;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.lc-zc-top em {
-  font-style: normal;
-  font-size: 10px;
-  color: var(--lc-verm);
-  flex: none;
-}
+.lc-zoom-card:active { transform: scale(0.985); }
+.lc-zc-thumb { width: 78px; height: 100%; background: #F1E9D9; display: block; overflow: hidden; }
+.lc-zc-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.lc-zc-body { padding: 9px 11px; display: flex; flex-direction: column; justify-content: center; gap: 4px; min-width: 0; }
+.lc-zc-top { display: flex; align-items: baseline; justify-content: space-between; gap: 6px; }
+.lc-zc-top strong { font-size: 13px; color: var(--lc-ink); font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.lc-zc-top em { font-style: normal; font-size: 10px; color: var(--lc-verm); flex: none; }
 .lc-zc-body small {
-  font-size: 11.5px;
-  line-height: 1.45;
-  color: var(--lc-ink-soft);
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
+  font-size: 11.5px; line-height: 1.45; color: var(--lc-ink-soft);
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
 }
 
 .lc-zoom-foot {
@@ -1222,139 +1006,23 @@ body[data-mode="map"] #vignette {
   background: rgba(250, 245, 236, 0.96);
 }
 .lc-zf-btn {
-  appearance: none;
-  border: 0;
-  border-radius: 999px;
-  min-height: 44px;
-  font-family: inherit;
-  font-size: 13px;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  cursor: pointer;
-  touch-action: manipulation;
-  -webkit-tap-highlight-color: transparent;
+  appearance: none; border: 0; border-radius: 999px; min-height: 44px;
+  font-family: inherit; font-size: 13px; font-weight: 600; letter-spacing: 0.08em; cursor: pointer;
 }
-.lc-zf-btn.is-soft {
-  background: rgba(28, 25, 22, 0.08);
-  color: var(--lc-ink);
-}
-.lc-zf-btn.is-celadon {
-  background: var(--lc-celadon);
-  color: #FAF6EE;
-}
-.lc-zf-btn.is-dismiss {
-  background: var(--lc-verm);
-  color: #FAF6EE;
-}
+.lc-zf-btn.is-soft { background: rgba(28, 25, 22, 0.08); color: var(--lc-ink); }
+.lc-zf-btn.is-celadon { background: var(--lc-celadon); color: #FAF6EE; }
+.lc-zf-btn.is-dismiss { background: var(--lc-verm); color: #FAF6EE; }
 
-/* ==================== 手机端布局响应式 (< 920px) ==================== */
 @media (max-width: 919px) {
-  .lc-atlas-shell {
-    grid-template-columns: 1fr;
-    padding-top: calc(max(10px, env(safe-area-inset-top)) + 90px);
-  }
-  .lc-folio {
-    display: none;
-  }
-  .lc-atlas-viewport {
-    padding: 0 4px 4px;
-  }
-  .lc-atlas-plate {
-    height: min(calc(100dvh - 196px), 590px);
-    max-width: 98vw;
-  }
-  .lc-pin-tag {
-    font-size: 11px;
-    padding: 2.5px 7px;
-  }
-  .lc-pin.is-featured .lc-pin-tag {
-    font-size: 11.5px;
-    padding: 3px 8px;
-  }
-  .lc-col-title {
-    font-size: 25px;
-  }
-  .lc-mobile-bar {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    padding: 4px 16px calc(12px + env(safe-area-inset-bottom, 0px));
-    z-index: 15;
-  }
-  .lc-cat-strip {
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    scrollbar-width: none;
-    padding-bottom: 2px;
-  }
-  .lc-cat-strip::-webkit-scrollbar { display: none; }
-  .lc-whisper-row {
-    border-top: 1px solid var(--lc-line);
-    padding-top: 9px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 8px;
-  }
-  .lc-whisper-hint {
-    font-size: 11px;
-    letter-spacing: 0.1em;
-    color: var(--lc-ink-mute);
-    white-space: nowrap;
-  }
-  .lc-whisper-acts {
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    flex: none;
-  }
-  .lc-whisper-share,
-  .lc-whisper-go {
-    appearance: none;
-    border: 0;
-    background: none;
-    padding: 4px 2px;
-    font-family: inherit;
-    font-size: 12px;
-    letter-spacing: 0.1em;
-    cursor: pointer;
-    white-space: nowrap;
-  }
-  .lc-whisper-share {
-    color: var(--lc-celadon);
-  }
-  .lc-whisper-go {
-    color: var(--lc-verm);
-    font-weight: 600;
-  }
-
-  .lc-zoom-top {
-    height: 40dvh;
-    min-height: 225px;
-  }
-  .lc-zoom-head {
-    padding: 2px 16px 10px;
-  }
-  .lc-zoom-scroll {
-    padding: 12px 16px 16px;
-  }
-  .lc-zoom-meta {
-    grid-template-columns: 1fr;
-  }
-  .lc-zoom-cards {
-    grid-template-columns: 1fr;
-  }
-  .lc-zoom-share-pill {
-    display: none;
-  }
+  .lc-zoom-top { height: 40dvh; min-height: 220px; }
+  .lc-zoom-head { padding: 2px 16px 10px; }
+  .lc-zoom-scroll { padding: 12px 16px 16px; }
+  .lc-zoom-meta { grid-template-columns: 1fr; }
+  .lc-zoom-cards { grid-template-columns: 1fr; }
+  .lc-zoom-share-pill { display: none; }
 }
 
 /* ==================== 宣纸分享笺实时预览弹层 ==================== */
-.lc-share-studio[hidden],
-.lc-zoom-panel[hidden] {
-  display: none !important;
-  pointer-events: none !important;
-}
 .lc-share-studio {
   position: fixed;
   inset: 0;
@@ -1366,178 +1034,61 @@ body[data-mode="map"] #vignette {
   pointer-events: none;
   transition: opacity 0.22s ease;
 }
-.lc-share-studio.open {
-  opacity: 1;
-  pointer-events: auto;
-}
+.lc-share-studio.open { opacity: 1; pointer-events: auto; }
 .lc-share-backdrop {
-  position: absolute;
-  inset: 0;
-  background: rgba(24, 20, 16, 0.56);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  position: absolute; inset: 0; background: rgba(24, 20, 16, 0.56);
+  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
 }
 .lc-share-dialog {
-  position: relative;
-  z-index: 2;
-  width: min(440px, 100%);
-  max-height: 92dvh;
-  background: #FAF5EC;
-  border: 1px solid rgba(28, 25, 22, 0.14);
-  border-radius: 22px;
-  box-shadow: 0 24px 60px rgba(16, 12, 8, 0.34);
-  padding: 16px 18px 18px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  overflow: hidden;
-  color: var(--lc-ink);
-  font-family: "Songti SC", "STSong", "Noto Serif CJK SC", serif;
+  position: relative; z-index: 2; width: min(440px, 100%); max-height: 92dvh;
+  background: #FAF5EC; border: 1px solid rgba(28, 25, 22, 0.14); border-radius: 22px;
+  box-shadow: 0 24px 60px rgba(16, 12, 8, 0.34); padding: 16px 18px 18px;
+  display: flex; flex-direction: column; gap: 12px; overflow: hidden;
+  color: var(--lc-ink); font-family: "Songti SC", "STSong", "Noto Serif CJK SC", serif;
 }
-.lc-share-head {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 10px;
-}
-.lc-share-k {
-  font-family: 'DuomeiFrL', Georgia, serif;
-  font-size: 10.5px;
-  letter-spacing: 0.26em;
-  color: var(--lc-verm);
-}
-.lc-share-head h3 {
-  margin: 3px 0 0;
-  font-size: 16px;
-  font-weight: 500;
-  letter-spacing: 0.08em;
-}
+.lc-share-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+.lc-share-k { font-family: 'DuomeiFrL', Georgia, serif; font-size: 10.5px; letter-spacing: 0.26em; color: var(--lc-verm); }
+.lc-share-head h3 { margin: 3px 0 0; font-size: 16px; font-weight: 500; letter-spacing: 0.08em; }
 .lc-share-close {
-  appearance: none;
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  border: 1px solid rgba(28, 25, 22, 0.16);
-  background: #F4EEE2;
-  color: var(--lc-ink);
-  font-size: 22px;
-  display: grid;
-  place-items: center;
-  cursor: pointer;
-  flex: none;
+  appearance: none; width: 44px; height: 44px; border-radius: 50%;
+  border: 1px solid rgba(28, 25, 22, 0.16); background: #F4EEE2; color: var(--lc-ink);
+  font-size: 22px; display: grid; place-items: center; cursor: pointer; flex: none;
 }
 .lc-share-stage {
-  flex: 1 1 auto;
-  min-height: 220px;
-  max-height: 50dvh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #EFE8D8;
-  border-radius: 14px;
-  padding: 10px;
-  overflow: hidden;
+  flex: 1 1 auto; min-height: 220px; max-height: 50dvh;
+  display: flex; align-items: center; justify-content: center;
+  background: #EFE8D8; border-radius: 14px; padding: 10px; overflow: hidden;
 }
-.lc-share-stage img {
-  max-height: 100%;
-  max-width: 100%;
-  border-radius: 10px;
-  box-shadow: 0 10px 26px rgba(28, 25, 22, 0.16);
-  display: block;
-}
-.lc-share-tpls {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  justify-content: center;
-}
+.lc-share-stage img { max-height: 100%; max-width: 100%; border-radius: 10px; box-shadow: 0 10px 26px rgba(28, 25, 22, 0.16); display: block; }
+.lc-share-tpls { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; }
 .lc-share-tpl-btn {
-  appearance: none;
-  border: 1px solid rgba(28, 25, 22, 0.15);
-  background: #F6F0E3;
-  color: var(--lc-ink-soft);
-  border-radius: 999px;
-  padding: 6px 12px;
-  font-family: inherit;
-  font-size: 11.5px;
-  letter-spacing: 0.08em;
-  cursor: pointer;
+  appearance: none; border: 1px solid rgba(28, 25, 22, 0.15); background: #F6F0E3; color: var(--lc-ink-soft);
+  border-radius: 999px; padding: 6px 12px; font-family: inherit; font-size: 11.5px; letter-spacing: 0.08em; cursor: pointer;
 }
-.lc-share-tpl-btn.is-active {
-  background: var(--lc-celadon);
-  border-color: var(--lc-celadon);
-  color: #FAF6EE;
-}
-.lc-share-status {
-  margin: 0;
-  text-align: center;
-  font-size: 11.5px;
-  color: var(--lc-ink-mute);
-}
-.lc-share-foot {
-  display: grid;
-  grid-template-columns: 1.5fr 0.8fr;
-  gap: 8px;
-}
+.lc-share-tpl-btn.is-active { background: var(--lc-celadon); border-color: var(--lc-celadon); color: #FAF6EE; }
+.lc-share-status { margin: 0; text-align: center; font-size: 11.5px; color: var(--lc-ink-mute); }
+.lc-share-foot { display: grid; grid-template-columns: 1.5fr 0.8fr; gap: 8px; }
 .lc-share-save,
 .lc-share-done {
-  appearance: none;
-  border: 0;
-  border-radius: 999px;
-  min-height: 46px;
-  font-family: inherit;
-  font-size: 13.5px;
-  font-weight: 600;
-  letter-spacing: 0.1em;
-  cursor: pointer;
+  appearance: none; border: 0; border-radius: 999px; min-height: 46px;
+  font-family: inherit; font-size: 13.5px; font-weight: 600; letter-spacing: 0.1em; cursor: pointer;
 }
-.lc-share-save {
-  background: var(--lc-verm);
-  color: #FAF6EE;
-}
-.lc-share-done {
-  background: rgba(28, 25, 22, 0.09);
-  color: var(--lc-ink);
-}
+.lc-share-save { background: var(--lc-verm); color: #FAF6EE; }
+.lc-share-done { background: rgba(28, 25, 22, 0.09); color: var(--lc-ink); }
 
-/* ==================== 详情团扇册页手机大关闭钮增强 ==================== */
-.card-close {
-  min-width: 44px;
-  min-height: 44px;
-  width: 44px;
-  height: 44px;
-  font-size: 22px;
-}
+/* ==================== 详情团扇册页手机大关闭钮 ==================== */
+.card-close { min-width: 44px; min-height: 44px; width: 44px; height: 44px; font-size: 22px; }
 .card-close-bar {
-  display: none;
-  position: sticky;
-  bottom: 0;
-  left: 0;
-  right: 0;
+  display: none; position: sticky; bottom: 0; left: 0; right: 0;
   padding: 10px 0 calc(10px + env(safe-area-inset-bottom, 0px));
-  background: linear-gradient(180deg, transparent, #F7F1E4 30%);
-  z-index: 5;
+  background: linear-gradient(180deg, transparent, #F7F1E4 30%); z-index: 5;
 }
 .card-close-bar button {
-  appearance: none;
-  width: 100%;
-  min-height: 48px;
-  border: 0;
-  border-radius: 999px;
-  background: rgba(28, 25, 22, 0.10);
-  color: #1C1916;
-  font-family: inherit;
-  font-size: 14.5px;
-  font-weight: 600;
-  letter-spacing: 0.14em;
-  cursor: pointer;
-  touch-action: manipulation;
+  appearance: none; width: 100%; min-height: 48px; border: 0; border-radius: 999px;
+  background: rgba(28, 25, 22, 0.10); color: #1C1916; font-family: inherit;
+  font-size: 14.5px; font-weight: 600; letter-spacing: 0.14em; cursor: pointer; touch-action: manipulation;
 }
-@media (max-width: 720px) {
-  .card-close-bar {
-    display: block;
-  }
-}
+@media (max-width: 720px) { .card-close-bar { display: block; } }
 
 @media (prefers-reduced-motion: reduce) {
   .lc-pin.is-featured .lc-pin-dot { animation: none; }
