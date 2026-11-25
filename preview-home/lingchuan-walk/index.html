@@ -3,6 +3,23 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <script>
+    // iOS 刷新会沿用上次的整页缩放：一旦检测到就重设 viewport 复位，避免地图、加载页放大偏位
+    (function () {
+      var vv = window.visualViewport;
+      if (!vv) return;
+      function reset() {
+        if (vv.scale <= 1.01) return;
+        var m = document.querySelector('meta[name="viewport"]');
+        if (!m) return;
+        var c = m.getAttribute('content');
+        m.setAttribute('content', c.replace('maximum-scale=1', 'maximum-scale=1.01'));
+        setTimeout(function () { m.setAttribute('content', c); }, 60);
+      }
+      reset();
+      window.addEventListener('pageshow', reset);
+    })();
+  </script>
   <title>灵川全境 · 十二乡镇立雕地图与六境长卷</title>
   <link rel="icon" href="data:,">
   <link rel="stylesheet" href="./style.css">
