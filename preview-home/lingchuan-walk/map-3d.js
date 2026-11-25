@@ -1023,10 +1023,20 @@ export function createInteractive3DMap({
   let lastPinchDist = 0;
   let lastPinchMid = null;
 
-  canvas.addEventListener('pointerdown', (e) => {
+  // 手指落在地图上方的乡镇签 / 立绘浮签上时，同样交给地图处理拖拽与双指缩放；
+  // 否则 iOS 会把这次捏合当成整页缩放（刷新后还会保留，加载页也跟着放大偏位）。
+  const GESTURE_PASSTHROUGH = '.lc-atlas-hud .lc-pin, .lc-atlas-hud .lc-standee-tag';
+  const overlayPointers = new Set();
+  let suppressOverlayClick = false;
+
+  function onPointerDown(e, fromOverlay) {
     if (!isModeActive() || isBlockingOverlayOpen()) return;
     pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
-    canvas.setPointerCapture?.(e.pointerId);
+    if (fromOverlay) {
+      overlayPointers.add(e.pointerId);
+    } else {
+      canvas.setPointerCapture?.(e.pointerId);
+    }
     camState.vx = 0;
     camState.vz = 0;
     lastMoveTime = performance.now();
@@ -1041,9 +1051,16 @@ export function createInteractive3DMap({
       lastPinchDist = Math.max(12, Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y));
       lastPinchMid = { x: (pts[0].x + pts[1].x) * 0.5, y: (pts[0].y + pts[1].y) * 0.5 };
     }
-  });
+  }
+  canvas.addEventListener('pointerdown', (e) => onPointerDown(e, false));
+  window.addEventListener('pointerdown', (e) => {
+    if (e.target === canvas) return;
+    const el = e.target instanceof Element ? e.target : null;
+    if (!el || !el.closest(GESTURE_PASSTHROUGH) || el.closest('.lc-zoom-panel')) return;
+    onPointerDown(e, true);
+  }, true);
 
-  canvas.addEventListener('pointermove', (e) => {
+  window.addEventListener('pointermove', (e) => {
     if (!isModeActive() || isBlockingOverlayOpen()) return;
     if (!pointers.has(e.pointerId)) return;
 
@@ -1103,6 +1120,8 @@ export function createInteractive3DMap({
   function onPointerFinish(e) {
     if (!pointers.has(e.pointerId)) return;
     pointers.delete(e.pointerId);
+    const hadOverlay = overlayPointers.size > 0;
+    overlayPointers.delete(e.pointerId);
     if (pointers.size < 2) {
       lastPinchDist = 0;
       lastPinchMid = null;
@@ -1110,6 +1129,12 @@ export function createInteractive3DMap({
 
     if (pointers.size === 0 && isModeActive() && !isBlockingOverlayOpen()) {
       const since = (performance.now() - lastMoveTime) / 1000;
+      // 起手在浮签上：没拖动就让浮签自己的 click 生效；拖动/捏合过则吞掉随后那次 click
+      if (hadOverlay && !dragMoved) return;
+      if (hadOverlay && dragMoved) {
+        suppressOverlayClick = true;
+        setTimeout(() => { suppressOverlayClick = false; }, 400);
+      }
       if (!dragMoved) {
         const { w, h } = getViewport();
         ndc.set((e.clientX / w) * 2 - 1, -(e.clientY / h) * 2 + 1);
@@ -1160,8 +1185,26 @@ export function createInteractive3DMap({
       }
     }
   }
-  canvas.addEventListener('pointerup', onPointerFinish);
-  canvas.addEventListener('pointercancel', onPointerFinish);
+  window.addEventListener('pointerup', onPointerFinish);
+  window.addEventListener('pointercancel', onPointerFinish);
+  window.addEventListener('click', (e) => {
+    if (!suppressOverlayClick) return;
+    const el = e.target instanceof Element ? e.target : null;
+    if (!el || !el.closest(GESTURE_PASSTHROUGH)) return;
+    suppressOverlayClick = false;
+    e.preventDefault();
+    e.stopPropagation();
+  }, true);
+
+  // iOS Safari 无视 user-scalable=no：地图模式下拦住系统的整页捏合缩放
+  const blockPageZoom = (e) => {
+    if (isModeActive()) e.preventDefault();
+  };
+  document.addEventListener('gesturestart', blockPageZoom, { passive: false });
+  document.addEventListener('gesturechange', blockPageZoom, { passive: false });
+  document.addEventListener('touchmove', (e) => {
+    if (e.touches && e.touches.length > 1 && isModeActive()) e.preventDefault();
+  }, { passive: false });
 
   // 滚轮落在地图上方的乡镇签 / 立绘浮签上时同样定点缩放（这些签可点击，会挡住 canvas 的 wheel）
   const WHEEL_PASSTHROUGH = '.lc-atlas-hud .lc-pin, .lc-atlas-hud .lc-standee-tag';
@@ -1277,12 +1320,13 @@ export function createInteractive3DMap({
     const rightBound = (view.w >= 920 && camState.desktopPanelOpen) ? (view.w - 388) : view.w;
 
     // 随缩放自适应收缩立绘物理高度：屏幕尺寸舒适一致，地面占地随放大急剧缩小，彻底拉开真实山川间隔！
-    const worldScale = clamp(1.36 / Math.pow(Math.max(1.0, z), 0.78), 0.16, 0.86);
+    // 立绘屏幕尺寸基本恒定（相机距离 ∝ 1/z^1.06），放大时只拉开地理间距，不跟着变大挤成一团
+    const worldScale = clamp(1.36 / Math.pow(Math.max(1.0, z), 0.9), 0.13, 0.86);
 
     // 屏幕空间最小防挡间距（像素）：确保每幅工笔立绘完整露脸不叠压
     const minGapX = isMobile ? 86 : 116;
     const minGapY = isMobile ? 76 : 98;
-    const maxActiveStandees = isMobile ? 7 : 13;
+    const maxActiveStandees = isMobile ? 9 : 13;
 
     // Step 1: 收集当前倍率与视野内有资格登场的候选立绘，并投影屏幕坐标
     const candidates = [];

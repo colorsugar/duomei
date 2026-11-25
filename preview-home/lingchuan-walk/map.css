@@ -211,6 +211,7 @@ body[data-mode="map"] #vignette {
 }
 
 .lc-pin {
+  /* 落在签上的手指也交给地图做拖拽/捏合，不让浏览器整页缩放 */
   appearance: none;
   border: 0;
   background: none;
@@ -224,7 +225,7 @@ body[data-mode="map"] #vignette {
   white-space: nowrap;
   cursor: pointer;
   pointer-events: auto;
-  touch-action: manipulation;
+  touch-action: none;
   -webkit-tap-highlight-color: transparent;
   will-change: transform, opacity;
   transition: opacity 0.24s ease;
@@ -322,7 +323,7 @@ body[data-mode="map"] #vignette {
   box-shadow: 0 4px 14px rgba(28, 25, 22, 0.14);
   cursor: pointer;
   pointer-events: auto;
-  touch-action: manipulation;
+  touch-action: none;
   white-space: nowrap;
   will-change: transform, opacity;
   transition: opacity 0.2s ease;
