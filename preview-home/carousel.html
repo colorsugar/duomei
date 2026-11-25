@@ -165,47 +165,8 @@ const nextTick=()=>new Promise(r=>requestAnimationFrame(()=>r()));
 const VAR={A:{n:'墨晕',p:'下一幅像墨滴落在宣纸上，从几处同时洇开'},D:{n:'环廊',p:'书封围成一圈 · 拖动 / 滑动旋转，松手停在一本'},E:{n:'百叶',p:'画面裂成竖条依次在空中翻面，背面就是下一幅，拼回完整一张'}};
 const MAP=[{v:'D',g:'故语'},{v:'A',g:'大陆'},{v:'E',g:'云游'}].filter(m=>{const o=new URLSearchParams(location.search).get('only');return !o||o===m.v});
 const EMB=/emb=1/.test(location.search);if(EMB){document.documentElement.classList.add('emb');
- addEventListener('wheel',e=>{if(ov.classList.contains('on'))return;if(e.shiftKey||Math.abs(e.deltaX)>Math.abs(e.deltaY))return;try{parent.__stopEmbFling&&parent.__stopEmbFling();parent.scrollBy(0,e.deltaY)}catch(_){}},{passive:true});
- let vt=null,axis=null,samples=[];
- addEventListener('touchstart',e=>{
-  try{parent.__stopEmbFling&&parent.__stopEmbFling()}catch(_){}
-  if(ov.classList.contains('on')||e.touches.length!==1){vt=null;axis=null;samples=[];return}
-  const t=e.touches[0],ts=performance.now();
-  vt={x:t.clientX,y:t.clientY,lx:t.clientX,ly:t.clientY};axis=null;samples=[{y:t.clientY,t:ts}];
- },{passive:true});
- addEventListener('touchmove',e=>{
-  if(!vt||e.touches.length!==1||ov.classList.contains('on'))return;
-  const t=e.touches[0],ts=performance.now();
-  const dx=t.clientX-vt.x,dy=t.clientY-vt.y;
-  if(!axis&&Math.hypot(dx,dy)>7){
-   axis=Math.abs(dx)>=Math.abs(dy)*0.95?'x':'y';
-  }
-  if(axis==='y'){
-   if(e.cancelable)e.preventDefault();
-   const stepDy=t.clientY-vt.ly;
-   vt.lx=t.clientX;vt.ly=t.clientY;
-   samples.push({y:t.clientY,t:ts});
-   while(samples.length>8&&ts-samples[0].t>110)samples.shift();
-   if(stepDy!==0){try{parent.scrollBy(0,-stepDy)}catch(_){}}
-  }
- },{passive:false});
- const finishV=()=>{
-  if(vt&&axis==='y'&&samples.length>=2){
-   const nowT=performance.now(),lastS=samples[samples.length-1];
-   if(nowT-lastS.t<90){
-    let firstS=samples[0];
-    for(let k=0;k<samples.length-1;k++){if(lastS.t-samples[k].t<=105){firstS=samples[k];break}}
-    const dt=(lastS.t-firstS.t)/1000;
-    if(dt>0.008){
-     const vy=Math.max(-4800,Math.min(4800,-(lastS.y-firstS.y)/dt));
-     if(Math.abs(vy)>85){try{parent.__startEmbFling&&parent.__startEmbFling(vy)}catch(_){}}
-    }
-   }
-  }
-  vt=null;axis=null;samples=[];
- };
- addEventListener('touchend',finishV,{passive:true});
- addEventListener('touchcancel',()=>{vt=null;axis=null;samples=[]},{passive:true});
+ // touch: vertical pans chain to the homepage natively (no forwarding); wheel goes to the page's own scroller
+ addEventListener('wheel',e=>{if(ov.classList.contains('on'))return;if(e.shiftKey||Math.abs(e.deltaX)>Math.abs(e.deltaY))return;e.preventDefault();try{parent.__wheelBy?parent.__wheelBy(e.deltaY):parent.scrollBy(0,e.deltaY)}catch(_){}},{passive:false});
 }
 (async()=>{
  const ALLD=await (await fetch('car-data.json')).json();
