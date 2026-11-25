@@ -33,23 +33,26 @@ export function createMapView({
       </div>
 
       <div class="lc-map-stage">
-        <img class="lc-map-base" src="${assetUrl(MAP_META.baseArt)}" alt="" decoding="async">
-        <svg class="lc-map-svg" viewBox="0 0 1000 1200" role="img" aria-label="灵川县乡镇示意地图">
-          <defs>
-            <filter id="lcSoft" x="-20%" y="-20%" width="140%" height="140%">
-              <feDropShadow dx="0" dy="6" stdDeviation="8" flood-color="#3a2a18" flood-opacity="0.18"/>
-            </filter>
-          </defs>
-          ${TOWNSHIPS.map((t) => `
-            <g class="lc-town-node${t.featured ? ' is-featured' : ''}" data-town="${t.id}" transform="translate(${t.cx} ${t.cy})">
-              <circle class="lc-town-halo" r="${t.r * 1.18}"></circle>
-              <circle class="lc-town-disk" r="${t.r}" filter="url(#lcSoft)"></circle>
-              <text class="lc-town-label" text-anchor="middle" dy="0.35em">${t.name}</text>
-              ${t.featured ? '<text class="lc-town-badge" text-anchor="middle" dy="28">放大</text>' : ''}
-            </g>
-          `).join('')}
-        </svg>
-        <img class="lc-map-guide" src="${assetUrl(MAP_META.guideArt)}" alt="" decoding="async">
+        <div class="lc-map-frame">
+          <img class="lc-map-base" src="${assetUrl(MAP_META.baseArt)}" alt="灵川县北向上示意底图" decoding="async">
+          <svg class="lc-map-svg" viewBox="0 0 1000 1200" role="img" aria-label="灵川县乡镇钉点地图">
+            <defs>
+              <filter id="lcPinSoft" x="-40%" y="-40%" width="180%" height="180%">
+                <feDropShadow dx="0" dy="2" stdDeviation="2.5" flood-color="#3a2a18" flood-opacity="0.28"/>
+              </filter>
+            </defs>
+            ${TOWNSHIPS.map((t) => `
+              <g class="lc-town-node${t.featured ? ' is-featured' : ''}" data-town="${t.id}" transform="translate(${t.cx} ${t.cy})">
+                <circle class="lc-town-hit" r="28"></circle>
+                <circle class="lc-town-halo" r="18"></circle>
+                <circle class="lc-town-pin" r="11" filter="url(#lcPinSoft)"></circle>
+                <circle class="lc-town-core" r="4.5"></circle>
+                <text class="lc-town-label" text-anchor="middle" dy="${t.labelDy ?? -26}">${t.name}</text>
+                ${t.featured ? `<text class="lc-town-badge" text-anchor="middle" dy="${(t.labelDy ?? -26) < 0 ? -44 : 52}">放大</text>` : ''}
+              </g>
+            `).join('')}
+          </svg>
+        </div>
       </div>
 
       <aside class="lc-map-rail" aria-label="乡镇列表">
