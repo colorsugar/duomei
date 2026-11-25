@@ -21,6 +21,10 @@ header{position:fixed;left:max(22px,env(safe-area-inset-left));top:max(18px,env(
 .seal{width:34px;height:34px;border-radius:9px;background:var(--verm);color:var(--paper);font:18px/1 MSZ,KaiTi,serif;display:grid;place-items:center;writing-mode:vertical-rl;letter-spacing:-2px;box-shadow:0 6px 18px rgba(179,38,30,.35)}
 header h1{margin:0;font:400 22px/1 ZMX,KaiTi,serif;letter-spacing:.12em}
 header small{display:block;font-size:11px;letter-spacing:.3em;opacity:.55;margin-top:6px}
+.home-back{pointer-events:auto;appearance:none;text-decoration:none;display:inline-flex;align-items:center;height:34px;padding:0 14px;border-radius:999px;background:rgba(243,238,230,.14);color:inherit;font:14px/1 MSZ,KaiTi,serif;letter-spacing:.16em;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);box-shadow:inset 0 0 0 1px rgba(243,238,230,.18);white-space:nowrap}
+body.light .home-back{background:rgba(28,25,22,.08);box-shadow:inset 0 0 0 1px rgba(28,25,22,.1)}
+/* homepage fullscreen overlay already has its own 返回; hide this clone inside the iframe */
+.in-frame .home-back,.embed .home-back{display:none!important}
 #cap{position:fixed;right:max(24px,env(safe-area-inset-right));top:max(20px,env(safe-area-inset-top));z-index:5;display:flex;gap:10px;align-items:baseline;pointer-events:none;transition:opacity .6s}
 #cap b{font:400 30px/1 ZMX,KaiTi,serif;letter-spacing:.1em}
 #cap span{font:15px/1 MSZ,KaiTi,serif;opacity:.6;letter-spacing:.2em}
@@ -201,10 +205,11 @@ body:not(.embed) #trail .up{top:62px}
 <script type="importmap">{ "imports": { "three": "./vendor/three.module.js" } }</script>
 </head>
 <body>
+<script>if(window!==window.top)document.documentElement.classList.add('in-frame')</script>
 <div id="stage"></div>
 <div id="vig"></div>
 <iframe id="frame" title="spread" hidden></iframe>
-<header><div class="seal">多美</div><div><h1>云游绘本</h1><small>POP-UP · 立体书</small></div></header>
+<header><a class="home-back" href="/" aria-label="返回多美主站">‹ 返回多美</a><div class="seal">多美</div><div><h1>云游绘本</h1><small>POP-UP · 立体书</small></div></header>
 <div id="cap"></div>
 <div id="iris"></div>
 <div id="quest"></div><div id="trail" aria-label="画中画层级"></div><div id="album"></div><div id="toast"></div><div id="cue"><span></span></div>

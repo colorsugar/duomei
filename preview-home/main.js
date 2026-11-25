@@ -98,7 +98,7 @@ function setActive(el){
   act=id;window.__curSec=KEY(id);
   HN.textContent=String(ORDER.indexOf(id)).padStart(2,'0');HC.textContent=NAME[id];roll(HN);roll(HC);
   menuLinks.forEach(a=>a.classList.toggle('on',a.dataset.sec===(id==='foot'||id==='ov'?'hero':id)));
-  HUD.classList.toggle('on',id!=='ov'&&id!=='foot');HUD.classList.toggle('foot-hide',id==='foot');HUD.classList.toggle('zb',id==='zaobao');
+  HUD.classList.toggle('on',id!=='ov');HUD.classList.toggle('at-foot',id==='foot');HUD.classList.toggle('zb',id==='zaobao');
  }
  if(dk!==actDk){actDk=dk;const col=dk?'#f3ead9':'#2a211b';UI.style.color=col;HUD.style.color=col;HUD.classList.toggle('dk',!!dk)}
 }
@@ -185,6 +185,22 @@ addEventListener('pageshow',()=>PT.classList.remove('go'));
 // desktop wheel gets inertia; touch scrolling is always the browser's own
 if(FINE&&!RM){const s=document.createElement('script');s.src='js/lenis.min.js';s.onload=()=>{if(!window.Lenis)return;lenis=window.__lenis=new window.Lenis({lerp:.1,smoothWheel:true,syncTouch:false,autoRaf:true,prevent:n=>!!(n.closest&&n.closest('[data-lenis-prevent],#modal,#hbfs,#dm-menu,#dm-music-card'))})};document.head.appendChild(s)}
 window.__wheelBy=dy=>{if(lenis)lenis.scrollTo(lenis.targetScroll+dy);else scrollBy(0,dy)};
+// iframe carousels (故语/大陆/云游): vertical pans forward to the page; horizontal stays with the embed
+const embFling={vy:0,y:0,t:0,on:false};let embRaf=0;
+function stepEmbFling(now){
+ if(!embFling.on){embRaf=0;return}
+ if(Math.abs(scrollY-embFling.y)>12){embFling.on=false;embFling.vy=0;embRaf=0;return}
+ const dt=Math.min(.05,Math.max(.001,(now-embFling.t)/1000));embFling.t=now;
+ const maxS=Math.max(0,document.documentElement.scrollHeight-innerHeight);
+ embFling.y+=embFling.vy*dt;embFling.vy*=Math.exp(-2.15*dt);
+ if(embFling.y<=0||embFling.y>=maxS||Math.abs(embFling.vy)<12){embFling.y=Math.min(maxS,Math.max(0,embFling.y));embFling.on=false;embFling.vy=0}
+ scrollTo(0,Math.round(embFling.y));
+ if(embFling.on)embRaf=requestAnimationFrame(stepEmbFling);else embRaf=0;
+}
+window.__startEmbFling=vy=>{embFling.vy=vy;embFling.y=scrollY;embFling.t=performance.now();embFling.on=true;if(!embRaf)embRaf=requestAnimationFrame(stepEmbFling)};
+window.__stopEmbFling=()=>{embFling.on=false;embFling.vy=0;embRaf=0};
+addEventListener('touchstart',()=>window.__stopEmbFling(),{passive:true});
+addEventListener('wheel',()=>window.__stopEmbFling(),{passive:true});
 
 // ---------- 08 纸上绘本 · fullscreen pop-up book ----------
 const HB={f:$('ifH'),ld:0,ready:0,fs:0,savedY:0};
@@ -202,9 +218,9 @@ $('hbopen').addEventListener('click',openHuiben);$('hbback').addEventListener('c
 // ---------- HUD progress + back-to-top (scroll position only; no layout work) ----------
 const PG=$('PG'),TT=$('totop'),RING=$('ttp'),SDA=CSS.supports&&CSS.supports('animation-timeline: scroll()');let maxY=1,hudRaf=0,ttOn=null;
 const measureMax=()=>{maxY=Math.max(1,document.documentElement.scrollHeight-innerHeight)};
-function hudTick(){hudRaf=0;const y=scrollY,p=cl(y/maxY);if(!SDA)PG.style.transform=`scaleX(${p.toFixed(4)})`;RING.style.strokeDashoffset=(113.1*(1-p)).toFixed(1);const on=y>innerHeight*.9&&act!=='foot';if(on!==ttOn){ttOn=on;TT.classList.toggle('show',on);TT.classList.toggle('foot-hide',act==='foot')}}
+function hudTick(){hudRaf=0;const y=scrollY,p=cl(y/maxY);if(!SDA)PG.style.transform=`scaleX(${p.toFixed(4)})`;RING.style.strokeDashoffset=(113.1*(1-p)).toFixed(1);const on=y>innerHeight*.9;if(on!==ttOn){ttOn=on;TT.classList.toggle('show',on)}}
 addEventListener('scroll',()=>{if(!hudRaf)hudRaf=requestAnimationFrame(hudTick)},{passive:true});
-TT.addEventListener('click',()=>window.__smoothTo(0));
+TT.addEventListener('click',()=>{window.__stopEmbFling&&window.__stopEmbFling();window.__smoothTo(0)});
 {const bar=Q('#HUD .bar')[0];let dn=false;const go=(e,instant)=>{const r=bar.getBoundingClientRect();window.__smoothTo(cl((e.clientX-r.left)/r.width)*maxY,instant)};
  bar.addEventListener('pointerdown',e=>{if(e.pointerType==='touch')return;dn=true;bar.setPointerCapture(e.pointerId);go(e)});
  bar.addEventListener('pointermove',e=>{if(dn)go(e,true)});bar.addEventListener('pointerup',()=>dn=false);bar.addEventListener('pointercancel',()=>dn=false)}
