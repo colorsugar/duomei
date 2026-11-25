@@ -553,8 +553,9 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}button
 }
 
 #ovwm span svg{display:block;width:.98em;height:.98em;overflow:visible}
+#ovwm{opacity:0}#ovwm.ink-live{opacity:1}
 #ovwm .sk{fill:none;stroke:#fff;stroke-width:150;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:1 1;stroke-dashoffset:1}
-#ovwm .gm,#ovwm .gf{fill:var(--ink)}#ovwm .gf{opacity:0}
+#ovwm .gm,#ovwm .gf{fill:var(--ink)}#ovwm .gm{opacity:0;visibility:hidden}#ovwm .gf{opacity:0}
 #ovwm .bl{fill:var(--ink);opacity:0;filter:blur(10px);transform-origin:500px 480px}
 #ovwm .tip{fill:#1C1916;opacity:0}
 #ovtag i{display:inline-block;transform-origin:50% 90%;will-change:transform}
@@ -658,15 +659,17 @@ a,button,.mag{-webkit-tap-highlight-color:transparent}
 .dm-brand{display:inline-flex;flex-direction:column;text-decoration:none;color:inherit;line-height:1.05;cursor:pointer;padding:2px 0}
 .dm-brand strong{font-family:FrB,Georgia,"Times New Roman",serif;font-size:18px;font-weight:600;letter-spacing:.05em}
 .dm-brand span{font-size:11px;letter-spacing:.14em;opacity:.78;margin-top:3px}
-#dm-orb{position:relative;width:40px;height:40px;flex:0 0 40px;border-radius:50%;border:0;padding:0;cursor:pointer;touch-action:manipulation;
- background:radial-gradient(circle,#c44b31 0 11.5%,transparent 12.5%),radial-gradient(circle,transparent 0 23%,#fbf7ef 24% 35%,transparent 36%),repeating-radial-gradient(circle,rgba(255,255,255,.06) 0 1.5px,transparent 1.5px 4px),radial-gradient(circle at 36% 32%,#3b3530,#191614 72%);
- box-shadow:0 0 0 1.2px rgba(255,253,247,.78),0 8px 20px rgba(28,25,22,.22);transition:transform .3s cubic-bezier(.22,1,.36,1),box-shadow .4s ease}
-#dm-orb::before{content:"";position:absolute;inset:2px;border-radius:50%;background:conic-gradient(from 210deg,rgba(255,255,255,.18),transparent 22%,transparent 55%,rgba(255,255,255,.1) 70%,transparent 84%);pointer-events:none}
+#dm-orb{position:relative;width:40px;height:40px;flex:0 0 40px;border-radius:50%;border:0;padding:0;cursor:pointer;touch-action:manipulation;background:transparent;box-shadow:none;transition:transform .3s cubic-bezier(.22,1,.36,1),box-shadow .4s ease;display:inline-flex;align-items:center;justify-content:center;color:#1C1916}
+#dm-orb svg{display:block;width:40px;height:40px;overflow:visible;pointer-events:none}
+#dm-orb .orb-disk{fill:#F6F0E6;stroke:currentColor;stroke-width:1.15}
+#dm-orb .orb-ring{fill:none;stroke:#B3261E;stroke-width:1.05;opacity:.72}
+#dm-orb .orb-ink{fill:none;stroke:currentColor;stroke-width:1.85;stroke-linecap:round;stroke-linejoin:round}
+#dm-orb .orb-dot{fill:#B3261E}
 #dm-orb:hover{transform:scale(1.07)}
-#dm-orb.is-playing::before{animation:dmSpin 5.5s linear infinite}
 #dm-orb.is-playing{animation:dmOrbPulse 2.8s ease-in-out infinite}
+#dm-orb.is-playing .orb-ring{animation:dmSpin 5.5s linear infinite;transform-origin:20px 20px}
 @keyframes dmSpin{to{transform:rotate(1turn)}}
-@keyframes dmOrbPulse{0%,100%{box-shadow:0 0 0 1.2px rgba(255,253,247,.78),0 8px 20px rgba(28,25,22,.22),0 0 0 0 rgba(196,75,49,.36)}50%{box-shadow:0 0 0 1.2px rgba(255,253,247,.78),0 8px 20px rgba(28,25,22,.22),0 0 0 8px rgba(196,75,49,0)}}
+@keyframes dmOrbPulse{0%,100%{filter:drop-shadow(0 6px 14px rgba(28,25,22,.18))}50%{filter:drop-shadow(0 6px 14px rgba(28,25,22,.18)) drop-shadow(0 0 0 rgba(179,38,30,0))}}
 
 /* Three-dot menu button -> X */
 #dm-menu-btn{position:relative;width:42px;height:42px;flex:0 0 42px;border-radius:50%;background:rgba(255,253,247,.86);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid rgba(28,25,22,.1);box-shadow:0 4px 16px rgba(28,25,22,.09);color:#1C1916;cursor:pointer;touch-action:manipulation;display:inline-flex;align-items:center;justify-content:center;transition:transform .25s ease,background .25s ease,box-shadow .25s ease}
@@ -1087,7 +1090,7 @@ body:not(.dm-music-open) #totop.show:not(.foot-hide){opacity:1!important;transfo
 <header class="ui" id="UI">
  <div class="dm-head-left">
   <a class="dm-brand" id="dm-brand" href="#top" aria-label="回到首页顶部"><strong>DUOMEI</strong><span>多美</span></a>
-  <div id="dm-music" class="dm-music-wrap"><button type="button" id="dm-orb" aria-label="展开多美原创音乐" aria-expanded="false"></button></div>
+  <div id="dm-music" class="dm-music-wrap"><button type="button" id="dm-orb" aria-label="展开多美原创音乐" aria-expanded="false"><svg viewBox="0 0 40 40" aria-hidden="true"><circle class="orb-disk" cx="20" cy="20" r="18.2"/><circle class="orb-ring" cx="20" cy="20" r="13.4"/><path class="orb-ink" d="M11.8 23.2c2.6-7.4 7.6-9.8 12.2-6.2 2.2 1.7 3.1 4.6 1.2 6.8-2.6 3-7.4 2.2-9.8-.6"/><circle class="orb-dot" cx="25.2" cy="13.6" r="2.15"/></svg></button></div>
  </div>
  <button type="button" id="dm-menu-btn" aria-label="打开导航" aria-expanded="false"><span></span><span></span><span></span></button>
  <nav id="dm-menu" aria-label="主导航">

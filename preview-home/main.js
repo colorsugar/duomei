@@ -62,7 +62,9 @@ const cards=NOTES.map((n,i)=>{const d=document.createElement('div');d.className=
 $('tick').textContent=('每日一纸，把世界摊在早餐桌上 ◆ 国际 ◆ 科技 ◆ AI ◆ 日常小事 ◆ 堺与大阪本周值得去的展和祭 ◆ 2026年11月23日 星期一 ◆ ').repeat(4);
 ['mq0','mq1','mq2'].forEach(id=>$(id).textContent='反正有大把时光 · 来啊，快活啊 · '.repeat(6));
 Q('#ovtag .tg').forEach(l=>{l.innerHTML=[...l.textContent].map(c=>`<i>${c}</i>`).join('')});const TAGC=Q('#ovtag i');
-const WMS=[];Q('#ovwm span').forEach((s,ci)=>{const tip=s.querySelector('.tip');const sk=[...s.querySelectorAll('.sk')];sk.forEach((el,k)=>WMS.push({el,tip,len:el.getTotalLength(),t0:.06+WMS.length*.085+ci*.08,last:k===sk.length-1}))});
+const WMS=[];Q('#ovwm span').forEach((s,ci)=>{const tip=s.querySelector('.tip');const sk=[...s.querySelectorAll('.sk')];sk.forEach((el,k)=>{el.style.strokeDasharray='1 1';el.style.strokeDashoffset='1';WMS.push({el,tip,len:el.getTotalLength(),t0:.06+WMS.length*.085+ci*.08,last:k===sk.length-1})})});
+const GMS=Q('#ovwm .gm');GMS.forEach(g=>{g.style.opacity='0';g.style.visibility='hidden'});
+$('ovwm').classList.remove('ink-live');
 const TPET=[0,1,2,3,4].map(k=>{const p=document.createElement('i');p.className='tpet';p.style.setProperty('--k',k);$('ov').querySelector('.sx').append(p);return p});
 split($('masth'));split($('hl'));split($('kside'));split($('dh'));Q('.head h2').forEach(split);
 {const b=document.createElement('i');b.id='hlbar';$('hl').prepend(b)}
@@ -158,7 +160,21 @@ let lenis=null;
 const yOf=key=>{if(!key||key==='hero')return 0;const el=$(key==='notes'?'xiaoji':key);return el?Math.round(el.getBoundingClientRect().top+scrollY):null};
 window.__smoothTo=(y,instant)=>{if(lenis&&!instant)lenis.scrollTo(y,{duration:Math.min(2.2,.9+Math.abs(y-scrollY)/innerHeight*.06)});else{if(lenis)lenis.scrollTo(y,{immediate:true});scrollTo({top:y,behavior:instant||RM?'instant':'smooth'})}};
 window.__scrollToSec=(key,behavior='smooth')=>{const y=yOf(key);if(y==null)return;if(window.__onSecJump)window.__onSecJump(key);window.__smoothTo(y,behavior==='instant'||behavior==='auto')};
-{const k=decodeURIComponent(location.hash.slice(1));if(k&&yOf(k)!=null){const j=()=>window.__scrollToSec(k,'instant');requestAnimationFrame(j);addEventListener('load',()=>requestAnimationFrame(j),{once:true})}}
+try{history.scrollRestoration='manual'}catch(_){}
+(function bootHash(){
+  const raw=location.hash.slice(1);const k=raw?decodeURIComponent(raw):'';
+  if(k&&yOf(k)!=null){
+    const land=()=>window.__scrollToSec(k,'instant');
+    const clear=()=>{if(location.hash)try{history.replaceState(null,'',location.pathname+location.search)}catch(_){}};
+    requestAnimationFrame(land);
+    addEventListener('load',()=>requestAnimationFrame(()=>{land();clear()}),{once:true});
+  }else{
+    const top=()=>{if(scrollY)scrollTo(0,0)};
+    top();
+    addEventListener('load',top,{once:true});
+    addEventListener('pageshow',e=>{if(e.persisted||!location.hash)top()});
+  }
+})()
 Q('#ovix .ix').forEach(t=>t.addEventListener('click',()=>window.__scrollToSec(t.dataset.go)));
 // page transition: an ink curtain rises before leaving for an inner page
 const PT=document.createElement('div');PT.id='pt';PT.innerHTML='<b>多美</b>';document.body.appendChild(PT);
@@ -226,9 +242,11 @@ function loader(now){if(loaderDone)return;const el=(now-LT)/1000/LS;
 const ovSpans=Q('#ovwm span').map(s=>({el:s,gf:s.querySelector('.gf'),bl:s.querySelector('.bl')}));
 const OVI=Q('#ovix .ix'),ovixSc=Q('#ovix .sc')[0],ovixHint=Q('#ovix .m-hint')[0],ovixEl=$('ovix');
 const WT=WMS.length?WMS[WMS.length-1].t0+.3:0,INTRO_END=WT+2.6;
+if(RM){$('ovwm').classList.add('ink-live');GMS.forEach(g=>{g.style.visibility='visible';g.style.opacity='1'});WMS.forEach(m=>{m.el.style.strokeDashoffset='0';m.tip.style.opacity=0});ovSpans.forEach(s=>{s.gf.style.opacity=1;s.bl.style.opacity=.17});$('ov').classList.add('alive');introDone=true}
 function intro(now){
- const rt=OVS==null?0:(window.__clock!=null?99:(now-OVS)/1000);
- WMS.forEach(m=>{const t=cl((rt-m.t0)/.3);m.el.style.strokeDashoffset=(1-qo(t)).toFixed(4);if(t>0&&t<1){const L=m.len*qo(t),p=m.el.getPointAtLength(L);m.tip.setAttribute('cx',p.x.toFixed(1));m.tip.setAttribute('cy',p.y.toFixed(1));m.tip.style.opacity=(.9*Math.sin(Math.PI*t)).toFixed(3);m.tip.setAttribute('r',(52-26*t).toFixed(1))}else if(t>=1)m.tip.style.opacity=0});
+ const rt=OVS==null?0:(window.__clock!=null?+window.__clock:(now-OVS)/1000);
+ if(rt>0.01)$('ovwm').classList.add('ink-live');
+ WMS.forEach(m=>{const t=cl((rt-m.t0)/.3);if(t>0){const g=m.el.closest('svg')&&m.el.closest('svg').querySelector('.gm');if(g){g.style.visibility='visible';g.style.opacity='1'}}m.el.style.strokeDashoffset=(1-qo(t)).toFixed(4);if(t>0&&t<1){const L=m.len*qo(t),p=m.el.getPointAtLength(L);m.tip.setAttribute('cx',p.x.toFixed(1));m.tip.setAttribute('cy',p.y.toFixed(1));m.tip.style.opacity=(.9*Math.sin(Math.PI*t)).toFixed(3);m.tip.setAttribute('r',(52-26*t).toFixed(1))}else if(t>=1)m.tip.style.opacity=0});
  const fill=oc(cl((rt-WT+.15)/.5));
  ovSpans.forEach(s=>{s.gf.style.opacity=fill.toFixed(3);s.bl.style.opacity=(fill*.17).toFixed(3)});
  const sr=cl((rt-WT-.1)/.42),ssc=sr<.62?lerp(2.6,.9,io(sr/.62)):lerp(.9,1,oc((sr-.62)/.38));
