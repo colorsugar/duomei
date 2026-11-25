@@ -1,5 +1,7 @@
 // ============================================================================
-// 灵川全境 · 宣纸立雕地图与十二乡镇风物志（完全贴合多美现网气质）
+// 灵川全境 · 3D 立体纸艺活地图 HUD 与风物志联动层
+// 透明覆盖在 Three.js 3D 宣纸立雕沙盘之上：实时投影 12 乡镇微签 + 弹起立绘纸签
+// + 缩放控制 + 焦点乡镇轻浮条 + 可展开完整乡镇详卷 + 5 套宣纸分享笺
 // ============================================================================
 
 import {
@@ -20,6 +22,8 @@ function clamp(v, lo, hi) {
   return v < lo ? lo : v > hi ? hi : v;
 }
 
+const STANDEE_TAG_POOL_SIZE = 5;
+
 export function createMapView({
   root,
   landmarksById,
@@ -30,116 +34,130 @@ export function createMapView({
   onJumpToSegment,
 }) {
   const state = {
-    selectedId: 'chaotian',
+    focusId: 'chaotian',
     zoomedId: null,
     overlayOpen: false,
     category: 'all',
-    scale: 1,
-    tx: 0,
-    ty: 0,
+    camZoom: 1.0,
     activeVillageId: null,
   };
 
+  let map3d = null;
   const townById = (id) => TOWNSHIPS.find((t) => t.id === id);
 
   root.innerHTML = `
-    <div class="lc-atlas" data-focus="chaotian">
-      <div class="lc-atlas-shell">
-        <!-- 左侧 / 手机主画布：宣纸立雕全境地图 -->
-        <section class="lc-atlas-stage" aria-label="灵川全境宣纸立雕地图">
-          <div class="lc-atlas-viewport" id="lc-atlas-viewport">
-            <div class="lc-atlas-transform" id="lc-atlas-transform">
-              <div class="lc-atlas-plate">
-                <div class="lc-compass" aria-hidden="true"><span>北</span><i></i></div>
-                <img class="lc-relief-img" src="${assetUrl(MAP_META.baseArt)}" alt="灵川县全境宣纸层叠立雕地图" decoding="async" draggable="false">
-                ${WATER_LABELS.map((w) => `
-                  <span class="lc-water-lbl" style="left:${w.x}%;top:${w.y}%;${w.rot ? `transform:translate(-50%,-50%) rotate(${w.rot}deg)` : ''}" aria-hidden="true">${w.text}</span>
-                `).join('')}
-                <div class="lc-pins-layer">
-                  ${TOWNSHIPS.map((t) => {
-                    const cls = [
-                      'lc-pin',
-                      `dir-${t.dir || 'top'}`,
-                      t.county ? 'is-county' : '',
-                      t.featured ? 'is-featured' : '',
-                    ].filter(Boolean).join(' ');
-                    const tagInner = t.featured
-                      ? `${t.name}<i class="lc-pin-seal">详卷</i>`
-                      : t.county
-                        ? `${t.name}<em>县治</em>`
-                        : t.name;
-                    return `
-                      <button type="button" class="${cls}" data-town="${t.id}" style="left:${t.x}%;top:${t.y}%;" aria-label="${t.name} · ${t.region}">
-                        <span class="lc-pin-dot" aria-hidden="true"></span>
-                        <span class="lc-pin-tag">${tagInner}</span>
-                      </button>
-                    `;
-                  }).join('')}
-                </div>
-                <div class="lc-colophon" aria-hidden="true">
-                  <div class="lc-col-title">${MAP_META.title}</div>
-                  <div class="lc-col-sub">${MAP_META.subtitle}</div>
-                  <div class="lc-col-seal">${MAP_META.seal}</div>
-                </div>
-              </div>
-            </div>
+    <div class="lc-atlas-hud" data-focus="chaotian" data-zoomed="0">
+      <!-- 1) 实时 3D->2D 投影层：水系题字 + 12 乡镇微签 + 靠近弹起立绘的防重叠纸签 -->
+      <div class="lc-proj-layer" aria-label="灵川十二乡镇与立体纸雕标注">
+        ${WATER_LABELS.map((w, i) => `
+          <span class="lc-water-lbl" data-water-idx="${i}" aria-hidden="true">${w.text}</span>
+        `).join('')}
 
-            <!-- 缩放后出现的极简复位微钮 -->
-            <button type="button" class="lc-reset-btn" id="lc-reset-btn" hidden aria-label="复位全境视图">复位全境</button>
-          </div>
+        ${TOWNSHIPS.map((t) => {
+          const cls = [
+            'lc-pin',
+            `dir-${t.dir || 'top'}`,
+            t.county ? 'is-county' : '',
+            t.featured ? 'is-featured' : '',
+          ].filter(Boolean).join(' ');
+          const tagInner = t.featured
+            ? `${t.name}<i class="lc-pin-seal">详卷</i>`
+            : t.county
+              ? `${t.name}<em>县治</em>`
+              : t.name;
+          return `
+            <button type="button" class="${cls}" data-town="${t.id}" aria-label="飞往 ${t.name} · ${t.region}">
+              <span class="lc-pin-dot" aria-hidden="true"></span>
+              <span class="lc-pin-tag">${tagInner}</span>
+            </button>
+          `;
+        }).join('')}
 
-          <!-- 手机端底部克制发丝提示栏（无卡片墙） -->
-          <div class="lc-mobile-bar">
-            <div class="lc-cat-strip" role="tablist" aria-label="按主题筛亮乡镇">
-              ${MAP_CATEGORIES.map((c) => `
-                <button type="button" class="lc-cat-btn${c.id === 'all' ? ' is-active' : ''}" data-cat="${c.id}" role="tab" aria-selected="${c.id === 'all'}">${c.label}</button>
-              `).join('')}
-            </div>
-            <div class="lc-whisper-row">
-              <span class="lc-whisper-hint">轻点乡镇放大细览 · 双指缩放</span>
-              <div class="lc-whisper-acts">
-                <button type="button" class="lc-whisper-share" id="lc-mob-share">分享笺</button>
-                <button type="button" class="lc-whisper-go" id="lc-mob-chaotian">直入潮田乡 →</button>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <!-- 桌面宽屏右侧：素雅宣纸风物侧笺 -->
-        <aside class="lc-folio" aria-label="灵川乡镇风物侧笺">
-          <div class="lc-folio-cats" role="tablist" aria-label="全县风物筛选">
-            ${MAP_CATEGORIES.map((c) => `
-              <button type="button" class="lc-cat-btn${c.id === 'all' ? ' is-active' : ''}" data-cat="${c.id}" role="tab" aria-selected="${c.id === 'all'}">${c.label}</button>
-            `).join('')}
-          </div>
-
-          <div class="lc-folio-body" id="lc-folio-body"></div>
-
-          <div class="lc-folio-share">
-            <div class="lc-folio-share-hd">
-              <strong>多模板宣纸分享笺</strong>
-              <span>点选模板即时预览导出</span>
-            </div>
-            <div class="lc-tpl-row">
-              ${listShareTemplates().map((t) => `
-                <button type="button" class="lc-share-tpl" data-share-tpl="${t.id}">${t.label}</button>
-              `).join('')}
-            </div>
-          </div>
-
-          <footer class="lc-folio-foot">
-            <span>${MAP_META.sourceNote}</span>
-          </footer>
-        </aside>
+        <!-- 弹起立绘的屏幕防重叠宣纸浮签池（最多 5 枚，点击直开三层视差团扇详卡） -->
+        ${Array.from({ length: STANDEE_TAG_POOL_SIZE }).map((_, i) => `
+          <button type="button" class="lc-standee-tag" data-st-slot="${i}" hidden>
+            <span class="lc-st-tick" aria-hidden="true"></span>
+            <span class="lc-st-txt"></span>
+          </button>
+        `).join('')}
       </div>
 
-      <!-- 乡镇放大详卷（潮田专属立体画卷 / 其余11乡智能聚焦 + 宣纸详笺抽屉） -->
+      <!-- 2) 左下角全境书法落款（放大近览时优雅淡出让位给立绘） -->
+      <div class="lc-colophon-float" id="lc-colophon-float" aria-hidden="true">
+        <div class="lc-col-title">${MAP_META.title}</div>
+        <div class="lc-col-sub">${MAP_META.subtitle}</div>
+        <div class="lc-col-seal">${MAP_META.seal}</div>
+      </div>
+
+      <!-- 3) 右侧极轻巧的 3D 缩放与复位控制钮 -->
+      <div class="lc-zoom-ctrls" aria-label="地图缩放控制">
+        <button type="button" class="lc-zctrl-btn" id="lc-z-in" title="放大靠近看立绘" aria-label="放大地图">+</button>
+        <button type="button" class="lc-zctrl-btn" id="lc-z-out" title="缩小看全境" aria-label="缩小地图">−</button>
+        <button type="button" class="lc-zctrl-btn is-reset" id="lc-z-reset" title="回到灵川全境" aria-label="复位全境" hidden>全境</button>
+      </div>
+
+      <!-- 4) 手机端底部轻透交互条（远观=分类+引导，靠近=当前焦点乡镇风物浮条，绝不糊脸弹窗） -->
+      <div class="lc-mobile-dock" id="lc-mobile-dock">
+        <div class="lc-focus-ribbon" id="lc-focus-ribbon">
+          <div class="lc-fr-info">
+            <strong id="lc-fr-name">潮田乡</strong>
+            <span id="lc-fr-sub">灵川东南部 · 潮田河谷水果之乡</span>
+          </div>
+          <div class="lc-fr-acts">
+            <button type="button" class="lc-fr-open" id="lc-fr-open">风物志</button>
+            <button type="button" class="lc-fr-share" id="lc-fr-share">分享笺</button>
+          </div>
+        </div>
+
+        <div class="lc-cat-strip" role="tablist" aria-label="按主题筛亮乡镇与立绘">
+          ${MAP_CATEGORIES.map((c) => `
+            <button type="button" class="lc-cat-btn${c.id === 'all' ? ' is-active' : ''}" data-cat="${c.id}" role="tab" aria-selected="${c.id === 'all'}">${c.label}</button>
+          `).join('')}
+        </div>
+
+        <div class="lc-whisper-row">
+          <span class="lc-whisper-hint" id="lc-whisper-hint">自由滑动缩放 · 靠近弹出纸艺立绘</span>
+          <div class="lc-whisper-acts">
+            <button type="button" class="lc-whisper-share" id="lc-mob-share">分享笺</button>
+            <button type="button" class="lc-whisper-go" id="lc-mob-chaotian">飞往潮田乡 →</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 5) 桌面宽屏右侧：随 3D 沙盘焦点实时翻页的素雅宣纸风物侧笺 -->
+      <aside class="lc-folio" aria-label="灵川乡镇风物侧笺">
+        <div class="lc-folio-cats" role="tablist" aria-label="全县风物筛选">
+          ${MAP_CATEGORIES.map((c) => `
+            <button type="button" class="lc-cat-btn${c.id === 'all' ? ' is-active' : ''}" data-cat="${c.id}" role="tab" aria-selected="${c.id === 'all'}">${c.label}</button>
+          `).join('')}
+        </div>
+
+        <div class="lc-folio-body" id="lc-folio-body"></div>
+
+        <div class="lc-folio-share">
+          <div class="lc-folio-share-hd">
+            <strong>多模板宣纸分享笺</strong>
+            <span>点选模板即时预览导出</span>
+          </div>
+          <div class="lc-tpl-row">
+            ${listShareTemplates().map((t) => `
+              <button type="button" class="lc-share-tpl" data-share-tpl="${t.id}">${t.label}</button>
+            `).join('')}
+          </div>
+        </div>
+
+        <footer class="lc-folio-foot">
+          <span>自由拖拽漫游 · 滚轮放大弹出纸艺立绘 · 点击立绘看详卡</span>
+        </footer>
+      </aside>
+
+      <!-- 6) 按需展开的乡镇完整风物志详卷（含潮田专属立体画卷、12乡镇可点村落名录与专志） -->
       <section class="lc-zoom-panel" id="lc-zoom-panel" aria-hidden="true" hidden>
         <div class="lc-zoom-top" id="lc-zoom-top">
           <div class="lc-zoom-chrome">
             <div class="lc-zoom-crumb">灵川全境 <span aria-hidden="true">›</span> <b id="lc-zoom-crumb-name"></b></div>
-            <button type="button" class="lc-zoom-close" aria-label="关闭乡镇放大并返回全境">
-              <span aria-hidden="true">×</span>返回全境
+            <button type="button" class="lc-zoom-close" aria-label="关闭乡镇风物志返回立体地图">
+              <span aria-hidden="true">×</span>返回立体地图
             </button>
           </div>
           <div class="lc-zoom-stage" id="lc-zoom-stage">
@@ -198,19 +216,36 @@ export function createMapView({
           <footer class="lc-zoom-foot">
             <button type="button" class="lc-zf-btn is-soft lc-zoom-share">分享笺</button>
             <button type="button" class="lc-zf-btn is-celadon" id="lc-zoom-walk-btn">入纸艺长卷 →</button>
-            <button type="button" class="lc-zf-btn is-dismiss lc-zoom-dismiss">返回全境</button>
+            <button type="button" class="lc-zf-btn is-dismiss lc-zoom-dismiss">返回地图</button>
           </footer>
         </div>
       </section>
     </div>
   `;
 
-  const atlasEl = root.querySelector('.lc-atlas');
-  const viewportEl = root.querySelector('#lc-atlas-viewport');
-  const transformEl = root.querySelector('#lc-atlas-transform');
-  const resetBtn = root.querySelector('#lc-reset-btn');
+  const hudEl = root.querySelector('.lc-atlas-hud');
+  const colophonEl = root.querySelector('#lc-colophon-float');
+  const zInBtn = root.querySelector('#lc-z-in');
+  const zOutBtn = root.querySelector('#lc-z-out');
+  const zResetBtn = root.querySelector('#lc-z-reset');
+  const frNameEl = root.querySelector('#lc-fr-name');
+  const frSubEl = root.querySelector('#lc-fr-sub');
+  const frOpenBtn = root.querySelector('#lc-fr-open');
+  const frShareBtn = root.querySelector('#lc-fr-share');
+  const whisperHintEl = root.querySelector('#lc-whisper-hint');
   const folioBody = root.querySelector('#lc-folio-body');
-  const pinEls = Array.from(root.querySelectorAll('.lc-pin'));
+
+  const pinMap = new Map();
+  root.querySelectorAll('.lc-proj-layer .lc-pin').forEach((el) => {
+    pinMap.set(el.dataset.town, el);
+  });
+  const waterEls = Array.from(root.querySelectorAll('.lc-water-lbl'));
+  const standeeSlots = Array.from(root.querySelectorAll('.lc-standee-tag')).map((el) => ({
+    el,
+    txt: el.querySelector('.lc-st-txt'),
+    id: null,
+    kind: null,
+  }));
   const catBtns = Array.from(root.querySelectorAll('.lc-cat-btn'));
 
   const zoomPanel = root.querySelector('#lc-zoom-panel');
@@ -235,114 +270,100 @@ export function createMapView({
   const zoomLandmarks = root.querySelector('#lc-zoom-landmarks');
   const zoomWalkBtn = root.querySelector('#lc-zoom-walk-btn');
 
-  // ---------- Pan & Pinch-Zoom for Full County Relief Map ----------
-  function applyTransform(animate = false) {
-    const vw = viewportEl.clientWidth || 390;
-    const vh = viewportEl.clientHeight || 600;
-    const maxTx = Math.max(0, (vw * (state.scale - 1)) * 0.52);
-    const maxTy = Math.max(0, (vh * (state.scale - 1)) * 0.52);
-    state.tx = clamp(state.tx, -maxTx, maxTx);
-    state.ty = clamp(state.ty, -maxTy, maxTy);
-    transformEl.style.transition = animate ? 'transform 0.36s cubic-bezier(0.22, 1, 0.36, 1)' : 'none';
-    transformEl.style.transform = `translate3d(${state.tx.toFixed(1)}px, ${state.ty.toFixed(1)}px, 0) scale(${state.scale.toFixed(3)})`;
-    resetBtn.hidden = state.scale <= 1.04 && Math.abs(state.tx) < 8 && Math.abs(state.ty) < 8;
-  }
+  // ---------- 3D Projection Sync (called every frame from map-3d.js) ----------
+  function syncProjection({ towns, waters, standees, zoom, focusTownId }) {
+    state.camZoom = zoom;
+    const isClose = zoom > 1.38;
+    hudEl.dataset.zoomed = isClose ? '1' : '0';
+    zResetBtn.hidden = zoom <= 1.12;
+    colophonEl.style.opacity = clamp(1 - (zoom - 1.15) * 2.4, 0, 1).toFixed(3);
 
-  function resetCamera() {
-    state.scale = 1;
-    state.tx = 0;
-    state.ty = 0;
-    applyTransform(true);
-  }
+    const vw = window.innerWidth || 390;
+    const vh = window.innerHeight || 740;
+    const rightLimit = vw >= 920 ? vw - 390 : vw - 16;
 
-  const pointers = new Map();
-  let pinchStartDist = 0;
-  let pinchStartScale = 1;
-  let dragLast = null;
-  let movedDist = 0;
-
-  viewportEl.addEventListener('pointerdown', (e) => {
-    if (e.target.closest('button')) return;
-    pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
-    movedDist = 0;
-    if (pointers.size === 1) {
-      dragLast = { x: e.clientX, y: e.clientY };
-    } else if (pointers.size === 2) {
-      const [a, b] = Array.from(pointers.values());
-      pinchStartDist = Math.hypot(a.x - b.x, a.y - b.y) || 1;
-      pinchStartScale = state.scale;
+    // 1) Update 12 township 3D->2D pins
+    for (const pt of towns) {
+      const el = pinMap.get(pt.id);
+      if (!el) continue;
+      const inView = pt.visible && pt.sx > 14 && pt.sx < rightLimit && pt.sy > 72 && pt.sy < vh - 96;
+      if (!inView) {
+        el.style.opacity = '0';
+        el.style.pointerEvents = 'none';
+        continue;
+      }
+      el.style.transform = `translate3d(${pt.sx.toFixed(1)}px, ${pt.sy.toFixed(1)}px, 0) translate(-50%, -50%)`;
+      const town = townById(pt.id);
+      const catMatch = state.category === 'all' || (town?.tags || []).includes(state.category);
+      // 放大靠近欣赏 3D 立绘时，焦点中心的乡镇签优雅淡出让位给立绘（底部风物条已标明该乡），周边乡镇保持轻提示
+      let op = 1;
+      let pe = 'auto';
+      if (!catMatch) {
+        op = 0.24;
+      } else if (zoom > 1.85 && pt.id === focusTownId) {
+        op = 0;
+        pe = 'none';
+      } else if (isClose && pt.id !== focusTownId) {
+        op = 0.62;
+      }
+      el.style.opacity = op.toFixed(2);
+      el.style.pointerEvents = pe;
+      el.classList.toggle('is-active', pt.id === focusTownId);
+      el.classList.toggle('is-matched', state.category !== 'all' && catMatch);
     }
-    viewportEl.setPointerCapture?.(e.pointerId);
-  });
 
-  viewportEl.addEventListener('pointermove', (e) => {
-    if (!pointers.has(e.pointerId)) return;
-    pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
-    if (pointers.size === 2) {
-      const [a, b] = Array.from(pointers.values());
-      const dist = Math.hypot(a.x - b.x, a.y - b.y);
-      state.scale = clamp(pinchStartScale * (dist / pinchStartDist), 1, 2.5);
-      applyTransform(false);
-    } else if (pointers.size === 1 && dragLast) {
-      const dx = e.clientX - dragLast.x;
-      const dy = e.clientY - dragLast.y;
-      movedDist += Math.hypot(dx, dy);
-      dragLast = { x: e.clientX, y: e.clientY };
-      if (state.scale > 1.02) {
-        state.tx += dx;
-        state.ty += dy;
-        applyTransform(false);
+    // 2) Update water labels
+    for (let i = 0; i < waterEls.length; i++) {
+      const w = waters[i];
+      const el = waterEls[i];
+      if (!w || !w.visible || w.sx < 24 || w.sx > rightLimit - 24 || w.sy < 80 || w.sy > vh - 110) {
+        el.style.opacity = '0';
+      } else {
+        el.style.transform = `translate3d(${w.sx.toFixed(1)}px, ${w.sy.toFixed(1)}px, 0) translate(-50%, -50%) rotate(${w.rot || 0}deg)`;
+        el.style.opacity = '0.78';
       }
     }
-  });
 
-  const endPtr = (e) => {
-    pointers.delete(e.pointerId);
-    if (pointers.size < 2) pinchStartDist = 0;
-    if (pointers.size === 1) {
-      const [rem] = Array.from(pointers.values());
-      dragLast = { x: rem.x, y: rem.y };
-    } else {
-      dragLast = null;
+    // 3) Collision-free floating paper tags above popped-up 3D standees!
+    const chosen = [];
+    if (!state.overlayOpen && (zoom > 1.32 || state.category !== 'all')) {
+      for (const s of standees) {
+        if (chosen.length >= STANDEE_TAG_POOL_SIZE) break;
+        if (s.sx < 40 || s.sx > rightLimit - 34 || s.sy < 86 || s.sy > vh - 128) continue;
+        const estW = s.title.length * 12 + 28;
+        let blocked = false;
+        for (const prev of chosen) {
+          if (Math.abs(s.sx - prev.sx) < (estW + prev.w) * 0.5 + 8 && Math.abs(s.sy - prev.sy) < 30) {
+            blocked = true;
+            break;
+          }
+        }
+        if (!blocked) chosen.push({ ...s, w: estW });
+      }
     }
-  };
-  viewportEl.addEventListener('pointerup', endPtr);
-  viewportEl.addEventListener('pointercancel', endPtr);
 
-  viewportEl.addEventListener('wheel', (e) => {
-    e.preventDefault();
-    const factor = e.deltaY < 0 ? 1.12 : 0.89;
-    state.scale = clamp(state.scale * factor, 1, 2.5);
-    if (state.scale <= 1.01) {
-      state.tx = 0;
-      state.ty = 0;
+    for (let i = 0; i < standeeSlots.length; i++) {
+      const slot = standeeSlots[i];
+      const item = chosen[i];
+      if (item) {
+        slot.el.hidden = false;
+        if (slot.id !== item.id) {
+          slot.id = item.id;
+          slot.kind = item.kind;
+          slot.txt.textContent = item.title;
+          slot.el.classList.toggle('is-featured', Boolean(item.featured));
+        }
+        slot.el.style.transform = `translate3d(${Math.round(item.sx)}px, ${Math.round(item.sy - 8)}px, 0) translate(-50%, -100%)`;
+        slot.el.style.opacity = '1';
+      } else {
+        slot.el.style.opacity = '0';
+        slot.el.hidden = true;
+        slot.id = null;
+      }
     }
-    applyTransform(true);
-  }, { passive: false });
-
-  resetBtn.addEventListener('click', resetCamera);
-
-  // ---------- Category Filter ----------
-  function setCategory(cat) {
-    state.category = cat;
-    catBtns.forEach((b) => {
-      const on = b.dataset.cat === cat;
-      b.classList.toggle('is-active', on);
-      b.setAttribute('aria-selected', String(on));
-    });
-    pinEls.forEach((p) => {
-      const town = townById(p.dataset.town);
-      const match = cat === 'all' || (town?.tags || []).includes(cat);
-      p.classList.toggle('is-dimmed', !match);
-      p.classList.toggle('is-matched', cat !== 'all' && match);
-    });
   }
 
-  catBtns.forEach((b) => {
-    b.addEventListener('click', () => setCategory(b.dataset.cat));
-  });
-
-  // ---------- Helpers for Landmarks & Extras ----------
+  // ---------- Helpers ----------
   function getTownLandmarks(town) {
     return (town.landmarks || [])
       .map((lid) => landmarksById.get(lid))
@@ -390,14 +411,22 @@ export function createMapView({
     if (poi) onOpenExtra?.(poi);
   }
 
-  // ---------- Desktop Right Editorial Folio ----------
-  function renderDesktopFolio(townId) {
+  // ---------- Focus Town Sync (Mobile Ribbon + Desktop Folio) ----------
+  function setFocusTown(townId) {
     const town = townById(townId) || townById('chaotian');
     if (!town) return;
-    state.selectedId = town.id;
-    atlasEl.dataset.focus = town.id;
-    pinEls.forEach((p) => p.classList.toggle('is-active', p.dataset.town === town.id));
+    state.focusId = town.id;
+    hudEl.dataset.focus = town.id;
 
+    // Mobile ribbon update
+    frNameEl.textContent = town.name;
+    frSubEl.textContent = `${town.region} · ${(town.villages || []).length} 处村落`;
+    frOpenBtn.textContent = `风物志 (${(town.villages || []).length}村)`;
+    whisperHintEl.textContent = state.camZoom > 1.35
+      ? `点立起来的纸雕看详卡 · 双指可缩回全境`
+      : `自由滑动缩放 · 靠近弹出纸艺立绘`;
+
+    // Desktop right folio update
     const idx = TOWNSHIPS.findIndex((t) => t.id === town.id) + 1;
     const marks = getTownLandmarks(town);
     const extras = getTownExtras(town);
@@ -428,28 +457,14 @@ export function createMapView({
       ` : ''}
 
       <div class="lc-folio-acts">
-        <button type="button" class="lc-folio-primary" data-open-zoom="${town.id}">放大细览 ${town.name} →</button>
-        <button type="button" class="lc-folio-sec" data-jump-seg="${town.segmentId || 'lijiang'}">入纸艺长卷</button>
+        <button type="button" class="lc-folio-primary" data-fly-town="${town.id}">飞近弹起立绘</button>
+        <button type="button" class="lc-folio-sec" data-open-zoom="${town.id}">本乡风物志</button>
+        <button type="button" class="lc-folio-sec" data-jump-seg="${town.segmentId || 'lijiang'}">入长卷</button>
       </div>
     `;
   }
 
-  folioBody.addEventListener('click', (e) => {
-    const zoomBtn = e.target.closest('[data-open-zoom]');
-    if (zoomBtn) {
-      openTown(zoomBtn.dataset.openZoom);
-      return;
-    }
-    const segBtn = e.target.closest('[data-jump-seg]');
-    if (segBtn) {
-      onJumpToSegment?.(segBtn.dataset.jumpSeg);
-      return;
-    }
-    const card = e.target.closest('.lc-zoom-card');
-    if (card) openItem(card.dataset.open, card.dataset.id);
-  });
-
-  // ---------- Village Detail Note inside Zoom Sheet ----------
+  // ---------- Village Detail Note inside Monograph Drawer ----------
   function showVillageNote(town, villageId) {
     const v = (town.villages || []).find((x) => x.id === villageId);
     state.activeVillageId = v ? v.id : null;
@@ -475,18 +490,13 @@ export function createMapView({
     `;
   }
 
-  villageNoteEl.addEventListener('click', (e) => {
-    const btn = e.target.closest('.lc-vn-go');
-    if (btn) openItem(btn.dataset.open, btn.dataset.id);
-  });
-
-  // ---------- Open Township Zoom View ----------
+  // ---------- Open Full Township Monograph Drawer (on demand) ----------
   function openTown(id) {
-    const town = townById(id);
+    const town = townById(id) || townById(state.focusId);
     if (!town) return;
     state.zoomedId = town.id;
     state.overlayOpen = true;
-    renderDesktopFolio(town.id);
+    setFocusTown(town.id);
 
     zoomCrumbName.textContent = town.name;
     zoomTitle.textContent = town.name;
@@ -498,12 +508,10 @@ export function createMapView({
       <div class="lc-meta-item"><em>行政建制</em><span>${town.kind} · 代码 ${town.code}</span></div>
       <div class="lc-meta-item"><em>推荐时令</em><span>${town.season}</span></div>
     `;
-
     zoomSpecs.innerHTML = (town.specialties || [])
       .map((s) => `<span class="lc-spec-tag">${s}</span>`)
       .join('');
 
-    // Upper hero: bespoke diorama for Chaotian, or precision zoomed relief crop for other 11 townships
     if (town.zoomArt) {
       zoomStage.classList.add('is-bespoke');
       zoomArt.src = assetUrl(town.zoomArt);
@@ -512,9 +520,7 @@ export function createMapView({
       zoomArt.style.transformOrigin = '';
       zoomPins.innerHTML = (town.zoomPins || []).map((p) => {
         const cls = ['lc-pin', `dir-${p.dir || 'top'}`, p.featured ? 'is-featured' : ''].filter(Boolean).join(' ');
-        const inner = p.badge
-          ? `${p.label}<i class="lc-pin-seal">${p.badge}</i>`
-          : p.label;
+        const inner = p.badge ? `${p.label}<i class="lc-pin-seal">${p.badge}</i>` : p.label;
         return `
           <button type="button" class="${cls}" data-open="${p.kind}" data-id="${p.id}" style="left:${p.x}%;top:${p.y}%;">
             <span class="lc-pin-dot" aria-hidden="true"></span>
@@ -538,7 +544,6 @@ export function createMapView({
       `;
     }
 
-    // Villages
     if (town.villages?.length) {
       zoomVillagesWrap.hidden = false;
       zoomVillages.innerHTML = town.villages.map((v) => `
@@ -554,25 +559,13 @@ export function createMapView({
       villageNoteEl.hidden = true;
     }
 
-    // Extras
     const extras = getTownExtras(town);
-    if (extras.length) {
-      zoomExtrasWrap.hidden = false;
-      zoomExtras.innerHTML = extras.map(cardHtml).join('');
-    } else {
-      zoomExtrasWrap.hidden = true;
-      zoomExtras.innerHTML = '';
-    }
+    zoomExtrasWrap.hidden = !extras.length;
+    zoomExtras.innerHTML = extras.map(cardHtml).join('');
 
-    // Landmarks
     const marks = getTownLandmarks(town);
-    if (marks.length) {
-      zoomLandmarksWrap.hidden = false;
-      zoomLandmarks.innerHTML = marks.map(cardHtml).join('');
-    } else {
-      zoomLandmarksWrap.hidden = true;
-      zoomLandmarks.innerHTML = '';
-    }
+    zoomLandmarksWrap.hidden = !marks.length;
+    zoomLandmarks.innerHTML = marks.map(cardHtml).join('');
 
     zoomWalkBtn.dataset.seg = town.segmentId || 'lijiang';
     zoomScroll.scrollTop = 0;
@@ -597,7 +590,7 @@ export function createMapView({
 
   // ---------- Share Helpers ----------
   async function shareTown(templateHint) {
-    const town = townById(state.zoomedId || state.selectedId) || townById('chaotian');
+    const town = townById(state.zoomedId || state.focusId) || townById('chaotian');
     await openShareStudio({
       template: templateHint || 'township',
       title: town.name,
@@ -616,28 +609,81 @@ export function createMapView({
       template: templateId || 'overview',
       mapOverview: true,
       title: '灵川全境 · 七镇五乡',
-      subtitle: '青狮潭至漓江 · 十二乡镇立体风物志',
-      tagline: '一脉山水，七镇五乡，皆收纸墨之间。',
+      subtitle: '青狮潭至漓江 · 十二乡镇立体纸艺志',
+      tagline: '一脉山水，七镇五乡，纸艺立雕随行展开。',
       body: '北起兰田瑶山与青狮潭，中经甘棠江与县城古圩，东接海洋百万银杏，南连大圩古镇、潮田果谷与大境雾凇。',
       imgUrl: assetUrl(MAP_META.baseArt),
-      footer: '桂林 · 灵川全境地图',
+      footer: '桂林 · 灵川全境立体地图',
     }, { onNote: onShareNote });
   }
 
-  // ---------- Event Wiring ----------
-  pinEls.forEach((btn) => {
-    btn.addEventListener('mouseenter', () => {
-      if (window.innerWidth >= 920) renderDesktopFolio(btn.dataset.town);
-    });
+  // ---------- Events ----------
+  pinMap.forEach((btn, townId) => {
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
-      if (movedDist > 12) return;
-      openTown(btn.dataset.town);
+      // 如果已经在近景聚焦这个乡镇了，再点一次展开它的完整风物志；否则先 3D 俯冲飞过去让它的立绘咔哒弹起来！
+      if (state.camZoom > 2.0 && state.focusId === townId) {
+        openTown(townId);
+      } else {
+        map3d?.flyToTown(townId, 2.55);
+        setFocusTown(townId);
+      }
     });
   });
 
-  root.querySelector('#lc-mob-chaotian').addEventListener('click', () => openTown('chaotian'));
+  standeeSlots.forEach((slot) => {
+    slot.el.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (!slot.id) return;
+      if (map3d) map3d.triggerStandeeById(slot.kind, slot.id);
+      else openItem(slot.kind, slot.id);
+    });
+  });
+
+  zInBtn.addEventListener('click', () => map3d?.nudgeZoom(0.65));
+  zOutBtn.addEventListener('click', () => map3d?.nudgeZoom(-0.65));
+  zResetBtn.addEventListener('click', () => map3d?.resetOverview());
+
+  frOpenBtn.addEventListener('click', () => openTown(state.focusId));
+  frShareBtn.addEventListener('click', () => shareTown('township'));
+
+  root.querySelector('#lc-mob-chaotian').addEventListener('click', () => {
+    map3d?.flyToTown('chaotian', 2.55);
+    setFocusTown('chaotian');
+  });
   root.querySelector('#lc-mob-share').addEventListener('click', () => shareOverview('overview'));
+
+  catBtns.forEach((b) => {
+    b.addEventListener('click', () => {
+      state.category = b.dataset.cat;
+      catBtns.forEach((x) => {
+        const on = x.dataset.cat === state.category;
+        x.classList.toggle('is-active', on);
+        x.setAttribute('aria-selected', String(on));
+      });
+      map3d?.setCategory(state.category);
+    });
+  });
+
+  folioBody.addEventListener('click', (e) => {
+    const flyBtn = e.target.closest('[data-fly-town]');
+    if (flyBtn) {
+      map3d?.flyToTown(flyBtn.dataset.flyTown, 2.55);
+      return;
+    }
+    const zoomBtn = e.target.closest('[data-open-zoom]');
+    if (zoomBtn) {
+      openTown(zoomBtn.dataset.openZoom);
+      return;
+    }
+    const segBtn = e.target.closest('[data-jump-seg]');
+    if (segBtn) {
+      onJumpToSegment?.(segBtn.dataset.jumpSeg);
+      return;
+    }
+    const card = e.target.closest('.lc-zoom-card');
+    if (card) openItem(card.dataset.open, card.dataset.id);
+  });
 
   root.querySelectorAll('.lc-share-tpl').forEach((btn) => {
     btn.addEventListener('click', () => {
@@ -652,13 +698,11 @@ export function createMapView({
   root.querySelector('.lc-zoom-dismiss').addEventListener('click', closeZoom);
   root.querySelector('.lc-zoom-share').addEventListener('click', () => shareTown('township'));
   root.querySelector('#lc-zoom-share-top').addEventListener('click', () => shareTown('township'));
-
   zoomWalkBtn.addEventListener('click', () => {
     const seg = zoomWalkBtn.dataset.seg || 'lijiang';
     closeZoom();
     onJumpToSegment?.(seg);
   });
-
   zoomPins.addEventListener('click', (e) => {
     const btn = e.target.closest('[data-open]');
     if (btn) openItem(btn.dataset.open, btn.dataset.id);
@@ -667,6 +711,10 @@ export function createMapView({
     const btn = e.target.closest('.lc-vchip');
     const town = townById(state.zoomedId);
     if (btn && town) showVillageNote(town, btn.dataset.vid);
+  });
+  villageNoteEl.addEventListener('click', (e) => {
+    const btn = e.target.closest('.lc-vn-go');
+    if (btn) openItem(btn.dataset.open, btn.dataset.id);
   });
   zoomExtras.addEventListener('click', (e) => {
     const btn = e.target.closest('.lc-zoom-card');
@@ -711,15 +759,20 @@ export function createMapView({
     el.addEventListener('pointercancel', onUp);
   });
 
-  // Keyboard Escape closes zoom
   window.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && state.overlayOpen) closeZoom();
   });
 
-  // Initial desktop folio population
-  renderDesktopFolio('chaotian');
+  setFocusTown('chaotian');
 
   return {
+    attach3D(api) {
+      map3d = api;
+    },
+    syncProjection,
+    setFocusTown,
+    flyToTown: (id, z) => map3d?.flyToTown(id, z),
+    resetOverview: () => map3d?.resetOverview(),
     openTown,
     closeZoom,
     isOverlayOpen: () => state.overlayOpen,
