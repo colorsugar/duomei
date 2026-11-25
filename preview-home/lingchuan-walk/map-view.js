@@ -22,7 +22,31 @@ function clamp(v, lo, hi) {
   return v < lo ? lo : v > hi ? hi : v;
 }
 
-const STANDEE_TAG_POOL_SIZE = 5;
+const STANDEE_TAG_POOL_SIZE = 7;
+
+function formatScaleBar(kmPer100Px) {
+  if (!Number.isFinite(kmPer100Px) || kmPer100Px <= 0) return { label: '10 公里', px: 64 };
+  const steps = [0.2, 0.5, 1, 2, 3, 5, 10, 15, 20, 30];
+  let best = steps[0];
+  let bestDiff = Infinity;
+  for (const s of steps) {
+    const px = (s / kmPer100Px) * 100;
+    const diff = Math.abs(px - 68);
+    if (px >= 34 && px <= 104 && diff < bestDiff) {
+      bestDiff = diff;
+      best = s;
+    }
+  }
+  const px = clamp(Math.round((best / kmPer100Px) * 100), 34, 108);
+  const label = best < 1 ? `${Math.round(best * 1000)} 米` : `${best} 公里`;
+  return { label, px };
+}
+
+function zoomTierLabel(z) {
+  if (z >= 2.75) return `村落深游 · ${z.toFixed(1)}×`;
+  if (z >= 1.48) return `乡镇近览 · ${z.toFixed(1)}×`;
+  return `灵川全境 · ${z.toFixed(1)}×`;
+}
 
 export function createMapView({
   root,
@@ -40,6 +64,7 @@ export function createMapView({
     category: 'all',
     camZoom: 1.0,
     activeVillageId: null,
+    folioCollapsed: false,
   };
 
   let map3d = null;
@@ -66,7 +91,7 @@ export function createMapView({
               ? `${t.name}<em>县治</em>`
               : t.name;
           return `
-            <button type="button" class="${cls}" data-town="${t.id}" aria-label="飞往 ${t.name} · ${t.region}">
+            <button type="button" class="${cls}" data-town="${t.id}" data-dir="${t.dir || 'top'}" aria-label="飞往 ${t.name} · ${t.region}">
               <span class="lc-pin-dot" aria-hidden="true"></span>
               <span class="lc-pin-tag">${tagInner}</span>
             </button>
@@ -89,11 +114,18 @@ export function createMapView({
         <div class="lc-col-seal">${MAP_META.seal}</div>
       </div>
 
-      <!-- 3) 右侧极轻巧的 3D 缩放与复位控制钮 -->
+      <!-- 3) 右侧极轻巧的 3D 缩放、复位与桌面侧笺折叠控制钮 -->
       <div class="lc-zoom-ctrls" aria-label="地图缩放控制">
-        <button type="button" class="lc-zctrl-btn" id="lc-z-in" title="放大靠近看立绘" aria-label="放大地图">+</button>
+        <button type="button" class="lc-zctrl-btn is-folio-toggle" id="lc-folio-toggle" title="收起或展开风物侧笺" aria-label="收起侧笺">收起</button>
+        <button type="button" class="lc-zctrl-btn" id="lc-z-in" title="放大靠近看高清地形与立绘" aria-label="放大地图">+</button>
         <button type="button" class="lc-zctrl-btn" id="lc-z-out" title="缩小看全境" aria-label="缩小地图">−</button>
         <button type="button" class="lc-zctrl-btn is-reset" id="lc-z-reset" title="回到灵川全境" aria-label="复位全境" hidden>全境</button>
+      </div>
+
+      <!-- 3.5) 实时真实地理比例尺与缩放倍率浮标 -->
+      <div class="lc-scale-bar" id="lc-scale-bar" aria-hidden="true">
+        <span class="lc-scale-tier" id="lc-scale-tier">灵川全境 · 1.0×</span>
+        <span class="lc-scale-rule"><i id="lc-scale-line"></i><em id="lc-scale-lbl">10 公里</em></span>
       </div>
 
       <!-- 4) 手机端底部轻透交互条（远观=分类+引导，靠近=当前焦点乡镇风物浮条，绝不糊脸弹窗） -->
@@ -225,6 +257,10 @@ export function createMapView({
 
   const hudEl = root.querySelector('.lc-atlas-hud');
   const colophonEl = root.querySelector('#lc-colophon-float');
+  const folioToggleBtn = root.querySelector('#lc-folio-toggle');
+  const scaleTierEl = root.querySelector('#lc-scale-tier');
+  const scaleLineEl = root.querySelector('#lc-scale-line');
+  const scaleLblEl = root.querySelector('#lc-scale-lbl');
   const zInBtn = root.querySelector('#lc-z-in');
   const zOutBtn = root.querySelector('#lc-z-out');
   const zResetBtn = root.querySelector('#lc-z-reset');
@@ -271,16 +307,28 @@ export function createMapView({
   const zoomWalkBtn = root.querySelector('#lc-zoom-walk-btn');
 
   // ---------- 3D Projection Sync (called every frame from map-3d.js) ----------
-  function syncProjection({ towns, waters, standees, zoom, focusTownId }) {
+  let lastScaleText = '';
+  function syncProjection({ towns, waters, standees, zoom, kmPer100Px, focusTownId }) {
     state.camZoom = zoom;
     const isClose = zoom > 1.38;
     hudEl.dataset.zoomed = isClose ? '1' : '0';
     zResetBtn.hidden = zoom <= 1.12;
     colophonEl.style.opacity = clamp(1 - (zoom - 1.15) * 2.4, 0, 1).toFixed(3);
 
+    // Real geographic scale bar & semantic zoom badge
+    const sc = formatScaleBar(kmPer100Px);
+    const tierTxt = zoomTierLabel(zoom);
+    const nextScaleKey = `${tierTxt}|${sc.label}|${sc.px}`;
+    if (nextScaleKey !== lastScaleText) {
+      lastScaleText = nextScaleKey;
+      scaleTierEl.textContent = tierTxt;
+      scaleLblEl.textContent = sc.label;
+      scaleLineEl.style.width = `${sc.px}px`;
+    }
+
     const vw = window.innerWidth || 390;
     const vh = window.innerHeight || 740;
-    const rightLimit = vw >= 920 ? vw - 390 : vw - 16;
+    const rightLimit = (vw >= 920 && !state.folioCollapsed) ? vw - 390 : vw - 16;
 
     // 1) Update 12 township 3D->2D pins
     for (const pt of towns) {
@@ -292,7 +340,15 @@ export function createMapView({
         el.style.pointerEvents = 'none';
         continue;
       }
-      el.style.transform = `translate3d(${pt.sx.toFixed(1)}px, ${pt.sy.toFixed(1)}px, 0) translate(-50%, -50%)`;
+      const dir = el.dataset.dir || 'top';
+      const anchor = dir === 'left'
+        ? 'translate(calc(-100% + 9px), -50%)'
+        : dir === 'right'
+          ? 'translate(-9px, -50%)'
+          : dir === 'bottom'
+            ? 'translate(-50%, -9px)'
+            : 'translate(-50%, calc(-100% + 9px))';
+      el.style.transform = `translate3d(${pt.sx.toFixed(1)}px, ${pt.sy.toFixed(1)}px, 0) ${anchor}`;
       const town = townById(pt.id);
       const catMatch = state.category === 'all' || (town?.tags || []).includes(state.category);
       // 放大靠近欣赏 3D 立绘时，焦点中心的乡镇签优雅淡出让位给立绘（底部风物条已标明该乡），周边乡镇保持轻提示
@@ -324,16 +380,17 @@ export function createMapView({
       }
     }
 
-    // 3) Collision-free floating paper tags above popped-up 3D standees!
+    // 3) Collision-free floating paper tags above popped-up 3D standees (phone max 4, desktop max 6 so artwork breathes!)
+    const maxTags = vw < 720 ? 4 : 6;
     const chosen = [];
-    if (!state.overlayOpen && (zoom > 1.32 || state.category !== 'all')) {
+    if (!state.overlayOpen && (zoom > 1.38 || state.category !== 'all')) {
       for (const s of standees) {
-        if (chosen.length >= STANDEE_TAG_POOL_SIZE) break;
-        if (s.sx < 40 || s.sx > rightLimit - 34 || s.sy < 86 || s.sy > vh - 128) continue;
-        const estW = s.title.length * 12 + 28;
+        if (chosen.length >= maxTags) break;
+        if (s.sx < 44 || s.sx > rightLimit - 38 || s.sy < 92 || s.sy > vh - 134) continue;
+        const estW = s.title.length * 11.5 + 26;
         let blocked = false;
         for (const prev of chosen) {
-          if (Math.abs(s.sx - prev.sx) < (estW + prev.w) * 0.5 + 8 && Math.abs(s.sy - prev.sy) < 30) {
+          if (Math.abs(s.sx - prev.sx) < (estW + prev.w) * 0.5 + 10 && Math.abs(s.sy - prev.sy) < 34) {
             blocked = true;
             break;
           }
@@ -643,6 +700,13 @@ export function createMapView({
   zInBtn.addEventListener('click', () => map3d?.nudgeZoom(0.65));
   zOutBtn.addEventListener('click', () => map3d?.nudgeZoom(-0.65));
   zResetBtn.addEventListener('click', () => map3d?.resetOverview());
+  folioToggleBtn.addEventListener('click', () => {
+    state.folioCollapsed = !state.folioCollapsed;
+    hudEl.dataset.folioCollapsed = state.folioCollapsed ? '1' : '0';
+    folioToggleBtn.textContent = state.folioCollapsed ? '侧笺' : '收起';
+    folioToggleBtn.setAttribute('aria-label', state.folioCollapsed ? '展开风物侧笺' : '收起风物侧笺');
+    map3d?.setDesktopPanelOpen(!state.folioCollapsed);
+  });
 
   frOpenBtn.addEventListener('click', () => openTown(state.focusId));
   frShareBtn.addEventListener('click', () => shareTown('township'));
