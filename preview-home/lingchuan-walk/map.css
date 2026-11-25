@@ -1,0 +1,656 @@
+/* Lingchuan map mode — paper atlas, keep walk/depth chrome untouched */
+
+/* Three-mode switch (overrides 2-col pill from style.css without rewriting that file) */
+.mode-switch {
+  grid-template-columns: 1fr 1fr 1fr !important;
+}
+.mode-pill-bg {
+  width: calc(33.333% - 2px) !important;
+}
+body[data-mode="map"] .mode-pill-bg {
+  transform: translateX(0) !important;
+}
+body[data-mode="walk"] .mode-pill-bg {
+  transform: translateX(100%) !important;
+}
+body[data-mode="depth"] .mode-pill-bg {
+  transform: translateX(200%) !important;
+}
+.mode-btn {
+  padding-left: 10px !important;
+  padding-right: 10px !important;
+  font-size: 11.5px !important;
+}
+
+#map-stage {
+  position: fixed;
+  inset: 0;
+  z-index: 6;
+  display: none;
+  pointer-events: none;
+}
+
+body[data-mode="map"] #map-stage {
+  display: block;
+  pointer-events: auto;
+}
+
+body[data-mode="map"] #stage,
+body[data-mode="map"] #tag-layer,
+body[data-mode="map"] #walk-dock,
+body[data-mode="map"] #depth-dock,
+body[data-mode="map"] #sub-bar {
+  visibility: hidden;
+  pointer-events: none;
+}
+
+body[data-mode="map"] .mode-pill-bg {
+  /* third tab visual handled by active btn */
+}
+
+.lc-map {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(220px, 300px);
+  gap: 0;
+  background:
+    radial-gradient(120% 80% at 20% 0%, rgba(255, 248, 230, 0.9), transparent 55%),
+    linear-gradient(180deg, #f4ecdc 0%, #e8dcc6 100%);
+  overflow: hidden;
+  padding-top: calc(64px + env(safe-area-inset-top, 0px));
+}
+
+.lc-map-parallax {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.lc-map-layer {
+  position: absolute;
+  inset: -8%;
+  background-size: cover;
+  background-position: center;
+  opacity: 0.35;
+  will-change: transform;
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.lc-map-far {
+  background-image: radial-gradient(circle at 30% 20%, rgba(120, 160, 140, 0.35), transparent 50%);
+}
+.lc-map-mid {
+  background-image: radial-gradient(circle at 70% 60%, rgba(196, 140, 70, 0.22), transparent 45%);
+}
+.lc-map-near {
+  background-image: radial-gradient(circle at 50% 90%, rgba(179, 38, 30, 0.08), transparent 40%);
+}
+
+.lc-map-stage {
+  position: relative;
+  z-index: 1;
+  min-height: 0;
+  display: grid;
+  place-items: center;
+  padding: 8px 12px 24px;
+}
+
+.lc-map-base {
+  position: absolute;
+  inset: 8% 6% 12%;
+  width: auto;
+  height: auto;
+  max-width: 92%;
+  max-height: 88%;
+  margin: auto;
+  object-fit: cover;
+  border-radius: 28px;
+  box-shadow:
+    0 18px 40px rgba(40, 28, 12, 0.22),
+    inset 0 0 0 1px rgba(255, 248, 230, 0.35);
+  filter: saturate(0.92) contrast(0.98);
+  opacity: 0.92;
+}
+
+.lc-map-svg {
+  position: relative;
+  z-index: 2;
+  width: min(92vw, 560px);
+  height: auto;
+  max-height: calc(100dvh - 140px);
+  touch-action: manipulation;
+}
+
+.lc-town-disk {
+  fill: rgba(247, 241, 228, 0.82);
+  stroke: rgba(91, 70, 54, 0.45);
+  stroke-width: 2.5;
+  transition: fill 0.25s ease, stroke 0.25s ease, transform 0.25s ease;
+}
+
+.lc-town-halo {
+  fill: rgba(179, 38, 30, 0.05);
+  stroke: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.lc-town-label {
+  font-family: "Songti SC", "STSong", serif;
+  font-size: 28px;
+  font-weight: 700;
+  fill: #2a2218;
+  pointer-events: none;
+}
+
+.lc-town-badge {
+  font-size: 18px;
+  fill: #b3261e;
+  font-family: "PingFang SC", sans-serif;
+  pointer-events: none;
+}
+
+.lc-town-node {
+  cursor: pointer;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.lc-town-node.is-featured .lc-town-disk {
+  fill: rgba(255, 244, 220, 0.92);
+  stroke: rgba(179, 38, 30, 0.55);
+}
+
+.lc-town-node.is-active .lc-town-disk,
+.lc-town-node:hover .lc-town-disk {
+  fill: #fff8ea;
+  stroke: #b3261e;
+}
+
+.lc-town-node.is-active .lc-town-halo,
+.lc-town-node:hover .lc-town-halo {
+  opacity: 1;
+}
+
+.lc-map[data-focus="chaotian"] .lc-town-node[data-town="chaotian"] .lc-town-disk {
+  animation: lcPulse 2.4s ease-in-out infinite;
+}
+
+@keyframes lcPulse {
+  0%, 100% { filter: url(#lcSoft); }
+  50% { stroke-width: 4; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lc-map[data-focus="chaotian"] .lc-town-node[data-town="chaotian"] .lc-town-disk {
+    animation: none;
+  }
+  .lc-map-layer { transition: none; }
+}
+
+.lc-map-guide {
+  position: absolute;
+  right: 2%;
+  bottom: 4%;
+  width: min(28vw, 140px);
+  height: auto;
+  z-index: 3;
+  pointer-events: none;
+  filter: drop-shadow(0 10px 18px rgba(40, 24, 8, 0.25));
+  opacity: 0.95;
+  animation: lcGuideBob 4.5s ease-in-out infinite;
+}
+
+@keyframes lcGuideBob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lc-map-guide { animation: none; }
+}
+
+.lc-map-rail {
+  position: relative;
+  z-index: 2;
+  background: rgba(247, 241, 228, 0.88);
+  border-left: 1px solid rgba(90, 70, 50, 0.12);
+  backdrop-filter: blur(10px);
+  padding: 14px 14px calc(18px + env(safe-area-inset-bottom, 0px));
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.lc-map-rail-head {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 8px;
+}
+
+.lc-map-rail-head strong {
+  font-family: "Songti SC", "STSong", serif;
+  font-size: 22px;
+  color: #1c1916;
+}
+
+.lc-map-rail-head span,
+.lc-map-source {
+  font-size: 12px;
+  line-height: 1.5;
+  color: rgba(60, 48, 36, 0.68);
+}
+
+.lc-map-source { margin: 0 0 12px; }
+
+.lc-map-chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.lc-map-chip {
+  appearance: none;
+  border: 1px solid rgba(90, 70, 50, 0.16);
+  background: rgba(255, 252, 245, 0.9);
+  border-radius: 14px;
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  min-width: calc(50% - 4px);
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  transition: border-color 0.2s ease, transform 0.2s ease;
+}
+
+.lc-map-chip-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1c1916;
+}
+
+.lc-map-chip-kind {
+  font-size: 11px;
+  color: rgba(60, 48, 36, 0.55);
+}
+
+.lc-map-chip.is-featured {
+  border-color: rgba(179, 38, 30, 0.35);
+  background: rgba(255, 240, 230, 0.95);
+}
+
+.lc-map-chip.is-active {
+  border-color: #b3261e;
+  transform: translateY(-1px);
+}
+
+.lc-map-share-row {
+  margin-top: 16px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+
+.lc-map-share-label {
+  width: 100%;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  color: rgba(60, 48, 36, 0.55);
+}
+
+.lc-share-tpl {
+  appearance: none;
+  border: 1px solid rgba(90, 70, 50, 0.18);
+  background: #fffaf0;
+  border-radius: 999px;
+  padding: 7px 10px;
+  font-size: 11px;
+  color: #3a2a1a;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.lc-share-tpl:active {
+  background: rgba(179, 38, 30, 0.1);
+}
+
+/* Zoom overlay */
+.lc-zoom-panel {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  background: rgba(28, 22, 16, 0.42);
+  display: grid;
+  align-items: end;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.28s ease;
+}
+
+.lc-zoom-panel.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.lc-zoom-sheet {
+  max-height: min(92dvh, 920px);
+  background: #f7f1e4;
+  border-radius: 22px 22px 0 0;
+  box-shadow: 0 -12px 40px rgba(20, 12, 4, 0.28);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transform: translate3d(0, 24px, 0);
+  transition: transform 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.lc-zoom-panel.open .lc-zoom-sheet {
+  transform: translate3d(0, 0, 0);
+}
+
+.lc-zoom-grab {
+  flex-shrink: 0;
+  height: 22px;
+  display: grid;
+  place-items: center;
+  touch-action: none;
+}
+
+.lc-zoom-grab i {
+  width: 42px;
+  height: 4px;
+  border-radius: 4px;
+  background: rgba(90, 70, 50, 0.28);
+}
+
+.lc-zoom-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 4px 16px 10px;
+  touch-action: none;
+}
+
+.lc-zoom-kicker {
+  margin: 0;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  color: #b3261e;
+}
+
+#lc-zoom-title {
+  margin: 2px 0 6px;
+  font-family: "Songti SC", "STSong", serif;
+  font-size: 28px;
+  color: #1c1916;
+}
+
+.lc-zoom-blurb {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.55;
+  color: rgba(40, 32, 24, 0.78);
+  max-width: 52ch;
+}
+
+.lc-zoom-close {
+  appearance: none;
+  border: 0;
+  min-width: 52px;
+  min-height: 52px;
+  padding: 0 14px;
+  border-radius: 999px;
+  background: rgba(28, 25, 22, 0.1);
+  color: #1c1916;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  flex-shrink: 0;
+}
+
+.lc-zoom-hero {
+  padding: 0 16px 10px;
+}
+
+.lc-zoom-hero img {
+  width: 100%;
+  height: min(28vw, 180px);
+  object-fit: cover;
+  border-radius: 16px;
+  display: block;
+  box-shadow: 0 8px 20px rgba(40, 24, 8, 0.16);
+}
+
+.lc-zoom-sections {
+  flex: 1;
+  overflow: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  padding: 0 16px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.lc-zoom-sections h3 {
+  margin: 0 0 8px;
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  color: rgba(60, 48, 36, 0.7);
+}
+
+.lc-zoom-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 10px;
+}
+
+.lc-zoom-card {
+  appearance: none;
+  border: 1px solid rgba(90, 70, 50, 0.14);
+  background: #fffaf2;
+  border-radius: 16px;
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: 86px 1fr;
+  text-align: left;
+  cursor: pointer;
+  padding: 0;
+  min-height: 86px;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.lc-zoom-card:active {
+  transform: scale(0.985);
+}
+
+.lc-zoom-card img {
+  width: 86px;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.lc-zoom-card-body {
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.lc-zoom-card-body strong {
+  font-size: 14px;
+  color: #1c1916;
+}
+
+.lc-zoom-card-body em {
+  font-style: normal;
+  font-size: 11px;
+  color: #b3261e;
+}
+
+.lc-zoom-card-body small {
+  font-size: 11px;
+  line-height: 1.4;
+  color: rgba(60, 48, 36, 0.65);
+}
+
+.lc-zoom-villages {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.lc-village-pill {
+  border: 1px solid rgba(90, 70, 50, 0.14);
+  background: rgba(255, 252, 245, 0.95);
+  border-radius: 12px;
+  padding: 8px 10px;
+  min-width: 42%;
+  flex: 1 1 42%;
+}
+
+.lc-village-pill strong {
+  display: block;
+  font-size: 13px;
+}
+
+.lc-village-pill span {
+  font-size: 11px;
+  color: rgba(60, 48, 36, 0.6);
+}
+
+.lc-empty {
+  margin: 0;
+  font-size: 12px;
+  color: rgba(60, 48, 36, 0.55);
+}
+
+.lc-zoom-foot {
+  flex-shrink: 0;
+  display: grid;
+  grid-template-columns: 1fr 1.2fr;
+  gap: 8px;
+  padding: 10px 16px calc(12px + env(safe-area-inset-bottom, 0px));
+  border-top: 1px solid rgba(90, 70, 50, 0.1);
+  background: rgba(247, 241, 228, 0.96);
+}
+
+.lc-zoom-share,
+.lc-zoom-dismiss {
+  appearance: none;
+  border: 0;
+  border-radius: 14px;
+  min-height: 48px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+.lc-zoom-share {
+  background: rgba(28, 25, 22, 0.08);
+  color: #1c1916;
+}
+
+.lc-zoom-dismiss {
+  background: #b3261e;
+  color: #fff8f0;
+}
+
+/* Mobile: rail becomes bottom strip under map */
+@media (max-width: 860px) {
+  .lc-map {
+    grid-template-columns: 1fr;
+    grid-template-rows: minmax(0, 1fr) auto;
+  }
+
+  .lc-map-rail {
+    border-left: 0;
+    border-top: 1px solid rgba(90, 70, 50, 0.12);
+    max-height: 38dvh;
+  }
+
+  .lc-map-guide {
+    width: 96px;
+    right: 4%;
+    bottom: 40%;
+  }
+
+  .lc-map-svg {
+    width: min(96vw, 520px);
+    max-height: calc(62dvh - 80px);
+  }
+
+  .lc-zoom-sheet {
+    max-height: 94dvh;
+  }
+
+  .lc-zoom-cards {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Detail card mobile close affordance boost (shared with walk mode) */
+.card-close {
+  min-width: 44px;
+  min-height: 44px;
+  width: 44px;
+  height: 44px;
+  font-size: 22px;
+}
+
+@media (max-width: 720px) {
+  .card-close-bar {
+    display: flex;
+  }
+}
+
+.card-close-bar {
+  display: none;
+  position: sticky;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 10px 0 calc(10px + env(safe-area-inset-bottom, 0px));
+  background: linear-gradient(180deg, transparent, #f7f1e4 28%);
+  z-index: 5;
+}
+
+.card-close-bar button {
+  appearance: none;
+  width: 100%;
+  min-height: 48px;
+  border: 0;
+  border-radius: 14px;
+  background: rgba(28, 25, 22, 0.1);
+  color: #1c1916;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+@media (max-width: 720px) {
+  .card-close-bar {
+    display: block;
+  }
+}

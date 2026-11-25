@@ -3,9 +3,10 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-  <title>灵川行卷 · 六境三十二景纸艺长卷与画中画穿镜</title>
+  <title>灵川行卷 · 乡镇地图与六境三十二景</title>
   <link rel="icon" href="data:,">
   <link rel="stylesheet" href="./style.css">
+  <link rel="stylesheet" href="./map.css">
   <script type="importmap">
     {
       "imports": {
@@ -14,8 +15,9 @@
     }
   </script>
 </head>
-<body data-mode="walk" data-segment="lijiang">
+<body data-mode="map" data-segment="lijiang">
   <div id="stage" aria-label="灵川六境三十二景立体山水长卷"></div>
+  <div id="map-stage" aria-label="灵川乡镇地图"></div>
   <div id="vignette" aria-hidden="true"></div>
 
   <!-- Screen-space collision-avoided rice-paper landmark & portal slips (pool of 4, zero layout reflow) -->
@@ -38,13 +40,14 @@
       <span class="brand-seal" aria-hidden="true">灵川</span>
       <div class="brand-text">
         <h1>灵川行卷</h1>
-        <span id="chapter-sub" class="chapter-sub">第一境 · 漓江洲渚</span>
+        <span id="chapter-sub" class="chapter-sub">乡镇地图 · 按区划展卷</span>
       </div>
     </div>
 
     <div class="mode-switch" role="tablist" aria-label="观看模式">
       <span class="mode-pill-bg" aria-hidden="true"></span>
-      <button type="button" class="mode-btn active" data-mode="walk" role="tab" aria-selected="true">纸艺长卷</button>
+      <button type="button" class="mode-btn active" data-mode="map" role="tab" aria-selected="true">乡镇地图</button>
+      <button type="button" class="mode-btn" data-mode="walk" role="tab" aria-selected="false">纸艺长卷</button>
       <button type="button" class="mode-btn" data-mode="depth" role="tab" aria-selected="false">2.5D 画境</button>
     </div>
 
@@ -216,8 +219,11 @@
             <path d="M10 3v9M6.5 6.5L10 3l3.5 3.5"/>
             <path d="M4 12.5v3a1.5 1.5 0 0 0 1.5 1.5h9a1.5 1.5 0 0 0 1.5-1.5v-3"/>
           </svg>
-          <span>分享卡片（即将开放）</span>
+          <span>分享卡片</span>
         </button>
+      </div>
+      <div class="card-close-bar">
+        <button type="button" id="card-close-bottom" aria-label="关闭册页">关闭</button>
       </div>
       <div id="card-inline-note" class="card-inline-note" aria-live="polite"></div>
     </div>

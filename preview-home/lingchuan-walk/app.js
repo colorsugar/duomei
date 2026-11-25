@@ -1,5 +1,7 @@
 import * as THREE from 'three';
 import { SEGMENTS, PORTAL_SPECS, LANDMARK_SPECS, COMPANION_SPECS } from './landmarks-data.js';
+import { createMapView, extraPoiToCardSpec } from './map-view.js';
+import { sharePayload } from './share-card.js';
 
 // ============================================================================
 // Viewport Cache, Asset Path Router & Verified Local Manifest (Zero 404s)
@@ -10,6 +12,8 @@ let viewAspect = viewW / viewH;
 const IS_MOBILE = Math.min(viewW, viewH) < 760;
 
 function getAssetUrl(name, forceFull = false) {
+  if (!name) return '';
+  if (name.startsWith('map/')) return `./img/${name}.webp`;
   const isLc = name.startsWith('lc-');
   if (isLc) {
     return (!forceFull && IS_MOBILE) ? `./img/m/${name}.webp` : `./img/${name}.webp`;
@@ -458,7 +462,7 @@ function makeSoftParticleTexture(stops) {
 // App & Physics State
 // ============================================================================
 const state = {
-  mode: 'walk',            // 'walk' | 'depth'
+  mode: 'map',             // 'map' | 'walk' | 'depth'
   depthScene: 'haiyang',   // 'haiyang' | 'lijiang' | 'dajing' | 'paideng'
 
   t: 0.014,
@@ -561,12 +565,16 @@ const dom = {
   cardStampBtn: document.getElementById('card-stamp-btn'),
   cardStampLabel: document.getElementById('card-stamp-label'),
   cardShareBtn: document.getElementById('card-share-btn'),
+  cardCloseBottom: document.getElementById('card-close-bottom'),
   cardInlineNote: document.getElementById('card-inline-note'),
+  mapStage: document.getElementById('map-stage'),
 
   loader: document.getElementById('loader'),
   loaderBar: document.getElementById('loader-bar'),
   loaderPct: document.getElementById('loader-pct'),
 };
+
+let mapViewApi = null;
 
 // ============================================================================
 // Preloader (60 Assets Loaded Cleanly from Local ./img & ../storybook/img)
@@ -3010,6 +3018,7 @@ function closeDetailCard() {
 function setMode(nextMode) {
   if (state.mode === nextMode) return;
   closeDetailCard();
+  if (nextMode !== 'map') mapViewApi?.closeZoom?.();
   state.velT = 0;
   state.velDepth = 0;
   dom.modeVeil.classList.add('flash');
@@ -3027,6 +3036,8 @@ function setMode(nextMode) {
     if (nextMode === 'depth') {
       dom.chapterSub.textContent = DEPTH_SCENE_TITLES[state.depthScene];
       applyDepthSceneAtmosphere(state.depthScene);
+    } else if (nextMode === 'map') {
+      dom.chapterSub.textContent = '乡镇地图 · 按区划展卷';
     } else {
       dom.chapterSub.textContent = SEGMENTS[state.segmentIdx].sub;
     }
@@ -3244,6 +3255,7 @@ function bindInteractions() {
 
   // Detail Card Dismiss, Scroll Isolation & Interactive 3-Layer Fan Window!
   dom.cardClose.addEventListener('click', closeDetailCard);
+  dom.cardCloseBottom?.addEventListener('click', closeDetailCard);
   dom.cardBackdrop.addEventListener('click', closeDetailCard);
   dom.card.addEventListener('wheel', (e) => e.stopPropagation(), { passive: true });
 
@@ -3292,8 +3304,21 @@ function bindInteractions() {
       showInlineCardNote('此景已盖章留存');
     }
   });
-  dom.cardShareBtn.addEventListener('click', () => {
-    showInlineCardNote('分享卡片功能即将开放');
+  dom.cardShareBtn.addEventListener('click', async () => {
+    const entry = state.selectedLandmark;
+    if (!entry) return;
+    const s = entry.spec;
+    showInlineCardNote('正在生成分享卡…');
+    await sharePayload({
+      template: s.shareTemplate || 'landmark',
+      title: s.title,
+      subtitle: `${s.zoneName || ''} · ${s.category || ''}`.trim(),
+      tagline: s.tagline,
+      body: s.story,
+      imgUrl: getAssetUrl(s.img, true),
+      category: s.category,
+      footer: 'duomei.site · 灵川行卷',
+    }, { onNote: showInlineCardNote });
   });
 
   // Swipe-down on top drag bar to dismiss card cleanly without interfering with inner scroll
@@ -3316,7 +3341,8 @@ function bindInteractions() {
   const endBarDrag = () => {
     if (barStartY === null) return;
     dom.card.style.transition = '';
-    if (barDy > 50) closeDetailCard();
+    // Thumb-friendly: slightly easier dismiss on phone
+    if (barDy > (IS_MOBILE ? 36 : 50)) closeDetailCard();
     else dom.card.style.transform = '';
     barStartY = null;
     barDy = 0;
@@ -3810,6 +3836,9 @@ function animate() {
 
   updateFanDiorama(time, dt);
 
+  if (state.mode === 'map') {
+    return;
+  }
   if (state.mode === 'walk') {
     updateWalkMode(time, dt);
     renderer.render(walkScene, walkCamera);
@@ -3857,6 +3886,20 @@ async function init() {
 
   isDraggingCanvas = bindInteractions();
   syncSegmentUI();
+
+  mapViewApi = createMapView({
+    root: dom.mapStage,
+    landmarksById: landmarkById,
+    onOpenLandmark: (entry) => openDetailCard(entry),
+    onOpenExtra: (poi) => openDetailCard({ spec: extraPoiToCardSpec(poi) }),
+    onShareNote: showInlineCardNote,
+  });
+
+  // Start in map mode (map-first IA); docks stay hidden until walk/depth
+  document.body.dataset.mode = 'map';
+  dom.walkDock.hidden = true;
+  dom.depthDock.hidden = true;
+  dom.chapterSub.textContent = '乡镇地图 · 按区划展卷';
 
   dom.loader.classList.add('done');
   animate();
