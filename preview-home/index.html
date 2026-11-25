@@ -23,7 +23,7 @@ img{transition:opacity .5s}
 #loader .half{position:absolute;left:0;right:0;height:50%;background:#efe7da}
 #loader .half.t{top:0}#loader .half.b{bottom:0}
 #loader svg{position:absolute;inset:0;width:100%;height:100%;z-index:2}
-#ltx{fill:transparent;stroke:#2a211b;stroke-width:2.2;stroke-dasharray:3000;stroke-dashoffset:3000;font-family:BrushH}
+#ltx{fill:transparent;stroke:#2a211b;stroke-width:2.2;stroke-dasharray:3000;stroke-dashoffset:3000;font-family:BrushH;font-size:min(42vh,48vw);font-weight:400}
 #lmeta{position:absolute;left:0;right:0;bottom:15vh;text-align:center;z-index:3}
 #lmeta .w{font-family:FrL;letter-spacing:.9em;font-size:15px;margin-right:-.9em}
 #lmeta .w span{display:inline-block;opacity:0}
@@ -616,7 +616,7 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}button
 #hbfs.on{opacity:1;pointer-events:auto}
 #hbfs[hidden]{display:none!important}
 #hbbar{position:absolute;left:0;right:0;top:0;z-index:3;height:calc(52px + env(safe-area-inset-top));padding:calc(10px + env(safe-area-inset-top)) 16px 8px;display:flex;align-items:center;background:linear-gradient(to bottom,rgba(10,8,10,.72),transparent);pointer-events:none}
-#hbback{appearance:none;border:0;background:rgba(243,238,230,.12);color:#F3EEE6;width:40px;height:40px;border-radius:50%;font:22px/40px serif;cursor:pointer;pointer-events:auto}
+#hbback{appearance:none;border:0;background:rgba(243,238,230,.14);color:#F3EEE6;min-width:40px;height:40px;padding:0 14px;border-radius:999px;font:14px/40px "Noto Serif CJK SC",serif;letter-spacing:.18em;cursor:pointer;pointer-events:auto;white-space:nowrap}
 #hbfs iframe{position:absolute;inset:0;width:100%;height:100%;border:0;background:#141016;z-index:1}
 #hbfs #hbload{z-index:2}
 #hbfs.ready #hbload{opacity:0;pointer-events:none;visibility:hidden}
@@ -804,7 +804,6 @@ a,button,.mag{-webkit-tap-highlight-color:transparent}
 
 /* HUD & Back-to-top hide when footer enters or music card opens */
 #HUD{transition:opacity .32s ease,color .4s ease}
-#HUD.foot-hide,#totop.foot-hide{opacity:0!important;pointer-events:none!important}
 body.dm-music-open #HUD,body.dm-music-open #totop{opacity:0!important;pointer-events:none!important}
 body.hb-open #dm-music-card,body.hb-open #dm-hover-zone{visibility:hidden}
 
@@ -977,8 +976,10 @@ html.mv #foot.in #W span{opacity:1;transform:none}
 #PG{width:100%!important;transform-origin:0 50%;transform:scaleX(0)}
 @supports (animation-timeline:scroll()){#PG{animation:pg linear both;animation-timeline:scroll(root)}}
 @keyframes pg{to{transform:scaleX(1)}}
+/* foot: hide section chrome, keep 回顶部 visible at the bottom */
+#HUD.at-foot #HN,#HUD.at-foot .bar,#HUD.at-foot .cn{opacity:0;pointer-events:none}
 #totop{transition:background .35s,box-shadow .35s,opacity .45s var(--e-out),transform .55s var(--e-spring),scale .45s var(--e-spring)!important}
-body:not(.dm-music-open) #totop.show:not(.foot-hide){opacity:1!important;transform:scale(1)!important}
+body:not(.dm-music-open) #totop.show{opacity:1!important;transform:scale(1)!important}
 #UI{transition:transform .5s var(--e-out),opacity .3s ease,color .45s ease!important}
 #UI.is-menu-open #dm-menu{transition:opacity .2s ease,transform .55s var(--e-spring),visibility 0s}
 #dm-menu a{opacity:0;translate:0 -6px;transition:background .18s,color .18s,opacity .18s ease,translate .3s var(--e-out)}
@@ -1062,7 +1063,7 @@ body:not(.dm-music-open) #totop.show:not(.foot-hide){opacity:1!important;transfo
  <div class="fold" id="fold2" style="position:absolute;inset:0;display:flex;flex-direction:column;visibility:hidden"><i style="flex:1;transform-origin:50% 0"></i><i style="flex:1;transform-origin:50% 100%"></i></div></section>
 
 <section class="sec" id="huiben"><div class="sx"><div id="hbpost"><img class="cover" src="huiben/img/bd-xiangbi.webp" alt="" width="1536" height="655" decoding="async" loading="lazy"><div class="veil"></div><div class="copy"><div class="kick" style="letter-spacing:.24em;opacity:.7;font:12px/1.4 ui-monospace,Menlo,monospace">08 · POP-UP BOOK</div><h2 style="font-family:'ZMX','Zhi Mang Xing',serif;font-weight:400;font-size:clamp(44px,6vw,86px);line-height:1;margin:.18em 0 .2em">纸上<b style="color:#B3261E;font-weight:400">绘本</b></h2><p style="font-size:14px;line-height:1.8;opacity:.78;margin:0">三处山水，折进一本书。点开后再进入立体页。</p></div><div class="hb-actions"><button type="button" id="hbopen"><i></i>打开绘本</button><a href="lingchuan-walk/" id="lcwalk">灵川行卷 · 32景画中画</a></div></div></div></section>
-<div id="hbfs" hidden><div id="hbbar"><button type="button" id="hbback" aria-label="关闭绘本">×</button></div><iframe id="ifH" title="纸上绘本 · 立体书" allow="gyroscope; accelerometer"></iframe><div id="hbload"><i>绘</i><u></u><span>正在裁纸</span></div></div>
+<div id="hbfs" hidden><div id="hbbar"><button type="button" id="hbback" aria-label="返回多美主站">‹ 返回多美</button></div><iframe id="ifH" title="纸上绘本 · 立体书" allow="gyroscope; accelerometer"></iframe><div id="hbload"><i>绘</i><u></u><span>正在裁纸</span></div></div>
 <section class="sec" id="color"><div class="sx"><canvas id="pcv"></canvas>
  <div id="cme" class="blo"><span class="kick">08 · COLOR · 关于我</span><h2 id="cname">Color</h2>
   <p class="cz">多美 · DUOMEI 的作者<span>现居 大阪 · 堺</span><span>故乡 桂林</span></p>
