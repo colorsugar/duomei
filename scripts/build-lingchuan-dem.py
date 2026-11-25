@@ -29,16 +29,16 @@ OUT_MAP = OUT_BASE / "img/map"
 OUT_TILES = OUT_MAP / "tiles"
 CACHE = Path.home() / ".gb/lingchuan-dem-cache"
 
-# Master canvas dimensions (3:4 exact aspect matching 3D tabletop MAP_W=27.0, MAP_D=36.0)
-MASTER_W, MASTER_H = 3072, 4096
-TILE_COLS, TILE_ROWS = 3, 4  # each tile = 1024 x 1024
-L0_W, L0_H = 1536, 2048
-HEIGHT_W, HEIGHT_H = 256, 340
+# Master canvas dimensions (4:5 aspect closely matches Lingchuan's real ~70km x 85km shape!)
+MASTER_W, MASTER_H = 4096, 5120
+TILE_COLS, TILE_ROWS = 4, 5  # 20 crisp 1024x1024 tiles = 20.97 MP!
+L0_W, L0_H = 1600, 2000
+HEIGHT_W, HEIGHT_H = 256, 320
 
-# Exact Mercator projection bounding box framing Lingchuan County (lon 110.095..110.785, lat 25.023..25.786)
-# Chosen so the 3:4 Mercator frame leaves graceful xuan-paper breathing margin around all 12 townships!
-LON_MIN, LON_MAX = 110.045, 110.835  # span = 0.790 deg (~79.4 km E-W)
-LAT_CENTER = 25.405
+# Tighter exact Mercator bounding box framing Lingchuan County (lon 110.095..110.785, lat 25.023..25.786)
+# Minimizes wasted margin so the full county fills the viewport boldly!
+LON_MIN, LON_MAX = 110.068, 110.812  # span = 0.744 deg (~74.8 km E-W)
+LAT_CENTER = 25.406
 
 def merc_y(lat_deg: float) -> float:
     r = math.radians(lat_deg)
@@ -200,20 +200,20 @@ def main() -> None:
     county_mask, county_rings = build_county_mask(CACHE / "county-450323.geojson", MASTER_W, MASTER_H, apply_gcj_fix=True)
     county_bool = county_mask > 0.5
 
-    # Verify all 12 official townships lie INSIDE the real county polygon!
+    # Verify all 12 official townships (OSM ground-truth verified!) lie INSIDE the real county polygon!
     townships_wgs84 = {
-        "lantian":        (110.1980, 25.6092, "兰田瑶族乡"),
-        "gongping":       (110.2000, 25.5650, "公平乡"),
-        "jiuwu":          (110.2315, 25.5192, "九屋镇"),
-        "sanjie":         (110.3867, 25.4689, "三街镇"),
-        "tanxia":         (110.2843, 25.4551, "潭下镇"),
-        "lingchuan-zhen": (110.3152, 25.3976, "灵川镇"),
-        "dingjiang":      (110.2998, 25.3377, "定江镇"),
-        "lingtian":       (110.4702, 25.3482, "灵田镇"),
-        "haiyang":        (110.5631, 25.3092, "海洋乡"),
-        "daxu":           (110.4105, 25.1820, "大圩镇"),
-        "chaotian":       (110.5090, 25.1997, "潮田乡"),
-        "dajing":         (110.5789, 25.2036, "大境瑶族乡"),
+        "lantian":        (110.1966, 25.6097, "兰田瑶族乡"),
+        "gongping":       (110.1571, 25.4931, "公平乡"),
+        "jiuwu":          (110.2510, 25.5302, "九屋镇"),
+        "sanjie":         (110.3849, 25.4685, "三街镇"),
+        "tanxia":         (110.2822, 25.4545, "潭下镇"),
+        "lingchuan-zhen": (110.3217, 25.4129, "灵川镇"),
+        "dingjiang":      (110.2996, 25.3381, "定江镇"),
+        "lingtian":       (110.4723, 25.3441, "灵田镇"),
+        "haiyang":        (110.5628, 25.3094, "海洋乡"),
+        "daxu":           (110.4224, 25.1891, "大圩镇"),
+        "chaotian":       (110.5086, 25.2000, "潮田乡"),
+        "dajing":         (110.5774, 25.2038, "大境瑶族乡"),
     }
     inside_cnt = 0
     for tid, (lon, lat, name) in townships_wgs84.items():
