@@ -1,5 +1,6 @@
-// Phone touch-feel check for the static homepage. Fails if section slides outrun the finger, a swipe lands
-// on an earlier section, or a swipe starting on the bottom progress bar seeks the page.
+// Phone touch-feel check for the static homepage. Fails if a section stops moving 1:1 with the page, script
+// rewrites inline styles while scrolling, a swipe does not follow the finger or lands on an earlier section,
+// or a swipe starting on the bottom progress bar seeks the page.
 // BASE=http://127.0.0.1:18822 [ENGINES=chromium,webkit] [PW=<dir with playwright-core>] node scripts/home-touch-check.mjs
 import { createRequire } from "node:module";
 
@@ -7,11 +8,11 @@ const PW = process.env.PW || "/private/tmp/claude-501/ui-patrol-pw/";
 const pw = createRequire(PW.endsWith("/") ? PW : PW + "/")("playwright-core");
 const BASE = process.env.BASE || "http://127.0.0.1:18822";
 const ENGINES = (process.env.ENGINES || "chromium,webkit").split(",");
-const W = 390, H = 844, MAX_RATIO = 2;
-// [element, u start, u end] of each phone section slide in main.js
-const SLIDES = [["zaobao", 0.1, 0.78], ["zaobao", 4.3, 5.2], ["guyu", 12.4, 13.4], ["xunji", 17.2, 18.0], ["dalu", 20.2, 21.0],
-  ["color", 34.4, 34.85], ["wbook", 38.35, 38.95], ["skill", 42.3, 42.95], ["skill", 44.35, 44.9]];
-const SWIPES = ["hero", "zaobao", "xiaoji", "kuaihuo", "guyu", "xunji", "dalu", "yunyou", "color", "weiyan", "skill"];
+const W = 390, H = 844;
+const SECS = ["zaobao", "xiaoji", "kuaihuo", "guyu", "xunji", "dalu", "yunyou", "huiben", "color", "weiyan", "skill", "foot"];
+// [section to start in, x share of the width]; 0.6 in 故语/大陆 starts the swipe on the embedded carousel
+const SWIPES = [["hero", 0.5], ["zaobao", 0.5], ["xiaoji", 0.5], ["kuaihuo", 0.5], ["guyu", 0.6], ["xunji", 0.5], ["dalu", 0.5], ["dalu-p2", 0.6],
+  ["yunyou", 0.5], ["huiben", 0.5], ["color", 0.5], ["weiyan", 0.5], ["skill", 0.5]];
 let fails = 0;
 const bad = (msg) => { fails++; console.log("  FAIL " + msg); };
 
@@ -21,25 +22,34 @@ for (const name of ENGINES) {
   const page = await ctx.newPage();
   await page.goto(`${BASE}/?t=${Date.now()}`, { waitUntil: "load" });
   await page.waitForFunction(() => window.__loaderIsDone && window.__loaderIsDone(), null, { timeout: 30000 });
+  await page.waitForFunction(() => document.getElementById("ov").classList.contains("alive"), null, { timeout: 8000 }).catch(() => {});
   console.log(`${name} ${W}x${H}`);
 
-  const ratios = await page.evaluate(async (slides) => {
+  const sweep = await page.evaluate(async (ids) => {
     const frame = () => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
-    const vh = window.__VH(), out = [];
-    for (const [id, a, b] of slides) {
-      const el = document.getElementById(id), y0 = window.__U2Y(a) * vh, y1 = window.__U2Y(b) * vh, step = (y1 - y0) / 30;
+    let writes = 0;
+    const who = {};
+    const mo = new MutationObserver((ms) => ms.forEach((m) => { if (!m.target.closest("#HUD,#UI,#cur,#loader")) { writes++; const k = m.target.id || m.target.className; who[k] = (who[k] || 0) + 1; } }));
+    mo.observe(document.body, { subtree: true, attributes: true, attributeFilter: ["style"] });
+    const vh = innerHeight, out = [];
+    for (const id of ids) {
+      const el = document.getElementById(id), y0 = Math.round(el.getBoundingClientRect().top + scrollY - vh * 0.5), step = 36;
       let max = 0, prev = null;
-      for (let y = y0 + step / 2; y <= y1 + step; y += step) {
-        scrollTo(0, y); await frame(); await frame();
-        const top = el.getBoundingClientRect().top;
-        if (prev != null) max = Math.max(max, Math.abs(top - prev) / step);
-        prev = top;
+      for (let y = y0; y <= y0 + vh; y += step) {
+        scrollTo(0, y); await frame();
+        const now = { top: el.getBoundingClientRect().top, y: scrollY };
+        if (prev && now.y !== prev.y) max = Math.max(max, Math.abs(Math.abs(now.top - prev.top) / Math.abs(now.y - prev.y) - 1));
+        prev = now;
       }
-      out.push([`${id}@${a}`, +max.toFixed(2)]);
+      out.push([id, +max.toFixed(3)]);
     }
-    return out;
-  }, SLIDES);
-  for (const [k, r] of ratios) { console.log(`  slide ${k}: ${r}x finger`); if (r > MAX_RATIO) bad(`${name} slide ${k} moves ${r}x scroll (max ${MAX_RATIO})`); }
+    await frame(); mo.disconnect();
+    return { out, writes, who: Object.entries(who).sort((a, b) => b[1] - a[1]).slice(0, 5), frames: ids.length * 24 };
+  }, SECS);
+  for (const [k, d] of sweep.out) if (d > 0.02) bad(`${name} section ${k} moves ${(1 + d).toFixed(2)}x the page scroll`);
+  console.log(`  sections 1:1 with scroll: ${sweep.out.filter(([, d]) => d <= 0.02).length}/${sweep.out.length}; inline style writes while scrolling: ${sweep.writes} over ${sweep.frames} frames`);
+  if (sweep.writes) console.log(`  style writers: ${JSON.stringify(sweep.who)}`);
+  if (sweep.writes > sweep.frames * 0.2) bad(`${name} script rewrote inline styles ${sweep.writes} times while scrolling`);
 
   await page.evaluate(() => window.__scrollToSec("guyu", "instant"));
   await page.waitForTimeout(600);
@@ -53,10 +63,10 @@ for (const name of ENGINES) {
   if (name === "chromium") {
     const cdp = await ctx.newCDPSession(page);
     const touch = (type, x, y) => cdp.send("Input.dispatchTouchEvent", { type, touchPoints: type === "touchEnd" ? [] : [{ x, y }] });
-    for (const k of SWIPES) {
-      await page.evaluate((k) => window.__scrollToSec(k, "instant"), k);
+    for (const [k, xs] of SWIPES) {
+      await page.evaluate((k) => k === "dalu-p2" ? scrollTo(0, document.querySelector(".dl-p2").getBoundingClientRect().top + scrollY) : window.__scrollToSec(k, "instant"), k);
       await page.waitForTimeout(1200);
-      const s0 = await page.evaluate(() => scrollY), x = W * (k === "guyu" ? 0.6 : 0.5), ya = H * 0.72, yb = H * 0.32;
+      const s0 = await page.evaluate(() => scrollY), x = W * xs, ya = H * 0.72, yb = H * 0.32;
       await touch("touchStart", x, ya);
       for (let i = 1; i <= 12; i++) { await touch("touchMove", x, ya + (yb - ya) * i / 12); await page.waitForTimeout(16); }
       const follow = ((await page.evaluate(() => scrollY)) - s0) / (ya - yb);
