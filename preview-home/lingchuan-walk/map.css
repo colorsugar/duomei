@@ -1180,17 +1180,48 @@ body[data-mode="map"] #vignette {
 .lc-atmo {
   --atmo-rgb: 220, 232, 226;
   --atmo-glow: 236, 244, 240;
+  --atmo-a: 0;
+  --tilt: 0;
   position: absolute;
   inset: 0;
   z-index: 0;
   pointer-events: none;
-  opacity: 0;
   overflow: hidden;
+}
+.lc-atmo::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: var(--atmo-a);
   transition: opacity 0.6s ease;
   background:
     linear-gradient(to bottom, rgba(var(--atmo-glow), 0.62) 0%, rgba(var(--atmo-glow), 0.18) 18%, rgba(var(--atmo-glow), 0) 34%),
     radial-gradient(130% 95% at 50% 46%, rgba(var(--atmo-rgb), 0) 52%, rgba(var(--atmo-rgb), 0.34) 82%, rgba(var(--atmo-rgb), 0.52) 100%),
     linear-gradient(to top, rgba(var(--atmo-glow), 0.42) 0%, rgba(var(--atmo-glow), 0) 20%);
+}
+/* 移轴景深：放大后上下两端轻微虚化，像微缩模型 */
+.lc-tilt {
+  position: absolute;
+  left: 0;
+  right: 0;
+  opacity: var(--tilt);
+  -webkit-backdrop-filter: blur(3px);
+  backdrop-filter: blur(3px);
+}
+.lc-tilt-top {
+  top: 0;
+  height: 30%;
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, rgba(0, 0, 0, 0.6) 45%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 0%, rgba(0, 0, 0, 0.6) 45%, transparent 100%);
+}
+.lc-tilt-bot {
+  bottom: 0;
+  height: 22%;
+  -webkit-mask-image: linear-gradient(to top, #000 0%, rgba(0, 0, 0, 0.5) 40%, transparent 100%);
+  mask-image: linear-gradient(to top, #000 0%, rgba(0, 0, 0, 0.5) 40%, transparent 100%);
+}
+@media (prefers-reduced-motion: reduce) {
+  .lc-tilt { display: none; }
 }
 .lc-atmo-sweep {
   position: absolute;
@@ -1204,11 +1235,11 @@ body[data-mode="map"] #vignette {
   will-change: transform;
 }
 .lc-atmo[data-fx="ginkgo"] .lc-atmo-sweep {
-  opacity: 1;
+  opacity: calc(1 * var(--atmo-a));
   animation: lc-atmo-sweep 11s ease-in-out infinite;
 }
 .lc-atmo[data-fx="petal"] .lc-atmo-sweep {
-  opacity: 0.55;
+  opacity: calc(0.55 * var(--atmo-a));
   background: linear-gradient(100deg, rgba(255, 220, 230, 0) 0%, rgba(255, 226, 234, 0.28) 50%, rgba(255, 220, 230, 0) 100%);
   animation: lc-atmo-sweep 14s ease-in-out infinite;
 }
@@ -1249,14 +1280,25 @@ body[data-mode="map"] #vignette {
 .lc-atmo[data-fx="blossom"] .lc-atmo-sweep,
 .lc-atmo[data-fx="spark"] .lc-atmo-sweep,
 .lc-atmo[data-fx="lantern"] .lc-atmo-sweep {
-  opacity: 0.6;
+  opacity: calc(0.6 * var(--atmo-a));
   background: linear-gradient(100deg, rgba(255, 210, 170, 0) 0%, rgba(255, 214, 176, 0.26) 50%, rgba(255, 210, 170, 0) 100%);
   animation: lc-atmo-sweep 13s ease-in-out infinite;
 }
 .lc-atmo[data-fx="mist"] .lc-atmo-sweep,
 .lc-atmo[data-fx="rain"] .lc-atmo-sweep,
 .lc-atmo[data-fx="snow"] .lc-atmo-sweep {
-  opacity: 0.5;
+  opacity: calc(0.5 * var(--atmo-a));
   background: linear-gradient(100deg, rgba(240, 246, 255, 0) 0%, rgba(244, 248, 255, 0.34) 50%, rgba(240, 246, 255, 0) 100%);
   animation: lc-atmo-sweep 18s ease-in-out infinite;
+}
+
+/* 底图数据署名（ODbL 要求） */
+.lc-map-credit {
+  font-size: 8.5px;
+  letter-spacing: 0.02em;
+  color: rgba(28, 25, 22, 0.42);
+  white-space: nowrap;
+}
+@media (max-width: 919px) {
+  .lc-map-credit { font-size: 7.5px; }
 }

@@ -132,6 +132,7 @@ export function createMapView({
       <div class="lc-scale-bar" id="lc-scale-bar" aria-hidden="true">
         <span class="lc-scale-tier" id="lc-scale-tier">灵川全境 · 1.0×</span>
         <span class="lc-scale-rule"><i id="lc-scale-line"></i><em id="lc-scale-lbl">10 公里</em></span>
+        <small class="lc-map-credit">路网水系 © OpenStreetMap 贡献者</small>
       </div>
 
       <!-- 4) 手机端底部轻透交互条（远观=分类+引导，靠近=当前焦点乡镇风物浮条，绝不糊脸弹窗） -->

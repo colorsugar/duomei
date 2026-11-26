@@ -8,6 +8,7 @@
 
 import { TOWNSHIPS, MAP_EXTRA_POIS, GROK_EXTRA_42, WATER_LABELS } from './map-townships.js';
 import { createMapAtmosphere } from './map-atmo.js';
+import { createMapProps } from './map-props.js';
 
 const MAP_W = 28.0;
 const MAP_D = 35.0; // 精确 4:5，匹配 4096x5120 真实 DEM 母版与 4x5 (20张) 1024x1024 高清瓦片
@@ -760,6 +761,9 @@ export function createInteractive3DMap({
 
   atmo.buildDecor(standees);
 
+  // 纸艺小景：满山剪纸树 + 真实村落小屋（按十二境换树种）
+  const props = createMapProps({ THREE, scene, lonLatToWorld, sampleElevation, standees, isMobile, mapW: MAP_W, mapD: MAP_D, maxAniso });
+
   // --------------------------------------------------------------------------
   // 5) 真实 12 乡镇与 4 条水脉世界坐标 + 异步加载真实 30m DEM 高度图
   // --------------------------------------------------------------------------
@@ -797,6 +801,7 @@ export function createInteractive3DMap({
     for (const ww of waterWorlds) {
       ww.wy = sampleElevation(ww.wx, ww.wz) + 0.14;
     }
+    props?.syncHeights();
   }
 
   const demImg = new Image();
@@ -1344,7 +1349,7 @@ export function createInteractive3DMap({
 
     // 随缩放自适应收缩立绘物理高度：屏幕尺寸舒适一致，地面占地随放大急剧缩小，彻底拉开真实山川间隔！
     // 立绘屏幕尺寸基本恒定（相机距离 ∝ 1/z^1.06），放大时只拉开地理间距，不跟着变大挤成一团
-    const worldScale = clamp(1.36 / Math.pow(Math.max(1.0, z), 0.9), 0.13, 0.86);
+    const worldScale = clamp(1.36 / Math.pow(Math.max(1.0, z), 0.62), 0.24, 0.86);
 
     // 屏幕空间最小防挡间距（像素）：确保每幅工笔立绘完整露脸不叠压
     const minGapX = isMobile ? 86 : 116;
@@ -1533,6 +1538,7 @@ export function createInteractive3DMap({
     }
     pGeo.attributes.position.needsUpdate = true;
 
+    props.update(z);
     atmo.update(dt, time, { tx: camState.tx, tz: camState.tz, zoom: z, pose, camera, worldScale });
 
     renderer.render(scene, camera);

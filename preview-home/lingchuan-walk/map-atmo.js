@@ -42,7 +42,7 @@ export const REALMS = [
     tint: '#E9AE33', speckCol: '#F7C22E', p: [0.50, 0.0, 20, -0.2], q: [0.0, 1.15],
     haze: '#F4DFAE', light: '#FFE0A0', fx: 'ginkgo', overlay: '236, 196, 112', glow: '255, 226, 150' },
   { id: 'daxu', epithet: '漓江烟雨', lon: 110.4224, lat: 25.1891, weight: 1.0, wash: 0.54,
-    tint: '#7E9BAA', speckCol: '#EEF3F5', p: [0.20, 0.22, 0, 0], q: [0.42, 1.0],
+    tint: '#8FB3A8', speckCol: '#EEF3F5', p: [0.30, 0.12, 0, 0], q: [0.15, 1.0],
     haze: '#E4EAEC', light: '#EEF4F8', fx: 'rain', overlay: '170, 190, 198', glow: '230, 238, 242' },
   { id: 'chaotian', epithet: '桃源花溪', lon: 110.5086, lat: 25.2, weight: 0.6, wash: 0.62,
     tint: '#F29BB0', speckCol: '#F7B6C6', p: [0.30, 0.0, 22, -0.9], q: [0.0, 1.05],
@@ -610,7 +610,7 @@ export function createMapAtmosphere({
     overlay = document.createElement('div');
     overlay.className = 'lc-atmo';
     overlay.setAttribute('aria-hidden', 'true');
-    overlay.innerHTML = '<i class="lc-atmo-sweep"></i>';
+    overlay.innerHTML = '<i class="lc-atmo-sweep"></i><i class="lc-tilt lc-tilt-top"></i><i class="lc-tilt lc-tilt-bot"></i>';
     host.insertBefore(overlay, host.firstChild);
   }
   let lastOverlayKey = '';
@@ -752,12 +752,14 @@ export function createMapAtmosphere({
       const glow = dom ? dom.glow : '236, 244, 240';
       const fxName = dom && domW > 0.18 ? dom.fx : 'jade';
       const alpha = dom ? a : 0.55 * zf;
-      const key = `${ov}|${fxName}|${alpha.toFixed(2)}`;
+      const tilt = smoothstep(1.6, 3.0, zoom);
+      const key = `${ov}|${fxName}|${alpha.toFixed(2)}|${tilt.toFixed(2)}`;
       if (key !== lastOverlayKey) {
         lastOverlayKey = key;
         overlay.style.setProperty('--atmo-rgb', ov);
         overlay.style.setProperty('--atmo-glow', glow);
-        overlay.style.opacity = alpha.toFixed(2);
+        overlay.style.setProperty('--atmo-a', alpha.toFixed(2));
+        overlay.style.setProperty('--tilt', tilt.toFixed(2));
         overlay.dataset.fx = fxName;
       }
     }
