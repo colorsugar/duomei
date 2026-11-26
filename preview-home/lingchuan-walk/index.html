@@ -18,6 +18,18 @@
       }
       reset();
       window.addEventListener('pageshow', reset);
+      // 整页缩放总闸：任何位置的 ctrl+滚轮 / Safari 手势 / 多指触摸都不许缩放网页，只留给地图自己处理
+      var off = { passive: false, capture: true };
+      window.addEventListener('wheel', function (e) { if (e.ctrlKey) e.preventDefault(); }, off);
+      ['gesturestart', 'gesturechange', 'gestureend'].forEach(function (n) {
+        document.addEventListener(n, function (e) { e.preventDefault(); }, off);
+      });
+      document.addEventListener('touchmove', function (e) {
+        if (e.touches && e.touches.length > 1) e.preventDefault();
+      }, off);
+      document.addEventListener('dblclick', function (e) { e.preventDefault(); }, off);
+      // 万一页面已被放大（视觉视口缩放不为 1），松手后自动还原
+      if (vv.addEventListener) vv.addEventListener('resize', function () { setTimeout(reset, 120); });
     })();
   </script>
   <title>桂林全境 · 灵川与市区立雕地图、六境长卷</title>
