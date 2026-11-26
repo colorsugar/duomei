@@ -486,7 +486,7 @@ export function createInteractive3DMap({
         tex.wrapS = THREE.ClampToEdgeWrapping;
         tex.wrapT = THREE.ClampToEdgeWrapping;
 
-        const geo = new THREE.PlaneGeometry(tileW, tileD, 24, 24);
+        const geo = new THREE.PlaneGeometry(tileW, tileD, isMobile ? 35 : 44, isMobile ? 35 : 44); // 与地形网格同格点（地形 352/280 段 ÷ 8），否则瓦片比地形粗，喀斯特处地形顶穿瓦片，露出糊的 L0 底图（手机 z30 白楔形）
         geo.rotateX(-Math.PI / 2);
         const pos = geo.attributes.position;
         for (let i = 0; i < pos.count; i++) {
@@ -796,7 +796,7 @@ export function createInteractive3DMap({
       return (t.city || t.countyLevel) ? t.id : 'lingchuan';
     },
   });
-  const street = createStreetBlock({ THREE, scene, lonLatToWorld, sampleElevation });
+  const street = createStreetBlock({ THREE, scene, lonLatToWorld, sampleElevation, isMobile });
   const notifyFocus = (id) => {
     region.setTown(id);
     onFocusTownChange?.(id);
@@ -1528,7 +1528,7 @@ export function createInteractive3DMap({
     camState.zoom = lerp(camState.zoom, camState.targetZoom, followK);
     camState.panelShiftFactor = lerp(camState.panelShiftFactor, camState.desktopPanelOpen ? 1.0 : 0.0, followK);
     region.update(camState.zoom, dt);
-    street.update(camState.tx, camState.tz, camState.zoom);
+    street.update(camState.tx, camState.tz, camState.zoom, camera.position);
     const streetK = street.nearK(camState.tx, camState.tz, camState.zoom);
 
     const pose = computeCamPose(camState.tx, camState.tz, camState.zoom, view, camState.panelShiftFactor);
@@ -1734,7 +1734,7 @@ export function createInteractive3DMap({
       }
       // 街区近景：这一带其余立绘也缩小，别盖住街
       const inBlock = Math.hypot(st.wx - street.center.x, st.wz - street.center.z) < STREET_BLOCK_RADIUS;
-      const sc = lerp(0.50, 1.0, smoothstep(0.05, 0.85, p)) * worldScale * (inBlock ? Math.max(STREET_MIN_SCALE, 1 - 0.2 * streetK) : 1) * (1 + st.hop * 0.14);
+      const sc = lerp(0.50, 1.0, smoothstep(0.05, 0.85, p)) * worldScale * (inBlock ? Math.max(STREET_MIN_SCALE, 1 - 0.2 * streetK) : 1) * (1 + st.hop * 0.14) * (st.id === 'gl-xiangbishan' ? Math.max(0.001, 1 - street.xiangbiK()) : 1); // 象鼻山近景试点淡入时立绘让位
       st.scaleGroup.scale.setScalar(sc);
       st.root.position.y = st.wy + st.hop * 0.24 * worldScale;
       st.tabMesh.material.opacity = clamp(p * 0.78, 0, 0.76);
