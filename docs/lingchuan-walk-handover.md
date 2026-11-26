@@ -1,7 +1,7 @@
 # 桂林全境纸艺地图 · 接手手册
 
-页面：`https://duomei.site/preview-home/lingchuan-walk/`（地图 + 长卷），`…/lingchuan-walk/youzong.html`（游踪：美食去处、行程生成）。
-代码全在 `preview-home/lingchuan-walk/`，纯静态 ES module + three.js，没有构建步骤。合并到 `main` 后 EdgeOne 自动部署。
+页面：`https://duomei.site/lingchuan-walk/`（地图 + 长卷），`https://duomei.site/lingchuan-walk/youzong.html`（游踪：美食去处、行程生成）。
+代码全在仓库 `preview-home/lingchuan-walk/`（线上 `preview-home/` 就是站点根），纯静态 ES module + three.js，没有构建步骤。合并到 `main` 后 EdgeOne 自动部署。
 
 先读仓库根的 `AGENTS.md`、`PROJECT_CONTEXT.md`、`docs/release-source-of-truth.md`。
 
@@ -71,10 +71,11 @@
 
 ## 进度（最近一次更新见文件末尾）
 
-已上线：#232–#238（灵川十二乡十二境、纸艺底图、游踪页、删傩祭、潮田舞狮拜年）。
+已上线：#232–#239（灵川十二乡十二境、纸艺底图、游踪页、删傩祭、潮田舞狮拜年、全市十七县区一张图）。
 
 进行中：
-- 分支 `cursor/guilin-atlas`：全市 17 县区连成一张图、十县各一境、行楷字体子集、水面反光 / 云影 / 飘云。
+- Codex 的六城区游踪资料（`~/grokbox/codex-youzong/`，70 条）待审后合进 `youzong-data.js`。
+- 远景交互：全市总览只题县名；点「灵川县」飞到县域（手机 0.8、电脑 1.0），乡镇签相碰先换边再让位。巡检脚本 `clickTownPin` 按这个流程走。
 - 十个县目前只有县级介绍，乡镇细节、立绘、游踪路线待补，素材要先由 WorkBuddy 搜、核查后再写。
 
 待老大定：
@@ -83,4 +84,4 @@
 
 ## 更新记录
 
-- 2026-11-26 Kiro：建本手册；全市画框扩到 17 县区。
+- 2026-11-26 Kiro：建本手册；全市画框扩到 17 县区，#239 上线（合并 3ffe98dc）。
