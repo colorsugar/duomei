@@ -48,6 +48,7 @@ const OVERVIEW_ZOOM = (typeof window !== 'undefined' && window.innerWidth / Math
 const MIN_ZOOM = 0.30;
 const MAX_ZOOM = (typeof window !== 'undefined' && window.innerWidth / Math.max(1, window.innerHeight) < 0.75) ? 80.0 : 40.0; // 全图仍只到 BASE_MAX_ZOOM，只有正阳步行街、东西巷一带能再放大（见 zoomCap）
 const BASE_MAX_ZOOM = 12.0;
+const ALL_MAX_ZOOM = 20.0; // 全图统一能放到 20 倍（灵川和市区手感一致）；街区一带仍能到 MAX_ZOOM
 // 街区近景时这两张是老城重点，不再整张藏掉，只在街区自身约 150m 内略缩（见 inBlock）
 const STREET_BLOCK_RADIUS = 0.05; // 世界单位，约 150m
 const STREET_MIN_SCALE = 0.8;
@@ -1518,7 +1519,7 @@ export function createInteractive3DMap({
     tourUpdate(dt);
 
     {
-      const cap = street.zoomCap(camState.targetTx, camState.targetTz, BASE_MAX_ZOOM, MAX_ZOOM);
+      const cap = Math.max(ALL_MAX_ZOOM, street.zoomCap(camState.targetTx, camState.targetTz, BASE_MAX_ZOOM, MAX_ZOOM));
       if (camState.targetZoom > cap) camState.targetZoom = cap;
     }
 
@@ -1589,6 +1590,7 @@ export function createInteractive3DMap({
     const minGapY = isMobile ? 76 : 98;
     const cityFocus = cityTownIds.has(camState.lockedTownId || camState.nearestTownId);
     const maxActiveStandees = (isMobile ? 9 : 13) + (cityFocus ? (isMobile ? 3 : 5) : 0);
+    const topSafe = isMobile ? 150 : 76; // 手机顶部有比例尺条（约到 140px），立绘和浮签别压它
     const bottomSafe = isMobile ? 130 : 94; // 手机底部卡片约 130px
 
     // Step 1: 收集当前倍率与视野内有资格登场的候选立绘，并投影屏幕坐标
@@ -1624,7 +1626,10 @@ export function createInteractive3DMap({
       const syFoot = (-projV.y * 0.5 + 0.5) * view.h;
       projV.set(st.wx, st.wy + st.baseH * worldScale, st.wz).project(camera);
       const syHead = (-projV.y * 0.5 + 0.5) * view.h - 34;
-      const inSafeBox = inScreen && sx > 24 && sx < rightBound - 24 && syHead > 76 && syFoot < view.h - bottomSafe;
+      // 左右按立绘整宽判（含右侧面板）：被切的一半就退让；已站起者放宽一点防抖
+      projV.set(st.wx + (st.baseW || st.baseH * 1.15) * worldScale * 0.5, st.wy + st.baseH * worldScale * 0.5, st.wz).project(camera);
+      const halfW = Math.abs((projV.x * 0.5 + 0.5) * view.w - sx) * (st.isShown ? 1.2 : 1.35); // 实测画面比 baseW 宽（纸边、透视），留余量
+      const inSafeBox = inScreen && sx - halfW > 6 && sx + halfW < rightBound - 6 && syHead > topSafe && syFoot < view.h - bottomSafe;
 
       if (!inSafeBox) {
         st.isShown = false;
@@ -1744,7 +1749,7 @@ export function createInteractive3DMap({
         if (projV.z > 0.02 && projV.z < 1) {
           const sx = (projV.x * 0.5 + 0.5) * view.w;
           const sy = (-projV.y * 0.5 + 0.5) * view.h;
-          if (sx > 28 && sx < rightBound - 28 && sy > 84 && sy < view.h - (isMobile ? 130 : 110)) {
+          if (sx > 28 && sx < rightBound - 28 && sy > (isMobile ? 158 : 84) && sy < view.h - (isMobile ? 130 : 110)) {
             const d = Math.hypot(st.wx - camState.tx, st.wz - camState.tz);
             projectedStandees.push({
               id: st.id,
