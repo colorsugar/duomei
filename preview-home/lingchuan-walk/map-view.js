@@ -123,6 +123,7 @@ export function createMapView({
       <!-- 3) 右侧极轻巧的 3D 缩放、复位与桌面侧笺折叠控制钮 -->
       <div class="lc-zoom-ctrls" aria-label="地图缩放控制">
         <button type="button" class="lc-zctrl-btn is-folio-toggle" id="lc-folio-toggle" title="收起或展开风物侧笺" aria-label="收起侧笺">收起</button>
+        <a class="lc-zctrl-btn is-yz" href="./youzong.html" title="吃什么、去哪里、哪天赶圩，排一卷游踪" aria-label="灵川游踪">游踪</a>
         <button type="button" class="lc-zctrl-btn" id="lc-z-in" title="放大靠近看高清地形与立绘" aria-label="放大地图">+</button>
         <button type="button" class="lc-zctrl-btn" id="lc-z-out" title="缩小看全境" aria-label="缩小地图">−</button>
         <button type="button" class="lc-zctrl-btn is-reset" id="lc-z-reset" title="回到灵川全境" aria-label="复位全境" hidden>全境</button>
