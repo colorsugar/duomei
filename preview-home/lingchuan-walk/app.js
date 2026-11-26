@@ -3954,6 +3954,14 @@ async function init() {
 
   dom.loader.classList.add('done');
   animate();
+
+  // 游踪页「在全境图上看」：?town=<乡镇 id>&z=<倍率>
+  const qs = new URLSearchParams(window.location.search);
+  const townParam = qs.get('town');
+  if (initialMode === 'map' && townParam) {
+    const z = Math.min(8, Math.max(1.5, Number(qs.get('z')) || 3.2));
+    setTimeout(() => map3dApi?.flyToTown?.(townParam, z), 600);
+  }
 }
 
 init();

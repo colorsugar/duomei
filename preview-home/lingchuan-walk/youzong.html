@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>灵川游踪 · 此间宜游</title>
+  <meta name="description" content="灵川十二乡镇的吃食、去处与圩期，按日子与脚程排一卷游踪。">
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="./youzong.css">
+</head>
+<body>
+  <header class="yz-top">
+    <a class="yz-back" href="./index.html" aria-label="回到灵川全境图">‹ 全境图</a>
+    <div class="yz-brand">
+      <span class="yz-seal" aria-hidden="true">游<br>踪</span>
+      <span class="yz-title">灵川游踪<em>此间宜游</em></span>
+    </div>
+    <button type="button" class="yz-bag-btn" id="yz-bag-btn" aria-label="囊中所藏">囊中 <b id="yz-bag-n">0</b></button>
+  </header>
+
+  <main id="yz-main">
+    <!-- 此时宜 -->
+    <section class="yz-now" aria-labelledby="yz-now-h">
+      <h2 id="yz-now-h" class="yz-h"><span id="yz-now-date"></span><small id="yz-now-lunar"></small></h2>
+      <div class="yz-now-grid" id="yz-now-grid"></div>
+    </section>
+
+    <!-- 问路 -->
+    <section class="yz-ask" aria-labelledby="yz-ask-h">
+      <h2 id="yz-ask-h" class="yz-h">问路<small>说个出发地与闲暇，替你排一卷</small></h2>
+      <form class="yz-form" id="yz-form" autocomplete="off">
+        <fieldset>
+          <legend>自何处起程</legend>
+          <div class="yz-chips" id="yz-f-origin"></div>
+        </fieldset>
+        <fieldset>
+          <legend>闲暇几许</legend>
+          <div class="yz-chips" id="yz-f-length"></div>
+        </fieldset>
+        <fieldset>
+          <legend>脚程</legend>
+          <div class="yz-chips" id="yz-f-mode"></div>
+        </fieldset>
+        <fieldset>
+          <legend>所好 <i>可多选</i></legend>
+          <div class="yz-chips" id="yz-f-prefs"></div>
+        </fieldset>
+        <fieldset class="yz-date-row">
+          <legend>哪一天</legend>
+          <input type="date" id="yz-f-date" required>
+          <span class="yz-date-hint" id="yz-date-hint"></span>
+        </fieldset>
+        <button type="submit" class="yz-go">起程</button>
+      </form>
+    </section>
+
+    <!-- 一卷 -->
+    <section class="yz-scroll" id="yz-scroll" hidden aria-live="polite"></section>
+
+    <!-- 十二月令 -->
+    <section class="yz-months" aria-labelledby="yz-months-h">
+      <h2 id="yz-months-h" class="yz-h">十二月令<small>滑到哪月，看哪月</small></h2>
+      <div class="yz-month-strip" id="yz-month-strip" role="tablist"></div>
+    </section>
+
+    <!-- 风物录 -->
+    <section class="yz-list-wrap" aria-labelledby="yz-list-h">
+      <h2 id="yz-list-h" class="yz-h">风物录<small id="yz-list-count"></small></h2>
+      <div class="yz-filter" id="yz-filter">
+        <div class="yz-chips yz-kind" id="yz-f-kind"></div>
+        <div class="yz-chips yz-towns" id="yz-f-town"></div>
+        <div class="yz-chips yz-tags" id="yz-f-tag"></div>
+      </div>
+      <div class="yz-map" id="yz-map" aria-label="灵川县域示意"></div>
+      <ol class="yz-list" id="yz-list"></ol>
+    </section>
+
+    <!-- 网友行脚 -->
+    <section class="yz-routes" aria-labelledby="yz-routes-h">
+      <h2 id="yz-routes-h" class="yz-h">网友行脚<small>别人走过的路</small></h2>
+      <div class="yz-route-list" id="yz-route-list"></div>
+    </section>
+
+    <footer class="yz-foot">
+      <p>所录皆出自网友游记、本地论坛与报道，原话照引，说法不一处照实标出；不录店名与电话。圩期各地有按农历、有按公历，出门前宜问一声当地。</p>
+      <p>县界与路网 © OpenStreetMap 贡献者</p>
+    </footer>
+  </main>
+
+  <!-- 囊中 -->
+  <div class="yz-sheet" id="yz-bag" hidden>
+    <div class="yz-sheet-card" role="dialog" aria-modal="true" aria-labelledby="yz-bag-h">
+      <button type="button" class="yz-x" data-close aria-label="关闭">×</button>
+      <h3 id="yz-bag-h">囊中所藏</h3>
+      <ol class="yz-list yz-bag-list" id="yz-bag-list"></ol>
+      <p class="yz-empty" id="yz-bag-empty">还没有收进什么。风物录里点「收入囊中」即可。</p>
+    </div>
+  </div>
+
+  <!-- 长卷预览 -->
+  <div class="yz-sheet" id="yz-poster" hidden>
+    <div class="yz-sheet-card yz-poster-card" role="dialog" aria-modal="true" aria-label="游踪长卷">
+      <button type="button" class="yz-x" data-close aria-label="关闭">×</button>
+      <img id="yz-poster-img" alt="游踪长卷">
+      <div class="yz-poster-acts">
+        <a class="yz-btn" id="yz-poster-dl" download="灵川游踪.png">存到相册</a>
+        <button type="button" class="yz-btn ghost" id="yz-poster-share">分享</button>
+      </div>
+      <p class="yz-tip" id="yz-poster-tip">手机上长按图片也可保存。</p>
+    </div>
+  </div>
+
+  <div class="yz-toast" id="yz-toast" role="status" aria-live="polite"></div>
+
+  <script type="module" src="./youzong.js"></script>
+</body>
+</html>

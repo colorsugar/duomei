@@ -1302,3 +1302,15 @@ body[data-mode="map"] #vignette {
 @media (max-width: 919px) {
   .lc-map-credit { font-size: 7.5px; }
 }
+
+/* 去游踪页 */
+.lc-zctrl-btn.is-yz {
+  text-decoration: none;
+  display: inline-grid;
+  place-items: center;
+  background: var(--lc-verm);
+  color: #FBF4E8;
+  font-family: "Kaiti SC", "STKaiti", "KaiTi", serif;
+  letter-spacing: 0.06em;
+  font-size: 14px;
+}
