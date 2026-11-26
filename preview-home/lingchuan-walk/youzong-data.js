@@ -329,6 +329,8 @@ export const ITEMS = [
 
 // 节令（只在特定日子或季节才有的事）
 export const FESTS = [
+  { id: 'chaotian-shi', town: 'chaotian', name: '潮田舞狮拜年', ll: [110.5086, 25.2000], when: '正月新春', months: [1, 2],
+    line: '狮队敲着锣鼓走村串户，到各家门前舞一回拜年。', src: [['潮田乡亲口述', '']] },
   { id: 'zoupaideng', town: 'lingtian', name: '灵田走牌灯', ll: [110.4723, 25.3441], map: 'lc-28', when: '春节前后，大年初一舞狮拜年后走牌灯',
     months: [1, 2], line: '三十六盏灯写着十二个月和二十四节气，阵形有「一条龙」「绞铁索」「转螺旋」「成牌」。', src: [S.zoupai, S.zoupai2] },
   { id: 'guniangjie', town: 'jiuwu', name: '江头洲姑娘节', ll: [110.2664, 25.5343], when: '农历五月十四', lunar: [5, 14],
