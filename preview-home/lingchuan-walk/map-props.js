@@ -259,8 +259,21 @@ const REALM_TREES = {
   daxu: { bamboo: 5, round: 3, willow: 2 },
   chaotian: { peach: 6, orange: 2, round: 2 },
   dajing: { snowpine: 6, pine: 4 },
+  'guilin-city': { round: 6, willow: 2, orange: 2 },
+  yanshan: { round: 4, peach: 2, orange: 2, bamboo: 2 },
+  lingui: { round: 4, willow: 3, bamboo: 3 },
+  yangshuo: { bamboo: 5, round: 3, willow: 2 },
+  lipu: { round: 5, bamboo: 3, orange: 2 },
+  pingle: { round: 4, bamboo: 4, willow: 2 },
+  gongcheng: { peach: 5, round: 3, orange: 2 },
+  yongfu: { round: 5, bamboo: 3, pine: 2 },
+  longsheng: { pine: 4, bamboo: 4, round: 2 },
+  ziyuan: { maple: 3, pine: 4, round: 3 },
+  'xing-an': { willow: 3, round: 4, bamboo: 3 },
+  quanzhou: { round: 4, pine: 3, willow: 3 },
+  guanyang: { pine: 5, round: 3, bamboo: 2 },
 };
-const REALM_HOUSE = { lantian: 'woodhouse', dajing: 'woodhouse', gongping: 'woodhouse' };
+const REALM_HOUSE = { lantian: 'woodhouse', dajing: 'woodhouse', gongping: 'woodhouse', longsheng: 'woodhouse' };
 
 export function createMapProps({ THREE, scene, lonLatToWorld, sampleElevation, standees, isMobile, mapW, mapD, maxAniso }) {
   const group = new THREE.Group();
@@ -331,7 +344,8 @@ export function createMapProps({ THREE, scene, lonLatToWorld, sampleElevation, s
     const cw = mapW / GW;
     const ch = mapD / GH;
     const rnd = mulberry32(450323);
-    const density = isMobile ? 2.4 : 3.6;
+    // 密度按每格面积换算（旧格 0.5 单位见方），保证同一缩放下树林疏密不变
+    const density = (isMobile ? 2.4 : 3.6) * (cw * ch) / 0.25 * 0.62;
     for (let gy = 0; gy < GH; gy++) {
       for (let gx = 0; gx < GW; gx++) {
         const i = gy * GW + gx;

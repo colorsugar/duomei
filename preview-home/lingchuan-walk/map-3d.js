@@ -10,13 +10,15 @@ import { TOWNSHIPS, MAP_EXTRA_POIS, GROK_EXTRA_42, WATER_LABELS } from './map-to
 import { createMapAtmosphere } from './map-atmo.js';
 import { createMapProps } from './map-props.js';
 
-const MAP_W = 28.0;
-const MAP_D = 35.0; // 精确 4:5，匹配 4096x5120 真实 DEM 母版与 4x5 (20张) 1024x1024 高清瓦片
+// 桂林全境（市辖 17 个县区）连成一张：1:1 墨卡托画框，8x8 张 1024 瓦片（scripts/build-guilin-atlas.py）
+// 世界尺寸按旧画框（1.14° 宽 = 40 单位）的比例放大，缩放档位、立绘大小在各处保持原样
+const MAP_W = 40.0 * (111.82 - 109.30) / 1.14;
+const MAP_D = MAP_W;
 
 // 真实 WGS84 Web Mercator 投影参数（与 scripts/build-lingchuan-dem.py / map-geo.json 100% 一致）
-const LON_MIN = 110.068;
-const LON_MAX = 110.812;
-const LAT_CENTER = 25.406;
+const LON_MIN = 109.30;
+const LON_MAX = 111.82;
+const LAT_CENTER = 25.33;
 const DEG2RAD = Math.PI / 180;
 
 function mercY(latDeg) {
@@ -34,9 +36,14 @@ const MY_MIN = MY_CENTER - MY_SPAN * 0.5;
 const REAL_WIDTH_KM = (LON_MAX - LON_MIN) * 111.32 * Math.cos(LAT_CENTER * DEG2RAD);
 const KM_PER_WORLD_UNIT = REAL_WIDTH_KM / MAP_W;
 
-const TILE_COLS = 4;
-const TILE_ROWS = 5;
-const MIN_ZOOM = 0.85;
+const TILE_COLS = 8;
+const TILE_ROWS = 8;
+// 倍率仍按原灵川县画框计（1.0 = 灵川全县铺满），各处远近阈值不变；
+// 桂林全境（17 个县区）总览在 OVERVIEW_ZOOM；1.0 仍是灵川一县铺满
+const OVERVIEW_ZOOM_WIDE = 0.33;
+const OVERVIEW_ZOOM_TALL = 0.36; // 竖屏手机：全市南北长，略放大铺满屏宽
+const OVERVIEW_ZOOM = (typeof window !== 'undefined' && window.innerWidth / Math.max(1, window.innerHeight) < 0.75) ? OVERVIEW_ZOOM_TALL : OVERVIEW_ZOOM_WIDE;
+const MIN_ZOOM = 0.30;
 const MAX_ZOOM = 12.0;
 const MAX_DEM_HEIGHT = 1.58;
 
@@ -274,8 +281,8 @@ export function createInteractive3DMap({
   scene.fog = new THREE.FogExp2(PAPER_HEX, 0.0058);
 
   const initView = getViewport();
-  const camera = new THREE.PerspectiveCamera(40, initView.w / Math.max(1, initView.h), 0.2, 240);
-  const simCamera = new THREE.PerspectiveCamera(40, initView.w / Math.max(1, initView.h), 0.2, 240);
+  const camera = new THREE.PerspectiveCamera(40, initView.w / Math.max(1, initView.h), 0.2, 420);
+  const simCamera = new THREE.PerspectiveCamera(40, initView.w / Math.max(1, initView.h), 0.2, 420);
 
   const hemi = new THREE.HemisphereLight('#FFFDF8', '#DDD1BC', 1.24);
   scene.add(hemi);
@@ -373,7 +380,7 @@ export function createInteractive3DMap({
   afg.drawImage(alphaCanvas, 0, 0);
   const terrainAlphaMap = new THREE.CanvasTexture(alphaFlat);
 
-  const terrainGeo = new THREE.PlaneGeometry(MAP_W, MAP_D, 120, 150);
+  const terrainGeo = new THREE.PlaneGeometry(MAP_W, MAP_D, isMobile ? 280 : 352, isMobile ? 280 : 352);
   terrainGeo.rotateX(-Math.PI / 2);
 
   function applyDemToPlaneGeo(geo, yOffset = 0) {
@@ -423,6 +430,8 @@ export function createInteractive3DMap({
     buildDieCutTexture,
     maxAniso,
     host: document.getElementById('map-stage'),
+    mapW: MAP_W,
+    mapD: MAP_D,
   });
   atmo.patchMaterial(terrainMat);
   const terrainMesh = new THREE.Mesh(terrainGeo, terrainMat);
@@ -878,8 +887,9 @@ export function createInteractive3DMap({
   // --------------------------------------------------------------------------
   // 7) 大气全境相机数学 + 真地图定点缩放引擎 (0.85x ~ 12.0x)
   // --------------------------------------------------------------------------
-  const HOME_TX = -0.35;
-  const HOME_TZ = 0.60;
+  // 桂林全市几何中心约在画框正中，略偏南
+  const HOME_TX = 0.0;
+  const HOME_TZ = 2.4;
 
   const camState = {
     tx: HOME_TX,
@@ -888,18 +898,18 @@ export function createInteractive3DMap({
     targetTz: HOME_TZ,
     vx: 0,
     vz: 0,
-    zoom: 1.0,
-    targetZoom: 1.0,
+    zoom: OVERVIEW_ZOOM,
+    targetZoom: OVERVIEW_ZOOM,
     category: 'all',
     nearestTownId: 'chaotian',
     lockedTownId: 'chaotian',
-    lastReportedZoom: 1.0,
+    lastReportedZoom: OVERVIEW_ZOOM,
     desktopPanelOpen: true,
     panelShiftFactor: 1.0,
   };
 
   function getPanBounds(z) {
-    const factor = clamp((z - 0.70) / 1.1, 0.30, 1.12);
+    const factor = clamp((z - 0.25) / 1.1, 0.30, 1.12);
     return {
       maxX: MAP_W * 0.49 * factor,
       maxZ: MAP_D * 0.49 * factor,
@@ -995,14 +1005,15 @@ export function createInteractive3DMap({
     }
   }
 
-  function flyToTown(townId, zoomLevel = 2.85) {
+  function flyToTown(townId, zoomLevel = 2.85, lonLat = null) {
     const tw = townWorlds.find((x) => x.town.id === townId);
     if (!tw) return;
+    const at = lonLat ? lonLatToWorld(lonLat[0], lonLat[1]) : { x: tw.wx, z: tw.wz };
     camState.vx = 0;
     camState.vz = 0;
     camState.lockedTownId = townId;
-    camState.targetTx = tw.wx;
-    camState.targetTz = tw.wz;
+    camState.targetTx = at.x;
+    camState.targetTz = at.z;
     camState.targetZoom = clamp(zoomLevel, MIN_ZOOM, MAX_ZOOM);
     if (camState.nearestTownId !== townId) {
       camState.nearestTownId = townId;
@@ -1016,7 +1027,7 @@ export function createInteractive3DMap({
     camState.lockedTownId = 'chaotian';
     camState.targetTx = HOME_TX;
     camState.targetTz = HOME_TZ;
-    camState.targetZoom = 1.0;
+    camState.targetZoom = OVERVIEW_ZOOM;
   }
 
   function nudgeZoom(factorOrDelta) {
@@ -1269,8 +1280,9 @@ export function createInteractive3DMap({
 
   function updateTileLod() {
     const z = camState.zoom;
-    const wantTiles = z > 1.32;
-    const tileAlpha = smoothstep(1.36, 1.82, z);
+    // 全市底图 L0 每单位像素比旧画框低，提早换上细瓦片
+    const wantTiles = z > 0.92;
+    const tileAlpha = smoothstep(0.96, 1.3, z);
     const viewRad = (14.0 / Math.max(1.0, z)) + 4.8;
 
     for (const tile of tiles) {
@@ -1313,6 +1325,18 @@ export function createInteractive3DMap({
 
     const pose = computeCamPose(camState.tx, camState.tz, camState.zoom, view, camState.panelShiftFactor);
     applyPoseToCamera(camera, pose);
+    // 地图变大后主光的阴影框跟着视点走，远看时放宽
+    {
+      const sr = 22 * clamp(1 / Math.max(0.01, camState.zoom), 1, 3.2);
+      const sc = keyLight.shadow.camera;
+      if (Math.abs(sc.right - sr) > 0.5) {
+        sc.left = -sr; sc.right = sr; sc.top = sr * 1.09; sc.bottom = -sr * 1.09; sc.far = 85 + sr * 2;
+        sc.updateProjectionMatrix();
+      }
+      keyLight.position.set(pose.lookX - 18, 30, pose.lookZ + 14);
+      keyLight.target.position.set(pose.lookX, 0, pose.lookZ);
+      keyLight.target.updateMatrixWorld();
+    }
 
     updateTileLod();
 

@@ -49,7 +49,8 @@ function zoomTierLabel(z) {
   if (z >= 5.2) return `山水微距 · ${z.toFixed(1)}×`;
   if (z >= 2.75) return `村落深游 · ${z.toFixed(1)}×`;
   if (z >= 1.48) return `乡镇近览 · ${z.toFixed(1)}×`;
-  return `灵川全境 · ${z.toFixed(1)}×`;
+  if (z >= 0.72) return `县域一览 · ${z.toFixed(1)}×`;
+  return `桂林全境 · ${z.toFixed(1)}×`;
 }
 
 export function createMapView({
@@ -73,6 +74,16 @@ export function createMapView({
 
   let map3d = null;
   const townById = (id) => TOWNSHIPS.find((t) => t.id === id);
+  // 远景（全市总览）只留县级签：十县 + 灵川县（县治灵川镇）+ 桂林市区（秀峰）+ 临桂、雁山
+  const FAR_ZOOM = 0.72;
+  const FAR_NAME = { 'lingchuan-zhen': '灵川县', xiufeng: '桂林市区' };
+  const FAR_DIR = { xiufeng: 'bottom', 'lingchuan-zhen': 'top' };
+  const PIN_DIRS = ['top', 'right', 'bottom', 'left'];
+  const farRank = (id) => {
+    if (id === 'xiufeng') return -1; // 桂林市区先占位
+    if (FAR_NAME[id] || id === 'lingui' || id === 'yanshan') return 0;
+    return townById(id)?.countyLevel ? 1 : 2;
+  };
 
   root.innerHTML = `
     <div class="lc-atlas-hud" data-focus="chaotian" data-zoomed="0">
@@ -89,11 +100,15 @@ export function createMapView({
             t.county ? 'is-county' : '',
             t.featured ? 'is-featured' : '',
           ].filter(Boolean).join(' ');
-          const tagInner = t.featured
+          const near = t.featured
             ? `${t.name}<i class="lc-pin-seal">详卷</i>`
             : t.county
               ? `${t.name}<em>县治</em>`
               : t.name;
+          // 全市远景：灵川只题「灵川县」，市区只题「桂林市区」，其余乡镇与城区签让位给各县
+          const tagInner = FAR_NAME[t.id]
+            ? `<span class="lc-pin-near">${near}</span><span class="lc-pin-far">${FAR_NAME[t.id]}</span>`
+            : near;
           const realm = REALM_BY_ID[t.id];
           const epi = realm ? `<span class="lc-pin-epi" style="--epi:${realm.tint}" aria-hidden="true">${realm.epithet}</span>` : '';
           return `
@@ -126,12 +141,12 @@ export function createMapView({
         <a class="lc-zctrl-btn is-yz" href="./youzong.html" title="吃什么、去哪里、哪天赶圩，排一卷游踪" aria-label="灵川游踪">游踪</a>
         <button type="button" class="lc-zctrl-btn" id="lc-z-in" title="放大靠近看高清地形与立绘" aria-label="放大地图">+</button>
         <button type="button" class="lc-zctrl-btn" id="lc-z-out" title="缩小看全境" aria-label="缩小地图">−</button>
-        <button type="button" class="lc-zctrl-btn is-reset" id="lc-z-reset" title="回到灵川全境" aria-label="复位全境" hidden>全境</button>
+        <button type="button" class="lc-zctrl-btn is-reset" id="lc-z-reset" title="回到全境" aria-label="复位全境" hidden>全境</button>
       </div>
 
       <!-- 3.5) 实时真实地理比例尺与缩放倍率浮标 -->
       <div class="lc-scale-bar" id="lc-scale-bar" aria-hidden="true">
-        <span class="lc-scale-tier" id="lc-scale-tier">灵川全境 · 1.0×</span>
+        <span class="lc-scale-tier" id="lc-scale-tier">桂林全境 · 0.7×</span>
         <span class="lc-scale-rule"><i id="lc-scale-line"></i><em id="lc-scale-lbl">10 公里</em></span>
         <small class="lc-map-credit">路网水系 © OpenStreetMap 贡献者</small>
       </div>
@@ -321,7 +336,7 @@ export function createMapView({
     state.camZoom = zoom;
     const isClose = zoom > 1.38;
     hudEl.dataset.zoomed = isClose ? '1' : '0';
-    zResetBtn.hidden = zoom <= 1.12;
+    zResetBtn.hidden = zoom <= 0.82;
     colophonEl.style.opacity = clamp(1 - (zoom - 1.15) * 2.4, 0, 1).toFixed(3);
 
     // Real geographic scale bar & semantic zoom badge
@@ -365,25 +380,50 @@ export function createMapView({
       return false;
     };
 
-    // 1) Update 12 township 3D->2D pins
-    for (const pt of towns) {
+    // 1) Update township / district 3D->2D pins（乡镇签之间也互相让位：靠前的先占位）
+    const placedPins = [];
+    const pinRect = (pt, el, dir = el.dataset.dir || 'top') => {
+      const town = townById(pt.id);
+      const w = ((town?.name || '').length * 13 + (town?.featured ? 52 : 34));
+      const h = 30;
+      let cx = pt.sx;
+      let cy = pt.sy - h * 0.5 + 9;
+      if (dir === 'left') { cx = pt.sx - w * 0.5 + 9; cy = pt.sy; }
+      else if (dir === 'right') { cx = pt.sx + w * 0.5 - 9; cy = pt.sy; }
+      else if (dir === 'bottom') { cy = pt.sy + h * 0.5 - 9; }
+      return { cx, cy, hw: w * 0.5, hh: h * 0.5 };
+    };
+    const far = zoom < FAR_ZOOM;
+    if (hudEl.dataset.far !== (far ? '1' : '0')) {
+      // 远景时「桂林市区」签挂到点下方，免得压住北面的「灵川县」
+      for (const [id, d] of Object.entries(FAR_DIR)) {
+        const el = pinMap.get(id);
+        if (!el) continue;
+        el.dataset.nearDir ||= el.dataset.dir;
+        const nd = far ? d : el.dataset.nearDir;
+        el.classList.remove(`dir-${el.dataset.liveDir || el.dataset.dir}`);
+        el.dataset.dir = nd;
+        el.dataset.liveDir = nd;
+        el.classList.add(`dir-${nd}`);
+      }
+    }
+    hudEl.dataset.far = far ? '1' : '0';
+    const ordered = far ? [...towns].sort((a, b) => farRank(a.id) - farRank(b.id)) : towns;
+    for (const pt of ordered) {
       const el = pinMap.get(pt.id);
       if (!el) continue;
+      if (far && farRank(pt.id) > 1) {  // 灵川各乡镇、市区其余城区
+        el.style.opacity = '0';
+        el.style.pointerEvents = 'none';
+        continue;
+      }
       const inView = pt.visible && pt.sx > 14 && pt.sx < rightLimit && pt.sy > 72 && pt.sy < vh - 96;
       if (!inView) {
         el.style.opacity = '0';
         el.style.pointerEvents = 'none';
         continue;
       }
-      const dir = el.dataset.dir || 'top';
-      const anchor = dir === 'left'
-        ? 'translate(calc(-100% + 9px), -50%)'
-        : dir === 'right'
-          ? 'translate(-9px, -50%)'
-          : dir === 'bottom'
-            ? 'translate(-50%, -9px)'
-            : 'translate(-50%, calc(-100% + 9px))';
-      el.style.transform = `translate3d(${pt.sx.toFixed(1)}px, ${pt.sy.toFixed(1)}px, 0) ${anchor}`;
+      let dir = el.dataset.dir || 'top';
       const town = townById(pt.id);
       const catMatch = state.category === 'all' || (town?.tags || []).includes(state.category);
       // 放大靠近欣赏 3D 立绘时，焦点中心的乡镇签优雅淡出让位给立绘（底部风物条已标明该乡），周边乡镇保持轻提示
@@ -402,6 +442,36 @@ export function createMapView({
           op = 0.62;
         }
       }
+      if (op > 0) {
+        // 签与已题的签相碰时，先换到点的另一侧再试，四面都碰才让位
+        const hit = (r) => placedPins.some((q) => Math.abs(q.cx - r.cx) < q.hw + r.hw + 3 && Math.abs(q.cy - r.cy) < q.hh + r.hh + 2);
+        const prev = el.dataset.liveDir;
+        const tries = [dir, ...(prev && prev !== dir ? [prev] : []), ...PIN_DIRS.filter((d) => d !== dir && d !== prev)];
+        let placed = null;
+        for (const d of tries) {
+          const r = pinRect(pt, el, d);
+          if (!hit(r)) { placed = r; dir = d; break; }
+        }
+        if (placed) {
+          placedPins.push(placed);
+        } else {
+          op = 0;
+          pe = 'none';
+        }
+      }
+      if (el.dataset.liveDir !== dir) {
+        el.classList.remove(`dir-${el.dataset.liveDir || el.dataset.dir}`);
+        el.classList.add(`dir-${dir}`);
+        el.dataset.liveDir = dir;
+      }
+      const anchor = dir === 'left'
+        ? 'translate(calc(-100% + 9px), -50%)'
+        : dir === 'right'
+          ? 'translate(-9px, -50%)'
+          : dir === 'bottom'
+            ? 'translate(-50%, -9px)'
+            : 'translate(-50%, calc(-100% + 9px))';
+      el.style.transform = `translate3d(${pt.sx.toFixed(1)}px, ${pt.sy.toFixed(1)}px, 0) ${anchor}`;
       el.style.opacity = op.toFixed(2);
       el.style.pointerEvents = pe;
       el.classList.toggle('is-active', pt.id === focusTownId);
@@ -542,8 +612,8 @@ export function createMapView({
 
     // Mobile ribbon update
     frNameEl.textContent = town.name;
-    frSubEl.textContent = `${town.region} · ${(town.villages || []).length} 处村落`;
-    frOpenBtn.textContent = `风物志 (${(town.villages || []).length}村)`;
+    frSubEl.textContent = town.villages?.length ? `${town.region} · ${town.villages.length} 处村落` : town.region;
+    frOpenBtn.textContent = town.villages?.length ? `风物志 (${town.villages.length}村)` : "风物志";
     whisperHintEl.textContent = state.camZoom > 1.35
       ? `点立起来的纸雕看详卡 · 双指可缩回全境`
       : `自由滑动缩放 · 靠近弹出纸艺立绘`;
@@ -555,7 +625,7 @@ export function createMapView({
     const previewItems = [...extras.slice(0, 2), ...marks.slice(0, 2)].slice(0, 3);
 
     folioBody.innerHTML = `
-      <div class="lc-folio-kicker">LINGCHUAN · ${String(idx).padStart(2, '0')} / ${TOWNSHIPS.length}</div>
+      <div class="lc-folio-kicker">GUILIN · ${String(idx).padStart(2, '0')} / ${TOWNSHIPS.length}</div>
       <div class="lc-folio-head">
         <h2>${town.name}</h2>
         <span class="lc-folio-region">${town.region}</span>
@@ -730,12 +800,12 @@ export function createMapView({
     await openShareStudio({
       template: templateId || 'overview',
       mapOverview: true,
-      title: '灵川全境 · 七镇五乡',
-      subtitle: '青狮潭至漓江 · 十二乡镇立体纸艺志',
-      tagline: '一脉山水，七镇五乡，纸艺立雕随行展开。',
-      body: '北起兰田瑶山与青狮潭，中经甘棠江与县城古圩，东接海洋百万银杏，南连大圩古镇、潮田果谷与大境雾凇。',
+      title: '桂林全境 · 十七县区',
+      subtitle: '资江之源至漓江下游 · 立体纸艺志',
+      tagline: '一脉山水，十七县区，纸艺立雕随行展开。',
+      body: '北起资源、全州的湘资二水，经兴安灵渠、龙胜梯田、灵川山乡与市区两江四湖，南到阳朔、荔浦、平乐、恭城。',
       imgUrl: assetUrl(MAP_META.baseArt),
-      footer: '桂林 · 灵川全境立体地图',
+      footer: '桂林全境立体地图',
     }, { onNote: onShareNote });
   }
 
@@ -746,6 +816,14 @@ export function createMapView({
       // 如果已经在近景聚焦这个乡镇了，再点一次展开它的完整风物志；否则先 3D 俯冲飞过去让它的立绘咔哒弹起来！
       if (state.camZoom > 2.0 && state.focusId === townId) {
         openTown(townId);
+      } else if (state.camZoom < FAR_ZOOM && townId === 'lingchuan-zhen') {
+        // 远景点「灵川县」：飞到县域中心，一县铺满，十二乡镇签随之出现
+        map3d?.flyToTown(townId, window.innerWidth / Math.max(1, window.innerHeight) < 0.75 ? 0.8 : 1.0, [110.45, 25.40]);
+        setFocusTown(townId);
+      } else if (townById(townId)?.countyLevel) {
+        // 十县暂无立绘，停在县域一览
+        map3d?.flyToTown(townId, 1.5);
+        setFocusTown(townId);
       } else {
         map3d?.flyToTown(townId, 2.55);
         setFocusTown(townId);

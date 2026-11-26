@@ -3,6 +3,23 @@ import { createRequire } from 'node:module';
 import fs from 'node:fs';
 import path from 'node:path';
 
+// 全市总览只题县名：先点「灵川县」飞进县域，乡镇签才出现；签被邻签挤掉时（手机竖屏常见）再按一下「+」放大
+async function clickTownPin(page, id) {
+  const pin = page.locator(`.lc-proj-layer .lc-pin[data-town="${id}"]`);
+  const far = await page.evaluate(() => document.querySelector('.lc-atlas-hud')?.dataset.far === '1');
+  if (far) {
+    await page.locator('.lc-proj-layer .lc-pin[data-town="lingchuan-zhen"]').click();
+    await page.waitForTimeout(1400);
+  }
+  for (let k = 0; k < 3; k++) {
+    const shown = await pin.evaluate((el) => el.style.opacity !== '0' && el.style.pointerEvents !== 'none');
+    if (shown) break;
+    await page.evaluate(([t, z]) => window.__LINGCHUAN_MAP3D?.flyToTown(t, z), [id, 1.25 + k * 0.3]);
+    await page.waitForTimeout(1200);
+  }
+  await pin.click();
+}
+
 const PW = process.env.PW || '/private/tmp/claude-501/ui-patrol-pw/';
 const pw = createRequire(PW.endsWith('/') ? PW : PW + '/')('playwright-core');
 const BASE = process.env.BASE || 'http://127.0.0.1:18765';
@@ -54,7 +71,8 @@ async function runMobileSuite(engineName) {
   });
   console.log(`[${engineName}] checks:`, JSON.stringify(checks));
   if (checks.mode !== 'map') bad(`${engineName} expected data-mode=map got ${checks.mode}`);
-  if (checks.pins !== 12) bad(`${engineName} expected 12 townships got ${checks.pins}`);
+  // 12 乡镇 + 6 城区 + 10 县
+  if (checks.pins !== 28) bad(`${engineName} expected 28 pins got ${checks.pins}`);
   if (!checks.hasBack || checks.backHref !== '/') bad(`${engineName} missing/wrong dm-home-back`);
   if (checks.headerOverlap) bad(`${engineName} header overlap`);
   if (checks.hasForbidden) bad(`${engineName} forbidden copy`);
@@ -63,7 +81,7 @@ async function runMobileSuite(engineName) {
   await page.screenshot({ path: path.join(OUT, `${engineName}-01-overview.png`) });
 
   // 2) Fly into Chaotian -> 3D camera swoops down, standees pop up with hinge physics!
-  await page.locator('.lc-proj-layer .lc-pin[data-town="chaotian"]').click();
+  await clickTownPin(page, 'chaotian');
   await page.waitForTimeout(1100);
   const standeeTagCount = await page.locator('.lc-standee-tag:not([hidden])').count();
   console.log(`[${engineName}] Chaotian popped-up standee tags:`, standeeTagCount);
@@ -89,14 +107,14 @@ async function runMobileSuite(engineName) {
   // 5) Reset overview then fly into Haiyang (golden ginkgo standees pop up + ginkgo particles!)
   await page.locator('#lc-z-reset').click();
   await page.waitForTimeout(650);
-  await page.locator('.lc-proj-layer .lc-pin[data-town="haiyang"]').click();
+  await clickTownPin(page, 'haiyang');
   await page.waitForTimeout(1100);
   await page.screenshot({ path: path.join(OUT, `${engineName}-05-haiyang-3d.png`) });
 
   // 6) Fly into Daxu then deep-zoom 4.8x into Qingshitan / Jiuwu to verify crisp high-res tiles + lazy Grok standees!
   await page.locator('#lc-z-reset').click();
   await page.waitForTimeout(650);
-  await page.locator('.lc-proj-layer .lc-pin[data-town="daxu"]').click();
+  await clickTownPin(page, 'daxu');
   await page.waitForTimeout(1100);
   await page.screenshot({ path: path.join(OUT, `${engineName}-06-daxu-3d.png`) });
 
@@ -140,6 +158,7 @@ async function runDesktopSuite() {
   await page.screenshot({ path: path.join(OUT, 'desktop-01-overview.png') });
 
   // Test focal-point wheel zoom over NW Qingshitan / Jiuwu region
+  const zoom0 = (await page.evaluate(() => window.__LINGCHUAN_MAP3D?.getState()))?.zoom || 0.33;
   await page.mouse.move(420, 340);
   for (let i = 0; i < 6; i++) {
     await page.mouse.wheel(0, -120);
@@ -148,7 +167,8 @@ async function runDesktopSuite() {
   await page.waitForTimeout(800);
   const wheelState = await page.evaluate(() => window.__LINGCHUAN_MAP3D?.getState());
   console.log('[desktop] after wheel focal zoom:', JSON.stringify({ zoom: wheelState?.zoom, tx: wheelState?.tx, tz: wheelState?.tz, tiles: wheelState?.loadedTiles }));
-  if (!wheelState || wheelState.zoom < 1.5) bad('desktop wheel focal zoom failed');
+  // 全市总览起点约 0.33，六格滚轮应至少放大两倍
+  if (!wheelState || wheelState.zoom < zoom0 * 2) bad('desktop wheel focal zoom failed');
 
   // Collapse desktop folio to verify fullscreen mode + deep zoom 4.6x Chaotian
   await page.locator('#lc-folio-toggle').click();
@@ -160,7 +180,7 @@ async function runDesktopSuite() {
   await page.locator('#lc-folio-toggle').click();
   await page.locator('#lc-z-reset').click();
   await page.waitForTimeout(700);
-  await page.locator('.lc-proj-layer .lc-pin[data-town="haiyang"]').click();
+  await clickTownPin(page, 'haiyang');
   await page.waitForTimeout(1150);
   await page.screenshot({ path: path.join(OUT, 'desktop-03-haiyang-3d.png') });
 

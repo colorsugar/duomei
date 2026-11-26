@@ -51,6 +51,51 @@ export const REALMS = [
     tint: '#D6E6F0', speckCol: '#FFFFFF', p: [0.45, 0.78, 26, 1], q: [0.30, 1.0],
     haze: '#EAF0F3', light: '#EEF4FF', fx: 'snow', overlay: '208, 222, 232', glow: '240, 246, 255' },
 ];
+// 桂林市区三境：老城（秀峰叠彩象山七星）、雁山、临桂
+REALMS.push(
+  { id: 'guilin-city', epithet: '山水城郭', lon: 110.296, lat: 25.272, weight: 1.1, wash: 0.50,
+    tint: '#4FA595', speckCol: '#F4C542', p: [0.45, 0.0, 18, -0.4], q: [0.0, 1.15],
+    haze: '#E4EFE9', light: '#FFF4D8', fx: 'osmanthus', overlay: '160, 206, 190', glow: '250, 240, 212' },
+  { id: 'yanshan', epithet: '雁山花畴', lon: 110.33, lat: 25.10, weight: 1.2, wash: 0.52,
+    tint: '#C2C45A', speckCol: '#F2D43A', p: [0.40, 0.0, 22, -0.9], q: [0.0, 1.1],
+    haze: '#F1EED6', light: '#FFF6D6', fx: 'blossom', overlay: '214, 210, 150', glow: '252, 246, 214' },
+  { id: 'lingui', epithet: '会仙湿地', lon: 110.10, lat: 25.15, weight: 2.4, wash: 0.50,
+    tint: '#5DAFA8', speckCol: '#DDF2A0', p: [0.45, 0.0, 12, -0.7], q: [0.0, 1.0],
+    haze: '#E2EEEA', light: '#F2FFF8', fx: 'firefly', overlay: '160, 206, 198', glow: '228, 244, 238' },
+
+  // 桂林其余十县：每县一境，取县域中心，色调按各县最出名的风物
+  { id: 'yangshuo', epithet: '碧莲群峰', lon: 110.45, lat: 24.85, weight: 1.4, wash: 0.52,
+    tint: '#5E9E8A', speckCol: '#EEF3F5', p: [0.40, 0.10, 0, 0], q: [0.04, 1.0],
+    haze: '#E3ECEA', light: '#EEF6F4', fx: 'mist', overlay: '168, 200, 190', glow: '232, 242, 238' },
+  { id: 'lipu', epithet: '荔江芋乡', lon: 110.4, lat: 24.5, weight: 1.2, wash: 0.52,
+    tint: '#9A86B8', speckCol: '#E8DDF4', p: [0.40, 0.0, 14, -0.6], q: [0.04, 1.0],
+    haze: '#ECE6F0', light: '#F6EEFF', fx: 'firefly', overlay: '196, 182, 216', glow: '242, 236, 250' },
+  { id: 'pingle', epithet: '三江汇流', lon: 110.8, lat: 24.58, weight: 1.2, wash: 0.52,
+    tint: '#6FA7B5', speckCol: '#EEF3F5', p: [0.35, 0.05, 0, 0], q: [0.04, 1.0],
+    haze: '#E2EBEE', light: '#EEF4F8', fx: 'rain', overlay: '170, 196, 204', glow: '230, 238, 242' },
+  { id: 'gongcheng', epithet: '桃红油茶', lon: 110.9, lat: 24.97, weight: 1.3, wash: 0.52,
+    tint: '#EE8FA6', speckCol: '#F7B6C6', p: [0.35, 0.0, 22, -0.8], q: [0.04, 1.0],
+    haze: '#F6E4E4', light: '#FFE8E6', fx: 'petal', overlay: '238, 186, 196', glow: '255, 222, 228' },
+  { id: 'yongfu', epithet: '福寿果乡', lon: 109.93, lat: 25.05, weight: 1.4, wash: 0.52,
+    tint: '#8DB860', speckCol: '#E8F59A', p: [0.50, 0.0, 14, -0.4], q: [0.04, 1.0],
+    haze: '#E8F0DE', light: '#F6FFE6', fx: 'blossom', overlay: '190, 214, 160', glow: '240, 248, 226' },
+  { id: 'longsheng', epithet: '龙脊梯田', lon: 110.04, lat: 25.85, weight: 1.6, wash: 0.52,
+    tint: '#D4B24A', speckCol: '#F7D26A', p: [0.45, 0.20, 18, 0.4], q: [0.04, 1.0],
+    haze: '#F1E8CC', light: '#FFF0C8', fx: 'mist', overlay: '226, 206, 140', glow: '252, 240, 206' },
+  { id: 'ziyuan', epithet: '丹霞资江', lon: 110.62, lat: 26.05, weight: 1.3, wash: 0.52,
+    tint: '#C8663E', speckCol: '#E0603A', p: [0.45, 0.0, 16, 0.2], q: [0.04, 1.0],
+    haze: '#F3E2D6', light: '#FFE4CC', fx: 'redleaf', overlay: '222, 168, 140', glow: '252, 230, 212' },
+  { id: 'xing-an', epithet: '灵渠秦韵', lon: 110.62, lat: 25.66, weight: 1.3, wash: 0.52,
+    tint: '#86B47C', speckCol: '#F6F3DC', p: [0.45, 0.0, 16, -0.6], q: [0.04, 1.0],
+    haze: '#EAF1E4', light: '#FBFFE8', fx: 'catkin', overlay: '196, 222, 186', glow: '244, 248, 228' },
+  { id: 'quanzhou', epithet: '湘源北去', lon: 111.05, lat: 25.95, weight: 1.6, wash: 0.52,
+    tint: '#6E9BB0', speckCol: '#EEF3F5', p: [0.40, 0.08, 0, 0], q: [0.04, 1.0],
+    haze: '#E3EAEE', light: '#EEF4FA', fx: 'mist', overlay: '170, 192, 206', glow: '232, 238, 244' },
+  { id: 'guanyang', epithet: '都庞山色', lon: 111.05, lat: 25.47, weight: 1.2, wash: 0.52,
+    tint: '#7C9D6E', speckCol: '#FFFFFF', p: [0.50, 0.30, 0, 1], q: [0.04, 1.0],
+    haze: '#E6ECE4', light: '#F0F6EE', fx: 'mist', overlay: '184, 204, 178', glow: '236, 242, 234' },
+);
+
 export const REALM_EPITHET = Object.fromEntries(REALMS.map((r) => [r.id, r.epithet]));
 const RN = REALMS.length;
 
@@ -188,6 +233,18 @@ function drawFxTexture(kind) {
       g.restore();
     }
     radial(g, [[0, '#FFD54A'], [0.6, '#F2B21C'], [1, 'rgba(242,178,28,0)']], 8);
+  } else if (kind === 'osmanthus') {
+    // 桂花：四瓣小金花
+    g.fillStyle = '#F2B81E';
+    for (let i = 0; i < 4; i++) {
+      g.save();
+      g.rotate((i / 4) * Math.PI * 2 + 0.4);
+      g.beginPath();
+      g.ellipse(0, -9, 7, 10, 0, 0, Math.PI * 2);
+      g.fill();
+      g.restore();
+    }
+    radial(g, [[0, '#FFE58A'], [0.6, '#F7C433'], [1, 'rgba(247,196,51,0)']], 7);
   } else if (kind === 'snow') {
     radial(g, [[0, 'rgba(255,255,255,1)'], [0.45, 'rgba(250,253,255,0.85)'], [1, 'rgba(240,246,255,0)']]);
   } else if (kind === 'catkin') {
@@ -236,6 +293,7 @@ const FX_PROFILE = {
   petal: { size: 0.016, fall: 0.026, sway: 0.034, spin: 2.0, opacity: 0.92, n: 1 },
   lotus: { size: 0.017, fall: 0.022, sway: 0.030, spin: 1.6, opacity: 0.9, n: 0.7 },
   blossom: { size: 0.013, fall: 0.024, sway: 0.030, spin: 1.8, opacity: 0.95, n: 0.8 },
+  osmanthus: { size: 0.008, fall: 0.020, sway: 0.028, spin: 1.6, opacity: 0.95, n: 0.9 },
   snow: { size: 0.010, fall: 0.022, sway: 0.016, spin: 0.4, opacity: 0.85, n: 1 },
   catkin: { size: 0.014, fall: 0.006, sway: 0.030, spin: 0.5, opacity: 0.8, n: 0.7 },
   mist: { size: 0.16, fall: 0.0, sway: 0.020, spin: 0, opacity: 0.42, n: 0.35, bill: true, drift: 0.035 },
@@ -261,6 +319,8 @@ uniform float uAtmoSpeck;
 uniform float uAtmoFocus;
 uniform vec2 uAtmoFocusXZ;
 uniform sampler2D uAtmoMask;
+uniform float uAtmoTime;
+uniform float uAtmoZoom;
 float atmoOut = 0.0;
 float atmoHash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
 float atmoNoise(vec2 p) {
@@ -305,7 +365,7 @@ const FRAG_APPLY = /* glsl */ `
   float sat = mx - min(c0.r, min(c0.g, c0.b));
   float foliage = clamp((c0.g - max(c0.r, c0.b)) * 5.0, 0.0, 1.0);
   float water = clamp((c0.b - max(c0.r, c0.g)) * 9.0, 0.0, 1.0);
-  float inside = texture2D(uAtmoMask, vAtmoW.xz / vec2(28.0, 35.0) + 0.5).r;
+  float inside = texture2D(uAtmoMask, vAtmoW.xz / vec2(__MW__, __MD__) + 0.5).r;
   atmoOut = 1.0 - inside;
   float hgt = clamp(vAtmoW.y / 1.58, 0.0, 1.0);
   vec2 xz = vAtmoW.xz;
@@ -335,6 +395,18 @@ const FRAG_APPLY = /* glsl */ `
   float focusW = uAtmoFocus * (1.0 - smoothstep(2.0, 4.5, distance(xz, uAtmoFocusXZ)));
   float amt = clamp(uAtmoGlobal + focusW * 0.35, 0.0, 1.0) * inside * (1.0 - water * 0.7);
   diffuseColor.rgb = mix(c0, g, amt);
+  // 江湖水面：缓缓流动的粼光
+  if (water > 0.05) {
+    vec2 q = xz * vec2(5.5, 9.0) + vec2(uAtmoTime * 0.35, uAtmoTime * 0.12);
+    float rip = atmoNoise(q) * atmoNoise(q * 1.9 + 7.0);
+    float glint = smoothstep(0.42, 0.62, rip) * (0.55 + 0.45 * sin(uAtmoTime * 1.7 + xz.x * 3.0));
+    diffuseColor.rgb = mix(diffuseColor.rgb, vec3(0.96, 0.99, 1.0), glint * water * 0.55);
+  }
+  // 云影：大片的云影慢慢掠过山野（总览时最明显）
+  float cs = atmoNoise(xz * 0.16 + vec2(uAtmoTime * 0.018, uAtmoTime * 0.007)) * 0.65
+           + atmoNoise(xz * 0.41 + vec2(uAtmoTime * 0.03, -uAtmoTime * 0.01)) * 0.35;
+  float cloudShade = smoothstep(0.52, 0.78, cs) * (1.0 - smoothstep(1.2, 3.0, uAtmoZoom)) * inside;
+  diffuseColor.rgb *= 1.0 - cloudShade * 0.16;
 }
 `;
 
@@ -342,7 +414,7 @@ const FRAG_FOG = /* glsl */ `
 #ifdef USE_FOG
 {
   // 县界外宣纸与地形四缘：溶进雾色，县域如长卷浮在纸上，消掉矩形硬边
-  vec2 uvw = vAtmoW.xz / vec2(28.0, 35.0) + 0.5;
+  vec2 uvw = vAtmoW.xz / vec2(__MW__, __MD__) + 0.5;
   float ed = min(min(uvw.x, 1.0 - uvw.x), min(uvw.y, 1.0 - uvw.y));
   float edgeF = 1.0 - smoothstep(0.0, 0.12, ed);
   float melt = max(edgeF, atmoOut);
@@ -364,6 +436,8 @@ export function createMapAtmosphere({
   buildDieCutTexture,
   maxAniso,
   host,
+  mapW = 40,
+  mapD = 40,
 }) {
   // -------------------------------------------------------------------------
   // 共享 uniforms（地形 L0 与 20 张瓦片共用）
@@ -386,6 +460,8 @@ export function createMapAtmosphere({
     uAtmoFocus: { value: 0 },
     uAtmoFocusXZ: { value: new THREE.Vector2() },
     uAtmoMask: { value: null },
+    uAtmoTime: { value: 0 },
+    uAtmoZoom: { value: 1 },
   };
 
   function patchMaterial(mat) {
@@ -398,11 +474,11 @@ export function createMapAtmosphere({
         .replace('#include <project_vertex>', '#include <project_vertex>\nvAtmoW = (modelMatrix * vec4(transformed, 1.0)).xyz;');
       shader.fragmentShader = shader.fragmentShader
         .replace('#include <common>', `#include <common>\n${FRAG_PARS}`)
-        .replace('#include <map_fragment>', `#include <map_fragment>\n${FRAG_APPLY}`)
-        .replace('#include <fog_fragment>', `#include <fog_fragment>\n${FRAG_FOG}`);
+        .replace('#include <map_fragment>', `#include <map_fragment>\n${FRAG_APPLY}`.replace(/__MW__/g, mapW.toFixed(1)).replace(/__MD__/g, mapD.toFixed(1)))
+        .replace('#include <fog_fragment>', `#include <fog_fragment>\n${FRAG_FOG}`.replace(/__MW__/g, mapW.toFixed(1)).replace(/__MD__/g, mapD.toFixed(1)));
     };
     const prevKey = mat.customProgramCacheKey?.bind(mat);
-    mat.customProgramCacheKey = () => `${prevKey ? prevKey() : ''}|lc-atmo-v2`;
+    mat.customProgramCacheKey = () => `${prevKey ? prevKey() : ''}|lc-atmo-v4`;
     mat.needsUpdate = true;
   }
 
@@ -585,8 +661,8 @@ export function createMapAtmosphere({
     for (const sp of spots) {
       if (tooCloseToStandee(sp.x, sp.z, 0.55)) continue;
       if (insideTest) {
-        const u = (sp.x / 28.0) + 0.5;
-        const v = (sp.z / 35.0) + 0.5;
+        const u = (sp.x / mapW) + 0.5;
+        const v = (sp.z / mapD) + 0.5;
         if (!insideTest(u, v)) continue;
       }
       const pick = mats[Math.floor(r2() * mats.length)];
@@ -618,7 +694,60 @@ export function createMapAtmosphere({
   // -------------------------------------------------------------------------
   // 每帧更新
   // -------------------------------------------------------------------------
+  // -------------------------------------------------------------------------
+  // 山间流云：总览时在高山上空飘几团白云，放大后散去
+  // -------------------------------------------------------------------------
+  const cloudTex = (() => {
+    const c = document.createElement('canvas');
+    c.width = 256;
+    c.height = 128;
+    const g = c.getContext('2d');
+    const r = mulberry32(31);
+    for (let i = 0; i < 26; i++) {
+      const x = 40 + r() * 176;
+      const y = 50 + r() * 40 - Math.abs(x - 128) * 0.12;
+      const rad = 18 + r() * 30;
+      const gr = g.createRadialGradient(x, y, 1, x, y, rad);
+      gr.addColorStop(0, 'rgba(255,255,255,0.55)');
+      gr.addColorStop(1, 'rgba(255,255,255,0)');
+      g.fillStyle = gr;
+      g.beginPath();
+      g.arc(x, y, rad, 0, Math.PI * 2);
+      g.fill();
+    }
+    const t = new THREE.CanvasTexture(c);
+    t.colorSpace = THREE.SRGBColorSpace;
+    return t;
+  })();
+  const cloudMat = new THREE.MeshBasicMaterial({ map: cloudTex, transparent: true, depthWrite: false, opacity: 0, fog: false, toneMapped: false });
+  const clouds = [];
+  {
+    const r = mulberry32(77);
+    for (let i = 0; i < (isMobile ? 9 : 14); i++) {
+      const m = new THREE.Mesh(new THREE.PlaneGeometry(1, 0.5), cloudMat);
+      m.renderOrder = 9;
+      const s = 4.5 + r() * 5;
+      m.scale.set(s, s, 1);
+      m.userData = { x: (r() - 0.5) * mapW * 0.7, z: (r() - 0.5) * mapD * 0.6, y: 3.2 + r() * 1.6, v: 0.10 + r() * 0.12 };
+      scene.add(m);
+      clouds.push(m);
+    }
+  }
+
   function update(dt, time, { tx, tz, zoom, pose, camera, worldScale }) {
+    uniforms.uAtmoTime.value = time;
+    uniforms.uAtmoZoom.value = zoom;
+    const cloudA = 1 - smoothstep(0.8, 1.5, zoom);
+    cloudMat.opacity = cloudA * 0.85;
+    for (const m of clouds) {
+      m.visible = cloudA > 0.02;
+      if (!m.visible) continue;
+      const u = m.userData;
+      u.x += u.v * dt;
+      if (u.x > mapW * 0.38) u.x = -mapW * 0.38;
+      m.position.set(u.x, u.y, u.z);
+      m.quaternion.copy(camera.quaternion);
+    }
     // 1) 地色强度：全境总览即显十二境，放大后铺满并加浓镜头所在一境
     uniforms.uAtmoGlobal.value = lerp(0.82, 0.92, smoothstep(1.15, 2.6, zoom));
     uniforms.uAtmoSpeck.value = smoothstep(2.0, 3.8, zoom);
@@ -649,7 +778,7 @@ export function createMapAtmosphere({
     scene.fog.color.copy(curHaze);
     if (scene.background?.isColor) scene.background.copy(curHaze);
     tableMat.color.copy(curHaze);
-    scene.fog.density = lerp(base.fogDensity, 0.0125, smoothstep(1.3, 3.6, zoom));
+    scene.fog.density = lerp(base.fogDensity * 0.45, 0.0125, smoothstep(0.75, 3.6, zoom));
 
     tmpCol.copy(base.key);
     if (dom) tmpCol.lerp(dom.lightCol, domW * 0.85);
