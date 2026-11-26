@@ -3288,9 +3288,13 @@ function openDetailCard(entry) {
   dom.cardTagline.textContent = s.tagline;
   dom.factTown.textContent = s.town;
   dom.factSeason.textContent = s.season;
+  // 查不到的字段写「—」，不显示：藏掉整格
+  dom.factSeason.parentElement.style.display = s.season === '—' ? 'none' : '';
   dom.factStat.textContent = s.stat;
+  dom.factStat.parentElement.style.display = s.stat === '—' ? 'none' : '';
   dom.cardStory.textContent = s.story;
   dom.cardTips.textContent = s.tips;
+  dom.cardTips.parentElement.style.display = s.tips === '—' ? 'none' : '';
   dom.cardInlineNote.classList.remove('show');
   dom.cardScroll.scrollTop = 0;
 
