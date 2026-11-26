@@ -371,23 +371,32 @@ const FRAG_APPLY = /* glsl */ `
   vec2 xz = vAtmoW.xz;
   vec2 wp = xz + (vec2(atmoNoise(xz * 0.55), atmoNoise(xz * 0.55 + 19.3)) - 0.5) * 1.5
                + (vec2(atmoNoise(xz * 2.1 + 5.0), atmoNoise(xz * 2.1 + 41.0)) - 0.5) * 0.4;
-  float d1 = 1e9;
-  float d2 = 1e9;
-  int i1 = 0;
-  int i2 = 0;
+  // 取最近的四境，前三境按「离第四境还有多远」软融合：排名交换时权重连续，交界是几公里宽的渐变，没有硬线和方块
+  float d1 = 1e9, d2 = 1e9, d3 = 1e9, d4 = 1e9;
+  int i1 = 0, i2 = 0, i3 = 0;
   for (int i = 0; i < ${RN}; i++) {
     vec2 dv = wp - uRA[i].xy;
     float d = dot(dv, dv) - uRA[i].z;
-    if (d < d1) { d2 = d1; i2 = i1; d1 = d; i1 = i; }
-    else if (d < d2) { d2 = d; i2 = i; }
+    if (d < d1) { d4 = d3; d3 = d2; i3 = i2; d2 = d1; i2 = i1; d1 = d; i1 = i; }
+    else if (d < d2) { d4 = d3; d3 = d2; i3 = i2; d2 = d; i2 = i; }
+    else if (d < d3) { d4 = d3; d3 = d; i3 = i; }
+    else if (d < d4) { d4 = d; }
   }
-  float gap = d2 - d1;
-  vec3 g1 = atmoRealm(i1, c0, lum, foliage, hgt, xz);
-  vec3 g2 = atmoRealm(i2, c0, lum, foliage, hgt, xz);
-  vec3 g = mix(g2, g1, 0.5 + 0.5 * smoothstep(0.0, 2.6, gap));
-  // 水彩积色：分区交界处颜料沉淀成一道略深的毛边
-  float edge = (1.0 - smoothstep(0.05, 0.7, gap)) * (0.6 + 0.4 * atmoNoise(xz * 5.0));
-  g *= 1.0 - 0.10 * edge * uAtmoGlobal;
+  // 平方距离差换算成近似的直线距离差（世界单位，1 单位约 2.9 公里）
+  float nrm = 0.5 / sqrt(max(d1 + 6.0, 1.0));
+  const float BAND = 2.4;
+  float k4 = pow(max(0.0, 1.0 - (d4 - d1) * nrm / BAND), 2.0);
+  float w1 = 1.0 - k4;
+  float w2 = max(0.0, pow(max(0.0, 1.0 - (d2 - d1) * nrm / BAND), 2.0) - k4);
+  float w3 = max(0.0, pow(max(0.0, 1.0 - (d3 - d1) * nrm / BAND), 2.0) - k4);
+  vec3 g = atmoRealm(i1, c0, lum, foliage, hgt, xz) * w1;
+  if (w2 > 0.001) g += atmoRealm(i2, c0, lum, foliage, hgt, xz) * w2;
+  if (w3 > 0.001) g += atmoRealm(i3, c0, lum, foliage, hgt, xz) * w3;
+  g /= max(1e-4, w1 + w2 + w3);
+  // 水彩积色：交界处只留极淡的颜料沉淀，不画线
+  float gap = (d2 - d1) * nrm;
+  float edge = (1.0 - smoothstep(0.0, 1.2, gap)) * atmoNoise(xz * 3.0);
+  g *= 1.0 - 0.03 * edge * uAtmoGlobal;
   // 颜料颗粒
   float gran = atmoNoise(xz * 9.0) * 0.6 + atmoNoise(xz * 23.0) * 0.4;
   g *= 0.955 + 0.09 * gran;

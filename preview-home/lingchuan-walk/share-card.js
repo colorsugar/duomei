@@ -7,9 +7,9 @@ const TEMPLATES = {
   overview: {
     id: 'overview',
     label: '水墨明信片',
-    seal: '灵川',
+    seal: '桂林',
     accent: '#1F5E5B',
-    ribbon: '灵川全境 · 明信片签',
+    ribbon: '桂林全境 · 明信片签',
     layout: 'postcard',
   },
   township: {
@@ -17,7 +17,7 @@ const TEMPLATES = {
     label: '宣纸手账签',
     seal: '风物',
     accent: '#B3261E',
-    ribbon: '七镇五乡 · 手账竖签',
+    ribbon: '十七县区 · 手账竖签',
     layout: 'vertical-seal',
   },
   village: {
@@ -25,7 +25,7 @@ const TEMPLATES = {
     label: '山乡风物志',
     seal: '乡情',
     accent: '#5B4636',
-    ribbon: '灵川村落 · 风物一页',
+    ribbon: '桂北村落 · 风物一页',
     layout: 'postcard',
   },
   'culture-lion': {
@@ -41,7 +41,7 @@ const TEMPLATES = {
     label: '青绿印记卡',
     seal: '印',
     accent: '#1F5E5B',
-    ribbon: '灵川行卷 · 三十二景',
+    ribbon: '桂林全境 · 青绿印记',
     layout: 'vertical-seal',
   },
 };
@@ -85,33 +85,57 @@ function loadImage(src) {
   });
 }
 
-function wrapText(ctx, text, x, y, maxW, lineH, maxLines) {
-  const chars = Array.from(String(text || ''));
-  let line = '';
-  let lines = 0;
-  for (const ch of chars) {
-    if (ch === '\n') {
-      ctx.fillText(line, x, y + lines * lineH);
-      lines += 1;
-      line = '';
-      if (lines >= maxLines) return lines;
-      continue;
+const NO_LINE_START = /[，。、；：！？）」』》〉,.;:!?)\]]/;
+
+function layoutLines(ctx, text, maxW) {
+  const lines = [];
+  for (const para of String(text || '').split('\n')) {
+    let line = '';
+    for (const ch of Array.from(para)) {
+      const test = line + ch;
+      if (ctx.measureText(test).width > maxW && line) {
+        if (NO_LINE_START.test(ch)) {
+          // 标点不起行：把上一行最后一个字带下来
+          const arr = Array.from(line);
+          const last = arr.pop();
+          lines.push(arr.join(''));
+          line = last + ch;
+        } else {
+          lines.push(line);
+          line = ch;
+        }
+      } else {
+        line = test;
+      }
     }
-    const test = line + ch;
-    if (ctx.measureText(test).width > maxW && line) {
-      ctx.fillText(line, x, y + lines * lineH);
-      lines += 1;
-      line = ch;
-      if (lines >= maxLines) return lines;
-    } else {
-      line = test;
-    }
-  }
-  if (line && lines < maxLines) {
-    ctx.fillText(line, x, y + lines * lineH);
-    lines += 1;
+    if (line) lines.push(line);
   }
   return lines;
+}
+
+function wrapText(ctx, text, x, y, maxW, lineH, maxLines) {
+  let lines = layoutLines(ctx, text, maxW);
+  if (lines.length > maxLines) {
+    lines = lines.slice(0, maxLines);
+    let last = lines[maxLines - 1];
+    while (last && ctx.measureText(last + '…').width > maxW) last = Array.from(last).slice(0, -1).join('');
+    lines[maxLines - 1] = last.replace(/[，。、；：,.;:]$/, '') + '…';
+  }
+  lines.forEach((l, i) => ctx.fillText(l, x, y + i * lineH));
+  return lines.length;
+}
+
+// 在给定高度内放下全文：逐级缩小字号，实在放不下才省略
+function fitText(ctx, text, x, y, maxW, maxH, { weight = 400, family = '"Songti SC", "PingFang SC", serif', size = 23, min = 17, lead = 1.62 } = {}) {
+  for (let fs = size; fs >= min; fs -= 1) {
+    ctx.font = `${weight} ${fs}px ${family}`;
+    const lh = Math.round(fs * lead);
+    const n = layoutLines(ctx, text, maxW).length;
+    if (n * lh <= maxH || fs === min) {
+      return wrapText(ctx, text, x, y, maxW, lh, Math.max(1, Math.floor(maxH / lh))) * lh;
+    }
+  }
+  return 0;
 }
 
 function drawVerticalColumn(ctx, text, x, y, stepY, maxChars = 10) {
@@ -154,7 +178,7 @@ function drawCoverArt(ctx, art, x, y, w, h, r) {
   ctx.fillStyle = '#F2EBDC';
   ctx.fillRect(x, y, w, h);
   if (art) {
-    const scale = Math.max(w / art.width, h / art.height);
+    const scale = Math.min(w / art.width, h / art.height);
     const dw = art.width * scale;
     const dh = art.height * scale;
     ctx.drawImage(art, x + (w - dw) / 2, y + (h - dh) / 2, dw, dh);
@@ -207,25 +231,26 @@ export async function renderShareCard(payload) {
 
     // Right vertical calligraphy title + square seal
     ctx.fillStyle = '#1C1916';
-    ctx.font = '700 50px "Songti SC", "STSong", serif';
     ctx.textAlign = 'center';
-    const titleShort = String(payload.title || '灵川全境').split('·')[0].trim();
-    drawVerticalColumn(ctx, titleShort, W - 116, 715, 58, 6);
+    const titleShort = String(payload.title || '桂林全境').split('·')[0].trim();
+    const tn = Array.from(titleShort).length;
+    const step = Math.min(58, Math.floor(330 / Math.max(tn, 1)));
+    ctx.font = `700 ${Math.round(step * 0.86)}px "Songti SC", "STSong", serif`;
+    drawVerticalColumn(ctx, titleShort, W - 116, 715, step, 8);
     drawSquareSeal(ctx, tpl.seal, W - 116, 1086, 58, tpl.accent);
 
     // Left poetic tagline & monograph
     ctx.textAlign = 'left';
     ctx.fillStyle = tpl.accent;
     ctx.font = '600 22px "Songti SC", "STSong", serif';
-    wrapText(ctx, payload.subtitle || '桂林 · 灵川', 72, 706, W - 250, 34, 2);
+    wrapText(ctx, payload.subtitle || '桂林', 72, 706, W - 250, 34, 2);
 
     ctx.fillStyle = '#1C1916';
-    ctx.font = '600 28px "Songti SC", "STSong", serif';
-    wrapText(ctx, payload.tagline || '一脉山水，七镇五乡。', 72, 780, W - 250, 42, 3);
+    const tagH = fitText(ctx, payload.tagline || '一脉山水，十七县区。', 72, 780, W - 250, 130, { weight: 600, family: '"Songti SC", "STSong", serif', size: 28, min: 22, lead: 1.5 });
 
     ctx.fillStyle = 'rgba(28, 25, 22, 0.72)';
-    ctx.font = '400 23px "Songti SC", "PingFang SC", serif';
-    wrapText(ctx, payload.body || '', 72, 932, W - 250, 38, 5);
+    const bodyY = 780 + tagH + 34;
+    fitText(ctx, payload.body || '', 72, bodyY, W - 250, (H - 130) - bodyY, { size: 23, min: 17 });
   } else {
     // Postcard / Festival Layout
     ctx.fillStyle = tpl.accent;
@@ -239,7 +264,7 @@ export async function renderShareCard(payload) {
 
     ctx.fillStyle = '#1C1916';
     ctx.font = '700 46px "Songti SC", "STSong", serif';
-    wrapText(ctx, payload.title || '灵川全境', 68, 720, W - 136, 56, 2);
+    wrapText(ctx, payload.title || '桂林全境', 68, 720, W - 136, 56, 2);
 
     if (payload.subtitle) {
       ctx.fillStyle = tpl.accent;
@@ -255,15 +280,15 @@ export async function renderShareCard(payload) {
     ctx.lineTo(W - 68, 822);
     ctx.stroke();
 
+    let bodyY = 878;
     if (payload.tagline) {
       ctx.fillStyle = '#2A231D';
-      ctx.font = '600 27px "Songti SC", "STSong", serif';
-      wrapText(ctx, payload.tagline, 68, 878, W - 136, 40, 2);
+      bodyY += fitText(ctx, payload.tagline, 68, 878, W - 136, 84, { weight: 600, family: '"Songti SC", "STSong", serif', size: 27, min: 21, lead: 1.48 });
     }
 
     ctx.fillStyle = 'rgba(28, 25, 22, 0.76)';
-    ctx.font = '400 23px "Songti SC", "PingFang SC", serif';
-    wrapText(ctx, payload.body || '', 68, 972, W - 136, 38, 4);
+    bodyY += 24;
+    fitText(ctx, payload.body || '', 68, bodyY, W - 136, (H - 130) - bodyY, { size: 23, min: 17 });
   }
 
   // Unified Duomei whisper footer
@@ -277,7 +302,7 @@ export async function renderShareCard(payload) {
   ctx.fillStyle = '#8C8176';
   ctx.font = '500 20px "Songti SC", "PingFang SC", serif';
   ctx.textAlign = 'left';
-  ctx.fillText(payload.footer || '桂林 · 灵川全境风物志', 68, H - 64);
+  ctx.fillText(payload.footer || '桂林全境风物志', 68, H - 64);
 
   ctx.textAlign = 'right';
   ctx.fillStyle = '#5A5147';
@@ -290,7 +315,7 @@ export async function renderShareCard(payload) {
 async function dispatchCanvasShare(canvas, payload, tpl, onNote) {
   const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/png', 0.94));
   const fileName = `duomei-lingchuan-${tpl.id}.png`;
-  const text = `${payload.title || '灵川全境'} · ${tpl.label}\n${payload.tagline || ''}\nhttps://duomei.site/lingchuan-walk/`;
+  const text = `${payload.title || '桂林全境'} · ${tpl.label}\n${payload.tagline || ''}\nhttps://duomei.site/lingchuan-walk/`;
 
   try {
     if (navigator.share && blob) {
@@ -341,7 +366,7 @@ function ensureShareStudio() {
       <header class="lc-share-head">
         <div>
           <span class="lc-share-k">DUOMEI · 宣纸分享笺</span>
-          <h3>换一种手账模板，留存这一页灵川</h3>
+          <h3>换一种手账模板，留存这一页桂林</h3>
         </div>
         <button type="button" class="lc-share-close" data-close="1" aria-label="关闭分享预览">×</button>
       </header>

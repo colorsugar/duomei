@@ -1,3 +1,4 @@
+@import url('./f/fonts.css');
 /* 灵川游踪 · 宣纸、墨、朱砂、青绿 */
 :root {
   --paper: #F5F0E3;
@@ -272,5 +273,4 @@ section { margin-top: 26px; }
 }
 
 /* 书法字体：随页面一同下载的子集，手机上没有楷体也能显示 */
-@font-face { font-family: 'MSZ'; src: url('./f/msz-lc.woff2') format('woff2'); font-display: swap; }
 :root { --kai: 'MSZ', "Kaiti SC", "STKaiti", "KaiTi", "Songti SC", serif; }

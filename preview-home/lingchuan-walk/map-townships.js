@@ -4,8 +4,10 @@
 // 严守事实边界：兰田/大境瑶族服饰、灵田走牌灯、林下仿野生灵芝、大野瀑布修缮提示、大参村待核实
 // ============================================================================
 
-import { GROK_EXTRA_42 } from './map-extra-42.js';
-export { GROK_EXTRA_42 };
+import { GROK_EXTRA_42 as LINGCHUAN_EXTRA_42 } from './map-extra-42.js';
+import { CITY_POIS } from './map-city.js';
+// 灵川 42 处 + 主城区 gl-*：同一套立绘摆放与侧笺卡片逻辑
+export const GROK_EXTRA_42 = [...LINGCHUAN_EXTRA_42, ...CITY_POIS];
 
 export const MAP_META = {
   title: '桂林全境',

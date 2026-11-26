@@ -1143,7 +1143,7 @@ body[data-mode="map"] #vignette {
   display: flex; align-items: center; justify-content: center;
   background: #EFE8D8; border-radius: 14px; padding: 10px; overflow: hidden;
 }
-.lc-share-stage img { max-height: 100%; max-width: 100%; border-radius: 10px; box-shadow: 0 10px 26px rgba(28, 25, 22, 0.16); display: block; }
+.lc-share-stage img { max-height: calc(50dvh - 20px); max-width: 100%; width: auto; height: auto; object-fit: contain; border-radius: 10px; box-shadow: 0 10px 26px rgba(28, 25, 22, 0.16); display: block; }
 .lc-share-tpls { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; }
 .lc-share-tpl-btn {
   appearance: none; border: 1px solid rgba(28, 25, 22, 0.15); background: #F6F0E3; color: var(--lc-ink-soft);
@@ -1302,6 +1302,10 @@ body[data-mode="map"] #vignette {
   color: rgba(28, 25, 22, 0.42);
   white-space: nowrap;
 }
+.lc-map-credit a { color: inherit; text-decoration: underline; text-underline-offset: 2px; pointer-events: auto; }
+.lc-map-credit { transition: opacity 0.4s ease, max-width 0.4s ease; max-width: 320px; overflow: hidden; display: inline-block; }
+.is-credit-folded .lc-map-credit { opacity: 0; max-width: 0; margin-left: -10px; pointer-events: none; }
+.lc-zctrl-btn.is-info { width: 30px; height: 30px; font-size: 14px; align-self: center; color: var(--lc-ink-soft); opacity: 0.8; }
 @media (max-width: 919px) {
   .lc-map-credit { font-size: 7.5px; }
 }
