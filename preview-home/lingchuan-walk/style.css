@@ -583,6 +583,8 @@ body[data-mode="depth"] .sub-bar {
 .bottom-dock[hidden] {
   display: none;
 }
+/* 画境 9 个按钮：电脑端放宽一点，手机端靠横滑 */
+.bottom-dock.depth-dock { width: min(860px, calc(100vw - 16px)); }
 
 .journey-track-wrap,
 .depth-track-wrap {
@@ -716,6 +718,9 @@ body[data-mode="depth"] .sub-bar {
   background: var(--accent);
   color: #FAF6EE;
 }
+/* 画境素材首次点到才下载：下载期间按钮轻轻呼吸 */
+.chapter-pill.loading { animation: pill-load 0.9s ease-in-out infinite alternate; }
+@keyframes pill-load { from { opacity: 1; } to { opacity: 0.45; } }
 
 .pill-dot {
   width: 4.5px;

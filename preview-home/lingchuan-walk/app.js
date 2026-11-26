@@ -17,7 +17,7 @@ function getAssetUrl(name, forceFull = false) {
   // 手机用 2048 的地形底图（323 KB，桌面 3072 / 950 KB）；近看时有分块高清图接上
   if (name === 'map/lingchuan-dem-l0' && IS_MOBILE && !forceFull) return './img/map/lingchuan-dem-l0-m.webp';
   if (name.startsWith('map/')) return `./img/${name}.webp`;
-  const isLc = name.startsWith('lc-') || name.startsWith('gl-');
+  const isLc = name.startsWith('lc-') || name.startsWith('gl-') || name.startsWith('hj-');
   if (isLc) {
     return (!forceFull && IS_MOBILE) ? `./img/m/${name}.webp` : `./img/${name}.webp`;
   }
@@ -467,7 +467,7 @@ function makeSoftParticleTexture(stops) {
 // ============================================================================
 const state = {
   mode: 'map',             // 'map' | 'walk' | 'depth'
-  depthScene: 'haiyang',   // 'haiyang' | 'lijiang' | 'dajing' | 'paideng'
+  depthScene: 'haiyang',   // 'haiyang' | 'lijiang' | 'dajing' | 'paideng' | HJ_SCENES 五幅(xingping…)
 
   t: 0.014,
   tTarget: 0.014,
@@ -2473,6 +2473,11 @@ const depthGroups = {
   lijiang: new THREE.Group(),
   dajing:  new THREE.Group(),
   paideng: new THREE.Group(),
+  xingping: new THREE.Group(),
+  liangjiang: new THREE.Group(),
+  longji: new THREE.Group(),
+  yulong: new THREE.Group(),
+  xiangbi: new THREE.Group(),
 };
 Object.values(depthGroups).forEach((grp) => {
   grp.visible = false;
@@ -2480,7 +2485,7 @@ Object.values(depthGroups).forEach((grp) => {
 });
 depthGroups.haiyang.visible = true;
 
-const depthAnimHooks = { haiyang: [], lijiang: [], dajing: [], paideng: [] };
+const depthAnimHooks = { haiyang: [], lijiang: [], dajing: [], paideng: [], xingping: [], liangjiang: [], longji: [], yulong: [], xiangbi: [] };
 
 function createReliefLayer(imgName, {
   w, h, x = 0, y = 0, z = 0,
@@ -2828,11 +2833,290 @@ function buildDepthScenePaideng() {
   addDepthParticles(G, hooks, fireflyTex, IS_MOBILE ? 55 : 85, { speed: 0.36, spin: false, additive: true });
 }
 
+// ============================================================================
+// 桂林五幅画境（兴坪 / 两江四湖 / 龙脊 / 遇龙河 / 象鼻山）
+// 素材 img/hj-<id>-{back,mid1..,fg1..}.webp 只在点到该画境时才下载，不进开场预载。
+// ============================================================================
+const HJ_SCENES = {
+  xingping:   ['back', 'mid1', 'mid2', 'mid3', 'fg1', 'fg2'],
+  liangjiang: ['back', 'mid1', 'mid2', 'mid3', 'fg1', 'fg2'],
+  longji:     ['back', 'mid1', 'mid2', 'mid3', 'fg1', 'fg2'],
+  yulong:     ['back', 'mid1', 'mid2', 'mid3', 'fg1', 'fg2'],
+  xiangbi:    ['back', 'mid1', 'mid2', 'fg1', 'fg2'],
+};
+const depthSceneReady = { haiyang: true, lijiang: true, dajing: true, paideng: true };
+const depthSceneLoading = {};
+
+function loadImageOnce(name) {
+  if (IMAGES[name]) return Promise.resolve();
+  return new Promise((resolve) => {
+    const im = new Image();
+    im.decoding = 'async';
+    im.onload = () => { IMAGES[name] = im; resolve(); };
+    im.onerror = () => {
+      const fb = new Image();
+      fb.onload = () => { IMAGES[name] = fb; resolve(); };
+      fb.onerror = () => resolve();
+      fb.src = getAssetUrl(name, true);
+    };
+    im.src = getAssetUrl(name, false);
+  });
+}
+
+/** 取得画境：首次点到才下载图、搭场景；之后直接用。 */
+function ensureDepthScene(id) {
+  if (depthSceneReady[id]) return Promise.resolve();
+  if (!depthSceneLoading[id]) {
+    depthSceneLoading[id] = Promise.all(HJ_SCENES[id].map((k) => loadImageOnce(`hj-${id}-${k}`))).then(() => {
+      HJ_BUILDERS[id]();
+      depthSceneReady[id] = true;
+    });
+  }
+  return depthSceneLoading[id];
+}
+
+/** 雾带：软圆斑横向慢飘，叠在山脚 / 水面上。 */
+function addMistBands(G, hooks, { y = 0.5, z = -7, w = 9, h = 1.6, color = '255,255,255', opacity = 0.34, count = 3, speed = 0.05, span = 5 } = {}) {
+  const tex = makeSoftParticleTexture([[0, `rgba(${color},0.9)`], [0.55, `rgba(${color},0.4)`], [1, `rgba(${color},0)`]]);
+  const bands = [];
+  for (let i = 0; i < count; i++) {
+    const m = new THREE.Mesh(
+      new THREE.PlaneGeometry(w * (0.8 + 0.25 * (i % 2)), h),
+      new THREE.MeshBasicMaterial({ map: tex, transparent: true, opacity, depthWrite: false, fog: false })
+    );
+    m.position.set(0, y + (i % 2) * 0.35, z + i * 0.8);
+    m.renderOrder = 5;
+    G.add(m);
+    bands.push({ m, ph: i * 2.1, x0: (i - (count - 1) / 2) * 2.2, sp: speed * (0.7 + 0.3 * i) });
+  }
+  hooks.push((time) => {
+    for (const b of bands) {
+      b.m.position.x = b.x0 + Math.sin(time * b.sp + b.ph) * span * 0.5;
+      b.m.material.opacity = opacity * (0.75 + 0.25 * Math.sin(time * 0.31 + b.ph));
+    }
+  });
+}
+
+/** 通用画境底：无限地面 + 天空片 + 羽化背景。 */
+function buildHjBase(id, { ground, sky, cloud, back, backTint = null }) {
+  const G = depthGroups[id];
+  const hooks = depthAnimHooks[id];
+  const infBase = new THREE.Mesh(new THREE.PlaneGeometry(300, 300).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ color: ground, fog: true }));
+  infBase.position.y = -0.08;
+  G.add(infBase);
+  const skyMesh = new THREE.Mesh(new THREE.PlaneGeometry(96, 44), new THREE.MeshBasicMaterial({ map: createSkyBackdrop(sky, cloud), fog: false }));
+  skyMesh.position.set(0, 12.0, -30);
+  G.add(skyMesh);
+  const bk = createReliefLayer(`hj-${id}-back`, { w: 44, x: 0, y: -0.4, z: -20.0, bulge: -0.6, curve: 2.2, tint: backTint, feathered: true });
+  G.add(bk);
+  hooks.push((time) => { bk.position.x = Math.sin(time * 0.045) * 0.9; }); // 云慢慢横移
+  return { G, hooks };
+}
+
+/** 吊在上沿的一件东西（柳条 / 灯笼）：枢轴在顶，绕顶摆。 */
+function createHangingLayer(imgName, { h, x, top, z, bulge = 0.3, nightGlow = false }) {
+  const pivot = new THREE.Group();
+  pivot.position.set(x, top, z);
+  const m = createReliefLayer(imgName, { h, bulge, bottomGrounded: false, nightGlow });
+  m.position.y = -h / 2;
+  pivot.add(m);
+  return pivot;
+}
+
+/** 水面：慢流的波光，铺满画境下半。col0 水深处，col1 水浅处。 */
+function addHjWater(G, hooks, col0, col1, alpha = 0.92) {
+  const mat = new THREE.ShaderMaterial({
+    transparent: true,
+    depthWrite: false,
+    uniforms: { uTime: { value: 0 } },
+    vertexShader: /* glsl */ `varying vec2 vUv; void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`,
+    fragmentShader: /* glsl */ `
+      uniform float uTime; varying vec2 vUv;
+      void main() {
+        float w = 0.5 + 0.5 * sin(vUv.x * 40.0 - uTime * 0.6 + sin(vUv.y * 30.0) * 1.3);
+        vec3 col = mix(vec3(${col0}), vec3(${col1}), w * 0.22 + (1.0 - vUv.y) * 0.3);
+        col = mix(col, vec3(1.0), smoothstep(0.9, 0.99, w) * 0.12);
+        float edge = smoothstep(0.0, 0.12, vUv.y) * smoothstep(1.0, 0.9, vUv.y) * smoothstep(0.0, 0.1, vUv.x) * smoothstep(1.0, 0.9, vUv.x);
+        gl_FragColor = vec4(col, edge * ${alpha});
+      }
+    `,
+  });
+  const m = new THREE.Mesh(new THREE.PlaneGeometry(46, 44).rotateX(-Math.PI / 2), mat);
+  m.position.set(0, 0.01, -2.0);
+  G.add(m);
+  hooks.push((time) => { mat.uniforms.uTime.value = time; });
+}
+
+function buildDepthSceneXingping() {
+  const { G, hooks } = buildHjBase('xingping', {
+    ground: '#DCE6DC',
+    sky: [[0, '#CFE0E0'], [0.5, '#EBEBD8'], [1, '#F6EFD8']], cloud: 'rgba(255,250,235,0.5)',
+    back: 'hj-xingping-back',
+  });
+addHjWater(G, hooks, '0.46,0.63,0.58', '0.80,0.88,0.82');
+    G.add(createReliefLayer('hj-xingping-mid1', { h: 5.07, x: 3.79, y: 0, z: -13.0, bulge: 0.5, tint: 'rgba(238,236,214,0.22)' }));
+  G.add(createReliefLayer('hj-xingping-mid2', { h: 6.76, x: -1.72, y: 0, z: -9.6, bulge: 0.6 }));
+  addMistBands(G, hooks, { y: 0.4, z: -9.0, color: '255,250,236', opacity: 0.4, count: 3, speed: 0.07 });
+  const river = createReliefLayer('hj-xingping-mid3', { w: 14.3, x: 0.0, y: -0.02, z: -5.6, bulge: 0.15, bottomGrounded: true });
+  G.add(river);
+  hooks.push((time) => { river.position.x = Math.sin(time * 0.22) * 0.25; });
+  const raft = createReliefLayer('hj-xingping-fg1', { h: 1.43, x: -0.69, y: 0.05, z: -3.4, bulge: 0.3 });
+  G.add(raft);
+  hooks.push((time) => {
+    raft.position.x = -0.9 + Math.sin(time * 0.3) * 0.7;
+    raft.position.y = 0.05 + Math.sin(time * 1.4) * 0.025;
+    raft.rotation.z = Math.sin(time * 1.0) * 0.014;
+  });
+  const bamboo = createReliefLayer('hj-xingping-fg2', { h: 4.29, x: -3.1, y: 0, z: -0.9, bulge: 0.3 });
+  G.add(bamboo);
+  hooks.push((time) => { bamboo.rotation.z = Math.sin(time * 0.9) * 0.022; });
+  hooks.push(createTyndallBeams(G, { color: '#FFF0C0', count: 4, opacity: 0.15 }));
+  addDepthParticles(G, hooks, makeFanLeafTexture('#9DBD68', '#5E8A3C'), IS_MOBILE ? 14 : 24, { speed: 0.3, spin: true, xSpan: 7, yMax: 4.5, zMin: -3, zSpan: 3 });
+}
+
+function buildDepthSceneLiangjiang() {
+  const { G, hooks } = buildHjBase('liangjiang', {
+    ground: '#0E1631',
+    sky: [[0, '#0A0F26'], [0.55, '#1B1F45'], [1, '#2C2A55']], cloud: 'rgba(120,100,170,0.16)',
+    back: 'hj-liangjiang-back',
+  });
+addHjWater(G, hooks, '0.04,0.07,0.17', '0.20,0.22,0.40');
+    G.add(createReliefLayer('hj-liangjiang-mid3', { w: 15.6, x: 0.0, y: 0, z: -13.0, bulge: 0.3, nightGlow: true }));
+  const moon = createReliefLayer('hj-liangjiang-mid1', { h: 5.07, x: -2.53, y: 0, z: -9.6, bulge: 0.45, nightGlow: true });
+  const sun = createReliefLayer('hj-liangjiang-mid2', { h: 6.37, x: 1.95, y: 0, z: -7.6, bulge: 0.45, nightGlow: true });
+  G.add(moon, sun);
+  addMistBands(G, hooks, { y: 0.15, z: -6.2, color: '150,140,200', opacity: 0.2, count: 3, speed: 0.06 });
+  const willow = createHangingLayer('hj-liangjiang-fg1', { h: 4.68, x: -3.45, top: 4.2, z: -1.0, nightGlow: true });
+  const lantern = createHangingLayer('hj-liangjiang-fg2', { h: 1.95, x: 2.76, top: 3.6, z: -1.6, nightGlow: true });
+  G.add(willow, lantern);
+  const pt = new THREE.PointLight('#FFB060', 3.6, 16, 1.4);
+  pt.position.set(1.0, 3.2, -1.5);
+  G.add(pt);
+  hooks.push((time) => {
+    willow.rotation.z = Math.sin(time * 0.8) * 0.04;
+    lantern.rotation.z = Math.sin(time * 1.1 + 0.8) * 0.07;
+    pt.intensity = 3.4 + Math.sin(time * 4.0) * 0.3;
+    moon.material.emissiveIntensity = 0.46 + Math.sin(time * 1.7) * 0.06;
+  });
+  const fireflyTex = makeSoftParticleTexture([[0, 'rgba(255,250,218,1)'], [0.35, 'rgba(255,190,78,0.9)'], [1, 'rgba(255,120,24,0)']]);
+  addDepthParticles(G, hooks, fireflyTex, IS_MOBILE ? 30 : 50, { speed: 0.3, spin: false, additive: true });
+}
+
+function buildDepthSceneLongji() {
+  const { G, hooks } = buildHjBase('longji', {
+    ground: '#DDE5E0',
+    sky: [[0, '#C4D7E2'], [0.5, '#E3ECEA'], [1, '#F2F3EA']], cloud: 'rgba(255,255,255,0.55)',
+    back: 'hj-longji-back',
+  });
+addHjWater(G, hooks, '0.50,0.62,0.62', '0.82,0.89,0.86', 0.6);
+    G.add(createReliefLayer('hj-longji-mid1', { h: 4.16, x: -3.1, y: 0, z: -10.0, bulge: 0.5 }));
+  const house = createReliefLayer('hj-longji-mid2', { h: 4.42, x: 1.72, y: 0, z: -8.2, bulge: 0.5 });
+  G.add(house);
+  addMistBands(G, hooks, { y: 0.3, z: -9.0, color: '248,250,252', opacity: 0.34, count: 3, speed: 0.06 });
+  const paddy = createReliefLayer('hj-longji-mid3', { w: 13.65, x: 0.0, y: -0.02, z: -5.0, bulge: 0.2 });
+  G.add(paddy);
+  hooks.push((time) => { paddy.material.opacity = 0.93 + Math.sin(time * 0.9) * 0.07; });
+  // 炊烟：木楼屋顶上缓缓升起的软斑
+  const smokeTex = makeSoftParticleTexture([[0, 'rgba(236,236,230,0.55)'], [1, 'rgba(236,236,230,0)']]);
+  const smoke = Array.from({ length: 5 }, (_, i) => {
+    const m = new THREE.Mesh(new THREE.PlaneGeometry(0.7, 0.7), new THREE.MeshBasicMaterial({ map: smokeTex, transparent: true, depthWrite: false, opacity: 0 }));
+    m.renderOrder = 6;
+    G.add(m);
+    return { m, off: i / 5 };
+  });
+  hooks.push((time) => {
+    for (const s of smoke) {
+      const t = (time * 0.07 + s.off) % 1;
+      s.m.position.set(1.5 + 0.05 + t * 0.6 + Math.sin(time * 0.6 + s.off * 6) * 0.08, 3.2 + t * 1.9, -8.0);
+      s.m.scale.setScalar(0.6 + t * 1.2);
+      s.m.material.opacity = Math.sin(t * Math.PI) * 0.55;
+    }
+  });
+  G.add(createReliefLayer('hj-longji-fg2', { h: 1.69, x: 1.03, y: 0, z: -2.2, bulge: 0.3 }));
+  const grass = createReliefLayer('hj-longji-fg1', { h: 2.73, x: -1.26, y: 0, z: -1.2, bulge: 0.3 });
+  G.add(grass);
+  hooks.push((time) => { grass.rotation.z = Math.sin(time * 1.1) * 0.03; });
+  hooks.push(createTyndallBeams(G, { color: '#F4FAFF', count: 4, opacity: 0.14 }));
+}
+
+function buildDepthSceneYulong() {
+  const { G, hooks } = buildHjBase('yulong', {
+    ground: '#DCEAE6',
+    sky: [[0, '#A9CBE6'], [0.5, '#D3E6F0'], [1, '#F0F5F2']], cloud: 'rgba(255,255,255,0.6)',
+    back: 'hj-yulong-back',
+  });
+addHjWater(G, hooks, '0.20,0.50,0.50', '0.58,0.82,0.78');
+    G.add(createReliefLayer('hj-yulong-mid2', { h: 3.9, x: 3.79, y: 0, z: -12.6, bulge: 0.5, tint: 'rgba(230,240,248,0.18)' }));
+  G.add(createReliefLayer('hj-yulong-mid1', { h: 7.28, x: -2.3, y: 0, z: -10.0, bulge: 0.6 }));
+  addMistBands(G, hooks, { y: 0.3, z: -8.8, color: '250,252,252', opacity: 0.3, count: 2, speed: 0.06 });
+  const river = createReliefLayer('hj-yulong-mid3', { w: 11.18, x: 0.46, y: -0.02, z: -5.4, bulge: 0.2 });
+  G.add(river);
+  const raft = createReliefLayer('hj-yulong-fg1', { h: 2.6, x: 0.69, y: 0.04, z: -2.4, bulge: 0.3 });
+  G.add(raft);
+  hooks.push((time) => {
+    raft.position.x = 0.6 + Math.sin(time * 0.33) * 0.6;
+    raft.position.y = 0.04 + Math.sin(time * 1.3) * 0.025;
+    raft.rotation.z = Math.sin(time * 1.0) * 0.02; // 篙轻轻摆
+  });
+  const flower = createReliefLayer('hj-yulong-fg2', { h: 3.12, x: 3.1, y: 0, z: -0.8, bulge: 0.3 });
+  G.add(flower);
+  hooks.push((time) => { flower.rotation.z = Math.sin(time * 1.0 + 1.0) * 0.03; });
+  hooks.push(createTyndallBeams(G, { color: '#FFF6D8', count: 4, opacity: 0.14 }));
+  addDepthParticles(G, hooks, makeSoftParticleTexture([[0, 'rgba(255,236,120,0.95)'], [1, 'rgba(255,236,120,0)']]), IS_MOBILE ? 14 : 24, { speed: 0.22, spin: false, xSpan: 8, yMax: 4, zMin: -4, zSpan: 4 });
+}
+
+function buildDepthSceneXiangbi() {
+  const { G, hooks } = buildHjBase('xiangbi', {
+    ground: '#F0DCCE',
+    sky: [[0, '#D7A9B8'], [0.5, '#F0C6B2'], [1, '#F8E4CC']], cloud: 'rgba(255,214,190,0.5)',
+    back: 'hj-xiangbi-back',
+  });
+addHjWater(G, hooks, '0.60,0.48,0.54', '0.96,0.80,0.70');
+    const shore = createReliefLayer('hj-xiangbi-mid2', { w: 7.28, x: -4.48, y: 0, z: -12.0, bulge: 0.4, tint: 'rgba(240,200,170,0.2)' });
+  G.add(shore);
+  hooks.push((time) => { shore.rotation.z = Math.sin(time * 0.7) * 0.006; });
+  G.add(createReliefLayer('hj-xiangbi-mid1', { w: 11.18, x: 0.8, y: 0, z: -8.8, bulge: 0.6 }));
+  addMistBands(G, hooks, { y: 0.2, z: -6.8, color: '255,226,206', opacity: 0.36, count: 3, speed: 0.06 });
+  const raft = createReliefLayer('hj-xiangbi-fg1', { h: 1.95, x: -0.46, y: 0.04, z: -3.0, bulge: 0.3 });
+  G.add(raft);
+  hooks.push((time) => {
+    raft.position.x = -0.6 + Math.sin(time * 0.28) * 0.8;
+    raft.position.y = 0.04 + Math.sin(time * 1.3) * 0.025;
+    raft.rotation.z = Math.sin(time * 1.0) * 0.012;
+  });
+  const bough = createHangingLayer('hj-xiangbi-fg2', { h: 3.9, x: 3.33, top: 3.9, z: -0.7 });
+  G.add(bough);
+  hooks.push((time) => { bough.rotation.z = Math.sin(time * 0.9) * 0.03; });
+  hooks.push(createTyndallBeams(G, { color: '#FFD8A8', count: 4, opacity: 0.16 }));
+}
+
+const HJ_BUILDERS = {
+  xingping: buildDepthSceneXingping,
+  liangjiang: buildDepthSceneLiangjiang,
+  longji: buildDepthSceneLongji,
+  yulong: buildDepthSceneYulong,
+  xiangbi: buildDepthSceneXiangbi,
+};
+
 const DEPTH_SCENE_TITLES = {
   haiyang: '2.5D 画境 · 海洋秋村',
   lijiang: '2.5D 画境 · 漓江桃洲',
   dajing:  '2.5D 画境 · 大境雾凇',
   paideng: '2.5D 画境 · 牌灯夜游',
+  xingping:   '2.5D 画境 · 兴坪',
+  liangjiang: '2.5D 画境 · 两江四湖',
+  longji:     '2.5D 画境 · 龙脊',
+  yulong:     '2.5D 画境 · 遇龙河',
+  xiangbi:    '2.5D 画境 · 象鼻山',
+};
+
+// 各画境的雾色 / 光色 / 雾浓度
+const DEPTH_ATMOS = {
+  xingping:   { bg: '#DCE6DC', fog: 0.016, hemi: '#F4F6E6', ground: '#8FA58E', key: '#FFEFC4', ki: 1.7 },
+  liangjiang: { bg: '#0E1631', fog: 0.015, hemi: '#4A5A98', ground: '#201C34', key: '#FFC890', ki: 1.1 },
+  longji:     { bg: '#DDE5E0', fog: 0.016, hemi: '#F0F6F6', ground: '#7C9486', key: '#FFFFFF', ki: 1.75 },
+  yulong:     { bg: '#DCEAE6', fog: 0.015, hemi: '#F2FAFA', ground: '#8AA89A', key: '#FFF4D4', ki: 1.85 },
+  xiangbi:    { bg: '#F0DCCE', fog: 0.016, hemi: '#FFE6D2', ground: '#A88A7C', key: '#FFC48A', ki: 1.6 },
 };
 
 function applyDepthSceneAtmosphere(sceneId) {
@@ -2863,6 +3147,15 @@ function applyDepthSceneAtmosphere(sceneId) {
     depthHemi.groundColor.set('#8DA4BA');
     depthKey.color.set('#FFFFFF');
     depthKey.intensity = 1.85;
+  } else if (DEPTH_ATMOS[sceneId]) {
+    const a = DEPTH_ATMOS[sceneId];
+    depthScene.background.set(a.bg);
+    depthScene.fog.color.set(a.bg);
+    depthScene.fog.density = a.fog;
+    depthHemi.color.set(a.hemi);
+    depthHemi.groundColor.set(a.ground);
+    depthKey.color.set(a.key);
+    depthKey.intensity = a.ki;
   } else {
     depthScene.background.set('#0F192E');
     depthScene.fog.color.set('#0F192E');
@@ -3234,8 +3527,14 @@ function bindInteractions() {
       const id = btn.dataset.depthScene;
       state.depthScene = id;
       dom.depthSceneBtns.forEach((b) => b.classList.toggle('active', b === btn));
-      applyDepthSceneAtmosphere(id);
+      btn.scrollIntoView?.({ block: 'nearest', inline: 'center', behavior: 'smooth' });
       dom.chapterSub.textContent = DEPTH_SCENE_TITLES[id];
+      if (depthSceneReady[id]) { applyDepthSceneAtmosphere(id); return; }
+      // 新五幅：首次点到才下载并搭场景，等好了再切过去（期间仍显示原画境）
+      btn.classList.add('loading');
+      ensureDepthScene(id).then(() => {
+        if (state.depthScene === id) applyDepthSceneAtmosphere(id);
+      }).finally(() => btn.classList.remove('loading'));
     });
   });
 
