@@ -363,10 +363,10 @@ export function createMapProps({ THREE, scene, lonLatToWorld, sampleElevation, s
   const avoid = [];
   for (const st of standees) avoid.push([st.wx, st.wz, 0.62]);
   // 立绘南侧（镜头一侧）留得更宽，免得前排树挡住立绘
-  const blocked = (x, z) => avoid.some(([ax, az, r]) => {
+  const blocked = (x, z, k = 1) => avoid.some(([ax, az, r]) => {
     const dz = z - az;
     const ez = dz > 0 ? dz / 1.9 : dz;
-    return (ax - x) ** 2 + ez * ez < r * r;
+    return (ax - x) ** 2 + ez * ez < (r * k) ** 2;
   });
 
   const items = {}; // kind -> [{x,z,h,yaw,flip}]
@@ -445,14 +445,15 @@ export function createMapProps({ THREE, scene, lonLatToWorld, sampleElevation, s
     if (data.city) {
       // 独立随机序列，不影响灵川等地已有树屋的位置
       const rc = mulberry32(450300);
-      const mob = isMobile ? 0.6 : 1;
+      const mob = isMobile ? 0.5 : 1;
+      const CK = 1.3; // 城区小景离立绘更远，重点立绘脚下不被树楼盖住
       for (const [lon, lat, n] of data.city.blocks) {
         const w = lonLatToWorld(lon, lat);
-        const nh = Math.round((2 + Math.min(6, Math.ceil(n / 6))) * mob);
+        const nh = Math.round((3 + Math.min(9, Math.ceil(n / 4))) * mob);
         for (let k = 0; k < nh; k++) {
-          const x = w.x + (rc() - 0.5) * 0.14;
-          const z = w.z + (rc() - 0.5) * 0.11;
-          if (blocked(x, z)) continue;
+          const x = w.x + (rc() - 0.5) * 0.15;
+          const z = w.z + (rc() - 0.5) * 0.12;
+          if (blocked(x, z, CK)) continue;
           const kind = pickKind(CITY_HOUSES, rc());
           push(kind, x, z, (kind === 'apt' ? 0.2 : 0.15) + rc() * 0.07, (rc() - 0.5) * 0.4, rc() < 0.5);
         }
@@ -460,17 +461,17 @@ export function createMapProps({ THREE, scene, lonLatToWorld, sampleElevation, s
         for (let k = 0; k < nt; k++) {
           const x = w.x + (rc() - 0.5) * 0.16;
           const z = w.z + (rc() - 0.5) * 0.13;
-          if (blocked(x, z)) continue;
+          if (blocked(x, z, CK)) continue;
           push(pickKind(CITY_TREES, rc()), x, z, 0.3 + rc() * 0.14, (rc() - 0.5) * 0.4, rc() < 0.5);
         }
       }
-      // 河湖岸：垂柳为主，间植桂花
+      // 河湖岸：数据已按 ~240m 稀疏成一行，垂柳为主，间植桂花；位置略抖开，不成直线
       for (const [lon, lat] of data.city.water) {
-        if (rc() > 0.7 * mob) continue;
+        if (rc() > 0.8) continue;
         const w = lonLatToWorld(lon, lat);
-        const x = w.x + (rc() - 0.5) * 0.05;
-        const z = w.z + (rc() - 0.5) * 0.05;
-        if (blocked(x, z)) continue;
+        const x = w.x + (rc() - 0.5) * 0.12;
+        const z = w.z + (rc() - 0.5) * 0.12;
+        if (blocked(x, z, CK)) continue;
         push(rc() < 0.72 ? 'willow' : 'guihua', x, z, 0.34 + rc() * 0.12, (rc() - 0.5) * 0.4, rc() < 0.5);
       }
     }

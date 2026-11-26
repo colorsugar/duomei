@@ -5,7 +5,7 @@
 //   钟塔坐标是估的（街心位置），不是实测；塔高、年代一概不写。
 // 另有两层（同一入口，同一套 nearK/zoomCap 淡入）：
 //   城区核心高清叠层：约 3x3km 的 OSM 纸艺图（scripts/build-city-core.py 生成），镜头靠近城区且放大才淡入、才下载。
-//   象鼻山近景试点：z>10 时淡入的小场景（山 + 水月洞 + 江面倒影 + 竹筏），用 hj-xiangbi-* 两张分层图做 billboard。
+//   象鼻山近景试点：z>10 时淡入的小场景（山 + 水月洞 + 竹筏），用 hj-xiangbi-* 两张分层图做 billboard。
 // 性能：路和楼合并成一个 BufferGeometry、一个 Mesh；镜头不在这一带或放得不够大时整个不建、不画。
 // ============================================================================
 
@@ -28,7 +28,7 @@ const CORE_ZOOM_B = 4.2; // 完全显示
 const XB_LL = [110.2915, 25.2701]; // 象鼻山（同 map-city.js 立绘坐标）
 const XB_ZOOM_A = 9.5;
 const XB_ZOOM_B = 11;
-const XB_W = 0.34; // billboard 宽（世界单位，比实物夸张，立绘风格）
+const XB_W = 0.72; // billboard 宽（世界单位，比实物夸张，立绘风格）
 
 function clamp(v, a, b) { return v < a ? a : v > b ? b : v; }
 function smoothstep(a, b, x) {
@@ -298,7 +298,7 @@ export function createStreetBlock({ THREE, scene, lonLatToWorld, sampleElevation
 
   function xbK(tx, tz, zoom) {
     const d = Math.hypot(tx - xb.pos.x, tz - xb.pos.z);
-    return smoothstep(0.55, 0.25, d) * smoothstep(XB_ZOOM_A, XB_ZOOM_B, zoom);
+    return smoothstep(1.6, 0.9, d) * smoothstep(XB_ZOOM_A, XB_ZOOM_B, zoom) * smoothstep(26, 22, zoom); // z>22 是正阳街区近景，让位给街区
   }
 
   function loadXb() {
@@ -317,21 +317,13 @@ export function createStreetBlock({ THREE, scene, lonLatToWorld, sampleElevation
       };
       const M0 = mk(mid, XB_W, '#F4F0E4', 1);
       const hill = new THREE.Mesh(new THREE.PlaneGeometry(M0.w, M0.h).translate(0, M0.h / 2, 0), M0.mat);
-      hill.renderOrder = 3;
+      hill.renderOrder = 10;
       g.add(hill);
-      // 江面倒影：平铺在水面上，朝镜头一侧展开，上下颠倒、压低饱和
-      const M1 = mk(mid, XB_W, '#9ED4D2', 0.42);
-      const refl = new THREE.Mesh(new THREE.PlaneGeometry(M1.w, M1.h * 0.8).translate(0, M1.h * 0.4, 0), M1.mat);
-      refl.rotation.x = Math.PI / 2;
-      refl.scale.x = -1;
-      refl.position.y = 0.002;
-      refl.renderOrder = 2;
-      g.add(refl);
       // 竹筏
-      const M2 = mk(raft, 0.09, '#F4F0E4', 1);
+      const M2 = mk(raft, 0.15, '#F4F0E4', 1);
       const rf = new THREE.Mesh(new THREE.PlaneGeometry(M2.w, M2.h).translate(0, M2.h / 2, 0), M2.mat);
-      rf.position.set(0.08, 0, M0.h * 0.55);
-      rf.renderOrder = 4;
+      rf.position.set(0.13, 0, M0.h * 0.55);
+      rf.renderOrder = 11;
       g.add(rf);
       g.visible = false;
       xb.g = g;

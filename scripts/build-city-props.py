@@ -61,6 +61,19 @@ for e in json.load(open(CACHE / "osm.json"))["elements"]:
             pos += STEP
         carry = (carry + d) % STEP
 
+# 去重稀疏：多条水线（两岸、湖岸、河面多边形）叠在一起会排成树墙，
+# 用网格贪心保证任意两点至少相距 MIN_GAP，再打乱次序前保持确定性
+MIN_GAP = 0.0024  # 度，约 240m
+kept, grid = [], {}
+for lon, lat in sorted(water):
+    gx, gy = int(lon / MIN_GAP), int(lat / MIN_GAP)
+    if any(math.hypot(lon - q[0], lat - q[1]) < MIN_GAP
+           for i in (-1, 0, 1) for j in (-1, 0, 1) for q in grid.get((gx + i, gy + j), [])):
+        continue
+    grid.setdefault((gx, gy), []).append((lon, lat))
+    kept.append([lon, lat])
+water = kept
+
 data = json.load(open(OUT))
 data["city"] = {"bbox": BBOX, "cell": CELL, "blocks": blocks, "water": water}
 OUT.write_text(json.dumps(data, ensure_ascii=False, separators=(",", ":")))
