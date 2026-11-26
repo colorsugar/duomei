@@ -1175,3 +1175,88 @@ body[data-mode="map"] #vignette {
   .lc-pin.is-featured .lc-pin-dot { animation: none; }
   .lc-zoom-art, .lc-zoom-sheet, .lc-zoom-panel { transition: none; }
 }
+
+/* ==================== 地域画境氛围层（海洋金秋 / 潮田桃花 / 大境雾凇 / 青绿岚气） ==================== */
+.lc-atmo {
+  --atmo-rgb: 220, 232, 226;
+  --atmo-glow: 236, 244, 240;
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0;
+  overflow: hidden;
+  transition: opacity 0.6s ease;
+  background:
+    linear-gradient(to bottom, rgba(var(--atmo-glow), 0.62) 0%, rgba(var(--atmo-glow), 0.18) 18%, rgba(var(--atmo-glow), 0) 34%),
+    radial-gradient(130% 95% at 50% 46%, rgba(var(--atmo-rgb), 0) 52%, rgba(var(--atmo-rgb), 0.34) 82%, rgba(var(--atmo-rgb), 0.52) 100%),
+    linear-gradient(to top, rgba(var(--atmo-glow), 0.42) 0%, rgba(var(--atmo-glow), 0) 20%);
+}
+.lc-atmo-sweep {
+  position: absolute;
+  top: -20%;
+  left: -60%;
+  width: 70%;
+  height: 140%;
+  opacity: 0;
+  background: linear-gradient(100deg, rgba(255, 236, 186, 0) 0%, rgba(255, 236, 186, 0.26) 45%, rgba(255, 246, 220, 0.34) 52%, rgba(255, 236, 186, 0) 100%);
+  transform: translate3d(0, 0, 0) rotate(8deg);
+  will-change: transform;
+}
+.lc-atmo[data-fx="ginkgo"] .lc-atmo-sweep {
+  opacity: 1;
+  animation: lc-atmo-sweep 11s ease-in-out infinite;
+}
+.lc-atmo[data-fx="petal"] .lc-atmo-sweep {
+  opacity: 0.55;
+  background: linear-gradient(100deg, rgba(255, 220, 230, 0) 0%, rgba(255, 226, 234, 0.28) 50%, rgba(255, 220, 230, 0) 100%);
+  animation: lc-atmo-sweep 14s ease-in-out infinite;
+}
+@keyframes lc-atmo-sweep {
+  0% { transform: translate3d(0, 0, 0) rotate(8deg); }
+  60%, 100% { transform: translate3d(260%, 0, 0) rotate(8deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .lc-atmo-sweep { animation: none !important; opacity: 0 !important; }
+}
+
+/* 十二乡十二境：总览时乡签上方题一行境名，放大后隐去 */
+.lc-pin-tag { position: relative; }
+.lc-pin-epi {
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 3px);
+  transform: translateX(-50%);
+  font-family: "Kaiti SC", "STKaiti", "KaiTi", "Songti SC", serif;
+  font-size: 10.5px;
+  letter-spacing: 0.22em;
+  padding-left: 0.22em;
+  white-space: nowrap;
+  color: #5a4a3a;
+  color: color-mix(in srgb, var(--epi, #8a7a6a) 58%, #2a2018);
+  text-shadow: 0 0 3px rgba(252, 248, 240, 0.95), 0 0 6px rgba(252, 248, 240, 0.8);
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+.lc-pin.dir-bottom .lc-pin-epi { bottom: auto; top: calc(100% + 3px); }
+.lc-atlas-hud[data-zoomed="1"] .lc-pin-epi { opacity: 0; }
+@media (max-width: 919px) {
+  .lc-pin-epi { font-size: 9.5px; letter-spacing: 0.16em; }
+}
+
+/* 各境扫光 */
+.lc-atmo[data-fx="redleaf"] .lc-atmo-sweep,
+.lc-atmo[data-fx="blossom"] .lc-atmo-sweep,
+.lc-atmo[data-fx="spark"] .lc-atmo-sweep,
+.lc-atmo[data-fx="lantern"] .lc-atmo-sweep {
+  opacity: 0.6;
+  background: linear-gradient(100deg, rgba(255, 210, 170, 0) 0%, rgba(255, 214, 176, 0.26) 50%, rgba(255, 210, 170, 0) 100%);
+  animation: lc-atmo-sweep 13s ease-in-out infinite;
+}
+.lc-atmo[data-fx="mist"] .lc-atmo-sweep,
+.lc-atmo[data-fx="rain"] .lc-atmo-sweep,
+.lc-atmo[data-fx="snow"] .lc-atmo-sweep {
+  opacity: 0.5;
+  background: linear-gradient(100deg, rgba(240, 246, 255, 0) 0%, rgba(244, 248, 255, 0.34) 50%, rgba(240, 246, 255, 0) 100%);
+  animation: lc-atmo-sweep 18s ease-in-out infinite;
+}

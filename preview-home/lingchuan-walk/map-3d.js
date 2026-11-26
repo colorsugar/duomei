@@ -7,6 +7,7 @@
 // ============================================================================
 
 import { TOWNSHIPS, MAP_EXTRA_POIS, GROK_EXTRA_42, WATER_LABELS } from './map-townships.js';
+import { createMapAtmosphere } from './map-atmo.js';
 
 const MAP_W = 28.0;
 const MAP_D = 35.0; // 精确 4:5，匹配 4096x5120 真实 DEM 母版与 4x5 (20张) 1024x1024 高清瓦片
@@ -334,6 +335,8 @@ export function createInteractive3DMap({
   const tableMat = new THREE.MeshBasicMaterial({ color: PAPER_HEX, fog: false });
   const tableMesh = new THREE.Mesh(tableGeo, tableMat);
   tableMesh.position.y = -0.06;
+  // 桌底宣纸不再绘制：县界外与沙盘四缘已在地形着色器里溶进雾色，桌面会在远处显出一块偏亮的矩形
+  tableMesh.visible = false;
   scene.add(tableMesh);
 
   // 程序化四边柔边 alphaMap：彻底隐去沙盘边缘，融进无限宣纸桌面
@@ -404,6 +407,23 @@ export function createInteractive3DMap({
     transparent: true,
     color: new THREE.Color('#FFFDF9'),
   });
+
+  // 地域画境氛围（海洋金秋 / 潮田桃花 / 大境雾凇）：地色、光雾、飘落物、剪纸银杏、屏幕氛围层
+  const atmo = createMapAtmosphere({
+    THREE,
+    scene,
+    hemi,
+    keyLight,
+    tableMat,
+    isMobile,
+    lonLatToWorld,
+    sampleElevation,
+    baseImg,
+    buildDieCutTexture,
+    maxAniso,
+    host: document.getElementById('map-stage'),
+  });
+  atmo.patchMaterial(terrainMat);
   const terrainMesh = new THREE.Mesh(terrainGeo, terrainMat);
   terrainMesh.receiveShadow = true;
   scene.add(terrainMesh);
@@ -470,6 +490,7 @@ export function createInteractive3DMap({
           polygonOffsetFactor: -1.5,
           polygonOffsetUnits: -2.0,
         });
+        atmo.patchMaterial(mat);
         const mesh = new THREE.Mesh(geo, mat);
         mesh.receiveShadow = true;
         mesh.visible = false;
@@ -736,6 +757,8 @@ export function createInteractive3DMap({
       lazy: true,
     });
   }
+
+  atmo.buildDecor(standees);
 
   // --------------------------------------------------------------------------
   // 5) 真实 12 乡镇与 4 条水脉世界坐标 + 异步加载真实 30m DEM 高度图
@@ -1380,7 +1403,8 @@ export function createInteractive3DMap({
       const hPx = Math.max(0, syBase - syTop) + 34;
       const wPx = Math.max(0, syBase - syTop) * ((st.baseW || st.baseH * 1.15) / st.baseH) * 1.15;
 
-      candidates.push({ st, sx, sy, d, priority, hPx, wPx });
+      st._scr = { sx, sy, w: wPx, h: hPx };
+      candidates.push({ st, sx, sy, d, priority, hPx, wPx, wasShown: st.isShown });
     }
 
     candidates.sort((a, b) => b.priority - a.priority);
@@ -1391,7 +1415,7 @@ export function createInteractive3DMap({
 
     for (const c of candidates) {
       // 已站起者给予 15% 滞回宽容，避免临界缩放抖动
-      const hyst = c.st.isShown ? 0.85 : 1.0;
+      const hyst = c.st.isShown ? 0.94 : 1.0;
       let collides = accepted.length >= maxActiveStandees;
       if (!collides) {
         for (const prev of accepted) {
@@ -1416,6 +1440,24 @@ export function createInteractive3DMap({
         c.st.isShown = false;
         c.st.dotMesh.visible = z > 1.55;
         c.st.dotMesh.scale.setScalar(clamp(1.2 / Math.pow(z, 0.72), 0.18, 0.95));
+      }
+    }
+
+    // Step 2b: 新站起的立绘若与仍在折叠退场的立绘重叠，等对方倒下再站起（双指缩放过程中不出现短暂叠压）
+    const leaving = [];
+    for (const st of standees) {
+      if (st.root.visible && st._scr && st.flap.p > 0.12 && !acceptedSet.has(st.id)) leaving.push(st._scr);
+    }
+    if (leaving.length) {
+      for (const c of accepted) {
+        if (c.wasShown) continue;
+        for (const r of leaving) {
+          if (Math.abs(c.sx - r.sx) < (c.wPx + r.w) * 0.5 + 6 && Math.abs(c.sy - r.sy) < (c.hPx + r.h) * 0.5 + 2) {
+            acceptedSet.delete(c.st.id);
+            c.st.isShown = false;
+            break;
+          }
+        }
       }
     }
 
@@ -1463,6 +1505,7 @@ export function createInteractive3DMap({
               sx,
               sy,
               dist: d,
+              box: st._scr ? { sx: st._scr.sx, sy: st._scr.sy, w: st._scr.w * p, h: st._scr.h * p } : null,
             });
           }
         }
@@ -1489,6 +1532,8 @@ export function createInteractive3DMap({
       }
     }
     pGeo.attributes.position.needsUpdate = true;
+
+    atmo.update(dt, time, { tx: camState.tx, tz: camState.tz, zoom: z, pose, camera, worldScale });
 
     renderer.render(scene, camera);
 
