@@ -6,8 +6,9 @@
 
 import { GROK_EXTRA_42 as LINGCHUAN_EXTRA_42 } from './map-extra-42.js';
 import { CITY_POIS } from './map-city.js';
+import { COUNTY_POIS } from './map-county.js';
 // 灵川 42 处 + 主城区 gl-*：同一套立绘摆放与侧笺卡片逻辑
-export const GROK_EXTRA_42 = [...LINGCHUAN_EXTRA_42, ...CITY_POIS];
+export const GROK_EXTRA_42 = [...LINGCHUAN_EXTRA_42, ...CITY_POIS, ...COUNTY_POIS];
 
 export const MAP_META = {
   title: '桂林全境',
