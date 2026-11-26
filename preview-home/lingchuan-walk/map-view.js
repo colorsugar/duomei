@@ -142,13 +142,14 @@ export function createMapView({
         <button type="button" class="lc-zctrl-btn" id="lc-z-in" title="放大靠近看高清地形与立绘" aria-label="放大地图">+</button>
         <button type="button" class="lc-zctrl-btn" id="lc-z-out" title="缩小看全境" aria-label="缩小地图">−</button>
         <button type="button" class="lc-zctrl-btn is-reset" id="lc-z-reset" title="回到全境" aria-label="复位全境" hidden>全境</button>
+        <button type="button" class="lc-zctrl-btn is-info" id="lc-credit-btn" title="地图数据来源" aria-label="地图数据来源">ⓘ</button>
       </div>
 
       <!-- 3.5) 实时真实地理比例尺与缩放倍率浮标 -->
       <div class="lc-scale-bar" id="lc-scale-bar" aria-hidden="true">
         <span class="lc-scale-tier" id="lc-scale-tier">桂林全境 · 0.7×</span>
         <span class="lc-scale-rule"><i id="lc-scale-line"></i><em id="lc-scale-lbl">10 公里</em></span>
-        <small class="lc-map-credit">路网水系 © OpenStreetMap 贡献者</small>
+        <small class="lc-map-credit" id="lc-map-credit">路网水系 © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> 贡献者 · 地形 SRTM</small>
       </div>
 
       <!-- 4) 手机端底部轻透交互条（远观=分类+引导，靠近=当前焦点乡镇风物浮条，绝不糊脸弹窗） -->
@@ -174,7 +175,6 @@ export function createMapView({
           <span class="lc-whisper-hint" id="lc-whisper-hint">自由滑动缩放 · 靠近弹出纸艺立绘</span>
           <div class="lc-whisper-acts">
             <button type="button" class="lc-whisper-share" id="lc-mob-share">分享笺</button>
-            <button type="button" class="lc-whisper-go" id="lc-mob-chaotian">飞往潮田乡 →</button>
           </div>
         </div>
       </div>
@@ -789,8 +789,8 @@ export function createMapView({
       subtitle: `${town.region} · ${town.season.split('·')[0].trim()}`,
       tagline: town.tagline,
       body: town.blurb,
-      imgUrl: assetUrl(town.zoomArt || MAP_META.baseArt),
-      footer: `桂林 · 灵川全境 · ${town.name}`,
+      imgUrl: assetUrl(town.zoomArt || [...getTownLandmarks(town), ...getTownExtras(town)].find((i) => i.img)?.img || MAP_META.baseArt),
+      footer: `桂林全境 · ${town.name}`,
       townName: town.name,
       kind: 'township',
     }, { onNote: onShareNote });
@@ -854,9 +854,17 @@ export function createMapView({
   frOpenBtn.addEventListener('click', () => openTown(state.focusId));
   frShareBtn.addEventListener('click', () => shareTown('township'));
 
-  root.querySelector('#lc-mob-chaotian').addEventListener('click', () => {
-    map3d?.flyToTown('chaotian', 2.55);
-    setFocusTown('chaotian');
+  // 数据署名：开场显示，5 秒后或首次操作地图时收起，ⓘ 可随时再看（OSMF 署名指引允许的做法）
+  const foldCredit = () => hudEl.classList.add("is-credit-folded");
+  const creditTimer = setTimeout(foldCredit, 5000);
+  window.addEventListener('pointerdown', (e) => {
+    if (e.target.closest?.('#lc-credit-btn, #lc-map-credit')) return;
+    clearTimeout(creditTimer);
+    foldCredit();
+  }, { once: true, capture: true });
+  root.querySelector('#lc-credit-btn').addEventListener('click', () => {
+    clearTimeout(creditTimer);
+    hudEl.classList.toggle("is-credit-folded");
   });
   root.querySelector('#lc-mob-share').addEventListener('click', () => shareOverview('overview'));
 

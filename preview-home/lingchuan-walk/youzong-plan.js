@@ -11,6 +11,8 @@ export const TOWN_NAMES = {
   daxu: '大圩', chaotian: '潮田', haiyang: '海洋', dajing: '大境', lingtian: '灵田',
   'lingchuan-zhen': '灵川镇', dingjiang: '定江', tanxia: '潭下', sanjie: '三街',
   jiuwu: '九屋', gongping: '公平', lantian: '兰田',
+  xiufeng: '秀峰区', diecai: '叠彩区', xiangshan: '象山区',
+  qixing: '七星区', yanshan: '雁山区', lingui: '临桂区',
 };
 export const TOWN_LINE = {};
 for (const [k, v] of Object.entries(LINES)) for (const t of v.towns) TOWN_LINE[t] = k;
@@ -165,7 +167,7 @@ export function scoreItem(it, { date, prefs, mode, marketIds, seedR }) {
     if (marketIds.has(it.xu)) s += 2.2;
     else if (it.kind === 'food') s -= 2.6;
   }
-  if (!it.stay && it.kind === 'food') s -= 1.2; // 只在节日家宴里的，不排进行程
+  if (it.stay === 0 && it.kind === 'food') s -= 1.2; // 明确记为 0 的节日家宴降权；来源未载时长不据此扣分
   const t = it.tags || [];
   if (prefs.has('eat') && it.kind === 'food') s += 1.4;
   if (prefs.has('hill') && it.kind === 'place' && HILL_RE.test(it.name)) s += 1.1;
@@ -257,7 +259,10 @@ export function makePlan(params) {
       if (!pool.length) continue;
       const top = pool.slice(0, 5).reduce((a, x) => a + Math.max(0, x.s), 0);
       const reach = travelMin(from, pool[0].it.ll, P.mode);
-      const v = top - reach / 35 + seedR() * 0.6;
+      // 公交日归要把往返耗时算入可游览时间，避免远处圩日加分压过就近城区。
+      const span = SLOTS.find((s) => s.id === L.slots.at(-1)).at - SLOTS.find((s) => s.id === L.slots[0]).at;
+      const usable = P.mode === 'bus' && P.length === 'day' ? Math.max(0, 1 - 2 * reach / span) : 1;
+      const v = top * usable - reach / 35 + seedR() * 0.6;
       if (!best || v > best.v) best = { lid, v, pool };
     }
     if (!best) break;

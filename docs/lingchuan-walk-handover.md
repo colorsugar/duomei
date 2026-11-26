@@ -29,7 +29,7 @@
 | `map-geo.json` / `map-props.json` | 画框经纬度、区县表；树林 / 平坝 / 村落网格（脚本生成） |
 | `img/map/lingchuan-dem-l0.webp`、`img/map/tiles/`、`lingchuan-dem-height.png` | 底图总览、细瓦片、高度图（脚本生成） |
 | `youzong*.{html,js,css}` | 游踪页；`youzong-plan.js` 是规则排程（不用大模型，免得编造） |
-| `f/zmx-lc.woff2`、`f/msz-lc.woff2` | 页面自带的行楷 / 楷体字体子集 |
+| `f/fonts.css` + `f/zmx-lc-*.woff2`、`f/msz-lc-*.woff2` | 行楷 / 楷体子集，按字频切块（unicode-range 按需下载），由 `scripts/subset-lingchuan-fonts.py` 生成 |
 
 ## 底图怎么生成
 
@@ -85,3 +85,12 @@
 ## 更新记录
 
 - 2026-11-26 Kiro：建本手册；全市画框扩到 17 县区，#239 上线（合并 3ffe98dc）。
+- 2026-11-26 Kiro（cursor/guilin-polish）：
+  - 主城区 23 处立绘上图：`map-city.js`（`CITY_POIS`，并入 `GROK_EXTRA_42` 导出），图 `img/gl-*.webp`、`img/m/gl-*.webp`，由 `~/grokbox/guilin-art/out/*.png` 去白底生成；坐标来自 OSM Nominatim。漓江竹筏没上图（位置不好定）。
+  - 游踪并入 Codex 的六城区资料（`youzong-data.js` / `youzong-plan.js`，来源与口径见 `~/grokbox/codex-youzong/REPORT.md`）。
+  - 区域分界改为相邻 4 区柔和过渡（`map-atmo.js`，缓存键 `lc-atmo-v5`）。
+  - OSM 署名：开场显示，5 秒后或首次点地图时收起，右下 ⓘ 可再看，文字链到 openstreetmap.org/copyright（符合 OSMF 署名指引的可收起做法）。
+  - 去掉手机底栏「飞往潮田乡」；主站导航「绘本 · 灵川」→「绘本 · 桂林」，入口按钮改「桂林全境 · 十七县区」。
+  - 分享笺：预览不再裁切；正文自动缩字号放下全文，标点不起行；乡镇无专图时用该乡第一张立绘；模板文字去掉「灵川」。
+  - 字体按字频切 5 块 + unicode-range（`f/fonts.css`），手机地形底图用 2048 版 `lingchuan-dem-l0-m.webp`。
+  - 待办：长卷 / 2.5D 素材仍在开场全部预载（约 3 MB），要改成切换时再建场景；植被种类与摆放；Grok 工位在按实拍重画主城区（`out2/`），画好后替换 `gl-*`。

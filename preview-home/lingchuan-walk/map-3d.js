@@ -762,8 +762,8 @@ export function createInteractive3DMap({
       imgKey: extra.img,
       poi: extra,
       featured: false,
-      tier: 2,
-      heightScale: 0.92,
+      tier: extra.tier || 2,
+      heightScale: extra.heightScale || 0.92,
       lazy: true,
     });
   }
