@@ -48,8 +48,9 @@ const OVERVIEW_ZOOM = (typeof window !== 'undefined' && window.innerWidth / Math
 const MIN_ZOOM = 0.30;
 const MAX_ZOOM = (typeof window !== 'undefined' && window.innerWidth / Math.max(1, window.innerHeight) < 0.75) ? 80.0 : 40.0; // 全图仍只到 BASE_MAX_ZOOM，只有正阳步行街、东西巷一带能再放大（见 zoomCap）
 const BASE_MAX_ZOOM = 12.0;
-// 街区近景时收起的大立绘（会盖住整条街）
-const STREET_HIDE_IDS = new Set(['gl-zhengyangjie', 'gl-dongxixiang']);
+// 街区近景时这两张是老城重点，不再整张藏掉，只在街区自身约 150m 内略缩（见 inBlock）
+const STREET_BLOCK_RADIUS = 0.05; // 世界单位，约 150m
+const STREET_MIN_SCALE = 0.8;
 const MAX_DEM_HEIGHT = 1.58;
 
 function clamp(v, lo, hi) {
@@ -761,7 +762,7 @@ export function createInteractive3DMap({
   const cityTownIds = new Set(TOWNSHIPS.filter((t) => t.city).map((t) => t.id));
   for (const extra of GROK_EXTRA_42) {
     const w = lonLatToWorld(extra.lon, extra.lat);
-    const cityShrink = cityTownIds.has(extra.townId) ? 0.74 : 1;
+    const cityShrink = cityTownIds.has(extra.townId) ? 0.92 : 1;
     addMapStandee({
       id: extra.id,
       kind: 'extra',
@@ -772,9 +773,10 @@ export function createInteractive3DMap({
       wz: w.z,
       imgKey: extra.img,
       poi: extra,
-      featured: false,
+      featured: Boolean(extra.featured),
       tier: extra.tier || 2,
-      heightScale: (extra.heightScale || 0.92) * cityShrink,
+      // 数据里写了 heightScale 就直接用它；没写才按默认 0.92 并让城区略小
+      heightScale: Number.isFinite(extra.heightScale) ? extra.heightScale : 0.92 * cityShrink,
       lazy: true,
     });
   }
@@ -1343,7 +1345,9 @@ export function createInteractive3DMap({
   const TOUR_STOPS = [
     { overview: true, hold: 4.2 },
     { id: 'gl-xiangbishan', zoom: 7.6 },
+    { id: 'gl-riyueshuangta', zoom: 7.6 },
     { id: 'gl-duxiufeng', zoom: 7.6 },
+    { id: 'gl-muglonghu', zoom: 7.2 },
     { id: 'gl-mifen', zoom: 8.2 },
     { id: 'gl-qixing', zoom: 7.2 },
     { id: 'lc-01', zoom: 5.6 },
@@ -1577,13 +1581,15 @@ export function createInteractive3DMap({
 
     // 随缩放自适应收缩立绘物理高度：屏幕尺寸舒适一致，地面占地随放大急剧缩小，彻底拉开真实山川间隔！
     // 立绘屏幕尺寸基本恒定（相机距离 ∝ 1/z^1.06），放大时只拉开地理间距，不跟着变大挤成一团
-    // 超过 12 倍（只有街区一带能到）再继续缩小，立绘才不会比街还大
-    const worldScale = clamp(1.36 / Math.pow(Math.max(1.0, z), 0.62), 0.24, 0.86) * (z > BASE_MAX_ZOOM ? Math.pow(BASE_MAX_ZOOM / z, 0.9) : 1);
+    // 超过 12 倍（只有街区一带能到）只缓缓收，屏幕上的立绘不再变小（相机距离 ∝ 1/z^1.06，指数 0.4 抵消后略增）
+    const worldScale = clamp(1.36 / Math.pow(Math.max(1.0, z), 0.62), 0.24, 0.86) * (z > BASE_MAX_ZOOM ? Math.pow(BASE_MAX_ZOOM / z, 0.4) : 1);
 
     // 屏幕空间最小防挡间距（像素）：确保每幅工笔立绘完整露脸不叠压
     const minGapX = isMobile ? 86 : 116;
     const minGapY = isMobile ? 76 : 98;
-    const maxActiveStandees = isMobile ? 9 : 13;
+    const cityFocus = cityTownIds.has(camState.lockedTownId || camState.nearestTownId);
+    const maxActiveStandees = (isMobile ? 9 : 13) + (cityFocus ? (isMobile ? 3 : 5) : 0);
+    const bottomSafe = isMobile ? 130 : 94; // 手机底部卡片约 130px
 
     // Step 1: 收集当前倍率与视野内有资格登场的候选立绘，并投影屏幕坐标
     const candidates = [];
@@ -1592,11 +1598,6 @@ export function createInteractive3DMap({
 
     for (const st of standees) {
       const catMatch = cat === 'all' || st.category === cat;
-      if (streetK > 0.3 && STREET_HIDE_IDS.has(st.id)) {
-        st.isShown = false;
-        st.dotMesh.visible = false;
-        continue;
-      }
       if (!catMatch) {
         st.isShown = false;
         st.dotMesh.visible = false;
@@ -1618,7 +1619,12 @@ export function createInteractive3DMap({
       const inScreen = projV.z > 0.02 && projV.z < 1;
       const sx = (projV.x * 0.5 + 0.5) * view.w;
       const sy = (-projV.y * 0.5 + 0.5) * view.h;
-      const inSafeBox = inScreen && sx > 24 && sx < rightBound - 24 && sy > 76 && sy < view.h - 94;
+      // 安全框按立绘整框判：脚在底卡之上，头（含顶部浮签约 34px）在顶栏之下
+      projV.set(st.wx, st.wy, st.wz).project(camera);
+      const syFoot = (-projV.y * 0.5 + 0.5) * view.h;
+      projV.set(st.wx, st.wy + st.baseH * worldScale, st.wz).project(camera);
+      const syHead = (-projV.y * 0.5 + 0.5) * view.h - 34;
+      const inSafeBox = inScreen && sx > 24 && sx < rightBound - 24 && syHead > 76 && syFoot < view.h - bottomSafe;
 
       if (!inSafeBox) {
         st.isShown = false;
@@ -1631,6 +1637,7 @@ export function createInteractive3DMap({
         (st.id === selectedStandeeId ? 200 : 0) +
         (st.id === 'gl-xuewang' && streetK > 0.3 ? 60 : 0) +
         (st.tier === 1 ? 40 : 0) +
+        (cityTownIds.has(st.townId) ? (st.tier === 1 ? 30 : 8) : 0) +
         (st.featured ? 18 : 0) +
         (st.townId === focusTownId ? 10 : 0) +
         (st.isShown ? 12 : 0) -
@@ -1726,8 +1733,8 @@ export function createInteractive3DMap({
         st.hop = 0;
       }
       // 街区近景：这一带其余立绘也缩小，别盖住街
-      const inBlock = Math.hypot(st.wx - street.center.x, st.wz - street.center.z) < 0.45;
-      const sc = lerp(0.50, 1.0, smoothstep(0.05, 0.85, p)) * worldScale * (inBlock ? 1 - 0.5 * streetK : 1) * (1 + st.hop * 0.14);
+      const inBlock = Math.hypot(st.wx - street.center.x, st.wz - street.center.z) < STREET_BLOCK_RADIUS;
+      const sc = lerp(0.50, 1.0, smoothstep(0.05, 0.85, p)) * worldScale * (inBlock ? Math.max(STREET_MIN_SCALE, 1 - 0.2 * streetK) : 1) * (1 + st.hop * 0.14);
       st.scaleGroup.scale.setScalar(sc);
       st.root.position.y = st.wy + st.hop * 0.24 * worldScale;
       st.tabMesh.material.opacity = clamp(p * 0.78, 0, 0.76);
@@ -1737,7 +1744,7 @@ export function createInteractive3DMap({
         if (projV.z > 0.02 && projV.z < 1) {
           const sx = (projV.x * 0.5 + 0.5) * view.w;
           const sy = (-projV.y * 0.5 + 0.5) * view.h;
-          if (sx > 28 && sx < rightBound - 28 && sy > 84 && sy < view.h - 110) {
+          if (sx > 28 && sx < rightBound - 28 && sy > 84 && sy < view.h - (isMobile ? 130 : 110)) {
             const d = Math.hypot(st.wx - camState.tx, st.wz - camState.tz);
             projectedStandees.push({
               id: st.id,
@@ -1805,7 +1812,7 @@ export function createInteractive3DMap({
         sx: (projV.x * 0.5 + 0.5) * view.w,
         sy: (-projV.y * 0.5 + 0.5) * view.h,
         rot: w.rot || 0,
-        visible: projV.z > 0.02 && projV.z < 1 && z < 3.6,
+        visible: projV.z > 0.02 && projV.z < 1 && z < 8,
       });
     }
 
