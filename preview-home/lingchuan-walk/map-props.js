@@ -197,6 +197,58 @@ const KINDS = {
     g.ellipse(64, 46, 30, 16, 0, 0, Math.PI * 2);
     g.fill();
   },
+  guihua: (g) => { trunk(g, '#5E4030', 8, 96); blobCrown(g, '#4E8F4A', '#78B65E', '#336B3A', 26, '#F4B81E'); },
+  banyan: (g) => {
+    // 榕树：宽冠 + 垂下的气根
+    trunk(g, '#6B5340', 12, 84);
+    g.strokeStyle = '#8A6A4E';
+    g.lineWidth = 2;
+    for (let i = 0; i < 7; i++) {
+      const x = 28 + i * 12;
+      g.beginPath();
+      g.moveTo(x, 84);
+      g.lineTo(x + (i % 2 ? 2 : -2), 126 + (i % 3) * 8);
+      g.stroke();
+    }
+    blobCrown(g, '#3F8A4A', '#6DB25E', '#2A6638');
+  },
+  apt: (g) => {
+    // 城区楼房：多层浅色楼 + 一排排窗 + 屋顶水箱
+    g.fillStyle = '#E9E2D2';
+    g.fillRect(34, 40, 60, 110);
+    g.fillStyle = '#D3C9B4';
+    g.fillRect(34, 40, 12, 110);
+    g.fillStyle = '#B8553F';
+    g.fillRect(30, 34, 68, 8);
+    g.fillStyle = '#8F9AA3';
+    g.fillRect(70, 24, 14, 12);
+    for (let y = 52; y < 140; y += 18) {
+      for (let x = 52; x < 90; x += 15) {
+        g.fillStyle = (x + y) % 3 === 0 ? '#FFD27A' : '#6F8CA3';
+        g.fillRect(x, y, 9, 11);
+      }
+    }
+  },
+  shop: (g) => {
+    // 骑楼商铺：三层 + 青瓦檐 + 红灯笼
+    g.fillStyle = '#F2E4C6';
+    g.fillRect(22, 70, 84, 80);
+    g.fillStyle = '#4A5560';
+    g.fillRect(16, 62, 96, 10);
+    g.fillStyle = '#C9553A';
+    g.fillRect(22, 112, 84, 6);
+    g.fillStyle = '#7A5A3E';
+    for (let x = 30; x < 100; x += 24) g.fillRect(x, 124, 14, 26);
+    for (let x = 30; x < 100; x += 24) {
+      g.fillStyle = '#6F8CA3';
+      g.fillRect(x, 82, 14, 18);
+    }
+    g.fillStyle = '#E0412C';
+    g.beginPath();
+    g.arc(30, 120, 5, 0, Math.PI * 2);
+    g.arc(98, 120, 5, 0, Math.PI * 2);
+    g.fill();
+  },
   house: (g) => {
     // 桂北白墙青瓦：马头墙 + 小窗
     g.fillStyle = '#F4EEE2';
@@ -259,7 +311,7 @@ const REALM_TREES = {
   daxu: { bamboo: 5, round: 3, willow: 2 },
   chaotian: { peach: 6, orange: 2, round: 2 },
   dajing: { snowpine: 6, pine: 4 },
-  'guilin-city': { round: 6, willow: 2, orange: 2 },
+  'guilin-city': { guihua: 4, banyan: 2, round: 3, willow: 2, orange: 1 },
   yanshan: { round: 4, peach: 2, orange: 2, bamboo: 2 },
   lingui: { round: 4, willow: 3, bamboo: 3 },
   yangshuo: { bamboo: 5, round: 3, willow: 2 },
@@ -273,6 +325,9 @@ const REALM_TREES = {
   quanzhou: { round: 4, pine: 3, willow: 3 },
   guanyang: { pine: 5, round: 3, bamboo: 2 },
 };
+// 城区小景（楼房聚类 + 滨水垂柳），数据在 map-props.json 的 city 键，由 scripts/build-city-props.py 生成
+const CITY_TREES = { guihua: 5, banyan: 2, round: 3, orange: 1 };
+const CITY_HOUSES = { apt: 4, shop: 3, house: 3 };
 const REALM_HOUSE = { lantian: 'woodhouse', dajing: 'woodhouse', gongping: 'woodhouse', longsheng: 'woodhouse' };
 
 export function createMapProps({ THREE, scene, lonLatToWorld, sampleElevation, standees, isMobile, mapW, mapD, maxAniso }) {
@@ -384,6 +439,39 @@ export function createMapProps({ THREE, scene, lonLatToWorld, sampleElevation, s
         const x = w.x + (rnd() - 0.5) * 0.3;
         const z = w.z + (rnd() - 0.5) * 0.24;
         if (!blocked(x, z)) push(pickKind(table, rnd()), x, z, 0.34 + rnd() * 0.12, 0, rnd() < 0.5);
+      }
+    }
+
+    if (data.city) {
+      // 独立随机序列，不影响灵川等地已有树屋的位置
+      const rc = mulberry32(450300);
+      const mob = isMobile ? 0.6 : 1;
+      for (const [lon, lat, n] of data.city.blocks) {
+        const w = lonLatToWorld(lon, lat);
+        const nh = Math.round((2 + Math.min(6, Math.ceil(n / 6))) * mob);
+        for (let k = 0; k < nh; k++) {
+          const x = w.x + (rc() - 0.5) * 0.14;
+          const z = w.z + (rc() - 0.5) * 0.11;
+          if (blocked(x, z)) continue;
+          const kind = pickKind(CITY_HOUSES, rc());
+          push(kind, x, z, (kind === 'apt' ? 0.2 : 0.15) + rc() * 0.07, (rc() - 0.5) * 0.4, rc() < 0.5);
+        }
+        const nt = Math.round((2 + Math.min(3, Math.floor(n / 10))) * mob);
+        for (let k = 0; k < nt; k++) {
+          const x = w.x + (rc() - 0.5) * 0.16;
+          const z = w.z + (rc() - 0.5) * 0.13;
+          if (blocked(x, z)) continue;
+          push(pickKind(CITY_TREES, rc()), x, z, 0.3 + rc() * 0.14, (rc() - 0.5) * 0.4, rc() < 0.5);
+        }
+      }
+      // 河湖岸：垂柳为主，间植桂花
+      for (const [lon, lat] of data.city.water) {
+        if (rc() > 0.7 * mob) continue;
+        const w = lonLatToWorld(lon, lat);
+        const x = w.x + (rc() - 0.5) * 0.05;
+        const z = w.z + (rc() - 0.5) * 0.05;
+        if (blocked(x, z)) continue;
+        push(rc() < 0.72 ? 'willow' : 'guihua', x, z, 0.34 + rc() * 0.12, (rc() - 0.5) * 0.4, rc() < 0.5);
       }
     }
 
