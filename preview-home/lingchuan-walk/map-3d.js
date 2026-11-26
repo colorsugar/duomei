@@ -275,6 +275,7 @@ export function createInteractive3DMap({
   onProjectUI,
   isModeActive,
   isBlockingOverlayOpen,
+  onTourStep,
 }) {
   const scene = new THREE.Scene();
   const PAPER_HEX = '#F5F0E3';
@@ -928,6 +929,7 @@ export function createInteractive3DMap({
     lastReportedZoom: OVERVIEW_ZOOM,
     desktopPanelOpen: true,
     panelShiftFactor: 1.0,
+    yaw: 0,
   };
 
   function getPanBounds(z) {
@@ -938,7 +940,7 @@ export function createInteractive3DMap({
     };
   }
 
-  function computeCamPose(tx, tz, zoom, view, panelFactor = camState.panelShiftFactor) {
+  function computeCamPose(tx, tz, zoom, view, panelFactor = camState.panelShiftFactor, yaw = camState.yaw) {
     const aspect = view.w / Math.max(1, view.h);
     const fov = aspect < 0.75 ? 43 : 37;
     const vTan = Math.tan(fov * DEG2RAD * 0.5);
@@ -966,9 +968,10 @@ export function createInteractive3DMap({
     const lookZ = tz;
     const lookY = sampleElevation(tx, tz) * 0.42 + lerp(0.04, 0.24, zoomT);
 
-    const posX = lookX;
+    // yaw：漫游时镜头绕视点轻轻摆动，平时为 0
+    const posX = lookX + Math.sin(yaw) * Math.cos(pitchRad) * dist;
     const posY = lookY + Math.sin(pitchRad) * dist;
-    const posZ = lookZ + Math.cos(pitchRad) * dist;
+    const posZ = lookZ + Math.cos(yaw) * Math.cos(pitchRad) * dist;
     const aimZ = lookZ - lerp(0, 0.35, zoomT);
 
     return { fov, aspect, dist, pitchRad, zoomT, posX, posY, posZ, lookX, lookY, aimZ };
@@ -1326,6 +1329,166 @@ export function createInteractive3DMap({
     }
   }
 
+  // ——— 自动漫游 ———
+  // 一站一站飞过去：远的航段先拉高再落下，到站后缓缓推近、镜头左右轻摆，立绘跳一下，题签说出这里是哪。
+  // 任何拖拽、滚轮、按键都会停下；开场 9 秒没人动就自己开始，停过之后要闲 45 秒才再起。
+  const TOUR_STOPS = [
+    { overview: true, hold: 4.2 },
+    { id: 'gl-xiangbishan', zoom: 7.6 },
+    { id: 'gl-duxiufeng', zoom: 7.6 },
+    { id: 'gl-mifen', zoom: 8.2 },
+    { id: 'gl-qixing', zoom: 7.2 },
+    { id: 'lc-01', zoom: 5.6 },
+    { id: 'lc-13', zoom: 5.4 },
+    { id: 'lc-15', zoom: 5.4 },
+    { id: 'lc-08', zoom: 5.2 },
+    { id: 'lc-11', zoom: 5.2 },
+  ];
+  const tourParams = new URLSearchParams(window.location.search);
+  const tourAutoAllowed = tourParams.get('tour') === '1' || (
+    tourParams.get('tour') !== '0'
+    && !navigator.webdriver
+    && !window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+  );
+  const tour = {
+    on: false, idx: -1, phase: 'fly', t: 0, dur: 1, hold: 6,
+    from: null, to: null, dip: 0, st: null, stop: null,
+    idle: 0, everRan: false, yawPhase: 0,
+  };
+
+  function tourBegin(idx, guard = 0) {
+    const n = TOUR_STOPS.length;
+    const stop = TOUR_STOPS[((idx % n) + n) % n];
+    let tx;
+    let tz;
+    let zoom;
+    let st = null;
+    if (stop.overview) {
+      tx = HOME_TX; tz = HOME_TZ; zoom = OVERVIEW_ZOOM;
+    } else {
+      st = standees.find((x) => x.id === stop.id);
+      if (!st) {
+        if (guard < n) tourBegin(idx + 1, guard + 1);
+        else stopTour();
+        return;
+      }
+      tx = st.wx; tz = st.wz; zoom = stop.zoom;
+      if (st.texState === 'lazy') ensureStandeeTexture(st);
+    }
+    const dist = Math.hypot(tx - camState.tx, tz - camState.tz);
+    tour.idx = ((idx % n) + n) % n;
+    tour.stop = stop;
+    tour.st = st;
+    tour.from = { tx: camState.tx, tz: camState.tz, lz: Math.log(camState.zoom) };
+    tour.to = { tx, tz, lz: Math.log(zoom) };
+    // 航程越远，中途拉得越高，看得见一路的山水
+    tour.dip = clamp(dist / 12, 0, 1.25);
+    tour.dur = clamp(2.6 + dist * 0.2, 2.8, 6.2);
+    tour.hold = stop.hold || 6.2;
+    tour.phase = 'fly';
+    tour.t = 0;
+    camState.vx = 0;
+    camState.vz = 0;
+    camState.lockedTownId = st ? st.townId : null;
+    if (tour.on) onTourStep?.({ active: true });
+  }
+
+  function startTour() {
+    if (tour.on) return;
+    tour.on = true;
+    tour.everRan = true;
+    tour.idle = 0;
+    // 从离当前视点最近的那一站接着走，免得一开始就横穿全图
+    let best = 0;
+    let bestD = Infinity;
+    TOUR_STOPS.forEach((stop, i) => {
+      const st = stop.overview ? null : standees.find((x) => x.id === stop.id);
+      const wx = st ? st.wx : HOME_TX;
+      const wz = st ? st.wz : HOME_TZ;
+      const d = Math.hypot(wx - camState.tx, wz - camState.tz) + (stop.overview && camState.zoom > 1.2 ? 99 : 0);
+      if (d < bestD) { bestD = d; best = i; }
+    });
+    tourBegin(best);
+    onTourStep?.({ active: true });
+  }
+
+  function stopTour() {
+    tour.idle = 0;
+    if (!tour.on) return;
+    tour.on = false;
+    camState.targetTx = camState.tx;
+    camState.targetTz = camState.tz;
+    camState.targetZoom = camState.zoom;
+    onTourStep?.(null);
+  }
+
+  const easeInOut = (x) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
+
+  function tourUpdate(dt) {
+    if (!tour.on) {
+      camState.yaw = lerp(camState.yaw, 0, 1 - Math.exp(-2.2 * dt));
+      if (tourAutoAllowed && pointers.size === 0 && !isBlockingOverlayOpen?.()) {
+        tour.idle += dt;
+        if (tour.idle > (tour.everRan ? 45 : 9)) startTour();
+      }
+      return;
+    }
+    if (isBlockingOverlayOpen?.()) return;
+    tour.t += dt;
+    let tx;
+    let tz;
+    let lz;
+    let yawTarget = 0;
+    if (tour.phase === 'fly') {
+      const e = clamp(tour.t / tour.dur, 0, 1);
+      const pe = easeInOut(e);
+      tx = lerp(tour.from.tx, tour.to.tx, pe);
+      tz = lerp(tour.from.tz, tour.to.tz, pe);
+      lz = lerp(tour.from.lz, tour.to.lz, easeInOut(e)) - tour.dip * Math.sin(Math.PI * e);
+      if (e >= 1) {
+        tour.phase = 'hold';
+        tour.t = 0;
+        tour.yawPhase = 0;
+        if (tour.st) {
+          selectedStandeeId = tour.st.id;
+          tour.st.hop = 1.0;
+        }
+        const st = tour.st;
+        const info = st ? (st.poi || st.entry?.spec || {}) : null;
+        const town = st ? TOWNSHIPS.find((t) => t.id === st.townId) : null;
+        onTourStep?.({
+          active: true,
+          index: tour.idx,
+          total: TOUR_STOPS.length,
+          title: st ? st.title : '桂林全境',
+          place: st ? (town?.name || '') : '十七县区',
+          line: st ? (info?.tagline || '') : '漓江自北向南，穿城而过。',
+        });
+      }
+    } else {
+      const h = clamp(tour.t / tour.hold, 0, 1);
+      tx = tour.to.tx;
+      tz = tour.to.tz;
+      lz = tour.to.lz + 0.12 * easeInOut(h);
+      tour.yawPhase += dt;
+      yawTarget = 0.13 * Math.sin(tour.yawPhase * 0.55) * Math.min(1, tour.yawPhase / 1.5);
+      if (h >= 1) tourBegin(tour.idx + 1);
+    }
+    camState.tx = camState.targetTx = tx;
+    camState.tz = camState.targetTz = tz;
+    camState.zoom = camState.targetZoom = clamp(Math.exp(lz), MIN_ZOOM, MAX_ZOOM);
+    camState.yaw = lerp(camState.yaw, yawTarget, 1 - Math.exp(-3 * dt));
+  }
+
+  // 用户一动就停下漫游（点漫游钮本身除外）
+  const interruptTour = (e) => {
+    if (e?.target?.closest?.('#lc-tour-btn')) return;
+    stopTour();
+  };
+  window.addEventListener('pointerdown', interruptTour, true);
+  window.addEventListener('wheel', interruptTour, { capture: true, passive: true });
+  window.addEventListener('keydown', interruptTour, true);
+
   function updateAndRender(dt, time) {
     const view = getViewport();
     const desiredAspect = view.w / Math.max(1, view.h);
@@ -1339,6 +1502,8 @@ export function createInteractive3DMap({
       camState.vx *= decay;
       camState.vz *= decay;
     }
+
+    tourUpdate(dt);
 
     const followK = 1 - Math.exp(-10.5 * dt);
     camState.tx = lerp(camState.tx, camState.targetTx, followK);
@@ -1680,7 +1845,12 @@ export function createInteractive3DMap({
     setDesktopPanelOpen,
     setCameraView,
     triggerStandeeById,
+    startTour,
+    stopTour,
+    isTouring: () => tour.on,
     getState: () => ({
+      touring: tour.on,
+      tourIdx: tour.idx,
       ...camState,
       loadedTiles: tiles.filter((t) => t.state === 'ready').length,
       totalStandees: standees.length,

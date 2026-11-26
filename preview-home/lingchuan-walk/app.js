@@ -3932,6 +3932,7 @@ async function init() {
     onProjectUI: (proj) => mapViewApi?.syncProjection(proj),
     isModeActive: () => state.mode === 'map',
     isBlockingOverlayOpen: () => Boolean(state.selectedLandmark || mapViewApi?.isOverlayOpen?.()),
+    onTourStep: (info) => mapViewApi?.setTourStep?.(info),
   });
   mapViewApi.attach3D(map3dApi);
   window.__LINGCHUAN_MAP3D = map3dApi;

@@ -1321,3 +1321,72 @@ body[data-mode="map"] #vignette {
   letter-spacing: 0.06em;
   font-size: 14px;
 }
+
+/* 自动漫游：按钮与到站题签 */
+.lc-zctrl-btn.is-tour {
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: #fff;
+  background: #1F5E5B;
+  border-color: rgba(31, 94, 91, 0.6);
+}
+.lc-zctrl-btn.is-tour.is-on {
+  background: rgba(252, 248, 240, 0.92);
+  color: var(--lc-verm, #B3261E);
+  border-color: rgba(179, 38, 30, 0.36);
+}
+.lc-tour-cap {
+  position: fixed;
+  left: calc((100vw - 406px) / 2);
+  bottom: 30px;
+  z-index: 8;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  max-width: min(520px, calc(100vw - 520px));
+  padding: 10px 18px 10px 12px;
+  border-radius: 14px;
+  background: rgba(252, 248, 240, 0.92);
+  border: 1px solid rgba(28, 25, 22, 0.10);
+  box-shadow: 0 10px 28px rgba(60, 44, 20, 0.16);
+  pointer-events: none;
+  opacity: 0;
+  transform: translate(-50%, 10px);
+  transition: opacity 0.6s ease, transform 0.6s cubic-bezier(0.22, 1, 0.36, 1), left 0.34s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.lc-tour-cap.is-shown { opacity: 1; transform: translate(-50%, 0); }
+.lc-atlas-hud[data-folio-collapsed="1"] .lc-tour-cap { left: 50vw; }
+.lc-tc-seal {
+  flex: none;
+  writing-mode: vertical-rl;
+  padding: 6px 4px;
+  border-radius: 4px;
+  background: var(--lc-verm, #B3261E);
+  color: #FBF3E4;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  line-height: 1;
+}
+.lc-tc-head { display: flex; align-items: baseline; gap: 10px; }
+.lc-tc-head b {
+  font-family: var(--font-title, "Songti SC", "STSong", serif);
+  font-weight: 400;
+  font-size: 22px;
+  color: var(--lc-ink, #1C1916);
+  letter-spacing: 0.06em;
+}
+.lc-tc-head em { font-style: normal; font-size: 12px; color: #1F5E5B; letter-spacing: 0.06em; }
+.lc-tour-cap p { margin: 3px 0 0; font-size: 13px; line-height: 1.55; color: rgba(28, 25, 22, 0.72); }
+@media (max-width: 919px) {
+  .lc-tour-cap {
+    left: 50vw;
+    top: calc(env(safe-area-inset-top) + 138px);
+    bottom: auto;
+    max-width: calc(100vw - 32px);
+    width: max-content;
+    transform: translate(-50%, -8px);
+  }
+  .lc-tour-cap.is-shown { transform: translate(-50%, 0); }
+  .lc-tc-head b { font-size: 19px; }
+  .lc-tour-cap p { font-size: 12px; }
+}

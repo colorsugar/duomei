@@ -139,10 +139,20 @@ export function createMapView({
       <div class="lc-zoom-ctrls" aria-label="地图缩放控制">
         <button type="button" class="lc-zctrl-btn is-folio-toggle" id="lc-folio-toggle" title="收起或展开风物侧笺" aria-label="收起侧笺">收起</button>
         <a class="lc-zctrl-btn is-yz" href="./youzong.html" title="吃什么、去哪里、哪天赶圩，排一卷游踪" aria-label="灵川游踪">游踪</a>
+        <button type="button" class="lc-zctrl-btn is-tour" id="lc-tour-btn" title="自动漫游：一站一站飞过桂林" aria-label="开始自动漫游" aria-pressed="false">漫游</button>
         <button type="button" class="lc-zctrl-btn" id="lc-z-in" title="放大靠近看高清地形与立绘" aria-label="放大地图">+</button>
         <button type="button" class="lc-zctrl-btn" id="lc-z-out" title="缩小看全境" aria-label="缩小地图">−</button>
         <button type="button" class="lc-zctrl-btn is-reset" id="lc-z-reset" title="回到全境" aria-label="复位全境" hidden>全境</button>
         <button type="button" class="lc-zctrl-btn is-info" id="lc-credit-btn" title="地图数据来源" aria-label="地图数据来源">ⓘ</button>
+      </div>
+
+      <!-- 3.2) 漫游题签：到站时说这是哪里 -->
+      <div class="lc-tour-cap" id="lc-tour-cap" aria-live="polite" hidden>
+        <span class="lc-tc-seal" id="lc-tc-seal"></span>
+        <div class="lc-tc-body">
+          <div class="lc-tc-head"><b id="lc-tc-title"></b><em id="lc-tc-place"></em></div>
+          <p id="lc-tc-line"></p>
+        </div>
       </div>
 
       <!-- 3.5) 实时真实地理比例尺与缩放倍率浮标 -->
@@ -840,6 +850,38 @@ export function createMapView({
     });
   });
 
+  const tourBtn = root.querySelector('#lc-tour-btn');
+  const tourCap = root.querySelector('#lc-tour-cap');
+  const CN_NUM = '一二三四五六七八九十';
+  tourBtn.addEventListener('click', () => {
+    if (map3d?.isTouring()) map3d.stopTour();
+    else map3d?.startTour();
+  });
+  function setTourStep(info) {
+    const on = Boolean(info?.active);
+    tourBtn.classList.toggle('is-on', on);
+    tourBtn.textContent = on ? '停' : '漫游';
+    tourBtn.setAttribute('aria-pressed', String(on));
+    tourBtn.setAttribute('aria-label', on ? '停止自动漫游' : '开始自动漫游');
+    hudEl.classList.toggle('is-touring', on);
+    if (!on) {
+      tourCap.classList.remove('is-shown');
+      tourCap.hidden = true;
+      return;
+    }
+    if (!info.title) {
+      tourCap.classList.remove('is-shown');
+      return;
+    }
+    tourCap.hidden = false;
+    tourCap.classList.remove('is-shown');
+    root.querySelector('#lc-tc-seal').textContent = info.index === 0 ? '总览' : `第${CN_NUM[info.index - 1] || info.index}站`;
+    root.querySelector('#lc-tc-title').textContent = info.title;
+    root.querySelector('#lc-tc-place').textContent = info.place || '';
+    root.querySelector('#lc-tc-line').textContent = info.line || '';
+    requestAnimationFrame(() => tourCap.classList.add('is-shown'));
+  }
+
   zInBtn.addEventListener('click', () => map3d?.nudgeZoom(0.65));
   zOutBtn.addEventListener('click', () => map3d?.nudgeZoom(-0.65));
   zResetBtn.addEventListener('click', () => map3d?.resetOverview());
@@ -986,6 +1028,7 @@ export function createMapView({
     },
     syncProjection,
     setFocusTown,
+    setTourStep,
     flyToTown: (id, z) => map3d?.flyToTown(id, z),
     resetOverview: () => map3d?.resetOverview(),
     openTown,
