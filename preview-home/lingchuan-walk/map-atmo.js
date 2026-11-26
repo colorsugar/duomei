@@ -53,9 +53,9 @@ export const REALMS = [
 ];
 // 桂林市区三境：老城（秀峰叠彩象山七星）、雁山、临桂
 REALMS.push(
-  { id: 'guilin-city', epithet: '山水城郭', lon: 110.296, lat: 25.272, weight: 1.1, wash: 0.50,
-    tint: '#4FA595', speckCol: '#F4C542', p: [0.45, 0.0, 18, -0.4], q: [0.0, 1.15],
-    haze: '#E4EFE9', light: '#FFF4D8', fx: 'osmanthus', overlay: '160, 206, 190', glow: '250, 240, 212' },
+  { id: 'guilin-city', epithet: '山水城郭', lon: 110.296, lat: 25.272, weight: 1.1, wash: 0.62,
+    tint: '#3E9E88', speckCol: '#F4B81E', p: [0.55, 0.0, 26, -0.4], q: [0.0, 1.25],
+    haze: '#E6EBC8', light: '#FFEDB8', fx: 'osmanthus', overlay: '176, 210, 150', glow: '255, 234, 176' },
   { id: 'yanshan', epithet: '雁山花畴', lon: 110.33, lat: 25.10, weight: 1.2, wash: 0.52,
     tint: '#C2C45A', speckCol: '#F2D43A', p: [0.40, 0.0, 22, -0.9], q: [0.0, 1.1],
     haze: '#F1EED6', light: '#FFF6D6', fx: 'blossom', overlay: '214, 210, 150', glow: '252, 246, 214' },
@@ -293,7 +293,7 @@ const FX_PROFILE = {
   petal: { size: 0.016, fall: 0.026, sway: 0.034, spin: 2.0, opacity: 0.92, n: 1 },
   lotus: { size: 0.017, fall: 0.022, sway: 0.030, spin: 1.6, opacity: 0.9, n: 0.7 },
   blossom: { size: 0.013, fall: 0.024, sway: 0.030, spin: 1.8, opacity: 0.95, n: 0.8 },
-  osmanthus: { size: 0.008, fall: 0.020, sway: 0.028, spin: 1.6, opacity: 0.95, n: 0.9 },
+  osmanthus: { size: 0.013, fall: 0.018, sway: 0.030, spin: 1.6, opacity: 0.95, n: 1 },
   snow: { size: 0.010, fall: 0.022, sway: 0.016, spin: 0.4, opacity: 0.85, n: 1 },
   catkin: { size: 0.014, fall: 0.006, sway: 0.030, spin: 0.5, opacity: 0.8, n: 0.7 },
   mist: { size: 0.16, fall: 0.0, sway: 0.020, spin: 0, opacity: 0.42, n: 0.35, bill: true, drift: 0.035 },
@@ -487,7 +487,7 @@ export function createMapAtmosphere({
         .replace('#include <fog_fragment>', `#include <fog_fragment>\n${FRAG_FOG}`.replace(/__MW__/g, mapW.toFixed(1)).replace(/__MD__/g, mapD.toFixed(1)));
     };
     const prevKey = mat.customProgramCacheKey?.bind(mat);
-    mat.customProgramCacheKey = () => `${prevKey ? prevKey() : ''}|lc-atmo-v4`;
+    mat.customProgramCacheKey = () => `${prevKey ? prevKey() : ''}|lc-atmo-v5`;
     mat.needsUpdate = true;
   }
 
