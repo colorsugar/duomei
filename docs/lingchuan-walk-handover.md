@@ -25,6 +25,8 @@
 | `map-view.js` | 地图 UI：标签避让、乡镇卡、风物志、游踪按钮 |
 | `map-townships.js` | 乡镇 / 城区 / 县数据（`TOWNSHIPS`）、专题卡 `MAP_EXTRA_POIS` |
 | `map-atmo.js` | 「一境一色」氛围：`REALMS`（加权 Voronoi 上色）、光雾、飘落物、水面反光、云影 |
+| `map-city.js` | 主城区与市内吃食 `CITY_POIS`（并入 `GROK_EXTRA_42`），图 `img/gl-*.webp` |
+| `map-region.js` + `map-bounds.json` | 聚焦县区的朱红描边 + 内侧金边；边界由 `scripts/build-guilin-bounds.py` 从 DataV 缓存生成，灵川各乡统一圈灵川县 |
 | `map-props.js` | 纸艺小景：按 `map-props.json` 种树、摆村屋 |
 | `map-geo.json` / `map-props.json` | 画框经纬度、区县表；树林 / 平坝 / 村落网格（脚本生成） |
 | `img/map/lingchuan-dem-l0.webp`、`img/map/tiles/`、`lingchuan-dem-height.png` | 底图总览、细瓦片、高度图（脚本生成） |
@@ -62,7 +64,7 @@
 
 | 目录 | 内容 | 交付标志 |
 |---|---|---|
-| `guilin-art/` | 市区立绘：WorkBuddy 搜实拍 → `pipeline.sh` 自动开 4 个 Grok 照片重画 → 对照图 | `PIPELINE-DONE`，成品复制到桌面「桂林市区立绘-照实拍重画」 |
+| `guilin-art/` | 市区立绘：WorkBuddy 搜实拍 → `pipeline.sh` 自动开 4 个 Grok 照片重画 → 对照图。单张重画：`bash tools/worker.sh <工位名> <slug>`；`candidates/<slug>/STYLE` 存在时会覆盖默认画风（象鼻山、独秀峰用的是动画电影背景风）；画好后 `python3 tools/cut.py out2/<slug>.png <仓库>/preview-home/lingchuan-walk/img gl-<id>` 去白底出两档 webp | `PIPELINE-DONE`，成品复制到桌面「桂林市区立绘-照实拍重画」 |
 | `factcheck/` | 灵川 159 段说法核查 | `DONE`，结果 `result.md`（6 条有误、23 条查不到，待老大过目后再改） |
 | `factcheck-counties/` | 十个县县级介绍核查 + 可补充的说法 | `DONE`，`result.md` |
 | `codex-youzong/` | Codex 给游踪页补六城区资料（副本） | `REPORT.md`，审过再合进仓库 |
@@ -71,7 +73,7 @@
 
 ## 进度（最近一次更新见文件末尾）
 
-已上线：#232–#239（灵川十二乡十二境、纸艺底图、游踪页、删傩祭、潮田舞狮拜年、全市十七县区一张图）。
+已上线：#232–#242（灵川十二乡十二境、纸艺底图、游踪页、删傩祭、潮田舞狮拜年、全市十七县区一张图）。
 
 进行中：
 - Codex 的六城区游踪资料（`~/grokbox/codex-youzong/`，70 条）待审后合进 `youzong-data.js`。
@@ -94,3 +96,10 @@
   - 分享笺：预览不再裁切；正文自动缩字号放下全文，标点不起行；乡镇无专图时用该乡第一张立绘；模板文字去掉「灵川」。
   - 字体按字频切 5 块 + unicode-range（`f/fonts.css`），手机地形底图用 2048 版 `lingchuan-dem-l0-m.webp`。
   - 待办：长卷 / 2.5D 素材仍在开场全部预载（约 3 MB），要改成切换时再建场景；植被种类与摆放；Grok 工位在按实拍重画主城区（`out2/`），画好后替换 `gl-*`。
+- 2026-11-26 Kiro（cursor/guilin-region-luosifen）：
+  - 修主城区卡片没图：`app.js` 把 `gl-*` 当成绘本图去 `storybook/img/m/` 找，404；现与 `lc-*` 同走本目录。
+  - 聚焦县区加描边（`map-region.js`）：朱红线 + 内侧金色带，贴地，随缩放变粗细，切换时淡入淡出。带子朝下会被背面剔除，所以材质要 `DoubleSide`。
+  - 加螺蛳粉（`gl-luosifen`，七星区，标「源出柳州」，不写店名）。
+  - 主城区立绘挤在几公里内，防挡逻辑只放独秀峰：城区立绘缩到 0.74；点选或从卡片进来的立绘优先站起（`selectedStandeeId`）。
+  - 象鼻山、独秀峰·王城按实拍机位让 Grok 重画成动画电影背景风（对照图 `~/grokbox/guilin-art/compare/`）。
+  - 老大新提、待做：整体太静态，要自动运镜 / 导览和更多动态；纸艺长卷、2.5D 画境太简单太少（现在长卷六境、画境四幅，全是灵川）。

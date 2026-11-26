@@ -264,6 +264,17 @@ export const CITY_POIS = [
     sources: ['桂林小吃公开资料'],
   }),
   P({
+    id: 'gl-luosifen', slug: 'luosifen', townId: 'qixing',
+    title: '螺蛳粉', subtitle: '桂林 · 街头粉店的另一碗', category: '美食特产',
+    lon: 110.3105, lat: 25.2812, approx: true,
+    tagline: '螺蛳熬汤，酸笋提味，一碗红油汤粉，隔条街都闻得到。',
+    town: '桂林城里粉店与夜宵摊', season: '一年四季 · 夜宵最多',
+    stat: '源出柳州 · 螺蛳汤底 · 酸笋腐竹',
+    story: '螺蛳粉源出柳州，用螺蛳与筒骨熬汤，配干切米粉，码上酸笋、炸腐竹、花生、木耳和青菜，浇一层红油。如今桂林街头的粉店与夜宵摊也多有供应，常和桂林米粉开在同一条街上。',
+    tips: '酸笋气味浓，辣度多可自选，初次吃不妨先点微辣。',
+    sources: ['螺蛳粉公开资料'],
+  }),
+  P({
     id: 'gl-youcha', slug: 'youcha', townId: 'gongcheng',
     title: '恭城油茶', subtitle: '恭城 · 打油茶', category: '美食特产',
     lon: 110.828, lat: 24.831, approx: true,

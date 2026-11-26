@@ -9,6 +9,7 @@
 import { TOWNSHIPS, MAP_EXTRA_POIS, GROK_EXTRA_42, WATER_LABELS } from './map-townships.js';
 import { createMapAtmosphere } from './map-atmo.js';
 import { createMapProps } from './map-props.js';
+import { createRegionHighlight } from './map-region.js';
 
 // 桂林全境（市辖 17 个县区）连成一张：1:1 墨卡托画框，8x8 张 1024 瓦片（scripts/build-guilin-atlas.py）
 // 世界尺寸按旧画框（1.14° 宽 = 40 单位）的比例放大，缩放档位、立绘大小在各处保持原样
@@ -522,6 +523,8 @@ export function createInteractive3DMap({
   // 4) 全部 76 处真实地理工笔立绘 + 未展开时的轻雅纸面圆点标记
   // --------------------------------------------------------------------------
   const standees = [];
+  // 点选的立绘优先站起，不被近旁立绘挤掉
+  let selectedStandeeId = null;
   const pickMeshes = [];
   const placedIds = new Set();
 
@@ -749,8 +752,11 @@ export function createInteractive3DMap({
   }
 
   // C) 全部 42 处 Grok 新增工笔风物立绘（按真实分布随放大逐步唤醒，绝不遮挡！）
+  // 主城区风物挤在几公里内：立绘缩小些，放大时能多站起几幅
+  const cityTownIds = new Set(TOWNSHIPS.filter((t) => t.city).map((t) => t.id));
   for (const extra of GROK_EXTRA_42) {
     const w = lonLatToWorld(extra.lon, extra.lat);
+    const cityShrink = cityTownIds.has(extra.townId) ? 0.74 : 1;
     addMapStandee({
       id: extra.id,
       kind: 'extra',
@@ -763,7 +769,7 @@ export function createInteractive3DMap({
       poi: extra,
       featured: false,
       tier: extra.tier || 2,
-      heightScale: extra.heightScale || 0.92,
+      heightScale: (extra.heightScale || 0.92) * cityShrink,
       lazy: true,
     });
   }
@@ -772,6 +778,21 @@ export function createInteractive3DMap({
 
   // 纸艺小景：满山剪纸树 + 真实村落小屋（按十二境换树种）
   const props = createMapProps({ THREE, scene, lonLatToWorld, sampleElevation, standees, isMobile, mapW: MAP_W, mapD: MAP_D, maxAniso });
+
+  // 县区高光：城区与十县用自身边界，灵川各乡镇统一圈灵川县
+  const townById = new Map(TOWNSHIPS.map((t) => [t.id, t]));
+  const region = createRegionHighlight({
+    THREE, scene, lonLatToWorld, sampleElevation,
+    regionOfTown: (id) => {
+      const t = townById.get(id);
+      if (!t) return null;
+      return (t.city || t.countyLevel) ? t.id : 'lingchuan';
+    },
+  });
+  const notifyFocus = (id) => {
+    region.setTown(id);
+    onFocusTownChange?.(id);
+  };
 
   // --------------------------------------------------------------------------
   // 5) 真实 12 乡镇与 4 条水脉世界坐标 + 异步加载真实 30m DEM 高度图
@@ -787,6 +808,7 @@ export function createInteractive3DMap({
 
   function syncAllHeightsToDem() {
     applyDemToPlaneGeo(terrainGeo, 0);
+    region.refresh();
     for (const tile of tiles) {
       if (tile.geo) {
         const pos = tile.geo.attributes.position;
@@ -1017,7 +1039,7 @@ export function createInteractive3DMap({
     camState.targetZoom = clamp(zoomLevel, MIN_ZOOM, MAX_ZOOM);
     if (camState.nearestTownId !== townId) {
       camState.nearestTownId = townId;
-      onFocusTownChange?.(townId);
+      notifyFocus(townId);
     }
   }
 
@@ -1188,6 +1210,7 @@ export function createInteractive3DMap({
         }
         if (picked) {
           picked.hop = 1.0;
+          selectedStandeeId = picked.id;
           camState.targetTx = picked.wx;
           camState.targetTz = picked.wz;
           if (camState.targetZoom < 2.8) camState.targetZoom = 3.2;
@@ -1322,6 +1345,7 @@ export function createInteractive3DMap({
     camState.tz = lerp(camState.tz, camState.targetTz, followK);
     camState.zoom = lerp(camState.zoom, camState.targetZoom, followK);
     camState.panelShiftFactor = lerp(camState.panelShiftFactor, camState.desktopPanelOpen ? 1.0 : 0.0, followK);
+    region.update(camState.zoom, dt);
 
     const pose = computeCamPose(camState.tx, camState.tz, camState.zoom, view, camState.panelShiftFactor);
     applyPoseToCamera(camera, pose);
@@ -1355,7 +1379,7 @@ export function createInteractive3DMap({
     const focusTownId = camState.lockedTownId || bestTown.town.id;
     if (focusTownId !== camState.nearestTownId) {
       camState.nearestTownId = focusTownId;
-      onFocusTownChange?.(focusTownId);
+      notifyFocus(focusTownId);
     }
 
     if (Math.abs(camState.zoom - camState.lastReportedZoom) > 0.04) {
@@ -1418,6 +1442,7 @@ export function createInteractive3DMap({
 
       // 优先级分数：已站起(防抖) + 一级核心地标 + 焦点乡镇 + 离屏中心近
       const priority =
+        (st.id === selectedStandeeId ? 200 : 0) +
         (st.tier === 1 ? 40 : 0) +
         (st.featured ? 18 : 0) +
         (st.townId === focusTownId ? 10 : 0) +
@@ -1613,6 +1638,7 @@ export function createInteractive3DMap({
     if (st) {
       if (st.texState === 'lazy') ensureStandeeTexture(st);
       st.hop = 1.0;
+      selectedStandeeId = st.id;
       camState.targetTx = st.wx;
       camState.targetTz = st.wz;
       if (camState.targetZoom < (st.tier === 2 ? 4.2 : 3.0)) {
