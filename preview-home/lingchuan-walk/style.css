@@ -67,6 +67,7 @@ body[data-mode="depth"][data-depth-scene="paideng"] {
 
 html, body {
   margin: 0;
+  touch-action: pan-x pan-y; /* 禁止整页捏合缩放，地图自己的缩放不受影响 */
   width: 100%;
   height: 100%;
   overflow: hidden;
