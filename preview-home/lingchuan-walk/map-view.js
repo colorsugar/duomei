@@ -12,6 +12,9 @@ import {
   WATER_LABELS,
 } from './map-townships.js';
 import { listShareTemplates, openShareStudio } from './share-card.js';
+import { REALMS } from './map-atmo.js';
+
+const REALM_BY_ID = Object.fromEntries(REALMS.map((r) => [r.id, r]));
 
 function assetUrl(rel) {
   if (!rel) return '';
@@ -91,10 +94,12 @@ export function createMapView({
             : t.county
               ? `${t.name}<em>县治</em>`
               : t.name;
+          const realm = REALM_BY_ID[t.id];
+          const epi = realm ? `<span class="lc-pin-epi" style="--epi:${realm.tint}" aria-hidden="true">${realm.epithet}</span>` : '';
           return `
             <button type="button" class="${cls}" data-town="${t.id}" data-dir="${t.dir || 'top'}" aria-label="飞往 ${t.name} · ${t.region}">
               <span class="lc-pin-dot" aria-hidden="true"></span>
-              <span class="lc-pin-tag">${tagInner}</span>
+              <span class="lc-pin-tag">${tagInner}${epi}</span>
             </button>
           `;
         }).join('')}
@@ -309,6 +314,7 @@ export function createMapView({
 
   // ---------- 3D Projection Sync (called every frame from map-3d.js) ----------
   let lastScaleText = '';
+  let epiTick = 0;
   function syncProjection({ towns, waters, standees, zoom, kmPer100Px, focusTownId }) {
     state.camZoom = zoom;
     const isClose = zoom > 1.38;
@@ -330,6 +336,32 @@ export function createMapView({
     const vw = window.innerWidth || 390;
     const vh = window.innerHeight || 740;
     const rightLimit = (vw >= 920 && !state.folioCollapsed) ? vw - 390 : vw - 16;
+
+    // 0) 已站起立绘的屏幕占位（图 + 顶部浮签），放大时与之重叠的周边乡镇签让位，杜绝签压图
+    const obstacles = [];
+    if (isClose) {
+      for (const s of standees) {
+        if (s.box) obstacles.push({ x: s.box.sx, y: s.box.sy, hw: s.box.w * 0.5, hh: s.box.h * 0.5 });
+        const tw = s.title.length * 11.5 + 26;
+        obstacles.push({ x: s.sx, y: s.sy - 24, hw: tw * 0.5, hh: 17 });
+      }
+    }
+    const pinHits = (pt, el) => {
+      if (!obstacles.length) return false;
+      const town = townById(pt.id);
+      const w = ((town?.name || '').length * 13 + 34);
+      const h = 30;
+      const dir = el.dataset.dir || 'top';
+      let cx = pt.sx;
+      let cy = pt.sy - h * 0.5 + 9;
+      if (dir === 'left') { cx = pt.sx - w * 0.5 + 9; cy = pt.sy; }
+      else if (dir === 'right') { cx = pt.sx + w * 0.5 - 9; cy = pt.sy; }
+      else if (dir === 'bottom') { cy = pt.sy + h * 0.5 - 9; }
+      for (const o of obstacles) {
+        if (Math.abs(cx - o.x) < w * 0.5 + o.hw + 4 && Math.abs(cy - o.y) < h * 0.5 + o.hh + 2) return true;
+      }
+      return false;
+    };
 
     // 1) Update 12 township 3D->2D pins
     for (const pt of towns) {
@@ -361,12 +393,42 @@ export function createMapView({
         op = 0;
         pe = 'none';
       } else if (isClose && pt.id !== focusTownId) {
-        op = 0.62;
+        if (pinHits(pt, el)) {
+          op = 0;
+          pe = 'none';
+        } else {
+          op = 0.62;
+        }
       }
       el.style.opacity = op.toFixed(2);
       el.style.pointerEvents = pe;
       el.classList.toggle('is-active', pt.id === focusTownId);
       el.classList.toggle('is-matched', state.category !== 'all' && catMatch);
+    }
+
+    // 1b) 总览境名题签：与其他乡签或境名相碰的不题，宁缺勿挤
+    if (!isClose && (epiTick++ % 12 === 0)) {
+      const rects = [];
+      const placed = [];
+      for (const pt of towns) {
+        const el = pinMap.get(pt.id);
+        if (!el || el.style.opacity === '0') continue;
+        const tag = el.querySelector('.lc-pin-tag');
+        const epi = el.querySelector('.lc-pin-epi');
+        if (!tag) continue;
+        const r = tag.getBoundingClientRect();
+        rects.push(r);
+        if (epi) placed.push({ el: epi, r: epi.getBoundingClientRect(), tag: r });
+      }
+      const hit = (a, b, pad = 2) => a.left < b.right + pad && a.right > b.left - pad && a.top < b.bottom + pad && a.bottom > b.top - pad;
+      const kept = [];
+      for (const e of placed) {
+        let ok = e.r.top > 64;
+        if (ok) for (const r of rects) if (r !== e.tag && hit(e.r, r)) { ok = false; break; }
+        if (ok) for (const k of kept) if (hit(e.r, k)) { ok = false; break; }
+        if (ok) kept.push(e.r);
+        e.el.style.visibility = ok ? '' : 'hidden';
+      }
     }
 
     // 2) Update water labels
