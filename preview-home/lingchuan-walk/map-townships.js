@@ -30,8 +30,15 @@ export const MAP_CATEGORIES = [
 export const WATER_LABELS = [
   { text: '青狮潭', lon: 110.205, lat: 25.536, rot: -22 },
   { text: '甘棠江', lon: 110.258, lat: 25.476, rot: -48 },
-  { text: '漓江', lon: 110.384, lat: 25.305, rot: -76 },
+  // 漓江：OSM way 49322861 城区段（解放桥北、伏波山南）
+  { text: '漓江', lon: 110.2982, lat: 25.2800, rot: -63 },
   { text: '潮田河', lon: 110.520, lat: 25.218, rot: -38 },
+  // 城区水名：桃花江取 OSM way 1547815440 上一点；四湖取 Nominatim 湖面点
+  { text: '桃花江', lon: 110.2765, lat: 25.2769, rot: -38 },
+  { text: '榕湖', lon: 110.2840, lat: 25.2778, rot: 0 },
+  { text: '杉湖', lon: 110.2902, lat: 25.2751, rot: 0 },
+  { text: '桂湖', lon: 110.2875, lat: 25.2864, rot: 0 },
+  { text: '木龙湖', lon: 110.2949, lat: 25.2941, rot: 0 },
 ];
 
 /**

@@ -10,7 +10,7 @@ const P = (o) => ({ tier: 2, heightScale: 0.92, ...o, img: `gl-${o.slug}` });
 export const CITY_POIS = [
   // -------------------- 象山区 --------------------
   P({
-    id: 'gl-xiangbishan', slug: 'xiangbishan', townId: 'xiangshan', tier: 1,
+    id: 'gl-xiangbishan', slug: 'xiangbishan', townId: 'xiangshan', tier: 1, featured: true, heightScale: 1.5,
     title: '象鼻山', subtitle: '象山区 · 漓江与桃花江汇口', category: '山水',
     lon: 110.2915, lat: 25.2701,
     tagline: '一头石象临江饮水，鼻下圈出一轮水月。',
@@ -21,7 +21,7 @@ export const CITY_POIS = [
     sources: ['桂林市公开旅游资料', 'OpenStreetMap 地名点'],
   }),
   P({
-    id: 'gl-riyueshuangta', slug: 'riyueshuangta', townId: 'xiangshan', tier: 1,
+    id: 'gl-riyueshuangta', slug: 'riyueshuangta', townId: 'xiangshan', tier: 1, featured: true, heightScale: 1.4,
     title: '日月双塔', subtitle: '象山区 · 杉湖', category: '山水',
     lon: 110.2903, lat: 25.2748,
     tagline: '杉湖里一金一白两座塔，夜里灯一亮，倒影比塔还亮。',
@@ -54,9 +54,21 @@ export const CITY_POIS = [
     sources: ['甑皮岩遗址公开资料', 'OpenStreetMap 地名点'],
   }),
 
+  P({
+    id: 'gl-shanhu', slug: 'shanhu', townId: 'xiangshan',
+    title: '杉湖', subtitle: '象山区 · 阳桥以东', category: '山水',
+    lon: 110.2895, lat: 25.2769,
+    tagline: '阳桥以东一湖清水，日月双塔就立在湖里。',
+    town: '象山区 · 象山街道', season: '四时皆宜 · 入夜看塔影',
+    stat: '两江四湖之一 · 因湖岸杉树得名 · 日月双塔在湖中',
+    story: '杉湖在老城正中，与榕湖以阳桥为界，桥东是杉湖，桥西是榕湖，两湖分别因湖岸的杉树、榕树得名。日月双塔就立在杉湖里。四湖在宋代原是城外的护城河。',
+    tips: '沿湖步道可走到榕湖与古南门；两江四湖游船经过这里。',
+    sources: ['桂林市公开旅游资料', 'OpenStreetMap 地名点（阳桥）'],
+  }),
+
   // -------------------- 秀峰区 --------------------
   P({
-    id: 'gl-duxiufeng', slug: 'duxiufeng', townId: 'xiufeng', tier: 1,
+    id: 'gl-duxiufeng', slug: 'duxiufeng', townId: 'xiufeng', tier: 1, featured: true, heightScale: 1.5,
     title: '独秀峰 · 靖江王城', subtitle: '秀峰区 · 老城正中', category: '古村',
     lon: 110.2949, lat: 25.2861,
     tagline: '王城红墙围着一座孤峰，「桂林山水甲天下」就刻在峰上。',
@@ -111,6 +123,39 @@ export const CITY_POIS = [
     sources: ['芦笛岩景区公开资料', 'OpenStreetMap 地名点'],
   }),
   P({
+    id: 'gl-ronghu', slug: 'ronghu', townId: 'xiufeng',
+    title: '榕湖 · 古榕双桥', subtitle: '秀峰区 · 阳桥以西', category: '山水',
+    lon: 110.284, lat: 25.2778,
+    tagline: '湖岸老榕垂着气根，古榕双桥跨在水上。',
+    town: '秀峰区 · 秀峰街道', season: '四时皆宜',
+    stat: '两江四湖之一 · 因湖岸榕树得名 · 古榕双桥',
+    story: '榕湖在阳桥以西，与杉湖相连，因湖岸多榕树得名。北岸是古南门，湖上的古榕双桥桥头也有一棵老榕。四湖在宋代原是城外的护城河，后来成了城中湖。',
+    tips: '环湖步道免费，可接杉湖与日月双塔；两江四湖游船经过这里。',
+    sources: ['桂林市公开旅游资料', 'OpenStreetMap 地名点'],
+  }),
+  P({
+    id: 'gl-taohuajiang', slug: 'taohuajiang', townId: 'xiufeng',
+    title: '桃花江', subtitle: '秀峰区 · 城西的江', category: '山水',
+    lon: 110.2617, lat: 25.2853,
+    tagline: '漓江的支流，绕过城西，在象鼻山下汇进漓江。',
+    town: '秀峰区', season: '四时皆宜',
+    stat: '漓江支流 · 两江四湖的「两江」之一 · 象鼻山下汇入漓江',
+    story: '桃花江是漓江的支流，从城北流下来，绕过老城西边，到象鼻山脚汇入漓江。两江四湖里的「两江」，说的就是漓江和桃花江。',
+    tips: '鲁家村就在桃花江边，可以顺路去走走。',
+    sources: ['桂林市公开旅游资料', 'OpenStreetMap 水系'],
+  }),
+  P({
+    id: 'gl-yeyou', slug: 'yeyou', townId: 'xiufeng',
+    title: '两江四湖夜游', subtitle: '老城 · 环城水路', category: '山水',
+    lon: 110.2936, lat: 25.2746,
+    tagline: '坐船绕老城一圈，灯下的塔、桥和湖岸都倒在水里。',
+    town: '秀峰区 · 滨江路', season: '四时皆宜 · 入夜最好',
+    stat: '漓江 · 桃花江 · 杉湖 · 榕湖 · 桂湖 · 木龙湖',
+    story: '两江四湖说的是城里的漓江、桃花江两条江，和杉湖、榕湖、桂湖、木龙湖四个湖，水路相通，绕着老城一圈，可以坐游船游览，其中夜游最常被推荐。四湖在宋代原是城外的护城河。',
+    tips: '航线、开船时间与票务以当日公告为准。',
+    sources: ['桂林市公开旅游资料', 'OpenStreetMap 地名点（两江四湖游船售票点）'],
+  }),
+  P({
     id: 'gl-lujiacun', slug: 'lujiacun', townId: 'xiufeng',
     title: '鲁家村', subtitle: '秀峰区 · 桃花江边', category: '古村',
     lon: 110.2692, lat: 25.2972,
@@ -146,7 +191,7 @@ export const CITY_POIS = [
     sources: ['桂林市公开旅游资料', 'OpenStreetMap 地名点'],
   }),
   P({
-    id: 'gl-muglonghu', slug: 'muglonghu', townId: 'diecai',
+    id: 'gl-muglonghu', slug: 'muglonghu', townId: 'diecai', tier: 1, featured: true, heightScale: 1.3,
     title: '木龙湖', subtitle: '叠彩区 · 宋城墙边', category: '古村',
     lon: 110.2949, lat: 25.2941,
     tagline: '宋代城墙沿湖蜿蜒，湖边一座楼阁塔。',
