@@ -264,6 +264,9 @@ body[data-mode="map"] #vignette {
 }
 .lc-pin.is-county .lc-pin-dot { background: #2C251F; width: 7.5px; height: 7.5px; }
 .lc-pin.is-county .lc-pin-tag { border-color: rgba(28, 25, 22, 0.28); font-weight: 600; }
+.lc-pin-far { display: none; }
+.lc-atlas-hud[data-far="1"] .lc-pin-near { display: none; }
+.lc-atlas-hud[data-far="1"] .lc-pin-far { display: inline; font-weight: 600; }
 .lc-pin.is-county .lc-pin-tag em {
   font-style: normal; font-size: 9.5px; font-weight: 400; color: var(--lc-ink-mute);
 }
@@ -1258,7 +1261,7 @@ body[data-mode="map"] #vignette {
   left: 50%;
   bottom: calc(100% + 3px);
   transform: translateX(-50%);
-  font-family: "Kaiti SC", "STKaiti", "KaiTi", "Songti SC", serif;
+  font-family: 'MSZ', "Kaiti SC", "STKaiti", "KaiTi", "Songti SC", serif;
   font-size: 10.5px;
   letter-spacing: 0.22em;
   padding-left: 0.22em;
@@ -1310,7 +1313,7 @@ body[data-mode="map"] #vignette {
   place-items: center;
   background: var(--lc-verm);
   color: #FBF4E8;
-  font-family: "Kaiti SC", "STKaiti", "KaiTi", serif;
+  font-family: 'MSZ', "Kaiti SC", "STKaiti", "KaiTi", serif;
   letter-spacing: 0.06em;
   font-size: 14px;
 }

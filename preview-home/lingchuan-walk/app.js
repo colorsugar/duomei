@@ -3040,7 +3040,7 @@ function setMode(nextMode) {
       dom.chapterSub.textContent = DEPTH_SCENE_TITLES[state.depthScene];
       applyDepthSceneAtmosphere(state.depthScene);
     } else if (nextMode === 'map') {
-      dom.chapterSub.textContent = '七镇五乡 · 一脉青绿';
+      dom.chapterSub.textContent = '桂林十七县区 · 一脉青绿';
     } else {
       dom.chapterSub.textContent = SEGMENTS[state.segmentIdx].sub;
     }
@@ -3947,7 +3947,7 @@ async function init() {
   dom.walkDock.hidden = initialMode !== 'walk';
   dom.depthDock.hidden = initialMode !== 'depth';
   dom.chapterSub.textContent = initialMode === 'map'
-    ? '七镇五乡 · 一脉青绿'
+    ? '桂林十七县区 · 一脉青绿'
     : initialMode === 'depth'
       ? DEPTH_SCENE_TITLES[state.depthScene]
       : (SEGMENTS[state.segmentIdx]?.sub || '纸艺长卷');

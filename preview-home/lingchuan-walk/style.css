@@ -1,11 +1,11 @@
 @font-face {
   font-family: 'ZMX';
-  src: url('../storybook/f/zmx-sub.woff2') format('woff2');
+  src: url('./f/zmx-lc.woff2') format('woff2');
   font-display: swap;
 }
 @font-face {
   font-family: 'MSZ';
-  src: url('../storybook/f/msz-sub.woff2') format('woff2');
+  src: url('./f/msz-lc.woff2') format('woff2');
   font-display: swap;
 }
 

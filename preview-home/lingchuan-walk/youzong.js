@@ -475,7 +475,7 @@ function renderRoutes() {
 // ---------------------------------------------------------------------------
 // 长卷图（Canvas）
 // ---------------------------------------------------------------------------
-const FONT_KAI = '"Kaiti SC", "STKaiti", "KaiTi", "Songti SC", serif';
+const FONT_KAI = '"MSZ", "Kaiti SC", "STKaiti", "KaiTi", serif';
 const FONT_SERIF = '"Songti SC", "STSong", "Noto Serif CJK SC", serif';
 
 function wrapText(g, text, maxW) {
@@ -667,6 +667,7 @@ let posterBlob = null;
 async function openPoster() {
   if (!lastPlan) return;
   toast('正在铺纸研墨…');
+  try { await document.fonts.load('40px MSZ'); } catch { /* 字体未到就用系统字 */ }
   const canvas = await drawPoster(lastPlan);
   const blob = await new Promise((r) => canvas.toBlob(r, 'image/png'));
   posterBlob = blob;
