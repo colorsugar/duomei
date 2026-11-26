@@ -276,14 +276,14 @@ export const CITY_POIS = [
   }),
   P({
     id: 'gl-youcha', slug: 'youcha', townId: 'gongcheng',
-    title: '恭城油茶', subtitle: '恭城 · 打油茶', category: '美食特产',
+    title: '桂北油茶', subtitle: '桂北 · 打油茶', category: '美食特产',
     lon: 110.828, lat: 24.831, approx: true,
     tagline: '油茶锅里捶茶叶、姜蒜，冲一碗配米花花生。',
     town: '恭城瑶族自治县', season: '一年四季 · 冬天最暖',
     stat: '桂北打油茶 · 恭城最有名',
     story: '油茶是桂北人家日常的吃喝，用油茶锅把茶叶与姜、蒜炒香，拿木槌捶打后加水煮开，滤出深色的茶汤，配米花、花生和葱花吃。各县都打油茶，恭城油茶名气最大。',
     tips: '第一口偏苦涩，本地说法是「一碗苦二碗涩，三碗四碗好油茶」。',
-    sources: ['恭城油茶公开资料'],
+    sources: ['桂北油茶公开资料'],
   }),
   P({
     id: 'gl-xuewang', slug: 'xuewang', townId: 'xiufeng', heightScale: 0.7,

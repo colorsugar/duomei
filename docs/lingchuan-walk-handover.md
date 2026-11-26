@@ -12,8 +12,9 @@
 - 文案要文雅，不要 AI 腔。资料来自网友自己写的攻略、游记，不用探店广告；不写店名电话。
 - 禁用词全站为零：`本村|老大村|老大的村|乡镇地图|盘瑶`。
 - 老大的私人照片暂不上网。
-- 立绘由 Grok 画，不自己画。Grok 的搜索只能搜到国外，国内实拍照让 WorkBuddy（hy 模型）去搜。
-- 调用别的 AI 时开在前台 Terminal 窗口，让老大能看见。能自动推进就自动推进。
+- 立绘由 Grok 画，不自己画，Grok 额度不用省。Grok 的搜索只能搜到国外，国内实拍用 `fetch2.py` 搜百度图片。
+- 帮手 AI 一律后台跑（nohup，日志写到各任务目录的 `logs/`），不再开前台窗口。
+- 能自动推进就自动推进。
 - 绘本（storybook）的改动要同步到 huiben。
 
 ## 文件地图
@@ -26,6 +27,9 @@
 | `map-townships.js` | 乡镇 / 城区 / 县数据（`TOWNSHIPS`）、专题卡 `MAP_EXTRA_POIS` |
 | `map-atmo.js` | 「一境一色」氛围：`REALMS`（加权 Voronoi 上色）、光雾、飘落物、水面反光、云影 |
 | `map-city.js` | 主城区与市内吃食 `CITY_POIS`（并入 `GROK_EXTRA_42`），图 `img/gl-*.webp` |
+| `map-county.js` | 十三个县区立绘 `COUNTY_POIS`（并入 `GROK_EXTRA_42`），格式同 `CITY_POIS`；查不到的时令、贴士写「—」，卡片上整行藏掉 |
+| `map-street.js` + `map-street.json` | 东西巷 / 正阳步行街街区：路、楼块、钟塔，近景才加载；数据由 `scripts/bake-street-block.py` 预烘 |
+| `img/hj-*.webp`、`img/m/hj-*` | 2.5D 画境五幅的分层图（点到才下载） |
 | `map-region.js` + `map-bounds.json` | 聚焦县区的朱红描边 + 内侧金边；边界由 `scripts/build-guilin-bounds.py` 从 DataV 缓存生成，灵川各乡统一圈灵川县 |
 | `map-props.js` | 纸艺小景：按 `map-props.json` 种树、摆村屋 |
 | `map-geo.json` / `map-props.json` | 画框经纬度、区县表；树林 / 平坝 / 村落网格（脚本生成） |
@@ -55,7 +59,7 @@
 
 ## 帮手 AI（都已登录）
 
-- WorkBuddy：`codebuddy -p --model hy4-preview --permission-mode bypassPermissions "读 TASK.md 照做。"`（国内搜索、事实核查，免费模型随便用）
+- WorkBuddy：`codebuddy -p --model hy4-preview --permission-mode bypassPermissions "读 TASK.md 照做。"`。**注意：Hy4 免费期 2026-11-15 已结束，现在每次调用都扣积分（11-26 一天约 220 积分），WorkBuddy 现在没积分了，调用会失败。** 没有老大点头不要再调；国内实拍改用 `guilin-art/tools/fetch2.py`（浏览器搜百度图片，不花积分）。
 - Grok：`grok -p "…" --always-approve`（能出图，可多开）
 - Codex：`codex --sandbox workspace-write --ask-for-approval never`（只让它改副本目录，别在仓库里跑）
 - 前台开窗：`osascript -e 'tell application "Terminal" to do script "cd <目录> && <命令>"'`
@@ -73,7 +77,7 @@
 
 ## 进度（最近一次更新见文件末尾）
 
-已上线：#232–#243（灵川十二乡十二境、纸艺底图、游踪页、删傩祭、潮田舞狮拜年、全市十七县区一张图）。
+已上线：#232–#247（灵川十二乡十二境、纸艺底图、游踪页、删傩祭、潮田舞狮拜年、全市十七县区一张图、自动漫游、县区立绘、街区、五幅画境、缩放修复）。
 
 进行中：
 - Codex 的六城区游踪资料（`~/grokbox/codex-youzong/`，70 条）待审后合进 `youzong-data.js`。
@@ -108,3 +112,14 @@
   - 开场 9 秒没人动自动开始；任何点按、滚轮、按键即停；停过之后闲 45 秒再起。右侧「漫游 / 停」钮手动开关。详卡开着时不动。
   - `?tour=0` 关掉自动开始，`?tour=1` 强制开（Playwright 的 `navigator.webdriver` 为真时默认不自动开，巡检不受影响）；系统「减少动态效果」时也不自动开。
   - 待做：长卷、画境的扩充（老大说太简单太少），地图上更多会动的东西（江上竹筏、飞鸟）。
+- 2026-11-27 Kiro（#244–#247 与收尾 cursor/guilin-wrapup）：
+  - #244 立绘（`cursor/guilin-standees`）：城区 21 张换照实拍新版（`cut.py` 去白底出 `img/` 与 `img/m/` 两档 webp）；县区 13 张上图，新 `map-county.js`，并入 `GROK_EXTRA_42`。阳朔：西街、兴坪、遇龙河、月亮山；荔浦：荔浦芋、银子岩；恭城文庙；永福罗汉果；龙胜龙脊；资源八角寨；兴安灵渠；全州湘山寺；灌阳月岭。漓江竹筏位置不好定，未上图。坐标取 OSM Nominatim，镇 / 乡 / 县代表点标 `approx`。文案只写核查过或 OSM 可查的；恭城文庙、月亮山、月岭、西街只写位置与所见。
+  - #245 街区（`cursor/guilin-street-block`）：东西巷、正阳步行街的路（152 条）、楼块（134 栋）、钟塔上图；数据来自 OSM（ODbL，2026-07 数据），只留几何坐标，不含名称、品牌标签。楼高 OSM 没有，运行时按类别伪随机 8–24 米，**不是实测**；钟塔位置取街段中部节点，标估测。街区范围内可放大到桌面 40、竖屏手机 80，其余地方仍限 12；近景时东西巷、正阳街大立绘隐藏。新增雪王红楼 `gl-xuewang`（蜜雪冰城旗舰店，秀峰区，OSM 两个点取其一，雪王形象可认，不画文字和 logo）。
+  - #246 画境（`cursor/guilin-huajing`）：2.5D 画境加五幅：兴坪、两江四湖、龙脊、遇龙河、象鼻山，共 29 张图。`app.js` 的 `HJ_SCENES`、`ensureDepthScene()`、`DEPTH_SCENE_TITLES`、`DEPTH_ATMOS`；点到才下载，点之前 0 个 hj 请求，开场预载表 `ASSET_LIST` 没动。按钮共 9 个，手机横滑。
+  - #247 缩放修复（`cursor/fix-page-zoom`）：原因是整页缩放只在「地图模式且无弹层」时被拦，缩放面板、按钮、弹层、手势事件都漏了，浏览器整页放大，按钮跟着变大。修法：`index.html` 内联脚本加全局总闸（ctrl+滚轮、`gesture*`、多指 touchmove、双击一律 `preventDefault`），`visualViewport` 变化时复位，`style.css` 的 `html/body` 加 `touch-action: pan-x pan-y`。真 iOS 捏合没测，只用 WebKit 模拟。
+  - 收尾：
+    - 字体：重跑 `scripts/subset-lingchuan-fonts.py`（需 fonttools；本机 `/opt/homebrew/bin/python3.13` 自带，系统 python3 没有）。源字体 `~/Projects/ai-inbox/files/fonts/` 里没有「嘢」「焗」两字，会退到系统字体，属字体本身缺字。
+    - 油茶：`gl-youcha` 图是通用的桂北油茶，原标题「恭城油茶」不符，改为「桂北油茶」；位置仍在恭城，因故事里写「恭城油茶名气最大」。
+    - 县区卡「—」：`app.js` 的卡片填充处，时令为「—」时藏掉该格，贴士为「—」时藏掉整块。
+    - 手册：并入仓库版和桌面版（桌面版原是指向 `~/grokbox/duomei-slim/docs/` 的符号链接，现改为独立副本，内容与仓库版相同）。
+  - 待办：十个县乡镇细节与游踪路线；漓江竹筏上图；长卷扩充；WorkBuddy 无积分，国内实拍用 `fetch2.py`。
