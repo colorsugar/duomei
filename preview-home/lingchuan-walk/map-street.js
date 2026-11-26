@@ -3,6 +3,9 @@
 // 数据：map-street.json（scripts/bake-street-block.py 从 OpenStreetMap 预烘，只留几何）
 //   OSM 没有楼高：按楼的类别在范围内随机，只为立体，不是实测。
 //   钟塔坐标是估的（街心位置），不是实测；塔高、年代一概不写。
+// 另有两层（同一入口，同一套 nearK/zoomCap 淡入）：
+//   城区核心高清叠层：约 3x3km 的 OSM 纸艺图（scripts/build-city-core.py 生成），镜头靠近城区且放大才淡入、才下载。
+//   象鼻山近景试点：z>10 时淡入的小场景（山 + 水月洞 + 江面倒影 + 竹筏），用 hj-xiangbi-* 两张分层图做 billboard。
 // 性能：路和楼合并成一个 BufferGeometry、一个 Mesh；镜头不在这一带或放得不够大时整个不建、不画。
 // ============================================================================
 
@@ -17,13 +20,23 @@ const ROAD_W = [0.0062, 0.0030, 0.0052]; // 世界单位；比真实略宽，远
 const M = 0.00035; // 1 米 ≈ 0.00035 世界单位
 const H_EXAG = 2.4; // 楼高垂直夸张
 
+// 城区核心叠层范围（来自 img/map/city-core.json，脚本重跑后要同步）
+const CORE_LON = [110.278099, 110.307901];
+const CORE_LAT = [25.262525, 25.289474];
+const CORE_ZOOM_A = 2.4; // 开始淡入
+const CORE_ZOOM_B = 4.2; // 完全显示
+const XB_LL = [110.2915, 25.2701]; // 象鼻山（同 map-city.js 立绘坐标）
+const XB_ZOOM_A = 9.5;
+const XB_ZOOM_B = 11;
+const XB_W = 0.34; // billboard 宽（世界单位，比实物夸张，立绘风格）
+
 function clamp(v, a, b) { return v < a ? a : v > b ? b : v; }
 function smoothstep(a, b, x) {
   const t = clamp((x - a) / (b - a), 0, 1);
   return t * t * (3 - 2 * t);
 }
 
-export function createStreetBlock({ THREE, scene, lonLatToWorld, sampleElevation, dataUrl = './map-street.json' }) {
+export function createStreetBlock({ THREE, scene, lonLatToWorld, sampleElevation, isMobile = false, dataUrl = './map-street.json' }) {
   const center = lonLatToWorld(110.2945, 25.2795);
   const group = new THREE.Group();
   group.visible = false;
@@ -128,8 +141,8 @@ export function createStreetBlock({ THREE, scene, lonLatToWorld, sampleElevation
       transparent: true,
       opacity: 0,
       polygonOffset: true,
-      polygonOffsetFactor: -2,
-      polygonOffsetUnits: -2,
+      polygonOffsetFactor: -6,
+      polygonOffsetUnits: -6,
     });
     mesh = new THREE.Mesh(geo, mat);
     mesh.frustumCulled = false;
@@ -222,6 +235,8 @@ export function createStreetBlock({ THREE, scene, lonLatToWorld, sampleElevation
 
   /** DEM 载入后重算高度；路和楼贴着地形抬一点点，避免和地形抢深度 */
   function refresh() {
+    coreHeights();
+    xbHeights();
     if (!mesh) return;
     const arr = mesh.geometry.attributes.position;
     for (let i = 0; i < arr.count; i++) {
@@ -232,6 +247,101 @@ export function createStreetBlock({ THREE, scene, lonLatToWorld, sampleElevation
     arr.needsUpdate = true;
     mesh.geometry.computeVertexNormals(); // 高度变了，墙面法线要重算（建时 y 全是 0）
     if (clock) clock.position.y = sampleElevation(clock.position.x, clock.position.z) + 0.006;
+  }
+
+
+  // ---------------- 城区核心高清叠层 ----------------
+  const cA = lonLatToWorld(CORE_LON[0], CORE_LAT[1]); // 西北角
+  const cB = lonLatToWorld(CORE_LON[1], CORE_LAT[0]); // 东南角
+  const core = { cx: (cA.x + cB.x) / 2, cz: (cA.z + cB.z) / 2, hw: Math.abs(cB.x - cA.x) / 2, hd: Math.abs(cB.z - cA.z) / 2, mesh: null, loading: false, alpha: 0 };
+  const CORE_SEG = 40;
+  const CORE_LIFT = 0.009;
+
+  function coreK(tx, tz, zoom) {
+    const d = Math.max(Math.abs(tx - core.cx) / core.hw, Math.abs(tz - core.cz) / core.hd);
+    return smoothstep(1.7, 1.0, d) * smoothstep(CORE_ZOOM_A, CORE_ZOOM_B, zoom);
+  }
+
+  function coreHeights() {
+    if (!core.mesh) return;
+    const arr = core.mesh.geometry.attributes.position;
+    for (let i = 0; i < arr.count; i++) {
+      arr.setY(i, sampleElevation(core.cx + arr.getX(i), core.cz + arr.getZ(i)) + CORE_LIFT);
+    }
+    arr.needsUpdate = true;
+  }
+
+  function loadCore() {
+    core.loading = true;
+    new THREE.TextureLoader().load(isMobile ? './img/map/city-core-m.webp' : './img/map/city-core-l.webp', (tex) => {
+      tex.colorSpace = THREE.SRGBColorSpace;
+      tex.anisotropy = 4;
+      const geo = new THREE.PlaneGeometry(core.hw * 2, core.hd * 2, CORE_SEG, CORE_SEG);
+      geo.rotateX(-Math.PI / 2);
+      const m = new THREE.MeshLambertMaterial({
+        map: tex, transparent: true, opacity: 0, depthWrite: false,
+        polygonOffset: true, polygonOffsetFactor: -3, polygonOffsetUnits: -3,
+      });
+      core.mesh = new THREE.Mesh(geo, m);
+      core.mesh.position.set(core.cx, 0, core.cz);
+      core.mesh.frustumCulled = false;
+      core.mesh.renderOrder = 1;
+      core.mesh.receiveShadow = true;
+      core.mesh.visible = false;
+      scene.add(core.mesh);
+      coreHeights();
+    }, undefined, () => { core.loading = false; });
+  }
+
+  // ---------------- 象鼻山近景试点 ----------------
+  const xb = { g: null, loading: false, alpha: 0, mats: [], pos: lonLatToWorld(XB_LL[0], XB_LL[1]) };
+
+  function xbK(tx, tz, zoom) {
+    const d = Math.hypot(tx - xb.pos.x, tz - xb.pos.z);
+    return smoothstep(0.55, 0.25, d) * smoothstep(XB_ZOOM_A, XB_ZOOM_B, zoom);
+  }
+
+  function loadXb() {
+    xb.loading = true;
+    const dir = isMobile ? './img/m/' : './img/';
+    const loader = new THREE.TextureLoader();
+    const load = (n) => new Promise((ok, no) => loader.load(`${dir}hj-xiangbi-${n}.webp`, (t) => { t.colorSpace = THREE.SRGBColorSpace; ok(t); }, undefined, no));
+    Promise.all([load('mid1'), load('fg1')]).then(([mid, raft]) => {
+      const g = new THREE.Group();
+      const mk = (tex, w, color, opacity) => {
+        const h = w * tex.image.height / tex.image.width;
+        const mat = new THREE.MeshBasicMaterial({ map: tex, transparent: true, opacity: 0, alphaTest: 0.02, color, side: THREE.DoubleSide, depthWrite: false });
+        mat.userData.max = opacity;
+        xb.mats.push(mat);
+        return { mat, w, h };
+      };
+      const M0 = mk(mid, XB_W, '#F4F0E4', 1);
+      const hill = new THREE.Mesh(new THREE.PlaneGeometry(M0.w, M0.h).translate(0, M0.h / 2, 0), M0.mat);
+      hill.renderOrder = 3;
+      g.add(hill);
+      // 江面倒影：平铺在水面上，朝镜头一侧展开，上下颠倒、压低饱和
+      const M1 = mk(mid, XB_W, '#9ED4D2', 0.42);
+      const refl = new THREE.Mesh(new THREE.PlaneGeometry(M1.w, M1.h * 0.8).translate(0, M1.h * 0.4, 0), M1.mat);
+      refl.rotation.x = Math.PI / 2;
+      refl.scale.x = -1;
+      refl.position.y = 0.002;
+      refl.renderOrder = 2;
+      g.add(refl);
+      // 竹筏
+      const M2 = mk(raft, 0.09, '#F4F0E4', 1);
+      const rf = new THREE.Mesh(new THREE.PlaneGeometry(M2.w, M2.h).translate(0, M2.h / 2, 0), M2.mat);
+      rf.position.set(0.08, 0, M0.h * 0.55);
+      rf.renderOrder = 4;
+      g.add(rf);
+      g.visible = false;
+      xb.g = g;
+      scene.add(g);
+      xbHeights();
+    }).catch(() => { xb.loading = false; });
+  }
+
+  function xbHeights() {
+    if (xb.g) xb.g.position.set(xb.pos.x, sampleElevation(xb.pos.x, xb.pos.z) + CORE_LIFT, xb.pos.z);
   }
 
   /** 镜头在这一带的程度 0..1：离得近且放得足够大。供立绘淡出用 */
@@ -246,7 +356,7 @@ export function createStreetBlock({ THREE, scene, lonLatToWorld, sampleElevation
     return base + (max - base) * smoothstep(NEAR_R * 1.6, NEAR_R * 0.7, d);
   }
 
-  function update(tx, tz, zoom) {
+  function update(tx, tz, zoom, camPos) {
     const k = nearK(tx, tz, zoom);
     if (k > 0.01 && !data && !loading) {
       loading = true;
@@ -256,10 +366,31 @@ export function createStreetBlock({ THREE, scene, lonLatToWorld, sampleElevation
         .catch(() => { loading = false; });
     }
     alpha += (k - alpha) * 0.2;
-    if (!mat) return;
-    mat.opacity = alpha;
-    group.visible = alpha > 0.02;
+    if (mat) {
+      mat.opacity = alpha;
+      group.visible = alpha > 0.02;
+    }
+
+    const ck = coreK(tx, tz, zoom);
+    if (ck > 0.01 && !core.mesh && !core.loading) loadCore();
+    core.alpha += (ck - core.alpha) * 0.2;
+    if (core.mesh) {
+      core.mesh.material.opacity = core.alpha;
+      core.mesh.visible = core.alpha > 0.02;
+    }
+
+    const bk = xbK(tx, tz, zoom);
+    if (bk > 0.01 && !xb.g && !xb.loading) loadXb();
+    xb.alpha += (bk - xb.alpha) * 0.2;
+    if (xb.g) {
+      for (const m of xb.mats) m.opacity = xb.alpha * m.userData.max;
+      xb.g.visible = xb.alpha > 0.02;
+      if (camPos) xb.g.rotation.y = Math.atan2(camPos.x - xb.pos.x, camPos.z - xb.pos.z);
+    }
   }
 
-  return { update, refresh, nearK, zoomCap, center };
+  /** 象鼻山试点的淡入程度 0..1（map-3d 用它让同处的立绘让位） */
+  const xiangbiK = () => xb.alpha;
+
+  return { update, refresh, nearK, zoomCap, center, xiangbiK };
 }
