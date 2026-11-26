@@ -17,7 +17,7 @@ function getAssetUrl(name, forceFull = false) {
   // 手机用 2048 的地形底图（323 KB，桌面 3072 / 950 KB）；近看时有分块高清图接上
   if (name === 'map/lingchuan-dem-l0' && IS_MOBILE && !forceFull) return './img/map/lingchuan-dem-l0-m.webp';
   if (name.startsWith('map/')) return `./img/${name}.webp`;
-  const isLc = name.startsWith('lc-');
+  const isLc = name.startsWith('lc-') || name.startsWith('gl-');
   if (isLc) {
     return (!forceFull && IS_MOBILE) ? `./img/m/${name}.webp` : `./img/${name}.webp`;
   }
