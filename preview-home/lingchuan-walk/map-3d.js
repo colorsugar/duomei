@@ -10,6 +10,7 @@ import { TOWNSHIPS, MAP_EXTRA_POIS, GROK_EXTRA_42, WATER_LABELS } from './map-to
 import { createMapAtmosphere } from './map-atmo.js';
 import { createMapProps } from './map-props.js';
 import { createRegionHighlight } from './map-region.js';
+import { createStreetBlock } from './map-street.js';
 
 // 桂林全境（市辖 17 个县区）连成一张：1:1 墨卡托画框，8x8 张 1024 瓦片（scripts/build-guilin-atlas.py）
 // 世界尺寸按旧画框（1.14° 宽 = 40 单位）的比例放大，缩放档位、立绘大小在各处保持原样
@@ -45,7 +46,10 @@ const OVERVIEW_ZOOM_WIDE = 0.33;
 const OVERVIEW_ZOOM_TALL = 0.36; // 竖屏手机：全市南北长，略放大铺满屏宽
 const OVERVIEW_ZOOM = (typeof window !== 'undefined' && window.innerWidth / Math.max(1, window.innerHeight) < 0.75) ? OVERVIEW_ZOOM_TALL : OVERVIEW_ZOOM_WIDE;
 const MIN_ZOOM = 0.30;
-const MAX_ZOOM = 12.0;
+const MAX_ZOOM = (typeof window !== 'undefined' && window.innerWidth / Math.max(1, window.innerHeight) < 0.75) ? 80.0 : 40.0; // 全图仍只到 BASE_MAX_ZOOM，只有正阳步行街、东西巷一带能再放大（见 zoomCap）
+const BASE_MAX_ZOOM = 12.0;
+// 街区近景时收起的大立绘（会盖住整条街）
+const STREET_HIDE_IDS = new Set(['gl-zhengyangjie', 'gl-dongxixiang']);
 const MAX_DEM_HEIGHT = 1.58;
 
 function clamp(v, lo, hi) {
@@ -790,6 +794,7 @@ export function createInteractive3DMap({
       return (t.city || t.countyLevel) ? t.id : 'lingchuan';
     },
   });
+  const street = createStreetBlock({ THREE, scene, lonLatToWorld, sampleElevation });
   const notifyFocus = (id) => {
     region.setTown(id);
     onFocusTownChange?.(id);
@@ -810,6 +815,7 @@ export function createInteractive3DMap({
   function syncAllHeightsToDem() {
     applyDemToPlaneGeo(terrainGeo, 0);
     region.refresh();
+    street.refresh();
     for (const tile of tiles) {
       if (tile.geo) {
         const pos = tile.geo.attributes.position;
@@ -966,13 +972,15 @@ export function createInteractive3DMap({
     const deskShiftX = view.w >= 920 ? (3.5 * panelFactor / Math.pow(Math.max(0.85, zoom), 0.90)) : 0;
     const lookX = tx + deskShiftX;
     const lookZ = tz;
-    const lookY = sampleElevation(tx, tz) * 0.42 + lerp(0.04, 0.24, zoomT);
+    // 超过 12 倍（只有街区一带能到）视点抬高、前移都按倍率平方收回，否则街区会掉出画面
+    const hiZ = zoom > BASE_MAX_ZOOM ? Math.pow(BASE_MAX_ZOOM / zoom, 2) : 1;
+    const lookY = sampleElevation(tx, tz) * 0.42 + lerp(0.04, 0.24, zoomT) * hiZ;
 
     // yaw：漫游时镜头绕视点轻轻摆动，平时为 0
     const posX = lookX + Math.sin(yaw) * Math.cos(pitchRad) * dist;
     const posY = lookY + Math.sin(pitchRad) * dist;
     const posZ = lookZ + Math.cos(yaw) * Math.cos(pitchRad) * dist;
-    const aimZ = lookZ - lerp(0, 0.35, zoomT);
+    const aimZ = lookZ - lerp(0, 0.35, zoomT) * hiZ;
 
     return { fov, aspect, dist, pitchRad, zoomT, posX, posY, posZ, lookX, lookY, aimZ };
   }
@@ -1505,12 +1513,19 @@ export function createInteractive3DMap({
 
     tourUpdate(dt);
 
+    {
+      const cap = street.zoomCap(camState.targetTx, camState.targetTz, BASE_MAX_ZOOM, MAX_ZOOM);
+      if (camState.targetZoom > cap) camState.targetZoom = cap;
+    }
+
     const followK = 1 - Math.exp(-10.5 * dt);
     camState.tx = lerp(camState.tx, camState.targetTx, followK);
     camState.tz = lerp(camState.tz, camState.targetTz, followK);
     camState.zoom = lerp(camState.zoom, camState.targetZoom, followK);
     camState.panelShiftFactor = lerp(camState.panelShiftFactor, camState.desktopPanelOpen ? 1.0 : 0.0, followK);
     region.update(camState.zoom, dt);
+    street.update(camState.tx, camState.tz, camState.zoom);
+    const streetK = street.nearK(camState.tx, camState.tz, camState.zoom);
 
     const pose = computeCamPose(camState.tx, camState.tz, camState.zoom, view, camState.panelShiftFactor);
     applyPoseToCamera(camera, pose);
@@ -1562,7 +1577,8 @@ export function createInteractive3DMap({
 
     // 随缩放自适应收缩立绘物理高度：屏幕尺寸舒适一致，地面占地随放大急剧缩小，彻底拉开真实山川间隔！
     // 立绘屏幕尺寸基本恒定（相机距离 ∝ 1/z^1.06），放大时只拉开地理间距，不跟着变大挤成一团
-    const worldScale = clamp(1.36 / Math.pow(Math.max(1.0, z), 0.62), 0.24, 0.86);
+    // 超过 12 倍（只有街区一带能到）再继续缩小，立绘才不会比街还大
+    const worldScale = clamp(1.36 / Math.pow(Math.max(1.0, z), 0.62), 0.24, 0.86) * (z > BASE_MAX_ZOOM ? Math.pow(BASE_MAX_ZOOM / z, 0.9) : 1);
 
     // 屏幕空间最小防挡间距（像素）：确保每幅工笔立绘完整露脸不叠压
     const minGapX = isMobile ? 86 : 116;
@@ -1576,6 +1592,11 @@ export function createInteractive3DMap({
 
     for (const st of standees) {
       const catMatch = cat === 'all' || st.category === cat;
+      if (streetK > 0.3 && STREET_HIDE_IDS.has(st.id)) {
+        st.isShown = false;
+        st.dotMesh.visible = false;
+        continue;
+      }
       if (!catMatch) {
         st.isShown = false;
         st.dotMesh.visible = false;
@@ -1608,6 +1629,7 @@ export function createInteractive3DMap({
       // 优先级分数：已站起(防抖) + 一级核心地标 + 焦点乡镇 + 离屏中心近
       const priority =
         (st.id === selectedStandeeId ? 200 : 0) +
+        (st.id === 'gl-xuewang' && streetK > 0.3 ? 60 : 0) +
         (st.tier === 1 ? 40 : 0) +
         (st.featured ? 18 : 0) +
         (st.townId === focusTownId ? 10 : 0) +
@@ -1703,7 +1725,9 @@ export function createInteractive3DMap({
       } else {
         st.hop = 0;
       }
-      const sc = lerp(0.50, 1.0, smoothstep(0.05, 0.85, p)) * worldScale * (1 + st.hop * 0.14);
+      // 街区近景：这一带其余立绘也缩小，别盖住街
+      const inBlock = Math.hypot(st.wx - street.center.x, st.wz - street.center.z) < 0.45;
+      const sc = lerp(0.50, 1.0, smoothstep(0.05, 0.85, p)) * worldScale * (inBlock ? 1 - 0.5 * streetK : 1) * (1 + st.hop * 0.14);
       st.scaleGroup.scale.setScalar(sc);
       st.root.position.y = st.wy + st.hop * 0.24 * worldScale;
       st.tabMesh.material.opacity = clamp(p * 0.78, 0, 0.76);
