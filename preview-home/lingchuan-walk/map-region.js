@@ -233,8 +233,8 @@ const WATER_FILL_FRAG = /* glsl */`
   void main() {
     float s = sin(vW.x * 41.0 + uTime * 0.9) * sin(vW.y * 33.0 - uTime * 0.7 + vW.x * 9.0);
     float sh = smoothstep(0.55, 1.0, s);
-    vec3 col = mix(uColor, vec3(0.92, 1.0, 1.0), sh * 0.6);
-    gl_FragColor = vec4(col, uAlpha * (0.62 + 0.25 * sh));
+    vec3 col = mix(uColor, vec3(0.85, 1.0, 1.0), sh * 0.5);
+    gl_FragColor = vec4(col, uAlpha * (0.86 + 0.12 * sh));
   }
 `;
 
@@ -254,7 +254,7 @@ const WATER_STRIP_VERT = /* glsl */`
     vSide = aSide;
     vKind = aKind;
     vU = aU;
-    float w = aKind < 0.5 ? 0.032 * uScale : (aKind < 1.5 ? uHalo * uScale : max(aW, 0.012 * uScale));
+    float w = aKind < 0.5 ? 0.045 * uScale : (aKind < 1.5 ? uHalo * uScale : max(aW, 0.012 * uScale));
     vec3 p = position;
     p.xz += aDir * aSide * w;
     gl_Position = projectionMatrix * modelViewMatrix * vec4(p, 1.0);
@@ -319,12 +319,12 @@ export function createCityWater({ THREE, scene, lonLatToWorld, sampleElevation, 
 
   const common = {
     transparent: true, side: THREE.DoubleSide, depthWrite: false,
-    polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2,
+    polygonOffset: true, polygonOffsetFactor: -4, polygonOffsetUnits: -4, // 须比 map-street.js 城区高清叠层（-3）更靠前，否则湖面被叠层挡住
   };
   const fillMat = new THREE.ShaderMaterial({
     vertexShader: WATER_FILL_VERT,
     fragmentShader: WATER_FILL_FRAG,
-    uniforms: { uColor: { value: new THREE.Color('#5EC4CC') }, uAlpha: { value: 0 }, uTime: { value: 0 } },
+    uniforms: { uColor: { value: new THREE.Color('#2FA3B3') }, uAlpha: { value: 0 }, uTime: { value: 0 } },
     ...common,
   });
   const stripMat = new THREE.ShaderMaterial({
@@ -337,7 +337,7 @@ export function createCityWater({ THREE, scene, lonLatToWorld, sampleElevation, 
       uFill: { value: new THREE.Color('#5EC4CC') },
     },
     ...common,
-    polygonOffsetFactor: -3, polygonOffsetUnits: -3,
+    polygonOffsetFactor: -5, polygonOffsetUnits: -5,
   });
 
   function toWorld(arr) {
@@ -437,8 +437,8 @@ export function createCityWater({ THREE, scene, lonLatToWorld, sampleElevation, 
     group = new THREE.Group();
     const fill = new THREE.Mesh(buildFill(), fillMat);
     const strips = new THREE.Mesh(buildStrips(), stripMat);
-    fill.renderOrder = 2;
-    strips.renderOrder = 2;
+    fill.renderOrder = 20;
+    strips.renderOrder = 21;
     group.add(fill, strips);
     group.visible = false;
     lift();
